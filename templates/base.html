@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{{ site.baseurl }}/images/icons/favicon-16x16.png" sizes="16x16" />
+    <title>{{ pagetitle }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.0/css/bulma.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/arxivstyle.css" />
+
+    <!-- Piwik -->
+    <script type="text/javascript">
+    var _paq = _paq || [];
+    _paq.push(["setDomains", ["*.arxiv.org"]]);
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function()
+    { var u="//webanalytics.library.cornell.edu/"; _paq.push(['setTrackerUrl', u+'piwik.php']); _paq.push(['setSiteId', 538]); var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s); }
+    )();
+    </script>
+    <!-- End Piwik Code -->
+
+  </head>
+  <body>
+  <noscript><img src="//webanalytics.library.cornell.edu/piwik.php?idsite=538&rec=1" style="border:0;" alt="" /></noscript>
+  <header>
+    {% block header %}
+    <!-- contains Cornell logo and sponsor statement -->
+    <div class="attribution columns">
+      <div class="column">
+        <a href="https://library.cornell.edu"><img src="{{ site.baseurl }}/images/CUL-reduced-white-SMALL.svg" /></a>
+      </div>
+      <div class="column"><p class="sponsors">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</p></div>
+    </div>
+    <!-- contains arXiv identity and search bar -->
+    <div class="identity"><h1><a href="{{ site.baseurl }}">arXiv.org</a></h1></div>
+    {% endblock header %}
+  </header>
+  <content>
+    <section class="section">
+      <div class="container">
+        <div class="content">
+          {% block content %}
+            {{ content }}
+          {% endblock content %}
+        </div>
+      </div>
+    </section>
+  </content>
+  <footer>
+    {% block footer %}
+      <div class="columns">
+        <div class="column">
+          <ul class="nav-spaced">
+            <li><a href="{{ site.baseurl }}/help/contact">Contact</a></li>
+            <li><a href="https://twitter.com/arxiv">Find us on Twitter</a></li>
+          </ul>
+        </div>
+        <div class="column">
+          <ul class="nav-spaced">
+            <li><a href="https://blogs.cornell.edu/arxiv/">Blog - the latest news</a></li>
+            <li><a href="https://confluence.cornell.edu/display/arxivpub/arXiv+Public+Wiki">Wiki - project documentation</a></li>
+          </ul>
+        </div>
+        <div class="column">
+          <ul class="nav-spaced">
+            <li><a href="mailto:web-accessibility@cornell.edu">Web Accessibility Help</a></li>
+            <li><a href="{{ site.baseurl }}/help">Help with using arXiv</a></li>
+          </ul>
+        </div>
+      </div>
+    {% endblock footer %}
+  </footer>
+  </body>
+</html>
