@@ -1,4 +1,4 @@
-#Base CSS and Templates for arXiv.org-NG
+# Base CSS and Templates for arXiv.org-NG
 
 Templates are written in [Jinja2 syntax](http://jinja.pocoo.org/docs/2.9/).
 CSS framework is [Bulma](http://bulma.io) with arXiv-specific overrides for color and typography.
