@@ -1,0 +1,2 @@
+recursive-include baseui/static/ *
+recursive-include baseui/templates *
