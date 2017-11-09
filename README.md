@@ -28,6 +28,10 @@ would write:
 
 ``-e git://github.com/cul-it/arxiv-base-ui.git@0.1#egg=arxiv-base-ui``
 
+Or if this repo is private, and you want to install a specific commit:
+
+``-e git+ssh://git@github.com/cul-it/arxiv-base-ui.git@d9af6c670afdf6f0fda6d92f7b110dcd60514f4a#egg=arxiv-base-ui``
+
 See the [pip documentation](https://pip.pypa.io/en/latest/reference/pip_install/#git)
 for details.
 
