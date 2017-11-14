@@ -8,12 +8,7 @@ files may also be imported and included.
 These files set the default display styles and layout for all pages on
 arxiv-NG, and can be overridden as needed by submodules.
 
-Currently there are no compile procedures or dependencies associated with these
-files.
-
 **TODO:** Add autoprefixer in postcss and autocompile sass/scss
-**TODO:** Add override variables prior to Bulma compile so that we can take
-advantage of its derived variables
 
 testpage.html is included for rapid evaluation of display layer CSS without
 invoking a local environment to render templates.
@@ -69,3 +64,16 @@ And use static files in your templates, e.g.:
 ```
 {{ url_for('baseui.static', filename='images/CUL-reduced-white-SMALL.svg') }}
 ```
+
+## Editing and compiling sass
+
+The file arxivstyle.css should never be edited directly. It is compiled from arxivstyle.sass with this command from project directory root:
+```sass baseui/static/sass/arxivstyle.sass:baseui/static/css/arxivstyle.css```
+
+or you can use the ``--watch`` option to autocompile on any changed file:
+
+```sass --watch baseui/static/sass/arxivstyle.sass:baseui/static/css/arxivstyle.css```
+
+Bulma source files are included in the ``static/sass`` directory so that variables can be overridden directly during compile. The ``arxivstyle.sass`` file has been written to do this; do not edit it.
+
+[Documentation for sass](http://sass-lang.com/documentation/file.SASS_REFERENCE.html)
