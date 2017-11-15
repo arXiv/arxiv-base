@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,700");
+html {
+  font-size: 14px; }
+
+body {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+header .columns .column {
+  padding-bottom: 0; }
+
+content a {
+  color: #0068ac; }
+  content a:hover {
+    border-bottom: 1px dotted #0068ac; }
+
+/** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. */
+header h1 {
+  font-size: 2em;
+  font-weight: bold; }
+
+footer {
+  background-color: #9b9b9b;
+  color: #fff;
+  padding: 0.5em 2em; }
+  footer a {
+    color: #fff; }
+    footer a:visited {
+      color: #fff; }
+    footer a:hover, footer a:active {
+      border-bottom: 1px dotted #fff; }
+
+.nav-spaced {
+  line-height: 2; }
+
+.content {
+  margin: 0 6rem; }
+  .content h1 {
+    font-size: 1.5em;
+    font-weight: bold; }
+
+.attribution {
+  align-items: center;
+  background-color: #222;
+  color: #fff;
+  line-height: 1; }
+
+.identity {
+  background-color: #b31b1b;
+  color: #fff;
+  margin-top: -0.75em;
+  padding: 0.75em 3em; }
+  .identity a {
+    color: #fff; }
+    .identity a:visited {
+      color: #fff; }
+    .identity a:hover {
+      border-bottom: 1px dotted #fff;
+      color: #fff; }
+
+.logo {
+  height: 45px;
+  margin: 0.2em; }
+
+.sponsors {
+  font-size: 0.9em;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 4px;
+  padding-right: 0.75em;
+  text-align: right; }
+
+/* specific styles for search lists with classic dl/dt/dd structure and classes */
+.list-identifier {
+  font-weight: 600; }
+
+.list-title {
+  font-size: 1.25em;
+  font-weight: 600; }
+
+dt {
+  margin-top: 1em; }
+
+/*# sourceMappingURL=arxivstyle.css.map */
