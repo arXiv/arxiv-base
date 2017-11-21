@@ -6,7 +6,6 @@
     <link rel="icon" type="image/png" href="{{ url_for('baseui.static', filename='images/icons/favicon-32x32.png')}}" sizes="32x32" />
     <link rel="icon" type="image/png" href="{{ url_for('baseui.static', filename='images/icons/favicon-16x16.png')}}" sizes="16x16" />
     <title>{{ pagetitle }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.0/css/bulma.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="{{ url_for('baseui.static', filename='css/arxivstyle.css')}}" />
 
@@ -28,24 +27,40 @@
   <header>
     {% block header %}
     <!-- contains Cornell logo and sponsor statement -->
-    <div class="attribution columns">
-      <div class="column">
-        <a href="https://library.cornell.edu"><img src="{{ url_for('baseui.static', filename='images/CUL-reduced-white-SMALL.svg') }}" alt="Cornell University Library" /></a>
+    <div class="attribution level is-marginless">
+      <div class="level-left">
+        <a class="level-item" href="https://library.cornell.edu"><img src="{{ url_for('baseui.static', filename='images/CUL-reduced-white-SMALL.svg') }}" alt="Cornell University Library" /></a>
       </div>
-      <div class="column"><p class="sponsors">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</p></div>
+      <div class="level-right"><p class="sponsors level-item">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</p></div>
     </div>
     <!-- contains arXiv identity and search bar -->
-    <div class="identity"><h1><a href="">arXiv.org</a></h1></div>
-    <div class="user-tools">Login | My Account | Logout</div>
-    <div class="search-block">
-      <form>
-        <input type="text" name="query" placeholder="Search..." />
-        <select name="searchtype">
-          <option selected="selected">All fields</option>
-        </select>
-        <button>Search</button>
-      </form>
-    </div>
+    <div class="identity level is-marginless">
+      <div class="level-left">
+        <h1 class="level-item"><a href="">arXiv.org</a></h1>
+      </div>
+      <div class="search-block level-right">
+        <form class="level-item">
+          <div class="field has-addons">
+            <div class="control">
+              <input class="input is-small" type="text" name="query" placeholder="Search..." />
+              <p class="help"><a href="">Help</a> | <a href="">Advanced Search</a></p>
+            </div>
+            <div class="control">
+              <div class="select is-small">
+                <select name="searchtype">
+                  <option selected="selected">All fields</option>
+                  <option>Title</option>
+                  <option>Author</option>
+                  <option>arXiv ID</option>
+                </select>
+              </div>
+            </div>
+            <button class="button is-small is-warning">Search</button>
+          </div>
+        </form>
+      </div>
+    </div> <!-- closes identity -->
+    <div class="user-tools box is-pulled-right"><a href="">Login</a> | <a href="">My Account</a> | <a href="">Logout</a></div>
     {% endblock header %}
   </header>
   <content>
