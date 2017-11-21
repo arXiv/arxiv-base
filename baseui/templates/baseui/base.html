@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="{{ url_for('baseui.static', filename='images/icons/favicon-32x32.png')}}" sizes="32x32" />
-    <link rel="icon" type="image/png" href="{{ url_for('baseui.static', filename='images/icons/favicon-16x16.png')}}" sizes="16x16" />    
+    <link rel="icon" type="image/png" href="{{ url_for('baseui.static', filename='images/icons/favicon-16x16.png')}}" sizes="16x16" />
     <title>{{ pagetitle }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.0/css/bulma.min.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -36,6 +36,16 @@
     </div>
     <!-- contains arXiv identity and search bar -->
     <div class="identity"><h1><a href="">arXiv.org</a></h1></div>
+    <div class="user-tools">Login | My Account | Logout</div>
+    <div class="search-block">
+      <form>
+        <input type="text" name="query" placeholder="Search..." />
+        <select name="searchtype">
+          <option selected="selected">All fields</option>
+        </select>
+        <button>Search</button>
+      </form>
+    </div>
     {% endblock header %}
   </header>
   <content>
