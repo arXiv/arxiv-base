@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    {% include 'head.html' %}
+    {% include url_for(baseui.static, filename='head.html') %}
     <!-- Custom style sheets or other head includes -->
     {% block addl_head %}
     {% endblock addl_head %}
   </head>
   <body>
-  {% import 'macros.html' as macros %}
+  {% import url_for(baseui.static, filename='macros.html') as macros %}
   <noscript><img src="//webanalytics.library.cornell.edu/piwik.php?idsite=538&rec=1" style="border:0;" alt="" /></noscript>
   <header>
     {% block header %}
-    {% include 'header.html' %}
+    {% include url_for(baseui.static, filename='header.html') %}
     {% endblock header %}
   </header>
   <content>
@@ -26,7 +26,7 @@
   </content>
   <footer>
     {% block footer %}
-    {% include 'footer.html' %}
+    {% include url_for(baseui.static, filename='footer.html') %}
     {% endblock footer %}
   </footer>
   </body>
