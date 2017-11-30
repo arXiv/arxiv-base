@@ -1,2 +1,3 @@
+recursive-include baseui/config/*
 recursive-include baseui/static/ *
 recursive-include baseui/templates *
