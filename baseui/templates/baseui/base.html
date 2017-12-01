@@ -1,66 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="{{ url_for('baseui.static', filename='images/icons/favicon-32x32.png')}}" sizes="32x32" />
-    <link rel="icon" type="image/png" href="{{ url_for('baseui.static', filename='images/icons/favicon-16x16.png')}}" sizes="16x16" />
-    <title>{{ pagetitle }}</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="{{ url_for('baseui.static', filename='css/arxivstyle.css')}}" />
-
-    <!-- Piwik -->
-    <script type="text/javascript">
-    var _paq = _paq || [];
-    _paq.push(["setDomains", ["*.arxiv.org"]]);
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
-    (function()
-    { var u="//webanalytics.library.cornell.edu/"; _paq.push(['setTrackerUrl', u+'piwik.php']); _paq.push(['setSiteId', 538]); var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s); }
-    )();
-    </script>
-    <!-- End Piwik Code -->
-
+    {% include "baseui/head.html" %}
+    <!-- Custom style sheets or other head includes -->
+    {% block addl_head %}
+    {% endblock addl_head %}
   </head>
   <body>
+  {% import "baseui/macros.html" as macros %}
   <noscript><img src="//webanalytics.library.cornell.edu/piwik.php?idsite=538&rec=1" style="border:0;" alt="" /></noscript>
   <header>
     {% block header %}
-    <!-- contains Cornell logo and sponsor statement -->
-    <div class="attribution level is-marginless">
-      <div class="level-left">
-        <a class="level-item" href="https://library.cornell.edu"><img src="{{ url_for('baseui.static', filename='images/CUL-reduced-white-SMALL.svg') }}" alt="Cornell University Library" /></a>
-      </div>
-      <div class="level-right"><p class="sponsors level-item">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</p></div>
-    </div>
-    <!-- contains arXiv identity and search bar -->
-    <div class="identity level is-marginless">
-      <div class="level-left">
-        <h1 class="level-item"><a href="">arXiv.org</a></h1>
-      </div>
-      <div class="search-block level-right">
-        <form class="level-item">
-          <div class="field has-addons">
-            <div class="control">
-              <input class="input is-small" type="text" name="query" placeholder="Search..." />
-              <p class="help"><a href="">Help</a> | <a href="">Advanced Search</a></p>
-            </div>
-            <div class="control">
-              <div class="select is-small">
-                <select name="searchtype">
-                  <option selected="selected">All fields</option>
-                  <option>Title</option>
-                  <option>Author</option>
-                  <option>arXiv ID</option>
-                </select>
-              </div>
-            </div>
-            <button class="button is-small is-warning">Search</button>
-          </div>
-        </form>
-      </div>
-    </div> <!-- closes identity -->
-    <div class="user-tools box is-pulled-right"><a href="">Login</a> | <a href="">My Account</a> | <a href="">Logout</a></div>
+    {% include "baseui/header.html" %}
     {% endblock header %}
   </header>
   <content>
@@ -68,7 +19,6 @@
       <div class="container">
         <div class="content">
           {% block content %}
-            {{ content }}
           {% endblock content %}
         </div>
       </div>
@@ -76,26 +26,7 @@
   </content>
   <footer>
     {% block footer %}
-      <div class="columns">
-        <div class="column">
-          <ul class="nav-spaced">
-            <li><a href="/help/contact">Contact</a></li>
-            <li><a href="https://twitter.com/arxiv">Find us on Twitter</a></li>
-          </ul>
-        </div>
-        <div class="column">
-          <ul class="nav-spaced">
-            <li><a href="https://blogs.cornell.edu/arxiv/">Blog - the latest news</a></li>
-            <li><a href="https://confluence.cornell.edu/display/arxivpub/arXiv+Public+Wiki">Wiki - project documentation</a></li>
-          </ul>
-        </div>
-        <div class="column">
-          <ul class="nav-spaced">
-            <li><a href="mailto:web-accessibility@cornell.edu">Web Accessibility Help</a></li>
-            <li><a href="/help">Help with using arXiv</a></li>
-          </ul>
-        </div>
-      </div>
+    {% include "baseui/footer.html" %}
     {% endblock footer %}
   </footer>
   </body>
