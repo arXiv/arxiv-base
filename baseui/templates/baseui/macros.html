@@ -1,6 +1,12 @@
 {# macros to be available to all templates across arxiv #}
 
 {% macro compactsearch(alignstyle="level-right") -%}
+  {# Creates an inline search widget with one input box, a dropdown for field
+    selection, a button, and two tiny help/advanced links. Can be wrapped with
+    Bulma's level element to align vertically with other elements in the same
+    horizontal band. Parameter is a Bulma class that sets overall alignment
+    within level wrapper, allowed values are level-left or level-right.
+  #}
   <div class="search-block {{ alignstyle }}">
     <form class="level-item">
       <div class="field has-addons">
@@ -25,6 +31,9 @@
 {%- endmacro %}
 
 {% macro pagination(current_page) -%}
+  {# Creates a uniform paginator. Currently unfinished - needs parameters
+     to define range, base URL, and current page.
+   #}
   <nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
     <a class="pagination-previous">Previous</a>
     <a class="pagination-next">Next page</a>
