@@ -13,6 +13,19 @@ arxiv-NG, and can be overridden as needed by submodules.
 testpage.html is included for rapid evaluation of display layer CSS without
 invoking a local environment to render templates.
 
+## Development server
+
+This project includes a minimal Flask application for development
+verification/testing purposes. To run the dev server (assuming that you are
+working in the root of this repository):
+
+```bash
+$ FLASK_APP=app.py FLASK_DEBUG=1 flask run
+```
+
+You should be able to view the rendered ``testpage.html`` at
+``http://127.0.0.1:5000/test``.
+
 ## Flask
 
 To use the base UI package in a Flask application...
