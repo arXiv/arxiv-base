@@ -11,12 +11,12 @@
     <form class="level-item">
       <div class="field has-addons">
         <div class="control">
-          <input class="input is-small" type="text" name="query" placeholder="Search..." />
+          <input class="input is-small" type="text" name="query" placeholder="Search..." aria-label="Search term or terms" />
           <p class="help"><a href="">Help</a> | <a href="">Advanced Search</a></p>
         </div>
         <div class="control">
           <div class="select is-small">
-            <select name="searchtype">
+            <select name="searchtype" aria-label="Field to search">
               <option selected="selected">All fields</option>
               <option>Title</option>
               <option>Author</option>
@@ -24,7 +24,7 @@
             </select>
           </div>
         </div>
-        <button class="button is-small is-warning">Search</button>
+        <button class="button is-small is-primary">Search</button>
       </div>
     </form>
   </div>
