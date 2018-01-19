@@ -18,8 +18,12 @@ $red: #cd0200
 $slate: #446e9b
 $slate-invert: #fff
 
-$primary: $slate !default
-$primary-invert: $slate-invert
+$cul-gray: #222
+$cul-red: #b31b1b
+$cul-red-darker: darken($cul-red, 30%)
+
+$primary: $cul-red-darker !default
+$primary-invert: #fff
 $warning: $orange
 $warning-invert: #fff
 
@@ -42,9 +46,6 @@ $subtitle-color: $grey
 
 $navbar-item-active-color: $primary
 $navbar-item-hover-background-color: transparent
-
-$cul-gray: #222
-$cul-red: #b31b1b
 
 @import '../sass/utilities/derived-variables'
 
