@@ -1,4 +1,4 @@
-# arxiv/base base docker file
+# arxiv/base
 
 FROM centos:centos7
 

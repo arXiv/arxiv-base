@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 
-class BaseUI(object):
+class Base(object):
     """Attaches a base UI blueprint to an application."""
 
     def __init__(self, app=None):
