@@ -8,4 +8,4 @@ blueprint = Blueprint('ui', __name__, url_prefix='')
 @blueprint.route('/test', methods=['GET'])
 def test_page() -> tuple:
     """Render the test page."""
-    return render_template("baseui/base.html")
+    return render_template("base/base.html")
