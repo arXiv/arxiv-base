@@ -1,2 +1,2 @@
-recursive-include baseui/static/ *
-recursive-include baseui/templates *
+recursive-include arxiv/base/static/ *
+recursive-include arxiv/base/templates *
