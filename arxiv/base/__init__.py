@@ -1,15 +1,17 @@
-from flask import Blueprint
+from typing import Optional
+from flask import Blueprint, Flask
 
 
 class Base(object):
     """Attaches a base UI blueprint to an application."""
 
-    def __init__(self, app=None):
+    def __init__(self, app: Optional[Flask] = None) -> None:
+        """Initialize ``app`` with base blueprint."""
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app):
-        """Creates and registers the base UI blueprint."""
+    def init_app(self, app: Flask) -> None:
+        """Create and register the base UI blueprint."""
         blueprint = Blueprint(
             'baseui',
             __name__,

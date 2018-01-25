@@ -7,7 +7,7 @@ from arxiv.base import Base, routes
 
 
 def create_web_app() -> Flask:
-    """Initialize and configure the zero application."""
+    """Initialize and configure the base application."""
     app = Flask('base')
     basedir, _ = os.path.split(os.path.abspath(__file__))
     app.config.from_pyfile(os.path.join(basedir, 'config.py'))

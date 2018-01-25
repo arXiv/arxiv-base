@@ -1,2 +1,6 @@
 flask==0.12.2
 nose2==0.7.3
+jsonschema==2.6.0
+mypy==0.560
+pylint==1.8.2
+coverage==4.4.2
