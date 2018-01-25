@@ -1,3 +1,5 @@
+"""arXiv base UI blueprint"""
+
 from typing import Optional
 from flask import Blueprint, Flask
 
