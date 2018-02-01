@@ -1,0 +1,32 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="{{ url_for('base.static', filename='images/icons/favicon-32x32.png')}}" sizes="32x32" />
+<link rel="icon" type="image/png" href="{{ url_for('base.static', filename='images/icons/favicon-16x16.png')}}" sizes="16x16" />
+<title>{{ pagetitle }}</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+<link rel="stylesheet" href="{{ url_for('base.static', filename='css/arxivstyle.css')}}" />
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX", "output/HTML-CSS"],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
+<!-- Piwik -->
+<script type="text/javascript">
+var _paq = _paq || [];
+_paq.push(["setDomains", ["*.arxiv.org"]]);
+_paq.push(['trackPageView']);
+_paq.push(['enableLinkTracking']);
+(function()
+{ var u="//webanalytics.library.cornell.edu/"; _paq.push(['setTrackerUrl', u+'piwik.php']); _paq.push(['setSiteId', 538]); var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s); }
+)();
+</script>
+<!-- End Piwik Code -->

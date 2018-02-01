@@ -1,0 +1,15 @@
+<!-- contains Cornell logo and sponsor statement -->
+<div class="attribution level is-marginless" role="banner">
+  <div class="level-left">
+    <a class="level-item" href="https://library.cornell.edu"><img src="{{ url_for('base.static', filename='images/CUL-reduced-white-SMALL.svg') }}" alt="Cornell University Library" width="300" aria-label="logo" /></a>
+  </div>
+  <div class="level-right"><p class="sponsors level-item">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</p></div>
+</div>
+<!-- contains arXiv identity and search bar -->
+<div class="identity level is-marginless">
+  <div class="level-left">
+    <h1 class="level-item"><a href="" aria-label="arxiv-logo">arXiv.org</a></h1>
+  </div>
+  {{ macros.compactsearch('level-right') }}
+</div> <!-- closes identity -->
+<div class="user-tools box is-pulled-right" role="navigation" aria-label="User menu"><a href="">Login</a> | <a href="">My Account</a> | <a href="">Logout</a></div>

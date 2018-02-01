@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "base/head.html" %}
+    <!-- Custom style sheets or other head includes -->
+    {% block addl_head %}
+    {% endblock addl_head %}
+  </head>
+  <body>
+  {% import "base/macros.html" as macros %}
+  <noscript><img src="//webanalytics.library.cornell.edu/piwik.php?idsite=538&rec=1" style="border:0;" alt="" /></noscript>
+  <header>
+    {% block header %}
+    {% include "base/header.html" %}
+    {% endblock header %}
+  </header>
+  <content>
+    <section class="section">
+      <div class="container">
+        <div class="content">
+          {% block content %}
+          {% endblock content %}
+        </div>
+      </div>
+    </section>
+  </content>
+  <footer>
+    {% block footer %}
+    {% include "base/footer.html" %}
+    {% endblock footer %}
+  </footer>
+  </body>
+</html>

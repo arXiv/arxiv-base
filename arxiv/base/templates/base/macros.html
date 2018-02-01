@@ -1,0 +1,50 @@
+{# macros to be available to all templates across arxiv #}
+
+{% macro compactsearch(alignstyle="level-right") -%}
+  {# Creates an inline search widget with one input box, a dropdown for field
+    selection, a button, and two tiny help/advanced links. Can be wrapped with
+    Bulma's level element to align vertically with other elements in the same
+    horizontal band. Parameter is a Bulma class that sets overall alignment
+    within level wrapper, allowed values are level-left or level-right.
+  #}
+  <div class="search-block {{ alignstyle }}">
+    <form class="level-item">
+      <div class="field has-addons">
+        <div class="control">
+          <input class="input is-small" type="text" name="query" placeholder="Search..." aria-label="Search term or terms" />
+          <p class="help"><a href="">Help</a> | <a href="">Advanced Search</a></p>
+        </div>
+        <div class="control">
+          <div class="select is-small">
+            <select name="searchtype" aria-label="Field to search">
+              <option selected="selected">All fields</option>
+              <option>Title</option>
+              <option>Author</option>
+              <option>arXiv ID</option>
+            </select>
+          </div>
+        </div>
+        <button class="button is-small is-primary">Search</button>
+      </div>
+    </form>
+  </div>
+{%- endmacro %}
+
+{% macro pagination(current_page) -%}
+  {# Creates a uniform paginator. Currently unfinished - needs parameters
+     to define range, base URL, and current page.
+   #}
+  <nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
+    <a class="pagination-previous">Previous</a>
+    <a class="pagination-next">Next page</a>
+    <ul class="pagination-list">
+      <li><a class="pagination-link" aria-label="Goto page 1">1</a></li>
+      <li><span class="pagination-ellipsis">&hellip;</span></li>
+      <li><a class="pagination-link" aria-label="Goto page b">b</a></li>
+      <li><a class="pagination-link is-current" aria-label="Page c" aria-current="page">{{ current_page }}</a></li>
+      <li><a class="pagination-link" aria-label="Goto page d">d</a></li>
+      <li><span class="pagination-ellipsis">&hellip;</span></li>
+      <li><a class="pagination-link" aria-label="Goto page n">n</a></li>
+    </ul>
+  </nav>
+{%- endmacro %}

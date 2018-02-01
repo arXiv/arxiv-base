@@ -1,0 +1,54 @@
+@import '../sass/utilities/initial-variables'
+@import '../sass/utilities/functions'
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,700')
+
+// Variables, inspired by Spacelab theme https://jenil.github.io/bulmaswatch/spacelab/
+$grey-darker: #2d2d2d
+$grey-dark: #333
+$grey: #777
+$grey-light: #999
+$grey-lighter: #eee
+
+$orange: #d47500
+$green: #3cb521
+$blue: #0068ac
+$red: #cd0200
+
+$slate: #446e9b
+$slate-invert: #fff
+
+$cul-gray: #222
+$cul-red: #b31b1b
+$cul-red-darker: darken($cul-red, 30%)
+
+$primary: $cul-red-darker !default
+$primary-invert: #fff
+$warning: $orange
+$warning-invert: #fff
+
+$subtitle-color: $grey
+
+$navbar-item-active-color: $primary
+$navbar-item-hover-background-color: transparent
+
+$family-sans-serif: 'Open Sans', 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif
+$family-smalltext: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif
+
+/* Overrides primary font size for all other derived sizes */
+$body-size: 14px
+$size-7: .8rem
+
+$box-padding: .75rem
+$box-radius: $radius-small
+
+$subtitle-color: $grey
+
+$navbar-item-active-color: $primary
+$navbar-item-hover-background-color: transparent
+
+@import '../sass/utilities/derived-variables'
+
+@import 'bulma'
+@import '_overrides'
+@import '_custom'
