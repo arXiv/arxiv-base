@@ -4,7 +4,7 @@
 if [ "$TRAVIS_PULL_REQUEST_SHA" = "" ];  then SHA=$TRAVIS_COMMIT; else SHA=$TRAVIS_PULL_REQUEST_SHA; fi
 
 # Check that base builds
-docker build -t arxiv-base:latest -f ./Dockerfile-base .
+docker build -t arxiv-base:latest -f ./Dockerfile .
 DOCKER_BUILD_BASE_STATUS=$?
 if [ $DOCKER_BUILD_BASE_STATUS -ne 0 ]; then
     DOCKER_BUILD_BASE_STATE="failure" && echo "docker build base failed";

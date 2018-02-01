@@ -14,12 +14,13 @@ RUN yum -y update && yum -y install epel-release \
 && echo $'#!/bin/bash\n\
 PKGS_TO_INSTALL=$(cat <<-END\n\
   ca-certificates\n\
-  wget\n\
   gcc\n\
   gcc-c++ \n\
+  git\n\
   python36u\n\
   python36u-devel\n\
-  git\n\
+  which\n\
+  wget\n\
 END\n\
 )\n\
 for pkg in ${PKGS_TO_INSTALL}; do\n\
@@ -35,5 +36,11 @@ yum -y install ${PKGS_TO_INSTALL}\n' >> /tmp/safe_yum.sh \
 
 RUN wget https://bootstrap.pypa.io/get-pip.py \
   && python3.6 get-pip.py
+
+#
+# This is needed by click: http://click.pocoo.org/5/python3/
+#
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 CMD /bin/bash
