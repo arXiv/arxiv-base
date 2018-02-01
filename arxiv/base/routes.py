@@ -1,4 +1,4 @@
-"""Provides routes for verifying baseui templates."""
+"""Provides routes for verifying base templates."""
 
 from typing import Any, Tuple
 from flask import Blueprint, render_template
