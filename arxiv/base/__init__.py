@@ -15,7 +15,7 @@ class Base(object):
     def init_app(self, app: Flask) -> None:
         """Create and register the base UI blueprint."""
         blueprint = Blueprint(
-            'baseui',
+            'base',
             __name__,
             template_folder='templates',
             static_folder='static',

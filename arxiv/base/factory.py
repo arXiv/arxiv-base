@@ -1,4 +1,4 @@
-"""Application factory for BaseUI app (development and testing only)."""
+"""Application factory for Base app (development and testing only)."""
 
 import logging
 import os
