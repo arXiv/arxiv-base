@@ -21,5 +21,6 @@ def config_url_builder() -> Dict[str, Callable]:
         """Generate a URL from this app's configuration."""
         target = target.upper()
         # Will raise a KeyError; that seems reasonable?
-        return current_app.config[f'ARXIV_{target}_URL']
+        url: str = current_app.config[f'ARXIV_{target}_URL']
+        return url
     return dict(config_url=config_url)
