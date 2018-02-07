@@ -1,6 +1,6 @@
 {# macros to be available to all templates across arxiv #}
 
-{% macro compactsearch(alignstyle="level-right") -%}
+{% macro compactsearch(config_url, alignstyle="level-right") -%}
   {# Creates an inline search widget with one input box, a dropdown for field
     selection, a button, and two tiny help/advanced links. Can be wrapped with
     Bulma's level element to align vertically with other elements in the same
@@ -8,11 +8,11 @@
     within level wrapper, allowed values are level-left or level-right.
   #}
   <div class="search-block {{ alignstyle }}">
-    <form class="level-item">
+    <form class="level-item" method="GET" action="{{ config_url('search_box') }}">
       <div class="field has-addons">
         <div class="control">
           <input class="input is-small" type="text" name="query" placeholder="Search..." aria-label="Search term or terms" />
-          <p class="help"><a href="">Help</a> | <a href="">Advanced Search</a></p>
+          <p class="help"><a href="{{ config_url('help') }}">Help</a> | <a href="{{ config_url('search_advanced') }}">Advanced Search</a></p>
         </div>
         <div class="control">
           <div class="select is-small">
