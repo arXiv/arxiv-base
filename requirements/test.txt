@@ -4,3 +4,4 @@ jsonschema==2.6.0
 mypy==0.560
 pylint==1.8.2
 coverage==4.4.2
+coveralls==1.2.0
