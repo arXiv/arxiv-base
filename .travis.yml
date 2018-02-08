@@ -11,6 +11,6 @@ script:
   - pip install -r requirements/test.txt
   - ./tests/lintstats.sh
   - ./tests/docker_tests.sh
-  - nose2
+  - nose2 --with-coverage
 after_success:
   - coveralls
