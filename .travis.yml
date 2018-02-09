@@ -11,6 +11,12 @@ script:
   - pip install -r requirements/test.txt
   - ./tests/lintstats.sh
   - ./tests/docker_tests.sh
+  - docker build ./ -t arxiv/base
   - nose2 --with-coverage
 after_success:
   - coveralls
+  - if [ "$TRAVIS_BRANCH" == "master" ] && [ -z {$TRAVIS_TAG} ]; then
+    docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD";
+    docker tag arxiv/base arxiv/base:${TRAVIS_TAG};
+    docker push arxiv/base:${TRAVIS_TAG};
+    fi
