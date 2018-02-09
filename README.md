@@ -49,11 +49,11 @@ Add it to your ``requirements.txt`` file. For the time being, we'll
 distribute directly from GitHub. To use a specific version, for example, you
 would write:
 
-``-e git://github.com/cul-it/arxiv-base-ui.git@0.1#egg=arxiv-base-ui``
+``-e git://github.com/cul-it/arxiv-base.git@0.1#egg=arxiv-base``
 
 Or if this repo is private, and you want to install a specific commit:
 
-``-e git+ssh://git@github.com/cul-it/arxiv-base-ui.git@d9af6c670afdf6f0fda6d92f7b110dcd60514f4a#egg=arxiv-base-ui``
+``-e git+ssh://git@github.com/cul-it/arxiv-base.git@d9af6c670afdf6f0fda6d92f7b110dcd60514f4a#egg=arxiv-base``
 
 See the [pip documentation](https://pip.pypa.io/en/latest/reference/pip_install/#git)
 for details.
@@ -64,7 +64,7 @@ templates and static files available to you. For example, in your
 
 ```python
 from flask import Flask
-from baseui import BaseUI
+from arxiv.base import Base
 from someapp import routes
 
 
@@ -72,7 +72,7 @@ def create_web_app() -> Flask:
    app = Flask('someapp')
    app.config.from_pyfile('config.py')
 
-   BaseUI(app)   # Registers the base UI blueprint.
+   Base(app)   # Registers the base/UI blueprint.
    app.register_blueprint(routes.blueprint)    # Your blueprint.
 return app
 ```
@@ -80,7 +80,7 @@ return app
 You can now extend base templates, e.g.:
 
 ```html
-{%- extends "baseui/base.html" %}
+{%- extends "base/base.html" %}
 
 {% block content %}
 Hello world!
@@ -90,17 +90,17 @@ Hello world!
 And use static files in your templates, e.g.:
 
 ```
-{{ url_for('baseui.static', filename='images/CUL-reduced-white-SMALL.svg') }}
+{{ url_for('base.static', filename='images/CUL-reduced-white-SMALL.svg') }}
 ```
 
 ## Editing and compiling sass
 
 The file arxivstyle.css should never be edited directly. It is compiled from arxivstyle.sass with this command from project directory root:
-```sass baseui/static/sass/arxivstyle.sass:baseui/static/css/arxivstyle.css```
+```sass base/static/sass/arxivstyle.sass:base/static/css/arxivstyle.css```
 
 or you can use the ``--watch`` option to autocompile on any changed file:
 
-```sass --watch baseui/static/sass/arxivstyle.sass:baseui/static/css/arxivstyle.css```
+```sass --watch base/static/sass/arxivstyle.sass:baseui/static/css/arxivstyle.css```
 
 Bulma source files are included in the ``static/sass`` directory so that variables can be overridden directly during compile. The ``arxivstyle.sass`` file has been written to do this; do not edit it.
 
