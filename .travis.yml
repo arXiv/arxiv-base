@@ -15,7 +15,7 @@ script:
   - nose2 --with-coverage
 after_success:
   - coveralls
-  - if [ "$TRAVIS_BRANCH" == "master" ] && [ -z {$TRAVIS_TAG} ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" ] && [ -z ${TRAVIS_TAG} ]; then
     docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD";
     docker tag arxiv/base arxiv/base:${TRAVIS_TAG};
     docker push arxiv/base:${TRAVIS_TAG};

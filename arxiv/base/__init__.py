@@ -3,9 +3,11 @@
 from typing import Optional
 from flask import Blueprint, Flask
 
+from .context_processors import config_url_builder
+
 
 class Base(object):
-    """Attaches a base UI blueprint to an application."""
+    """Attaches a base UI blueprint and context processors to an app."""
 
     def __init__(self, app: Optional[Flask] = None) -> None:
         """Initialize ``app`` with base blueprint."""
@@ -21,3 +23,4 @@ class Base(object):
             static_folder='static',
             static_url_path=app.static_url_path + '/base',)
         app.register_blueprint(blueprint)
+        app.context_processor(config_url_builder)
