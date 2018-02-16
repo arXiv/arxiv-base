@@ -16,7 +16,7 @@ def config_url_builder() -> Dict[str, Callable]:
         try:
             url: str = current_app.config.get(f'ARXIV_{target}_URL')
             if url is None:
-                url: str = getattr(config, f'ARXIV_{target}_URL')
+                url = getattr(config, f'ARXIV_{target}_URL')
         except AttributeError as e:
             raise ConfigurationError(f'URL for {target} not set') from e
         return url
