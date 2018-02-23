@@ -1,6 +1,6 @@
 """Tests for arXiv taxonomy module."""
 from unittest import TestCase
-from datetime import datetime
+from datetime import date
 from arxiv.taxonomy import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
     LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY
@@ -40,13 +40,17 @@ class TestTaxonomy(TestCase):
                           '{} is a valid group'.format(value['in_group']))
             self.assertIn('start_date', value,
                           'start_date defined for {}'.format(key))
-            start_dt = datetime.strptime(value['start_date'], '%Y-%m')
-            self.assertIsInstance(start_dt, datetime)
-            self.assertGreaterEqual(start_dt, datetime(1991, 8, 1))
+            # start_dt = datetime.strptime(value['start_date'], '%Y-%m')
+            self.assertIsInstance(value['start_date'], date)
+            self.assertGreaterEqual(value['start_date'], date(1991, 8, 1))
             if 'end_date' in value:
-                end_dt = datetime.strptime(value['end_date'], '%Y-%m')
+                # end_dt = datetime.strptime(value['end_date'], '%Y-%m')
+                self.assertIsInstance(value['end_date'], date)
                 self.assertGreater(
-                    end_dt, start_dt, 'end_date greater than start_date')
+                    value['end_date'],
+                    value['start_date'],
+                    'end_date greater than start_date'
+                )
 
     def test_active_archives(self):
         """Tests for active (non-defunct) archives."""
@@ -77,12 +81,12 @@ class TestTaxonomy(TestCase):
         """Test for archives that were used as primary/secondary categories."""
         for key, value in LEGACY_ARCHIVE_AS_PRIMARY.items():
             self.assertIn(key, ARCHIVES, '{} is a valid archive'.format(key))
-            dt = datetime.strptime(value, '%Y-%m')
-            self.assertIsInstance(dt, datetime)
+            # dt = datetime.strptime(value, '%Y-%m')
+            self.assertIsInstance(value, date)
         for key, value in LEGACY_ARCHIVE_AS_SECONDARY.items():
             self.assertIn(key, ARCHIVES, '{} is a valid archive'.format(key))
-            dt = datetime.strptime(value, '%Y-%m')
-            self.assertIsInstance(dt, datetime)
+            # dt = datetime.strptime(value, '%Y-%m')
+            self.assertIsInstance(value, date)
 
     def test_categories(self):
         """Test for the lowest level of the category taxonomy (categories)."""

@@ -1,4 +1,5 @@
 """arXiv group, archive and category definitions."""
+from datetime import date
 
 GROUPS = {
     'grp_physics': {
@@ -49,216 +50,216 @@ ARCHIVES = {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_group': 'grp_physics',
-        'start_date': '1994-11',
-        'end_date': '1996-09',
+        'start_date': date(1994, 11, 1),
+        'end_date': date(1996, 9, 1)
     },
     'adap-org': {
         'name': 'Adaptation, Noise, and Self-Organizing Systems',
         'in_group': 'grp_physics',
-        'start_date': '1993-03',
-        'end_date': '1999-12',
+        'start_date': date(1993, 3, 1),
+        'end_date': date(1999, 12, 1)
     },
     'alg-geom': {
         'name': 'Algebraic Geometry',
         'in_group': 'grp_math',
-        'start_date': '1992-02',
-        'end_date': '1997-12',
+        'start_date': date(1992, 2, 1),
+        'end_date': date(1997, 12, 1)
     },
     'ao-sci': {
         'name': 'Atmospheric-Oceanic Sciences',
         'in_group': 'grp_physics',
-        'start_date': '1995-02',
-        'end_date': '1996-09',
+        'start_date': date(1995, 2, 1),
+        'end_date': date(1996, 9, 1)
     },
     'astro-ph': {
         'name': 'Astrophysics',
         'in_group': 'grp_physics',
-        'start_date': '1992-04',
+        'start_date': date(1992, 4, 1)
     },
     'atom-ph': {
         'name': 'Atomic, Molecular and Optical Physics',
         'in_group': 'grp_physics',
-        'start_date': '1995-09',
-        'end_date': '1996-09',
+        'start_date': date(1995, 9, 1),
+        'end_date': date(1996, 9, 1)
     },
     'bayes-an': {
         'name': 'Bayesian Analysis',
         'in_group': 'grp_physics',
-        'start_date': '1995-06',
-        'end_date': '1996-11',
+        'start_date': date(1995, 6, 1),
+        'end_date': date(1996, 11, 1)
     },
     'chao-dyn': {
         'name': 'Chaotic Dynamics',
         'in_group': 'grp_physics',
-        'start_date': '1993-01',
-        'end_date': '1999-12',
+        'start_date': date(1993, 1, 1),
+        'end_date': date(1999, 12, 1)
     },
     'chem-ph': {
         'name': 'Chemical Physics',
         'in_group': 'grp_physics',
-        'start_date': '1994-03',
-        'end_date': '1996-09',
+        'start_date': date(1994, 3, 1),
+        'end_date': date(1996, 9, 1)
     },
     'cmp-lg': {
         'name': 'Computation and Language',
         'in_group': 'grp_cs',
-        'start_date': '1994-04',
-        'end_date': '1998-09',
+        'start_date': date(1994, 4, 1),
+        'end_date': date(1998, 9, 1)
     },
     'comp-gas': {
         'name': 'Cellular Automata and Lattice Gases',
         'in_group': 'grp_physics',
-        'start_date': '1993-02',
-        'end_date': '1999-12',
+        'start_date': date(1993, 2, 1),
+        'end_date': date(1999, 12, 1)
     },
     'cond-mat': {
         'name': 'Condensed Matter',
         'in_group': 'grp_physics',
-        'start_date': '1992-04',
+        'start_date': date(1992, 4, 1)
     },
     'cs': {
         'name': 'Computer Science',
         'in_group': 'grp_cs',
-        'start_date': '1993-01',
+        'start_date': date(1993, 1, 1)
     },
     'dg-ga': {
         'name': 'Differential Geometry',
         'in_group': 'grp_math',
-        'start_date': '1994-06',
-        'end_date': '1997-12',
+        'start_date': date(1994, 6, 1),
+        'end_date': date(1997, 12, 1)
     },
     'econ': {
         'name': 'Economics',
         'in_group': 'grp_econ',
-        'start_date': '2017-09',
+        'start_date': date(2017, 9, 1)
     },
     'eess': {
         'name': 'Electrical Engineering and Systems Science',
         'in_group': 'grp_eess',
-        'start_date': '2017-09',
+        'start_date': date(2017, 9, 1)
     },
     'funct-an': {
         'name': 'Functional Analysis',
         'in_group': 'grp_math',
-        'start_date': '1992-04',
-        'end_date': '1997-12',
+        'start_date': date(1992, 4, 1),
+        'end_date': date(1997, 12, 1)
     },
     'gr-qc': {
         'name': 'General Relativity and Quantum Cosmology',
         'in_group': 'grp_physics',
-        'start_date': '1992-07',
+        'start_date': date(1992, 7, 1)
     },
     'hep-ex': {
         'name': 'High Energy Physics - Experiment',
         'in_group': 'grp_physics',
-        'start_date': '1994-04',
+        'start_date': date(1994, 4, 1)
     },
     'hep-lat': {
         'name': 'High Energy Physics - Lattice',
         'in_group': 'grp_physics',
-        'start_date': '1992-02',
+        'start_date': date(1992, 2, 1)
     },
     'hep-ph': {
         'name': 'High Energy Physics - Phenomenology',
         'in_group': 'grp_physics',
-        'start_date': '1992-03',
+        'start_date': date(1992, 3, 1)
     },
     'hep-th': {
         'name': 'High Energy Physics - Theory',
         'in_group': 'grp_physics',
-        'start_date': '1991-08',
+        'start_date': date(1991, 8, 1)
     },
     'math': {
         'name': 'Mathematics',
         'in_group': 'grp_math',
-        'start_date': '1992-02',
+        'start_date': date(1992, 2, 1)
     },
     'math-ph': {
         'name': 'Mathematical Physics',
         'in_group': 'grp_physics',
-        'start_date': '1996-09',
+        'start_date': date(1996, 9, 1)
     },
     'mtrl-th': {
         'name': 'Materials Theory',
         'in_group': 'grp_physics',
-        'start_date': '1994-11',
-        'end_date': '1996-09',
+        'start_date': date(1994, 11, 1),
+        'end_date': date(1996, 9, 1)
     },
     'nlin': {
         'name': 'Nonlinear Sciences',
         'in_group': 'grp_physics',
-        'start_date': '1993-01',
+        'start_date': date(1993, 1, 1)
     },
     'nucl-ex': {
         'name': 'Nuclear Experiment',
         'in_group': 'grp_physics',
-        'start_date': '1994-12',
+        'start_date': date(1994, 12, 1)
     },
     'nucl-th': {
         'name': 'Nuclear Theory',
         'in_group': 'grp_physics',
-        'start_date': '1992-10',
+        'start_date': date(1992, 10, 1)
     },
     'patt-sol': {
         'name': 'Pattern Formation and Solitons',
         'in_group': 'grp_physics',
-        'start_date': '1993-02',
-        'end_date': '1999-12',
+        'start_date': date(1993, 2, 1),
+        'end_date': date(1999, 12, 1)
     },
     'physics': {
         'name': 'Physics',
         'in_group': 'grp_physics',
-        'start_date': '1996-10',
+        'start_date': date(1996, 10, 1)
     },
     'plasm-ph': {
         'name': 'Plasma Physics',
         'in_group': 'grp_physics',
-        'start_date': '1995-09',
-        'end_date': '1996-09',
+        'start_date': date(1995, 9, 1),
+        'end_date': date(1996, 9, 1)
     },
     'q-alg': {
         'name': 'Quantum Algebra and Topology',
         'in_group': 'grp_math',
-        'start_date': '1994-12',
-        'end_date': '1997-12',
+        'start_date': date(1994, 12, 1),
+        'end_date': date(1997, 12, 1)
     },
     'q-bio': {
         'name': 'Quantitative Biology',
         'in_group': 'grp_q-bio',
-        'start_date': '2003-09',
+        'start_date': date(2003, 9, 1)
     },
     'q-fin': {
         'name': 'Quantitative Finance',
         'in_group': 'grp_q-fin',
-        'start_date': '2008-12',
+        'start_date': date(2008, 12, 1)
     },
     'quant-ph': {
         'name': 'Quantum Physics',
         'in_group': 'grp_physics',
-        'start_date': '1994-12',
+        'start_date': date(1994, 12, 1)
     },
     'solv-int': {
         'name': 'Exactly Solvable and Integrable Systems',
         'in_group': 'grp_physics',
-        'start_date': '1993-04',
-        'end_date': '1999-12',
+        'start_date': date(1993, 4, 1),
+        'end_date': date(1999, 12, 1)
     },
     'stat': {
         'name': 'Statistics',
         'in_group': 'grp_stat',
-        'start_date': '2007-04',
+        'start_date': date(2007, 4, 1)
     },
     'supr-con': {
         'name': 'Superconductivity',
         'in_group': 'grp_physics',
-        'start_date': '1994-11',
-        'end_date': '1996-09',
+        'start_date': date(1994, 11, 1),
+        'end_date': date(1996, 9, 1)
     },
     'test': {
         'name': 'Test',
         'in_group': 'grp_test',
         'is_test': True,
-        'start_date': '1995-02',
+        'start_date': date(1995, 2, 1)
     }
 }
 
@@ -291,15 +292,15 @@ ARCHIVES_SUBSUMED = {
 # Legacy bare-archive names used as primary and secondary
 # categories for old submissions. yyyy-mm is last month allowed.
 LEGACY_ARCHIVE_AS_PRIMARY = {
-    'astro-ph': '2008-12',
-    'cond-mat': '2004-01',
-    'test': '2010-01',
+    'astro-ph': date(2008, 12, 1),
+    'cond-mat': date(2004, 1, 1),
+    'test': date(2010, 1, 1)
 }
 LEGACY_ARCHIVE_AS_SECONDARY = {
-    'astro-ph': '2008-12',
-    'cond-mat': '2004-01',
-    'q-bio': '2003-08',
-    'test': '2010-01'
+    'astro-ph': date(2008, 12, 1),
+    'cond-mat': date(2004, 1, 1),
+    'q-bio': date(2003, 8, 1),
+    'test': date(2010, 1, 1)
 }
 
 CATEGORIES = {
