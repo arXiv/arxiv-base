@@ -10,6 +10,8 @@ name = "pypi"
 flask = "*"
 "nose2" = "*"
 jsonschema = "*"
+mypy = "*"
+pylint = "*"
 
 
 [dev-packages]
