@@ -1,4 +1,30 @@
-"""arXiv base UI blueprint"""
+"""
+arXiv base Flask components.
+
+Provides :class:`.Base`, which attaches base templates, static assets, global
+context processors, and exception handlers to a :class:`flask.Flask` app
+instance.
+
+Intended for use in an application factory. For example:
+
+.. code-block:: python
+
+   python
+   from flask import Flask
+   from arxiv.base import Base
+   from someapp import routes
+
+
+   def create_web_app() -> Flask:
+      app = Flask('someapp')
+      app.config.from_pyfile('config.py')
+
+      Base(app)   # Registers the base/UI blueprint.
+      app.register_blueprint(routes.blueprint)    # Your blueprint.
+   return app
+
+
+"""
 
 from typing import Optional
 from flask import Blueprint, Flask

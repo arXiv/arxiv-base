@@ -15,7 +15,7 @@ will be rendered within the base template for that exception class, including
 markup.
 """
 
-from typing import Callable
+from typing import Callable, List, Tuple
 
 from werkzeug.exceptions import NotFound, Forbidden, Unauthorized, \
     MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError, \
@@ -40,7 +40,7 @@ def handler(exception: type) -> Callable:
     return deco
 
 
-def get_handlers():
+def get_handlers() -> List[Tuple[type, Callable]]:
     """
     Get a list of registered exception handlers.
 
@@ -48,6 +48,7 @@ def get_handlers():
     -------
     list
         List of (:class:`.HTTPException`, callable) tuples.
+
     """
     return _handlers
 

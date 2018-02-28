@@ -1,3 +1,5 @@
+"""Install arXiv-base as an importable package."""
+
 from setuptools import setup, find_packages
 
 
