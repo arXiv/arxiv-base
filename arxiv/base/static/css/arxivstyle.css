@@ -6432,6 +6432,8 @@ footer {
   background-color: #222;
   color: #fff;
   line-height: 1; }
+  .attribution .level-item {
+    padding: 0.25em; }
 
 .identity {
   background-color: #b31b1b;
@@ -6457,6 +6459,13 @@ footer {
   margin: 4px;
   padding-right: 0.75em;
   text-align: right; }
+  .sponsors a {
+    color: #fff; }
+    .sponsors a:visited {
+      color: #fff; }
+    .sponsors a:hover {
+      background-color: #999;
+      color: #fff; }
 
 /* specific styles for search lists with classic dl/dt/dd structure and classes */
 .list-identifier {

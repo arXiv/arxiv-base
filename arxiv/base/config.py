@@ -27,3 +27,7 @@ ARXIV_ACCESSIBILITY_URL = os.environ.get(
 )
 ARXIV_LIBRARY_URL = os.environ.get('ARXIV_LIBRARY_URL',
                                    'https://library.cornell.edu')
+ARXIV_ACKNOWLEDGEMENT_URL = os.environ.get(
+    'ARXIV_ACKNOWLEDGEMENT_URL',
+    "https://confluence.cornell.edu/x/ALlRF"
+)
