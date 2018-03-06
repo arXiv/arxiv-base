@@ -19,8 +19,8 @@ blueprint = Blueprint('ui', __name__, url_prefix='')
 @blueprint.route('/test', methods=['GET'])
 def test_page() -> Response:
     """Render the test page."""
-    response = make_response(render_template("base/base.html"),
-                             status_code=status.HTTP_200_OK)
+    rendered = render_template("base/base.html", pagetitle='Home')
+    response = make_response(rendered, status_code=status.HTTP_200_OK)
     return response
 
 

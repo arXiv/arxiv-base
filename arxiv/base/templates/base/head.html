@@ -1,23 +1,34 @@
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="icon" type="image/png" href="{{ url_for('base.static', filename='images/icons/favicon-32x32.png')}}" sizes="32x32" />
 <link rel="icon" type="image/png" href="{{ url_for('base.static', filename='images/icons/favicon-16x16.png')}}" sizes="16x16" />
-<title>{{ pagetitle }}</title>
+<title>{{ pagetitle }} | arXiv e-print repository</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" href="{{ url_for('base.static', filename='css/arxivstyle.css')}}" />
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     extensions: ["tex2jax.js"],
-    jax: ["input/TeX", "output/HTML-CSS"],
+    jax: ["input/TeX", "output/HTML-CSS", "TeX/AMSmath.js","TeX/AMSsymbols.js", "TeX/noErrors.js"],
     tex2jax: {
       inlineMath: [ ['$','$'], ["\\(","\\)"] ],
       displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-      processEscapes: true
+      processEscapes: true,
+      ignoreClass: 'ignore_mathjax'
     },
+    TeX: {
+      noErrors: {
+        inlineDelimiters: ['$','$'],
+        multiLine: false,
+        style: {
+          'font-size': '100%',
+          errorConfig
+        }
+      }
+    }
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
 </script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+<script src='//static.arxiv.org/MathJax-2.7.3/MathJax.js'></script>
 
 <!-- Piwik -->
 <script type="text/javascript">
