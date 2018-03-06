@@ -1,4 +1,9 @@
-"""Provides routes for verifying base templates."""
+"""
+Provides routes for verifying base templates and exception handling.
+
+The blueprint instantiated here is **not** for use in a production application;
+it is not attached by :class:`arxiv.base.Base`.
+"""
 
 from typing import Any, Tuple, Callable, Dict
 from flask import Blueprint, render_template, current_app, make_response, \
