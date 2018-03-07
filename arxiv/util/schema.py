@@ -26,6 +26,7 @@ def load(schema_path: str) -> Callable:
     callable
         A validator function; when called with a ``dict``, validates the data
         against the schema.
+
     """
     try:
         with open(schema_path) as f:
@@ -48,6 +49,7 @@ def load(schema_path: str) -> Callable:
         Raises
         ------
         :class:`.ValidationError`
+
         """
         jsonschema.validate(data, schema, resolver=resolver)
     return validate
