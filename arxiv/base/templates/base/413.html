@@ -1,20 +1,18 @@
 {% extends "base/base.html" %}
 
 {% block content %}
-<section class="hero">
-  <div class="hero-body">
-    <div class="container">
-      <h1 class="title">
-        Four-Thirteen
-      </h1>
-      <h2 class="subtitle">
-        Request entity too large
-      </h2>
-      <p>
-        {{ error.description|safe }}
-      </p>
-    </div>
+<div class="has-text-centered">
+  <h1 class="title is-size-1">
+    Request Entity Too Large
+  </h1>
+  <div class="status-code">
+    <p class="is-flex">
+      <span>413</span>
+    </p>
   </div>
-</section>
+  <p class="is-size-5">
+    {{ error.description|safe }}
+  </p>
+</div>
 
 {% endblock content %}

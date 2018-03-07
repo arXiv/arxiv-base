@@ -95,13 +95,21 @@ And use static files in your templates, e.g.:
 
 ## Editing and compiling sass
 
-The file arxivstyle.css should never be edited directly. It is compiled from arxivstyle.sass with this command from project directory root:
-```sass base/static/sass/arxivstyle.sass:base/static/css/arxivstyle.css```
+The file arxivstyle.css should never be edited directly. It is compiled from
+arxivstyle.sass with this command from project directory root:
+```sass arxiv/base/static/sass/arxivstyle.sass:arxiv/base/static/css/arxivstyle.css```
 
 or you can use the ``--watch`` option to autocompile on any changed file:
 
-```sass --watch base/static/sass/arxivstyle.sass:baseui/static/css/arxivstyle.css```
+```sass --watch arxiv/base/static/sass/arxivstyle.sass:arxiv/base/static/css/arxivstyle.css```
 
-Bulma source files are included in the ``static/sass`` directory so that variables can be overridden directly during compile. The ``arxivstyle.sass`` file has been written to do this; do not edit it.
+Bulma source files are included in the ``static/sass`` directory so that
+variables can be overridden directly during compile. The ``arxivstyle.sass``
+file has been written to do this; do not edit it.
 
 [Documentation for sass](http://sass-lang.com/documentation/file.SASS_REFERENCE.html)
+
+## Beta Watermark
+
+Adding ``class="beta"`` to the main content div will create a beta watermark at
+ the top left of pages having this class.

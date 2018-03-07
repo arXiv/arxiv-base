@@ -1,20 +1,18 @@
 {% extends "base/base.html" %}
 
 {% block content %}
-<section class="hero">
-  <div class="hero-body">
-    <div class="container">
-      <h1 class="title">
-        Four-Oh-Three
-      </h1>
-      <h2 class="subtitle">
-        Not authorized
-      </h2>
-      <p>
-        {{ error.description|safe }}
+  <div class="has-text-centered">
+    <h1 class="title is-size-1">
+      Not Authorized
+    </h1>
+    <div class="status-code">
+      <p class="is-flex">
+        <span>4</span><img src="{{ url_for('base.static', filename='images/smileybones.svg') }}" alt="0" width="170" height="170" /><span>3</span>
       </p>
     </div>
+    <p class="is-size-5">
+      {{ error.description|safe }}
+    </p>
   </div>
-</section>
-
+  
 {% endblock content %}
