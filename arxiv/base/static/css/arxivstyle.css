@@ -6468,7 +6468,6 @@ footer {
       color: #fff; }
 
 .status-code {
-  display: inline-block;
   background-color: #0a0a0a;
   color: #00FF00;
   font-size: 16em;
@@ -6477,7 +6476,8 @@ footer {
   width: max-content;
   line-height: 1em;
   padding: 0.1em 0.25em;
-  margin-bottom: 0.25em; }
+  margin-left: auto !important;
+  margin-right: auto !important; }
 
 /* #TODO: responsive widths for mobile status display */
 /* specific styles for search lists with classic dl/dt/dd structure and classes */
