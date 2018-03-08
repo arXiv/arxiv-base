@@ -6487,7 +6487,8 @@ footer {
   top: 0;
   left: 0;
   line-height: 0.75em;
-  font-family: serif; }
+  font-family: serif;
+  z-index: -10; }
 
 /* specific styles for search lists with classic dl/dt/dd structure and classes */
 .list-identifier {
