@@ -6479,7 +6479,16 @@ footer {
   margin-left: auto !important;
   margin-right: auto !important; }
 
-/* #TODO: responsive widths for mobile status display */
+.beta::after {
+  content: "β";
+  color: #eee;
+  font-size: 25em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  line-height: 0.75em;
+  font-family: serif; }
+
 /* specific styles for search lists with classic dl/dt/dd structure and classes */
 .list-identifier {
   font-weight: 600; }
