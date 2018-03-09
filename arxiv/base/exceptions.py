@@ -113,7 +113,6 @@ def handle_bad_request(error: BadRequest) -> Response:
     return response
 
 
-@handler(HTTPException)
 @handler(InternalServerError)
 def handle_internal_server_error(error: InternalServerError) -> Response:
     """Render the base 500 error page."""

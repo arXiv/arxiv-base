@@ -13,6 +13,7 @@ from arxiv import status
 from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
     MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError
 
+
 blueprint = Blueprint('ui', __name__, url_prefix='')
 
 

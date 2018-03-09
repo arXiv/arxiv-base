@@ -1,0 +1,30 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="has-text-centered">
+  <h1 class="title is-size-1">
+    {% block error_title %}Page Not Found{% endblock %}
+  </h1>
+  <div class="status-code columns is-gapless">
+    {% block error_illustration %}
+    <div class="column">
+      <span>4</span>
+    </div>
+    <div class="column">
+      <img src="{{ url_for('base.static', filename='images/smileybones.svg') }}" alt="0" />
+    </div>
+    <div class="column">
+      <span>4</span>
+    </div>
+    {% endblock %}
+  </div>
+  <p class="is-size-5">
+    {{ error.description|safe }}
+  </p>
+  <p class="is-size-5">
+    If the error persists, please contact arXiv support at
+    <a href="mailto:help@arxiv.org">help@arxiv.org</a>.
+  </p>
+</div>
+
+{% endblock content %}
