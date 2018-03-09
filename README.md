@@ -109,7 +109,9 @@ file has been written to do this; do not edit it.
 
 [Documentation for sass](http://sass-lang.com/documentation/file.SASS_REFERENCE.html)
 
-## Beta Watermark
+## Layout features, tips and tricks
+
+### Beta watermark
 
 Adding ``class="beta"`` to the main content div will create a beta watermark at
  the top left of pages having this class.
