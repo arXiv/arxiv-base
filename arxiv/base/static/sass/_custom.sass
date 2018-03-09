@@ -7,16 +7,15 @@ header h1
   padding: .25em 0 .5em
 
 footer
-  background-color: #9b9b9b
+  background-color: $grey
   color: #fff
-  padding: .5em 2em
+  padding: .5em 2em .75em 2em
   a
     color: #fff
-    &:visited
-      color: #fff
     &:hover,
     &:active
       border-bottom: 1px dotted #fff
+      background-color: $grey-light
 
 .nav-spaced
   line-height: 2
@@ -31,6 +30,8 @@ footer
   background-color: $cul-gray
   color: #fff
   line-height: 1
+  .level-item
+    padding: .25em
 
 .identity
   background-color: $cul-red
@@ -56,6 +57,37 @@ footer
   margin: 4px
   padding-right: .75em
   text-align: right
+  a
+    color: #fff
+    &:visited
+      color: #fff
+    &:hover
+      background-color: $grey-light
+      color: #fff
+
+.status-code
+  background-color: $black
+  color: #00FF00
+  font-size: 16em
+  font-family: 'Courier', monospace
+  font-weight: bold
+  width: max-content
+  line-height: 1em
+  padding: .1em .25em
+  margin-left: auto !important
+  margin-right: auto !important
+
+.beta
+  &::after
+    content: '\03b2'
+    color: $grey-lighter
+    font-size: 25em
+    position: absolute
+    top: 0
+    left: 0
+    line-height: .75em
+    font-family: serif
+    z-index: -10
 
 /* specific styles for search lists with classic dl/dt/dd structure and classes */
 .list-identifier

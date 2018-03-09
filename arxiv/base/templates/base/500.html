@@ -1,0 +1,15 @@
+{% extends "base/exception.html" %}
+
+{% block error_title %}Internal Server Error{% endblock %}
+
+{% block error_illustration %}
+<div class="column">
+  <span>5</span>
+</div>
+<div class="column">
+  <img src="{{ url_for('base.static', filename='images/smileybones.svg') }}" alt="0" width="170" height="170" style="padding-right: 10px" />
+</div>
+<div class="column">
+  <img src="{{ url_for('base.static', filename='images/smileybones.svg') }}" alt="0" width="170" height="170" style="padding-left: 10px" />
+</div>
+{% endblock %}
