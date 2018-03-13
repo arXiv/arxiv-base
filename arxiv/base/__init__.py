@@ -31,6 +31,7 @@ from flask import Blueprint, Flask
 
 from arxiv.base.context_processors import config_url_builder
 from arxiv.base import exceptions
+from arxiv.base.converter import ArXivConverter
 
 
 class Base(object):
@@ -43,6 +44,9 @@ class Base(object):
 
     def init_app(self, app: Flask) -> None:
         """Create and register the base UI blueprint."""
+        # Attach the arXiv identifier converter for URLs with IDs.
+        app.url_map.converters['arxiv'] = ArXivConverter
+
         # The base blueprint attaches static assets and templates.
         blueprint = Blueprint(
             'base',
