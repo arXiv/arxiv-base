@@ -2,7 +2,7 @@
 
 import re
 
-from arxiv.identifier import parse_arxiv_id
+from arxiv import identifier
 from werkzeug.routing import BaseConverter, ValidationError
 
 
@@ -11,7 +11,7 @@ class ArXivConverter(BaseConverter):
 
     def to_python(self, value: str) -> str:
         """Parse URL path part to Python rep (str)."""
-        return parse_arxiv_id(value)
+        return identifier.parse_arxiv_id(value)
 
     def to_url(self, value: str) -> str:
         """Cast Python rep (str) to URL path part."""
