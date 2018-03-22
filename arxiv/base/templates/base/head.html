@@ -18,7 +18,15 @@
       processClass: 'mathjax.*'
     },
     TeX: {
-        extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js"]
+        extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js"],
+        noErrors: {
+          inlineDelimiters: ["$","$"],
+          multiLine: false,
+          style: {
+            "font-size": "normal"',
+            "border": ""
+          }
+        }
     },
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
