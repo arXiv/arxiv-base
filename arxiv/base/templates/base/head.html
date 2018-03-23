@@ -7,16 +7,26 @@
 <link rel="stylesheet" href="{{ url_for('base.static', filename='css/arxivstyle.css')}}" />
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
+    messageStyle: "none",
     extensions: ["tex2jax.js"],
     jax: ["input/TeX", "output/HTML-CSS"],
     tex2jax: {
       inlineMath: [ ['$','$'], ["\\(","\\)"] ],
       displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
       processEscapes: true,
-      ignoreClass: 'ignore_mathjax'
+      ignoreClass: '.*',
+      processClass: 'mathjax.*'
     },
     TeX: {
-        extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js"]
+        extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js"],
+        noErrors: {
+          inlineDelimiters: ["$","$"],
+          multiLine: false,
+          style: {
+            "font-size": "normal",
+            "border": ""
+          }
+        }
     },
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
