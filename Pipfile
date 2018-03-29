@@ -12,6 +12,8 @@ flask = "*"
 jsonschema = "*"
 mypy = "*"
 pylint = "*"
+pytz = "*"
+uwsgi = "*"
 
 
 [dev-packages]
