@@ -13,13 +13,10 @@ Writing a middleware
 
 Middlewares may subclass :class:`.base.BaseMiddleware`, which implements some
 of the boilerplate needed to make the middleware work with Flask. In that case,
-the middleware class need only implement a ``__call__`` method; that method
-should:
+the middleware class need only implement one or both of:
 
-- Accept the WSGI request environment (``dict``) and the ``start_response()``
-  callable;
-- Call ``self.app`` with those two parameters.
-- Return a response iterable (returned by ``self.app``).
+- ``before(environ: dict, start_response: Callable) -> Tuple[dict, Callable]``
+- ``after(response: Iterable) -> Iterable``
 
 For example:
 
@@ -30,10 +27,11 @@ For example:
    class FooMiddleware(BaseMiddleware):
        '''Adds the parameter ``foo`` to the request environment.'''
 
-       def __call__(self, environ: dict, start_response: Callable) -> Iterable:
+       def before(self, environ: dict, start_response: Callable) \
+               -> Tuple[dict, Callable]:
            '''Insert ``foo`` into the environment, and handle the request.'''
            environ['foo'] = 'bar'
-           return self.app(environ, start_response)
+           return environ, start_response
 
 
 In the example above, the ``'foo'`` parameter would be available on the

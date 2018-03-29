@@ -45,14 +45,14 @@ class TestWrap(TestCase):
     def test_wrap_is_inside_out(self):
         """Order of middleware determines call order upon request."""
         class FirstMiddleware(middleware.base.BaseMiddleware):
-            def __call__(self, environ, start_response):
+            def before(self, environ, start_response):
                 environ['call_order'].append('first')
-                return self.app(environ, start_response)
+                return environ, start_response
 
         class SecondMiddleware(middleware.base.BaseMiddleware):
-            def __call__(self, environ, start_response):
+            def before(self, environ, start_response):
                 environ['call_order'].append('second')
-                return self.app(environ, start_response)
+                return environ, start_response
 
         app = Flask('test')
         self.environ['call_order'] = []

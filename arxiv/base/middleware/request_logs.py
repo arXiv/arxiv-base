@@ -4,7 +4,7 @@ Provides middleware to support classic CUL/Apache log format.
 For accurate request metrics, apply this middleware before any others.
 """
 
-from typing import Type, Callable, List, Iterable
+from typing import Type, Callable, List, Iterable, Tuple
 from datetime import datetime
 from pytz import timezone
 from .base import BaseMiddleware
@@ -20,10 +20,10 @@ try:
     class ClassicLogsMiddleware(BaseMiddleware):
         """Add params to uwsgi to support classic CUL/Apache log format."""
 
-        def __call__(self, environ: dict, start_response: Callable) \
-                -> Iterable:
+        def before(self, environ: dict, start_response: Callable) \
+                -> Tuple[dict, Callable]:
             """
-            Handle a WSGI request.
+            Inject request time in CUL classic format, and start TTFB clock.
 
             Parameters
             ----------
@@ -35,20 +35,38 @@ try:
 
             Returns
             -------
-            iterable
-                Iterable that generates the HTTP response. See
-                https://www.python.org/dev/peps/pep-0333/#the-application-framework-side
+            dict
+                Request environment (``environ``).
+            function
+                ``start_response`` function.
             """
-            start = datetime.now()
+            self.start = datetime.now()
 
             # Express the time that the request was received in the classic
             # format.
             rtime = datetime.now(tz=EASTERN).strftime('%d/%m/%Y:%H:%M:%S %z')
             uwsgi.set_logvar('rtime', rtime)
-            response: Iterable = self.app(environ, start_response)
+            return environ, start_response
+
+        def after(self, response: Iterable) -> Iterable:
+            """
+            Set TTFB log variable.
+
+            Parameters
+            ----------
+            response : iterable
+                Iterable that generates the HTTP response. See
+                https://www.python.org/dev/peps/pep-0333/#the-application-framework-side
+
+            Returns
+            -------
+            iterable
+                Iterable that generates the HTTP response. See
+                https://www.python.org/dev/peps/pep-0333/#the-application-framework-side
+            """
             # This is a close approximation of "TTFB" (time from the
             # request received to the start of the response).
-            ttfb = (datetime.now() - start).microseconds
+            ttfb = (datetime.now() - self.start).microseconds
             uwsgi.set_logvar('ttfb', str(ttfb).encode('ascii'))
             return response
 
