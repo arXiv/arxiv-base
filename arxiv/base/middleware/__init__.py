@@ -100,12 +100,13 @@ def wrap(app: Union[Flask, Callable],
         A callable that behaves like a Flask application factory.
 
     """
-    # factory = app_factory
+    if not hasattr(app, 'wsgi_app'):
+        raise TypeError('Not a valid Flask app or middleware')
     # Apply the last middleware first, so that the first middleware is called
     # first upon the request.
-    wrapped_app = app.wsgi_app
+    wrapped_app = app.wsgi_app  # type: ignore
     for middleware in middlewares[::-1]:
         wrapped_app = middleware(wrapped_app)
         # factory = middleware(factory)
-    app.wsgi_app = wrapped_app
+    app.wsgi_app = wrapped_app  # type: ignore
     return app

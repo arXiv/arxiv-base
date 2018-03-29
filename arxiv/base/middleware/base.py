@@ -1,6 +1,6 @@
 """Provides base classes for WSGI middlewares."""
 
-from typing import Callable, Union, Iterable
+from typing import Callable, Union, Iterable, TypeVar
 from flask import Flask
 
 
@@ -11,7 +11,7 @@ class BaseMiddleware(object):
     Child classes should reimplement :meth:`.__call__`.
     """
 
-    def __init__(self, app: Union[Flask, Callable]):
+    def __init__(self, app: Union[Flask, Callable]) -> None:
         """
         Set the app factory that this middleware wraps.
 
@@ -42,10 +42,11 @@ class BaseMiddleware(object):
             Iterable that generates the HTTP response. See
             https://www.python.org/dev/peps/pep-0333/#the-application-framework-side
         """
-        return self.app(environ, start_response)
+        response: Iterable = self.app(environ, start_response)
+        return response
 
     @property
-    def wsgi_app(self):
+    def wsgi_app(self):    # type: ignore
         """
         Refer to the current instance of this class.
 

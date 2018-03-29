@@ -4,7 +4,7 @@ Provides middleware to support classic CUL/Apache log format.
 For accurate request metrics, apply this middleware before any others.
 """
 
-from typing import Type, Callable, List
+from typing import Type, Callable, List, Iterable
 from datetime import datetime
 from pytz import timezone
 from .base import BaseMiddleware
@@ -20,7 +20,8 @@ try:
     class ClassicLogsMiddleware(BaseMiddleware):
         """Add params to uwsgi to support classic CUL/Apache log format."""
 
-        def __call__(self, environ, start_response):
+        def __call__(self, environ: dict, start_response: Callable) \
+                -> Iterable:
             """
             Handle a WSGI request.
 
@@ -44,7 +45,7 @@ try:
             # format.
             rtime = datetime.now(tz=EASTERN).strftime('%d/%m/%Y:%H:%M:%S %z')
             uwsgi.set_logvar('rtime', rtime)
-            response = self.app(environ, start_response)
+            response: Iterable = self.app(environ, start_response)
             # This is a close approximation of "TTFB" (time from the
             # request received to the start of the response).
             ttfb = (datetime.now() - start).microseconds
@@ -52,4 +53,5 @@ try:
             return response
 
 except ImportError as e:     # Not running in uWSGI.
-    ClassicLogsMiddleware = BaseMiddleware      # BaseMiddleware does nothing.
+    # BaseMiddleware does nothing.
+    ClassicLogsMiddleware = BaseMiddleware  # type: ignore
