@@ -42,12 +42,13 @@ class BaseMiddleware(object):
             Iterable that generates the HTTP response. See
             https://www.python.org/dev/peps/pep-0333/#the-application-framework-side
         """
+
         if hasattr(self, 'before'):
-            environ, start_response = self.before(environ, start_response)
+            environ, start_response = self.before(environ, start_response)  # type: ignore
         response: Iterable = self.app(environ, start_response)
 
         if hasattr(self, 'after'):
-            response = self.after(response)
+            response = self.after(response)       # type: ignore
         return response
 
     @property
