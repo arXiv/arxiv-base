@@ -41,7 +41,7 @@ try:
                 ``start_response`` function.
             """
             self.start = datetime.now()
-
+            
             # Express the time that the request was received in the classic
             # format.
             rtime = datetime.now(tz=EASTERN).strftime('%d/%m/%Y:%H:%M:%S %z')

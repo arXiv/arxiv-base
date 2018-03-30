@@ -32,6 +32,7 @@ from flask import Blueprint, Flask
 from arxiv.base.context_processors import config_url_builder
 from arxiv.base import exceptions
 from arxiv.base.converter import ArXivConverter
+from arxiv.base.middleware import request_logs, wrap
 
 
 class Base(object):

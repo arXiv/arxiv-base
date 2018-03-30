@@ -8,7 +8,11 @@ class BaseMiddleware(object):
     """
     Base class for WSGI middlewares.
 
-    Child classes should reimplement :meth:`.__call__`.
+    Child classes should implement one or both of:
+
+    - ``before(environ: dict, start_response: Callable) -> Tuple[dict, Callable]``
+    - ``after(response: Iterable) -> Iterable``
+
     """
 
     def __init__(self, app: Union[Flask, Callable]) -> None:
@@ -42,7 +46,6 @@ class BaseMiddleware(object):
             Iterable that generates the HTTP response. See
             https://www.python.org/dev/peps/pep-0333/#the-application-framework-side
         """
-
         if hasattr(self, 'before'):
             environ, start_response = self.before(environ, start_response)  # type: ignore
         response: Iterable = self.app(environ, start_response)
