@@ -1,5 +1,16 @@
-"""Provides a logger factory with reasonable defaults."""
+"""
+Provides a logger factory with reasonable defaults.
 
+We need to be able to analyze application logs in a consistent way across all
+arXiv services. This module provides a :func:`.getLogger`, which works just
+like the builtin logging.getLogger, but with a simpler interface:
+``getLogger(name: str, stream: IO)``.
+
+It sets some defaults that should be applied consistently across all arXiv
+services (e.g. date formatting, overall message structure), so that we can
+parse application log messages in a consistent way.
+"""
+from typing import IO
 import logging
 import sys
 from datetime import datetime
@@ -23,7 +34,7 @@ class RequestFormatter(logging.Formatter):
         return super().format(record)
 
 
-def getLogger(name: str, stream=sys.stderr) -> logging.Logger:
+def getLogger(name: str, stream: IO = sys.stderr) -> logging.Logger:
     """
     Wrapper for :func:`logging.getLogger` that applies configuration.
 
