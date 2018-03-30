@@ -57,7 +57,7 @@ def getLogger(name: str, stream: IO = sys.stderr) -> logging.Logger:
 
     # Log messages should be in Eastern local time, for consistency with
     # classic CUL/Apache logs.
-    tz = timezone(config.get('TIMEZONE', 'US/Eastern'))
+    tz = timezone(config.get('ARXIV_BUSINESS_TZ', 'US/Eastern'))
     logging.Formatter.converter = lambda *args: datetime.now(tz=tz).timetuple()
 
     # Set the formats for log messages and asctime. We instantiate our own
