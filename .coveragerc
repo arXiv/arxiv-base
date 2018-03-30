@@ -3,3 +3,4 @@ omit =
     app.py
     setup.py
     docs/*
+    test*
