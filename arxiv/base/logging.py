@@ -1,0 +1,59 @@
+"""Provides a logger factory with reasonable defaults."""
+
+import logging
+import sys
+from datetime import datetime
+from pytz import timezone, utc
+
+from flask import request
+
+from arxiv.base.globals import get_application_config
+
+
+class RequestFormatter(logging.Formatter):
+    """Logging formatter that adds the current request ID to the log record."""
+
+    def format(self, record):
+        """Attach the request ID from the request environ to the log record."""
+        try:
+            request_id = request.environ.get('request_id', None)
+        except RuntimeError as e:
+            request_id = None
+        record.requestid = request_id
+        return super().format(record)
+
+
+def getLogger(name: str, stream=sys.stderr) -> logging.Logger:
+    """
+    Wrapper for :func:`logging.getLogger` that applies configuration.
+
+    Parameters
+    ----------
+    name : str
+
+    Returns
+    -------
+    :class:`logging.Logger`
+    """
+    logger = logging.getLogger(name)
+    config = get_application_config()
+
+    # Set the log level from the Flask app configuration.
+    level = int(config.get('LOGLEVEL', logging.INFO))
+    logger.setLevel(level)
+
+    # Log messages should be in Eastern local time, for consistency with
+    # classic CUL/Apache logs.
+    tz = timezone(config.get('TIMEZONE', 'US/Eastern'))
+    logging.Formatter.converter = lambda *args: datetime.now(tz=tz).timetuple()
+
+    # Set the formats for log messages and asctime. We instantiate our own
+    # StreamHandler so that we can use RequestFormatter (above).
+    fmt = ("application %(asctime)s - %(name)s - %(requestid)s"
+           " - %(levelname)s: \"%(message)s\"")
+    datefmt = '%d/%b/%Y:%H:%M:%S %z'    # Used to format asctime.
+    handler = logging.StreamHandler(stream)
+    handler.setFormatter(RequestFormatter(fmt=fmt, datefmt=datefmt))
+    logger.handlers = []    # Clear default handler(s).
+    logger.addHandler(handler)
+    return logger
