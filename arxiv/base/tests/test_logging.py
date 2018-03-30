@@ -50,3 +50,23 @@ class TestGetLogger(TestCase):
         self.assertIn('DEBUG', captured_value,
                       "Changing LOGLEVEL in the app config should change the"
                       " logger log level")
+
+    def test_paper_id_is_set(self):
+        """``paperid`` is included in the log data."""
+        stream = StringIO()
+        logger = logging.getLogger('foologger', stream)
+        logger.error('what', extra={'paperid': '1234'})
+        captured_value = stream.getvalue()
+        stream.close()
+        self.assertIn('arxiv:1234', captured_value,
+                      "Should include paper ID in log messages")
+
+    def test_paper_id_is_not_set(self):
+        """``paperid`` is not included in the log data."""
+        stream = StringIO()
+        logger = logging.getLogger('foologger', stream)
+        logger.error('what')
+        captured_value = stream.getvalue()
+        stream.close()
+        self.assertIn('arxiv:null', captured_value,
+                      "Paper ID should be null in log messages")

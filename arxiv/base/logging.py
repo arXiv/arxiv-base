@@ -24,13 +24,15 @@ from arxiv.base.globals import get_application_config
 class RequestFormatter(logging.Formatter):
     """Logging formatter that adds the current request ID to the log record."""
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         """Attach the request ID from the request environ to the log record."""
         try:
             request_id = request.environ.get('request_id', None)
         except RuntimeError as e:
             request_id = None
-        record.requestid = request_id
+        record.requestid = request_id   # type: ignore
+        if 'paperid' not in record.__dict__:
+            record.paperid = 'null'
         return super().format(record)
 
 
@@ -61,7 +63,7 @@ def getLogger(name: str, stream: IO = sys.stderr) -> logging.Logger:
     # Set the formats for log messages and asctime. We instantiate our own
     # StreamHandler so that we can use RequestFormatter (above).
     fmt = ("application %(asctime)s - %(name)s - %(requestid)s"
-           " - %(levelname)s: \"%(message)s\"")
+           " - [arxiv:%(paperid)s] - %(levelname)s: \"%(message)s\"")
     datefmt = '%d/%b/%Y:%H:%M:%S %z'    # Used to format asctime.
     handler = logging.StreamHandler(stream)
     handler.setFormatter(RequestFormatter(fmt=fmt, datefmt=datefmt))
