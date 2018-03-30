@@ -32,7 +32,7 @@ class RequestFormatter(logging.Formatter):
             request_id = None
         record.requestid = request_id   # type: ignore
         if 'paperid' not in record.__dict__:
-            record.paperid = 'null'
+            record.paperid = 'null'     # type: ignore
         return super().format(record)
 
 
