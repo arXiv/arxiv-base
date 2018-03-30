@@ -12,11 +12,21 @@ curl -u $USERNAME:$GITHUB_TOKEN \
     > /dev/null 2>&1
 
 # Check mypy integration
-pipenv run mypy -p arxiv
-MYPY_STATUS=$?
+MYPY_STATUS=$( pipenv run mypy -p arxiv | grep -v "test.*" | wc -l | tr -d '[:space:]' )
 if [ $MYPY_STATUS -ne 0 ]; then MYPY_STATE="failure" && echo "mypy failed"; else MYPY_STATE="success" &&  echo "mypy passed"; fi
 
 curl -u $USERNAME:$GITHUB_TOKEN \
     -d '{"state": "'$MYPY_STATE'", "target_url": "https://travis-ci.org/'$TRAVIS_REPO_SLUG'/builds/'$TRAVIS_BUILD_ID'", "description": "", "context": "code-quality/mypy"}' \
+    -XPOST https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA \
+    > /dev/null 2>&1
+
+
+# Check pydocstyle integration
+pipenv run pydocstyle --convention=numpy --add-ignore=D401 base
+PYDOCSTYLE_STATUS=$?
+if [ $PYDOCSTYLE_STATUS -ne 0 ]; then PYDOCSTYLE_STATE="failure" && echo "pydocstyle failed"; else PYDOCSTYLE_STATE="success" &&  echo "pydocstyle passed"; fi
+
+curl -u $USERNAME:$GITHUB_TOKEN \
+    -d '{"state": "'$PYDOCSTYLE_STATE'", "target_url": "https://travis-ci.org/'$TRAVIS_REPO_SLUG'/builds/'$TRAVIS_BUILD_ID'", "description": "", "context": "code-quality/pydocstyle"}' \
     -XPOST https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA \
     > /dev/null 2>&1
