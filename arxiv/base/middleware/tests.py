@@ -4,7 +4,6 @@ from unittest import TestCase, mock
 from flask import Flask
 
 import sys
-from arxiv.base import middleware
 
 
 class TestWrap(TestCase):
@@ -21,6 +20,8 @@ class TestWrap(TestCase):
 
     def test_wrap_attaches_middleware(self):
         """:func:`.middleware.wrap` attaches WSGI middleware to a Flask app."""
+        from arxiv.base import middleware
+
         class FooMiddleware(object):
             def __init__(self, app):
                 self.app = app
@@ -44,6 +45,8 @@ class TestWrap(TestCase):
 
     def test_wrap_is_inside_out(self):
         """Order of middleware determines call order upon request."""
+        from arxiv.base import middleware
+
         class FirstMiddleware(middleware.base.BaseMiddleware):
             def before(self, environ, start_response):
                 environ['call_order'].append('first')
@@ -102,11 +105,13 @@ class TestRequestLogs(TestCase):
         """Attach logging middleware to app when uwsgi is available."""
         mock_uwsgi = mock.MagicMock()
         sys.modules['uwsgi'] = mock_uwsgi
-        from arxiv.base.middleware import request_logs
+        from arxiv.base.middleware import request_logs, wrap
 
         app = Flask('test')
-        middleware.wrap(app, [request_logs.ClassicLogsMiddleware])
-        self.assertIsInstance(app.wsgi_app, request_logs.ClassicLogsMiddleware)
+        wrap(app, [request_logs.ClassicLogsMiddleware])
+        self.assertIsInstance(app.wsgi_app, request_logs.ClassicLogsMiddleware,
+                              "ClassicLogsMiddleware should be the outermost"
+                              " middleware")
         app(self.environ, mock.MagicMock())
         self.assertGreater(mock_uwsgi.set_logvar.call_count, 0,
                            "Should set logging variables for uwsgi")
@@ -115,8 +120,8 @@ class TestRequestLogs(TestCase):
         """Attach base middleware when uwsgi is not available."""
         if 'uwsgi' in sys.modules:
             del sys.modules['uwsgi']
-        from arxiv.base.middleware import request_logs
+        from arxiv.base.middleware import request_logs, wrap
         app = Flask('test')
-        middleware.wrap(app, [request_logs.ClassicLogsMiddleware])
+        wrap(app, [request_logs.ClassicLogsMiddleware])
         self.assertIsInstance(app.wsgi_app, request_logs.BaseMiddleware,
                               "BaseMiddleware is attached instead")
