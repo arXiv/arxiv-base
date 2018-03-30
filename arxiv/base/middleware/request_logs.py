@@ -44,7 +44,7 @@ try:
 
             # Express the time that the request was received in the classic
             # format.
-            rtime = datetime.now(tz=EASTERN).strftime('%d/%m/%Y:%H:%M:%S %z')
+            rtime = datetime.now(tz=EASTERN).strftime('%d/%b/%Y:%H:%M:%S %z')
             uwsgi.set_logvar('rtime', rtime)
             return environ, start_response
 
