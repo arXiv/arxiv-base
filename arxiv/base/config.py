@@ -31,3 +31,5 @@ ARXIV_ACKNOWLEDGEMENT_URL = os.environ.get(
     'ARXIV_ACKNOWLEDGEMENT_URL',
     "https://confluence.cornell.edu/x/ALlRF"
 )
+
+ARXIV_BUSINESS_TZ = os.environ.get('ARXIV_BUSINESS_TZ', 'US/Eastern')

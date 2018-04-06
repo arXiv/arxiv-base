@@ -6396,8 +6396,10 @@ label.panel-block {
 header .columns .column {
   padding-bottom: 0; }
 
-content a:hover {
-  border-bottom: 1px dotted #0068ac; }
+content a {
+  border-bottom: 1px solid transparent; }
+  content a:hover {
+    border-bottom: 1px dotted #0068ac; }
 
 .help,
 .is-small {
@@ -6415,7 +6417,8 @@ footer {
   color: #fff;
   padding: 0.5em 2em 0.75em 2em; }
   footer a {
-    color: #fff; }
+    color: #fff;
+    border-bottom: 1px solid transparent; }
     footer a:hover, footer a:active {
       border-bottom: 1px dotted #fff;
       background-color: #999999; }
@@ -6440,7 +6443,8 @@ footer {
   color: #fff;
   padding: 0 0.75em; }
   .identity a {
-    color: #fff; }
+    color: #fff;
+    border-bottom: 1px solid transparent; }
     .identity a:visited {
       color: #fff; }
     .identity a:hover {
