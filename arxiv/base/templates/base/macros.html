@@ -17,14 +17,24 @@
         <div class="control">
           <div class="select is-small">
             <select name="searchtype" aria-label="Field to search">
-              <option value='all' selected="selected">All fields</option>
-              <option value='title'>Title</option>
-              <option value='author'>Author</option>
-              <option value='abstract'>Abstract</option>
-              <option>arXiv ID</option>
+              <option value="all" selected="selected">All fields</option>
+              <option value="title">Title</option>
+              <option value="author">Author</option>
+              <option value="abstract">Abstract</option>
+              <option value="comments">Comments</option>
+              <option value="journal_ref">Journal reference</option>
+              <option value="acm_class">ACM classification</option>
+              <option value="msc_class">MSC classification</option>
+              <option value="report_num">Report number</option>
+              <option value="paper_id">arXiv identifier</option>
+              <option value="doi">DOI</option>
+              <option value="orcid">ORCID</option>
+              <option value="author_id">arXiv author ID</option>
+              <option value="help">Help pages</option>
             </select>
           </div>
         </div>
+        <input type="hidden" name="source" value="header">
         <button class="button is-small is-primary">Search</button>
       </div>
     </form>
