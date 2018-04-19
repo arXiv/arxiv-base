@@ -12,6 +12,9 @@ stream-management (e.g. checkpointing) and error-handling boilerplate needed
 for any Kinesis consumer, so that we can focus on building the idiosyncratic
 functional bits in arXiv services.
 
+Using :class:`.BaseConsumer`
+============================
+
 You (the developer) should be able to create a minimal agent by:
 
 1. Defining a class that inherits from :class:`.BaseConsumer`
@@ -53,6 +56,21 @@ If you're using the provided :class:`.DiskCheckpointManager` provided here
 ``KINESIS_CHECKPOINT_VOLUME`` : str
     Full path to a directory where the consumer should store its position.
     Must be readable/writeable.
+
+
+Testing and development
+=======================
+
+The easiest way to write tests for Kinesis consumers is to mock the
+[``boto3.client`` factory](http://boto3.readthedocs.io/en/latest/reference/services/kinesis.html).
+Unit tests for this module can be found in :mod:`arxiv.base.agent.tests`,
+most of which mock boto3 in this way.
+
+For integration tests, or developing against a "live" Kinesis stream,
+[Localstack](https://github.com/localstack/localstack) provides a Kinesis
+for testing/development purposes (port 4568). You can use the config
+parameters above to point to a local instance of localstack (e.g. run with
+Docker). 
 
 """
 
