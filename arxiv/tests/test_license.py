@@ -7,7 +7,7 @@ class TestLicense(TestCase):
     """Tests for the arXiv license definitions."""
 
     def test_current_license_uris(self):
-        """Tests for the current active licenses."""
+        """Regression test for the current active licenses."""
         self.assertListEqual(
             CURRENT_LICENSE_URIS,
             [
@@ -19,3 +19,17 @@ class TestLicense(TestCase):
             ],
             'current license URIs match'
         )
+
+    def test_licenses_are_valid(self):
+        """Test licenses contain required key/values."""
+        for uri, license in LICENSES.items():
+            self.assertIn('label', license)
+            self.assertTrue(license['label'])
+            self.assertIn('is_current', license)
+            self.assertIsInstance(license['is_current'], bool)
+            self.assertIn('order', license)
+            self.assertIsInstance(license['order'], int)
+            if 'icon_uri' in license:
+                self.assertTrue(license['icon_uri'])
+            if 'note' in license:
+                self.assertTrue(license['note'])
