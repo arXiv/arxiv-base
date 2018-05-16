@@ -6,7 +6,7 @@ LICENSES = {
     'http://arxiv.org/licenses/nonexclusive-distrib/1.0/': {
         'uri': 'http://arxiv.org/licenses/nonexclusive-distrib/1.0/',
         'label': 'arXiv.org perpetual, non-exclusive license to '
-        'distribute this article',
+                 'distribute this article',
         'note': '(Minimal rights required by arXiv.org. Select this '
                 'unless you understand the implications of other '
                 'licenses)',
@@ -34,7 +34,7 @@ LICENSES = {
         'uri': 'http://creativecommons.org/licenses/by-nc-sa/4.0/',
         'order': 7,
         'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
-        ' license',
+                 'license',
         'is_current': True,
         'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
@@ -70,7 +70,7 @@ LICENSES = {
     'http://creativecommons.org/licenses/by-nc-sa/3.0/': {
         'uri': 'http://creativecommons.org/licenses/by-nc-sa/3.0/',
         'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
-        'license',
+                 'license',
         'order': 3,
         'is_current': False,
         'is_valid': True,
@@ -83,7 +83,7 @@ LICENSES = {
         'order': 4,
         'is_current': False,
         'is_valid': True,
-        'icon_uri': "$icon_baseurl/publicdomain.png"
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/publicdomain.png'
     },
     'no_license': {
         'order': 99,
@@ -106,7 +106,7 @@ TRANSLATED_LICENSES = {
 
 CURRENT_LICENSES = {
     k: v for k, v in LICENSES.items()
-    if all(k in v for k in ('is_current', 'order')) and v['is_current']
+    if 'order' in v and 'is_current' in v and v['is_current']
 }
 
 # Current license URIs by display order
