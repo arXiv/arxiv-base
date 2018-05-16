@@ -97,3 +97,5 @@ class TestTaxonomy(TestCase):
                           'in_archive defined for {}'.format(key))
             self.assertIn(value['in_archive'], ARCHIVES,
                           '{} is a valid archive'.format(value['in_archive']))
+            self.assertIn('is_active', value),
+            self.assertIsInstance(value['is_active'], bool)
