@@ -12,14 +12,12 @@ LICENSES = {
                 'licenses)',
         'order': 1,
         'is_current': True,
-        'is_valid': True,
     },
     'http://creativecommons.org/licenses/by/4.0/': {
         'uri': 'http://creativecommons.org/licenses/by/4.0/',
         'label': 'Creative Commons Attribution license',
         'order': 5,
         'is_current': True,
-        'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
 
     'http://creativecommons.org/licenses/by-sa/4.0/': {
@@ -27,7 +25,6 @@ LICENSES = {
         'order': 6,
         'label': 'Creative Commons Attribution-ShareAlike license',
         'is_current': True,
-        'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-sa-4.0.png'},
 
     'http://creativecommons.org/licenses/by-nc-sa/4.0/': {
@@ -36,7 +33,6 @@ LICENSES = {
         'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
                  'license',
         'is_current': True,
-        'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
 
     'http://creativecommons.org/publicdomain/zero/1.0/': {
@@ -44,7 +40,6 @@ LICENSES = {
         'label': 'Creative Commons Public Domain Declaration',
         'order': 8,
         'is_current': True,
-        'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/zero-1.0.png'
     },
 
@@ -55,7 +50,6 @@ LICENSES = {
                  'January 2004',
         'order': 9,
         'is_current': False,
-        'is_valid': True,
     },
 
     'http://creativecommons.org/licenses/by/3.0/': {
@@ -63,7 +57,6 @@ LICENSES = {
         'label': 'Creative Commons Attribution license',
         'order': 2,
         'is_current': False,
-        'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-3.0.png'
     },
 
@@ -73,7 +66,6 @@ LICENSES = {
                  'license',
         'order': 3,
         'is_current': False,
-        'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-3.0.png'
     },
     'http://creativecommons.org/licenses/publicdomain/': {
@@ -82,15 +74,10 @@ LICENSES = {
         'note': '(Suitable for US government employees, for example)',
         'order': 4,
         'is_current': False,
-        'is_valid': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/publicdomain.png'
-    },
-    'no_license': {
-        'order': 99,
-        'label': 'I do not certify that any of the above licenses apply',
-        'is_valid': False
     }
 }
+NO_LICENSE_TEXT = 'I do not certify that any of the above licenses apply'
 
 ASSUMED_LICENSE = LICENSES['http://arxiv.org/licenses/assumed-1991-2003/']
 
