@@ -73,7 +73,7 @@ NO_LICENSE_TEXT = 'I do not certify that any of the above licenses apply'
 
 ASSUMED_LICENSE = LICENSES['http://arxiv.org/licenses/assumed-1991-2003/']
 
-# Historical license to updated/current license (old: new)
+# Historical license to updated/current license (old URI: new URI)
 TRANSLATED_LICENSES = {
     'http://creativecommons.org/licenses/by/3.0/':
     'http://creativecommons.org/licenses/by/4.0/',
