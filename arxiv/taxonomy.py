@@ -1634,6 +1634,11 @@ CATEGORIES = {
                        'modeling and market-making',
         'is_active': True
     },
+    'quant-ph': {
+        'name': 'Quantum Physics',
+        'in_archive': 'quant-ph',
+        'is_active': True
+    },
     'solv-int': {
         'name': 'Exactly Solvable and Integrable Systems',
         'in_archive': 'solv-int',
