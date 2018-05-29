@@ -1,6 +1,6 @@
 """Tests for arXiv taxonomy module."""
 from unittest import TestCase
-from arxiv.license import LICENSES, CURRENT_LICENSE_URIS
+from arxiv.license import LICENSES, CURRENT_LICENSE_URIS, ASSUMED_LICENSE_URI
 
 
 class TestLicense(TestCase):
@@ -33,3 +33,7 @@ class TestLicense(TestCase):
                 self.assertTrue(license['icon_uri'])
             if 'note' in license:
                 self.assertTrue(license['note'])
+
+    def test_assumed_license_is_valid(self):
+        """Test assumed license is defined in licenses."""
+        self.assertIn(ASSUMED_LICENSE_URI, LICENSES)

@@ -71,7 +71,7 @@ LICENSES = {
 }
 NO_LICENSE_TEXT = 'I do not certify that any of the above licenses apply'
 
-ASSUMED_LICENSE = LICENSES['http://arxiv.org/licenses/assumed-1991-2003/']
+ASSUMED_LICENSE_URI = 'http://arxiv.org/licenses/assumed-1991-2003/'
 
 # Historical license to updated/current license (old URI: new URI)
 TRANSLATED_LICENSES = {
