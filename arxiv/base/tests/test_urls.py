@@ -12,17 +12,20 @@ class TestConfigURL(TestCase):
     def test_config_url_key_exists(self):
         """config_url() is called for an URL that is configured on the app."""
         app = Flask('foo')
-        app.config['ARXIV_FOO_URL'] = 'https://foo.arxiv.org'
+        app.config['EXTERNAL_URLS'] = {
+            'foo': 'https://foo.arxiv.org'
+        }
         with app.app_context():
             url = config_url('foo')
 
-        self.assertEqual(url, app.config['ARXIV_FOO_URL'],
+        self.assertEqual(url, 'https://foo.arxiv.org',
                          "Should return configured URL")
 
-    @mock.patch('arxiv.base.urls.config')
+    @mock.patch('base.urls.config')
     def test_config_url_key_not_on_current_app(self, mock_base_config):
         """config_url() is called for an URL that is not on the current app."""
-        mock_base_config.ARXIV_FOO_URL = 'https://bar.arxiv.org'
+        mock_base_config.EXTERNAL_URLS = {}
+        mock_base_config.EXTERNAL_URLS['foo'] = 'https://bar.arxiv.org'
         app = Flask('foo')
         with app.app_context():
             url = config_url('foo')
@@ -30,17 +33,21 @@ class TestConfigURL(TestCase):
         self.assertEqual(url, 'https://bar.arxiv.org',
                          "Should return URL configured in arxiv base")
 
-    def test_config_url_key_not_set_anywhere(self):
+    @mock.patch('base.urls.config')
+    def test_config_url_key_not_set_anywhere(self, mock_base_config):
         """config_url() is called for an URL that is not configured."""
         app = Flask('foo')
+        mock_base_config.EXTERNAL_URLS = {}
         with app.app_context():
             with self.assertRaises(ConfigurationError):
                 config_url('foo')
 
-    @mock.patch('arxiv.base.urls.config')
+    @mock.patch('base.urls.config')
     def test_config_url_with_format_parameter(self, mock_base_config):
         """URL requires a parameter, which is provided."""
-        mock_base_config.ARXIV_FOO_URL = 'https://bar.arxiv.org/{foo}'
+        mock_base_config.EXTERNAL_URLS = {
+            'foo': 'https://bar.arxiv.org/{foo}'
+        }
         app = Flask('foo')
         with app.app_context():
             url = config_url('foo', {'foo': 'bar'})
@@ -48,19 +55,23 @@ class TestConfigURL(TestCase):
         self.assertEqual(url, 'https://bar.arxiv.org/bar',
                          "Should return URL configured in arxiv base")
 
-    @mock.patch('arxiv.base.urls.config')
+    @mock.patch('base.urls.config')
     def test_config_url_with_parameter_not_provided(self, mock_base_config):
         """URL requires a parameter, which is not provided."""
-        mock_base_config.ARXIV_FOO_URL = 'https://bar.arxiv.org/{foo}'
+        mock_base_config.EXTERNAL_URLS = {
+            'foo': 'https://bar.arxiv.org/{foo}'
+        }
         app = Flask('foo')
         with app.app_context():
             with self.assertRaises(ValueError):
-                url = config_url('foo')
+                config_url('foo')
 
     def test_config_url_with_get_param(self):
         """Request parameters are included."""
         app = Flask('foo')
-        app.config['ARXIV_FOO_URL'] = 'https://foo.arxiv.org'
+        app.config['EXTERNAL_URLS'] = {
+            'foo': 'https://foo.arxiv.org'
+        }
         with app.app_context():
             url = config_url('foo', params={'baz': 'bat'})
 
@@ -70,7 +81,9 @@ class TestConfigURL(TestCase):
     def test_config_url_with_extra_get_param(self):
         """Request parameters are included in addition to those present."""
         app = Flask('foo')
-        app.config['ARXIV_FOO_URL'] = 'https://foo.arxiv.org?yes=no'
+        app.config['EXTERNAL_URLS'] = {
+            'foo': 'https://foo.arxiv.org?yes=no'
+        }
         with app.app_context():
             url = config_url('foo', params={'baz': 'bat'})
 

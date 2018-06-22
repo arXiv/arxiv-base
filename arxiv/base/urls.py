@@ -48,16 +48,21 @@ def config_url(target: str, path_params: dict = {}, params: dict = {}) -> str:
 
        from arxiv.base.urls import config_url
     """
-    target = target.upper()
+    url: str
     # Look for the URL on the config of the current app (this will *not* be
     # base); fall back to the base config if not found.
+    configured_urls = dict(current_app.config.get('EXTERNAL_URLS', []))
+    base_urls = dict(config.EXTERNAL_URLS)
     try:
-        url: str = current_app.config.get(f'ARXIV_{target}_URL')
-        if url is None:
-            url = getattr(config, f'ARXIV_{target}_URL')
-
-    except AttributeError as e:
-        raise ConfigurationError(f'URL for {target} not set') from e
+        if configured_urls:
+            url = configured_urls[target]
+        else:   # Keeping this here for backward compatibility.
+            url = current_app.config[f'ARXIV_{target.upper()}_URL']
+    except KeyError as e:   # Not defined on the application config.
+        # Fall back to the base configuration.
+        url = base_urls.get(target)
+        if not url:     # Nothing left to do.
+            raise ConfigurationError(f'URL for {target} not set') from e
 
     # Format with path parameters.
     try:
@@ -65,7 +70,9 @@ def config_url(target: str, path_params: dict = {}, params: dict = {}) -> str:
     except KeyError as e:
         raise ValueError('Missing a required parameter: %s' % e) from e
 
-    # Format with request parameters.
+    # Format with request parameters. This uses url_parse/url_unparse to
+    # modify the request ("query") parameters safely; i.e. without clobbering
+    # any parameters that may already be present.
     parts = url_parse(url)
     params.update(parse_qs(parts.query))
     parts = parts.replace(query=url_encode(params))

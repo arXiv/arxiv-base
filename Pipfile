@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 flask = "*"
 "nose2" = "*"
 jsonschema = "*"
@@ -17,6 +14,4 @@ uwsgi = "*"
 pydocstyle = "*"
 "boto3" = "*"
 
-
 [dev-packages]
-

@@ -3,16 +3,16 @@
   <div class="level-left">
     <a class="level-item" href="{{ config_url('library') }}"><img src="{{ url_for('base.static', filename='images/CUL-reduced-white-SMALL.svg') }}" alt="Cornell University Library" width="300" aria-label="logo" /></a>
   </div>
-  <div class="level-right"><p class="sponsors level-item is-marginless"><a href="{{ config_url('acknowledgement') }}">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</a></p></div>
+  <div class="level-right"><p class="sponsors level-item is-marginless"><a href="{{ config_url('acknowledgment') }}">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</a></p></div>
 </div>
 <!-- contains arXiv identity and search bar -->
 <div class="identity level is-marginless">
   <div class="level-left">
-    <h1 class="level-item"><a href="{{ config_url('home') }}" aria-label="arxiv-logo">arXiv.org</a></h1>
+    <h1 class="level-item"><a href="{{ url_for('home') }}" aria-label="arxiv-logo">arXiv.org</a></h1>
   </div>
   {{ macros.compactsearch(config_url, 'level-right') }}
 </div> <!-- closes identity -->
 
 <!--  # TODO: reintroduce this once we have access to the user's session.
-  <div class="user-tools box is-pulled-right" role="navigation" aria-label="User menu"><a href="{{ config_url('login') }}">Login</a> | <a href="{{ config_url('account') }}">My Account</a> | <a href="{{ config_url('logout') }}">Logout</a></div>
+  <div class="user-tools box is-pulled-right" role="navigation" aria-label="User menu"><a href="{{ url_for('login') }}">Login</a> | <a href="{{ url_for('account') }}">My Account</a> | <a href="{{ url_for('logout') }}">Logout</a></div>
 -->
