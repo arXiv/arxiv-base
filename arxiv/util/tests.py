@@ -76,82 +76,82 @@ class TestValidateRequest(TestCase):
         self.assertEqual(r_status, status.HTTP_200_OK,
                          "Interfered with a valid request")
 
-#
-# class TestValidateSchema(TestCase):
-#     """Validate data against a JSON Schema specification."""
-#
-#     def setUp(self):
-#         """Provision a temporary file for the schema."""
-#         _, self.schema_path = tempfile.mkstemp()
-#
-#     def tearDown(self):
-#         """Clean up the temporary file used for the schema."""
-#         os.remove(self.schema_path)
-#
-#     def test_load_valid_schema(self):
-#         """:func:`.schema.load` returns a callable validator."""
-#         schema_body = json.dumps({
-#             "title": "FooResource",
-#             "additionalProperties": False,
-#             "required": ["baz", "bat"],
-#             "type": "object",
-#             "properties": {
-#                 "baz": {
-#                     "type": "string"
-#                 },
-#                 "bat": {
-#                     "type": "integer"
-#                 }
-#             }
-#         })
-#
-#         with open(self.schema_path, 'w') as f:
-#             f.write(schema_body)
-#
-#         try:
-#             validator = util.schema.load(self.schema_path)
-#         except Exception as e:
-#             self.fail('Failed to load valid schema: %s' % e)
-#         self.assertTrue(hasattr(validator, '__call__'))
-#
-#         try:
-#             validator({'baz': 'asdf', 'bat': -1})
-#         except util.schema.ValidationError as e:
-#             self.fail('Validation failed on valid data: %s' % e)
-#
-#     def test_load_invalid_schema(self):
-#         """:func:`.util.schema.load` raises IOError if schema is not valid JSON."""
-#         with open(self.schema_path, 'w') as f:
-#             f.write('thisisnotajsons..."."{{chema')
-#
-#         with self.assertRaises(IOError):
-#             util.schema.load(self.schema_path)
-#
-#     def test_load_nonexistant_schema(self):
-#         """:func:`.util.schema.load` raises IOError if schema does not exist."""
-#         with self.assertRaises(IOError):
-#             util.schema.load('/tmp/is/unlikely/to/exist')
-#
-#     def test_validation_failed(self):
-#         """Validator raises :class:`.util.schema.ValidationError` on bad data."""
-#         schema_body = json.dumps({
-#             "title": "FooResource",
-#             "additionalProperties": False,
-#             "required": ["baz", "bat"],
-#             "type": "object",
-#             "properties": {
-#                 "baz": {
-#                     "type": "string"
-#                 },
-#                 "bat": {
-#                     "type": "integer"
-#                 }
-#             }
-#         })
-#         with open(self.schema_path, 'w') as f:
-#             f.write(schema_body)
-#
-#         validator = util.schema.load(self.schema_path)
-#
-#         with self.assertRaises(util.schema.ValidationError):
-#             validator({'nobody': 'expects', 'thespanish': 'inquisition'})
+
+class TestValidateSchema(TestCase):
+    """Validate data against a JSON Schema specification."""
+
+    def setUp(self):
+        """Provision a temporary file for the schema."""
+        _, self.schema_path = tempfile.mkstemp()
+
+    def tearDown(self):
+        """Clean up the temporary file used for the schema."""
+        os.remove(self.schema_path)
+
+    def test_load_valid_schema(self):
+        """:func:`.schema.load` returns a callable validator."""
+        schema_body = json.dumps({
+            "title": "FooResource",
+            "additionalProperties": False,
+            "required": ["baz", "bat"],
+            "type": "object",
+            "properties": {
+                "baz": {
+                    "type": "string"
+                },
+                "bat": {
+                    "type": "integer"
+                }
+            }
+        })
+
+        with open(self.schema_path, 'w') as f:
+            f.write(schema_body)
+
+        try:
+            validator = util.schema.load(self.schema_path)
+        except Exception as e:
+            self.fail('Failed to load valid schema: %s' % e)
+        self.assertTrue(hasattr(validator, '__call__'))
+
+        try:
+            validator({'baz': 'asdf', 'bat': -1})
+        except util.schema.ValidationError as e:
+            self.fail('Validation failed on valid data: %s' % e)
+
+    def test_load_invalid_schema(self):
+        """:func:`.util.schema.load` raises IOError if schema is not valid JSON."""
+        with open(self.schema_path, 'w') as f:
+            f.write('thisisnotajsons..."."{{chema')
+
+        with self.assertRaises(IOError):
+            util.schema.load(self.schema_path)
+
+    def test_load_nonexistant_schema(self):
+        """:func:`.util.schema.load` raises IOError if schema does not exist."""
+        with self.assertRaises(IOError):
+            util.schema.load('/tmp/is/unlikely/to/exist')
+
+    def test_validation_failed(self):
+        """Validator raises :class:`.util.schema.ValidationError` on bad data."""
+        schema_body = json.dumps({
+            "title": "FooResource",
+            "additionalProperties": False,
+            "required": ["baz", "bat"],
+            "type": "object",
+            "properties": {
+                "baz": {
+                    "type": "string"
+                },
+                "bat": {
+                    "type": "integer"
+                }
+            }
+        })
+        with open(self.schema_path, 'w') as f:
+            f.write(schema_body)
+
+        validator = util.schema.load(self.schema_path)
+
+        with self.assertRaises(util.schema.ValidationError):
+            validator({'nobody': 'expects', 'thespanish': 'inquisition'})
