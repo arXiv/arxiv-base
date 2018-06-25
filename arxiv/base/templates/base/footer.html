@@ -1,7 +1,7 @@
 <div class="columns" role="navigation" aria-label="Secondary">
   <div class="column">
     <ul class="nav-spaced">
-      <li><a href="{{ config_url('contact') }}">Contact</a></li>
+      <li><a href="{{ url_for('contact') }}">Contact</a></li>
       <li><a href="{{ config_url('twitter') }}">Find us on Twitter</a></li>
     </ul>
   </div>
@@ -14,7 +14,7 @@
   <div class="column">
     <ul class="nav-spaced">
       <li><a href="{{ config_url('accessibility') }}">Web Accessibility Help</a></li>
-      <li><a href="{{ config_url('help') }}">Help with using arXiv</a></li>
+      <li><a href="{{ url_for('help') }}">Help with using arXiv</a></li>
     </ul>
   </div>
 </div>

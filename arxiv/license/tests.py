@@ -1,6 +1,6 @@
 """Tests for arXiv taxonomy module."""
 from unittest import TestCase
-from arxiv.license import LICENSES, CURRENT_LICENSE_URIS, ASSUMED_LICENSE_URI
+from license import LICENSES, CURRENT_LICENSE_URIS, ASSUMED_LICENSE_URI
 
 
 class TestLicense(TestCase):

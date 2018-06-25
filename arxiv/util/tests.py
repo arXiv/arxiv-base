@@ -5,7 +5,7 @@ import json
 import os
 import tempfile
 
-from arxiv.util import schema
+from arxiv import util
 from arxiv import status
 
 
@@ -38,7 +38,7 @@ class TestValidateRequest(TestCase):
 
     def test_decorate_route(self):
         """:func:`.schema.validate_request` generates a decorator."""
-        decorator = schema.validate_request(self.schema_path)
+        decorator = util.schema.validate_request(self.schema_path)
         self.assertTrue(hasattr(decorator, '__call__'))
 
     @mock.patch('arxiv.util.schema.request')
@@ -48,7 +48,7 @@ class TestValidateRequest(TestCase):
             return_value={'not': 'what you expected'}
         )
 
-        decorator = schema.validate_request(self.schema_path)
+        decorator = util.schema.validate_request(self.schema_path)
 
         @decorator
         def foo_route():
@@ -66,7 +66,7 @@ class TestValidateRequest(TestCase):
             return_value={'baz': 'asdf', 'bat': -1}
         )
 
-        decorator = schema.validate_request(self.schema_path)
+        decorator = util.schema.validate_request(self.schema_path)
 
         @decorator
         def foo_route():
@@ -109,31 +109,31 @@ class TestValidateSchema(TestCase):
             f.write(schema_body)
 
         try:
-            validator = schema.load(self.schema_path)
+            validator = util.schema.load(self.schema_path)
         except Exception as e:
             self.fail('Failed to load valid schema: %s' % e)
         self.assertTrue(hasattr(validator, '__call__'))
 
         try:
             validator({'baz': 'asdf', 'bat': -1})
-        except schema.ValidationError as e:
+        except util.schema.ValidationError as e:
             self.fail('Validation failed on valid data: %s' % e)
 
     def test_load_invalid_schema(self):
-        """:func:`.schema.load` raises IOError if schema is not valid JSON."""
+        """:func:`.util.schema.load` raises IOError if schema is not valid JSON."""
         with open(self.schema_path, 'w') as f:
             f.write('thisisnotajsons..."."{{chema')
 
         with self.assertRaises(IOError):
-            schema.load(self.schema_path)
+            util.schema.load(self.schema_path)
 
     def test_load_nonexistant_schema(self):
-        """:func:`.schema.load` raises IOError if schema does not exist."""
+        """:func:`.util.schema.load` raises IOError if schema does not exist."""
         with self.assertRaises(IOError):
-            schema.load('/tmp/is/unlikely/to/exist')
+            util.schema.load('/tmp/is/unlikely/to/exist')
 
     def test_validation_failed(self):
-        """Validator raises :class:`.schema.ValidationError` on bad data."""
+        """Validator raises :class:`.util.schema.ValidationError` on bad data."""
         schema_body = json.dumps({
             "title": "FooResource",
             "additionalProperties": False,
@@ -151,7 +151,7 @@ class TestValidateSchema(TestCase):
         with open(self.schema_path, 'w') as f:
             f.write(schema_body)
 
-        validator = schema.load(self.schema_path)
+        validator = util.schema.load(self.schema_path)
 
-        with self.assertRaises(schema.ValidationError):
+        with self.assertRaises(util.schema.ValidationError):
             validator({'nobody': 'expects', 'thespanish': 'inquisition'})

@@ -8,11 +8,11 @@
     within level wrapper, allowed values are level-left or level-right.
   #}
   <div class="search-block {{ alignstyle }}">
-    <form class="level-item" method="GET" action="{{ config_url('search_box') }}">
+    <form class="level-item" method="GET" action="{{ url_for('search_box') }}">
       <div class="field has-addons">
         <div class="control">
           <input class="input is-small" type="text" name="query" placeholder="Search..." aria-label="Search term or terms" />
-          <p class="help"><a href="{{ config_url('help') }}">Help</a> | <a href="{{ config_url('search_advanced') }}">Advanced Search</a></p>
+          <p class="help"><a href="{{ url_for('help') }}">Help</a> | <a href="{{ url_for('search_advanced') }}">Advanced Search</a></p>
         </div>
         <div class="control">
           <div class="select is-small">
