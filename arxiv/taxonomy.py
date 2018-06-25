@@ -735,7 +735,7 @@ CATEGORIES = {
         'is_active': True
     },
     'cs.LG': {
-        'name': 'Learning',
+        'name': 'Machine Learning',
         'in_archive': 'cs',
         'description': 'Covers machine learning and computational (PAC) '
                        'learning. Roughly includes material in ACM Subject '
