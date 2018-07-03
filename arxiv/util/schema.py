@@ -75,7 +75,7 @@ def validate_request(schema_path: str) -> Callable:
     --------
     Should be used with a Flask route, for example:
 
-        from arxiv.util import schema
+        from util import schema
 
         @blueprint.route('/foo/', methods=['POST'])
         @schema.validate_request('schema/resources/foo.json')

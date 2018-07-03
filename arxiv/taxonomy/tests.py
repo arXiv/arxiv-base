@@ -1,7 +1,7 @@
 """Tests for arXiv taxonomy module."""
 from unittest import TestCase
 from datetime import date
-from arxiv.taxonomy import GROUPS, ARCHIVES, \
+from taxonomy import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
     LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY
 

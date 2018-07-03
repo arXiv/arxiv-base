@@ -28,10 +28,16 @@ Intended for use in an application factory. For example:
 
 from typing import Optional
 from flask import Blueprint, Flask
+from werkzeug.exceptions import NotFound
 
 from arxiv.base.context_processors import config_url_builder
-from arxiv.base import exceptions
+from arxiv.base import exceptions, urls, config
 from arxiv.base.converter import ArXivConverter
+
+
+def placeholder(*args, **kwargs):
+    """Placeholder route for external endpoints."""
+    raise NotFound("This endpoint is not provided by this service.")
 
 
 class Base(object):
@@ -63,3 +69,9 @@ class Base(object):
         # Register base exception handlers.
         for error, handler in exceptions.get_handlers():
             app.errorhandler(error)(handler)
+
+        # Register URLs for other services. This allows us to use flask's
+        # ``url_for()`` function to generate URLs for services that are
+        # deployed at the same hostname.
+        for name, pattern in config.ARXIV_URLS:
+            app.add_url_rule(pattern, name, placeholder)
