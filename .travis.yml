@@ -10,7 +10,6 @@ python:
 script:
   - pip install -U pip pipenv
   - pipenv install
-  - pipenv install ./
   - ./tests/lintstats.sh
   - ./tests/docker_tests.sh
   - docker build ./ -t arxiv/base
