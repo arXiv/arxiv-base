@@ -9,5 +9,12 @@ setup(
     packages=[f'arxiv.{package}' for package
               in find_packages('arxiv', exclude=['*test*'])],
     zip_safe=False,
+    install_requires=[
+        'flask',
+        'jsonschema',
+        'pytz', 
+        'uwsgi',
+        'boto3'
+    ],
     include_package_data=True
 )
