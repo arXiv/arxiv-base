@@ -62,7 +62,7 @@ And in your template:
 """
 
 import hmac
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 from datetime import datetime, timedelta
 import dateutil.parser
 
@@ -75,11 +75,11 @@ from arxiv.base.globals import get_application_config
 class SessionCSRF(CSRF):
     """Session-based CSRF protection."""
 
-    def setup_form(self, form: 'CSRFForm') -> None:
+    def setup_form(self, form: 'CSRFForm') -> Any:
         """Grab the CSRF context and secret from the form."""
         self.csrf_context = form.meta.csrf_context
         self.csrf_secret = form.meta.csrf_secret
-        super(SessionCSRF, self).setup_form(form)
+        return super(SessionCSRF, self).setup_form(form)
 
     @staticmethod
     def _hash(secret: str, nonce: str, ip_address: str, expires: str) -> str:
