@@ -54,8 +54,8 @@ And in your template:
    {% block content %}
    <form method="POST" action="{{ url_for('ui.some_view') }}">
      {{ form.csrf_token }}
-
-     ...
+     {{ form.something_sensitive }}
+     <input type="submit" class="button is-link is-small"></input>
    </form>
    {% endblock content %}
 
