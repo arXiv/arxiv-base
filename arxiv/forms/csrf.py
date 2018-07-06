@@ -10,6 +10,56 @@ this class expects that:
   :class:`arxiv.users.auth.Auth`.
 - A parameter called ``CSRF_SECRET`` is set in the application configuration.
 
+Here's an example:
+
+.. code-block:: python
+
+
+   from typing import Tuple
+   from werkzeug import MultiDict
+   from wtforms import StringField
+   from arxiv import status
+   from arxiv.forms import csrf
+
+   ResponseData = Tuple[dict, int, dict]
+
+
+   class ProtectedForm(csrf.CSRFForm):
+       '''A CSRF-protected form.'''
+
+       something_sensitive = StringField('Something sensitive')
+
+
+   def some_controller(method: str, form_data: MultiDict) -> ResponseData:
+       '''Handle a form-based view.'''
+       headers = {}
+       if method == 'POST':
+           form = ProtectedForm(form_data)
+           data = {'form': form}
+           if not form.validate():    # Checks the CSRF token, too!
+               return data, status.HTTP_400_BAD_REQUEST, headers
+
+           # do something sensitive
+           return data, status.HTTP_201_CREATED, headers
+
+       form = ProtectedForm()
+       return {'form': form}, status.HTTP_200_OK, headers
+
+
+And in your template:
+
+.. code-block:: html
+
+   {% extends "base/base.html" %}
+   {% block content %}
+   <form method="POST" action="{{ url_for('ui.some_view') }}">
+     {{ form.csrf_token }}
+
+     ...
+   </form>
+   {% endblock content %}
+
+
 
 """
 
