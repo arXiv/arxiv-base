@@ -59,8 +59,6 @@ And in your template:
    </form>
    {% endblock content %}
 
-
-
 """
 
 import hmac
@@ -137,7 +135,7 @@ class CSRFForm(Form):
             """The CSRF secret from the current application configuration."""
             config = get_application_config()
             try:
-                secret: str = config.get['CSRF_SECRET']
+                secret: str = config['CSRF_SECRET']
             except KeyError as e:
                 raise RuntimeError('Parameter CSRF_SECRET must be set') from e
             return secret
