@@ -23,16 +23,16 @@ EXTERNAL_URLS = [
 ]
 """External URLs, configurable via environment variables."""
 
-ARXIV_URLS = [
-    ("help", "/help"),
-    ("contact", "/help/contact"),
-    ("search_box", "/search"),
-    ("search_advanced", "/search/advanced"),
-    ("account", "/user"),
-    ("login", "/user/login"),
-    ("logout", "/user/logout"),
-    ("home", "/"),
-    ("pdf", "/pdf/<arxiv:paper_id>"),
+URLS = [
+    ("help", "/help", "arxiv.org"),
+    ("contact", "/help/contact", "arxiv.org"),
+    ("search_box", "/search", "arxiv.org"),
+    ("search_advanced", "/search/advanced", "arxiv.org"),
+    ("account", "/user", "arxiv.org"),
+    ("login", "/user/login", "arxiv.org"),
+    ("logout", "/user/logout", "arxiv.org"),
+    ("home", "/", "arxiv.org"),
+    ("pdf", "/pdf/<arxiv:paper_id>", "arxiv.org"),
 ]
 """
 URLs for other services, for use with :func:`flask.url_for`.

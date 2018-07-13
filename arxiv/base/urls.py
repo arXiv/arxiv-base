@@ -1,10 +1,14 @@
 """Helpers for working with URLs in arXiv Flask applications."""
 
+import sys
+from typing import Dict, Any
 from urllib.parse import parse_qs
 from werkzeug.urls import url_encode, url_parse, url_unparse, url_encode
+from werkzeug.routing import Map, Rule, BuildError
 from flask import current_app
 from arxiv.base import config
 from arxiv.base.exceptions import ConfigurationError
+from arxiv.base.converter import ArXivConverter
 
 
 def config_url(target: str, path_params: dict = {}, params: dict = {}) -> str:
@@ -77,4 +81,53 @@ def config_url(target: str, path_params: dict = {}, params: dict = {}) -> str:
     params.update(parse_qs(parts.query))
     parts = parts.replace(query=url_encode(params))
     url = url_unparse(parts)
+    return url
+
+
+def get_url_map() -> str:
+    """Build a :class:`werkzeug.routing.Map` from configured URLs."""
+    # Get the base URLs (configured in this package).
+    configured_urls = {url[0]: url for url in config.URLS}
+    # Privilege ARXIV_URLs set on the application config.
+    current_urls = current_app.config.get('URLS', [])
+    if current_urls:
+        configured_urls.update({url[0]: url for url in current_urls})
+
+    url_map = Map([
+        Rule(pattern, endpoint=name, host=host, build_only=True)
+        for name, pattern, host in configured_urls.values()
+    ], converters={'arxiv': ArXivConverter}, host_matching=True)
+    return url_map
+
+
+def external_url_for(endpoint: str, **values: Any) -> str:
+    """
+    Like :flask`.url_for`, but builds external URLs based on the config.
+
+    This works by loading the configuration variable ``URLS`` from
+    :mod:`arxiv.base.config` and from the application on which the blueprint
+    has been registered, and registering the URL patterns described therein.
+    Preference is given to URLs defined on the current application. An attempt
+    is made to avoid adding URL rules for which identical patterns have already
+    been registered.
+
+    ``URLS`` should be a list of two-tuples, with the name of the
+    """
+    values.pop('_external', None)
+    url_map = get_url_map()
+    adapter = url_map.bind('arxiv.org', url_scheme='https')
+    return adapter.build(endpoint, values=values, force_external=True)
+
+
+def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
+    """Attempt to handle failed URL building with :func:`external_url_for`."""
+    try:
+        url = external_url_for(endpoint, **values)
+    except BuildError as e:
+        # Re-raise the original BuildError, in context of original traceback.
+        exc_type, exc_value, tb = sys.exc_info()
+        if exc_value is err:
+            raise exc_type(exc_value).with_traceback(tb)
+        else:
+            raise err
     return url
