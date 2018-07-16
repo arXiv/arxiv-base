@@ -49,7 +49,7 @@ set ``EXTERNAL_URL_SCHEME = 'http'`` in your configuration.
 import sys
 from typing import Dict, Any
 from urllib.parse import parse_qs
-from werkzeug.urls import url_encode, url_parse, url_unparse, url_encode
+from werkzeug.urls import url_encode, url_parse, url_unparse
 from werkzeug.routing import Map, Rule, BuildError
 from flask import current_app
 from arxiv.base import config
