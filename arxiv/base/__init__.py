@@ -30,7 +30,6 @@ from typing import Optional, Any, Dict
 from flask import Blueprint, Flask, Blueprint
 from werkzeug.exceptions import NotFound
 
-from arxiv.base.context_processors import config_url_builder
 from arxiv.base import exceptions, urls, config
 from arxiv.base.converter import ArXivConverter
 
@@ -57,9 +56,6 @@ class Base(object):
             static_url_path=app.static_url_path + '/base'
         )
         app.register_blueprint(blueprint)
-
-        # Register base context processors (e.g. to inject global URLs).
-        app.context_processor(config_url_builder)
 
         # Register base exception handlers.
         for error, handler in exceptions.get_handlers():
