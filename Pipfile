@@ -13,6 +13,6 @@ pytz = "*"
 uwsgi = "*"
 pydocstyle = "*"
 "boto3" = "*"
-"e1839a8" = {path = "."}
+wtforms = "*"
 
 [dev-packages]
