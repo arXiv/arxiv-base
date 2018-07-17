@@ -9,16 +9,23 @@ SERVER_NAME = None
 A11Y_URL = os.environ.get("ARXIV_ACCESSIBILITY_URL",
                           "mailto:web-accessibility@cornell.edu")
 
+BASE_SERVER = os.environ.get('BASE_SERVER', 'arxiv.org')
+
 URLS = [
-    ("help", "/help", "arxiv.org"),
-    ("contact", "/help/contact", "arxiv.org"),
-    ("search_box", "/search", "arxiv.org"),
-    ("search_advanced", "/search/advanced", "arxiv.org"),
-    ("account", "/user", "arxiv.org"),
-    ("login", "/user/login", "arxiv.org"),
-    ("logout", "/user/logout", "arxiv.org"),
-    ("home", "/", "arxiv.org"),
-    ("pdf", "/pdf/<arxiv:paper_id>", "arxiv.org"),
+    ("help", "/help", BASE_SERVER),
+    ("help_identifier", "/help/arxiv_identifier", BASE_SERVER),
+    ("help_trackback", "/help/trackback", BASE_SERVER),
+    ("help_mathjax", "/help/mathjax", BASE_SERVER),
+    ("help_social_bookmarking", "/help/social_bookmarking", BASE_SERVER),
+    ("contact", "/help/contact", BASE_SERVER),
+    ("search_box", "/search", BASE_SERVER),
+    ("search_advanced", "/search/advanced", BASE_SERVER),
+    ("account", "/user", BASE_SERVER),
+    ("login", "/user/login", BASE_SERVER),
+    ("logout", "/user/logout", BASE_SERVER),
+    ("home", "/", BASE_SERVER),
+    ("ignore_me", "/IgnoreMe", BASE_SERVER),    # Anti-robot honneypot.
+    ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
     ("twitter", "/arxiv", "twitter.com"),
     ("blog", "/arxiv", "blogs.cornell.edu"),
     ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
