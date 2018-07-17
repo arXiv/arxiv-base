@@ -1,46 +1,58 @@
 """Flask configuration."""
 
+from typing import Optional
 import os
+from urllib.parse import urlparse
 
 SERVER_NAME = None
 
-EXTERNAL_URLS = [
-    ("twitter", os.environ.get("ARXIV_TWITTER_URL",
-                               "https://twitter.com/arxiv")),
-    ("blog", os.environ.get("ARXIV_BLOG_URL",
-                            "https://blogs.cornell.edu/arxiv/")),
-    ("wiki", os.environ.get("ARXIV_WIKI_URL",
-                            "https://confluence.cornell.edu/display/arxivpub/"
-                            "arXiv+Public+Wiki")),
-    ("accessibility", os.environ.get("ARXIV_ACCESSIBILITY_URL",
-                                     "mailto:web-accessibility@cornell.edu")),
-    ("library", os.environ.get("ARXIV_LIBRARY_URL",
-                               "https://library.cornell.edu")),
-    ("acknowledgment", os.environ.get(
-        "ARXIV_ACKNOWLEDGEMENT_URL",
-        "https://confluence.cornell.edu/x/ALlRF"
-    )),
-]
-"""External URLs, configurable via environment variables."""
+A11Y_URL = os.environ.get("ARXIV_ACCESSIBILITY_URL",
+                          "mailto:web-accessibility@cornell.edu")
 
-ARXIV_URLS = [
-    ("help", "/help"),
-    ("contact", "/help/contact"),
-    ("search_box", "/search"),
-    ("search_advanced", "/search/advanced"),
-    ("account", "/user"),
-    ("login", "/user/login"),
-    ("logout", "/user/logout"),
-    ("home", "/"),
-    ("pdf", "/pdf/<arxiv:paper_id>"),
+BASE_SERVER = os.environ.get('BASE_SERVER', 'arxiv.org')
+
+URLS = [
+    ("help", "/help", BASE_SERVER),
+    ("help_identifier", "/help/arxiv_identifier", BASE_SERVER),
+    ("help_trackback", "/help/trackback", BASE_SERVER),
+    ("help_mathjax", "/help/mathjax", BASE_SERVER),
+    ("help_social_bookmarking", "/help/social_bookmarking", BASE_SERVER),
+    ("contact", "/help/contact", BASE_SERVER),
+    ("search_box", "/search", BASE_SERVER),
+    ("search_advanced", "/search/advanced", BASE_SERVER),
+    ("account", "/user", BASE_SERVER),
+    ("login", "/user/login", BASE_SERVER),
+    ("logout", "/user/logout", BASE_SERVER),
+    ("home", "/", BASE_SERVER),
+    ("ignore_me", "/IgnoreMe", BASE_SERVER),    # Anti-robot honneypot.
+    ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
+    ("twitter", "/arxiv", "twitter.com"),
+    ("blog", "/arxiv", "blogs.cornell.edu"),
+    ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
+    ("library", "/", "library.cornell.edu"),
+    ("acknowledgment", "/x/ALlRF", "confluence.cornell.edu")
 ]
 """
-URLs for other services, for use with :func:`flask.url_for`.
+URLs for external services, for use with :func:`flask.url_for`.
 
-This only works for services at the same hostname, since Flask uses the
-hostname on the request to generate the full URL. For addresses at a different
-hostname, use :func:`arxiv.base.urls.config_url`, which relies on
-``EXTERNAL_URLS`` in this configuration file.
+For details, see :mod:`arxiv.base.urls`.
 """
+
+# In order to provide something close to the config_url behavior, this will
+# look for ARXIV_{endpoint}_URL variables in the environ, and update `URLS`
+# accordingly.
+for key, value in os.environ.items():
+    if key.startswith('ARXIV_') and key.endswith('_URL'):
+        endpoint = "_".join(key.split('_')[1:-1]).lower()
+        o = urlparse(value)
+        if not o.netloc:    # Doesn't raise an exception.
+            continue
+        i: Optional[int]
+        try:
+            i = list(zip(*URLS))[0].index(endpoint)
+        except ValueError:
+            i = None
+        if i is not None:
+            URLS[i] = (endpoint, o.path, o.netloc)
 
 ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
