@@ -927,7 +927,24 @@ CATEGORIES = {
                        'Econometrics, Empirical Content of Economic Relations '
                        'discovered via New Methods, Methodological Aspects of '
                        'the Application of Statistical Inference to Economic '
-                       'Data',
+                       'Data.',
+        'is_active': True
+    },
+    'econ.GN': {
+        'name': 'General Economics',
+        'in_archive': 'econ',
+        'description': 'General methodological and applied contributions to '
+                       'economics.',
+        'is_active': True
+    },
+    'econ.TH': {
+        'name': 'Theoretical Economics',
+        'in_archive': 'econ',
+        'description': 'Includes theoretical contributions to Contract '
+                       'Theory, Decision Theory, Game Theory, General '
+                       'Equilibrium, Growth, Learning and Evolution, '
+                       'Macroeconomics, Market and Mechanism Design, and '
+                       'Social Choice.',
         'is_active': True
     },
     'eess.AS': {
@@ -1574,10 +1591,10 @@ CATEGORIES = {
     'q-fin.EC': {
         'name': 'Economics',
         'in_archive': 'q-fin',
-        'description': 'Economics, including micro and macro economics, '
-                       'international economics, theory of the firm, labor '
-                       'economics, and other economic topics outside of '
-                       'finance',
+        'description': 'q-fin.EC is an alias for econ.GN. Economics, '
+                       'including micro and macro economics, international '
+                       'economics, theory of the firm, labor economics, and '
+                       'other economic topics outside finance',
         'is_active': True
     },
     'q-fin.GN': {
