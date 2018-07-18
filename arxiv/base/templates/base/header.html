@@ -1,16 +1,16 @@
 <!-- contains Cornell logo and sponsor statement -->
 <div class="attribution level is-marginless" role="banner">
   <div class="level-left">
-    <a class="level-item" href="{{ config_url('library') }}"><img src="{{ url_for('base.static', filename='images/CUL-reduced-white-SMALL.svg') }}" alt="Cornell University Library" width="300" aria-label="logo" /></a>
+    <a class="level-item" href="{{ url_for('library') }}"><img src="{{ url_for('base.static', filename='images/CUL-reduced-white-SMALL.svg') }}" alt="Cornell University Library" width="300" aria-label="logo" /></a>
   </div>
-  <div class="level-right"><p class="sponsors level-item is-marginless"><a href="{{ config_url('acknowledgment') }}">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</a></p></div>
+  <div class="level-right"><p class="sponsors level-item is-marginless"><a href="{{ url_for('acknowledgment') }}">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions</a></p></div>
 </div>
 <!-- contains arXiv identity and search bar -->
 <div class="identity level is-marginless">
   <div class="level-left">
     <h1 class="level-item"><a href="{{ url_for('home') }}" aria-label="arxiv-logo">arXiv.org</a></h1>
   </div>
-  {{ macros.compactsearch(config_url, 'level-right') }}
+  {{ macros.compactsearch('level-right') }}
 </div> <!-- closes identity -->
 
 <!--  # TODO: reintroduce this once we have access to the user's session.

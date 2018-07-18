@@ -12,6 +12,7 @@ curl -u $USERNAME:$GITHUB_TOKEN \
     > /dev/null 2>&1
 
 # Check mypy integration
+touch arxiv/__init__.py # https://github.com/python/mypy/issues/1645
 MYPY_STATUS=$( pipenv run mypy -p arxiv | grep -v "test.*" | wc -l | tr -d '[:space:]' )
 if [ $MYPY_STATUS -ne 0 ]; then MYPY_STATE="failure" && echo "mypy failed"; else MYPY_STATE="success" &&  echo "mypy passed"; fi
 
@@ -20,6 +21,7 @@ curl -u $USERNAME:$GITHUB_TOKEN \
     -XPOST https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA \
     > /dev/null 2>&1
 
+rm arxiv/__init__.py    # https://github.com/python/mypy/issues/1645
 
 # Check pydocstyle integration
 pipenv run pydocstyle --convention=numpy --add-ignore=D401 base

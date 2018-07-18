@@ -2,18 +2,18 @@
   <div class="column">
     <ul class="nav-spaced">
       <li><a href="{{ url_for('contact') }}">Contact</a></li>
-      <li><a href="{{ config_url('twitter') }}">Find us on Twitter</a></li>
+      <li><a href="{{ url_for('twitter') }}">Find us on Twitter</a></li>
     </ul>
   </div>
   <div class="column">
     <ul class="nav-spaced">
-      <li><a href="{{ config_url('blog') }}">Blog - the latest news</a></li>
-      <li><a href="{{ config_url('wiki') }}">Wiki - project documentation</a></li>
+      <li><a href="{{ url_for('blog') }}">Blog - the latest news</a></li>
+      <li><a href="{{ url_for('wiki') }}">Wiki - project documentation</a></li>
     </ul>
   </div>
   <div class="column">
     <ul class="nav-spaced">
-      <li><a href="{{ config_url('accessibility') }}">Web Accessibility Help</a></li>
+      <li><a href="{{ config.A11Y_URL }}">Web Accessibility Help</a></li>
       <li><a href="{{ url_for('help') }}">Help with using arXiv</a></li>
     </ul>
   </div>
