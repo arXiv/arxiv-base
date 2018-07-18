@@ -281,6 +281,10 @@ class TestWithClient(TestCase):
         def bat_location():
             return url_for('bat', foo=1)
 
+        @self.app.route('/acknowledgment_location')
+        def acknowledgment_location():
+            return url_for('acknowledgment')
+
         @self.app.route('/something')
         def something():
             return 'nothing'
@@ -293,3 +297,5 @@ class TestWithClient(TestCase):
                          b'https://baz.org/baz')
         self.assertEqual(self.client.get('/bat_location').data,
                          b'https://bat.org/bat/1')
+        self.assertEqual(self.client.get('/acknowledgment_location').data,
+                         b'https://confluence.cornell.edu/x/ALlRF')
