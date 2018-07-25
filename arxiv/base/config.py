@@ -19,6 +19,7 @@ URLS = [
     ("help_social_bookmarking", "/help/social_bookmarking", BASE_SERVER),
     ("contact", "/help/contact", BASE_SERVER),
     ("search_box", "/search", BASE_SERVER),
+    ("search_archive", "/search/<archive>", BASE_SERVER),
     ("search_advanced", "/search/advanced", BASE_SERVER),
     ("account", "/user", BASE_SERVER),
     ("login", "/user/login", BASE_SERVER),
