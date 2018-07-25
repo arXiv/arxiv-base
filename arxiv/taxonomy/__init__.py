@@ -616,7 +616,8 @@ CATEGORIES = {
         'description': 'Covers fault-tolerance, distributed algorithms, '
                        'stabilility, parallel computation, and cluster '
                        'computing. Roughly includes material in ACM Subject '
-                       'Classes C.1.2, C.1.4, C.2.4, D.1.3, D.4.5, D.4.7, E.1.',
+                       'Classes C.1.2, C.1.4, C.2.4, D.1.3, D.4.5, D.4.7, '
+                       'E.1.',
         'is_active': True
     },
     'cs.DL': {
@@ -927,7 +928,24 @@ CATEGORIES = {
                        'Econometrics, Empirical Content of Economic Relations '
                        'discovered via New Methods, Methodological Aspects of '
                        'the Application of Statistical Inference to Economic '
-                       'Data',
+                       'Data.',
+        'is_active': True
+    },
+    'econ.GN': {
+        'name': 'General Economics',
+        'in_archive': 'econ',
+        'description': 'General methodological and applied contributions to '
+                       'economics.',
+        'is_active': True
+    },
+    'econ.TH': {
+        'name': 'Theoretical Economics',
+        'in_archive': 'econ',
+        'description': 'Includes theoretical contributions to Contract '
+                       'Theory, Decision Theory, Game Theory, General '
+                       'Equilibrium, Growth, Learning and Evolution, '
+                       'Macroeconomics, Market and Mechanism Design, and '
+                       'Social Choice.',
         'is_active': True
     },
     'eess.AS': {
@@ -1574,10 +1592,10 @@ CATEGORIES = {
     'q-fin.EC': {
         'name': 'Economics',
         'in_archive': 'q-fin',
-        'description': 'Economics, including micro and macro economics, '
-                       'international economics, theory of the firm, labor '
-                       'economics, and other economic topics outside of '
-                       'finance',
+        'description': 'q-fin.EC is an alias for econ.GN. Economics, '
+                       'including micro and macro economics, international '
+                       'economics, theory of the firm, labor economics, and '
+                       'other economic topics outside finance',
         'is_active': True
     },
     'q-fin.GN': {
@@ -1739,3 +1757,17 @@ CATEGORIES = {
 CATEGORIES_ACTIVE = {key: value for key, value in CATEGORIES.items()
                      if 'is_active' in CATEGORIES[key] and
                      CATEGORIES[key]['is_active']}
+
+CATEGORY_ALIASES = {
+    'math.MP': 'math-ph',
+    'stat.TH': 'math.ST',
+    'math.IT': 'cs.IT',
+    'q-fin.EC': 'econ.GN'
+}
+"""
+Equivalences: category alias: canonical category
+
+This model is based on the notion that only two categories may be
+equivalent--not more. There would have to be some significant changes
+to the (classic) code to support three-way equivalences.
+"""
