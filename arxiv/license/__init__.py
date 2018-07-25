@@ -73,7 +73,6 @@ NO_LICENSE_TEXT = 'I do not certify that any of the above licenses apply'
 
 ASSUMED_LICENSE_URI = 'http://arxiv.org/licenses/assumed-1991-2003/'
 
-# Historical license to updated/current license (old URI: new URI)
 TRANSLATED_LICENSES = {
     'http://creativecommons.org/licenses/by/3.0/':
     'http://creativecommons.org/licenses/by/4.0/',
@@ -82,12 +81,13 @@ TRANSLATED_LICENSES = {
     'http://creativecommons.org/licenses/publicdomain/':
     'http://creativecommons.org/publicdomain/zero/1.0/'
 }
+"""Historical license to updated/current license (old URI: new URI)."""
 
 CURRENT_LICENSES = {
     k: v for k, v in LICENSES.items()
     if 'order' in v and 'is_current' in v and v['is_current']
 }
 
-# Current license URIs by display order
 CURRENT_LICENSE_URIS = \
     sorted(CURRENT_LICENSES, key=lambda x: CURRENT_LICENSES[x]['order'])
+"""Current license URIs by display order."""

@@ -616,7 +616,8 @@ CATEGORIES = {
         'description': 'Covers fault-tolerance, distributed algorithms, '
                        'stabilility, parallel computation, and cluster '
                        'computing. Roughly includes material in ACM Subject '
-                       'Classes C.1.2, C.1.4, C.2.4, D.1.3, D.4.5, D.4.7, E.1.',
+                       'Classes C.1.2, C.1.4, C.2.4, D.1.3, D.4.5, D.4.7, '
+                       'E.1.',
         'is_active': True
     },
     'cs.DL': {
@@ -1756,3 +1757,17 @@ CATEGORIES = {
 CATEGORIES_ACTIVE = {key: value for key, value in CATEGORIES.items()
                      if 'is_active' in CATEGORIES[key] and
                      CATEGORIES[key]['is_active']}
+
+CATEGORY_ALIASES = {
+    'math.MP': 'math-ph',
+    'stat.TH': 'math.ST',
+    'math.IT': 'cs.IT',
+    'q-fin.EC': 'econ.GN'
+}
+"""
+Equivalences: category alias: canonical category
+
+This model is based on the notion that only two categories may be
+equivalent--not more. There would have to be some significant changes
+to the (classic) code to support three-way equivalences.
+"""
