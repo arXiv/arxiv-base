@@ -17,10 +17,10 @@ from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
 blueprint = Blueprint('ui', __name__, url_prefix='')
 
 
-@blueprint.route('/test', methods=['GET'])
+@blueprint.route('/styleguide', methods=['GET'])
 def test_page() -> Response:
     """Render the test page."""
-    rendered = render_template("base/base.html", pagetitle='Home')
+    rendered = render_template("base/styleguide.html", pagetitle='Home')
     response = make_response(rendered, status.HTTP_200_OK)
     return response
 

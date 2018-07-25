@@ -3,7 +3,7 @@ from unittest import TestCase
 from datetime import date
 from taxonomy import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
-    LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY
+    LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY, CATEGORY_ALIASES
 
 
 class TestTaxonomy(TestCase):
@@ -99,3 +99,11 @@ class TestTaxonomy(TestCase):
                           '{} is a valid archive'.format(value['in_archive']))
             self.assertIn('is_active', value),
             self.assertIsInstance(value['is_active'], bool)
+
+    def test_aliases(self):
+        """Test for category aliases."""
+        for key, value in CATEGORY_ALIASES.items():
+            self.assertNotEqual(key, value,
+                                'alias should be different from canonical')
+            self.assertIn(key, CATEGORIES)
+            self.assertIn(value, CATEGORIES)
