@@ -2,6 +2,14 @@
 Provides middleware to support classic CUL/Apache log format.
 
 For accurate request metrics, apply this middleware before any others.
+
+You should use the following log format when running uWSGI with this
+middleware installed:
+
+.. code-block::
+
+   %(addr) %(addr) - %(user_id)|%(session_id) [%(rtime)] [%(uagent)] "%(method) %(uri) %(proto)" %(status) %(size) %(micros) %(ttfb) %(requestid)
+
 """
 
 from typing import Type, Callable, List, Iterable, Tuple
@@ -41,6 +49,9 @@ try:
                 ``start_response`` function.
             """
             self.start = datetime.now()
+
+            # Add the request ID as a uWSGI log variable.
+            uwsgi.set_logvar('requestid', environ.get('REQUEST_ID', ''))
 
             # Express the time that the request was received in the classic
             # format.
