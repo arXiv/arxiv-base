@@ -27,7 +27,7 @@ class TestGetLogger(TestCase):
     @mock.patch('arxiv.base.logging.request')
     def test_get_logger_with_request(self, mock_request):
         """The request context is available."""
-        mock_request.environ = {'request_id': 'foo-id-1234'}
+        mock_request.environ = {'REQUEST_ID': 'foo-id-1234'}
         stream = StringIO()
         logger = logging.getLogger('foologger', stream)
         self.assertIsInstance(logger, pyLogging.Logger,
