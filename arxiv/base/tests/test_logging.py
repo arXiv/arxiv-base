@@ -24,7 +24,7 @@ class TestGetLogger(TestCase):
         self.assertIn('ERROR: "foo"', captured_value,
                       "Should log normally even if request is not present")
 
-    @mock.patch('arxiv.base.logging.request')
+    @mock.patch(f'{logging.__name__}.request')
     def test_get_logger_with_request(self, mock_request):
         """The request context is available."""
         mock_request.environ = {'REQUEST_ID': 'foo-id-1234'}
@@ -38,10 +38,12 @@ class TestGetLogger(TestCase):
         self.assertIn('foo-id-1234', captured_value,
                       "Should include request ID in log messages")
 
+    @mock.patch(f'{logging.__name__}.request')
     @mock.patch('arxiv.base.logging.get_application_config')
-    def test_config_sets_loglevel(self, mock_get_config):
+    def test_config_sets_loglevel(self, mock_get_config, mock_request):
         """LOGLEVEL param in config controls log level."""
         mock_get_config.return_value = {'LOGLEVEL': 10}
+        mock_request.environ = {'REQUEST_ID': 'foo-id-1234'}
         stream = StringIO()
         logger = logging.getLogger('foologger', stream)
         logger.debug('foo')
@@ -51,8 +53,10 @@ class TestGetLogger(TestCase):
                       "Changing LOGLEVEL in the app config should change the"
                       " logger log level")
 
-    def test_paper_id_is_set(self):
+    @mock.patch(f'{logging.__name__}.request')
+    def test_paper_id_is_set(self, mock_request):
         """``paperid`` is included in the log data."""
+        mock_request.environ = {'REQUEST_ID': 'foo-id-1234'}
         stream = StringIO()
         logger = logging.getLogger('foologger', stream)
         logger.error('what', extra={'paperid': '1234'})
@@ -61,8 +65,10 @@ class TestGetLogger(TestCase):
         self.assertIn('arxiv:1234', captured_value,
                       "Should include paper ID in log messages")
 
-    def test_paper_id_is_not_set(self):
+    @mock.patch(f'{logging.__name__}.request')
+    def test_paper_id_is_not_set(self, mock_request):
         """``paperid`` is not included in the log data."""
+        mock_request.environ = {'REQUEST_ID': 'foo-id-1234'}
         stream = StringIO()
         logger = logging.getLogger('foologger', stream)
         logger.error('what')

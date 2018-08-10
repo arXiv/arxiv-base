@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 SERVER_NAME = None
 
+SECRET_KEY = os.environ.get('SECRET_KEY', 'yes123')
 A11Y_URL = os.environ.get("ARXIV_ACCESSIBILITY_URL",
                           "mailto:web-accessibility@cornell.edu")
 
