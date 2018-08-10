@@ -2866,7 +2866,7 @@ a.box:active {
 .notification {
   background-color: whitesmoke;
   border-radius: 4px;
-  padding: 1.25rem 2.5rem 1.25rem 1.5rem;
+  padding: 0.25em 0.5em 0.25em 0.5em;
   position: relative; }
   .notification a:not(.button) {
     color: currentColor;
@@ -6626,19 +6626,12 @@ tr.is-warning {
 
 /* flash notifications */
 .notifications {
-  margin-top: 5px; }
+  margin-top: 0.3em; }
 
 .notification {
-  padding: 0.25em 0.5em 0.25em 0.5em;
   width: 70%;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 5px !important; }
-
-.notification .notification-message {
-  font-size: 0.8em; }
-
-.notification .notification-title {
-  font-weight: 600; }
+  margin-bottom: 0.3em !important; }
 
 /*# sourceMappingURL=arxivstyle.css.map */

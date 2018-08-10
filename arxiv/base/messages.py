@@ -110,7 +110,9 @@ def flash_failure(message: str, title: Optional[str] = None,
     Flash a failure message to the user.
 
     Failures are an unavoidable part of life. We should be honest about our
-    mistakes, and find constructive ways to move forward with our lives.
+    mistakes, and find constructive ways to move forward with our lives. That
+    means that we should provide some specific hints for how the user can
+    achieve success (nb: this is an important accessibility requirement).
 
     Parameters
     ----------
@@ -136,7 +138,7 @@ def flash_success(message: str, title: Optional[str] = None,
     """
     Flash a success message to the user.
 
-    It's nice to know when you've done something right for a chance.
+    It's nice to know when you've done something right for a change.
 
     Parameters
     ----------

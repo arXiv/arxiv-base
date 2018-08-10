@@ -19,18 +19,17 @@
   </div>
 </div>
 
-<div class="container is-fluid notifications">
+<div class="container is-fluid notifications" role=alert>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
           <div class="notification is-{{ category }}">
             {% if message.dismissable %}<button class="delete notification-dismiss"></button>{% endif %}
-            {% if message.title %}<div class="notification-title">{{ message.title }}</div>{% endif %}
-            <p class="notification-message">{{ message.message }}</p>
+            {% if message.title %}<h2 class="has-text-weight-bold">{{ message.title }}</h2>{% endif %}
+            <p class="is-size-7">{{ message.message }}</p>
           </div>
         {% endfor %}
 
       {% endif %}
     {% endwith %}
-
 </div>
