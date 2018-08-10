@@ -9,7 +9,7 @@ python:
   - "3.6"
 script:
   - pip install -U pip pipenv
-  - pipenv install
+  - pipenv install --dev
   - pipenv install ./
   - ./tests/lintstats.sh
   - ./tests/docker_tests.sh

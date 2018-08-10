@@ -7,12 +7,13 @@ it is not attached by :class:`arxiv.base.Base`.
 
 from typing import Any, Tuple, Callable, Dict
 from flask import Blueprint, render_template, current_app, make_response, \
-    Response
+    Response, flash, url_for
 
 from arxiv import status
 from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
     MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError
 
+from . import messages
 
 blueprint = Blueprint('ui', __name__, url_prefix='')
 
@@ -22,6 +23,17 @@ def test_page() -> Response:
     """Render the test page."""
     rendered = render_template("base/styleguide.html", pagetitle='Home')
     response = make_response(rendered, status.HTTP_200_OK)
+
+    # Demonstrate flash messages. To see these messages, reload the page.
+    help_url = url_for('help')
+    messages.flash_warning(f'This is a warning, see <a href="{help_url}">the'
+                           f' docs</a> for more information',
+                           title='Warning title', safe=True)
+    messages.flash_info('This is some info', title='Info title')
+    messages.flash_failure('This is a failure', title='Failure title')
+    messages.flash_success('This is a success', title='Success title')
+    messages.flash_warning('This is a warning that cannot be dismissed',
+                           dismissable=False)
     return response
 
 
