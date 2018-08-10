@@ -6626,10 +6626,10 @@ tr.is-warning {
 
 /* flash notifications */
 .notifications {
-  margin-top: 0.3em; }
+  margin-top: 0.3em;
+  width: 60%; }
 
 .notification {
-  width: 70%;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 0.3em !important; }
