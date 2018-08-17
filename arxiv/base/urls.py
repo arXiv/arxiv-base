@@ -87,7 +87,8 @@ def external_url_for(endpoint: str, **values: Any) -> str:
     values.pop('_external', None)
     url_map = get_url_map()
     scheme = current_app.config.get('EXTERNAL_URL_SCHEME', 'https')
-    adapter = url_map.bind('arxiv.org', url_scheme=scheme)
+    host = current_app.config.get('BASE_SERVER', 'arxiv.org')
+    adapter = url_map.bind(host, url_scheme=scheme)
     url: str = adapter.build(endpoint, values=values, force_external=True)
     return url
 
