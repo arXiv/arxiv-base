@@ -30,7 +30,7 @@ from typing import Optional, Any, Dict
 from flask import Blueprint, Flask, Blueprint
 from werkzeug.exceptions import NotFound
 
-from arxiv.base import exceptions, urls, config
+from arxiv.base import exceptions, urls
 from arxiv.base.converter import ArXivConverter
 
 
