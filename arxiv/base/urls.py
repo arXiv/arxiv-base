@@ -52,13 +52,14 @@ from urllib.parse import parse_qs
 from werkzeug.urls import url_encode, url_parse, url_unparse
 from werkzeug.routing import Map, Rule, BuildError
 from flask import current_app
-from arxiv.base import config
+
 from arxiv.base.exceptions import ConfigurationError
 from arxiv.base.converter import ArXivConverter
 
 
 def get_url_map() -> Map:
     """Build a :class:`werkzeug.routing.Map` from configured URLs."""
+    from arxiv.base import config
     # Get the base URLs (configured in this package).
     configured_urls = {url[0]: url for url in config.URLS}
     # Privilege ARXIV_URLs set on the application config.
