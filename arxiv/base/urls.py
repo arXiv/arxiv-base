@@ -57,9 +57,20 @@ from arxiv.base.exceptions import ConfigurationError
 from arxiv.base.converter import ArXivConverter
 
 
+# The module arxiv.base.config needs to be able to load its values from
+# environment variables, some of which are set by SetEnv directives in Apache.
+# Those variables are not set until application execution begins, which means
+# that if arxiv.base.config is imported beforehand its values will not be
+# correct. 
+def _get_base_config() -> Map:
+    from arxiv.base import config
+    return config
+
+
 def get_url_map() -> Map:
     """Build a :class:`werkzeug.routing.Map` from configured URLs."""
-    from arxiv.base import config
+    config = _get_base_config()
+
     # Get the base URLs (configured in this package).
     configured_urls = {url[0]: url for url in config.URLS}
     # Privilege ARXIV_URLs set on the application config.
