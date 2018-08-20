@@ -2866,7 +2866,7 @@ a.box:active {
 .notification {
   background-color: whitesmoke;
   border-radius: 4px;
-  padding: 0.25em 0.5em 0.25em 0.5em;
+  padding: 0.75rem 1.25rem;
   position: relative; }
   .notification a:not(.button) {
     color: currentColor;
@@ -6342,6 +6342,10 @@ label.panel-block {
   background-color: #fafafa;
   padding: 3rem 1.5rem 6rem; }
 
+/* sets base font scale for all other font sizes */
+html {
+  font-size: 14px; }
+
 header .columns .column {
   padding-bottom: 0; }
 
@@ -6349,6 +6353,14 @@ content a {
   border-bottom: 1px solid transparent; }
   content a:hover {
     border-bottom: 1px dotted #0068ac; }
+
+/* overrides Bulma defaults which have bigger differences */
+.content h1 {
+  font-size: 1.75em; }
+.content h2 {
+  font-size: 1.5em; }
+.content h3 {
+  font-size: 1.35em; }
 
 .help,
 .is-small {
@@ -6415,43 +6427,43 @@ content a {
 
 .notification.is-white {
   background-color: white;
-  border-color: white;
+  border: 1px solid white;
   color: #4d4d4d; }
 .notification.is-black {
   background-color: #fafafa;
-  border-color: #0a0a0a;
+  border: 1px solid #0a0a0a;
   color: #0a0a0a; }
 .notification.is-light {
   background-color: #fafafa;
-  border-color: whitesmoke;
+  border: 1px solid whitesmoke;
   color: #4f4f4f; }
 .notification.is-dark {
   background-color: #fafafa;
-  border-color: #2d2d2d;
+  border: 1px solid #2d2d2d;
   color: #242424; }
 .notification.is-primary {
   background-color: #fef6f6;
-  border-color: #b31b1b;
+  border: 1px solid #b31b1b;
   color: #881818; }
 .notification.is-link {
   background-color: #f5fbff;
-  border-color: #0068ac;
+  border: 1px solid #0068ac;
   color: #03426c; }
 .notification.is-info {
   background-color: #f6fbfe;
-  border-color: #209cee;
+  border: 1px solid #209cee;
   color: #12537e; }
 .notification.is-success {
   background-color: #f8fdf6;
-  border-color: #3cb521;
+  border: 1px solid #3cb521;
   color: #173a10; }
 .notification.is-warning {
   background-color: #fffaf5;
-  border-color: #d47500;
+  border: 1px solid #d47500;
   color: #5d3605; }
 .notification.is-danger {
   background-color: #fff5f5;
-  border-color: #cd0200;
+  border: 1px solid #cd0200;
   color: #970503; }
 
 /** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. */
@@ -6474,9 +6486,6 @@ footer {
 
 .nav-spaced {
   line-height: 2; }
-
-.content h1 {
-  font-size: 1.75em; }
 
 .attribution {
   align-items: center;
@@ -6666,13 +6675,5 @@ tr.is-warning {
   margin: 0; }
 
 /* flash notifications */
-.notifications {
-  margin-top: 0.3em;
-  width: 60%; }
-
-.notification {
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 0.3em !important; }
 
 /*# sourceMappingURL=arxivstyle.css.map */

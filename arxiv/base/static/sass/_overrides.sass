@@ -1,5 +1,9 @@
 // Overrides
 
+/* sets base font scale for all other font sizes */
+html
+  font-size: 14px
+
 header .columns .column
   padding-bottom: 0
 
@@ -7,6 +11,15 @@ content a
   border-bottom: 1px solid transparent
   &:hover
     border-bottom: 1px dotted $blue
+
+/* overrides Bulma defaults which have bigger differences */
+.content
+  h1
+    font-size: 1.75em
+  h2
+    font-size: 1.5em
+  h3
+    font-size: 1.35em
 
 .help,
 .is-small
@@ -72,5 +85,5 @@ content a
     $desaturate-percentage: $color-luminance * 30%
     &.is-#{$name}
       background-color: lighten($color, $color-lightning)
-      border-color: $color
+      border: 1px solid $color
       color: desaturate(darken($color, $darken-percentage), $desaturate-percentage)
