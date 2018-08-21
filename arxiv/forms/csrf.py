@@ -143,7 +143,7 @@ class CSRFForm(Form):
         @property
         def csrf_context(self) -> Dict[str, str]:
             """Session information used to generate a CSRF token."""
-            if not hasattr(request, 'session'):
+            if not request or not request.session:
                 raise RuntimeError('Missing active user session')
 
             # Sessions provided by arxiv.auth should have a nonce that was
