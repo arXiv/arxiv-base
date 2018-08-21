@@ -18,6 +18,20 @@
     <section class="section">
       <div class="container">
         <div class="content">
+          <div class="notifications" role="alert">
+              {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                  {% for category, message in messages %}
+                    <div class="notification is-{{ category }}">
+                      {% if message.dismissable %}<button class="delete notification-dismiss"></button>{% endif %}
+                      {% if message.title %}<h2 class="is-size-5 is-marginless">{{ message.title }}</h2>{% endif %}
+                      <p>{{ message.message }}</p>
+                    </div>
+                  {% endfor %}
+
+                {% endif %}
+              {% endwith %}
+          </div>
           {% block content %}
           {% endblock content %}
         </div>
