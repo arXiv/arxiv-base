@@ -61,8 +61,8 @@ from arxiv.base.converter import ArXivConverter
 # environment variables, some of which are set by SetEnv directives in Apache.
 # Those variables are not set until application execution begins, which means
 # that if arxiv.base.config is imported beforehand its values will not be
-# correct. 
-def _get_base_config() -> Map:
+# correct.
+def _get_base_config() -> Any:
     from arxiv.base import config
     return config
 
