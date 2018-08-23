@@ -6,9 +6,11 @@ from urllib.parse import urlparse
 
 SERVER_NAME = None
 
+SECRET_KEY = os.environ.get('SECRET_KEY', 'yes123')
 A11Y_URL = os.environ.get("ARXIV_ACCESSIBILITY_URL",
                           "mailto:web-accessibility@cornell.edu")
 
+EXTERNAL_URL_SCHEME = os.environ.get('EXTERNAL_URL_SCHEME', 'https')
 BASE_SERVER = os.environ.get('BASE_SERVER', 'arxiv.org')
 
 URLS = [

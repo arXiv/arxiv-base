@@ -52,7 +52,7 @@ from urllib.parse import parse_qs
 from werkzeug.urls import url_encode, url_parse, url_unparse
 from werkzeug.routing import Map, Rule, BuildError
 from flask import current_app
-from arxiv.base import config
+
 from arxiv.base.exceptions import ConfigurationError
 from arxiv.base.converter import ArXivConverter
 from arxiv.base import logging
@@ -60,8 +60,20 @@ from arxiv.base import logging
 logger = logging.getLogger(__name__)
 
 
+# The module arxiv.base.config needs to be able to load its values from
+# environment variables, some of which are set by SetEnv directives in Apache.
+# Those variables are not set until application execution begins, which means
+# that if arxiv.base.config is imported beforehand its values will not be
+# correct.
+def _get_base_config() -> Any:
+    from arxiv.base import config
+    return config
+
+
 def get_url_map() -> Map:
     """Build a :class:`werkzeug.routing.Map` from configured URLs."""
+    config = _get_base_config()
+
     # Get the base URLs (configured in this package).
     configured_urls = {url[0]: url for url in config.URLS}
     # Privilege ARXIV_URLs set on the application config.
@@ -90,7 +102,8 @@ def external_url_for(endpoint: str, **values: Any) -> str:
     values.pop('_external', None)
     url_map = get_url_map()
     scheme = current_app.config.get('EXTERNAL_URL_SCHEME', 'https')
-    adapter = url_map.bind('arxiv.org', url_scheme=scheme)
+    host = current_app.config.get('BASE_SERVER', 'arxiv.org')
+    adapter = url_map.bind(host, url_scheme=scheme)
     url: str = adapter.build(endpoint, values=values, force_external=True)
     return url
 

@@ -27,7 +27,7 @@ class RequestFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Attach the request ID from the request environ to the log record."""
         try:
-            request_id = request.environ.get('request_id', None)
+            request_id = request.environ.get('REQUEST_ID', None)
         except RuntimeError as e:
             request_id = None
         record.requestid = request_id   # type: ignore
