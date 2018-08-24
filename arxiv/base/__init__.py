@@ -30,8 +30,16 @@ from typing import Optional, Any, Dict
 from flask import Blueprint, Flask, Blueprint
 from werkzeug.exceptions import NotFound
 
-from arxiv.base import exceptions, urls
+from arxiv.base import exceptions, urls, alerts
 from arxiv.base.converter import ArXivConverter
+
+
+def inject_get_alerts() -> dict:
+    return dict(get_alerts=alerts.get_alerts)
+
+
+def inject_get_hidden_alerts() -> dict:
+    return dict(get_hidden_alerts=alerts.get_hidden_alerts)
 
 
 class Base(object):
@@ -64,3 +72,6 @@ class Base(object):
         # Attach the external URL handler as a fallback for failed calls to
         # url_for().
         app.url_build_error_handlers.append(urls.external_url_handler)
+
+        app.context_processor(inject_get_alerts)
+        app.context_processor(inject_get_hidden_alerts)

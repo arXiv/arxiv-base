@@ -33,15 +33,19 @@ For example:
        alerts.flash_warning('This is a warning that cannot be dismissed',
                             dismissable=False)
 
+
+:func:`flash_hidden` can be used to send hidden data across requests.
+
 """
 
-from typing import Optional
-from flask import flash, Markup
+from typing import Optional, List, Tuple
+from flask import flash, Markup, get_flashed_messages
 
 INFO = 'info'
 WARNING = 'warning'
 FAILURE = 'danger'   # This is odd, but we use `danger` in styles.
 SUCCESS = 'success'
+HIDDEN = 'hidden'
 
 
 def _flash_with(severity: str, message: str, title: Optional[str] = None,
@@ -157,3 +161,70 @@ def flash_success(message: str, title: Optional[str] = None,
 
     """
     _flash_with(SUCCESS, message, title, dismissable, safe)
+
+
+def flash_hidden(message: dict, key: str,
+                 dismissable: bool = True, safe: bool = False) -> None:
+    """
+    Propagate hidden data using the flash mechanism.
+
+    Hidden messages are not shown to the user.
+
+    Parameters
+    ----------
+    message : dict
+        Data to flash across requests.
+    key : str or None
+        Key used to identify the data.
+    dismissable : bool
+        If True, a button will be provided that allows the user to hide the
+        notification.
+    safe : bool
+        If True, the message content (only) will be treated as safe for display
+        in the HTML page. NB: only use this if you know for sure that the
+        message content is safe for display (i.e. you're not using raw content
+        from a request).
+
+    """
+    _flash_with(HIDDEN, message, key, dismissable, safe)
+
+
+def get_alerts(severity: Optional[str] = None) -> List[Tuple[str, dict]]:
+    """
+    Get displayable alerts.
+
+    Parameters
+    ----------
+    severity : str or None
+        If provided (default: None), only alerts of the specified severity
+        will be loaded.
+
+    Returns
+    -------
+    list
+        Items are (str, dict) tuples, where the first element is the severity
+        and the second element is the alert itself.
+
+    """
+    if severity is not None:
+        return get_flashed_messages(with_categories=True,
+                                    category_filter=[severity])
+    return get_flashed_messages(with_categories=True)
+
+
+def get_hidden_alerts(key: str) -> Optional[dict]:
+    """
+    Get all hidden alerts.
+
+    Parameters
+    ----------
+    key : str
+        Key used to generate the hidden alert in the previous request.
+
+    Returns
+    -------
+    dict or None
+
+    """
+    messages = get_flashed_messages(category_filter=[HIDDEN])
+    return {m['title']: m['message'] for m in messages}.get(key, None)
