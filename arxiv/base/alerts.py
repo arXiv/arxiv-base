@@ -1,14 +1,14 @@
 """
-Support for typed flash messages.
+Support for typed flash alerts.
 
 Flask provides a `simple cookie-based flashing mechanism
 <http://flask.pocoo.org/docs/1.0/patterns/flashing/>`. This module extends
-that mechanism to support structured messages (i.e. dicts) and set
+that mechanism to support structured alerts (i.e. dicts) and set
 message categories/severity.
 
 .. note::
 
-   For security purposes, messages are not treated as safe in the template by
+   For security purposes, alerts are not treated as safe in the template by
    default. To treat a message as safe, use ``safe=True`` when generating the
    flash notification.
 
@@ -18,20 +18,20 @@ For example:
 .. code-block:: python
 
    from flask import url_for
-   from arxiv.base import messages
+   from arxiv.base import alerts
 
    def handle_request():
        ...
 
        help_url = url_for('help')
-       messages.flash_warning(f'This is a warning, see <a href="{help_url}">'
-                              f'the docs</a> for more information',
-                              title='Warning title', safe=True)
-       messages.flash_info('This is some info', title='Info title')
-       messages.flash_failure('This is a failure', title='Failure title')
-       messages.flash_success('This is a success', title='Success title')
-       messages.flash_warning('This is a warning that cannot be dismissed',
-                              dismissable=False)
+       alerts.flash_warning(f'This is a warning, see <a href="{help_url}">'
+                            f'the docs</a> for more information',
+                            title='Warning title', safe=True)
+       alerts.flash_info('This is some info', title='Info title')
+       alerts.flash_failure('This is a failure', title='Failure title')
+       alerts.flash_success('This is a success', title='Success title')
+       alerts.flash_warning('This is a warning that cannot be dismissed',
+                            dismissable=False)
 
 """
 
@@ -81,7 +81,7 @@ def flash_warning(message: str, title: Optional[str] = None,
     """
     Flash a warning message to the user.
 
-    Warnings are like info messages, but with a higher level of concern. For
+    Warnings are like info alerts, but with a higher level of concern. For
     example, this might be used to notify a user that an unintended consequence
     might be imminent.
 
