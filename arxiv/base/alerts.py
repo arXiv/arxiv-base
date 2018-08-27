@@ -38,7 +38,7 @@ For example:
 
 """
 
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Union
 from flask import flash, Markup, get_flashed_messages
 
 INFO = 'info'
@@ -48,8 +48,9 @@ SUCCESS = 'success'
 HIDDEN = 'hidden'
 
 
-def _flash_with(severity: str, message: str, title: Optional[str] = None,
-                dismissable: bool = True, safe: bool = False) -> None:
+def _flash_with(severity: str, message: Union[str, dict],
+                title: Optional[str] = None, dismissable: bool = True,
+                safe: bool = False) -> None:
     if safe:
         message = Markup(message)
     data = {'message': message, 'title': title, 'dismissable': dismissable}
@@ -206,10 +207,13 @@ def get_alerts(severity: Optional[str] = None) -> List[Tuple[str, dict]]:
         and the second element is the alert itself.
 
     """
+    alerts: List[Tuple[str, dict]]
     if severity is not None:
-        return get_flashed_messages(with_categories=True,
-                                    category_filter=[severity])
-    return get_flashed_messages(with_categories=True)
+        alerts = get_flashed_messages(with_categories=True,
+                                      category_filter=[severity])
+    else:
+        alerts = get_flashed_messages(with_categories=True)
+    return alerts
 
 
 def get_hidden_alerts(key: str) -> Optional[dict]:
