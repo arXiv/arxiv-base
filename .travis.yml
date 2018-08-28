@@ -11,6 +11,14 @@ script:
   - pip install pipenv
   - pipenv install --dev
   - pipenv install ./
-  - pipenv run nose2 -s arxiv --with-coverage && coveralls
+  - pipenv run nose2 -s arxiv --with-coverage
   - ./tests/lintstats.sh
-  - if [ -z "$TRAVIS_TAG ]; then echo "Not a tagged commit; skipping deploy."; else pip install twine && python setup.py sdist && twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*; fi
+after_success:
+  - coveralls
+  - if [ -z "$TRAVIS_TAG ]; then
+      echo "Not a tagged commit; skipping deploy.";
+    else
+      pip install twine
+      python setup.py sdist
+      twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*;
+    fi
