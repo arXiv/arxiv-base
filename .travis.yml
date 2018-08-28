@@ -7,18 +7,10 @@ os:
   - linux
 python:
   - "3.6"
-jobs:
-  include:
-    - stage: test
-      script: pip install pipenv
-    - stage: test
-      script: pipenv install --dev
-    - stage: test
-      script: pipenv install ./
-    - stage: test
-      script: pipenv run nose2 -s arxiv --with-coverage && coveralls
-    - stage: test 
-      script: ./tests/lintstats.sh
-    - stage: deploy
-      if: tag IS present
-      script: pip install twine && python setup.py sdist && twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
+script:
+  - pip install pipenv
+  - pipenv install --dev
+  - pipenv install ./
+  - pipenv run nose2 -s arxiv --with-coverage && coveralls
+  - ./tests/lintstats.sh
+  - if [ -z "$TRAVIS_TAG ]; then echo "Not a tagged commit; skipping deploy."; else pip install twine && python setup.py sdist && twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*; fi
