@@ -15,7 +15,7 @@ script:
   - ./tests/lintstats.sh
 after_success:
   - coveralls
-  - if [ -z "$TRAVIS_TAG ]; then
+  - if [ -z "$TRAVIS_TAG" ]; then
       echo "Not a tagged commit; skipping deploy.";
     else
       pip install twine
