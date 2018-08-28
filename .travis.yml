@@ -9,12 +9,12 @@ python:
   - "3.6"
 jobs:
   include:
-    - stage: dependencies
-      script: pip install pipenv && pipenv install --dev && pipenv install ./
     - stage: test
-      script: pipenv run nose2 -s arxiv --with-coverage && coveralls
-    - stage: lint
-      script: ./tests/lintstats.sh
+      script: pip install pipenv
+    - script: pipenv install --dev
+    - script: pipenv install ./
+    - script: pipenv run nose2 -s arxiv --with-coverage && coveralls
+    - script: ./tests/lintstats.sh
     - stage: deploy
       if: tag IS present
-      script: pipenv install --dev twine && python setup.py sdist && twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
+      script: pip install twine && python setup.py sdist && twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
