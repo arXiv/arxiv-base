@@ -7,18 +7,14 @@ os:
   - linux
 python:
   - "3.6"
-script:
-  - pip install -U pip pipenv
-  - pipenv install --dev
-  - pipenv install ./
-  - ./tests/lintstats.sh
-  - ./tests/docker_tests.sh
-  - docker build ./ -t arxiv/base
-  - pipenv run nose2 -s arxiv --with-coverage
-after_success:
-  - coveralls
-  - if [ "$TRAVIS_BRANCH" == "master" ] && [ -z ${TRAVIS_TAG} ]; then
-    docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD";
-    docker tag arxiv/base arxiv/base:${TRAVIS_TAG};
-    docker push arxiv/base:${TRAVIS_TAG};
-    fi
+jobs:
+  include:
+    - stage: dependencies
+      script: pip install pipenv && pipenv install --dev && pipenv install ./
+    - stage: test
+      script: pipenv run nose2 -s arxiv --with-coverage && coveralls
+    - stage: lint
+      script: ./tests/lintstats.sh
+    - stage: deploy
+      if: tag IS present
+      script: pipenv install --dev twine && python setup.py sdist && twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
