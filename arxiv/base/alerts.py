@@ -38,6 +38,7 @@ For example:
 
 """
 
+from arxiv.base import logging
 from typing import Optional, List, Tuple, Union
 from flask import flash, Markup, get_flashed_messages
 
@@ -47,6 +48,8 @@ FAILURE = 'danger'   # This is odd, but we use `danger` in styles.
 SUCCESS = 'success'
 HIDDEN = 'hidden'
 
+logger = logging.getLogger(__name__)
+
 
 def _flash_with(severity: str, message: Union[str, dict],
                 title: Optional[str] = None, dismissable: bool = True,
@@ -54,6 +57,8 @@ def _flash_with(severity: str, message: Union[str, dict],
     if safe:
         message = Markup(message)
     data = {'message': message, 'title': title, 'dismissable': dismissable}
+    logger.debug('flash with severity %s: (title: %s) %s',
+                 severity, title, message)
     flash(data, severity)
 
 
@@ -230,5 +235,8 @@ def get_hidden_alerts(key: str) -> Optional[dict]:
     dict or None
 
     """
+    logger.debug('all current alerts: %s', get_flashed_messages())
+    logger.debug('get hidden alert "%s"', key)
     messages = get_flashed_messages(category_filter=[HIDDEN])
+    logger.debug('got messages: %s', messages)
     return {m['title']: m['message'] for m in messages}.get(key, None)
