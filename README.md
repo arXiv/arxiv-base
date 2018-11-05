@@ -25,8 +25,10 @@ arxiv-NG, and can be overridden as needed by submodules.
 
 **TODO:** Add autoprefixer in postcss and autocompile sass/scss
 
-testpage.html is included for rapid evaluation of display layer CSS without
-invoking a local environment to render templates.
+A template is included for rapid evaluation of display layer CSS within this
+repo, prepopulated with sample content.
+The ``styleguide.html`` template (route: /styleguide) shows error message
+samples, informational message boxes, and sample content from search.
 
 ## Development server
 
@@ -38,25 +40,37 @@ working in the root of this repository):
 $ FLASK_APP=app.py FLASK_DEBUG=1 flask run
 ```
 
-You should be able to view the rendered ``testpage.html`` at
-``http://127.0.0.1:5000/test``.
+You should be able to view the rendered ``styleguide.html`` at
+``http://127.0.0.1:5000/styleguide``.
 
 ## Flask
 
 To use the base UI package in a Flask application...
 
-Add it to your ``requirements.txt`` file. For the time being, we'll
+Add it to your ``Pipfile``. For the time being, we'll
 distribute directly from GitHub. To use a specific version, for example, you
 would write:
 
-``-e git://github.com/cul-it/arxiv-base.git@0.1#egg=arxiv-base``
+``arxiv-base = "==0.11.1rc5"``
 
-Or if this repo is private, and you want to install a specific commit:
 
-``-e git+ssh://git@github.com/cul-it/arxiv-base.git@d9af6c670afdf6f0fda6d92f7b110dcd60514f4a#egg=arxiv-base``
+Or if you want to install a specific working branch (dev only) the Pipfile line
+might read:
+
+``arxiv-base = {git = "https://github.com/cul-it/arxiv-base.git@task/ARXIVNG-1215"}``
+
 
 See the [pip documentation](https://pip.pypa.io/en/latest/reference/pip_install/#git)
 for details.
+
+You can use ``pipenv`` from the command line to install a selected unpublished
+branch. First uninstall existing, then reinstall using pip syntax above.
+Example:
+
+```bash
+pipenv uninstall arxiv-base
+pipenv install git+https://github.com/cul-it/arxiv-base.git@task/ARXIVNG-1010#egg=arxiv-base
+```
 
 In your application factory, instantiate the BaseUI blueprint. This makes
 templates and static files available to you. For example, in your
