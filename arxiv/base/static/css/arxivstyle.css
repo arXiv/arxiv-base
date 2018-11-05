@@ -6477,7 +6477,10 @@ header h1 {
 footer {
   background-color: #757575;
   color: #fff;
-  padding: 0.5em 2em 0.75em 2em; }
+  padding: 1em 2em; }
+  footer h2 {
+    margin-bottom: 0.5em;
+    text-transform: uppercase; }
   footer a {
     color: #fff;
     border-bottom: 1px solid transparent; }
@@ -6628,8 +6631,8 @@ li.is-danger {
       content: "";
       font-family: "FontAwesome";
       color: #cd0200;
-      position: absolute;
-      left: 0.5em; }
+      position: relative;
+      left: -0.5em; }
 
 li.is-warning {
   background-color: #fffaf5;
@@ -6642,8 +6645,8 @@ li.is-warning {
       content: "";
       font-family: "FontAwesome";
       color: #d47500;
-      position: absolute;
-      left: 0.5em; }
+      position: relative;
+      left: -0.5em; }
 
 li.is-success {
   background-color: #f8fdf6;
@@ -6653,11 +6656,11 @@ li.is-success {
   li.is-success p {
     padding-left: 2em; }
     li.is-success p:before {
-      content: "";
+      content: "";
       font-family: "FontAwesome";
       color: #1F6B0E;
-      position: absolute;
-      left: 0.5em; }
+      position: relative;
+      left: -0.5em; }
 
 /* whitespace styles */
 .breathe-vertical {
