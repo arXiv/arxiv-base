@@ -1,14 +1,14 @@
 """
-Support for typed flash messages.
+Support for typed flash alerts.
 
 Flask provides a `simple cookie-based flashing mechanism
 <http://flask.pocoo.org/docs/1.0/patterns/flashing/>`. This module extends
-that mechanism to support structured messages (i.e. dicts) and set
+that mechanism to support structured alerts (i.e. dicts) and set
 message categories/severity.
 
 .. note::
 
-   For security purposes, messages are not treated as safe in the template by
+   For security purposes, alerts are not treated as safe in the template by
    default. To treat a message as safe, use ``safe=True`` when generating the
    flash notification.
 
@@ -18,37 +18,47 @@ For example:
 .. code-block:: python
 
    from flask import url_for
-   from arxiv.base import messages
+   from arxiv.base import alerts
 
    def handle_request():
        ...
 
        help_url = url_for('help')
-       messages.flash_warning(f'This is a warning, see <a href="{help_url}">'
-                              f'the docs</a> for more information',
-                              title='Warning title', safe=True)
-       messages.flash_info('This is some info', title='Info title')
-       messages.flash_failure('This is a failure', title='Failure title')
-       messages.flash_success('This is a success', title='Success title')
-       messages.flash_warning('This is a warning that cannot be dismissed',
-                              dismissable=False)
+       alerts.flash_warning(f'This is a warning, see <a href="{help_url}">'
+                            f'the docs</a> for more information',
+                            title='Warning title', safe=True)
+       alerts.flash_info('This is some info', title='Info title')
+       alerts.flash_failure('This is a failure', title='Failure title')
+       alerts.flash_success('This is a success', title='Success title')
+       alerts.flash_warning('This is a warning that cannot be dismissed',
+                            dismissable=False)
+
+
+:func:`flash_hidden` can be used to send hidden data across requests.
 
 """
 
-from typing import Optional
-from flask import flash, Markup
+from arxiv.base import logging
+from typing import Optional, List, Tuple, Union
+from flask import flash, Markup, get_flashed_messages
 
 INFO = 'info'
 WARNING = 'warning'
 FAILURE = 'danger'   # This is odd, but we use `danger` in styles.
 SUCCESS = 'success'
+HIDDEN = 'hidden'
+
+logger = logging.getLogger(__name__)
 
 
-def _flash_with(severity: str, message: str, title: Optional[str] = None,
-                dismissable: bool = True, safe: bool = False) -> None:
+def _flash_with(severity: str, message: Union[str, dict],
+                title: Optional[str] = None, dismissable: bool = True,
+                safe: bool = False) -> None:
     if safe:
         message = Markup(message)
     data = {'message': message, 'title': title, 'dismissable': dismissable}
+    logger.debug('flash with severity %s: (title: %s) %s',
+                 severity, title, message)
     flash(data, severity)
 
 
@@ -81,7 +91,7 @@ def flash_warning(message: str, title: Optional[str] = None,
     """
     Flash a warning message to the user.
 
-    Warnings are like info messages, but with a higher level of concern. For
+    Warnings are like info alerts, but with a higher level of concern. For
     example, this might be used to notify a user that an unintended consequence
     might be imminent.
 
@@ -157,3 +167,76 @@ def flash_success(message: str, title: Optional[str] = None,
 
     """
     _flash_with(SUCCESS, message, title, dismissable, safe)
+
+
+def flash_hidden(message: dict, key: str,
+                 dismissable: bool = True, safe: bool = False) -> None:
+    """
+    Propagate hidden data using the flash mechanism.
+
+    Hidden messages are not shown to the user.
+
+    Parameters
+    ----------
+    message : dict
+        Data to flash across requests.
+    key : str or None
+        Key used to identify the data.
+    dismissable : bool
+        If True, a button will be provided that allows the user to hide the
+        notification.
+    safe : bool
+        If True, the message content (only) will be treated as safe for display
+        in the HTML page. NB: only use this if you know for sure that the
+        message content is safe for display (i.e. you're not using raw content
+        from a request).
+
+    """
+    _flash_with(HIDDEN, message, key, dismissable, safe)
+
+
+def get_alerts(severity: Optional[str] = None) -> List[Tuple[str, dict]]:
+    """
+    Get displayable alerts.
+
+    Parameters
+    ----------
+    severity : str or None
+        If provided (default: None), only alerts of the specified severity
+        will be loaded.
+
+    Returns
+    -------
+    list
+        Items are (str, dict) tuples, where the first element is the severity
+        and the second element is the alert itself.
+
+    """
+    alerts: List[Tuple[str, dict]]
+    if severity is not None:
+        alerts = get_flashed_messages(with_categories=True,
+                                      category_filter=[severity])
+    else:
+        alerts = get_flashed_messages(with_categories=True)
+    return alerts
+
+
+def get_hidden_alerts(key: str) -> Optional[dict]:
+    """
+    Get all hidden alerts.
+
+    Parameters
+    ----------
+    key : str
+        Key used to generate the hidden alert in the previous request.
+
+    Returns
+    -------
+    dict or None
+
+    """
+    logger.debug('all current alerts: %s', get_flashed_messages())
+    logger.debug('get hidden alert "%s"', key)
+    messages = get_flashed_messages(category_filter=[HIDDEN])
+    logger.debug('got messages: %s', messages)
+    return {m['title']: m['message'] for m in messages}.get(key, None)

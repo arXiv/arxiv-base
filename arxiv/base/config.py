@@ -33,7 +33,9 @@ URLS = [
     ("blog", "/arxiv", "blogs.cornell.edu"),
     ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
     ("library", "/", "library.cornell.edu"),
-    ("acknowledgment", "/x/ALlRF", "confluence.cornell.edu")
+    ("acknowledgment", "/x/ALlRF", "confluence.cornell.edu"),
+    ("faq", "/help/faq", BASE_SERVER),
+    ("subscribe", "/help/subscribe", BASE_SERVER)
 ]
 """
 URLs for external services, for use with :func:`flask.url_for`.

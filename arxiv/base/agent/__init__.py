@@ -70,7 +70,7 @@ For integration tests, or developing against a "live" Kinesis stream,
 [Localstack](https://github.com/localstack/localstack) provides a Kinesis
 for testing/development purposes (port 4568). You can use the config
 parameters above to point to a local instance of localstack (e.g. run with
-Docker). 
+Docker).
 
 """
 
@@ -187,7 +187,9 @@ class BaseConsumer(object):
     """
 
     def __init__(self, stream_name: str = '', shard_id: str = '',
-                 access_key: str = '', secret_key: str = '', region: str = '',
+                 access_key: Optional[str] = None,
+                 secret_key: Optional[str] = None,
+                 region: str = '',
                  checkpointer: Optional[DiskCheckpointManager] = None,
                  back_off: int = 5, batch_size: int = 50,
                  endpoint: Optional[str] = None, verify: bool = True,
@@ -220,12 +222,20 @@ class BaseConsumer(object):
 
         logger.info(f'Getting a new connection to Kinesis at {endpoint}'
                     f' in region {region}, with SSL verification={verify}')
-        self.client = boto3.client('kinesis',
-                                   aws_access_key_id=access_key,
-                                   aws_secret_access_key=secret_key,
-                                   endpoint_url=endpoint,
-                                   verify=verify,
-                                   region_name=region)
+        params = dict(
+            endpoint_url=endpoint,
+            verify=verify,
+            region_name=region
+        )
+        # Only add these if they are set/truthy. This allows us to use a
+        # shared credentials file via an environment variable.
+        if access_key and secret_key:
+            params.update(dict(
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key
+            ))
+        logger.debug('New client with parameters: %s', params)
+        self.client = boto3.client('kinesis', **params)
 
         logger.info(f'Waiting for {self.stream_name} to be available')
         try:

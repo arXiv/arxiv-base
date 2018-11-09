@@ -6477,7 +6477,10 @@ header h1 {
 footer {
   background-color: #757575;
   color: #fff;
-  padding: 0.5em 2em 0.75em 2em; }
+  padding: 1em 2em; }
+  footer h2 {
+    margin-bottom: 0.5em;
+    text-transform: uppercase; }
   footer a {
     color: #fff;
     border-bottom: 1px solid transparent; }
@@ -6617,35 +6620,47 @@ dt {
 .is-subdirectory {
   margin-left: 2em; }
 
-tr.is-danger {
+li.is-danger {
   background-color: #fff5f5;
   color: #970503;
-  border: 1px solid #cd0200; }
-  tr.is-danger td {
-    border-color: #cd0200; }
-    tr.is-danger td:first-child {
-      padding-left: 2em; }
-      tr.is-danger td:first-child:before {
-        content: "";
-        font-family: "FontAwesome";
-        color: #cd0200;
-        position: absolute;
-        left: 0.5em; }
+  border: 1px solid #cd0200;
+  padding: 2px; }
+  li.is-danger p {
+    padding-left: 2em; }
+    li.is-danger p:before {
+      content: "";
+      font-family: "FontAwesome";
+      color: #cd0200;
+      position: relative;
+      left: -0.5em; }
 
-tr.is-warning {
+li.is-warning {
   background-color: #fffaf5;
   color: #5d3605;
-  border: 1px solid #d47500; }
-  tr.is-warning td {
-    border-color: #d47500; }
-    tr.is-warning td:first-child {
-      padding-left: 2em; }
-      tr.is-warning td:first-child:before {
-        content: "";
-        font-family: "FontAwesome";
-        color: #d47500;
-        position: absolute;
-        left: 0.5em; }
+  border: 1px solid #d47500;
+  padding: 2px; }
+  li.is-warning p {
+    padding-left: 2em; }
+    li.is-warning p:before {
+      content: "";
+      font-family: "FontAwesome";
+      color: #d47500;
+      position: relative;
+      left: -0.5em; }
+
+li.is-success {
+  background-color: #f8fdf6;
+  color: #1F6B0E;
+  border: 1px solid #3CB521;
+  padding: 2px; }
+  li.is-success p {
+    padding-left: 2em; }
+    li.is-success p:before {
+      content: "";
+      font-family: "FontAwesome";
+      color: #1F6B0E;
+      position: relative;
+      left: -0.5em; }
 
 /* whitespace styles */
 .breathe-vertical {

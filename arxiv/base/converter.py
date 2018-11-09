@@ -11,7 +11,10 @@ class ArXivConverter(BaseConverter):
 
     def to_python(self, value: str) -> str:
         """Parse URL path part to Python rep (str)."""
-        return identifier.parse_arxiv_id(value)
+        try:
+            return identifier.parse_arxiv_id(value)
+        except ValueError as e:
+            raise ValidationError('Not a valid arXiv ID') from e
 
     def to_url(self, value: str) -> str:
         """Cast Python rep (str) to URL path part."""

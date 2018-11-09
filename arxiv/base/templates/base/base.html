@@ -19,7 +19,7 @@
       <div class="container">
         <div class="content">
           <div class="notifications" role="alert">
-              {% with messages = get_flashed_messages(with_categories=true) %}
+              {% with messages = get_alerts() %}
                 {% if messages %}
                   {% for category, message in messages %}
                     <div class="notification is-{{ category }}">
@@ -28,7 +28,6 @@
                       <p>{{ message.message }}</p>
                     </div>
                   {% endfor %}
-
                 {% endif %}
               {% endwith %}
           </div>
