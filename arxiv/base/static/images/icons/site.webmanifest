@@ -1,0 +1,19 @@
+{
+    "name": "arXiv",
+    "short_name": "arXiv",
+    "icons": [
+        {
+            "src": "/images/icons/android-chrome-192x192.png?v=zXbxxv8Lok",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/images/icons/android-chrome-512x512.png?v=zXbxxv8Lok",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#b31b1b",
+    "background_color": "#b31b1b",
+    "display": "standalone"
+}
