@@ -14,5 +14,9 @@ uwsgi = "*"
 pydocstyle = "*"
 "boto3" = "*"
 wtforms = "*"
+"e1839a8" = {path = "."}
 
 [dev-packages]
+sphinx = "*"
+sphinxcontrib-websupport = "*"
+sphinx-autodoc-typehints = "*"
