@@ -187,3 +187,44 @@ class TestExternalURLFallback(TestCase):
         ])
         with self.app.app_context():
             self.assertEqual(url_for('bar', foo=1), 'https://bar.org/bar/1')
+
+
+class TestWithClient(TestCase):
+    """Test external URL building in a Flask app."""
+
+    def setUp(self):
+        """Create a Flask app."""
+        self.app = Flask('test')
+        self.app.config['URLS'] = [
+            ('baz', '/baz', 'baz.org'),
+            ('bat', '/bat/<string:foo>', 'bat.org'),
+        ]
+        self.app.config['SERVER_NAME'] = 'nope.com'
+        Base(self.app)
+
+        @self.app.route('/baz_location')
+        def baz_location():
+            return url_for('baz')
+
+        @self.app.route('/bat_location')
+        def bat_location():
+            return url_for('bat', foo=1)
+
+        @self.app.route('/acknowledgment_location')
+        def acknowledgment_location():
+            return url_for('acknowledgment')
+
+        @self.app.route('/something')
+        def something():
+            return 'nothing'
+
+        self.client = self.app.test_client()
+
+    def test_application_url(self):
+        """url_for works as expected for an app-defined URL."""
+        self.assertEqual(self.client.get('/baz_location').data,
+                         b'https://baz.org/baz')
+        self.assertEqual(self.client.get('/bat_location').data,
+                         b'https://bat.org/bat/1')
+        self.assertEqual(self.client.get('/acknowledgment_location').data,
+                         b'https://confluence.cornell.edu/x/ALlRF')

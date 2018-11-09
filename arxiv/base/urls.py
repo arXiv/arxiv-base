@@ -55,6 +55,9 @@ from flask import current_app
 
 from arxiv.base.exceptions import ConfigurationError
 from arxiv.base.converter import ArXivConverter
+from arxiv.base import logging
+
+logger = logging.getLogger(__name__)
 
 
 # The module arxiv.base.config needs to be able to load its values from
