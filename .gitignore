@@ -52,6 +52,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+
 local_settings.py
 
 # Flask stuff:
@@ -110,9 +111,11 @@ zero.db
 *.idea
 *.vscode
 default.nix
+arxiv-browse.iml
 *.db
 *#*
 *.#*
+*~
 
 *.pyc
 build/
@@ -120,3 +123,13 @@ dist/
 *.egg-info/
 *.DS_Store
 .sass-cache/
+
+mypy_test_errors.txt
+
+# DB connection, etc
+private_vars.sh
+
+#misc
+.fuse_hidden*
+.pycheckers
+
