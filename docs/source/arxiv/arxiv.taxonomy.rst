@@ -11,5 +11,6 @@ Submodules
 
 .. toctree::
 
+   arxiv.taxonomy.category
+   arxiv.taxonomy.definitions
    arxiv.taxonomy.tests
-

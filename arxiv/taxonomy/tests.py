@@ -1,9 +1,10 @@
 """Tests for arXiv taxonomy module."""
 from unittest import TestCase
 from datetime import date
-from taxonomy import GROUPS, ARCHIVES, \
+from .definitions import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
     LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY, CATEGORY_ALIASES
+from .category import Category
 
 
 class TestTaxonomy(TestCase):
@@ -100,6 +101,12 @@ class TestTaxonomy(TestCase):
             self.assertIn('is_active', value),
             self.assertIsInstance(value['is_active'], bool)
 
+            category = Category(key)
+            self.assertIsInstance(category.name, str)
+            self.assertIsInstance(category.canonical, Category)
+            self.assertIsInstance(category.display, str)
+            self.assertIsInstance(category.unalias(), Category)
+
     def test_aliases(self):
         """Test for category aliases."""
         for key, value in CATEGORY_ALIASES.items():
@@ -107,3 +114,7 @@ class TestTaxonomy(TestCase):
                                 'alias should be different from canonical')
             self.assertIn(key, CATEGORIES)
             self.assertIn(value, CATEGORIES)
+            
+            category = Category(key)
+            self.assertIsInstance(category.unalias(), Category)
+            self.assertNotEqual(category.unalias(), category)
