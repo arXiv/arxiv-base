@@ -17,4 +17,4 @@ search, etc. does not need to understand the break with hierarchy.
 from typing import Optional
 from .definitions import CATEGORIES, CATEGORIES_ACTIVE, ARCHIVES, \
     ARCHIVES_ACTIVE, ARCHIVES_SUBSUMED, CATEGORY_ALIASES
-from .category import Category
+from .category import Category, Archive, Group

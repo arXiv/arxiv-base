@@ -4,7 +4,7 @@ from datetime import date
 from .definitions import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
     LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY, CATEGORY_ALIASES
-from .category import Category
+from .category import Category, Archive, Group
 
 
 class TestTaxonomy(TestCase):
@@ -30,6 +30,12 @@ class TestTaxonomy(TestCase):
                         value['default_archive'])
                 )
 
+            group = Group(key)
+            self.assertIsInstance(group.name, str)
+            self.assertIsInstance(group.canonical, Category)
+            self.assertIsInstance(group.display, str)
+            self.assertIsInstance(group.unalias(), Category)
+
     def test_archives(self):
         """Tests for the middle level of the category taxonomy (archives)."""
         for key, value in ARCHIVES.items():
@@ -53,10 +59,22 @@ class TestTaxonomy(TestCase):
                     'end_date greater than start_date'
                 )
 
+            archive = Archive(key)
+            self.assertIsInstance(archive.name, str)
+            self.assertIsInstance(archive.canonical, Category)
+            self.assertIsInstance(archive.display, str)
+            self.assertIsInstance(archive.unalias(), Category)
+
     def test_active_archives(self):
         """Tests for active (non-defunct) archives."""
         for key, value in ARCHIVES_ACTIVE.items():
             self.assertNotIn('end_date', value)
+
+            archive = Archive(key)
+            self.assertIsInstance(archive.name, str)
+            self.assertIsInstance(archive.canonical, Category)
+            self.assertIsInstance(archive.display, str)
+            self.assertIsInstance(archive.unalias(), Category)
 
     def test_archives_subsumed(self):
         """Tests for defunct archives that have been subsumed by categories."""
@@ -77,6 +95,11 @@ class TestTaxonomy(TestCase):
                 ARCHIVES[CATEGORIES[value]['in_archive']],
                 '{} is not in a defunct archive'.format(value)
             )
+            archive = Archive(key)
+            self.assertIsInstance(archive.name, str)
+            self.assertIsInstance(archive.canonical, Category)
+            self.assertIsInstance(archive.display, str)
+            self.assertIsInstance(archive.unalias(), Category)
 
     def test_legacy_archives_as_categories(self):
         """Test for archives that were used as primary/secondary categories."""
@@ -84,10 +107,23 @@ class TestTaxonomy(TestCase):
             self.assertIn(key, ARCHIVES, '{} is a valid archive'.format(key))
             # dt = datetime.strptime(value, '%Y-%m')
             self.assertIsInstance(value, date)
+
+            archive = Archive(key)
+            self.assertIsInstance(archive.name, str)
+            self.assertIsInstance(archive.canonical, Category)
+            self.assertIsInstance(archive.display, str)
+            self.assertIsInstance(archive.unalias(), Category)
+
         for key, value in LEGACY_ARCHIVE_AS_SECONDARY.items():
             self.assertIn(key, ARCHIVES, '{} is a valid archive'.format(key))
             # dt = datetime.strptime(value, '%Y-%m')
             self.assertIsInstance(value, date)
+
+            archive = Archive(key)
+            self.assertIsInstance(archive.name, str)
+            self.assertIsInstance(archive.canonical, Category)
+            self.assertIsInstance(archive.display, str)
+            self.assertIsInstance(archive.unalias(), Category)
 
     def test_categories(self):
         """Test for the lowest level of the category taxonomy (categories)."""
@@ -114,7 +150,7 @@ class TestTaxonomy(TestCase):
                                 'alias should be different from canonical')
             self.assertIn(key, CATEGORIES)
             self.assertIn(value, CATEGORIES)
-            
+
             category = Category(key)
             self.assertIsInstance(category.unalias(), Category)
             self.assertNotEqual(category.unalias(), category)
