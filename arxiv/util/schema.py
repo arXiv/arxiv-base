@@ -7,9 +7,10 @@ from typing import Callable, Tuple, Any
 import jsonschema
 from flask import request
 
-from arxiv import status
-
 ValidationError = jsonschema.exceptions.ValidationError
+
+HTTP_200_OK = 200
+HTTP_400_BAD_REQUEST = 400
 
 
 def load(schema_path: str) -> Callable:
@@ -95,7 +96,7 @@ def validate_request(schema_path: str) -> Callable:
                 msg = str(e).split('\n')[0]
                 return (
                     {'reason': 'Metadata validation failed: %s' % msg},
-                    status.HTTP_400_BAD_REQUEST,
+                    HTTP_400_BAD_REQUEST,
                     {}
                 )
             response: Tuple[dict, int, dict] = func(*args, **kwargs)

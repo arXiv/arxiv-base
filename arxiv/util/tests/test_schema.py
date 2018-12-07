@@ -1,12 +1,11 @@
-"""Tests for :mod:`arxiv.util.schema`."""
+"""Tests for :mod:`arxiv.schema`."""
 
 from unittest import TestCase, mock
 import json
 import os
 import tempfile
 
-from arxiv import util
-from arxiv import status
+from .. import schema
 
 
 class TestValidateRequest(TestCase):
@@ -38,42 +37,42 @@ class TestValidateRequest(TestCase):
 
     def test_decorate_route(self):
         """:func:`.schema.validate_request` generates a decorator."""
-        decorator = util.schema.validate_request(self.schema_path)
+        decorator = schema.validate_request(self.schema_path)
         self.assertTrue(hasattr(decorator, '__call__'))
 
-    @mock.patch('arxiv.util.schema.request')
+    @mock.patch(f'{schema.__name__}.request')
     def test_validate_with_invalid_request_data(self, mock_request):
         """Decorated route function returns 400 bad request on invalid data."""
         mock_request.get_json = mock.MagicMock(
             return_value={'not': 'what you expected'}
         )
 
-        decorator = util.schema.validate_request(self.schema_path)
+        decorator = schema.validate_request(self.schema_path)
 
         @decorator
         def foo_route():
-            return {}, status.HTTP_200_OK, {}
+            return {}, schema.HTTP_200_OK, {}
 
         r_body, r_status, r_headers = foo_route()
-        self.assertEqual(r_status, status.HTTP_400_BAD_REQUEST,
+        self.assertEqual(r_status, schema.HTTP_400_BAD_REQUEST,
                          "Failed to catch an invalid request.")
         self.assertIn('reason', r_body)
 
-    @mock.patch('arxiv.util.schema.request')
+    @mock.patch(f'{schema.__name__}.request')
     def test_validate_with_valid_request_data(self, mock_request):
         """Decorated route function returns normally on valid data."""
         mock_request.get_json = mock.MagicMock(
             return_value={'baz': 'asdf', 'bat': -1}
         )
 
-        decorator = util.schema.validate_request(self.schema_path)
+        decorator = schema.validate_request(self.schema_path)
 
         @decorator
         def foo_route():
-            return {}, status.HTTP_200_OK, {}
+            return {}, schema.HTTP_200_OK, {}
 
         r_body, r_status, r_headers = foo_route()
-        self.assertEqual(r_status, status.HTTP_200_OK,
+        self.assertEqual(r_status, schema.HTTP_200_OK,
                          "Interfered with a valid request")
 
 
@@ -109,31 +108,31 @@ class TestValidateSchema(TestCase):
             f.write(schema_body)
 
         try:
-            validator = util.schema.load(self.schema_path)
+            validator = schema.load(self.schema_path)
         except Exception as e:
             self.fail('Failed to load valid schema: %s' % e)
         self.assertTrue(hasattr(validator, '__call__'))
 
         try:
             validator({'baz': 'asdf', 'bat': -1})
-        except util.schema.ValidationError as e:
+        except schema.ValidationError as e:
             self.fail('Validation failed on valid data: %s' % e)
 
     def test_load_invalid_schema(self):
-        """:func:`.util.schema.load` raises IOError if schema is not valid JSON."""
+        """:func:`.schema.load` raises IOError if schema is not valid JSON."""
         with open(self.schema_path, 'w') as f:
             f.write('thisisnotajsons..."."{{chema')
 
         with self.assertRaises(IOError):
-            util.schema.load(self.schema_path)
+            schema.load(self.schema_path)
 
     def test_load_nonexistant_schema(self):
-        """:func:`.util.schema.load` raises IOError if schema does not exist."""
+        """:func:`.schema.load` raises IOError if schema does not exist."""
         with self.assertRaises(IOError):
-            util.schema.load('/tmp/is/unlikely/to/exist')
+            schema.load('/tmp/is/unlikely/to/exist')
 
     def test_validation_failed(self):
-        """Validator raises :class:`.util.schema.ValidationError` on bad data."""
+        """Validator raises :class:`.schema.ValidationError` on bad data."""
         schema_body = json.dumps({
             "title": "FooResource",
             "additionalProperties": False,
@@ -151,7 +150,7 @@ class TestValidateSchema(TestCase):
         with open(self.schema_path, 'w') as f:
             f.write(schema_body)
 
-        validator = util.schema.load(self.schema_path)
+        validator = schema.load(self.schema_path)
 
-        with self.assertRaises(util.schema.ValidationError):
+        with self.assertRaises(schema.ValidationError):
             validator({'nobody': 'expects', 'thespanish': 'inquisition'})
