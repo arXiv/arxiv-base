@@ -29,15 +29,17 @@ interupting once one is found.
 We should probably match DOIs first because they are the source of a
 lot of false positives for arxiv matches.
 """
-from typing import Optional, List, Pattern, Match, Tuple, Callable, NamedTuple
+from typing import Optional, List, Pattern, Match, Tuple, Callable, \
+    NamedTuple, Dict, Union
 import re
 
+from functools import partial
 from urllib.parse import quote
+from flask import url_for
 from jinja2 import Markup, escape
 
 from arxiv import identifier
-
-Izer = Callable[[str], str]
+from . import clickthrough
 
 
 class Matchable(NamedTuple):
@@ -45,6 +47,12 @@ class Matchable(NamedTuple):
 
     examples: List[str]
     pattern: Pattern
+
+
+Izer = Callable[[str], str]
+Substituter = Callable[[Match, Izer],
+                       Tuple[Union[Markup, str], Union[Markup, str]]]
+URLType = Tuple[List[Matchable], Substituter, Izer]
 
 
 def _identity(x: str) -> str:
@@ -147,12 +155,8 @@ def _find_match(patterns: List[Matchable], token: str) \
     return None
 
 
-def _transform_token(patterns: List[Matchable],
-                     bad_patterns: List[Pattern],
-                     id_to_url: Izer,
-                     doi_to_url: Izer,
-                     url_to_url: Izer,
-                     token: str) -> str:
+def _transform_token(targets: Tuple[str, List[str], Substituter, Izer],
+                     bad_patterns: List[Pattern], token: str) -> str:
     """
     Transform a token from text to one of the Matchables.
 
@@ -160,39 +164,35 @@ def _transform_token(patterns: List[Matchable],
     Matching on this token will be skipped if any of the bad_patterns
     match the token (that is re.search).
     """
-    id_to_url = id_to_url or (lambda x: x)
-    doi_to_url = doi_to_url or (lambda x: x)
-    url_to_url = url_to_url or (lambda x: x)
-
     for pattern in bad_patterns:
         if re.search(pattern, token):
             return token
 
+    patterns = [p for _, ptns, _, _ in targets for p in ptns]
     mtch = _find_match(patterns, token)
     if mtch is None:
         return token
 
     (match, _) = mtch
     keys = match.groupdict().keys()
-    if 'arxiv_id' in keys:
-        (front, back) = _arxiv_id_sub(match, id_to_url)
-    elif 'doi' in keys:
-        (front, back) = _doi_sub(match, doi_to_url)
-    elif 'url' in keys:
-        (front, back) = _url_sub(match, url_to_url)
-    else:
-        # unclear how to substitute in for this match
+    target_match = False
+    for target_type, _, substituter, izer in targets:
+        if target_type in keys:
+            (front, back) = substituter(match, izer)
+            target_match = True
+            break
+    # If no substituters apply, there is nothing more to do.
+    if not target_match:    # But this would be an odd case...
         return token
 
     if back:
-        t_back = _transform_token(patterns, bad_patterns,
-                                  id_to_url, doi_to_url, url_to_url, back)
+        t_back = _transform_token(targets, bad_patterns, back)
         return front + Markup(t_back)
     else:
         return front
 
 
-def _arxiv_id_sub(match: Match, id_to_url: Izer) -> Tuple[Markup, str]:
+def id_substituter(match: Match, id_to_url: Izer) -> Tuple[Markup, str]:
     """Return match.string transformed for a arxiv id match."""
     aid = match.group('arxiv_id')
     prefix = 'arXiv:' if match.group('arxiv_prefix') else ''
@@ -210,7 +210,7 @@ def _arxiv_id_sub(match: Match, id_to_url: Izer) -> Tuple[Markup, str]:
     return (Markup(f'{front}<a href="{arxiv_url}">{anchor}</a>'), back)
 
 
-def _doi_sub(match: Match, doi_to_url: Izer) -> Tuple[Markup, str]:
+def doi_substituter(match: Match, doi_to_url: Izer) -> Tuple[Markup, str]:
     """Return match.string transformed for a DOI match."""
     doi = match.group('doi')
     if(doi[-1] in _bad_endings):
@@ -219,16 +219,14 @@ def _doi_sub(match: Match, doi_to_url: Izer) -> Tuple[Markup, str]:
     else:
         back = match.string[match.end():]
 
-    quoted_doi = quote(doi, safe='/')
-    doi_url = f'https://dx.doi.org/{quoted_doi}'
-    doi_url = doi_to_url(doi_url)
+    doi_url = doi_to_url(doi)
 
     anchor = escape(doi)
     front = match.string[0:match.start()]
     return (Markup(f'{front}<a href="{doi_url}">{anchor}</a>'), back)
 
 
-def _url_sub(match: Match, url_to_url: Izer) ->Tuple[Markup, str]:
+def url_substituter(match: Match, url_to_url: Izer) ->Tuple[Markup, str]:
     """Return match.string transformed for a URL match."""
     url = match.group('url')
     if url.startswith('https'):
@@ -259,17 +257,10 @@ in the returned list.
 """
 
 
-def _to_tags(patterns: List[Matchable],
-             bad_patterns: List[Pattern],
-             id_to_url: Izer,
-             doi_to_url: Izer,
-             url_to_url: Izer,
-             text: str)-> str:
+def _to_tags(targets: Tuple[str, List[str], Substituter, Izer],
+             bad_patterns: List[Pattern], text: str)-> str:
     """Split text to tokens, do _transform_token for each, return results."""
-    def transform_token(tkn: str) -> str:
-        return _transform_token(patterns, bad_patterns,
-                                id_to_url, doi_to_url, url_to_url,
-                                tkn)
+    transform_token = partial(_transform_token, targets, bad_patterns)
 
     if not hasattr(text, '__html__'):
         text = Markup(escape(text))
@@ -283,15 +274,7 @@ def _to_tags(patterns: List[Matchable],
     return Markup(result)
 
 
-def urlize_ids(id_to_url: Izer, text: str) -> str:
-    """Transform arxiv ids in text to <a> tags."""
-    return _to_tags(basic_arxiv_id_patterns,
-                    bad_arxiv_id_patterns,
-                    id_to_url, _identity, _identity,
-                    text)
-
-
-def urlize(id_to_url: Izer, doi_to_url: Izer, text: str) -> str:
+def _urlize(id_to_url: Izer, doi_to_url: Izer, text: str) -> str:
     """Transform DOIs, arxiv ids and URLs in text to <a> tags."""
     return _to_tags(dois_ids_and_urls,
                     bad_arxiv_id_patterns,
@@ -299,14 +282,36 @@ def urlize(id_to_url: Izer, doi_to_url: Izer, text: str) -> str:
                     text)
 
 
-def urlize_dois(doi_to_url: Izer, text: str) -> str:
-    """Transform DOIs in text to <a> tags."""
-    return _to_tags(doi_patterns, [], _identity, doi_to_url, _identity, text)
+def arxiv_id_to_url(arxiv_id: str) -> str:
+    """Generate an URL for an arXiv ID."""
+    return url_for('abs_by_id', paper_id=arxiv_id)
 
 
-def urlize_dois_and_ids(id_to_url: Izer, doi_to_url: Izer, text: str) -> str:
-    """Transform DOIs and arXiv IDs to <a> tags."""
-    return _to_tags(doi_patterns + basic_arxiv_id_patterns,
-                    bad_arxiv_id_patterns,
-                    id_to_url, doi_to_url, _identity,
-                    text)
+def doi_to_url(doi: str) -> str:
+    """Generate an URL for a DOI."""
+    quoted_doi = quote(doi, safe='/')
+    return clickthrough.clickthrough_url(f'https://dx.doi.org/{quoted_doi}')
+
+
+URL_TYPES: Dict[str, URLType] = {
+    'url': (basic_url_patterns, url_substituter, _identity),
+    'arxiv_id': (basic_arxiv_id_patterns, id_substituter, arxiv_id_to_url),
+    'doi': (doi_patterns, doi_substituter, doi_to_url),
+}
+
+
+def urlizer(kinds: List[str] = list(URL_TYPES.keys()),
+            extra_types: Dict[str, URLType] = {}) -> Callable[[str], str]:
+    """Generate a new urlize function for a specific set of tokens."""
+    types = URL_TYPES
+    if extra_types:
+        types.update(extra_types)
+    target_types = [
+        (kind, *target) for kind, target in types.items() if kind in kinds
+    ]
+    return partial(_to_tags, target_types, bad_arxiv_id_patterns)
+
+
+def urlize(text: str, kinds: List[str] = list(URL_TYPES.keys())) -> str:
+    """Convert URLs and certain identifiers to links."""
+    return urlizer(kinds=kinds)(text)

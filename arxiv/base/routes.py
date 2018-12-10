@@ -6,6 +6,7 @@ it is not attached by :class:`arxiv.base.Base`.
 """
 
 from typing import Any, Tuple, Callable, Dict
+from datetime import datetime
 from flask import Blueprint, render_template, current_app, make_response, \
     Response, flash, url_for
 
@@ -35,6 +36,35 @@ def test_page() -> Response:
     alerts.flash_warning('This is a warning that cannot be dismissed',
                            dismissable=False)
     return response
+
+
+@blueprint.route('/macros', methods=['GET'])
+def test_macros() -> Response:
+    """Test the 404 error page."""
+    context = {
+        'arxiv_id': 'physics/9707012',
+        'title': 'Supersymmetric partner chirping of Newtonian free damping',
+        'authors': 'H.C. Rosu, J.L. Romero, J. Socorro',
+        'abstract': """We connect the classical free damping cases by means of Rosner's construction
+in supersymmetric quantum mechanics. Starting with the critical damping, one
+can obtain in the underdamping case a chirping of instantaneous physical
+frequency \omega ^{2}(t) \propto \omega_{u}^{2}sech^2(\omega_{u}t), whereas in
+the overdamped case the "chirping" is of the (unphysical) type \omega
+^{2}(t)\propto\omega_{o}^{2}sec^{2}(\omega_{o}t), where \omega_{u}$ and
+$\omega_{o} are the underdamped and overdamped frequency parameters,
+respectively.\n\nThis has some linefeeds""",
+        'comments': """This version (physics/9707012v2) was not stored by arXiv. A
+  subsequent replacement was made before versioning was introduced.""",
+        'primary_category': 'Superconductivity (cond-mat.supr-con)',
+        'submitted_date': datetime.now(),
+        'submission_history': [
+            {'version': 1, 'submitted_date': datetime.now()},
+            {'version': 2, 'submitted_date': datetime.now()},
+            {'version': 3, 'submitted_date': datetime.now()},
+        ],
+        'version': 2,
+    }
+    return render_template("base/testmacros.html", **context, pagetitle='Home')
 
 
 @blueprint.route('/404', methods=['GET'])

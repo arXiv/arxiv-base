@@ -57,6 +57,9 @@ from arxiv.base.exceptions import ConfigurationError
 from arxiv.base.converter import ArXivConverter
 from arxiv.base import logging
 
+from .clickthrough import clickthrough_url
+from .links import urlize, urlizer
+
 logger = logging.getLogger(__name__)
 
 
@@ -125,3 +128,21 @@ def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
         else:
             raise err
     return url
+
+
+def canonical_url(id: str, version: int = 0) -> str:
+    """
+    Generate the canonical URL for an arXiv identifier.
+
+    This can be done from just the ID because the category is only needed if it
+    is in the ID. id can be just the id or idv or cat/id or cat/idv.
+    """
+    # TODO: This should be better.
+    # There should probably be something like INTERNAL_URL_SCHEMA
+    # Also, /abs should probably be specified somewhere else
+    # like arxiv.base.canonical
+    scheme = current_app.config.get('EXTERNAL_URL_SCHEME', 'https')
+    host = current_app.config.get('MAIN_SERVER', 'arxiv.org')
+    if version:
+        return f'{scheme}://{host}/abs/{id}v{version}'
+    return f'{scheme}://{host}/abs/{id}'
