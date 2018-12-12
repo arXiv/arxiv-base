@@ -92,13 +92,19 @@
   )
 {%- endmacro -%}
 
-{# Title: {{ abs_meta.title|tex_to_utf|arxiv_id_urls }} #}
-{# Authors: {%- include "abs/author_links.html" %} #}
-{# {{ abs_meta.abstract|tex_to_utf|arxiv_urlize }} #}
-{# {{ abs_meta.comments|arxiv_urlize }} #}
-{# {{ abs_meta.doi|single_doi_url }} #}
-{# {{ version_atag( abs_meta.arxiv_identifier.id, 0) }} #}
-{# {{version_atag(abs_meta.arxiv_identifier.id, abs_meta.version)}} #}
+{%- macro version_atag(arxiv_id, version, primary_category) -%}
+  {%- if version -%}
+    {%- set vpart = 'v' ~ version -%}
+  {%- else -%}
+    {%- set vpart = '' -%}
+  {% endif %}
+  {%- if primary_category in arxiv_id -%}
+    <a href="{{ arxiv_id|canonical_url(version) }}">arXiv:{{ arxiv_id }}{{vpart}}</a>
+    {%- else -%}
+    <a href="{{ arxiv_id|canonical_url(version) }}">arXiv:{{ arxiv_id }}{{vpart}}</a> [{{ primary_category }}]
+  {%- endif -%}
+{%- endmacro -%}
+
 {% macro abs(
     arxiv_id,
     title,
@@ -116,21 +122,22 @@
     submission_history = [],
     secondary_categories = []) -%}
 
+<link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/abs.css') }}">
 <div id="content">
   <div id="abs">
 
-    <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title }}</h1>
+    <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|urlize }}</h1>
     <div class="authors"><span class="descriptor">Authors:</span>{{ authors }}</div>
     <div class="dateline">{{ abs_date_line(arxiv_id, submitted_date, version, submission_history) }}</div>
 
-    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|replace("\n\n", "<br />")|safe }}</blockquote>
+    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|tex2utf|urlize|replace('\n\n', '<br />')|safe }}</blockquote>
     <!--CONTEXT-->
     <div class="metatable">
       <table summary="Additional metadata">
         {%- if comments %}
         <tr>
           <td class="tablecell label">Comments:</td>
-          <td class="tablecell comments mathjax">{{ comments }}</td>
+          <td class="tablecell comments mathjax">{{ comments|urlize|safe }}</td>
         </tr>
         {% endif -%}
         <tr>
@@ -161,7 +168,7 @@
         {%- if doi %}
         <tr>
           <td class="tablecell label"><abbr title="Digital Object Identifier">DOI</abbr>:</td>
-          <td class="tablecell msc_classes">{{ doi }}</td>
+          <td class="tablecell msc_classes">{{ doi|urlize|safe }}</td>
         </tr>
         {% endif -%}
         {%- if report_num %}
@@ -172,12 +179,12 @@
         {% endif -%}
         <tr>
           <td class="tablecell label">Cite as:</td>
-          <td class="tablecell arxivid">{{ arxiv_id }}</td>
+          <td class="tablecell arxivid"><span class="arxivid">{{ version_atag(arxiv_id, 0, primary_category) }}</span></td>
         </tr>
         <tr>
           <td class="tablecell label">&nbsp;</td>
           <td class="tablecell arxividv">(or <span class="arxivid">
-              {{ arxiv_id }}v{{ version }}</span> for this version)
+              {{ version_atag(arxiv_id, version, primary_category) }}</span> for this version)
           </td>
         </tr>
       </table>

@@ -314,4 +314,4 @@ def urlizer(kinds: List[str] = list(URL_TYPES.keys()),
 
 def urlize(text: str, kinds: List[str] = list(URL_TYPES.keys())) -> str:
     """Convert URLs and certain identifiers to links."""
-    return urlizer(kinds=kinds)(text)
+    return str(urlizer(kinds=kinds)(text))

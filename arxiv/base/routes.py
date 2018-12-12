@@ -63,6 +63,7 @@ respectively.\n\nThis has some linefeeds""",
             {'version': 3, 'submitted_date': datetime.now()},
         ],
         'version': 2,
+        'doi': '10.1000/182',
     }
     return render_template("base/testmacros.html", **context, pagetitle='Home')
 

@@ -14,8 +14,4 @@ def create_web_app() -> Flask:
     Base(app)    # Gives us access to the base UI templates and resources.
     app.register_blueprint(routes.blueprint)
 
-    @app.template_filter('foo')
-    def foo(v):
-        return v + ' foo'
-
     return app
