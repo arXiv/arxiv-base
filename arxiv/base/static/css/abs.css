@@ -46,7 +46,7 @@
 }
 
 #abs blockquote.abstract {
-    font-size: 10pt;
+    font-size: 14.4px;
     margin-block-end: 21.6px;
     margin-block-start: 14.4px;
     margin-bottom: 21.6px;
@@ -58,7 +58,7 @@
 }
 
 #abs div.metatable {
-    font-size: 9pt !important;
+    font-size: 12.96px !important;
     margin-bottom: 19.44px;
     margin-left: 20px;
     margin-right: 0px;
@@ -73,6 +73,7 @@
 
 #abs td.tablecell {
     padding: 0px;
+    padding-right: 6.48px;
     vertical-align: top;
     border: 0px;
 }
@@ -81,7 +82,7 @@
     padding-bottom: 0px;
     padding-left: 0px;
     vertical-align: top;
-    font-size: 9pt !important;
+    font-size: 12.96px !important;
     margin-top: 0px;
     margin-bottom: 0px;
 }
