@@ -11,7 +11,7 @@
 
 #abs h1.title {
     display: block;
-    font-size: 18pt;
+    font-size: 1.8em !important;
     font-weight: 700;
     margin-block-end: 12px;
     margin-block-start: 12px;
@@ -28,7 +28,7 @@
 }
 
 #abs div.authors {
-    font-size: 12pt;
+    font-size: 1.2em;
     line-height: 24px;
     margin-bottom: 8px;
     margin-left: 20px;
@@ -37,7 +37,7 @@
 }
 
 #abs div.dateline {
-    font-size: 9pt;
+    font-size: 0.9em;
     font-style: italic;
     margin-bottom: 6.5px;
     margin-left: 20px;
@@ -46,7 +46,7 @@
 }
 
 #abs blockquote.abstract {
-    font-size: 14.4px;
+    font-size: 1.05em;
     margin-block-end: 21.6px;
     margin-block-start: 14.4px;
     margin-bottom: 21.6px;
@@ -58,8 +58,8 @@
 }
 
 #abs div.metatable {
-    font-size: 12.96px !important;
-    margin-bottom: 19.44px;
+    font-size: 0.95em !important;
+    margin-bottom: 19px;
     margin-left: 20px;
     margin-right: 0px;
     margin-top: 0px;
@@ -71,25 +71,21 @@
     vertical-align: middle;
 }
 
-#abs td.tablecell {
-    padding: 0px;
-    padding-right: 6.48px;
-    vertical-align: top;
-    border: 0px;
-}
-
-#abs td.tablecell {
-    padding-bottom: 0px;
-    padding-left: 0px;
-    vertical-align: top;
-    font-size: 12.96px !important;
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
 #abs tr {
     margin-top: 0px;
     margin-bottom: 0px;
+}
+
+#abs td.tablecell {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-right: 6.5px;
+    padding-left: 0px;
+    vertical-align: top;
+    font-size: 0.95em !important;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    border: 0px;
 }
 
 #abs td.tablecell.label {

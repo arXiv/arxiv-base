@@ -18,3 +18,15 @@ from typing import Optional
 from .definitions import CATEGORIES, CATEGORIES_ACTIVE, ARCHIVES, \
     ARCHIVES_ACTIVE, ARCHIVES_SUBSUMED, CATEGORY_ALIASES
 from .category import Category, Archive, Group
+
+
+def get_category_display(category: str) -> str:
+    return Category(category).display
+
+
+def get_archive_display(archive: str) -> str:
+    return Archive(archive).display
+
+
+def get_group_display(group: str) -> str:
+    return Group(group).display

@@ -143,8 +143,8 @@
         <tr>
           <td class="tablecell label">Subjects:</td>
           <td class="tablecell subjects">
-            <span class="primary-subject">{{ primary_category }}</span>
-            {%- for category in secondary_categories -%}; {{ category }}{%- endfor -%}
+            <span class="primary-subject">{{ primary_category|get_category_display }}</span>
+            {%- for category in secondary_categories -%}; {{ category|get_category_display }}{%- endfor -%}
           </td>
         </tr>
         {%- if msc_class %}
