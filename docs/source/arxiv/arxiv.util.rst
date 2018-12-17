@@ -6,11 +6,19 @@ arxiv.util package
     :undoc-members:
     :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+
+    arxiv.util.tests
+
 Submodules
 ----------
 
 .. toctree::
 
+   arxiv.util.authors
    arxiv.util.schema
-   arxiv.util.tests
+   arxiv.util.tex2utf
 
