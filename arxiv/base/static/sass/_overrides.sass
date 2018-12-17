@@ -12,6 +12,21 @@ content a
   &:hover
     border-bottom: 1px dotted $blue
 
+/* sticky footer solution as written by Philip Walton */
+/* https://philipwalton.com/articles/normalizing-cross-browser-flexbox-bugs/ */
+
+body
+  display: flex
+  flex-direction: column
+  height: 100vh
+
+header,
+footer
+  flex-shrink: 0
+
+content
+  flex: 1 0 auto
+
 /* overrides Bulma defaults which have bigger differences */
 .content
   h1
