@@ -168,7 +168,7 @@ def _transform_token(targets: Tuple[str, List[str], Substituter, Izer],
         if re.search(pattern, token):
             return token
 
-    patterns = [p for _, ptns, _, _ in targets for p in ptns]
+    patterns = [p for _, ptns, _, _ in targets for p in ptns]    # type: ignore
     mtch = _find_match(patterns, token)
     if mtch is None:
         return token
@@ -176,7 +176,7 @@ def _transform_token(targets: Tuple[str, List[str], Substituter, Izer],
     (match, _) = mtch
     keys = match.groupdict().keys()
     target_match = False
-    for target_type, _, substituter, izer in targets:
+    for target_type, _, substituter, izer in targets:   # type: ignore
         if target_type in keys:
             (front, back) = substituter(match, izer)
             target_match = True
@@ -187,9 +187,9 @@ def _transform_token(targets: Tuple[str, List[str], Substituter, Izer],
 
     if back:
         t_back = _transform_token(targets, bad_patterns, back)
-        return front + Markup(t_back)
+        return front + Markup(t_back)   # type: ignore
     else:
-        return front
+        return front       # type: ignore
 
 
 def id_substituter(match: Match, id_to_url: Izer) -> Tuple[Markup, str]:
@@ -274,17 +274,10 @@ def _to_tags(targets: Tuple[str, List[str], Substituter, Izer],
     return Markup(result)
 
 
-def _urlize(id_to_url: Izer, url_for_doi: Izer, text: str) -> str:
-    """Transform DOIs, arxiv ids and URLs in text to <a> tags."""
-    return _to_tags(dois_ids_and_urls,
-                    bad_arxiv_id_patterns,
-                    id_to_url, url_for_doi, _identity,
-                    text)
-
-
 def arxiv_id_to_url(arxiv_id: str) -> str:
     """Generate an URL for an arXiv ID."""
-    return url_for('abs_by_id', paper_id=arxiv_id)
+    url: str = url_for('abs_by_id', paper_id=arxiv_id)
+    return url
 
 
 def url_for_doi(doi: str) -> str:
@@ -295,7 +288,7 @@ def url_for_doi(doi: str) -> str:
 
 def clickthrough_url_for_doi(doi: str) -> str:
     """Generate a clickthrough URL for a DOI."""
-    return clickthrough.clickthrough_url(url_for_doi)
+    return clickthrough.clickthrough_url(url_for_doi(doi))
 
 
 URL_TYPES: Dict[str, URLType] = {

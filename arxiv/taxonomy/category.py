@@ -18,7 +18,7 @@ class Category(str):
     def name(self) -> str:
         """Get the full category name."""
         if self in self.lookup:
-            return self.lookup[self]['name']
+            return str(self.lookup[self]['name'])
         raise ValueError('No such category')
 
     @property

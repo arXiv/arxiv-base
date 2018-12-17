@@ -28,4 +28,5 @@ def is_hash_valid(secret: str, url: str, ct_hash: str) -> bool:
 def clickthrough_url(url: str) -> str:
     """Create a URL to the clickthrough service with a valid hash."""
     secret = current_app.config.get('CLICKTHROUGH_SECRET', 'foo')
-    return url_for('clickthrough', url=url, v=create_hash(secret, url))
+    ct_url: str = url_for('clickthrough', url=url, v=create_hash(secret, url))
+    return ct_url
