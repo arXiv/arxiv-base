@@ -48,10 +48,10 @@ def test_macros() -> Response:
         'abstract': """We connect the classical free damping cases by means of Rosner's construction
 in supersymmetric quantum mechanics. Starting with the critical damping, one
 can obtain in the underdamping case a chirping of instantaneous physical
-frequency \omega ^{2}(t) \propto \omega_{u}^{2}sech^2(\omega_{u}t), whereas in
-the overdamped case the "chirping" is of the (unphysical) type \omega
-^{2}(t)\propto\omega_{o}^{2}sec^{2}(\omega_{o}t), where \omega_{u}$ and
-$\omega_{o} are the underdamped and overdamped frequency parameters,
+frequency $\omega ^{2}(t) \propto \omega_{u}^{2}sech^2(\omega_{u}t)$, whereas in
+the overdamped case the "chirping" is of the (unphysical) type $\omega
+^{2}(t)\propto\omega_{o}^{2}sec^{2}(\omega_{o}t)$, where $\omega_{u}$ and
+$\omega_{o}$ are the underdamped and overdamped frequency parameters,
 respectively.\n\nThis has some linefeeds""",
         'comments': """This version (physics/9707012v2) was not stored by arXiv. A
   subsequent replacement was made before versioning was introduced.""",
