@@ -6355,6 +6355,20 @@ content a {
   content a:hover {
     border-bottom: 1px dotted #0068ac; }
 
+/* sticky footer solution as written by Philip Walton */
+/* https://philipwalton.com/articles/normalizing-cross-browser-flexbox-bugs/ */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; }
+
+header,
+footer {
+  flex-shrink: 0; }
+
+content {
+  flex: 1 0 auto; }
+
 /* overrides Bulma defaults which have bigger differences */
 .content h1 {
   font-size: 1.75em; }
@@ -6511,6 +6525,11 @@ footer {
     .identity a:hover {
       border-bottom: 1px dotted #fff;
       color: #fff; }
+  .identity .arxiv {
+    margin: 0.5em 0; }
+  .identity .search-block {
+    margin-top: 0.5em;
+    margin-bottom: 0.25em; }
 
 .logo {
   height: 45px;

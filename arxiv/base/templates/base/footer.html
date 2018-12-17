@@ -9,9 +9,9 @@
   <div class="column">
     <h2 class="has-text-weight-bold">Contact Us</h2>
     <ul class="nav-spaced">
-      <li><span class="icon"><i class="fa fa-envelope"></i></span><a href="{{ url_for('contact') }}">Contact</a></li>
-      <li><span class="icon"><i class="fa fa-twitter"></i></span><a href="{{ url_for('twitter') }}">Follow us on Twitter</a></li>
-      <li><span class="icon"><i class="fa fa-rss"></i></span><a href="{{ url_for('subscribe') }}">Subscribe</a></li>
+      <li><span class="icon"><i class="fa fa-envelope"></i></span><a href="{{ url_for('contact') }}"> Contact</a></li>
+      <li><span class="icon"><i class="fa fa-twitter"></i></span><a href="{{ url_for('twitter') }}"> Follow us on Twitter</a></li>
+      <li><span class="icon"><i class="fa fa-rss"></i></span><a href="{{ url_for('subscribe') }}"> Subscribe</a></li>
     </ul>
   </div>
   <div class="column">
@@ -22,8 +22,14 @@
       <li><a href="{{ url_for('faq') }}">FAQ</a>
     </ul>
   </div>
+</div>
+
+<div class="columns" style="border-top: 1px solid #979797">
   <div class="column">
-    <p>If you have a disability and are having trouble accessing information
+    <p class="help">arXiv® is a registered trademark of Cornell University.</p>
+  </div>
+  <div class="column">
+    <p class="help">If you have a disability and are having trouble accessing information
       on this website or need materials in an alternate format, contact
       <a href="{{ config.A11Y_URL }}">web-accessibility@cornell.edu</a> for
        assistance.</p>
