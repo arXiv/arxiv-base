@@ -58,7 +58,7 @@ from arxiv.base.converter import ArXivConverter
 from arxiv.base import logging
 
 from .clickthrough import clickthrough_url
-from .links import urlize, urlizer
+from .links import urlize, urlizer, url_for_doi
 
 logger = logging.getLogger(__name__)
 

@@ -20,13 +20,63 @@ from .definitions import CATEGORIES, CATEGORIES_ACTIVE, ARCHIVES, \
 from .category import Category, Archive, Group
 
 
-def get_category_display(category: str) -> str:
+def get_category_display(category: str, canonical: bool = True) -> str:
+    """
+    Get the display name of an arXiv category.
+
+    Parameters
+    ----------
+    category : str
+        Category identifier, e.g. ``nlin.AO``.
+    canonical : bool
+        If True (default) and the category is subsumed, the display name for
+        the canonical category will be returned instead.
+
+    Returns
+    -------
+    str
+        Display name for the category, e.g. ``Adaptation and Self-Organizing
+        Systems (nlin.AO)``.
+    """
+    if canonical:
+        return Category(category).canonical.display
     return Category(category).display
 
 
-def get_archive_display(archive: str) -> str:
+def get_archive_display(archive: str, canonical: bool = True) -> str:
+    """
+    Get the display name of an arXiv archive.
+
+    Parameters
+    ----------
+    archive : str
+        Archive identifier, e.g. ``astro-ph``.
+    canonical : bool
+        If True (default) and the archive is subsumed, the display name for
+        the canonical archive will be returned instead.
+
+    Returns
+    -------
+    str
+        Display name for the category, e.g. ``Astrophysics (astro-ph)``.
+    """
+    if canonical:
+        return Archive(archive).canonical.display
     return Archive(archive).display
 
 
 def get_group_display(group: str) -> str:
+    """
+    Get the display name of an arXiv group.
+
+    Parameters
+    ----------
+    group : str
+        Group identifier, e.g. ``grp_math``.
+
+    Returns
+    -------
+    str
+        Display name for the group, e.g. ``Mathematics (grp_math)``.
+    """
     return Group(group).display

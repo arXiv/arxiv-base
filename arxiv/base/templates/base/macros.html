@@ -126,7 +126,7 @@
 <div id="content">
   <div id="abs">
 
-    <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|urlize }}</h1>
+    <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|urlize|safe }}</h1>
     <div class="authors"><span class="descriptor">Authors:</span>{{ authors }}</div>
     <div class="dateline">{{ abs_date_line(arxiv_id, submitted_date, version, submission_history) }}</div>
 
@@ -168,7 +168,7 @@
         {%- if doi %}
         <tr>
           <td class="tablecell label"><abbr title="Digital Object Identifier">DOI</abbr>:</td>
-          <td class="tablecell msc_classes">{{ doi|urlize|safe }}</td>
+          <td class="tablecell msc_classes"><a href="{{ doi|url_for_doi|clickthrough_url }}">{{ doi }}</a></td>
         </tr>
         {% endif -%}
         {%- if report_num %}

@@ -210,7 +210,7 @@ def id_substituter(match: Match, id_to_url: Izer) -> Tuple[Markup, str]:
     return (Markup(f'{front}<a href="{arxiv_url}">{anchor}</a>'), back)
 
 
-def doi_substituter(match: Match, doi_to_url: Izer) -> Tuple[Markup, str]:
+def doi_substituter(match: Match, url_for_doi: Izer) -> Tuple[Markup, str]:
     """Return match.string transformed for a DOI match."""
     doi = match.group('doi')
     if(doi[-1] in _bad_endings):
@@ -219,7 +219,7 @@ def doi_substituter(match: Match, doi_to_url: Izer) -> Tuple[Markup, str]:
     else:
         back = match.string[match.end():]
 
-    doi_url = doi_to_url(doi)
+    doi_url = url_for_doi(doi)
 
     anchor = escape(doi)
     front = match.string[0:match.start()]
@@ -274,11 +274,11 @@ def _to_tags(targets: Tuple[str, List[str], Substituter, Izer],
     return Markup(result)
 
 
-def _urlize(id_to_url: Izer, doi_to_url: Izer, text: str) -> str:
+def _urlize(id_to_url: Izer, url_for_doi: Izer, text: str) -> str:
     """Transform DOIs, arxiv ids and URLs in text to <a> tags."""
     return _to_tags(dois_ids_and_urls,
                     bad_arxiv_id_patterns,
-                    id_to_url, doi_to_url, _identity,
+                    id_to_url, url_for_doi, _identity,
                     text)
 
 
@@ -287,16 +287,21 @@ def arxiv_id_to_url(arxiv_id: str) -> str:
     return url_for('abs_by_id', paper_id=arxiv_id)
 
 
-def doi_to_url(doi: str) -> str:
+def url_for_doi(doi: str) -> str:
     """Generate an URL for a DOI."""
     quoted_doi = quote(doi, safe='/')
-    return clickthrough.clickthrough_url(f'https://dx.doi.org/{quoted_doi}')
+    return f'https://dx.doi.org/{quoted_doi}'
+
+
+def clickthrough_url_for_doi(doi: str) -> str:
+    """Generate a clickthrough URL for a DOI."""
+    return clickthrough.clickthrough_url(url_for_doi)
 
 
 URL_TYPES: Dict[str, URLType] = {
     'url': (basic_url_patterns, url_substituter, _identity),
     'arxiv_id': (basic_arxiv_id_patterns, id_substituter, arxiv_id_to_url),
-    'doi': (doi_patterns, doi_substituter, doi_to_url),
+    'doi': (doi_patterns, doi_substituter, clickthrough_url_for_doi),
 }
 
 
