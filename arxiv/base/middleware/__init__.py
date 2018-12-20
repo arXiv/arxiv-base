@@ -1,4 +1,4 @@
-"""
+r"""
 WSGI middleware integration for Flask apps.
 
 A WSGI middleware sits "between" the WSGI server (e.g. uWSGI) and the Flask

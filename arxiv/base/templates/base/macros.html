@@ -60,3 +60,135 @@
     </ul>
   </nav>
 {%- endmacro %}
+
+{%- macro abs_date_line(arxiv_id, submitted_date, version = 1, submission_history = []) -%}
+  {% set this_is_the_first_version = version == 1 %}
+  {% set there_are_more_versions = submission_history and version < submission_history[-1].version %}
+  {% set this_is_the_latest_version = not submission_history or version == submission_history[-1].version %}
+  {% if this_is_the_first_version %}
+    {% set first_version_submitted_date = submitted_date %}
+  {% else %}
+    {% set first_version_submitted_date = submission_history[0].submitted_date %}
+  {% endif %}
+  {% if this_is_the_latest_version %}
+    {% set latest_version_submitted_date = submitted_date %}
+    {% set latest_version = version %}
+  {% else %}
+    {% set latest_version_submitted_date = submission_history[-1].submitted_date %}
+    {% set latest_version = submission_history[-1].version %}
+  {% endif %}
+
+  (Submitted on {{ first_version_submitted_date.strftime('%-d %b %Y') }}
+  {%- if this_is_the_first_version and there_are_more_versions %} (this version){%- endif -%}
+  {%- if not this_is_the_first_version %} (<a href="{{ url_for('abs', paper_id=arxiv_id, version=1) }}">v1</a>){%- endif %}
+  {%- if not this_is_the_first_version and not this_is_the_latest_version -%}
+    , revised {{ submitted_date.strftime('%-d %b %Y') }} (this version, v{{ version }})
+  {%- endif -%}
+  {%- if not this_is_the_latest_version -%}
+    , <em>latest version {{ latest_version_submitted_date.strftime('%-d %b %Y') }}</em> (<a href="{{ url_for('abs', paper_id=arxiv_id, version=latest_version) }}">v{{ latest_version }}</a>)
+  {%- elif not this_is_the_first_version and this_is_the_latest_version -%}
+    , last revised {{ latest_version_submitted_date.strftime('%-d %b %Y') }} (this version, v{{ version }})
+  {%- endif -%}
+  )
+{%- endmacro -%}
+
+{%- macro version_atag(arxiv_id, version, primary_category) -%}
+  {%- if version -%}
+    {%- set vpart = 'v' ~ version -%}
+  {%- else -%}
+    {%- set vpart = '' -%}
+  {% endif %}
+  {%- if primary_category in arxiv_id -%}
+    <a href="{{ arxiv_id|canonical_url(version) }}">arXiv:{{ arxiv_id }}{{vpart}}</a>
+    {%- else -%}
+    <a href="{{ arxiv_id|canonical_url(version) }}">arXiv:{{ arxiv_id }}{{vpart}}</a> [{{ primary_category }}]
+  {%- endif -%}
+{%- endmacro -%}
+
+{% macro abs(
+    arxiv_id,
+    title,
+    authors,
+    abstract,
+    submitted_date,
+    primary_category,
+    comments = None,
+    msc_class = None,
+    acm_class = None,
+    journal_ref = None,
+    doi = None,
+    report_num = None,
+    version = 1,
+    submission_history = [],
+    secondary_categories = []) -%}
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/abs.css') }}">
+<div id="content">
+  <div id="abs">
+
+    <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|urlize|safe }}</h1>
+    <div class="authors"><span class="descriptor">Authors:</span>{{ authors }}</div>
+    <div class="dateline">{{ abs_date_line(arxiv_id, submitted_date, version, submission_history) }}</div>
+
+    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|tex2utf|urlize|replace('\n\n', '<br />')|safe }}</blockquote>
+    <!--CONTEXT-->
+    <div class="metatable">
+      <table summary="Additional metadata">
+        {%- if comments %}
+        <tr>
+          <td class="tablecell label">Comments:</td>
+          <td class="tablecell comments mathjax">{{ comments|urlize|safe }}</td>
+        </tr>
+        {% endif -%}
+        <tr>
+          <td class="tablecell label">Subjects:</td>
+          <td class="tablecell subjects">
+            <span class="primary-subject">{{ primary_category|get_category_display }}</span>
+            {%- for category in secondary_categories -%}; {{ category|get_category_display }}{%- endfor -%}
+          </td>
+        </tr>
+        {%- if msc_class %}
+        <tr>
+          <td class="tablecell label"><abbr title="Mathematical Subject Classification">MSC</abbr> classes:</td>
+          <td class="tablecell msc-classes">{{ msc_class }}</td>
+        </tr>
+        {% endif -%}
+        {%- if acm_class %}
+        <tr>
+          <td class="tablecell label"><abbr title="Association of Computing Machinery Classification">ACM</abbr>&nbsp;classes:</td>
+          <td class="tablecell acm-classes">{{ acm_class }}</td>
+        </tr>
+        {% endif -%}
+        {%- if journal_ref %}
+        <tr>
+          <td class="tablecell label">Journal&nbsp;reference:</td>
+          <td class="tablecell jref">{{ journal_ref }}</td>
+        </tr>
+        {% endif -%}
+        {%- if doi %}
+        <tr>
+          <td class="tablecell label"><abbr title="Digital Object Identifier">DOI</abbr>:</td>
+          <td class="tablecell msc_classes"><a href="{{ doi|url_for_doi|clickthrough_url }}">{{ doi }}</a></td>
+        </tr>
+        {% endif -%}
+        {%- if report_num %}
+        <tr>
+          <td class="tablecell label">Report&nbsp;number:</td>
+          <td class="tablecell jref">{{ report_num }}</td>
+        </tr>
+        {% endif -%}
+        <tr>
+          <td class="tablecell label">Cite as:</td>
+          <td class="tablecell arxivid"><span class="arxivid">{{ version_atag(arxiv_id, 0, primary_category) }}</span></td>
+        </tr>
+        <tr>
+          <td class="tablecell label">&nbsp;</td>
+          <td class="tablecell arxividv">(or <span class="arxivid">
+              {{ version_atag(arxiv_id, version, primary_category) }}</span> for this version)
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+{%- endmacro -%}
