@@ -29,3 +29,4 @@ def register_context_processors(app: Flask) -> None:
     """
     app.context_processor(inject_get_alerts)
     app.context_processor(inject_get_hidden_alerts)
+    app.context_processor(inject_a11y_url)
