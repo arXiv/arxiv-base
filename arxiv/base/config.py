@@ -7,11 +7,15 @@ from urllib.parse import urlparse
 SERVER_NAME = None
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'yes123')
+CLICKTHROUGH_SECRET = os.environ.get('CLICKTHROUGH_SECRET', 'bar')
+
 A11Y_URL = os.environ.get("ARXIV_ACCESSIBILITY_URL",
                           u"mailto:web-accessibility@cornell.edu")
 
 EXTERNAL_URL_SCHEME = os.environ.get('EXTERNAL_URL_SCHEME', 'https')
 BASE_SERVER = os.environ.get('BASE_SERVER', 'arxiv.org')
+MAIN_SERVER = os.environ.get('MAIN_SERVER', 'arxiv.org')
+
 
 URLS = [
     ("help", "/help", BASE_SERVER),
@@ -21,12 +25,15 @@ URLS = [
     ("help_social_bookmarking", "/help/social_bookmarking", BASE_SERVER),
     ("contact", "/help/contact", BASE_SERVER),
     ("search_box", "/search", BASE_SERVER),
+    ("clickthrough", "/ct", BASE_SERVER),
     ("search_archive", "/search/<archive>", BASE_SERVER),
     ("search_advanced", "/search/advanced", BASE_SERVER),
     ("account", "/user", BASE_SERVER),
     ("login", "/user/login", BASE_SERVER),
     ("logout", "/user/logout", BASE_SERVER),
     ("home", "/", BASE_SERVER),
+    ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
+    ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
     ("ignore_me", "/IgnoreMe", BASE_SERVER),    # Anti-robot honneypot.
     ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
     ("twitter", "/arxiv", "twitter.com"),

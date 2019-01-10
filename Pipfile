@@ -5,18 +5,19 @@ name = "pypi"
 
 [packages]
 flask = "*"
-"nose2" = "*"
 jsonschema = "*"
-mypy = "*"
-pylint = "*"
 pytz = "*"
 uwsgi = "*"
-pydocstyle = "*"
 "boto3" = "*"
 wtforms = "*"
 "e1839a8" = {path = "."}
 
 [dev-packages]
+pydocstyle = "*"
+mypy = "*"
+pylint = "*"
+"nose2" = "*"
+hypothesis = "*"
 sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"

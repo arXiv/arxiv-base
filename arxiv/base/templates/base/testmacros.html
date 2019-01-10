@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+
+{% import "base/macros.html" as macros %}
+
+{% block addl_head %}
+
+{% endblock %}
+
+{% block content %}
+
+{{ macros.abs(
+    arxiv_id,
+    title,
+    authors,
+    abstract,
+    submitted_date,
+    primary_category,
+    version=version,
+    submission_history=submission_history,
+    comments=comments,
+    doi=doi) }}
+
+{% endblock %}
