@@ -218,6 +218,13 @@ class Id_Patterns_Test(unittest.TestCase):
         )
 
     @mock.patch(f'{links.__name__}.url_for', mock_url_for)
+    def test_parens(self):
+        self.assertEqual(
+            links.urlize('http://www-nuclear.univer.kharkov.ua/lib/1017_3(55)_12_p28-59.pdf'),
+            '<a href=\"http://www-nuclear.univer.kharkov.ua/lib/1017_3(55)_12_p28-59.pdf\">this http URL</a>'
+        )
+
+    @mock.patch(f'{links.__name__}.url_for', mock_url_for)
     def test_hosts(self):
         self.assertEqual(
             links.urlize('can be downloaded from http://rwcc.bao.ac.cn:8001'
