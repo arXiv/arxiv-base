@@ -25,21 +25,21 @@ class ISO8601JSONEncoder(json.JSONEncoder):
 class ISO8601JSONDecoder(json.JSONDecoder):
     """Attempts to parse ISO8601 strings as datetime objects."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Pass :func:`object_hook` to the base constructor."""
-        super(ISO8601JSONDecoder, self).__init__(object_hook=self.object_hook,
-                                                 *args, **kwargs)
+        kwargs['object_hook'] = kwargs.get('object_hook', self.object_hook)
+        super(ISO8601JSONDecoder, self).__init__(*args, **kwargs)
 
     def _try_isoparse(self, value: Any) -> Any:
         """Attempt to parse a value as an ISO8601 datetime."""
         if type(value) is not str:
             return value
         try:
-            return dateutil.parser.isoparse(value)
+            return dateutil.parser.isoparse(value)  # type: ignore
         except ValueError as e:
             return value
 
-    def object_hook(self, data: dict, **extra) -> Any:
+    def object_hook(self, data: dict, **extra: Any) -> Any:
         """Intercept and coerce ISO8601 strings to datetimes."""
         for key, value in data.items():
             if type(value) is list:
