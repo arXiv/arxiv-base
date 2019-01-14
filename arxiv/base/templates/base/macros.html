@@ -120,9 +120,12 @@
     report_num = None,
     version = 1,
     submission_history = [],
-    secondary_categories = []) -%}
+    secondary_categories = [],
+    include_stylesheet = 1) -%}
 
+{% if include_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/abs.css') }}">
+{% endif %}
 <div id="content">
   <div id="abs">
 
