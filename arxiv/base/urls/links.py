@@ -30,13 +30,14 @@ We should probably match DOIs first because they are the source of a
 lot of false positives for arxiv matches.
 """
 from typing import Optional, List, Pattern, Match, Tuple, Callable, \
-    NamedTuple, Dict, Union
+    NamedTuple, Dict, Union, Mapping
 import re
-
 from functools import partial
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
+
 from flask import url_for
 from jinja2 import Markup, escape
+import bleach
 
 from arxiv import identifier
 from . import clickthrough
@@ -111,7 +112,8 @@ URLINTEXT_PAT = re.compile(r'(?P<url>(?:https?://)'
                            re.I)
 """Regex to match URLs in text."""
 
-FTP_PAT = re.compile(rf'(?P<url>(?:ftp://)({OKCHARS}|(@))*{PATH})', re.I)
+FTP_PAT_RAW = rf'(?P<url>(?:ftp://)({OKCHARS}|(@))*{PATH})'
+FTP_PAT = re.compile(FTP_PAT_RAW, re.I)
 """Regex to match FTP URLs in text."""
 
 basic_url_patterns = [
@@ -291,25 +293,103 @@ def clickthrough_url_for_doi(doi: str) -> str:
     return clickthrough.clickthrough_url(url_for_doi(doi))
 
 
-URL_TYPES: Dict[str, URLType] = {
-    'url': (basic_url_patterns, url_substituter, _identity),
+def extend_class_attr(attrs: Mapping, new_class: str) -> Mapping:
+    if (None, 'class') not in attrs:
+        attrs[(None, 'class')] = ''
+    attrs[(None, 'class')] = (attrs[(None, 'class')] + f' {new_class}').strip()
+
+
+def add_rel_external(attrs: Mapping, new: bool = False) -> Mapping:
+    o = urlparse(attrs[(None, 'href')])
+    print(attrs['_text'], o.netloc.split(':'))
+    if not o.netloc.split(':')[0].endswith('arxiv.org'):   # External link?
+        attrs[(None, 'rel')] = 'external'
+        extend_class_attr(attrs, 'link-external')
+    return attrs
+
+
+def add_scheme_info(attrs: Mapping, new: bool = False) -> Mapping:
+    o = urlparse(attrs[(None, 'href')])
+    if (None, 'class') not in attrs:
+        attrs[(None, 'class')] = ''
+    extend_class_attr(attrs, f'link-{o.scheme}')
+    attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
+    return attrs
+
+
+REGEX_URL_KINDS: Dict[str, URLType] = {
+    # 'url': (basic_url_patterns, url_substituter, _identity),
     'arxiv_id': (basic_arxiv_id_patterns, id_substituter, arxiv_id_to_url),
     'doi': (doi_patterns, doi_substituter, clickthrough_url_for_doi),
 }
 
+IP_ADDRESS = r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
 
-def urlizer(kinds: List[str] = list(URL_TYPES.keys()),
-            extra_types: Dict[str, URLType] = {}) -> Callable[[str], str]:
+
+# TODO: incorporate DOI into this regex, optionally; use callbacks to detect
+# things that need clickthrough URLs. Consider even doing arXiv IDs this way.
+def build_url_re(tlds=bleach.linkifier.TLDS,
+                 protocols=bleach.linkifier.html5lib_shim.allowed_protocols):
+    """Builds the url regex used by linkifier
+
+   If you want a different set of tlds or allowed protocols, pass those in
+   and stomp on the existing ``url_re``::
+
+       from bleach import linkifier
+
+       my_url_re = linkifier.build_url_re(my_tlds_list, my_protocols)
+
+       linker = LinkifyFilter(url_re=my_url_re)
+
+    """
+    return re.compile(
+        f"(?:{FTP_PAT_RAW})" + "|" + r"""(?:\(*  # Match any opening parentheses.
+        \b(?<![@/])(?:(?:{0}):/{{0,3}}(?:(?:\w+:)?\w+@)?)?  # http://
+        (?:(?:([\w-]+\.)+(?:{1}))|(?:{2}))(?:\:[0-9]+)?(?!\.\w)\b   # xx.yy.tld(:##)?
+        (?:[/?][^\s\{{\}}\|\\\^\[\]`<>"]*)?)
+            # /path/zz (excluding "unsafe" chars from RFC 1738,
+            # except for # and ~, which happen in practice)
+        """.format('|'.join(protocols), '|'.join(tlds), IP_ADDRESS),
+        re.IGNORECASE | re.VERBOSE | re.UNICODE)
+
+
+linker = bleach.linkifier.Linker(
+    callbacks=[add_rel_external, add_scheme_info],
+    skip_tags=['a'],
+    url_re=build_url_re()
+)
+
+CALLABLE_URL_KINDS: Dict[str, Callable[[str], str]] = {
+    'url': linker.linkify #partial(bleach.linkify,
+                   #callbacks=[add_rel_external, add_scheme_info],
+                   #skip_tags=['a'])
+}
+
+SUPPORTED_KINDS = ['url', 'arxiv_id', 'doi']
+
+
+def regex_urlizer(kinds: List[str] = list(REGEX_URL_KINDS.keys()),
+                  extra_kinds: Dict[str, URLType] = {}) \
+        -> Callable[[str], str]:
     """Generate a new urlize function for a specific set of tokens."""
-    types = URL_TYPES
-    if extra_types:
-        types.update(extra_types)
+    all_kinds = REGEX_URL_KINDS
+    if extra_kinds:
+        all_kinds.update(extra_kinds)
     target_types = [
-        (kind, *target) for kind, target in types.items() if kind in kinds
+        (kind, *target) for kind, target in all_kinds.items() if kind in kinds
     ]
     return partial(_to_tags, target_types, bad_arxiv_id_patterns)
 
 
-def urlize(text: str, kinds: List[str] = list(URL_TYPES.keys())) -> str:
+def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:
     """Convert URLs and certain identifiers to links."""
-    return str(urlizer(kinds=kinds)(text))
+    regex_kinds = [kind for kind in kinds if kind in REGEX_URL_KINDS]
+    callables = [f for kind, f in CALLABLE_URL_KINDS.items() if kind in kinds]
+    out = regex_urlizer(kinds=regex_kinds)(text)
+    for func in callables:
+        out = func(out)
+    return str(out)
+
+
+def urlizer(kinds: List[str] = SUPPORTED_KINDS):
+    return partial(urlize, kinds=kinds)
