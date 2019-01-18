@@ -12,38 +12,11 @@ def mock_url_for(endpoint, **kwargs):
         return f'https://arxiv.org/abs/{paper_id}'
 
 
-class TestFoo(unittest.TestCase):
-    @mock.patch(f'{links.__name__}.url_for', mock_url_for)
-    def test_foo(self):
-        print(links.urlize('see <a href="http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20">this http URL</a>', ['arxiv_id']))
-
-
 class Id_Patterns_Test(unittest.TestCase):
-
-    def test_basic(self):
-        links._find_match([], 'test')
-
-        m = links._find_match([links.Matchable([], re.compile(r'test'))],
-                              'test')
-        self.assertIsNotNone(m)
-        m0 = links.Matchable([], re.compile(r'test'))
-        m1 = links.Matchable([], re.compile(r'tests'))
-
-        m = links._find_match([m0, m1], 'test')
-        self.assertIsNotNone(m)
-        self.assertEqual(m[1], m0)
-
-        m = links._find_match([m0, m1], 'tests')
-        self.assertIsNotNone(m)
-        self.assertEqual(m[1], m0)
-
-        m = links._find_match([m1, m0], 'tests')
-        self.assertIsNotNone(m)
-        self.assertEqual(m[1], m1)
-
     def test_arxiv_ids(self):
         def find_match(txt):
-            return links._find_match(links.dois_ids_and_urls, txt)
+            ptn = links._get_pattern(links.SUPPORTED_KINDS)
+            return ptn.search(txt)
 
         self.assertIsNotNone(find_match('math/9901123'))
         self.assertIsNotNone(find_match('hep-ex/9901123'))
@@ -60,7 +33,8 @@ class Id_Patterns_Test(unittest.TestCase):
 
     def test_find_match(self):
         def find_match(txt):
-            return links._find_match(links.dois_ids_and_urls, txt)
+            ptn = links._get_pattern(links.SUPPORTED_KINDS)
+            return ptn.search(txt)
 
         self.assertIsNone(find_match('junk'))
         self.assertIsNone(find_match(''))
@@ -76,6 +50,24 @@ class Id_Patterns_Test(unittest.TestCase):
         )
         self.assertIsNotNone(find_match('"http://arxiv.org"'))
 
+
+class TestURLize(unittest.TestCase):
+    @mock.patch(f'{links.__name__}.clickthrough')
+    def test_doi(self, mock_clickthrough):
+        mock_clickthrough.clickthrough_url = lambda url: f'http://arxiv.org/clickthrough?url={url}'
+        self.assertEqual(
+            links.urlize('here is a rando doi doi:10.1109/5.771073 that needs a link'),
+            'here is a rando doi doi:<a class="link-http" doi="10.1109/5.771073" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/10.1109/5.771073">10.1109/5.771073</a> that needs a link'
+        )
+
+    @mock.patch(f'{links.__name__}.clickthrough')
+    def test_interesting_doi(self, mock_clickthrough):
+        mock_clickthrough.clickthrough_url = lambda url: f'http://arxiv.org/clickthrough?url={url}'
+        self.assertEqual(
+            links.urlize('here is a doi that we didn not expect 1721.1/107045'),
+            'here is a doi that we didn not expect <a class="link-http" doi="1721.1/107045" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/1721.1/107045">1721.1/107045</a>'
+        )
+
     def test_transform_token(self):
         # def doi_id_url_transform_token(tkn,fn):
         #     return doi_id_url_transform_token(fn, tkn)
@@ -84,25 +76,25 @@ class Id_Patterns_Test(unittest.TestCase):
 
         self.assertEqual(
             links.urlize('it is fine, chapter 234 see<xxyx,234>'),
-            Markup(escape('it is fine, chapter 234 see<xxyx,234>'))
+            escape('it is fine, chapter 234 see<xxyx,234>')
         )
 
         self.assertEqual(links.urlize('http://arxiv.org', ['url']),
-                         '<a class="link-http" href="http://arxiv.org">this http URL</a>')
+                         '<a class="link-internal link-http" href="http://arxiv.org">this http URL</a>')
 
         self.assertEqual(
             links.urlize('in the front http://arxiv.org oth', ['url']),
-            'in the front <a class="link-http" href="http://arxiv.org">this http URL</a> oth'
+            'in the front <a class="link-internal link-http" href="http://arxiv.org">this http URL</a> oth'
         )
 
         self.assertEqual(
             links.urlize('.http://arxiv.org.', ['url']),
-            '.<a class="link-http" href="http://arxiv.org">this http URL</a>.'
+            '.<a class="link-internal link-http" href="http://arxiv.org">this http URL</a>.'
         )
 
         self.assertEqual(
             links.urlize('"http://arxiv.org"', ['url']),
-            '"<a class="link-http" href="http://arxiv.org">this http URL</a>"'
+            '"<a class="link-internal link-http" href="http://arxiv.org">this http URL</a>"'
         )
 
     @mock.patch(f'{links.__name__}.clickthrough')
@@ -154,7 +146,7 @@ class Id_Patterns_Test(unittest.TestCase):
 
         self.assertEqual(
             links.urlize('cond-mat/97063007'),
-            '<a href="https://arxiv.org/abs/cond-mat/9706300">cond-mat/9706300</a>7',
+            '<a arxiv="cond-mat/9706300" class="link-https" href="https://arxiv.org/abs/cond-mat/9706300">cond-mat/9706300</a>7',
             'urlize (should match) 7/9')
 
         self.assertEqual(
@@ -193,21 +185,19 @@ class Id_Patterns_Test(unittest.TestCase):
 
         self.assertEqual(
             links.urlize('see http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20'),
-            'see <a href="http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20">this http URL</a>'
+            'see <a class="link-external link-http" href="http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20" rel="external">this http URL</a>'
         )
 
         self.assertEqual(
             links.urlize('http://authors.elsevier.com/a/1TcSd,Ig45ZtO'),
-            '<a href="http://authors.elsevier.com/a/1TcSd,Ig45ZtO">this http'
-            ' URL</a>'
+            '<a class="link-external link-http" href="http://authors.elsevier.com/a/1TcSd,Ig45ZtO" rel="external">this http URL</a>'
         )
 
     @mock.patch(f'{links.__name__}.url_for', mock_url_for)
     def test_category_id(self):
         self.assertEqual(
-            links.urlize('version of arXiv.math.GR/0512484 (2011).'),
-            'version of arXiv.<a href=\"https://arxiv.org/abs/math.GR/0512484'
-            '\">math.GR/0512484</a> (2011).'
+            links.urlize('version of arXiv.math.GR/0512484 (2011).', ['arxiv_id']),
+            'version of arXiv.<a arxiv="math.GR/0512484" class="link-https" href="https://arxiv.org/abs/math.GR/0512484">math.GR/0512484</a> (2011).'
         )
 
     @mock.patch(f'{links.__name__}.url_for', mock_url_for)
@@ -251,13 +241,11 @@ class Id_Patterns_Test(unittest.TestCase):
         self.assertEqual(
             links.urlize('7 Pages; ftp://ftp%40micrognu%2Ecom:anon%40anon@ftp.micrognu.com/pnenp/conclusion.pdf'),
             '7 Pages; <a class="link-external link-ftp" href="ftp://ftp%40micrognu%2Ecom:anon%40anon@ftp.micrognu.com/pnenp/conclusion.pdf" rel="external">this ftp URL</a>'
-        )
+       )
 
     @mock.patch(f'{links.__name__}.url_for', mock_url_for)
     def test_arxiv_prefix(self):
-        cmt = "see arxiv:1201.12345"
         self.assertEqual(
-            links.urlize(cmt),
-            Markup('see <a href="https://arxiv.org/abs/1201.12345">arXiv:1201.'
-                   '12345</a>')
+            links.urlize("see arxiv:1201.12345"),
+            'see <a arxiv="1201.12345" class="link-https" href="https://arxiv.org/abs/1201.12345">arXiv:1201.12345</a>'
         )
