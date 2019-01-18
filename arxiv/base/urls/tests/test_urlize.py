@@ -60,14 +60,6 @@ class TestURLize(unittest.TestCase):
             'here is a rando doi doi:<a class="link-http" doi="10.1109/5.771073" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/10.1109/5.771073">10.1109/5.771073</a> that needs a link'
         )
 
-    @mock.patch(f'{links.__name__}.clickthrough')
-    def test_interesting_doi(self, mock_clickthrough):
-        mock_clickthrough.clickthrough_url = lambda url: f'http://arxiv.org/clickthrough?url={url}'
-        self.assertEqual(
-            links.urlize('here is a doi that we didn not expect 1721.1/107045'),
-            'here is a doi that we didn not expect <a class="link-http" doi="1721.1/107045" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/1721.1/107045">1721.1/107045</a>'
-        )
-
     def test_transform_token(self):
         # def doi_id_url_transform_token(tkn,fn):
         #     return doi_id_url_transform_token(fn, tkn)
