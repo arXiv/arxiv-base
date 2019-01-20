@@ -43,11 +43,14 @@ import bleach
 from arxiv import identifier
 from . import clickthrough
 
-Callback = Callable[[Mapping, bool], Mapping]
+
+Attrs = Dict[Union[str, Tuple[None, str]], str]
+Callback = Callable[[Attrs, bool], Attrs]
 
 
 def _without_group_names(pattern: Pattern) -> str:
-    return re.sub(r'\(\?P<[^>\!]+>', '(?:', pattern.pattern)
+    ptn: str = re.sub(r'\(\?P<[^>\!]+>', '(?:', pattern.pattern)
+    return ptn
 
 
 DOI = re.compile(   # '10.1145/0001234.1234567'
@@ -123,13 +126,14 @@ def clickthrough_url_for_doi(doi: str) -> str:
     return clickthrough.clickthrough_url(url_for_doi(doi))
 
 
-def _extend_class_attr(attrs: Mapping, new_class: str) -> Mapping:
+def _extend_class_attr(attrs: Attrs, new_class: str) -> Attrs:
     if (None, 'class') not in attrs:
         attrs[(None, 'class')] = ''
     attrs[(None, 'class')] = (attrs[(None, 'class')] + f' {new_class}').strip()
+    return attrs
 
 
-def _add_rel_external(attrs: Mapping, new: bool = False) -> Mapping:
+def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
     o = urlparse(attrs[(None, 'href')])
     if not o.netloc.split(':')[0].endswith('arxiv.org'):   # External link?
         attrs[(None, 'rel')] = 'external'
@@ -142,7 +146,7 @@ def _add_rel_external(attrs: Mapping, new: bool = False) -> Mapping:
     return attrs
 
 
-def _add_scheme_info(attrs: Mapping, new: bool = False) -> Mapping:
+def _add_scheme_info(attrs: Attrs, new: bool = False) -> Attrs:
     o = urlparse(attrs[(None, 'href')])
     if (None, 'class') not in attrs:
         attrs[(None, 'class')] = ''
@@ -150,7 +154,7 @@ def _add_scheme_info(attrs: Mapping, new: bool = False) -> Mapping:
     return attrs
 
 
-def _handle_arxiv_url(attrs: Mapping, new: bool = False) -> Mapping:
+def _handle_arxiv_url(attrs: Attrs, new: bool = False) -> Attrs:
     """
     Screen for reference to an arXiv e-print, and generate URL.
 
@@ -175,7 +179,7 @@ def _handle_arxiv_url(attrs: Mapping, new: bool = False) -> Mapping:
     return attrs
 
 
-def _handle_doi_url(attrs: Mapping, new: bool = False) -> Mapping:
+def _handle_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
     """
     Screen for reference to a DOI, and generate a URL.
 
@@ -209,7 +213,7 @@ ORDER = ['arxiv_id', 'doi', 'url']
 SUPPORTED_KINDS = ORDER
 """Identifier types that we can currently match and convert to to URLs."""
 
-DEFAULT_CALLBACKS = [
+DEFAULT_CALLBACKS: List[Callback] = [
     _handle_doi_url,
     _handle_arxiv_url,
     _add_rel_external,
@@ -228,11 +232,12 @@ def _get_pattern(kinds: List[str]) -> Pattern:
 def _get_linker(kinds: List[str],
                 callbacks: List[Callback] = DEFAULT_CALLBACKS) \
         -> Callable[[str], str]:
-    return bleach.linkifier.Linker(
+    linker: Callable[[str], str] = bleach.linkifier.Linker(
         callbacks=callbacks,
         skip_tags=['a'],
         url_re=_get_pattern(kinds)
     ).linkify
+    return linker
 
 
 def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:
