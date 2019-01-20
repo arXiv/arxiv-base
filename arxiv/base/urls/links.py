@@ -135,7 +135,7 @@ def _add_rel_external(attrs: Mapping, new: bool = False) -> Mapping:
         attrs[(None, 'rel')] = 'external'
         attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
         _extend_class_attr(attrs, 'link-external')
-    elif (None, 'arxiv') not in attrs and (None, 'doi') not in attrs:
+    elif (None, 'data-arxiv') not in attrs and (None, 'data-doi') not in attrs:
         attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
         _extend_class_attr(attrs, 'link-internal')
     return attrs
@@ -170,7 +170,7 @@ def _handle_arxiv_url(attrs: Mapping, new: bool = False) -> Mapping:
     if ARXIV_ID.match(target):
         attrs[(None, 'href')] = arxiv_id_to_url(target)
         attrs['_text'] = f'{prefix}{target}'
-        attrs[(None, 'arxiv')] = target     # Add arxiv="<arxiv id>"
+        attrs[(None, 'data-arxiv')] = target     # Add arxiv="<arxiv id>"
     return attrs
 
 
@@ -195,7 +195,7 @@ def _handle_doi_url(attrs: Mapping, new: bool = False) -> Mapping:
     if DOI.match(target):
         attrs[(None, 'href')] = clickthrough_url_for_doi(target)
         attrs['_text'] = f'{prefix}{target}'
-        attrs[(None, 'doi')] = target     # Add arxiv="<arxiv id>"
+        attrs[(None, 'data-doi')] = target     # Add arxiv="<arxiv id>"
     return attrs
 
 

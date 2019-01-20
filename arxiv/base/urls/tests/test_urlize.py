@@ -57,7 +57,7 @@ class TestURLize(unittest.TestCase):
         mock_clickthrough.clickthrough_url = lambda url: f'http://arxiv.org/clickthrough?url={url}'
         self.assertEqual(
             links.urlize('here is a rando doi doi:10.1109/5.771073 that needs a link'),
-            'here is a rando doi doi:<a class="link-http" doi="10.1109/5.771073" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/10.1109/5.771073">10.1109/5.771073</a> that needs a link'
+            'here is a rando doi doi:<a class="link-http" data-doi="10.1109/5.771073" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/10.1109/5.771073">10.1109/5.771073</a> that needs a link'
         )
 
     def test_transform_token(self):
@@ -138,7 +138,7 @@ class TestURLize(unittest.TestCase):
 
         self.assertEqual(
             links.urlize('cond-mat/97063007'),
-            '<a arxiv="cond-mat/9706300" class="link-https" href="https://arxiv.org/abs/cond-mat/9706300">cond-mat/9706300</a>7',
+            '<a class="link-https" data-arxiv="cond-mat/9706300" href="https://arxiv.org/abs/cond-mat/9706300">cond-mat/9706300</a>7',
             'urlize (should match) 7/9')
 
         self.assertEqual(
@@ -189,7 +189,7 @@ class TestURLize(unittest.TestCase):
     def test_category_id(self):
         self.assertEqual(
             links.urlize('version of arXiv.math.GR/0512484 (2011).', ['arxiv_id']),
-            'version of arXiv.<a arxiv="math.GR/0512484" class="link-https" href="https://arxiv.org/abs/math.GR/0512484">math.GR/0512484</a> (2011).'
+            'version of arXiv.<a class="link-https" data-arxiv="math.GR/0512484" href="https://arxiv.org/abs/math.GR/0512484">math.GR/0512484</a> (2011).'
         )
 
     @mock.patch(f'{links.__name__}.url_for', mock_url_for)
@@ -239,5 +239,5 @@ class TestURLize(unittest.TestCase):
     def test_arxiv_prefix(self):
         self.assertEqual(
             links.urlize("see arxiv:1201.12345"),
-            'see <a arxiv="1201.12345" class="link-https" href="https://arxiv.org/abs/1201.12345">arXiv:1201.12345</a>'
+            'see <a class="link-https" data-arxiv="1201.12345" href="https://arxiv.org/abs/1201.12345">arXiv:1201.12345</a>'
         )
