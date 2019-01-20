@@ -46,6 +46,10 @@ from . import clickthrough
 Callback = Callable[[Mapping, bool], Mapping]
 
 
+def _without_group_names(pattern: Pattern) -> str:
+    return re.sub(r'\(\?P<[^>\!]+>', '(?:', pattern.pattern)
+
+
 DOI = re.compile(   # '10.1145/0001234.1234567'
     r'(?P<doi>10.\d{4,9}/[-._;()/:A-Z0-9]+)',
     re.I
@@ -66,7 +70,8 @@ ARXIV_PATTERNS = [
     identifier.STANDARD  # 1609.05068 1207.1234v1 1207.1234 1807.12345v12
 ]
 ARXIV_ID = re.compile(
-    "|".join([rf"(?:{pattern.pattern})" for pattern in ARXIV_PATTERNS]),
+    "|".join([rf"(?:{_without_group_names(pattern)})"
+              for pattern in ARXIV_PATTERNS]),
     re.IGNORECASE | re.VERBOSE | re.UNICODE
 )
 
