@@ -11,7 +11,7 @@ _archive = '|'.join([re.escape(key) for key in taxonomy.ARCHIVES.keys()])
 
 _category = '|'.join([re.escape(key) for key in taxonomy.CATEGORIES.keys()])
 
-_prefix = r'ar[xX]iv:'
+_prefix = r'(?P<arxiv_prefix>ar[xX]iv:)'
 """
 Attempt to catch the arxiv prefix in front of arxiv ids.
 
@@ -25,23 +25,23 @@ ARXIV_REGEX = (
 )
 
 OLD_STYLE_WITH_ARCHIVE = re.compile(
-    r'(?:%s)?(%s)\/\d{2}[01]\d{4}(v\d*)?' % (_prefix, _archive),
+    r'(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)' % (_prefix, _archive),
     re.I
 )
 
 OLD_STYLE_WITH_CATEGORY = re.compile(
-    r'(?:%s)?(%s)\/\d{2}[01]\d{4}(v\d*)?' % (_prefix, _category),
+    r'(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)' % (_prefix, _category),
     re.I
 )
 
 OLD_STYLE = re.compile(
-    r'(?:%s)?(%s)\/\d{2}[01]\d{4}(v\d*)?'
+    r'(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)'
     % (_prefix, f'{_archive}|{_category}'),
     re.I
 )
 
 STANDARD = re.compile(
-    r'(?<![\d=\.])(?:%s)?\d{4}\.\d{4,5}(v\d*)?'
+    r'(?<![\d=\.])(?:%s)?(?P<arxiv_id>\d{4}\.\d{4,5}(v\d*)?)'
     % (_prefix),
     re.I
 )
