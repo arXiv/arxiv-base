@@ -6350,9 +6350,9 @@ html {
 header .columns .column {
   padding-bottom: 0; }
 
-content a {
+main a {
   border-bottom: 1px solid transparent; }
-  content a:hover {
+  main a:hover {
     border-bottom: 1px dotted #0068ac; }
 
 /* sticky footer solution as written by Philip Walton */
@@ -6366,7 +6366,7 @@ header,
 footer {
   flex-shrink: 0; }
 
-content {
+main {
   flex: 1 0 auto; }
 
 /* overrides Bulma defaults which have bigger differences */

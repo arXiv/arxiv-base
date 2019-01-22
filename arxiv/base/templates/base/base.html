@@ -14,8 +14,9 @@
     {% include "base/header.html" %}
     {% endblock header %}
   </header>
-  <content>
-    <section class="section">
+
+  <main role="main">
+    <div class="section">
       <div class="container">
         <div class="content">
           <div class="notifications" role="alert">
@@ -35,8 +36,9 @@
           {% endblock content %}
         </div>
       </div>
-    </section>
-  </content>
+    </div>
+  </main>
+
   <footer>
     {% block footer %}
     {% include "base/footer.html" %}
