@@ -6864,8 +6864,7 @@ main {
     font-size: 1.15em; }
   main ul {
     list-style: disc outside;
-    margin-left: 2em;
-    margin-top: 1em; }
+    margin-left: 2em; }
     main ul ul {
       list-style-type: circle;
       margin-top: 0.5em; }
@@ -6873,6 +6872,11 @@ main {
     list-style-position: outside;
     margin-left: 2em;
     margin-top: 1em; }
+  main li + li {
+    margin-bottom: 0.5em; }
+
+.breadcrumb ul {
+  margin-left: 0; }
 
 /**** End primary content default styling *** */
 .nav-spaced {
