@@ -6673,14 +6673,6 @@ label.panel-block {
 html {
   font-size: 14px; }
 
-header .columns .column {
-  padding-bottom: 0; }
-
-content a {
-  border-bottom: 1px solid transparent; }
-  content a:hover {
-    border-bottom: 1px dotted #0068ac; }
-
 /* sticky footer solution as written by Philip Walton */
 /* https://philipwalton.com/articles/normalizing-cross-browser-flexbox-bugs/ */
 body {
@@ -6692,7 +6684,7 @@ header,
 footer {
   flex-shrink: 0; }
 
-content {
+main {
   flex: 1 0 auto; }
 
 /* overrides Bulma defaults which have bigger differences */
@@ -6808,11 +6800,12 @@ content {
   color: #970503; }
 
 /** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. */
-/* line-height property here sets vertical alignment to center */
 header h1 {
   font-size: 2em;
   font-weight: bold;
   padding: 0.25em 0 0.5em; }
+header .columns .column {
+  padding-bottom: 0; }
 
 footer {
   background-color: #757575;
@@ -6828,6 +6821,64 @@ footer {
       border-bottom: 1px dotted #fff;
       background-color: #999999; }
 
+/**** Primary content default styling *** */
+main {
+  padding: 3rem 1.5rem; }
+  main a {
+    border-bottom: 1px solid transparent; }
+    main a:hover {
+      border-bottom: 1px dotted #0068ac; }
+  main p:not(:last-child),
+  main dl:not(:last-child),
+  main ol:not(:last-child),
+  main ul:not(:last-child),
+  main blockquote:not(:last-child),
+  main pre:not(:last-child),
+  main table:not(:last-child) {
+    margin-bottom: 1em; }
+  main h1,
+  main h2,
+  main h3,
+  main h4,
+  main h5,
+  main h6 {
+    font-weight: 600;
+    margin-bottom: 0.8em; }
+    main h1:not(:first-child),
+    main h2:not(:first-child),
+    main h3:not(:first-child),
+    main h4:not(:first-child),
+    main h5:not(:first-child),
+    main h6:not(:first-child) {
+      margin-top: 1em; }
+  main h1 {
+    font-size: 1.75em; }
+  main h2 {
+    font-size: 1.5em;
+    margin-bottom: 0.5em; }
+  main h3 {
+    font-size: 1.35em; }
+  main h4 {
+    font-size: 1.25em; }
+  main h5 {
+    font-size: 1.15em; }
+  main ul {
+    list-style: disc outside;
+    margin-left: 2em; }
+    main ul ul {
+      list-style-type: circle;
+      margin-top: 0.5em; }
+  main ol {
+    list-style-position: outside;
+    margin-left: 2em;
+    margin-top: 1em; }
+  main li + li {
+    margin-bottom: 0.5em; }
+
+.breadcrumb ul {
+  margin-left: 0; }
+
+/**** End primary content default styling *** */
 .nav-spaced {
   line-height: 2; }
 
@@ -6945,16 +6996,6 @@ dt {
   margin-top: auto !important;
   margin-bottom: auto !important; }
 
-.hidden-label {
-  border: 0;
-  clip: rect(0, 0, 0, 0);
-  height: 1px;
-  width: 0;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute; }
-
 .is-datefield {
   max-width: 8rem; }
 
@@ -7034,7 +7075,5 @@ li.is-success {
 
 .pagination-list li + li {
   margin: 0; }
-
-/* flash notifications */
 
 /*# sourceMappingURL=arxivstyle.css.map */

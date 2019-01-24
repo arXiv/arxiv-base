@@ -14,29 +14,26 @@
     {% include "base/header.html" %}
     {% endblock header %}
   </header>
-  <content>
-    <section class="section">
-      <div class="container">
-        <div class="content">
-          <div class="notifications" role="alert">
-              {% with messages = get_alerts() %}
-                {% if messages %}
-                  {% for category, message in messages %}
-                    <div class="notification is-{{ category }}">
-                      {% if message.dismissable %}<button class="delete notification-dismiss"></button>{% endif %}
-                      {% if message.title %}<h2 class="is-size-5 is-marginless">{{ message.title }}</h2>{% endif %}
-                      <p>{{ message.message }}</p>
-                    </div>
-                  {% endfor %}
-                {% endif %}
-              {% endwith %}
-          </div>
-          {% block content %}
-          {% endblock content %}
+
+  <main role="main" class="container">
+    {% with messages = get_alerts() -%}
+      {% if messages -%}
+        <div class="notifications" role="alert">
+          {% for category, message in messages -%}
+            <div class="notification is-{{ category }}">
+              {% if message.dismissable %}<button class="delete notification-dismiss"></button>{% endif %}
+              {% if message.title %}<h2 class="is-size-5 is-marginless">{{ message.title }}</h2>{%- endif %}
+              <p>{{ message.message }}</p>
+            </div>
+          {%- endfor %}
         </div>
-      </div>
-    </section>
-  </content>
+      {%- endif %}
+    {%- endwith %}
+
+    {% block content %}
+    {% endblock content %}
+  </main>
+
   <footer>
     {% block footer %}
     {% include "base/footer.html" %}
