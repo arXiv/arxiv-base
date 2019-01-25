@@ -94,3 +94,29 @@ main
       background-color: lighten($color, $color-lightning)
       border: 1px solid $color
       color: desaturate(darken($color, $darken-percentage), $desaturate-percentage)
+
+.button
+  // Needed stronger contrast in hover and active states.
+  @each $name, $pair in $colors
+    $color: nth($pair, 1)
+    $color-invert: nth($pair, 2)
+    &.is-#{$name}
+      background-color: $color
+      border-color: transparent
+      color: $color-invert
+      &:hover,
+      &.is-hovered
+        background-color: darken($color, 6%)
+        border-color: transparent
+        color: $color-invert
+      &:focus,
+      &.is-focused
+        border-color: transparent
+        color: $color-invert
+        &:not(:active)
+          box-shadow: $button-focus-box-shadow-size rgba($color, 0.5)
+      &:active,
+      &.is-active
+        background-color: darken($color, 10%)
+        border-color: transparent
+        color: $color-invert
