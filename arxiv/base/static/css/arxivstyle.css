@@ -1066,7 +1066,7 @@ a.box:active {
     margin-right: calc(-0.375em - 1px); }
   .button:hover, .button.is-hovered {
     border-color: #999999;
-    color: #2d2d2d; }
+    color: gray; }
   .button:focus, .button.is-focused {
     border-color: #0068ac;
     color: #2d2d2d; }
@@ -6799,6 +6799,177 @@ main {
   border: 1px solid #cd0200;
   color: #970503; }
 
+.button.is-white {
+  background-color: white;
+  border-color: transparent;
+  color: #0a0a0a; }
+  .button.is-white:hover, .button.is-white.is-hovered {
+    background-color: #f0f0f0;
+    border-color: transparent;
+    color: #0a0a0a; }
+  .button.is-white:focus, .button.is-white.is-focused {
+    border-color: transparent;
+    color: #0a0a0a; }
+    .button.is-white:focus:not(:active), .button.is-white.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.35); }
+  .button.is-white:active, .button.is-white.is-active {
+    background-color: #e6e6e6;
+    border-color: transparent;
+    color: #0a0a0a; }
+.button.is-black {
+  background-color: #0a0a0a;
+  border-color: transparent;
+  color: white; }
+  .button.is-black:hover, .button.is-black.is-hovered {
+    background-color: black;
+    border-color: transparent;
+    color: white; }
+  .button.is-black:focus, .button.is-black.is-focused {
+    border-color: transparent;
+    color: white; }
+    .button.is-black:focus:not(:active), .button.is-black.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(10, 10, 10, 0.35); }
+  .button.is-black:active, .button.is-black.is-active {
+    background-color: black;
+    border-color: transparent;
+    color: white; }
+.button.is-light {
+  background-color: whitesmoke;
+  border-color: transparent;
+  color: #2d2d2d; }
+  .button.is-light:hover, .button.is-light.is-hovered {
+    background-color: #e6e6e6;
+    border-color: transparent;
+    color: #2d2d2d; }
+  .button.is-light:focus, .button.is-light.is-focused {
+    border-color: transparent;
+    color: #2d2d2d; }
+    .button.is-light:focus:not(:active), .button.is-light.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(245, 245, 245, 0.35); }
+  .button.is-light:active, .button.is-light.is-active {
+    background-color: #dbdbdb;
+    border-color: transparent;
+    color: #2d2d2d; }
+.button.is-dark {
+  background-color: #2d2d2d;
+  border-color: transparent;
+  color: whitesmoke; }
+  .button.is-dark:hover, .button.is-dark.is-hovered {
+    background-color: #1e1e1e;
+    border-color: transparent;
+    color: whitesmoke; }
+  .button.is-dark:focus, .button.is-dark.is-focused {
+    border-color: transparent;
+    color: whitesmoke; }
+    .button.is-dark:focus:not(:active), .button.is-dark.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(45, 45, 45, 0.35); }
+  .button.is-dark:active, .button.is-dark.is-active {
+    background-color: #141414;
+    border-color: transparent;
+    color: whitesmoke; }
+.button.is-primary {
+  background-color: #b31b1b;
+  border-color: transparent;
+  color: #fff; }
+  .button.is-primary:hover, .button.is-primary.is-hovered {
+    background-color: #981717;
+    border-color: transparent;
+    color: #fff; }
+  .button.is-primary:focus, .button.is-primary.is-focused {
+    border-color: transparent;
+    color: #fff; }
+    .button.is-primary:focus:not(:active), .button.is-primary.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(179, 27, 27, 0.35); }
+  .button.is-primary:active, .button.is-primary.is-active {
+    background-color: #871414;
+    border-color: transparent;
+    color: #fff; }
+.button.is-link {
+  background-color: #0068ac;
+  border-color: transparent;
+  color: #fff; }
+  .button.is-link:hover, .button.is-link.is-hovered {
+    background-color: #00558d;
+    border-color: transparent;
+    color: #fff; }
+  .button.is-link:focus, .button.is-link.is-focused {
+    border-color: transparent;
+    color: #fff; }
+    .button.is-link:focus:not(:active), .button.is-link.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(0, 104, 172, 0.35); }
+  .button.is-link:active, .button.is-link.is-active {
+    background-color: #004979;
+    border-color: transparent;
+    color: #fff; }
+.button.is-info {
+  background-color: #209cee;
+  border-color: transparent;
+  color: #fff; }
+  .button.is-info:hover, .button.is-info.is-hovered {
+    background-color: #118cdf;
+    border-color: transparent;
+    color: #fff; }
+  .button.is-info:focus, .button.is-info.is-focused {
+    border-color: transparent;
+    color: #fff; }
+    .button.is-info:focus:not(:active), .button.is-info.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(32, 156, 238, 0.35); }
+  .button.is-info:active, .button.is-info.is-active {
+    background-color: #0f81cc;
+    border-color: transparent;
+    color: #fff; }
+.button.is-success {
+  background-color: #3cb521;
+  border-color: transparent;
+  color: #fff; }
+  .button.is-success:hover, .button.is-success.is-hovered {
+    background-color: #339b1c;
+    border-color: transparent;
+    color: #fff; }
+  .button.is-success:focus, .button.is-success.is-focused {
+    border-color: transparent;
+    color: #fff; }
+    .button.is-success:focus:not(:active), .button.is-success.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(60, 181, 33, 0.35); }
+  .button.is-success:active, .button.is-success.is-active {
+    background-color: #2e8a19;
+    border-color: transparent;
+    color: #fff; }
+.button.is-warning {
+  background-color: #d47500;
+  border-color: transparent;
+  color: #fff; }
+  .button.is-warning:hover, .button.is-warning.is-hovered {
+    background-color: #b56400;
+    border-color: transparent;
+    color: #fff; }
+  .button.is-warning:focus, .button.is-warning.is-focused {
+    border-color: transparent;
+    color: #fff; }
+    .button.is-warning:focus:not(:active), .button.is-warning.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(212, 117, 0, 0.35); }
+  .button.is-warning:active, .button.is-warning.is-active {
+    background-color: #a15900;
+    border-color: transparent;
+    color: #fff; }
+.button.is-danger {
+  background-color: #cd0200;
+  border-color: transparent;
+  color: #fff; }
+  .button.is-danger:hover, .button.is-danger.is-hovered {
+    background-color: #ae0200;
+    border-color: transparent;
+    color: #fff; }
+  .button.is-danger:focus, .button.is-danger.is-focused {
+    border-color: transparent;
+    color: #fff; }
+    .button.is-danger:focus:not(:active), .button.is-danger.is-focused:not(:active) {
+      box-shadow: 0 0 0 0.125em rgba(205, 2, 0, 0.35); }
+  .button.is-danger:active, .button.is-danger.is-active {
+    background-color: #9a0200;
+    border-color: transparent;
+    color: #fff; }
+
 /** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. */
 header h1 {
   font-size: 2em;
@@ -6872,7 +7043,7 @@ main {
     list-style-position: outside;
     margin-left: 2em;
     margin-top: 1em; }
-  main li + li {
+  main li {
     margin-bottom: 0.5em; }
 
 .breadcrumb ul {
@@ -6917,6 +7088,8 @@ main {
   background-color: #711111;
   color: white;
   border-color: transparent; }
+  .button.is-cul-darker:hover, .button.is-cul-darker:active {
+    background-color: #440a0a; }
 
 .sponsors {
   font-size: 0.9em;
