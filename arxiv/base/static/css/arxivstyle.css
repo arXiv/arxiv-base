@@ -6872,7 +6872,7 @@ main {
     list-style-position: outside;
     margin-left: 2em;
     margin-top: 1em; }
-  main li + li {
+  main li {
     margin-bottom: 0.5em; }
 
 .breadcrumb ul {
