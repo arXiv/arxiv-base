@@ -11,6 +11,7 @@ uwsgi = "*"
 "boto3" = "*"
 wtforms = "*"
 "e1839a8" = {path = "."}
+bleach = "*"
 
 [dev-packages]
 pydocstyle = "*"

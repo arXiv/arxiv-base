@@ -20,6 +20,9 @@
 <ul>
   <li>and list items</li>
   <li>just in case</li>
+  <li>and a list item with <br />
+    multiple lines</li>
+  <li>to test line breaks</li>
   <li class="help">and small type of class help</li>
 </ul>
 <hr>
@@ -27,7 +30,7 @@
 <div class="breathe-horizontal">
   <div class="field has-addons-tablet">
     <div class="control is-expanded">
-      <label for="query" class="hidden-label">Search term or terms</label>
+      <label for="query" class="is-sr-only">Search term or terms</label>
         <input class="input is-medium" id="query" name="query" placeholder="Search term..." type="text" value="red dwarf">
     </div>
     <div class="select control is-medium">
@@ -98,4 +101,13 @@
   </p>
 </div>
 
+<h2>List of buttons for testing hover/active/focus states</h2>
+<div class="buttons">
+  <button class="button" href="#">Default</button>
+  <button class="button is-link" href="#">Default</button>
+  <button class="button is-primary" href="#">Default</button>
+  <button class="button is-danger" href="#">Default</button>
+  <button class="button is-warning" href="#">Default</button>
+  <button class="button is-success" href="#">Default</button>
+</div>
 {% endblock content %}

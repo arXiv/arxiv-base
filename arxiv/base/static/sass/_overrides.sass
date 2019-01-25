@@ -4,14 +4,6 @@
 html
   font-size: 14px
 
-header .columns .column
-  padding-bottom: 0
-
-content a
-  border-bottom: 1px solid transparent
-  &:hover
-    border-bottom: 1px dotted $blue
-
 /* sticky footer solution as written by Philip Walton */
 /* https://philipwalton.com/articles/normalizing-cross-browser-flexbox-bugs/ */
 
@@ -24,7 +16,7 @@ header,
 footer
   flex-shrink: 0
 
-content
+main
   flex: 1 0 auto
 
 /* overrides Bulma defaults which have bigger differences */
@@ -102,3 +94,29 @@ content
       background-color: lighten($color, $color-lightning)
       border: 1px solid $color
       color: desaturate(darken($color, $darken-percentage), $desaturate-percentage)
+
+.button
+  // Needed stronger contrast in hover and active states.
+  @each $name, $pair in $colors
+    $color: nth($pair, 1)
+    $color-invert: nth($pair, 2)
+    &.is-#{$name}
+      background-color: $color
+      border-color: transparent
+      color: $color-invert
+      &:hover,
+      &.is-hovered
+        background-color: darken($color, 6%)
+        border-color: transparent
+        color: $color-invert
+      &:focus,
+      &.is-focused
+        border-color: transparent
+        color: $color-invert
+        &:not(:active)
+          box-shadow: $button-focus-box-shadow-size rgba($color, 0.35)
+      &:active,
+      &.is-active
+        background-color: darken($color, 10%)
+        border-color: transparent
+        color: $color-invert
