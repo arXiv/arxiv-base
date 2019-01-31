@@ -14,7 +14,8 @@ setup(
         'jsonschema',
         'pytz',
         'uwsgi',
-        'boto3'
+        'boto3',
+        'bleach==3.1.0'
     ],
     include_package_data=True
 )
