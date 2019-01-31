@@ -46,7 +46,7 @@ class Category(str):
             (archive, _) = parts
             if archive in ARCHIVES:
                 archive_name = ARCHIVES[archive]['name']
-                return f'{archive_name} ({self})'
+                return f'{archive_name} ({archive})'
         return self
 
     def unalias(self) -> 'Category':

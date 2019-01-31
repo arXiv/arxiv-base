@@ -16,7 +16,8 @@ from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
 
 from . import alerts
 
-blueprint = Blueprint('ui', __name__, url_prefix='')
+blueprint = Blueprint('ui', __name__, url_prefix='',
+                      static_folder='./static_test')
 
 
 @blueprint.route('/styleguide', methods=['GET'])
@@ -28,8 +29,8 @@ def test_page() -> Response:
     # Demonstrate flash alerts. To see these alerts, reload the page.
     help_url = url_for('help')
     alerts.flash_warning(f'This is a warning, see <a href="{help_url}">the'
-                           f' docs</a> for more information',
-                           title='Warning title', safe=True)
+                         f' docs</a> for more information',
+                         title='Warning title', safe=True)
     alerts.flash_info('This is some info', title='Info title')
     alerts.flash_failure('This is a failure', title='Failure title')
     alerts.flash_success('This is a success', title='Success title')

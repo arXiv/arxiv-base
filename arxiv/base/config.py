@@ -62,3 +62,25 @@ for key, value in os.environ.items():
             URLS[i] = (endpoint, o.path, o.netloc)
 
 ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
+
+BASE_VERSION = "0.14.1"
+"""The version of the arxiv-base package."""
+
+APP_VERSION = "0.14.1"
+"""The version of the base test app."""
+
+"""
+Flask-S3 plugin settings.
+
+See `<https://flask-s3.readthedocs.io/en/latest/>`_.
+"""
+FLASKS3_BUCKET_NAME = os.environ.get('FLASKS3_BUCKET_NAME', 'some_bucket')
+# FLASKS3_CDN_DOMAIN = os.environ.get('FLASKS3_CDN_DOMAIN', 'static.arxiv.org')
+FLASKS3_USE_HTTPS = os.environ.get('FLASKS3_USE_HTTPS', 1)
+FLASKS3_FORCE_MIMETYPE = os.environ.get('FLASKS3_FORCE_MIMETYPE', 1)
+FLASKS3_ACTIVE = bool(int(os.environ.get('FLASKS3_ACTIVE', 0)))
+
+# AWS credentials.
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'nope')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', 'nope')
+AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')

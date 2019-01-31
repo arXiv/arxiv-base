@@ -13,6 +13,7 @@ script:
 - pipenv install ./
 - pipenv run nose2 -s arxiv --with-coverage
 - "./tests/lintstats.sh"
+- pipenv run python tests/run_app_tests.py
 after_success:
 - coveralls
 deploy:
