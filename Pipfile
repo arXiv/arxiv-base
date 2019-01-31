@@ -12,6 +12,7 @@ uwsgi = "*"
 wtforms = "*"
 "e1839a8" = {path = "."}
 bleach = "*"
+"flask-s3" = "*"
 
 [dev-packages]
 pydocstyle = "*"
