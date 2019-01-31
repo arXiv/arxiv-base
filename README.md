@@ -125,6 +125,27 @@ above) to ``/static/[app name]/[ app version ]``. It will also rewrite blueprint
 [``static_url_path``](http://flask.pocoo.org/docs/1.0/api/#flask.Blueprint.static_url_path)
 to ``/static/[app name]/[ app version ]/[ blueprint name]``.
 
+### Serving static files on S3
+
+We use [Flask-S3](https://flask-s3.readthedocs.io/en/latest/) to serve static
+files via S3. Given the URL strategy above, following the instructions for
+Flask-S3 should just work.
+
+Be sure to initialize the integration after  instantiating ``Base`` and
+registering your blueprints. For example:
+
+```python
+def create_web_app() -> Flask:
+    """Initialize and configure the application."""
+
+    app = Flask('coolapp')
+    app.config.from_object(config)
+    Base(app)    # Gives us access to the base UI templates and resources.
+    app.register_blueprint(routes.blueprint)
+    s3.init_app(app)    # <- Down here!
+    return app
+```
+
 ## App tests
 
 Some tests to check app configuration and pattern compliance are provided in
