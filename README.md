@@ -72,7 +72,14 @@ pipenv uninstall arxiv-base
 pipenv install git+https://github.com/cul-it/arxiv-base.git@task/ARXIVNG-1010#egg=arxiv-base
 ```
 
-In your application factory, instantiate the BaseUI blueprint. This makes
+In your ``config.py``, be sure to set ``APP_VERSION`` to the current semantic
+version of the app. For example:
+
+```python
+APP_VERSION = "1.4.2rc5"
+```
+
+In your application factory, instantiate the Base component. This makes
 templates and static files available to you. For example, in your
 ``factory.py`` module:
 
@@ -107,15 +114,52 @@ And use static files in your templates, e.g.:
 {{ url_for('base.static', filename='images/CUL-reduced-white-SMALL.svg') }}
 ```
 
+## Static files and paths
+
+Base does a little bit of work for you to keep static files from different
+apps and versions sorted. The ``Base`` component will automatically set  your
+app's
+[``static_url_path``](http://flask.pocoo.org/docs/1.0/api/#flask.Flask.static_url_path)
+using the name of the app and the value of  ``APP VERSION`` in your config (see
+above) to ``/static/[app name]/[ app version ]``. It will also rewrite blueprint
+[``static_url_path``](http://flask.pocoo.org/docs/1.0/api/#flask.Blueprint.static_url_path)
+to ``/static/[app name]/[ app version ]/[ blueprint name]``.
+
+### Serving static files on S3
+
+We use [Flask-S3](https://flask-s3.readthedocs.io/en/latest/) to serve static
+files via S3. Given the URL strategy above, following the instructions for
+Flask-S3 should just work.
+
+Be sure to initialize the integration after  instantiating ``Base`` and
+registering your blueprints. For example:
+
+```python
+def create_web_app() -> Flask:
+    """Initialize and configure the application."""
+
+    app = Flask('coolapp')
+    app.config.from_object(config)
+    Base(app)    # Gives us access to the base UI templates and resources.
+    app.register_blueprint(routes.blueprint)
+    s3.init_app(app)    # <- Down here!
+    return app
+```
+
+## App tests
+
+Some tests to check app configuration and pattern compliance are provided in
+``arxiv.base.app_tests``. See that module for usage.
+
 ## Editing and compiling sass
 
 The file arxivstyle.css should never be edited directly. It is compiled from
 arxivstyle.sass with this command from project directory root:
-```sass arxiv/base/static/sass/arxivstyle.sass:arxiv/base/static/css/arxivstyle.css```
+``sass arxiv/base/static/sass/arxivstyle.sass:arxiv/base/static/css/arxivstyle.css``
 
 or you can use the ``--watch`` option to autocompile on any changed file:
 
-```sass --watch arxiv/base/static/sass/arxivstyle.sass:arxiv/base/static/css/arxivstyle.css```
+``sass --watch arxiv/base/static/sass/arxivstyle.sass:arxiv/base/static/css/arxivstyle.css``
 
 Bulma source files are included in the ``static/sass`` directory so that
 variables can be overridden directly during compile. The ``arxivstyle.sass``
