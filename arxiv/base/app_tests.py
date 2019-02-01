@@ -32,6 +32,7 @@ And run with:
 
 from flask import Flask, current_app
 from unittest import TestCase
+from . import config
 
 
 class TestConfig(TestCase):
@@ -63,25 +64,36 @@ class TestStaticFiles(TestCase):
         )
 
         for key, blueprint in current_app.blueprints.items():
-            self.assertIsNotNone(
-                blueprint.static_url_path,
-                f"The static_url_path should be set on blueprint `{key}`"
-            )
-            self.assertTrue(current_app.static_url_path.startswith('/static'),
-                            "The static url path for the app should start with"
-                            " /static")
-            self.assertIn(
-                f'/{current_app.name}', blueprint.static_url_path,
-                f"The static_url_path should include the name of the app"
-            )
-            self.assertIn(
-                f'/{current_app.config.get("APP_VERSION")}',
-                blueprint.static_url_path,
-                f"The static_url_path should include the version of the app"
-                " (config.APP_VERSION)"
-            )
-            self.assertIn(
-                key, blueprint.static_url_path,
-                f"The static_url_path for blueprint `{key}` should include"
-                " the name of the blueprint"
-            )
+            if key == 'base':
+                self.assertEqual(
+                    blueprint.static_url_path,
+                    f"/static/base/{config.BASE_VERSION}",
+                    "The static URL for base should be independent of the"
+                    " app static URL path, and should be based on the"
+                    " version of the arxiv.base package."
+                )
+
+            else:
+                self.assertIsNotNone(
+                    blueprint.static_url_path,
+                    f"The static_url_path should be set on blueprint `{key}`"
+                )
+                self.assertTrue(
+                    current_app.static_url_path.startswith('/static'),
+                    "The static url path for the app should start with /static"
+                )
+                self.assertIn(
+                    f'/{current_app.name}', blueprint.static_url_path,
+                    f"The static_url_path should include the name of the app"
+                )
+                self.assertIn(
+                    f'/{current_app.config.get("APP_VERSION")}',
+                    blueprint.static_url_path,
+                    f"The static_url_path should include the version of the"
+                    " app (config.APP_VERSION)"
+                )
+                self.assertIn(
+                    key, blueprint.static_url_path,
+                    f"The static_url_path for blueprint `{key}` should include"
+                    " the name of the blueprint"
+                )

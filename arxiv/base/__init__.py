@@ -53,6 +53,21 @@ class Base(object):
         app_static_path = f'/static/{app.name}/{app_version}'
         app.static_url_path = app_static_path
 
+        # The base blueprint attaches static assets and templates. These are
+        # used by many different apps.
+        #
+        # We include the version of this package in the static path, so that
+        # apps can run slightly different versions of this package without
+        # clobbering each other.
+        blueprint = Blueprint(
+            'base',
+            __name__,
+            template_folder='templates',
+            static_folder='static',
+            static_url_path=f'/static/base/{base_config.BASE_VERSION}'
+        )
+        app.register_blueprint(blueprint)
+
         # 2019-01-31 - Erick P.:
         #
         # We need to able able to set the static URL for blueprints, so that
@@ -71,22 +86,6 @@ class Base(object):
 
         app._register_blueprint = app.register_blueprint
         app.register_blueprint = types.MethodType(register_blueprint, app)
-
-        # The base blueprint attaches static assets and templates. These are
-        # used by many different apps.
-        #
-        # We include the version of this package in the static path, so that
-        # apps can run slightly different versions of this package without
-        # clobbering each other.
-        static_path = f'/static/base/{base_config.BASE_VERSION}'
-        blueprint = Blueprint(
-            'base',
-            __name__,
-            template_folder='templates',
-            static_folder='static',
-            static_url_path=static_path
-        )
-        app.register_blueprint(blueprint)
 
         # Register base exception handlers.
         for error, handler in exceptions.get_handlers():
