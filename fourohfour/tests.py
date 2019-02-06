@@ -8,6 +8,8 @@ from arxiv import status
 
 
 class TestFourOhFour(TestCase):
+    """Four oh four abounds."""
+
     def setUp(self):
         """We have an app and a client."""
         self.app = create_web_app()
@@ -50,3 +52,20 @@ class TestFourOhFour(TestCase):
             self.assertEqual(response.status_code,
                              status.HTTP_404_NOT_FOUND,
                              "404 all day long")
+
+
+class TestHealthCheck(TestCase):
+    """Test the health check endpoint."""
+
+    def setUp(self):
+        """We have an app and a client."""
+        self.app = create_web_app()
+        self.client = self.app.test_client()
+
+    def test_returns_200(self):
+        """The health check endpoint returns 200."""
+        with self.app.app_context():
+            response = self.client.get('/healthz')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK,
+                         "The health check endpoint returns 200")
