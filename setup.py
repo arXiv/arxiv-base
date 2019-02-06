@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='arxiv-base',
-    version='0.14.3rc4',
+    version='0.14.3rc5',
     packages=[f'arxiv.{package}' for package
               in find_packages('arxiv', exclude=['*test*'])],
     zip_safe=False,
