@@ -7,8 +7,10 @@ set -o nounset
 ENVIRONMENT=$1
 TOKEN_NAME=USER_TOKEN_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
 SA_NAME=USER_SA_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
+RELEASE_NAME=HELM_RELEASE_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
 USER_TOKEN=${!TOKEN_NAME}
 USER_SA=${!SA_NAME}
+HELM_RELEASE=${!RELEASE_NAME}
 
 
 # Install kubectl & Helm
@@ -27,17 +29,21 @@ kubectl config set-credentials $USER_SA --token=$(echo $USER_TOKEN | base64 --de
 kubectl config set-context travis --cluster=$CLUSTER_NAME --user=$USER_SA --namespace=$ENVIRONMENT
 kubectl config use-context travis
 kubectl config current-context
+echo "Configured kubectl"
 
 helm init --client-only --tiller-namespace $ENVIRONMENT
+echo "Set up helm client"
 
 # Add S3 repo. Requires AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set
 # in the environment.
 helm plugin install https://github.com/hypnoglow/helm-s3.git
 helm repo add arxiv $HELM_REPOSITORY
 helm repo update
+echo "Updated Helm repo"
 
 # Deploy to Kubernetes.
-helm upgrade arxiv/fourohfour --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
+helm upgrade arxiv/fourohfour --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT --name $HELM_RELEASE
+echo "Deploy release"
 
 function cleanup {
     printf "Cleaning up...\n"
