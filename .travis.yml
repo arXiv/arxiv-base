@@ -33,11 +33,11 @@ deploy:
   on:
     tags: true
 - provider: script
-  script: deploy/deploy_fourohfour.sh staging
+  script: deploy/deploy_fourohfour.sh fourohfour staging
   on:
     tags: true
 - provider: script
-  script: deploy/deploy_fourohfour.sh development
+  script: deploy/deploy_fourohfour.sh fourohfour development
   on:
     branch: develop
 

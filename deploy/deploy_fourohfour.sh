@@ -4,7 +4,34 @@ set -o pipefail
 set -o errexit
 set -o nounset
 
-ENVIRONMENT=$1
+# Deploy builds to Kubernetes!
+#
+# This script can be used to deploy builds to Kubernetes using Helm. More
+# specifically, this script *upgrades* an existing Helm deployment.
+#
+# Params:
+# - deployment name (must match the Helm install)
+# - namespace (used to select other env vars, see below)
+#
+# Pre-requisites:
+# - Must have already provisioned an SA for Tiller, and initialized the Tiller
+#   service in the target namespace.
+# - Must have already provisioned an SA for Travis in the target namespace.
+#   The following env vars should be set, e.g. in the Travis-CI interface:
+#   - USER_SA_{namespace} = the SA name
+#   - USER_TOKEN_{namespace} = base64-encoded bearer token for the Travis SA.
+# - In addition, the following env vars must be set to configure access to
+#   the Kubernetes API server:
+#   - CLUSTER_ENDPOINT = URI of the K8s API server
+#   - CA_CERT = base64 encoded root CA of the K8s cluster
+#   - CLUSTER_NAME = the name of the cluster
+# - The following env vars must be set for Helm to work:
+#   - HELM_REPOSITORY = the location of the arXiv helm repository,
+#     e.g. s3://...
+#   - HELM_RELEASE = the name of the release that this script will upgrade.
+
+CHART_NAME=$1
+ENVIRONMENT=$2
 TOKEN_NAME=USER_TOKEN_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
 SA_NAME=USER_SA_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
 RELEASE_NAME=HELM_RELEASE_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
@@ -42,7 +69,7 @@ helm repo update
 echo "Updated Helm repo"
 
 # Deploy to Kubernetes.
-helm upgrade arxiv/fourohfour --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT --name $HELM_RELEASE
+helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
 echo "Deploy release"
 
 function cleanup {
