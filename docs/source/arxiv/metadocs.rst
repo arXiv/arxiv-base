@@ -69,14 +69,52 @@ Creating auto-doc stubs
 '''''''''''''''''''''''''
 For each module you will create an rst file containing the automod declarations.
 
-For example, with arxiv-compiler, I would create a file "compiler.domain.rst"
+For example, with arxiv-compiler, I would create a file "compiler.domain.rst".
 
+.. code-block:: none
+    :caption: compiler.domain.rst
 
- 
+    compiler.domain module
+    =========================
+    
+    .. automodule:: compiler.domain
+        :members:
+        :undoc-members:
+        :show-inheritance: 
 
- 
+After creating this file, I add it to the index.rst so it builds.
+
+.. code-block:: none
+    :caption: index.rst
+
+    .. arXiv Compilation Service documentation master file, created by
+    sphinx-quickstart on Mon Oct 15 16:35:18 2018.
+    You can adapt this file completely to your liking, but it should at least
+    contain the root `toctree` directive.
+    
+    Welcome to arXiv Compilation Service's documentation!
+    =====================================================
+    
+    .. toctree::
+    :maxdepth: 2
+    :caption: Contents:
+    
+    compiler.domain.rst
+    
+    
+    
+    Indices and tables
+    ==================
+    
+    * :ref:`genindex`
+    * :ref:`modindex`
+    * :ref:`search`
 
 If you have an issue with ModuleNotFoundError, then the paths in the conf.py need to be changed. Add the following to the top of docs/conf.py::
+
+
+.. code-block:: python
+    :caption: conf.py
 
     import os
     import sys
@@ -100,7 +138,8 @@ The script should be run from your development copy's repository root (same leve
     pipenv shell
     bash update-docs.sh
 
-:: 
+.. code-block:: bash
+    :caption: update-docs.sh
 
     #!/bin/bash
     SRCDOCS=`pwd`/docs/_build/html
