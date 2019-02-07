@@ -39,8 +39,7 @@ URLS = [
     ("subscribe", "/help/subscribe", BASE_SERVER),
     ("submit", "/submit", BASE_SERVER),
     ("about", "/about", BASE_SERVER),
-    ("team", "/about/people/leadership_team", BASE_SERVER),
-    ("donate", "/s/1717/alumni/index.aspx?sid=1717&gid=2&pgid=403&cid=1031&dids=276&bledit=1&appealcode=UNXX0OLL1", "securelb.imodules.com")
+    ("team", "/about/people/leadership_team", BASE_SERVER)
 ]
 """
 URLs for external services, for use with :func:`flask.url_for`.
