@@ -1,13 +1,12 @@
 <div class="columns" role="navigation" aria-label="Secondary">
   <div class="column">
-    <h2 class="has-text-weight-bold">About arXiv</h2>
     <ul class="nav-spaced">
-      <li><a href="{{ url_for('blog') }}">News from our blog</a></li>
-      <li><a href="{{ url_for('wiki') }}">Project documentation</a></li>
+      <li><a href="{{ url_for('about')}}">About</a></li>
+      <li><a href="{{ url_for('team')}}">Leadership Team</a></li>
+      <li><a href="{{ url_for('blog') }}">Blog</a></li>
     </ul>
   </div>
   <div class="column">
-    <h2 class="has-text-weight-bold">Contact Us</h2>
     <ul class="nav-spaced">
       <li><span class="icon"><i class="fa fa-envelope"></i></span><a href="{{ url_for('contact') }}"> Contact</a></li>
       <li><span class="icon"><i class="fa fa-twitter"></i></span><a href="{{ url_for('twitter') }}"> Follow us on Twitter</a></li>
@@ -15,11 +14,10 @@
     </ul>
   </div>
   <div class="column">
-    <h2 class="has-text-weight-bold">Support</h2>
     <ul class="nav-spaced">
-      <!-- <li><a href="{{ config.A11Y_URL }}">Web Accessibility Help</a></li> -->
-      <li><a href="{{ url_for('help') }}">Help using arXiv</a></li>
-      <li><a href="{{ url_for('faq') }}">FAQ</a>
+      <li><a href="{{ url_for('help') }}">Help</a></li>
+      <li><a href="{{ url_for('submit') }}">Submit</a></li>
+      <li><a href="{{ url_for('donate')}}">Donate</a></li>
     </ul>
   </div>
 </div>
