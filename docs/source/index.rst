@@ -20,3 +20,4 @@ Each component of this project **must** meet all of the following criteria:
    :caption: Contents:
 
    arxiv/modules.rst
+   arxiv/metadocs.rst
