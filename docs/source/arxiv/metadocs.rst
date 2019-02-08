@@ -110,8 +110,7 @@ After creating this file, I add it to the index.rst so it builds.
     * :ref:`modindex`
     * :ref:`search`
 
-If you have an issue with ModuleNotFoundError, then the paths in the conf.py need to be changed. Add the following to the top of docs/conf.py::
-
+If you have an issue with ModuleNotFoundError, then the paths in the conf.py need to be changed. Add the following to the top of docs/conf.py:
 
 .. code-block:: python
     :caption: conf.py
