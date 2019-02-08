@@ -39,6 +39,13 @@ USER_TOKEN=${!TOKEN_NAME}
 USER_SA=${!SA_NAME}
 HELM_RELEASE=${!RELEASE_NAME}
 
+if [ -z "${TRAVIS_TAG}" ] then
+    IMAGE_TAG=${TRAVIS_COMMIT}
+else
+    IMAGE_TAG=${TRAVIS_TAG}
+fi
+
+echo "Deploying ${CHART_NAME} in ${ENVIRONMENT}"
 
 # Install kubectl & Helm
 curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.9.2/bin/linux/amd64/kubectl
@@ -70,7 +77,7 @@ echo "Updated Helm repo"
 
 # Deploy to Kubernetes.
 helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
-echo "Deploy release"
+echo "Deployed!"
 
 function cleanup {
     printf "Cleaning up...\n"
