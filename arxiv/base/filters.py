@@ -1,5 +1,6 @@
 """Template filters."""
 
+from functools import partial
 from flask import Flask
 from arxiv.base.urls import urlize, url_for_doi, canonical_url, \
     clickthrough_url
@@ -18,7 +19,8 @@ def register_filters(app: Flask) -> None:
 
     """
     app.template_filter('urlize')(urlize)
-    app.template_filter('tex2utf')(tex2utf)
+    app.template_filter('tex2utf')(partial(tex2utf, letters=True))
+    app.template_filter('tex2utf_no_symbols')(partial(tex2utf, letters=False))
     app.template_filter('canonical_url')(canonical_url)
     app.template_filter('url_for_doi')(url_for_doi)
     app.template_filter('clickthrough_url')(clickthrough_url)
