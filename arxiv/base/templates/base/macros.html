@@ -129,18 +129,19 @@
 <div id="content">
   <div id="abs">
 
-    <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|urlize|safe }}</h1>
+    <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|escape|urlize|safe }}</h1>
     <div class="authors"><span class="descriptor">Authors:</span>{{ authors }}</div>
     <div class="dateline">{{ abs_date_line(arxiv_id, submitted_date, version, submission_history) }}</div>
-
-    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|tex2utf_no_symbols|urlize|replace('\n\n', '<br />')|safe }}</blockquote>
+    {#- TODO: the 'replace' call here does not work the same as the line_feed_to_br filter in arxiv-browse and should be fixed -#}
+    {#- TODO: arxiv-base filters may need to be Markup aware so that filters can be ordered arbitrarily and explicit escape is not needed -#}
+    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|tex2utf_no_symbols|escape|urlize|replace('\n\n', '<br />')|safe }}</blockquote>
     <!--CONTEXT-->
     <div class="metatable">
       <table summary="Additional metadata">
         {%- if comments %}
         <tr>
           <td class="tablecell label">Comments:</td>
-          <td class="tablecell comments mathjax">{{ comments|urlize|safe }}</td>
+          <td class="tablecell comments mathjax">{{ comments|escape|urlize|safe }}</td>
         </tr>
         {% endif -%}
         <tr>
