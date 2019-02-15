@@ -6,11 +6,10 @@ set -o nounset
 
 # Deploy builds to Kubernetes!
 #
-# This script can be used to deploy builds to Kubernetes using Helm. More
-# specifically, this script *upgrades* an existing Helm deployment.
+# This script can be used to deploy builds to Kubernetes using Helm.
 #
 # Params:
-# - deployment name (must match the Helm install)
+# - chart name (not including repository name)
 # - namespace (used to select other env vars, see below)
 #
 # Pre-requisites:
@@ -18,7 +17,7 @@ set -o nounset
 #   service in the target namespace.
 # - Must have already provisioned an SA for Travis in the target namespace.
 #   The following env vars should be set, e.g. in the Travis-CI interface:
-#   - USER_SA_{namespace} = the SA name
+#   - USER_SA_{namespace} = the service account name
 #   - USER_TOKEN_{namespace} = base64-encoded bearer token for the Travis SA.
 # - In addition, the following env vars must be set to configure access to
 #   the Kubernetes API server:
@@ -28,7 +27,8 @@ set -o nounset
 # - The following env vars must be set for Helm to work:
 #   - HELM_REPOSITORY = the location of the arXiv helm repository,
 #     e.g. s3://...
-#   - HELM_RELEASE = the name of the release that this script will upgrade.
+#   - HELM_RELEASE_{namespace} = the name of the release that this script will
+#     install or upgrade.
 
 CHART_NAME=$1
 ENVIRONMENT=$2
@@ -51,9 +51,12 @@ echo "Deploying ${CHART_NAME} in ${ENVIRONMENT}"
 curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.9.2/bin/linux/amd64/kubectl
 chmod +x ./kubectl
 sudo mv ./kubectl /usr/local/bin/kubectl
+echo "Intalled kubectl"
+
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
 chmod 700 get_helm.sh
 sudo ./get_helm.sh -v v2.8.0
+echo "Intalled Helm"
 
 # Configure Kubernetes & Helm
 echo $CA_CERT | base64 --decode > ${HOME}/ca.crt
@@ -76,7 +79,15 @@ helm repo update
 echo "Updated Helm repo"
 
 # Deploy to Kubernetes.
-helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
+helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT
+status=$?
+if [ status -eq 0 ]; then
+    echo "Release exists; upgrading"
+    helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
+else
+    echo "Release does not exist; creating"
+    helm install arxiv/$CHART_NAME --name=$HELM_RELEASE --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
+fi
 echo "Deployed!"
 
 function cleanup {
