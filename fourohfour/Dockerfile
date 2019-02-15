@@ -15,17 +15,7 @@ RUN pipenv install arxiv-base arxiv-auth
 
 EXPOSE 8000
 
-ADD wsgi.py /opt/arxiv
-ADD entrypoint.sh /opt/arxiv
+ADD wsgi.py uwsgi.ini entrypoint.sh /opt/arxiv/
 
-ENTRYPOINT ["/opt/arxiv/entrypoint.sh"]
-CMD ["--http-socket", ":8000", \
-     "-M", \
-     "-t 3000", \
-     "--manage-script-name", \
-     "--processes", "8", \
-     "--threads", "1", \
-     "--async", "100", \
-     "--ugreen", \
-     "--mount", "/=wsgi.py", \
-     "--logformat", "%(addr) %(addr) - %(user_id)|%(session_id) [%(rtime)] [%(uagent)] \"%(method) %(uri) %(proto)\" %(status) %(size) %(micros) %(ttfb)"]
+ENTRYPOINT ["pipenv", "run"]
+CMD ["uwsgi", "--ini", "/opt/arxiv/uwsgi.ini"]
