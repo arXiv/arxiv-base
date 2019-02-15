@@ -39,7 +39,7 @@ USER_TOKEN=${!TOKEN_NAME}
 USER_SA=${!SA_NAME}
 HELM_RELEASE=${!RELEASE_NAME}
 
-if [ -z "${TRAVIS_TAG}" ] then
+if [ -z "${TRAVIS_TAG}" ]; then
     IMAGE_TAG=${TRAVIS_COMMIT}
 else
     IMAGE_TAG=${TRAVIS_TAG}
