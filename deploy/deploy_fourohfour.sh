@@ -81,7 +81,7 @@ echo "Updated Helm repo"
 # Deploy to Kubernetes.
 helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT
 status=$?
-if [ status -eq 0 ]; then
+if [ $status -eq 0 ]; then
     echo "Release exists; upgrading"
     helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
 else
