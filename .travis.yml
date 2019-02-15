@@ -39,7 +39,7 @@ deploy:
 - provider: script
   script: deploy/deploy_fourohfour.sh fourohfour development
   on:
-    branch: ARXIVNG-1669
+    branch: task/ARXIVNG-1669
 
 notifications:
   slack:
