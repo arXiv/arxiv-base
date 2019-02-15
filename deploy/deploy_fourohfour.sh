@@ -79,7 +79,7 @@ helm repo update
 echo "Updated Helm repo"
 
 # Deploy to Kubernetes.
-helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT
+helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT 2> /dev/null
 status=$?
 if [ $status -eq 0 ]; then
     echo "Release exists; upgrading"
