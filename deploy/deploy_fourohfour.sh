@@ -79,15 +79,9 @@ helm repo update
 echo "Updated Helm repo"
 
 # Deploy to Kubernetes.
-helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT 2> /dev/null
-status=$?
-if [ $status -eq 0 ]; then
-    echo "Release exists; upgrading"
-    helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
-else
-    echo "Release does not exist; creating"
-    helm install arxiv/$CHART_NAME --name=$HELM_RELEASE --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
-fi
+helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT 2> /dev/null \
+    && helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT \
+    || helm install arxiv/$CHART_NAME --name=$HELM_RELEASE --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
 echo "Deployed!"
 
 function cleanup {
