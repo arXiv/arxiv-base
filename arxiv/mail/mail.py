@@ -39,9 +39,14 @@ def send(recipient: str, subject: str, text_body: str,
         E-mail addresses that should be BCC recipients.
 
     """
+    smtp_params = {
+        'hostname': _get_smtp_hostname(),
+        'port': _get_smtp_port(),
+        'local_hostname': _get_local_hostname()
+    }
     _send(_write(recipient, subject, text_body, html_body=html_body,
                  sender=sender, headers=headers, cc_recipients=cc_recipients,
-                 bcc_recipients=bcc_recipients))
+                 bcc_recipients=bcc_recipients), **smtp_params)
 
 
 def _write(recipient: str, subject: str, text_body: str,
@@ -72,3 +77,15 @@ def _send(message: EmailMessage, host: str = 'localhost', port: int = 0,
 
 def _get_default_sender() -> str:
     return get_application_config().get('DEFAULT_SENDER', NOREPLY)
+
+
+def _get_smtp_hostname() -> str:
+    return get_application_config().get('SMTP_HOSTNAME', 'localhost')
+
+
+def _get_smtp_port() -> int:
+    return int(get_application_config().get('SMTP_PORT', '0'))
+
+
+def _get_local_hostname() -> Optional[str]:
+    return get_application_config().get('SMTP_LOCAL_HOSTNAME', None)
