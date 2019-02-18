@@ -1,3 +1,5 @@
+"""Dern simple support for sending multipart/alternative e-mails."""
+
 from typing import Optional, Dict, List
 from email.message import EmailMessage
 import smtplib
