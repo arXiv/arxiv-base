@@ -27,7 +27,7 @@ class TestSendEmail(TestCase):
 
     @mock.patch(f'{mail.__name__}.smtplib.SMTP')
     def test_send_text_with_cc_and_bcc(self, mock_SMTP):
-        """Send a text-only e-mail."""
+        """Send a text-only e-mail with CC and BCC recipients."""
         mock_SMTP_instance = mock.MagicMock()
         mock_SMTP.return_value.__enter__.return_value = mock_SMTP_instance
         mail.send("erick.peirson@gmail.com", "Subject!", "Hi there.",
