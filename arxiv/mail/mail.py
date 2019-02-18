@@ -40,7 +40,7 @@ def send(recipient: str, subject: str, text_body: str,
 
     """
     smtp_params = {
-        'hostname': _get_smtp_hostname(),
+        'host': _get_smtp_hostname(),
         'port': _get_smtp_port(),
         'local_hostname': _get_local_hostname()
     }
