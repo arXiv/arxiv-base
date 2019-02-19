@@ -47,7 +47,7 @@ fi
 
 if [[ ! "${ENVIRONMENT}" =~ "^development|staging$" ]]; then
     SLUG_BRANCHNAME=$(echo $TRAVIS_BRANCH | iconv -t ascii//TRANSLIT | sed -E 's/[~\^]+//g' | sed -E 's/[^a-zA-Z0-9]+/-/g' | sed -E 's/^-+\|-+$//g' | sed -E 's/^-+//g' | sed -E 's/-+$//g' | tr A-Z a-z);
-    DEPLOYMENT_HOSTNAME=$SLUG_BRANCHNAME"."$DEPLOYMENT_HOSTNAME
+    DEPLOYMENT_HOSTNAME=$HELM_RELEASE"-"$SLUG_BRANCHNAME"."$DEPLOYMENT_HOSTNAME
     HELM_RELEASE=$HELM_RELEASE"-"$SLUG_BRANCHNAME
 fi
 
