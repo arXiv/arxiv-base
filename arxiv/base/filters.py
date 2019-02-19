@@ -24,7 +24,7 @@ JinjaFilterInput = Union[Markup, str]
 
 def abstract_lf_to_br(text: JinjaFilterInput) -> Markup:
     """Lines that start with two spaces should be broken."""
-    if hasattr(text, '__html__'):
+    if isinstance(text, Markup):
         etxt = text
     else:
         etxt = Markup(escape(text))
@@ -38,8 +38,8 @@ def abstract_lf_to_br(text: JinjaFilterInput) -> Markup:
 def f_tex2utf(text: JinjaFilterInput,
               letters: bool = True) -> Markup:
     """Return output of tex2utf function as escaped Markup."""
-    if hasattr(text, '__html__'):
-        return Markup(escape(tex2utf(text.unescape(), letters=letters)))
+    if isinstance(text, Markup):
+        return escape(tex2utf(text.unescape(), letters=letters))
     else:
         return Markup(escape(tex2utf(text, letters=letters)))
 
