@@ -27,22 +27,28 @@ set -o nounset
 # - The following env vars must be set for Helm to work:
 #   - HELM_REPOSITORY = the location of the arXiv helm repository,
 #     e.g. s3://...
-#   - HELM_RELEASE_{namespace} = the name of the release that this script will
-#     install or upgrade.
+# - DEPLOYMENT_DOMAIN_{namespace}
 
 CHART_NAME=$1
 ENVIRONMENT=$2
 TOKEN_NAME=USER_TOKEN_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
 SA_NAME=USER_SA_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
-RELEASE_NAME=HELM_RELEASE_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
+DEPLOYMENT_HOSTNAME_VAR=DEPLOYMENT_DOMAIN_$(echo $ENVIRONMENT | awk '{print toupper($0)}')
 USER_TOKEN=${!TOKEN_NAME}
 USER_SA=${!SA_NAME}
-HELM_RELEASE=${!RELEASE_NAME}
+HELM_RELEASE=${CHART_NAME}-${HELM_RELEASE}
+DEPLOYMENT_HOSTNAME=${!DEPLOYMENT_HOSTNAME_VAR}
 
 if [ -z "${TRAVIS_TAG}" ]; then
     IMAGE_TAG=${TRAVIS_COMMIT}
 else
     IMAGE_TAG=${TRAVIS_TAG}
+fi
+
+if [[ ! "${ENVIRONMENT}" =~ "^development|staging$" ]]; then
+    SLUG_BRANCHNAME=$(echo $TRAVIS_BRANCH | iconv -t ascii//TRANSLIT | sed -E 's/[~\^]+//g' | sed -E 's/[^a-zA-Z0-9]+/-/g' | sed -E 's/^-+\|-+$//g' | sed -E 's/^-+//g' | sed -E 's/-+$//g' | tr A-Z a-z);
+    DEPLOYMENT_HOSTNAME=$SLUG_BRANCHNAME"."$DEPLOYMENT_HOSTNAME
+    HELM_RELEASE=$HELM_RELEASE"-"$SLUG_BRANCHNAME
 fi
 
 echo "Deploying ${CHART_NAME} in ${ENVIRONMENT}"
@@ -81,7 +87,7 @@ echo "Updated Helm repo"
 # Deploy to Kubernetes.
 helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT 2> /dev/null \
     && helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT \
-    || helm install arxiv/$CHART_NAME --name=$HELM_RELEASE --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
+    || helm install arxiv/$CHART_NAME --name=$HELM_RELEASE --set=host=$DEPLOYMENT_HOSTNAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
 echo "Deployed!"
 
 function cleanup {
