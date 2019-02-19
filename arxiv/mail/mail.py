@@ -44,7 +44,8 @@ def send(recipient: str, subject: str, text_body: str,
         'port': _get_smtp_port(),
         'local_hostname': _get_local_hostname(),
         'username': _get_smtp_username(),
-        'password': _get_smtp_password()
+        'password': _get_smtp_password(),
+        'use_ssl': _use_ssl()
     }
     _send(_write(recipient, subject, text_body, html_body=html_body,
                  sender=sender, headers=headers, cc_recipients=cc_recipients,
@@ -72,10 +73,11 @@ def _write(recipient: str, subject: str, text_body: str,
 
 
 def _send(message: EmailMessage, host: str = 'localhost', port: int = 0,
-          local_hostname: Optional[str] = None,
+          local_hostname: Optional[str] = None, use_ssl: bool = False,
           username: Optional[str] = None,
           password: Optional[str] = None) -> None:
-    with smtplib.SMTP(host, port, local_hostname) as s:
+    SMTP = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
+    with SMTP(host, port, local_hostname) as s:
         if username and password:
             s.login(username, password)
         s.send_message(message)
@@ -103,3 +105,7 @@ def _get_smtp_port() -> int:
 
 def _get_local_hostname() -> Optional[str]:
     return get_application_config().get('SMTP_LOCAL_HOSTNAME', None)
+
+
+def _use_ssl() -> bool:
+    return bool(int(get_application_config().get('SMTP_SSL', '0')))
