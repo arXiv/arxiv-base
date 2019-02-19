@@ -87,7 +87,7 @@ echo "Updated Helm repo"
 # Deploy to Kubernetes.
 helm get $HELM_RELEASE --tiller-namespace $ENVIRONMENT 2> /dev/null \
     && helm upgrade $HELM_RELEASE arxiv/$CHART_NAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT \
-    || helm install arxiv/$CHART_NAME --name=$HELM_RELEASE --set=host=$DEPLOYMENT_HOSTNAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
+    || helm install arxiv/$CHART_NAME --name=$HELM_RELEASE --set=deploymentName=$HELM_RELEASE --set=servicetName=$HELM_RELEASE --set=ingressName=$HELM_RELEASE --set=host=$DEPLOYMENT_HOSTNAME --set=imageTag=$TRAVIS_COMMIT --set=namespace=$ENVIRONMENT --tiller-namespace $ENVIRONMENT --namespace $ENVIRONMENT
 echo "Deployed!"
 
 function cleanup {
