@@ -31,7 +31,7 @@ deploy:
 - provider: script
   script: deploy/push_fourohfour_image.sh
   on:
-    tags: true
+    all_branches: true
 - provider: script
   script: deploy/deploy_fourohfour.sh fourohfour staging
   on:
