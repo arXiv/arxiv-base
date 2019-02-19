@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit
 
-if [ -z "${TRAVIS_TAG}" ] then
+if [ -z "${TRAVIS_TAG}" ]; then
     IMAGE_TAG=${TRAVIS_COMMIT}
 else
     IMAGE_TAG=${TRAVIS_TAG}
