@@ -11,15 +11,30 @@ class TextTex2Utf(TestCase):
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, test_str)
 
+        utf_out = tex2utf(test_str, letters=False)
+        self.assertEqual(utf_out, test_str)
+
         test_str = "\\'e"
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, chr(0xe9))
-        #<test><args>\'e</args><func>tex2UTF</func><out>&#xe9;</out></test>
 
         test_str = "\\'E"
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, chr(
             0xc9))
+
+        test_str = "\\'E"
+        utf_out = tex2utf(test_str, letters=True)
+        self.assertEqual(utf_out, chr(
+            0xc9))
+
+        test_str = "\\'E"
+        utf_out = tex2utf(test_str, letters=False)
+        self.assertEqual(utf_out, chr(0xc9))
+
+        test_str = "\\'E"
+        utf_out = tex2utf(test_str, False)
+        self.assertEqual(utf_out, chr(0xc9))
 
         # single textsymbol
         test_str = '\\OE'
@@ -53,6 +68,15 @@ class TextTex2Utf(TestCase):
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, chr(
             0x03b1))
+
+        test_str = '\\alpha'
+        utf_out = tex2utf(test_str, True)
+        self.assertEqual(utf_out, chr(
+            0x03b1))
+
+        test_str = '\\alpha'
+        utf_out = tex2utf(test_str, False)
+        self.assertEqual(utf_out, r'\alpha')
 
         # simple test_string of greek
         test_str = '\\alpha\\beta\gamma'
@@ -116,7 +140,8 @@ class TextTex2Utf(TestCase):
         # textlet followed by underscore (for subscript)
         test_str = 'foo \\alpha_\\beta_\\gamma_7'
         utf_out = tex2utf(test_str)
-        self.assertEqual(utf_out, 'foo ' + chr(0x03b1) + '_' + chr(0x03b2) + '_' + chr(0x03b3) + '_7')
+        self.assertEqual(utf_out, 'foo ' + chr(0x03b1) + '_' +
+                         chr(0x03b2) + '_' + chr(0x03b3) + '_7')
 
     # <test><args>\'E</args><func>tex2UTF</func><out>&#xc9;</out></test>
     def test_tex2utf_curly(self):
@@ -125,8 +150,8 @@ class TextTex2Utf(TestCase):
         self.assertEqual(utf_out, chr(
             0xe9))
 
-        #<test><args>\'{e}</args><func>tex2UTF</func><out>&#xe9;</out></test>
-        #<test><args>{\'e}</args><func>tex2UTF</func><out>{&#xe9;}</out></test>
+        # <test><args>\'{e}</args><func>tex2UTF</func><out>&#xe9;</out></test>
+        # <test><args>{\'e}</args><func>tex2UTF</func><out>{&#xe9;}</out></test>
 
     def test_ARXIVDEV2322fixes(self):
         test_str = "ARXIVDEV-2322 \\u{A} fix"
