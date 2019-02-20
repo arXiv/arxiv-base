@@ -2,12 +2,6 @@
 import re
 from typing import Pattern, Dict, Match
 
-# Hash to lookup tex markup and convert to Unicode
-#
-# macron is line above character (overbar \= in Tex)
-# caron is v-shape above (\v{ } in Tex)
-# See: http://www.unicode.org/charts/
-
 accents = {
     # first accents with non-letter prefix, e.g. \'A
     "'A": 0x00c1, "'C": 0x0106, "'E": 0x00c9, "'I": 0x00cd,
@@ -63,6 +57,14 @@ accents = {
     'vr': 0x0159, 'vs': 0x0161, 'vt': 0x0165, 'vu': 0x01d4,
     'vz': 0x017e
 }
+r"""
+Hash to lookup tex markup and convert to Unicode.
+
+macron: a line above character (overbar \={} in TeX)
+caron: v-shape above character (\v{ } in TeX)
+See: http://www.unicode.org/charts/
+
+"""
 
 textlet = {
     'AA': 0x00c5, 'AE': 0x00c6, 'DH': 0x00d0, 'DJ': 0x0110,
