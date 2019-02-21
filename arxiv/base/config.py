@@ -36,7 +36,14 @@ URLS = [
     ("university", "/", "cornell.edu"),
     ("acknowledgment", "/x/ALlRF", "confluence.cornell.edu"),
     ("faq", "/help/faq", BASE_SERVER),
-    ("subscribe", "/help/subscribe", BASE_SERVER)
+    ("subscribe", "/help/subscribe", BASE_SERVER),
+    ("submit", "/submit", BASE_SERVER),
+    ("about", "/about", BASE_SERVER),
+    ("team", "/about/people/leadership_team", BASE_SERVER),
+    ("privacy_policy", "/help/policies/privacy_policy", BASE_SERVER),
+    ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
+    ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
+    ("clickthrough", "/ct", BASE_SERVER)
 ]
 """
 URLs for external services, for use with :func:`flask.url_for`.

@@ -37,7 +37,7 @@ verification/testing purposes. To run the dev server (assuming that you are
 working in the root of this repository):
 
 ```bash
-$ FLASK_APP=app.py FLASK_DEBUG=1 flask run
+$ FLASK_APP=app.py FLASK_DEBUG=1 pipenv run flask run
 ```
 
 You should be able to view the rendered ``styleguide.html`` at
