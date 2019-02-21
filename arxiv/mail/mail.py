@@ -39,17 +39,15 @@ def send(recipient: str, subject: str, text_body: str,
         E-mail addresses that should be BCC recipients.
 
     """
-    smtp_params = {
-        'host': _get_smtp_hostname(),
-        'port': _get_smtp_port(),
-        'local_hostname': _get_local_hostname(),
-        'username': _get_smtp_username(),
-        'password': _get_smtp_password(),
-        'use_ssl': _use_ssl()
-    }
     _send(_write(recipient, subject, text_body, html_body=html_body,
                  sender=sender, headers=headers, cc_recipients=cc_recipients,
-                 bcc_recipients=bcc_recipients), **smtp_params)
+                 bcc_recipients=bcc_recipients),
+          host=_get_smtp_hostname(),
+          port=_get_smtp_port(),
+          local_hostname=_get_local_hostname(),
+          username=_get_smtp_username(),
+          password=_get_smtp_password(),
+          use_ssl=_use_ssl())
 
 
 def _write(recipient: str, subject: str, text_body: str,
