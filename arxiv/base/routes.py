@@ -56,7 +56,7 @@ def test_macros() -> Response:
                     " type $\omega ^{2}(t)\propto\omega_{o}^{2}sec^{2}(\omega_"
                     "{o}t)$, where $\omega_{u}$ and $\omega_{o}$ are the"
                     " underdamped and overdamped frequency parameters,"
-                    " respectively.\n\nThis has some linefeeds""",
+                    " respectively.\n This has an \"abstract\" linefeed.""",
         'comments': "This version (physics/9707012v2) was not stored by arXiv."
                     " A subsequent replacement was made before versioning was"
                     " introduced.",
