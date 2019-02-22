@@ -17,13 +17,35 @@ script:
 after_success:
 - coveralls
 deploy:
-  provider: pypi
-  user: arxiv
-  password:
-    secure: Hz66/lkqTH8/d0c5aF5+CWl2EhhRU6tBArQyeqjvC2rKR0Bx59yx8ZFbzfv0wjQkyOMjTD9DHqDkddqSWXMCSoCLheIfCkx27Irm5HGqxUxs4KulGoMTTD6l2091IfN3yv/EJ8QMN45DO4e3Fbtn/QMzDlaSRZrGIDkfMVZzu7Avgu2JncD4fPOdAq3kfSaSxFB2PC7vMsm4YDTKUvFNoDE7hlDUsEX/1HRHz2HMXJrmOT0bkCObuifnNfSs5Fg88Wvi3ca/vGwYwTUFWRqD2idGtE+Uh7mNGG55YPX5IqN8sLdCCOUYLM5LywRO8OmhGB2HO/nbgzDsvl2doWde5hVgtlE0sTGZb5HWVGgS0YOSfuPIOwPo/bTcQ/I8Bx3Sc99aC70mhJj4+NNBS7kcI34eCOnx1LwadICL7rsm2o6pT+T9ZY2zVVvSnrUzdIG30EDFo0GpG+k3sLtPIIgKhFg2fmDFg7vaOcH3KIadrUUQCuJzoD0W15sZ5zQ6YOdDzc6PpRAK3JMnmX43zINIxg6f3ohycJe2TuReZF88+6Zdx6EbWQD1audCBZapVV01iRW6D+XsyczeI/OK9xN+qPdGkfLqZC4/BQwPAnHWttDMDEj7iOceDZBUQcKa397wq8LHIpPG3h/zm91JXv5cgUSMj50fT/n0DDKwN3zsi1k=
-  distributions: sdist
+#- provider: pypi
+#  user: arxiv
+#  password:
+#    secure: Hz66/lkqTH8/d0c5aF5+CWl2EhhRU6tBArQyeqjvC2rKR0Bx59yx8ZFbzfv0wjQkyOMjTD9DHqDkddqSWXMCSoCLheIfCkx27Irm5HGqxUxs4KulGoMTTD6l2091IfN3yv/EJ8QMN45DO4e3Fbtn/QMzDlaSRZrGIDkfMVZzu7Avgu2JncD4fPOdAq3kfSaSxFB2PC7vMsm4YDTKUvFNoDE7hlDUsEX/1HRHz2HMXJrmOT0bkCObuifnNfSs5Fg88Wvi3ca/vGwYwTUFWRqD2idGtE+Uh7mNGG55YPX5IqN8sLdCCOUYLM5LywRO8OmhGB2HO/nbgzDsvl2doWde5hVgtlE0sTGZb5HWVGgS0YOSfuPIOwPo/bTcQ/I8Bx3Sc99aC70mhJj4+NNBS7kcI34eCOnx1LwadICL7rsm2o6pT+T9ZY2zVVvSnrUzdIG30EDFo0GpG+k3sLtPIIgKhFg2fmDFg7vaOcH3KIadrUUQCuJzoD0W15sZ5zQ6YOdDzc6PpRAK3JMnmX43zINIxg6f3ohycJe2TuReZF88+6Zdx6EbWQD1audCBZapVV01iRW6D+XsyczeI/OK9xN+qPdGkfLqZC4/BQwPAnHWttDMDEj7iOceDZBUQcKa397wq8LHIpPG3h/zm91JXv5cgUSMj50fT/n0DDKwN3zsi1k=
+#  distributions: sdist
+#  on:
+#    tags: true
+- provider: script
+  script: deploy/push_base_image.sh
+  on:
+    all_branches: true
+- provider: script
+  script: deploy/push_fourohfour_image.sh
+  on:
+    all_branches: true
+- provider: script
+  script: deploy/deploy_fourohfour.sh fourohfour staging
   on:
     tags: true
+- provider: script
+  script: deploy/deploy_fourohfour.sh fourohfour development
+  on:
+    branch: development
+- provider: script
+  script: deploy/deploy_fourohfour.sh fourohfour development
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH != master && $TRAVIS_BRANCH != develop
+
 notifications:
   slack:
     secure: vrs2jVriOTn7PWRo8eyfChNGage7phvczDRisM43D/rEGfALHXSSAcy9n1NWUwdurFgJN//B2L/HSAXZN8geec6pf6pK0MTorJHv6YdAp/snNt4rMFrBz/r1TaLydDevm/mgjTM7tmOgZX3c+3kI/HcREbQCvDsgf6qTbb02Khp0dTrgzY/iHhanNnmtW8/TBSuyqPUzBKLL98KHrhkRQBKDgYNg0sJuRG4Z+Z30xo6bSAUJ5hA9zBoR8aA6E7zXqCxHL9cczbkHb5/9yJdTHtR/Js32WU2gaFlayO0liG0CraW6l2KrV3AZIVkOYUqBjIPtn+68lWunqH0O9c3ZMj2RKB8H+N0AXQGXiAyixDEbtJCUeA0kdXrd0TWKsyIBvYqEMbYGjyizsLmFk0z5wBAC1/ICuX0ZnALpm1yW6DyQtqbS/picVZVAa8Ioj0EZ4FiAZALJLszsnszeHd50m7piRwq94meEDHFYe7l7S/yLFWHhWUb9Xk3SY+FpYKd8kAriMD6qUhpinsKbizx6wRgVcOEs0B/i1jaAQnaBvdgWUqx7DECsHcRmhqT3eVmzO3bm8VeILy9ySAfOpdTcZjHHackld/bj8TSYEotYum3ysfOrRBlL14hHJoXY3pnt3RSHDHbn61xROwEpbcyH98uccIQ4N/McOBpKqK1Q1UU=

@@ -85,7 +85,7 @@ class Base(object):
             self._register_blueprint(blueprint, **options)
 
         app._register_blueprint = app.register_blueprint
-        app.register_blueprint = types.MethodType(register_blueprint, app)
+        app.register_blueprint = types.MethodType(register_blueprint, app)    # type: ignore
 
         # Register base exception handlers.
         for error, handler in exceptions.get_handlers():
