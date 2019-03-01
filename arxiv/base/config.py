@@ -24,8 +24,8 @@ URLS = [
     ("search_archive", "/search/<archive>", BASE_SERVER),
     ("search_advanced", "/search/advanced", BASE_SERVER),
     ("account", "/user", BASE_SERVER),
-    ("login", "/user/login", BASE_SERVER),
-    ("logout", "/user/logout", BASE_SERVER),
+    ("login", "/login", BASE_SERVER),
+    ("logout", "/logout", BASE_SERVER),
     ("home", "/", BASE_SERVER),
     ("ignore_me", "/IgnoreMe", BASE_SERVER),    # Anti-robot honneypot.
     ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
