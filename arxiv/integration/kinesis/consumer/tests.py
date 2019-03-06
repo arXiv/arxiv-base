@@ -3,7 +3,7 @@
 from unittest import TestCase, mock
 from botocore.exceptions import BotoCoreError, WaiterError, ClientError
 
-from arxiv.base.agent import BaseConsumer, CheckpointError, StopProcessing, \
+from ..consumer import BaseConsumer, CheckpointError, StopProcessing, \
     KinesisRequestFailed, ConfigurationError, StreamNotAvailable, \
     process_stream
 
