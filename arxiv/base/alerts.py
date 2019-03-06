@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 def _flash_with(severity: str, message: Union[str, dict],
                 title: Optional[str] = None, dismissable: bool = True,
                 safe: bool = False) -> None:
-    if safe:
+    if safe and isinstance(message, str):
         message = Markup(message)
     data = {'message': message, 'title': title, 'dismissable': dismissable}
     logger.debug('flash with severity %s: (title: %s) %s',

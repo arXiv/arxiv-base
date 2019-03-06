@@ -16,10 +16,11 @@ bleach = "*"
 
 [dev-packages]
 pydocstyle = "*"
-mypy = "*"
-pylint = "*"
+mypy = "==0.670"
+pylint = "<2"
 "nose2" = "*"
 hypothesis = "*"
 sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
+astroid = "<2.2"

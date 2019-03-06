@@ -24,8 +24,8 @@ URLS = [
     ("search_archive", "/search/<archive>", BASE_SERVER),
     ("search_advanced", "/search/advanced", BASE_SERVER),
     ("account", "/user", BASE_SERVER),
-    ("login", "/user/login", BASE_SERVER),
-    ("logout", "/user/logout", BASE_SERVER),
+    ("login", "/login", BASE_SERVER),
+    ("logout", "/logout", BASE_SERVER),
     ("home", "/", BASE_SERVER),
     ("ignore_me", "/IgnoreMe", BASE_SERVER),    # Anti-robot honneypot.
     ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
@@ -40,7 +40,10 @@ URLS = [
     ("submit", "/submit", BASE_SERVER),
     ("about", "/about", BASE_SERVER),
     ("team", "/about/people/leadership_team", BASE_SERVER),
-    ("privacy_policy", "/help/policies/privacy_policy", BASE_SERVER)
+    ("privacy_policy", "/help/policies/privacy_policy", BASE_SERVER),
+    ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
+    ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
+    ("clickthrough", "/ct", BASE_SERVER)
 ]
 """
 URLs for external services, for use with :func:`flask.url_for`.

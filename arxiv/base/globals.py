@@ -11,13 +11,13 @@ object.
 """
 
 import os
-from typing import Optional, Union
+from typing import Optional, Union, Mapping
 from flask import g, Flask
 from flask import current_app as flask_app
 import werkzeug
 
 
-def get_application_config(app: Flask = None) -> Union[dict, os._Environ]:
+def get_application_config(app: Optional[Flask] = None) ->Mapping:
     """
     Get a configuration from the current app, or fall back to os.env.
 
@@ -34,9 +34,9 @@ def get_application_config(app: Flask = None) -> Union[dict, os._Environ]:
     # pylint: disable=protected-access
     if app is not None:
         if isinstance(app, Flask):
-            return app.config   # type: ignore
+            return app.config
     if flask_app:    # Proxy object; falsey if there is no application context.
-        return flask_app.config     # type: ignore
+        return flask_app.config
     return os.environ
 
 

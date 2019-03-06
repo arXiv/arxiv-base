@@ -24,7 +24,7 @@ blueprint = Blueprint('ui', __name__, url_prefix='',
 def test_page() -> Response:
     """Render the test page."""
     rendered = render_template("base/styleguide.html", pagetitle='Home')
-    response = make_response(rendered, status.HTTP_200_OK)
+    response: Response = make_response(rendered, status.HTTP_200_OK)
 
     # Demonstrate flash alerts. To see these alerts, reload the page.
     help_url = url_for('help')
@@ -56,7 +56,7 @@ def test_macros() -> Response:
                     " type $\omega ^{2}(t)\propto\omega_{o}^{2}sec^{2}(\omega_"
                     "{o}t)$, where $\omega_{u}$ and $\omega_{o}$ are the"
                     " underdamped and overdamped frequency parameters,"
-                    " respectively.\n\nThis has some linefeeds""",
+                    " respectively.\n This has an \"abstract\" linefeed.""",
         'comments': "This version (physics/9707012v2) was not stored by arXiv."
                     " A subsequent replacement was made before versioning was"
                     " introduced.",
@@ -69,8 +69,10 @@ def test_macros() -> Response:
         ],
         'version': 2,
         'doi': '10.1000/182',
+        'pagetitle': 'Home'
     }
-    return render_template("base/testmacros.html", **context, pagetitle='Home')
+    response: Response = render_template("base/testmacros.html", **context)
+    return response
 
 
 @blueprint.route('/404', methods=['GET'])

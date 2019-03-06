@@ -15,7 +15,8 @@ s3 = FlaskS3()
 def create_web_app() -> Flask:
     """Initialize and configure the base application."""
     app = Flask('base_test')
-    app.config.from_object(config)
+    # .config is an instance of a dict subclass with some methods.
+    app.config.from_object(config)  # type: ignore
 
     Base(app)    # Gives us access to the base UI templates and resources.
     app.register_blueprint(routes.blueprint)

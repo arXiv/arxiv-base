@@ -1,0 +1,18 @@
+We have received your submission to arXiv.
+
+Your temporary submission identifier is: [% subm.sub_id %].
+You may update your submission at: [% submit_url %]
+
+Your article is scheduled to be announced at [% subm.publish_time_string %].
+The abstract will appear in the subsequent mailing as displayed below,
+except that the submission identifier will be replaced by
+the official arXiv identifier. Updates before [% subm.freeze_time_string %] will
+not delay announcement.
+
+A paper password will be emailed to you when the article is announced.
+You should share this with co-authors to allow them to claim ownership.
+If you have a problem that you are not able to resolve through the web
+interface, contact [% www_admin %] with a description of the issue and
+reference the submission identifier.
+
+- arXiv admin
