@@ -182,7 +182,6 @@ class TestProcessStream(TestCase):
             'AWS_REGION': 'su-tsae-9'
         }
 
-
     @mock.patch('boto3.client')
     def test_process_stream(self, mock_client_factory):
         """Run :func:`.process_stream` with a vanilla config."""

@@ -18,6 +18,9 @@ from .exceptions import RequestFailed, RequestUnauthorized, RequestForbidden, \
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_ENDPOINT = 'http://fooservice:8000/'
+DEFAULT_VERIFY = True
+
 
 class HTTPIntegration(metaclass=MetaIntegration):
     """
@@ -80,17 +83,17 @@ class HTTPIntegration(metaclass=MetaIntegration):
                       expected_code: List[int] = [status.HTTP_200_OK]) -> None:
         """Check for unexpected or errant status codes."""
         if resp.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
-            raise RequestFailed(f'Status: {resp.status_code}; {resp.content}')
+            raise RequestFailed(f'Status: {resp.status_code}', resp)
         elif resp.status_code == status.HTTP_401_UNAUTHORIZED:
-            raise RequestUnauthorized(f'Not authorized: {resp.content}')
+            raise RequestUnauthorized(f'Not authorized', resp)
         elif resp.status_code == status.HTTP_403_FORBIDDEN:
-            raise RequestForbidden(f'Forbidden: {resp.content}')
+            raise RequestForbidden(f'Forbidden', resp)
         elif resp.status_code == status.HTTP_404_NOT_FOUND:
-            raise NotFound(f'No such resource: {resp.url}')
+            raise NotFound(f'No such resource: {resp.url}', resp)
         elif resp.status_code >= status.HTTP_400_BAD_REQUEST:
-            raise BadRequest(f'Bad request: {resp.content}', data=resp.content)
+            raise BadRequest(f'Bad request: {resp.content}', resp)
         elif resp.status_code not in expected_code:
-            raise RequestFailed(f'Unexpected status code: {resp.status_code}')
+            raise RequestFailed(f'Unexpected code: {resp.status_code}', resp)
 
     def request(self, method: str, path: str, token: Optional[str] = None,
                 expected_code: List[int] = [status.HTTP_200_OK], **kwargs) \
@@ -143,8 +146,8 @@ class HTTPIntegration(metaclass=MetaIntegration):
         if not hasattr(cls, 'Meta'):
             raise NotImplementedError('Child class must have Meta class')
         name = cls.Meta.service_name.upper()
-        app.config.setdefault(f'{name}_ENDPOINT', 'http://fooservice:8000/')
-        app.config.setdefault(f'{name}_VERIFY', True)
+        app.config.setdefault(f'{name}_ENDPOINT', DEFAULT_ENDPOINT)
+        app.config.setdefault(f'{name}_VERIFY', DEFAULT_VERIFY)
 
     @classmethod
     def get_session(cls, app: Optional[Flask] = None) -> 'HTTPIntegration':

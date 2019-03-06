@@ -8,7 +8,7 @@ flask = "*"
 jsonschema = "*"
 pytz = "*"
 uwsgi = "*"
-"boto3" = "*"
+"boto3" = "==1.9.108"
 wtforms = "*"
 "e1839a8" = {path = "."}
 bleach = "*"

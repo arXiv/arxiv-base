@@ -1,13 +1,20 @@
 """Exceptions for HTTP integrations."""
 
+from requests import Response
+
 
 class RequestFailed(IOError):
     """The file management service returned an unexpected status code."""
 
-    def __init__(self, msg: str, data: dict = {}) -> None:
+    def __init__(self, msg: str, response: Response) -> None:
         """Attach (optional) data to the exception."""
-        self.data = data
+        self.response = response
         super(RequestFailed, self).__init__(msg)
+
+    @property
+    def status_code(self) -> int:
+        """Get the code from the response originating the exception."""
+        return self.response.status_code
 
 
 class RequestUnauthorized(RequestFailed):
