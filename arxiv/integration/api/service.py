@@ -131,7 +131,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         try:
             return resp.json(), resp.headers
         except json.decoder.JSONDecodeError as e:
-            raise BadResponse(f'Could not decode: {resp.content}') from e
+            raise BadResponse(f'Could not decode', resp) from e
 
     def get_status(self) -> dict:
         """Get the status of the file management service."""
