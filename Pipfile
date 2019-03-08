@@ -13,8 +13,6 @@ wtforms = "*"
 "e1839a8" = {path = "."}
 bleach = "*"
 "flask-s3" = "*"
-arxiv-submission-core = "==0.6.2rc19"
-arxiv-auth = "==0.3.2rc4"
 
 [dev-packages]
 pydocstyle = "*"
