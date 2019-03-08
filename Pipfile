@@ -13,6 +13,8 @@ wtforms = "*"
 "e1839a8" = {path = "."}
 bleach = "*"
 "flask-s3" = "*"
+arxiv-submission-core = "==0.6.2rc19"
+arxiv-auth = "==0.3.2rc4"
 
 [dev-packages]
 pydocstyle = "*"
@@ -24,3 +26,6 @@ sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
 astroid = "<2.2"
+
+[pipenv]
+allow_prereleases = true
