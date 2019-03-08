@@ -25,6 +25,9 @@ sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
 astroid = "<2.2"
+<<<<<<< HEAD
 
 [pipenv]
 allow_prereleases = true
+=======
+>>>>>>> master

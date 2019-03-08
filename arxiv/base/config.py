@@ -24,8 +24,8 @@ URLS = [
     ("search_archive", "/search/<archive>", BASE_SERVER),
     ("search_advanced", "/search/advanced", BASE_SERVER),
     ("account", "/user", BASE_SERVER),
-    ("login", "/user/login", BASE_SERVER),
-    ("logout", "/user/logout", BASE_SERVER),
+    ("login", "/login", BASE_SERVER),
+    ("logout", "/logout", BASE_SERVER),
     ("home", "/", BASE_SERVER),
     ("ignore_me", "/IgnoreMe", BASE_SERVER),    # Anti-robot honneypot.
     ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
@@ -70,10 +70,10 @@ for key, value in os.environ.items():
 
 ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
 
-BASE_VERSION = "0.14.1"
+BASE_VERSION = "0.15.2"
 """The version of the arxiv-base package."""
 
-APP_VERSION = "0.14.1"
+APP_VERSION = "0.15.2"
 """The version of the base test app."""
 
 """

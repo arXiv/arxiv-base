@@ -115,7 +115,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
 
     def json(self, method: str, path: str, token: Optional[str] = None,
              expected_code: List[int] = [status.HTTP_200_OK], **kwargs) \
-            -> Tuple[dict, MutableMapping]:
+            -> Tuple[dict, int, MutableMapping]:
         """
         Perform an HTTP request to a JSON endpoint, and handle any exceptions.
 
@@ -123,15 +123,17 @@ class HTTPIntegration(metaclass=MetaIntegration):
         -------
         dict
             Response content.
+        int
+            HTTP status code.
         dict
             Response headers.
 
         """
-        resp = self.request(method, path, token, expected_code, **kwargs)
+        response = self.request(method, path, token, expected_code, **kwargs)
         try:
-            return resp.json(), resp.headers
+            return response.json(), response.status_code, response.headers
         except json.decoder.JSONDecodeError as e:
-            raise BadResponse(f'Could not decode', resp) from e
+            raise BadResponse(f'Could not decode', response) from e
 
     def get_status(self) -> dict:
         """Get the status of the file management service."""
