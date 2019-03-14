@@ -67,6 +67,7 @@ class MetaIntegration(type):
 
        filemanager.get_upload_status(59192)
 
+
     A better way
     ------------
     Classes that use this metaclass are expected to implement a classmethod
