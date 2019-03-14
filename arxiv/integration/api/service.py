@@ -95,9 +95,18 @@ class HTTPIntegration(metaclass=MetaIntegration):
         elif resp.status_code not in expected_code:
             raise RequestFailed(f'Unexpected code: {resp.status_code}', resp)
 
+    def _parse_location(self, location: str) -> str:
+        endpoint_path = urlparse(self._endpoint).path
+        if self._endpoint in location:
+            _, location = location.split(self._endpoint, 1)
+        elif endpoint_path in location:
+            _, location = location.split(endpoint_path, 1)
+        return location
+
     def request(self, method: str, path: str, token: Optional[str] = None,
-                expected_code: List[int] = [status.HTTP_200_OK], **kwargs) \
-            -> requests.Response:
+                expected_code: List[int] = [status.HTTP_200_OK],
+                allow_2xx_redirects: bool = True,
+                **kwargs) -> requests.Response:
         """Make an HTTP request with error/code handling."""
         if token is not None:
             if 'headers' not in kwargs:
@@ -110,6 +119,17 @@ class HTTPIntegration(metaclass=MetaIntegration):
             raise SecurityException('SSL failed: %s' % e) from e
         except requests.exceptions.ConnectionError as e:
             raise ConnectionFailed('Could not connect: %s' % e) from e
+
+        # 200-series redirects are a common pattern on our projects, so these
+        # should be supported.
+        is_2xx = status.HTTP_200_OK < resp.status_code \
+            and resp.status_code < status.HTTP_300_MULTIPLE_CHOICES
+        if allow_2xx_redirects and is_2xx and 'Location' in resp.headers:
+            loc = self._parse_location(resp.headers['Location'])
+            logger.debug('Following 2xx redirect to %s', loc)
+            resp = self.request('get', loc, token, expected_code,
+                                allow_2xx_redirects)
+
         self._check_status(resp, expected_code)
         return resp
 

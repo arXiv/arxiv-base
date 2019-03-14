@@ -29,5 +29,3 @@ astroid = "<2.2"
 
 [pipenv]
 allow_prereleases = true
-=======
->>>>>>> master
