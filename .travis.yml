@@ -40,19 +40,11 @@ deploy:
   script: deploy/deploy_fourohfour.sh fourohfour development
   on:
     branch: development
-<<<<<<< HEAD
 # - provider: script
 #   script: deploy/deploy_fourohfour.sh fourohfour development
 #   on:
 #     all_branches: true
 #     condition: $TRAVIS_BRANCH != master && $TRAVIS_BRANCH != develop
-=======
-- provider: script
-  script: deploy/deploy_fourohfour.sh fourohfour development
-  on:
-    all_branches: true
-    condition: $TRAVIS_BRANCH != master && $TRAVIS_BRANCH != develop
->>>>>>> master
 
 notifications:
   slack:
