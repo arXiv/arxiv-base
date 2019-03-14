@@ -1,1 +1,1 @@
-"""Provides tools and base classes for HTTP integrations."""
+"""Provides tools and base classes for HTTP API integrations."""

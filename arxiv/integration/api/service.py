@@ -1,4 +1,24 @@
-"""Provides a base class for HTTP service integrations."""
+"""
+Provides a base class for HTTP API integrations.
+
+The goal of this module is to handle boilerplate connection and request
+handling that is invariant (or nearly so) among service integration modules
+that target HTTP APIs.
+
+Specific goals
+--------------
+
+- Handle verifying the response status code, and raise appropriate and
+  semantically meaningful exceptions.
+- Handle setting up a persistent HTTP session to cut down on overhead.
+- Provide basic retry functionality.
+- Handle binding a service instance (with its persistent session) to the
+  Flask application context.
+
+.. todo::
+   Make retry parameters easier to configure.
+
+"""
 
 from typing import Optional, Tuple, MutableMapping, List
 import inspect
@@ -28,6 +48,49 @@ class HTTPIntegration(metaclass=MetaIntegration):
 
     Provides binding to the application context, so that connections can be
     re-used.
+
+    To implement an HTTP API service integration, define a class that inherits
+    from :class:`.HTTPIntegration`. At minimum, it should include an inner
+    class called ``Meta`` with the attribute ``service_name``; this is used to
+    identify the configuration parameters for the service. For example:
+
+    .. code-block:: python
+
+       class MyCoolIntegration(HTTPIntegration):
+           class Meta:
+               service_name = "cool_beans"
+
+           def get_something(self, anything: str, token: str) -> dict:
+               data, _, _ = self.json("get", f"/thing/{anything}", token)
+               return data
+
+
+    and in your ``config.py``, include:
+
+    .. code-block:: python
+
+       COOL_BEANS_ENDPOINT = "http://thecool.beans.arxiv.org:9876"
+       COOL_BEANS_VERIFY = False   # (or True, if you are using SSL)
+
+
+   Thanks to :class:`arxiv.integration.meta.MetaIntegration`, you should be
+   able to use this integration in your app like:
+
+   .. code-block:: python
+
+      from my.cool.services import MyCoolIntegration
+      from arxiv.users import auth
+
+      app = Flask(__name__)
+      MyCoolIntegration.init_app(app)
+      auth.Auth(app)
+
+      @app.route('/foo')
+      def foo():
+          MyCoolIntegration.get_something('foo', request.environ['token'])
+          ...
+
+
     """
 
     class Meta:

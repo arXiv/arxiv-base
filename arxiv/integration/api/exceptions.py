@@ -1,4 +1,4 @@
-"""Exceptions for HTTP integrations."""
+"""Exceptions for HTTP API integrations."""
 
 from requests import Response
 
