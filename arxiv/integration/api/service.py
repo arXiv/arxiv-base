@@ -211,7 +211,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
             raise BadResponse(f'Could not decode', response) from e
 
     def get_status(self) -> dict:
-        """Get the status of the file management service."""
+        """Get the status of the service."""
         logger.debug('Get service status')
         content = self.json('get', 'status')[0]
         logger.debug('Got status response: %s', content)
