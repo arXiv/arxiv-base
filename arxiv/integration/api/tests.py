@@ -9,7 +9,7 @@ from flask import Flask
 class TestHTTPIntegration(TestCase):
     """Test for :class:`.HTTPIntegration`."""
 
-    def session(self, status_code=status.HTTP_200_OK, method="get", json={},
+    def session(self, status_code=status.OK, method="get", json={},
                 content="", headers={}):
         """Make a mock session."""
         return mock.MagicMock(**{
@@ -43,12 +43,12 @@ class TestHTTPIntegration(TestCase):
         """:func:`HTTPIntegration.request` uses contextual config."""
         session_one = mock.MagicMock(
             get=mock.MagicMock(
-                return_value=mock.MagicMock(status_code=status.HTTP_200_OK)
+                return_value=mock.MagicMock(status_code=status.OK)
             )
         )
         session_two = mock.MagicMock(
             get=mock.MagicMock(
-                return_value=mock.MagicMock(status_code=status.HTTP_200_OK)
+                return_value=mock.MagicMock(status_code=status.OK)
             )
         )
         mock_Session.side_effect = [session_one, session_two]
@@ -71,7 +71,7 @@ class TestHTTPIntegration(TestCase):
     @mock.patch(f'{service.__name__}.requests.Session')
     def test_handles_500_series(self, mock_Session):
         """Handles 500-series response codes."""
-        session_one = self.session(status.HTTP_503_SERVICE_UNAVAILABLE)
+        session_one = self.session(status.SERVICE_UNAVAILABLE)
         mock_Session.return_value = session_one
         self.app_one.config['BASE_ENDPOINT'] = 'https://fooservice/baz'
         service.HTTPIntegration.init_app(self.app_one)
@@ -82,12 +82,12 @@ class TestHTTPIntegration(TestCase):
             except Exception as e:
                 self.assertIsInstance(e, exceptions.RequestFailed)
                 self.assertEqual(e.status_code,
-                                 status.HTTP_503_SERVICE_UNAVAILABLE)
+                                 status.SERVICE_UNAVAILABLE)
 
     @mock.patch(f'{service.__name__}.requests.Session')
     def test_handles_unauthorized(self, mock_Session):
         """Handles 401 Unauthorized response code."""
-        session_one = self.session(status.HTTP_401_UNAUTHORIZED)
+        session_one = self.session(status.UNAUTHORIZED)
         mock_Session.return_value = session_one
         self.app_one.config['BASE_ENDPOINT'] = 'https://fooservice/baz'
         service.HTTPIntegration.init_app(self.app_one)
@@ -98,12 +98,12 @@ class TestHTTPIntegration(TestCase):
             except Exception as e:
                 self.assertIsInstance(e, exceptions.RequestUnauthorized)
                 self.assertEqual(e.status_code,
-                                 status.HTTP_401_UNAUTHORIZED)
+                                 status.UNAUTHORIZED)
 
     @mock.patch(f'{service.__name__}.requests.Session')
     def test_handles_forbidden(self, mock_Session):
         """Handles 403 Forbidden response code."""
-        session_one = self.session(status.HTTP_403_FORBIDDEN)
+        session_one = self.session(status.FORBIDDEN)
         mock_Session.return_value = session_one
         self.app_one.config['BASE_ENDPOINT'] = 'https://fooservice/baz'
         service.HTTPIntegration.init_app(self.app_one)
@@ -114,12 +114,12 @@ class TestHTTPIntegration(TestCase):
             except Exception as e:
                 self.assertIsInstance(e, exceptions.RequestForbidden)
                 self.assertEqual(e.status_code,
-                                 status.HTTP_403_FORBIDDEN)
+                                 status.FORBIDDEN)
 
     @mock.patch(f'{service.__name__}.requests.Session')
     def test_handles_not_found(self, mock_Session):
         """Handles 404 Not Found response code."""
-        session_one = self.session(status.HTTP_404_NOT_FOUND)
+        session_one = self.session(status.NOT_FOUND)
         mock_Session.return_value = session_one
         self.app_one.config['BASE_ENDPOINT'] = 'https://fooservice/baz'
         service.HTTPIntegration.init_app(self.app_one)
@@ -130,12 +130,12 @@ class TestHTTPIntegration(TestCase):
             except Exception as e:
                 self.assertIsInstance(e, exceptions.NotFound)
                 self.assertEqual(e.status_code,
-                                 status.HTTP_404_NOT_FOUND)
+                                 status.NOT_FOUND)
 
     @mock.patch(f'{service.__name__}.requests.Session')
     def test_handle_bad_request(self, mock_Session):
         """Handles 400 Bad Request response code."""
-        session_one = self.session(status.HTTP_400_BAD_REQUEST)
+        session_one = self.session(status.BAD_REQUEST)
         mock_Session.return_value = session_one
         self.app_one.config['BASE_ENDPOINT'] = 'https://fooservice/baz'
         service.HTTPIntegration.init_app(self.app_one)
@@ -146,12 +146,12 @@ class TestHTTPIntegration(TestCase):
             except Exception as e:
                 self.assertIsInstance(e, exceptions.BadRequest)
                 self.assertEqual(e.status_code,
-                                 status.HTTP_400_BAD_REQUEST)
+                                 status.BAD_REQUEST)
 
     @mock.patch(f'{service.__name__}.requests.Session')
     def test_handle_unexpected(self, mock_Session):
         """Handles unexpected response code."""
-        session_one = self.session(status.HTTP_305_USE_PROXY)
+        session_one = self.session(status.USE_PROXY)
         mock_Session.return_value = session_one
         self.app_one.config['BASE_ENDPOINT'] = 'https://fooservice/baz'
         service.HTTPIntegration.init_app(self.app_one)
@@ -162,9 +162,9 @@ class TestHTTPIntegration(TestCase):
             except Exception as e:
                 self.assertIsInstance(e, exceptions.RequestFailed)
                 self.assertEqual(e.status_code,
-                                 status.HTTP_305_USE_PROXY)
+                                 status.USE_PROXY)
 
-        session_one = self.session(status.HTTP_200_OK)
+        session_one = self.session(status.OK)
         mock_Session.return_value = session_one
         self.app_one.config['BASE_ENDPOINT'] = 'https://fooservice/baz'
         service.HTTPIntegration.init_app(self.app_one)
@@ -174,8 +174,8 @@ class TestHTTPIntegration(TestCase):
                 service.HTTPIntegration.request(
                     'get',
                     '/one',
-                    expected_code=[status.HTTP_306_RESERVED]
+                    expected_code=[status.GONE]
                 )
             except Exception as e:
                 self.assertIsInstance(e, exceptions.RequestFailed)
-                self.assertEqual(e.status_code, status.HTTP_200_OK)
+                self.assertEqual(e.status_code, status.OK)

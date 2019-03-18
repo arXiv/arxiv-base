@@ -21,6 +21,7 @@ Specific goals
 """
 
 from typing import Optional, Tuple, MutableMapping, List
+from http import HTTPStatus as status
 import inspect
 import requests
 from urllib3.util.retry import Retry
@@ -29,7 +30,7 @@ import json
 
 from flask import g, Flask, current_app
 
-from . import status
+
 from ..meta import MetaIntegration
 import logging
 
@@ -143,19 +144,10 @@ class HTTPIntegration(metaclass=MetaIntegration):
         ))
 
     def _check_status(self, resp: requests.Response,
-                      expected_code: List[int] = [status.HTTP_200_OK]) -> None:
+                      expected_code: List[int] = [status.OK]) -> None:
         """Check for unexpected or errant status codes."""
-        if resp.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
-            raise RequestFailed(f'Status: {resp.status_code}', resp)
-        elif resp.status_code == status.HTTP_401_UNAUTHORIZED:
-            raise RequestUnauthorized(f'Not authorized', resp)
-        elif resp.status_code == status.HTTP_403_FORBIDDEN:
-            raise RequestForbidden(f'Forbidden', resp)
-        elif resp.status_code == status.HTTP_404_NOT_FOUND:
-            raise NotFound(f'No such resource: {resp.url}', resp)
-        elif resp.status_code >= status.HTTP_400_BAD_REQUEST:
-            raise BadRequest(f'Bad request: {resp.content}', resp)
-        elif resp.status_code not in expected_code:
+        if resp.status_code not in expected_code:
+            raise_for_http_status(resp.status_code, resp)
             raise RequestFailed(f'Unexpected code: {resp.status_code}', resp)
 
     def _parse_location(self, location: str) -> str:
@@ -167,7 +159,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         return location
 
     def request(self, method: str, path: str, token: Optional[str] = None,
-                expected_code: List[int] = [status.HTTP_200_OK],
+                expected_code: List[int] = [status.OK],
                 allow_2xx_redirects: bool = True,
                 **kwargs) -> requests.Response:
         """Make an HTTP request with error/code handling."""
@@ -185,8 +177,8 @@ class HTTPIntegration(metaclass=MetaIntegration):
 
         # 200-series redirects are a common pattern on our projects, so these
         # should be supported.
-        is_2xx = status.HTTP_200_OK < resp.status_code \
-            and resp.status_code < status.HTTP_300_MULTIPLE_CHOICES
+        is_2xx = status.OK < resp.status_code \
+            and resp.status_code < status.MULTIPLE_CHOICES
         if allow_2xx_redirects and is_2xx and 'Location' in resp.headers:
             loc = self._parse_location(resp.headers['Location'])
             logger.debug('Following 2xx redirect to %s', loc)
@@ -197,7 +189,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         return resp
 
     def json(self, method: str, path: str, token: Optional[str] = None,
-             expected_code: List[int] = [status.HTTP_200_OK], **kwargs) \
+             expected_code: List[int] = [status.OK], **kwargs) \
             -> Tuple[dict, int, MutableMapping]:
         """
         Perform an HTTP request to a JSON endpoint, and handle any exceptions.
@@ -259,3 +251,33 @@ class HTTPIntegration(metaclass=MetaIntegration):
         elif name not in g:
             setattr(g, name, cls.get_session())  # type: ignore
         return getattr(g, name)  # type: ignore
+
+
+def raise_for_http_status(status_code: int,
+                          resp: Optional[requests.Response] = None) -> None:
+    """
+    Raise an exception based on an HTTP status code.
+
+    Parameters
+    ----------
+    status_code : int
+        HTTP status code.
+    resp : :class:`requests.Response`
+        If provided, passed to the exception.
+
+    Raises
+    ------
+    :class:`RequestFailed`
+        Or one of its children. See :class:`.exceptions`.
+
+    """
+    if resp.status_code >= status.INTERNAL_SERVER_ERROR:
+        raise RequestFailed(f'Status: {resp.status_code}', resp)
+    elif resp.status_code == status.UNAUTHORIZED:
+        raise RequestUnauthorized(f'Not authorized', resp)
+    elif resp.status_code == status.FORBIDDEN:
+        raise RequestForbidden(f'Forbidden', resp)
+    elif resp.status_code == status.NOT_FOUND:
+        raise NotFound(f'No such resource: {resp.url}', resp)
+    elif resp.status_code >= status.BAD_REQUEST:
+        raise BadRequest(f'Bad request: {resp.content}', resp)

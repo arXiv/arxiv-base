@@ -22,7 +22,7 @@ from werkzeug.exceptions import NotFound, Forbidden, Unauthorized, \
     HTTPException
 from flask import render_template, make_response, Response
 
-from arxiv import status
+from http import HTTPStatus as status
 
 _handlers = []
 
@@ -59,7 +59,7 @@ def handle_not_found(error: NotFound) -> Response:
     rendered = render_template("base/404.html", error=error,
                                pagetitle="404 Not Found")
     response: Response = make_response(rendered)
-    response.status_code = status.HTTP_404_NOT_FOUND
+    response.status_code = status.NOT_FOUND
     return response
 
 
@@ -69,7 +69,7 @@ def handle_forbidden(error: Forbidden) -> Response:
     rendered = render_template("base/403.html", error=error,
                                pagetitle="403 Forbidden")
     response: Response = make_response(rendered)
-    response.status_code = status.HTTP_403_FORBIDDEN
+    response.status_code = status.FORBIDDEN
     return response
 
 
@@ -79,7 +79,7 @@ def handle_unauthorized(error: Unauthorized) -> Response:
     rendered = render_template("base/401.html", error=error,
                                pagetitle="401 Unauthorized")
     response: Response = make_response(rendered)
-    response.status_code = status.HTTP_401_UNAUTHORIZED
+    response.status_code = status.UNAUTHORIZED
     return response
 
 
@@ -89,7 +89,7 @@ def handle_method_not_allowed(error: MethodNotAllowed) -> Response:
     rendered = render_template("base/405.html", error=error,
                                pagetitle="405 Method Not Allowed")
     response: Response = make_response(rendered)
-    response.status_code = status.HTTP_405_METHOD_NOT_ALLOWED
+    response.status_code = status.METHOD_NOT_ALLOWED
     return response
 
 
@@ -99,7 +99,7 @@ def handle_request_entity_too_large(error: RequestEntityTooLarge) -> Response:
     rendered = render_template("base/413.html", error=error,
                                pagetitle="413 Request Entity Too Large")
     response: Response = make_response(rendered)
-    response.status_code = status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    response.status_code = status.REQUEST_ENTITY_TOO_LARGE
     return response
 
 
@@ -109,7 +109,7 @@ def handle_bad_request(error: BadRequest) -> Response:
     rendered = render_template("base/400.html", error=error,
                                pagetitle="400 Bad Request")
     response: Response = make_response(rendered)
-    response.status_code = status.HTTP_400_BAD_REQUEST
+    response.status_code = status.BAD_REQUEST
     return response
 
 
@@ -119,5 +119,5 @@ def handle_internal_server_error(error: InternalServerError) -> Response:
     rendered = render_template("base/500.html", error=error,
                                pagetitle="500 Internal Server Error")
     response: Response = make_response(rendered)
-    response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    response.status_code = status.INTERNAL_SERVER_ERROR
     return response
