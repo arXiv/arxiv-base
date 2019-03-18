@@ -225,26 +225,19 @@
 \\
 arXiv:{{ arxiv_id }}
 From: {{ submitter_name }} <{{ submitter_email }}>
-Date: {{ submitted_date }}   ({{ submission_size_bytes|tidy_filesize }})
+Date: {{ (submitted_date|as_eastern).strftime("%a, %-d %b %Y %H:%M:%S ET") }}   ({{ submission_size_bytes|tidy_filesize }})
 
 Title: {{ title }}
 Authors: {{ authors }}
-Categories: {{ primary_category }}{%- for category in secondary_categories -%} {{ category }}{%- endfor -%}
-{% if comments %}
-Comments: {{ comments|wordwrap(77, wrapstring="\n  ") }}{%- endif %}
-{% if msc_class %}
-MSC classes: {{ msc_class }}{%- endif %}
-{% if acm_class %}
-ACM classes: {{ acm_class }}{%- endif %}
-{% if journal_ref %}
-Journal reference: {{ journal_ref }}{%- endif %}
-{% if doi %}
-DOI: {{ doi }}{%- endif %}
-{% if report_num %}
-Report number: {{ report_num }}{%- endif %}
-{% if doi %}
-DOI: {{ doi }}{%- endif %}
-
+Categories: {{ primary_category }}{%- for category in secondary_categories -%} {{ category }}{%- endfor %}
+{% if comments -%}{{ ("Comments: " + comments)|wordwrap(77, wrapstring="\n  ") }}{%- endif %}
+{% if msc_class -%}MSC classes: {{ msc_class }}{%- endif %}
+{% if acm_class -%}ACM classes: {{ acm_class }}{%- endif %}
+{% if journal_ref -%}Journal reference: {{ journal_ref }}{%- endif %}
+{% if doi -%}DOI: {{ doi }}{%- endif -%}
+{% if report_num -%}Report number: {{ report_num }}{%- endif %}
 License: {{ license_uri }}
+\\
+  {{ abstract|wordwrap(77) }}
 \\
 {% endmacro %}

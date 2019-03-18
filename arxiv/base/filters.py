@@ -3,14 +3,21 @@
 import re
 import os
 from functools import partial
+from datetime import datetime
+from pytz import timezone
 from typing import Union
+
 from flask import Flask
 from jinja2 import Markup, escape
+
 from arxiv.base.urls import urlize, url_for_doi, canonical_url, \
     clickthrough_url
 from arxiv.util.tex2utf import tex2utf
 from arxiv.taxonomy import get_category_display, get_archive_display, \
     get_group_display
+
+ET = timezone('US/Eastern')
+
 
 JinjaFilterInput = Union[Markup, str]
 """
@@ -76,6 +83,11 @@ def tidy_filesize(size: int) -> str:
     return '{} {}'.format(size, units[units_index])
 
 
+def as_eastern(utc_datetime: datetime) -> datetime:
+    """Relocalize an UTC datetime in US/Eastern time."""
+    return utc_datetime.astimezone(ET)
+
+
 def register_filters(app: Flask) -> None:
     """
     Register base template filters on a Flask app.
@@ -97,3 +109,4 @@ def register_filters(app: Flask) -> None:
     app.template_filter('get_group_display')(get_group_display)
     app.template_filter('embed_content')(embed_content)
     app.template_filter('tidy_filesize')(tidy_filesize)
+    app.template_filter('as_eastern')(as_eastern)
