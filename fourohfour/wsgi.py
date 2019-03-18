@@ -5,7 +5,7 @@ from typing import Mapping
 from flask import Flask
 
 from arxiv.base import Base
-from arxiv import status
+from http import HTTPStatus as status
 
 
 def create_web_app() -> Flask:
@@ -16,7 +16,7 @@ def create_web_app() -> Flask:
     @app.route('/healthz')
     def healthz():
         """Health check endpoint."""
-        return "i'm still here", status.HTTP_200_OK, {}
+        return "i'm still here", status.OK, {}
 
     return app
 

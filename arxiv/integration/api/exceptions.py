@@ -1,5 +1,6 @@
 """Exceptions for HTTP API integrations."""
 
+from typing import Optional
 from requests import Response
 
 
@@ -12,9 +13,11 @@ class RequestFailed(IOError):
         super(RequestFailed, self).__init__(msg)
 
     @property
-    def status_code(self) -> int:
+    def status_code(self) -> Optional[int]:
         """Get the code from the response originating the exception."""
-        return self.response.status_code
+        if self.response:
+            return self.response.status_code
+        return None
 
 
 class RequestUnauthorized(RequestFailed):
