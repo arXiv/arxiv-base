@@ -1,8 +1,12 @@
 """Dern simple support for sending multipart/alternative e-mails."""
 
 from typing import Optional, Dict, List
+import os
 from email.message import EmailMessage
 import smtplib
+
+from flask import Flask, Blueprint
+
 from arxiv.base.globals import get_application_config
 
 NOREPLY = 'noreply@arxiv.org'
@@ -107,3 +111,10 @@ def _get_local_hostname() -> Optional[str]:
 
 def _use_ssl() -> bool:
     return bool(int(get_application_config().get('SMTP_SSL', '0')))
+
+
+def init_app(app: Flask) -> None:
+    template_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   'templates')
+    blueprint = Blueprint('mail', __name__, template_folder=template_folder)
+    app.register_blueprint(blueprint)

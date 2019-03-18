@@ -1,2 +1,3 @@
 recursive-include arxiv/base/static/ *
 recursive-include arxiv/base/templates *
+recursive-include arxiv/mail/templates *
