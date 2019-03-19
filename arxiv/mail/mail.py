@@ -3,6 +3,7 @@
 from typing import Optional, Dict, List
 import os
 from email.message import EmailMessage
+from email.utils import formatdate
 import smtplib
 
 from flask import Flask, Blueprint
@@ -64,6 +65,10 @@ def _write(recipient: str, subject: str, text_body: str,
     message['Subject'] = subject
     message['From'] = sender
     message['To'] = recipient
+
+    # For bleeping context, see https://bugs.python.org/issue28879.
+    message['Date'] = formatdate()
+
     if cc_recipients:
         message['CC'] = ', '.join(cc_recipients)
     if bcc_recipients:
