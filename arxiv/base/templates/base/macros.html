@@ -124,7 +124,7 @@
     include_stylesheet = 1,
     embed_stylesheet = 0) -%}
 
-{% if include_stylesheet %}
+{% if include_stylesheet and not embed_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/abs.css') }}">
 {% endif %}
 {% if embed_stylesheet %}
