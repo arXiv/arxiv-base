@@ -29,11 +29,14 @@ Updated 18 January, 2019: refactored to combine arXiv + DOI regexes with URL
 matching and link generation provided by `bleach
 <https://bleach.readthedocs.io>`_. The bleach URL regex is extended a bit to
 handle FTP addresses.
+
+Updated 20 March, 2019: refactored to provide independent bleach attribute
+callbacks for each kind of link.
 """
 from typing import Optional, List, Pattern, Match, Tuple, Callable, \
     NamedTuple, Dict, Union, Mapping
 import re
-from functools import partial
+from functools import partial, reduce
 from urllib.parse import quote, urlparse
 
 from flask import url_for
@@ -213,12 +216,12 @@ ORDER = ['arxiv_id', 'doi', 'url']
 SUPPORTED_KINDS = ORDER
 """Identifier types that we can currently match and convert to to URLs."""
 
-DEFAULT_CALLBACKS: List[Callback] = [
-    _handle_doi_url,
-    _handle_arxiv_url,
-    _add_rel_external,
-    _add_scheme_info
-]
+callbacks: Dict[str, List[Callback]] = {
+    'doi': [_handle_doi_url, _add_scheme_info],
+    'arxiv_id': [_handle_arxiv_url, _add_scheme_info, _add_rel_external],
+    'url': [ _add_rel_external, _add_scheme_info]
+}
+"""Bleach attribute callbacks for each kind."""
 
 
 def _get_pattern(kinds: List[str]) -> Pattern:
@@ -229,15 +232,29 @@ def _get_pattern(kinds: List[str]) -> Pattern:
     )
 
 
-def _get_linker(kinds: List[str],
-                callbacks: List[Callback] = DEFAULT_CALLBACKS) \
-        -> Callable[[str], str]:
+def _get_linker_of_kind(kind:str):
+    # The returned object will attempt to match url_re in the input string.
+    # For each url_re that matches, it will run all of the attribute
+    # adjsuting callbacks and then stick the tag in the output string replacing the
+    # matched text.
     linker: Callable[[str], str] = bleach.linkifier.Linker(
-        callbacks=callbacks,
+        callbacks=callbacks[kind],
         skip_tags=['a'],
-        url_re=_get_pattern(kinds)
+        url_re=_get_pattern([kind])
     ).linkify
     return linker
+
+
+def _compose_list_of_funcs(fv: List[Callable]) -> Callable:
+    if not fv:
+        return lambda x: x
+    return reduce(lambda f, g: lambda x: f(g(x)), fv[1:], fv[0])
+
+def _get_linker(kinds: List[str]) \
+        -> Callable[[str], str]:
+    ordered_linkers = [_get_linker_of_kind(kind) for kind
+                       in sorted(kinds, key=lambda kind: ORDER.index(kind))]
+    return _compose_list_of_funcs(ordered_linkers)
 
 
 def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:

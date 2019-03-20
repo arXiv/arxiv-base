@@ -239,5 +239,35 @@ class TestURLize(unittest.TestCase):
     def test_arxiv_prefix(self):
         self.assertEqual(
             links.urlize("see arxiv:1201.12345"),
-            'see <a class="link-https" data-arxiv-id="1201.12345" href="https://arxiv.org/abs/1201.12345">arXiv:1201.12345</a>'
-        )
+            'see <a class="link-https" data-arxiv-id="1201.12345" href="https://arxiv.org/abs/1201.12345">arXiv:1201.12345</a>')
+
+
+    @mock.patch(f'{links.__name__}.clickthrough')
+    def test_doi_2(self, mock_clickthrough):
+        mock_clickthrough.clickthrough_url = lambda x: x
+        self.assertRegex(links.urlize('10.1088/1475-7516/2018/07/009'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2018/07/009".*>10.1088/1475-7516/2018/07/009</a>')
+
+        self.assertRegex(links.urlize('10.1088/1475-7516/2019/02/E02/meta'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/meta".*>10.1088/1475-7516/2019/02/E02/meta</a>')
+        self.assertRegex(links.urlize('10.1088/1475-7516/2019/02/E02/META'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/META".*>10.1088/1475-7516/2019/02/E02/META</a>')
+        self.assertRegex(links.urlize('doi:10.1088/1475-7516/2018/07/009'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2018/07/009".*>10.1088/1475-7516/2018/07/009</a>')
+
+        self.assertRegex(links.urlize('doi:10.1088/1475-7516/2019/02/E02/meta'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/meta".*>10.1088/1475-7516/2019/02/E02/meta</a>')
+        self.assertRegex(links.urlize('doi:10.1088/1475-7516/2019/02/E02/META'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/META".*>10.1088/1475-7516/2019/02/E02/META</a>')
+
+
+    @mock.patch(f'{links.__name__}.clickthrough')
+    def test_double_doi(self, mock_clickthrough):
+        mock_clickthrough.clickthrough_url = lambda x: x
+        txt = links.urlize('10.1088/1475-7516/2018/07/009 10.1088/1475-7516/2019/02/E02/meta' )
+        self.assertNotRegex(txt, r'this.*URL',
+                            'DOIs should not get the generic "this https URL" they should have the DOI text')
+        self.assertRegex(txt, r'<a.*>10.1088/1475-7516/2018/07/009</a> <a.*>10.1088/1475-7516/2019/02/E02/meta</a>',
+                         'Should handle two DOIs in a row correctly')
+
+
