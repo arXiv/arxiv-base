@@ -49,6 +49,7 @@ from . import clickthrough
 
 Attrs = Dict[Union[str, Tuple[None, str]], str]
 Callback = Callable[[Attrs, bool], Attrs]
+Callable_Linker = Callable[[str], str]
 
 
 def _without_group_names(pattern: Pattern) -> str:
@@ -136,16 +137,31 @@ def _extend_class_attr(attrs: Attrs, new_class: str) -> Attrs:
     return attrs
 
 
-def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
+def _add_rel(attrs: Attrs, new: bool = False) -> Attrs:
+    """Check if href is interal or external and adds attrs as appropriate."""
     o = urlparse(attrs[(None, 'href')])
     if not o.netloc.split(':')[0].endswith('arxiv.org'):   # External link?
-        attrs[(None, 'rel')] = 'external'
-        attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
-        _extend_class_attr(attrs, 'link-external')
-    elif (None, 'data-arxiv-id') not in attrs \
-            and (None, 'data-doi') not in attrs:
-        attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
-        _extend_class_attr(attrs, 'link-internal')
+        return _add_rel_external(attrs, new)
+    else:
+        return _add_rel_internal(attrs, new)
+
+def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
+    """Always adds external rel."""
+    # noopener for security reasons
+    # nofollow to disencentivie arXiv articles for SEO
+    # external says that link is away from arxiv
+    attrs[(None, 'rel')] = 'external noopener nofollow'
+    _extend_class_attr(attrs, 'link-external')
+    return attrs
+
+def _add_rel_internal(attrs: Attrs, new: bool = False) -> Attrs:
+    """Always adds interal rel."""
+    _extend_class_attr(attrs, 'link-internal')
+    return attrs
+
+def _this_url_text(attrs: Attrs, new: bool = False) -> Attrs:
+    o = urlparse(attrs[(None, 'href')])
+    attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
     return attrs
 
 
@@ -216,10 +232,10 @@ ORDER = ['arxiv_id', 'doi', 'url']
 SUPPORTED_KINDS = ORDER
 """Identifier types that we can currently match and convert to to URLs."""
 
-callbacks: Dict[str, List[Callback]] = {
-    'doi': [_handle_doi_url, _add_scheme_info],
-    'arxiv_id': [_handle_arxiv_url, _add_scheme_info, _add_rel_external],
-    'url': [ _add_rel_external, _add_scheme_info]
+callbacks = {
+    'doi':      [_handle_doi_url,   _add_scheme_info ],
+    'arxiv_id': [_handle_arxiv_url, _add_scheme_info ],
+    'url':      [_this_url_text,    _add_rel, _add_scheme_info]
 }
 """Bleach attribute callbacks for each kind."""
 
@@ -232,26 +248,25 @@ def _get_pattern(kinds: List[str]) -> Pattern:
     )
 
 
-def _get_linker_of_kind(kind:str):
+def _get_linker_of_kind(kind: str) -> Callable_Linker:
     # The returned object will attempt to match url_re in the input string.
     # For each url_re that matches, it will run all of the attribute
-    # adjsuting callbacks and then stick the tag in the output string replacing the
-    # matched text.
+    # adjsuting callbacks and then stick the tag in the output string
+    # replacing the matched text.
     linker: Callable[[str], str] = bleach.linkifier.Linker(
         callbacks=callbacks[kind],
         skip_tags=['a'],
-        url_re=_get_pattern([kind])
-    ).linkify
+        url_re=_get_pattern([kind])).linkify
     return linker
 
 
-def _compose_list_of_funcs(fv: List[Callable]) -> Callable:
+def _compose_list_of_funcs(fv: List[Callable_Linker]) -> Callable_Linker:
     if not fv:
         return lambda x: x
     return reduce(lambda f, g: lambda x: f(g(x)), fv[1:], fv[0])
 
-def _get_linker(kinds: List[str]) \
-        -> Callable[[str], str]:
+
+def _get_linker(kinds: List[str]) -> Callable_Linker:
     ordered_linkers = [_get_linker_of_kind(kind) for kind
                        in sorted(kinds, key=lambda kind: ORDER.index(kind))]
     return _compose_list_of_funcs(ordered_linkers)
@@ -277,7 +292,7 @@ def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:
     return _get_linker(kinds)(text)
 
 
-def urlizer(kinds: List[str] = SUPPORTED_KINDS) -> Callable[[str], str]:
+def urlizer(kinds: List[str] = SUPPORTED_KINDS) -> Callable_Linker:
     """
     Generate a function to convert tokens to links.
 
