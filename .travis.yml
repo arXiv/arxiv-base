@@ -24,27 +24,27 @@ deploy:
 #  distributions: sdist
 #  on:
 #    tags: true
-- provider: script
-  script: deploy/push_base_image.sh
-  on:
-    all_branches: true
-- provider: script
-  script: deploy/push_fourohfour_image.sh
-  on:
-    all_branches: true
-- provider: script
-  script: deploy/deploy_fourohfour.sh fourohfour staging
-  on:
-    tags: true
-- provider: script
-  script: deploy/deploy_fourohfour.sh fourohfour development
-  on:
-    branch: development
-- provider: script
-  script: deploy/deploy_fourohfour.sh fourohfour development
-  on:
-    all_branches: true
-    condition: $TRAVIS_BRANCH != master && $TRAVIS_BRANCH != develop
+# - provider: script
+#   script: deploy/push_base_image.sh
+#   on:
+#     all_branches: true
+# - provider: script
+#   script: deploy/push_fourohfour_image.sh
+#   on:
+#     all_branches: true
+# - provider: script
+#   script: deploy/deploy_fourohfour.sh fourohfour staging
+#   on:
+#     tags: true
+# - provider: script
+#   script: deploy/deploy_fourohfour.sh fourohfour development
+#   on:
+#     branch: development
+# - provider: script
+#   script: deploy/deploy_fourohfour.sh fourohfour development
+#   on:
+#     all_branches: true
+#     condition: $TRAVIS_BRANCH != master && $TRAVIS_BRANCH != develop
 
 notifications:
   slack:
