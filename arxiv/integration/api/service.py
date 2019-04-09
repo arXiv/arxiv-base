@@ -20,7 +20,7 @@ Specific goals
 
 """
 
-from typing import Optional, Tuple, MutableMapping, List
+from typing import Optional, Tuple, MutableMapping, List, Any
 from http import HTTPStatus as status
 import inspect
 import requests
@@ -120,7 +120,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         """
         self._session = requests.Session()
         self._verify = verify
-        self._retry = Retry(  # type: ignore
+        self._retry = Retry(
             total=10,
             read=10,
             connect=10,
@@ -161,14 +161,16 @@ class HTTPIntegration(metaclass=MetaIntegration):
     def request(self, method: str, path: str, token: Optional[str] = None,
                 expected_code: List[int] = [status.OK],
                 allow_2xx_redirects: bool = True,
-                **kwargs) -> requests.Response:
+                **kwargs: Any) -> requests.Response:
         """Make an HTTP request with error/code handling."""
         if token is not None:
             if 'headers' not in kwargs:
                 kwargs['headers'] = {}
             kwargs['headers'].update({'Authorization': token})
+        resp: requests.Response
         try:
-            resp = getattr(self._session, method)(self._path(path), **kwargs)
+            make_request = getattr(self._session, method)
+            resp = make_request(self._path(path), **kwargs)
             logger.debug('Got response %s', resp)
         except requests.exceptions.SSLError as e:
             raise SecurityException('SSL failed: %s' % e) from e
@@ -189,7 +191,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         return resp
 
     def json(self, method: str, path: str, token: Optional[str] = None,
-             expected_code: List[int] = [status.OK], **kwargs) \
+             expected_code: List[int] = [status.OK], **kwargs: Any) \
             -> Tuple[dict, int, MutableMapping]:
         """
         Perform an HTTP request to a JSON endpoint, and handle any exceptions.
@@ -249,7 +251,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         if not g:
             return cls.get_session()
         elif name not in g:
-            setattr(g, name, cls.get_session())  # type: ignore
+            setattr(g, name, cls.get_session())
         return getattr(g, name)  # type: ignore
 
 
@@ -271,6 +273,8 @@ def raise_for_http_status(status_code: int,
         Or one of its children. See :class:`.exceptions`.
 
     """
+    if resp is None:
+        raise ValueError('No response')
     if resp.status_code >= status.INTERNAL_SERVER_ERROR:
         raise RequestFailed(f'Status: {resp.status_code}', resp)
     elif resp.status_code == status.UNAUTHORIZED:

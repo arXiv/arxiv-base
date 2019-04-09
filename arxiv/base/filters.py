@@ -59,7 +59,7 @@ def embed_content(path: str) -> Markup:
         return Markup(f.read())
 
 
-def tidy_filesize(size: int) -> str:
+def tidy_filesize(size: Union[int, float]) -> str:
     """
     Convert upload size to human readable form.
 
