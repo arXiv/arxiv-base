@@ -96,6 +96,10 @@ class TestISO8601JSONDecoder(TestCase):
             [{"date": [datetime(year=1993, month=11, day=3)]}],
             serialize.loads('[{"date": ["1993-11-03"]}]')
         )
+        self.assertEqual(
+            [{"date": ["1993"]}],
+            serialize.loads('[{"date": ["1993"]}]')
+        )
 
     def test_decode_with_datetime(self):
         """Decode JSON with a datetime value."""

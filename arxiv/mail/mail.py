@@ -1,8 +1,13 @@
 """Dern simple support for sending multipart/alternative e-mails."""
 
 from typing import Optional, Dict, List
+import os
 from email.message import EmailMessage
+from email.utils import formatdate
 import smtplib
+
+from flask import Flask, Blueprint
+
 from arxiv.base.globals import get_application_config
 
 NOREPLY = 'noreply@arxiv.org'
@@ -60,6 +65,10 @@ def _write(recipient: str, subject: str, text_body: str,
     message['Subject'] = subject
     message['From'] = sender
     message['To'] = recipient
+
+    # For bleeping context, see https://bugs.python.org/issue28879.
+    message['Date'] = formatdate()
+
     if cc_recipients:
         message['CC'] = ', '.join(cc_recipients)
     if bcc_recipients:
@@ -107,3 +116,11 @@ def _get_local_hostname() -> Optional[str]:
 
 def _use_ssl() -> bool:
     return bool(int(get_application_config().get('SMTP_SSL', '0')))
+
+
+def init_app(app: Flask) -> None:
+    """Configure a Flask app to use the base mail templates."""
+    template_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   'templates')
+    blueprint = Blueprint('mail', __name__, template_folder=template_folder)
+    app.register_blueprint(blueprint)

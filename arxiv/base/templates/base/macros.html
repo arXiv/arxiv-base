@@ -121,10 +121,16 @@
     version = 1,
     submission_history = [],
     secondary_categories = [],
-    include_stylesheet = 1) -%}
+    include_stylesheet = 1,
+    embed_stylesheet = 0) -%}
 
-{% if include_stylesheet %}
+{% if include_stylesheet and not embed_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/abs.css') }}">
+{% endif %}
+{% if embed_stylesheet %}
+  <style>
+  {{ 'css/abs.css'|embed_content }}
+  </style>
 {% endif %}
 <div id="content">
   <div id="abs">
@@ -194,3 +200,44 @@
   </div>
 </div>
 {%- endmacro -%}
+
+
+{% macro abs_plaintext(
+    arxiv_id,
+    title,
+    authors,
+    abstract,
+    submitted_date,
+    primary_category,
+    submitter_name,
+    submitter_email,
+    submission_size_bytes,
+    license_uri,
+    comments = None,
+    msc_class = None,
+    acm_class = None,
+    journal_ref = None,
+    doi = None,
+    report_num = None,
+    version = 1,
+    submission_history = [],
+    secondary_categories = []) -%}
+\\
+arXiv:{{ arxiv_id }}
+From: {{ submitter_name }} <{{ submitter_email }}>
+Date: {{ (submitted_date|as_eastern).strftime("%a, %-d %b %Y %H:%M:%S ET") }}   ({{ submission_size_bytes|tidy_filesize }})
+
+Title: {{ title }}
+Authors: {{ authors }}
+Categories: {{ primary_category }}{%- for category in secondary_categories -%} {{ category }}{%- endfor %}
+{% if comments -%}{{ ("Comments: " + comments)|wordwrap(77, wrapstring="\n  ") }}{%- endif %}
+{% if msc_class -%}MSC classes: {{ msc_class }}{%- endif %}
+{% if acm_class -%}ACM classes: {{ acm_class }}{%- endif %}
+{% if journal_ref -%}Journal reference: {{ journal_ref }}{%- endif %}
+{% if doi -%}DOI: {{ doi }}{%- endif -%}
+{% if report_num -%}Report number: {{ report_num }}{%- endif %}
+License: {{ license_uri }}
+\\
+  {{ abstract|wordwrap(77) }}
+\\
+{% endmacro %}

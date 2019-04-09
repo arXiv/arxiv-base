@@ -3,7 +3,7 @@
 from unittest import TestCase, mock
 from botocore.exceptions import BotoCoreError, WaiterError, ClientError
 
-from arxiv.base.agent import BaseConsumer, CheckpointError, StopProcessing, \
+from ..consumer import BaseConsumer, CheckpointError, StopProcessing, \
     KinesisRequestFailed, ConfigurationError, StreamNotAvailable, \
     process_stream
 
@@ -181,7 +181,6 @@ class TestProcessStream(TestCase):
             'AWS_SECRET_ACCESS_KEY': 'qwerty',
             'AWS_REGION': 'su-tsae-9'
         }
-
 
     @mock.patch('boto3.client')
     def test_process_stream(self, mock_client_factory):

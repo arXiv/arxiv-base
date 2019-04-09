@@ -15,7 +15,8 @@ setup(
         'pytz',
         'uwsgi',
         'boto3',
-        'bleach==3.1.0'
+        'bleach==3.1.0',
+        'backports-datetime-fromisoformat==1.0.0'
     ],
     include_package_data=True
 )

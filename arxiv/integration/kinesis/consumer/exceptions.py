@@ -1,4 +1,4 @@
-"""Exceptions raised by :class:`arxiv.base.agent.BaseConsumer`."""
+"""Exceptions raised by :class:`.BaseConsumer`."""
 
 
 class CheckpointError(RuntimeError):

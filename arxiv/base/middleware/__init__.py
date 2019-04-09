@@ -105,6 +105,5 @@ def wrap(app: Union[Flask, Callable],
     wrapped_app = app.wsgi_app  # type: ignore
     for middleware in middlewares[::-1]:
         wrapped_app = middleware(wrapped_app)
-        # factory = middleware(factory)
     app.wsgi_app = wrapped_app  # type: ignore
     return app
