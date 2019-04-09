@@ -311,7 +311,7 @@ def urlize(text: str, kinds: List[str] = DEFAULT_KINDS) -> str:
 def urlizer(kinds: List[str] = DEFAULT_KINDS) -> Callable_Linker:
     """Generate a function to convert tokens to links.
 
-    If the urlizing funciton is going to be reused, this is more
+    If the urlizing function is going to be reused, this is more
     efficient than urlize because this will only call _get_linker()
     once. urlize() will call _get_linker() on each call to urlize(txt)
 
