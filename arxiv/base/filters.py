@@ -102,7 +102,6 @@ def register_filters(app: Flask) -> None:
     app.template_filter('tex2utf')(partial(f_tex2utf, letters=True))
     app.template_filter('tex2utf_no_symbols')(partial(f_tex2utf, letters=False))
     app.template_filter('canonical_url')(canonical_url)
-    app.template_filter('url_for_doi')(url_for_doi)
     app.template_filter('clickthrough_url')(clickthrough_url)
     app.template_filter('get_category_display')(get_category_display)
     app.template_filter('get_archive_display')(get_archive_display)
