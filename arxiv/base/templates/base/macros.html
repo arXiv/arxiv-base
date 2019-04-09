@@ -145,7 +145,7 @@
         {%- if comments %}
         <tr>
           <td class="tablecell label">Comments:</td>
-          <td class="tablecell comments mathjax">{{ comments|escape|urlize|safe }}</td>
+          <td class="tablecell comments mathjax">{{ comments|tex2utf|urlize|safe }}</td>
         </tr>
         {% endif -%}
         <tr>
