@@ -74,23 +74,22 @@ class HTTPIntegration(metaclass=MetaIntegration):
        COOL_BEANS_VERIFY = False   # (or True, if you are using SSL)
 
 
-   Thanks to :class:`arxiv.integration.meta.MetaIntegration`, you should be
-   able to use this integration in your app like:
+    Thanks to :class:`arxiv.integration.meta.MetaIntegration`, you should be
+    able to use this integration in your app like:
 
-   .. code-block:: python
+    .. code-block:: python
 
-      from my.cool.services import MyCoolIntegration
-      from arxiv.users import auth
+       from my.cool.services import MyCoolIntegration
+       from arxiv.users import auth
 
-      app = Flask(__name__)
-      MyCoolIntegration.init_app(app)
-      auth.Auth(app)
+       app = Flask(__name__)
+       MyCoolIntegration.init_app(app)
+       auth.Auth(app)
 
-      @app.route('/foo')
-      def foo():
-          MyCoolIntegration.get_something('foo', request.environ['token'])
-          ...
-
+       @app.route('/foo')
+       def foo():
+           MyCoolIntegration.get_something('foo', request.environ['token'])
+           ...
 
     """
 

@@ -119,6 +119,7 @@ def _use_ssl() -> bool:
 
 
 def init_app(app: Flask) -> None:
+    """Configure a Flask app to use the base mail templates."""
     template_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    'templates')
     blueprint = Blueprint('mail', __name__, template_folder=template_folder)
