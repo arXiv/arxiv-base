@@ -67,8 +67,16 @@ Pattern for matching DOIs.
 We should probably match DOIs first because they are the source of a
 lot of false positives for arxiv matches.
 
-Only using the most general express from
+Only using the most general expression from
 https://www.crossref.org/blog/dois-and-matching-regular-expressions/
+"""
+
+
+BROAD_DOI=re.compile(r'(?P<doi>10\.\d{4,5}\/\S+)', re.I)
+"""
+Very broad pattern for matching DOIs in the abs DOI field.
+
+Ex. 10.1175/1520-0469(1996)053<0946:ASTFHH>2.0.CO;2
 """
 
 ARXIV_PATTERNS = [
@@ -225,17 +233,22 @@ def _handle_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
 
 PATTERNS = {
     'doi': DOI,
+    'doi_field': BROAD_DOI,
     'url': URL,
     'arxiv_id': ARXIV_ID
 }
-ORDER = ['arxiv_id', 'doi', 'url']
-SUPPORTED_KINDS = ORDER
-"""Identifier types that we can currently match and convert to to URLs."""
+ORDER = ['arxiv_id', 'doi', 'url', 'doi_field']
+DEFAULT_KINDS = ['arxiv_id', 'doi', 'url']
+"""Default list of identifier types to match and convert to to URLs.
+
+This does not include 'doi_field because that is a specialized kind
+for just the abs DOI field."""
 
 callbacks = {
-    'doi':      [_handle_doi_url,   _add_scheme_info ],
-    'arxiv_id': [_handle_arxiv_url, _add_scheme_info ],
-    'url':      [_this_url_text,    _add_rel, _add_scheme_info]
+    'doi':      [_handle_doi_url, _add_scheme_info, _add_rel_external],
+    'doi_field': [_handle_doi_url, _add_scheme_info, _add_rel_external],
+    'arxiv_id': [_handle_arxiv_url, _add_scheme_info],
+    'url':      [_this_url_text, _add_rel, _add_scheme_info ]
 }
 """Bleach attribute callbacks for each kind."""
 
@@ -261,18 +274,21 @@ def _get_linker_of_kind(kind: str) -> Callable_Linker:
 
 
 def _compose_list_of_funcs(fv: List[Callable_Linker]) -> Callable_Linker:
+    """Returns function that calls fv functions one after another."""
     if not fv:
         return lambda x: x
     return reduce(lambda f, g: lambda x: f(g(x)), fv[1:], fv[0])
 
 
 def _get_linker(kinds: List[str]) -> Callable_Linker:
+    if len(kinds) > 1 and 'doi_field' in kinds:
+        raise ValueError('doi_field should not be used in combination with other kinds')
     ordered_linkers = [_get_linker_of_kind(kind) for kind
                        in sorted(kinds, key=lambda kind: ORDER.index(kind))]
     return _compose_list_of_funcs(ordered_linkers)
 
 
-def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:
+def urlize(text: str, kinds: List[str] = DEFAULT_KINDS) -> str:
     """
     Convert URLs and certain identifiers to HTML links.
 
@@ -292,9 +308,12 @@ def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:
     return _get_linker(kinds)(text)
 
 
-def urlizer(kinds: List[str] = SUPPORTED_KINDS) -> Callable_Linker:
-    """
-    Generate a function to convert tokens to links.
+def urlizer(kinds: List[str] = DEFAULT_KINDS) -> Callable_Linker:
+    """Generate a function to convert tokens to links.
+
+    If the urlizing funciton is going to be reused, this is more
+    efficent than urlize because this will only call _get_linker()
+    once. urlize() will call _get_linker() on each call to urlize(txt)
 
     Parameters
     ----------

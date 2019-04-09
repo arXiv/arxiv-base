@@ -176,7 +176,7 @@
         {%- if doi %}
         <tr>
           <td class="tablecell label"><abbr title="Digital Object Identifier">DOI</abbr>:</td>
-          <td class="tablecell msc_classes"><a href="{{ doi|urlize }}">{{ doi }}</a></td>
+          <td class="tablecell msc_classes">{{ doi|abs_doi_to_urls }}</td>
         </tr>
         {% endif -%}
         {%- if report_num %}
