@@ -97,7 +97,7 @@ def register_filters(app: Flask) -> None:
 
     """
     app.template_filter('abstract_lf_to_br')(abstract_lf_to_br)
-    app.template_filter('urlize')(urlizer)
+    app.template_filter('urlize')(urlizer())
     app.template_filter('tex2utf')(partial(f_tex2utf, letters=True))
     app.template_filter('tex2utf_no_symbols')(partial(f_tex2utf, letters=False))
     app.template_filter('canonical_url')(canonical_url)
@@ -108,4 +108,4 @@ def register_filters(app: Flask) -> None:
     app.template_filter('embed_content')(embed_content)
     app.template_filter('tidy_filesize')(tidy_filesize)
     app.template_filter('as_eastern')(as_eastern)
-    app.template_filter('abs_doi_to_urls')(urlizer('doi_field'))
+    app.template_filter('abs_doi_to_urls')(urlizer(['doi_field']))
