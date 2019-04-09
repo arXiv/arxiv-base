@@ -5,7 +5,21 @@ from typing_extensions import Protocol
 
 
 WSGIRequest = Tuple[dict, Callable]
+"""
+The WSGI request.
+
+Comprised of an environ mapping and a callable for starting the response. See
+also `https://www.python.org/dev/peps/pep-0333/#the-start-response-callable`_.
+"""
+
 WSGIResponse = Iterable
+"""
+The iterable that generates a WSGI response.
+
+See also
+`https://www.python.org/dev/peps/pep-0333/#the-application-framework-side`_.
+"""
+
 IWSGIApp = Callable[[dict, Callable], WSGIResponse]
 
 
@@ -35,14 +49,10 @@ class IWSGIMiddlewareFactory(Protocol):
 
 
 class BaseMiddleware:
-    """
+    r"""
     Base class for WSGI middlewares.
 
-    Child classes should implement one or both of:
-
-    - ``before(environ: dict, start_response: Callable) -> Tuple[dict, Callable]``
-    - ``after(response: Iterable) -> Iterable``
-
+    Child classes should override :func:`.before` and/or :func:`.after`\.
     """
 
     def __init__(self, wsgi_app: IWSGIApp, config: Mapping = {}) -> None:
@@ -62,13 +72,45 @@ class BaseMiddleware:
         self.config = config
 
     def before(self, environ: dict, start_response: Callable) -> WSGIRequest:
+        """
+        Pre-process a WSGI request. To be overridden by a child class.
+
+        Parameters
+        ----------
+        environ : dict
+            WSGI request environ.
+        start : callable
+            Callable used to begin the HTTP response.
+
+        Returns
+        -------
+        dict
+            WSGI request environ.
+        callable
+            Callable used to begin the HTTP response.
+
+        """
         return environ, start_response
 
     def after(self, response: WSGIResponse) -> WSGIResponse:
+        """
+        Post-process a WSGI response. To be overridden by a child class.
+
+        Parameters
+        ----------
+        response : iterable
+            The WSGI response.
+
+        Returns
+        -------
+        iterable
+            The WSGI response.
+
+        """
         return response
 
     def __call__(self, environ: dict, start: Callable) -> WSGIResponse:
-        """
+        r"""
         Handle a WSGI request.
 
         Parameters
@@ -77,13 +119,13 @@ class BaseMiddleware:
             WSGI request environment.
         start : function
             Function used to begin the HTTP response. See
-            https://www.python.org/dev/peps/pep-0333/#the-start-response-callable
+            :const:`.WSGIRequest`\.
 
         Returns
         -------
         iterable
             Iterable that generates the HTTP response. See
-            https://www.python.org/dev/peps/pep-0333/#the-application-framework-side
+            :const:`.WSGIResponse`\.
 
         """
         environ, start_response = self.before(environ, start)
