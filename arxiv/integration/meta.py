@@ -1,6 +1,7 @@
 """Meta tools for integrations."""
 
 import inspect
+from typing import Any
 
 
 class MetaIntegration(type):
@@ -138,7 +139,7 @@ class MetaIntegration(type):
 
     """
 
-    def __getattribute__(self, key):
+    def __getattribute__(self, key: str) -> Any:
         """Get the attribute from the instance bound to the current context."""
         obj = super(MetaIntegration, self).__getattribute__(key)
         if inspect.isfunction(obj):
