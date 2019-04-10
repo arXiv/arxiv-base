@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='arxiv-base',
-    version='0.15.3',
+    version='0.15.4',
     packages=[f'arxiv.{package}' for package
               in find_packages('arxiv', exclude=['*test*'])],
     zip_safe=False,
@@ -15,7 +15,8 @@ setup(
         'pytz',
         'uwsgi',
         'boto3',
-        'bleach==3.1.0'
+        'bleach==3.1.0',
+        'backports-datetime-fromisoformat==1.0.0'
     ],
     include_package_data=True
 )

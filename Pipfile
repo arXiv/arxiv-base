@@ -8,11 +8,12 @@ flask = "*"
 jsonschema = "*"
 pytz = "*"
 uwsgi = "*"
-"boto3" = "*"
+"boto3" = "==1.9.108"
 wtforms = "*"
 "e1839a8" = {path = "."}
 bleach = "*"
 "flask-s3" = "*"
+"backports-datetime-fromisoformat" = "==1.0.0"
 
 [dev-packages]
 pydocstyle = "*"
@@ -24,3 +25,6 @@ sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
 astroid = "<2.2"
+
+[pipenv]
+allow_prereleases = true

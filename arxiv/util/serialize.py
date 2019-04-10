@@ -3,7 +3,8 @@
 from typing import Any, Union, List
 import json
 from datetime import datetime, date
-import dateutil.parser
+from backports.datetime_fromisoformat import MonkeyPatch
+MonkeyPatch.patch_fromisoformat()
 
 
 class ISO8601JSONEncoder(json.JSONEncoder):
@@ -35,8 +36,9 @@ class ISO8601JSONDecoder(json.JSONDecoder):
         if type(value) is not str:
             return value
         try:
-            return dateutil.parser.isoparse(value)  # type: ignore
-        except ValueError as e:
+            # Switched from dateutil.parser because it was too liberal.
+            return datetime.fromisoformat(value)  # type: ignore
+        except ValueError:
             return value
 
     def object_hook(self, data: dict, **extra: Any) -> Any:

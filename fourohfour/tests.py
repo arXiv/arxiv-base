@@ -4,7 +4,7 @@ from unittest import TestCase, mock
 import string
 import random
 from wsgi import create_web_app
-from arxiv import status
+from http import HTTPStatus as status
 
 
 class TestFourOhFour(TestCase):
@@ -20,7 +20,7 @@ class TestFourOhFour(TestCase):
         with self.app.app_context():
             response = self.client.get('/')
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+        self.assertEqual(response.status_code, status.NOT_FOUND,
                          "The root endpoint returns 400")
 
     def test_returns_404_on_post(self):
@@ -28,7 +28,7 @@ class TestFourOhFour(TestCase):
         with self.app.app_context():
             response = self.client.post('/')
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+        self.assertEqual(response.status_code, status.NOT_FOUND,
                          "The root endpoint returns 400")
 
     def test_returns_404_on_head(self):
@@ -36,7 +36,7 @@ class TestFourOhFour(TestCase):
         with self.app.app_context():
             response = self.client.head('/')
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+        self.assertEqual(response.status_code, status.NOT_FOUND,
                          "The root endpoint returns 400")
 
     def test_it_really_returns_404(self):
@@ -50,7 +50,7 @@ class TestFourOhFour(TestCase):
                 response = self.client.get(random_path())
 
             self.assertEqual(response.status_code,
-                             status.HTTP_404_NOT_FOUND,
+                             status.NOT_FOUND,
                              "404 all day long")
 
 
@@ -67,5 +67,5 @@ class TestHealthCheck(TestCase):
         with self.app.app_context():
             response = self.client.get('/healthz')
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK,
+        self.assertEqual(response.status_code, status.OK,
                          "The health check endpoint returns 200")

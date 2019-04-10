@@ -18,7 +18,7 @@ Here's an example:
    from typing import Tuple
    from werkzeug import MultiDict
    from wtforms import StringField
-   from arxiv import status
+   from http import HTTPStatus as status
    from arxiv.forms import csrf
 
    ResponseData = Tuple[dict, int, dict]
@@ -37,13 +37,13 @@ Here's an example:
            form = ProtectedForm(form_data)
            data = {'form': form}
            if not form.validate():    # Checks the CSRF token, too!
-               return data, status.HTTP_400_BAD_REQUEST, headers
+               return data, status.BAD_REQUEST, headers
 
            # do something sensitive
-           return data, status.HTTP_201_CREATED, headers
+           return data, status.CREATED, headers
 
        form = ProtectedForm()
-       return {'form': form}, status.HTTP_200_OK, headers
+       return {'form': form}, status.OK, headers
 
 
 And in your template:

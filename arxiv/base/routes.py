@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, current_app, make_response, \
     Response, flash, url_for
 
-from arxiv import status
+from http import HTTPStatus as status
 from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
     MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError
 
@@ -24,7 +24,7 @@ blueprint = Blueprint('ui', __name__, url_prefix='',
 def test_page() -> Response:
     """Render the test page."""
     rendered = render_template("base/styleguide.html", pagetitle='Home')
-    response: Response = make_response(rendered, status.HTTP_200_OK)
+    response: Response = make_response(rendered, status.OK)
 
     # Demonstrate flash alerts. To see these alerts, reload the page.
     help_url = url_for('help')

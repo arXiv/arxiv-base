@@ -76,6 +76,7 @@ Docker).
 
 import time
 import json
+from pytz import UTC
 from datetime import datetime, timedelta
 import os
 from typing import Any, Optional, Tuple, Generator, Callable, Dict, Union
@@ -87,19 +88,19 @@ import boto3
 from botocore.exceptions import WaiterError, NoCredentialsError, \
     PartialCredentialsError, BotoCoreError, ClientError
 
-from arxiv.base import logging
+import logging
 from .exceptions import CheckpointError, StreamNotAvailable, StopProcessing, \
     KinesisRequestFailed, ConfigurationError
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
-NOW = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+NOW = datetime.now(tz=UTC).strftime('%Y-%m-%dT%H:%M:%S')
 
 
 def retry(retries: int = 5, wait: int = 5) -> Callable:
     """
-    Decorator factory for retrying Kinesis calls.
+    Generate a decorator for retrying Kinesis calls.
 
     Parameters
     ----------
