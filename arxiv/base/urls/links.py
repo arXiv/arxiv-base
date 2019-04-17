@@ -248,7 +248,7 @@ def _dont_urlize_arxiv_categories(attrs: Attrs, new: bool = False) -> Attrs:
     """
     url = urlparse(attrs[(None, 'href')])
     if DONT_URLIZE_CATS.match(url.netloc):
-        return None
+        return None  # type: ignore
     else:
         return attrs
 
