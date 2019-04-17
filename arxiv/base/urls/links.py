@@ -43,6 +43,7 @@ from flask import url_for
 from jinja2 import Markup, escape
 import bleach
 
+from arxiv.taxonomy import CATEGORIES
 from arxiv import identifier
 from . import clickthrough
 
@@ -230,6 +231,21 @@ def _handle_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
         attrs[(None, 'data-doi')] = target     # Add arxiv="<arxiv id>"
     return attrs
 
+ENDS_WITH_TLD = r".*\.(" + TLDS + ")$"
+CATEGORIES_THAT_COULD_BE_HOSTNAMES = '|'.join([cat_id for cat_id in CATEGORIES.keys()
+                    if re.search(ENDS_WITH_TLD, cat_id, re.IGNORECASE)])
+DONT_URLIZE_CATS = re.compile(CATEGORIES_THAT_COULD_BE_HOSTNAMES,
+                              re.IGNORECASE|re.UNICODE)
+def _dont_urlize_arxiv_categories(attrs: Attrs, new: bool = False) -> Attrs:
+    """Prevents urlizing archive categories that look like hostnames.    
+
+    Ex. don't urlize math.CO but do urlize supermath.co
+    """
+    url = urlparse(attrs[(None, 'href')])
+    if DONT_URLIZE_CATS.match(url.netloc):
+        return None
+    else:
+        return attrs
 
 PATTERNS = {
     'doi': DOI,
@@ -248,7 +264,7 @@ callbacks = {
     'doi':      [_handle_doi_url, _add_scheme_info, _add_rel_external],
     'doi_field': [_handle_doi_url, _add_scheme_info, _add_rel_external],
     'arxiv_id': [_handle_arxiv_url, _add_scheme_info],
-    'url':      [_this_url_text, _add_rel, _add_scheme_info ]
+    'url':      [_dont_urlize_arxiv_categories, _this_url_text, _add_rel, _add_scheme_info]
 }
 """Bleach attribute callbacks for each kind."""
 
