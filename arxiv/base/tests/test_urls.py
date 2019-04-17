@@ -1,10 +1,58 @@
 """Tests for :mod:`arxiv.base.urls`."""
 
 from unittest import TestCase, mock
-from flask import Flask, url_for
+from flask import Flask, url_for, Blueprint
 from arxiv.base import urls, Base
 from arxiv.base.exceptions import ConfigurationError
 from werkzeug.routing import BuildError
+
+
+class TestStaticURLs(TestCase):
+    """Test building static URLs."""
+
+    def test_static_urls(self):
+        """We have vanilla Flask app with a blueprint."""
+        self.app = Flask('test')
+        self.app.config['SERVER_NAME'] = 'nope.com'
+        Base(self.app)
+
+        self.app.register_blueprint(Blueprint('fooprint', __name__,
+                                              url_prefix='/foo',
+                                              static_folder='static',
+                                              static_url_path='baz'))
+
+        with self.app.app_context():
+            url = url_for('base.static', filename='css/abs.css')
+            self.assertTrue(url.startswith('http://nope.com/static/base/'))
+            url = url_for('fooprint.static', filename='img/foo.jpg')
+            self.assertTrue(url.startswith('http://nope.com/foo/static/test/'))
+
+    def test_relative_static_urls(self):
+        """Relative static paths are enabled."""
+        self.app = Flask('test')
+        self.app.config['SERVER_NAME'] = 'nope.com'
+        self.app.config.update({
+            'SITE_HUMAN_NAME': 'The test site of testiness',
+            'SITE_HUMAN_SHORT_NAME': 'Test site',
+            'RELATIVE_STATIC_PATHS': True,
+            'RELATIVE_STATIC_PREFIX': 'oof',
+            'SITE_URL_PREFIX': '/test'
+        })
+        Base(self.app)
+
+        self.app.register_blueprint(Blueprint('fooprint', __name__,
+                                              url_prefix='/foo',
+                                              static_folder='static',
+                                              static_url_path='baz'))
+
+        with self.app.app_context():
+            url = url_for('base.static', filename='css/abs.css')
+            self.assertTrue(url.startswith('http://nope.com/oof/static/base/'),
+                            'The static URL for base starts with the'
+                            ' configured prefix.')
+            url = url_for('fooprint.static', filename='img/foo.jpg')
+            self.assertFalse(url.startswith('http://nope.com/oof'),
+                             'The blueprint static path is not affected.')
 
 
 class TestGetURLMap(TestCase):
