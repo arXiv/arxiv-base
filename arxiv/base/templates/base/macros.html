@@ -152,7 +152,7 @@
           <td class="tablecell label">Subjects:</td>
           <td class="tablecell subjects">
             <span class="primary-subject">{{ primary_category|get_category_display }}</span>
-            {%- for category in secondary_categories -%}; {{ category|get_category_display }}{%- endfor -%}
+            {%- for category in secondary_categories|sort(attribute='id') -%}; {{ category|get_category_display }}{%- endfor -%}
           </td>
         </tr>
         {%- if msc_class %}
@@ -229,7 +229,7 @@ Date: {{ (submitted_date|as_eastern).strftime("%a, %-d %b %Y %H:%M:%S ET") }}   
 
 Title: {{ title }}
 Authors: {{ authors }}
-Categories: {{ primary_category }}{%- for category in secondary_categories -%} {{ category }}{%- endfor %}
+Categories: {{ primary_category }}{%- for category in secondary_categories|sort(attribute='id') -%} {{ category }}{%- endfor %}
 {% if comments -%}{{ ("Comments: " + comments)|wordwrap(77, wrapstring="\n  ") }}{%- endif %}
 {% if msc_class -%}MSC classes: {{ msc_class }}{%- endif %}
 {% if acm_class -%}ACM classes: {{ acm_class }}{%- endif %}
