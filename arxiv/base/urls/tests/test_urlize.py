@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+import re
 
 from jinja2 import escape
 from .. import links
@@ -51,6 +52,12 @@ class Id_Patterns_Test(unittest.TestCase):
 
 
 class TestURLize(unittest.TestCase):
+            
+    def test_dont_urlize_cats( self ):
+        self.assertGreater(len(links.CATEGORIES_THAT_COULD_BE_HOSTNAMES), 0,
+                           'The links.CATEGORIES_THAT_COULD_BE_HOSTNAMES must not be empty or it will match everything')
+
+        
     @mock.patch(f'{links.__name__}.clickthrough')
     def test_doi(self, mock_clickthrough):
         mock_clickthrough.clickthrough_url = lambda url: f'http://arxiv.org/clickthrough?url={url}'
@@ -313,3 +320,11 @@ class TestURLize(unittest.TestCase):
 
         # Post clickthrough on legacy goes to :
         # https://dx.doi.org/10.1175%2F1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2
+
+
+    def test_dont_urlize_category_name(self):
+        urlize = links.urlizer()
+        self.assertEqual(urlize('math.CO'), 'math.CO',
+                         'category name math.CO should not get urlized')
+        self.assertIn('href="http://supermath.co', urlize('supermath.co'),
+                      'hostname close to category name should get urlized')

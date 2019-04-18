@@ -51,6 +51,19 @@ class Base(object):
         # Set the static url path.
         app_version = app.config.get("APP_VERSION", "null")
         app_static_path = f'/static/{app.name}/{app_version}'
+
+        base_static_url_path = f'/static/base/{base_config.BASE_VERSION}'
+
+        # In some cases, we want an app to handle all of its static files, e.g.
+        # when deploying in a development environment. Setting the
+        # configuration param RELATIVE_STATIC_PATHS to True will cause
+        # ``/{RELATIVE_STATIC_PATHS}`` to be prepended to the static paths for
+        # base assets. This should have no impact on static paths for
+        # blueprints.
+        if app.config.get('RELATIVE_STATIC_PATHS'):
+            prefix = app.config.get('RELATIVE_STATIC_PREFIX', '').strip('/')
+            base_static_url_path = f'/{prefix}{base_static_url_path}'
+
         app.static_url_path = app_static_path
 
         # The base blueprint attaches static assets and templates. These are
@@ -64,7 +77,7 @@ class Base(object):
             __name__,
             template_folder='templates',
             static_folder='static',
-            static_url_path=f'/static/base/{base_config.BASE_VERSION}'
+            static_url_path=base_static_url_path
         )
         app.register_blueprint(blueprint)
 
