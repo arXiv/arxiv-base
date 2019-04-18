@@ -91,3 +91,11 @@ FLASKS3_ACTIVE = bool(int(os.environ.get('FLASKS3_ACTIVE', 0)))
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'nope')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', 'nope')
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+
+# In some cases, we want an app to handle all of its static files, e.g. when
+# deploying in a development environment. Setting the configuration param
+# RELATIVE_STATIC_PATHS to True will cause ``/{RELATIVE_STATIC_PREFIX}`` to be
+# prepended to the static paths for base assets. This should have no impact on
+# static paths for blueprints.
+RELATIVE_STATIC_PATHS = bool(int(os.environ.get('RELATIVE_STATIC_PATHS', '0')))
+RELATIVE_STATIC_PREFIX = os.environ.get('RELATIVE_STATIC_PREFIX', '')
