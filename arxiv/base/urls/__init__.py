@@ -104,8 +104,9 @@ def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
     """
     values.pop('_external')
     try:
-        url = current_app.external_url_adapter.build(endpoint, values=values,
-                                                     force_external=True)
+        url: str = current_app.external_url_adapter.build(endpoint,
+                                                          values=values,
+                                                          force_external=True)
     except BuildError:
         # Re-raise the original BuildError, in context of original traceback.
         exc_type, exc_value, tb = sys.exc_info()
