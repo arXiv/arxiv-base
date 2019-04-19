@@ -106,8 +106,7 @@ class Base(object):
 
         # Attach the external URL handler as a fallback for failed calls to
         # url_for().
-        app.external_url_adapter = urls.build_adapter(app)
-        app.url_build_error_handlers.append(urls.external_url_handler)
+        urls.register_external_urls(app)
 
         filters.register_filters(app)
         context_processors.register_context_processors(app)

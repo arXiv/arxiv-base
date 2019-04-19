@@ -44,6 +44,18 @@ sources with increasing priority.
 
 This will build URLs with the ``https`` scheme by default. To use ``http``,
 set ``EXTERNAL_URL_SCHEME = 'http'`` in your configuration.
+
+
+Danger! Memory leaks lurk here
+------------------------------
+Earlier versions of this module built Werkzeug routing machinery (Rules, Maps,
+etc) on the fly. This led to serious memory leaks. As of v0.15.6,
+:class:`.Base` uses :func:`register_external_urls` to set up external URL
+handling, which registers a single :class:`.MapAdapter` on a Flask app. This
+adapter is in turn used by :func:`external_url_handler` on demand.
+
+See ARXIVNG-2085.
+
 """
 
 import sys
@@ -120,3 +132,9 @@ def canonical_url(id: str, version: int = 0) -> str:
     if version:
         return f'{scheme}://{host}/abs/{id}v{version}'
     return f'{scheme}://{host}/abs/{id}'
+
+
+def register_external_urls(app: Flask) -> None:
+    """Register :func:`external_url_handler` on a Flask app."""
+    app.external_url_adapter = build_adapter(app)
+    app.url_build_error_handlers.append(external_url_handler)
