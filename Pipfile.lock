@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0ea0094d0488a8c74c01da3bc37b7b164f37a0f652ad50636bb78b501b59db12"
+            "sha256": "3818600507b94947fa0933d18577e03ca9f40cd2f6a064e3d7aabab4a3ddbe7c"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -14,9 +14,6 @@
         ]
     },
     "default": {
-        "arxiv-base": {
-            "path": "."
-        },
         "attrs": {
             "hashes": [
                 "sha256:69c0dbf2ed392de1cb5ec704444b08a5ef81680a61cb899dc08127123af36a79",
