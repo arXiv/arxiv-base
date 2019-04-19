@@ -47,15 +47,16 @@ set ``EXTERNAL_URL_SCHEME = 'http'`` in your configuration.
 """
 
 import sys
-from typing import Dict, Any
+from typing import Dict, Any, List
 from urllib.parse import parse_qs
 from werkzeug.urls import url_encode, url_parse, url_unparse
-from werkzeug.routing import Map, Rule, BuildError
-from flask import current_app
+from werkzeug.routing import Map, Rule, BuildError, MapAdapter
+from flask import current_app, g, Flask
 
 from arxiv.base.exceptions import ConfigurationError
 from arxiv.base.converter import ArXivConverter
 from arxiv.base import logging
+from arxiv.base import config as base_config
 
 from .clickthrough import clickthrough_url
 from .links import urlize, urlizer, url_for_doi
@@ -63,52 +64,23 @@ from .links import urlize, urlizer, url_for_doi
 logger = logging.getLogger(__name__)
 
 
-# The module arxiv.base.config needs to be able to load its values from
-# environment variables, some of which are set by SetEnv directives in Apache.
-# Those variables are not set until application execution begins, which means
-# that if arxiv.base.config is imported beforehand its values will not be
-# correct.
-def _get_base_config() -> Any:
-    from arxiv.base import config
-    return config
-
-
-def get_url_map() -> Map:
-    """Build a :class:`werkzeug.routing.Map` from configured URLs."""
-    config = _get_base_config()
-
+def build_adapter(app: Flask) -> MapAdapter:
+    """Build a :class:`.MapAdapter` from configured URLs."""
     # Get the base URLs (configured in this package).
-    configured_urls = {url[0]: url for url in config.URLS}
+    configured_urls = {url[0]: url for url in base_config.URLS}
     # Privilege ARXIV_URLs set on the application config.
-    current_urls = current_app.config.get('URLS', [])
+    current_urls = app.config.get('URLS', [])
     if current_urls:
         configured_urls.update({url[0]: url for url in current_urls})
-
     url_map = Map([
         Rule(pattern, endpoint=name, host=host, build_only=True)
         for name, pattern, host in configured_urls.values()
     ], converters={'arxiv': ArXivConverter}, host_matching=True)
-    return url_map
 
-
-def external_url_for(endpoint: str, **values: Any) -> str:
-    """
-    Like :flask`.url_for`, but builds external URLs based on the config.
-
-    This works by loading the configuration variable ``URLS`` from
-    :mod:`arxiv.base.config` and from the application on which the blueprint
-    has been registered, and registering the URL patterns described therein.
-    Preference is given to URLs defined on the current application. An attempt
-    is made to avoid adding URL rules for which identical patterns have already
-    been registered.
-    """
-    values.pop('_external', None)
-    url_map = get_url_map()
-    scheme = current_app.config.get('EXTERNAL_URL_SCHEME', 'https')
-    host = current_app.config.get('BASE_SERVER', 'arxiv.org')
-    adapter = url_map.bind(host, url_scheme=scheme)
-    url: str = adapter.build(endpoint, values=values, force_external=True)
-    return url
+    scheme = app.config.get('EXTERNAL_URL_SCHEME', 'https')
+    base_host = app.config.get('BASE_SERVER', 'arxiv.org')
+    adapter: MapAdapter = url_map.bind(base_host, url_scheme=scheme)
+    return adapter
 
 
 def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
@@ -116,11 +88,13 @@ def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
     Attempt to handle failed URL building with :func:`external_url_for`.
 
     This gets attached to a Flask application via the
-    :meth:`flask.Flask.url_build_error_handlers` hook.
+    :func:`flask.Flask.url_build_error_handlers` hook.
     """
+    values.pop('_external')
     try:
-        url = external_url_for(endpoint, **values)
-    except BuildError as e:
+        url = current_app.external_url_adapter.build(endpoint, values=values,
+                                                     force_external=True)
+    except BuildError:
         # Re-raise the original BuildError, in context of original traceback.
         exc_type, exc_value, tb = sys.exc_info()
         if exc_value is err:
