@@ -10,12 +10,9 @@ pytz = "*"
 uwsgi = "*"
 "boto3" = "==1.9.108"
 wtforms = "*"
-e1839a8 = {path = "."}
 bleach = "*"
 "flask-s3" = "*"
 "backports-datetime-fromisoformat" = "==1.0.0"
-hvac = "*"
-arxiv-base = {path = "."}
 typing-extensions = "*"
 
 [dev-packages]
