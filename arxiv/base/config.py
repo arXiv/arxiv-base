@@ -70,10 +70,10 @@ for key, value in os.environ.items():
 
 ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
 
-BASE_VERSION = "0.15.3"
+BASE_VERSION = "0.15.6"
 """The version of the arxiv-base package."""
 
-APP_VERSION = "0.15.3"
+APP_VERSION = "0.15.6"
 """The version of the base test app."""
 
 """
@@ -91,3 +91,11 @@ FLASKS3_ACTIVE = bool(int(os.environ.get('FLASKS3_ACTIVE', 0)))
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'nope')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', 'nope')
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+
+# In some cases, we want an app to handle all of its static files, e.g. when
+# deploying in a development environment. Setting the configuration param
+# RELATIVE_STATIC_PATHS to True will cause ``/{RELATIVE_STATIC_PREFIX}`` to be
+# prepended to the static paths for base assets. This should have no impact on
+# static paths for blueprints.
+RELATIVE_STATIC_PATHS = bool(int(os.environ.get('RELATIVE_STATIC_PATHS', '0')))
+RELATIVE_STATIC_PREFIX = os.environ.get('RELATIVE_STATIC_PREFIX', '')

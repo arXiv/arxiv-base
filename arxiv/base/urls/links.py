@@ -33,16 +33,15 @@ handle FTP addresses.
 Updated 20 March, 2019: refactored to provide independent bleach attribute
 callbacks for each kind of link.
 """
-from typing import Optional, List, Pattern, Match, Tuple, Callable, \
-    NamedTuple, Dict, Union, Mapping
+from typing import List, Pattern, Tuple, Callable, Dict, Union
 import re
-from functools import partial, reduce
+from functools import reduce
 from urllib.parse import quote, urlparse
 
 from flask import url_for
-from jinja2 import Markup, escape
 import bleach
 
+from arxiv.taxonomy import CATEGORIES
 from arxiv import identifier
 from . import clickthrough
 
@@ -67,8 +66,16 @@ Pattern for matching DOIs.
 We should probably match DOIs first because they are the source of a
 lot of false positives for arxiv matches.
 
-Only using the most general express from
+Only using the most general expression from
 https://www.crossref.org/blog/dois-and-matching-regular-expressions/
+"""
+
+
+BROAD_DOI = re.compile(r'(?P<doi>10\.\d{4,5}\/\S+)', re.I)
+"""
+Very broad pattern for matching DOIs in the abs DOI field.
+
+Ex. 10.1175/1520-0469(1996)053<0946:ASTFHH>2.0.CO;2
 """
 
 ARXIV_PATTERNS = [
@@ -145,8 +152,9 @@ def _add_rel(attrs: Attrs, new: bool = False) -> Attrs:
     else:
         return _add_rel_internal(attrs, new)
 
+
 def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
-    """Always adds external rel."""
+    """Add an external rel."""
     # noopener for security reasons
     # nofollow to disencentivie arXiv articles for SEO
     # external says that link is away from arxiv
@@ -154,10 +162,12 @@ def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
     _extend_class_attr(attrs, 'link-external')
     return attrs
 
+
 def _add_rel_internal(attrs: Attrs, new: bool = False) -> Attrs:
-    """Always adds interal rel."""
+    """Add an interal rel."""
     _extend_class_attr(attrs, 'link-internal')
     return attrs
+
 
 def _this_url_text(attrs: Attrs, new: bool = False) -> Attrs:
     o = urlparse(attrs[(None, 'href')])
@@ -223,19 +233,44 @@ def _handle_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
     return attrs
 
 
+ENDS_WITH_TLD = r".*\.(" + TLDS + ")$"
+CATEGORIES_THAT_COULD_BE_HOSTNAMES = '|'.join([cat_id for cat_id in CATEGORIES.keys()
+                                               if re.search(ENDS_WITH_TLD, cat_id, re.IGNORECASE)])
+DONT_URLIZE_CATS = re.compile(CATEGORIES_THAT_COULD_BE_HOSTNAMES,
+                              re.IGNORECASE | re.UNICODE)
+
+
+def _dont_urlize_arxiv_categories(attrs: Attrs, new: bool = False) -> Attrs:
+    """
+    Prevent urlizing archive categories that look like hostnames.
+
+    Ex. don't urlize math.CO but do urlize supermath.co
+    """
+    url = urlparse(attrs[(None, 'href')])
+    if DONT_URLIZE_CATS.match(url.netloc):
+        return None  # type: ignore
+    else:
+        return attrs
+
+
 PATTERNS = {
     'doi': DOI,
+    'doi_field': BROAD_DOI,
     'url': URL,
     'arxiv_id': ARXIV_ID
 }
-ORDER = ['arxiv_id', 'doi', 'url']
-SUPPORTED_KINDS = ORDER
-"""Identifier types that we can currently match and convert to to URLs."""
+ORDER = ['arxiv_id', 'doi', 'url', 'doi_field']
+DEFAULT_KINDS = ['arxiv_id', 'doi', 'url']
+"""Default list of identifier types to match and convert to to URLs.
+
+This does not include 'doi_field because that is a specialized kind
+for just the abs DOI field."""
 
 callbacks = {
-    'doi':      [_handle_doi_url,   _add_scheme_info ],
-    'arxiv_id': [_handle_arxiv_url, _add_scheme_info ],
-    'url':      [_this_url_text,    _add_rel, _add_scheme_info]
+    'doi':      [_handle_doi_url, _add_scheme_info, _add_rel_external],
+    'doi_field': [_handle_doi_url, _add_scheme_info, _add_rel_external],
+    'arxiv_id': [_handle_arxiv_url, _add_scheme_info],
+    'url':      [_dont_urlize_arxiv_categories, _this_url_text, _add_rel, _add_scheme_info]
 }
 """Bleach attribute callbacks for each kind."""
 
@@ -243,7 +278,7 @@ callbacks = {
 def _get_pattern(kinds: List[str]) -> Pattern:
     return re.compile(
         '|'.join([rf'(?:{PATTERNS[kind].pattern})' for kind
-                 in sorted(kinds, key=lambda kind: ORDER.index(kind))]),
+                  in sorted(kinds, key=lambda kind: ORDER.index(kind))]),
         re.IGNORECASE | re.VERBOSE | re.UNICODE
     )
 
@@ -261,18 +296,22 @@ def _get_linker_of_kind(kind: str) -> Callable_Linker:
 
 
 def _compose_list_of_funcs(fv: List[Callable_Linker]) -> Callable_Linker:
+    """Return function that calls fv functions one after another."""
     if not fv:
         return lambda x: x
     return reduce(lambda f, g: lambda x: f(g(x)), fv[1:], fv[0])
 
 
 def _get_linker(kinds: List[str]) -> Callable_Linker:
+    if len(kinds) > 1 and 'doi_field' in kinds:
+        raise ValueError(
+            'doi_field should not be used in combination with other kinds')
     ordered_linkers = [_get_linker_of_kind(kind) for kind
                        in sorted(kinds, key=lambda kind: ORDER.index(kind))]
     return _compose_list_of_funcs(ordered_linkers)
 
 
-def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:
+def urlize(text: str, kinds: List[str] = DEFAULT_KINDS) -> str:
     """
     Convert URLs and certain identifiers to HTML links.
 
@@ -292,9 +331,12 @@ def urlize(text: str, kinds: List[str] = SUPPORTED_KINDS) -> str:
     return _get_linker(kinds)(text)
 
 
-def urlizer(kinds: List[str] = SUPPORTED_KINDS) -> Callable_Linker:
-    """
-    Generate a function to convert tokens to links.
+def urlizer(kinds: List[str] = DEFAULT_KINDS) -> Callable_Linker:
+    """Generate a function to convert tokens to links.
+
+    If the urlizing function is going to be reused, this is more
+    efficient than urlize because this will only call _get_linker()
+    once. urlize() will call _get_linker() on each call to urlize(txt)
 
     Parameters
     ----------

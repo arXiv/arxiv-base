@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 import re
 
-from jinja2 import Markup, escape
+from jinja2 import escape
 from .. import links
 
 
@@ -15,7 +15,7 @@ def mock_url_for(endpoint, **kwargs):
 class Id_Patterns_Test(unittest.TestCase):
     def test_arxiv_ids(self):
         def find_match(txt):
-            ptn = links._get_pattern(links.SUPPORTED_KINDS)
+            ptn = links._get_pattern(links.DEFAULT_KINDS)
             return ptn.search(txt)
 
         self.assertIsNotNone(find_match('math/9901123'))
@@ -33,7 +33,7 @@ class Id_Patterns_Test(unittest.TestCase):
 
     def test_find_match(self):
         def find_match(txt):
-            ptn = links._get_pattern(links.SUPPORTED_KINDS)
+            ptn = links._get_pattern(links.DEFAULT_KINDS)
             return ptn.search(txt)
 
         self.assertIsNone(find_match('junk'))
@@ -52,12 +52,19 @@ class Id_Patterns_Test(unittest.TestCase):
 
 
 class TestURLize(unittest.TestCase):
+            
+    def test_dont_urlize_cats( self ):
+        self.assertGreater(len(links.CATEGORIES_THAT_COULD_BE_HOSTNAMES), 0,
+                           'The links.CATEGORIES_THAT_COULD_BE_HOSTNAMES must not be empty or it will match everything')
+
+        
     @mock.patch(f'{links.__name__}.clickthrough')
     def test_doi(self, mock_clickthrough):
         mock_clickthrough.clickthrough_url = lambda url: f'http://arxiv.org/clickthrough?url={url}'
+        self.maxDiff = 3000
         self.assertEqual(
             links.urlize('here is a rando doi doi:10.1109/5.771073 that needs a link'),
-            'here is a rando doi doi:<a class="link-http" data-doi="10.1109/5.771073" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/10.1109/5.771073">10.1109/5.771073</a> that needs a link'
+            'here is a rando doi doi:<a class="link-http link-external" data-doi="10.1109/5.771073" href="http://arxiv.org/clickthrough?url=https://dx.doi.org/10.1109/5.771073" rel="external noopener nofollow">10.1109/5.771073</a> that needs a link'
         )
 
     def test_transform_token(self):
@@ -271,3 +278,53 @@ class TestURLize(unittest.TestCase):
                          'Should handle two DOIs in a row correctly')
 
 
+    @mock.patch(f'{links.__name__}.clickthrough')
+    def test_broad_doi(self, mock_clickthrough):
+        mock_clickthrough.clickthrough_url = lambda x: x
+
+        broad_doi_fn = links.urlizer(['doi_field'])
+        
+        self.assertRegex(broad_doi_fn('10.1088/1475-7516/2018/07/009'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2018/07/009".*>10.1088/1475-7516/2018/07/009</a>')
+
+        self.assertRegex(broad_doi_fn('10.1088/1475-7516/2019/02/E02/meta'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/meta".*>10.1088/1475-7516/2019/02/E02/meta</a>')
+        self.assertRegex(broad_doi_fn('10.1088/1475-7516/2019/02/E02/META'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/META".*>10.1088/1475-7516/2019/02/E02/META</a>')
+        self.assertRegex(broad_doi_fn('doi:10.1088/1475-7516/2018/07/009'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2018/07/009".*>10.1088/1475-7516/2018/07/009</a>')
+
+        self.assertRegex(broad_doi_fn('doi:10.1088/1475-7516/2019/02/E02/meta'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/meta".*>10.1088/1475-7516/2019/02/E02/meta</a>')
+        self.assertRegex(broad_doi_fn('doi:10.1088/1475-7516/2019/02/E02/META'),
+                         r'<a.*href="https://.*10.1088/1475-7516/2019/02/E02/META".*>10.1088/1475-7516/2019/02/E02/META</a>')
+        
+        txt = broad_doi_fn('10.1088/1475-7516/2018/07/009 10.1088/1475-7516/2019/02/E02/meta' )
+        self.assertNotRegex(txt, r'this.*URL',
+                            'DOIs should not get the generic "this https URL" they should have the DOI text')
+        self.assertRegex(txt, r'<a.*>10.1088/1475-7516/2018/07/009</a> <a.*>10.1088/1475-7516/2019/02/E02/meta</a>',
+                         'Should handle two DOIs in a row correctly')
+
+        urlized_doi = broad_doi_fn('10.1175/1520-0469(1996)053<0946:ASTFHH>2.0.CO;2')
+
+        self.assertNotIn('href="http://2.0.CO"',
+                         urlized_doi,
+                         "Should not have odd second <A> tag for DOI urlize for ao-sci/9503001 see ARXIVNG-2049")
+
+        leg_rx = r'<a .* href="https://dx.doi.org/10.1175/1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2".*'
+        self.assertRegex(urlized_doi, leg_rx,
+                         "Should handle Complex DOI for ao-sci/9503001 see ARXIVNG-2049")
+
+        # in legacy:
+        # <a href="/ct?url=https%3A%2F%2Fdx.doi.org%2F10.1175%252F1520-0469%25281996%2529053%253C0946%253AASTFHH%253E2.0.CO%253B2&amp;v=34a1af05">10.1175/1520-0469(1996)053&lt;0946:ASTFHH&gt;2.0.CO;2</a>
+
+        # Post clickthrough on legacy goes to :
+        # https://dx.doi.org/10.1175%2F1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2
+
+
+    def test_dont_urlize_category_name(self):
+        urlize = links.urlizer()
+        self.assertEqual(urlize('math.CO'), 'math.CO',
+                         'category name math.CO should not get urlized')
+        self.assertIn('href="http://supermath.co', urlize('supermath.co'),
+                      'hostname close to category name should get urlized')

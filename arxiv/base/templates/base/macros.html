@@ -145,14 +145,14 @@
         {%- if comments %}
         <tr>
           <td class="tablecell label">Comments:</td>
-          <td class="tablecell comments mathjax">{{ comments|escape|urlize|safe }}</td>
+          <td class="tablecell comments mathjax">{{ comments|tex2utf|urlize|safe }}</td>
         </tr>
         {% endif -%}
         <tr>
           <td class="tablecell label">Subjects:</td>
           <td class="tablecell subjects">
             <span class="primary-subject">{{ primary_category|get_category_display }}</span>
-            {%- for category in secondary_categories -%}; {{ category|get_category_display }}{%- endfor -%}
+            {%- for category in secondary_categories|sort(attribute='id') -%}; {{ category|get_category_display }}{%- endfor -%}
           </td>
         </tr>
         {%- if msc_class %}
@@ -176,7 +176,7 @@
         {%- if doi %}
         <tr>
           <td class="tablecell label"><abbr title="Digital Object Identifier">DOI</abbr>:</td>
-          <td class="tablecell msc_classes"><a href="{{ doi|urlize }}">{{ doi }}</a></td>
+          <td class="tablecell msc_classes">{{ doi|escape|abs_doi_to_urls|safe }}</td>
         </tr>
         {% endif -%}
         {%- if report_num %}
@@ -229,7 +229,7 @@ Date: {{ (submitted_date|as_eastern).strftime("%a, %-d %b %Y %H:%M:%S ET") }}   
 
 Title: {{ title }}
 Authors: {{ authors }}
-Categories: {{ primary_category }}{%- for category in secondary_categories -%} {{ category }}{%- endfor %}
+Categories: {{ primary_category }}{%- for category in secondary_categories|sort(attribute='id') -%} {{ category }}{%- endfor %}
 {% if comments -%}{{ ("Comments: " + comments)|wordwrap(77, wrapstring="\n  ") }}{%- endif %}
 {% if msc_class -%}MSC classes: {{ msc_class }}{%- endif %}
 {% if acm_class -%}ACM classes: {{ acm_class }}{%- endif %}
