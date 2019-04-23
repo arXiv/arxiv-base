@@ -46,7 +46,6 @@ In the example above, the ``'foo'`` parameter would be available on the
        foo = request.environ['foo']
        return f'The value of foo is {foo}'
 
-
 For more information, see the `WSGI spec
 <https://www.python.org/dev/peps/pep-0333/>`_.
 
@@ -69,41 +68,43 @@ called first upon each request.
    wrap(app, [FirstMiddleware, SecondMiddleware, ThirdMiddleware])
 
 
+
 """
 
 from typing import Type, Callable, List, Union
 from flask import Flask
 
-from .base import BaseMiddleware
+from .base import BaseMiddleware, IWSGIMiddlewareFactory, IWSGIApp
 
 
-def wrap(app: Union[Flask, Callable],
-         middlewares: List[Callable]) -> Callable:
+def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
     """
-    Wrap an application factory function in WSGI middlewares.
+    Wrap a :class:`.Flask` app in WSGI middlewares.
 
     Parameters
     ----------
-    app_factory : function
-        Should be a Flask application factory, or a middleware that wraps a
-        Flask application factory.
+    app : :class:`.Flask`
+        The Flask app to wrap.
     middlewares : list
-        A list of callables that return an app factory callable. These are
-        applied in reverse, so that the first middleware is the "outermost"
-        wrapper around the base ``app_factory`` and is therefore called first.
+        A list of middleware classes. These are applied in reverse, so that the
+        first middleware is the "outermost" wrapper around the base ``app``,
+        and is therefore called first.
 
     Returns
     -------
-    function
-        A callable that behaves like a Flask application factory.
+    :class:`.Flask`
+        The original Flask ``app``, with middlewares applied.
 
     """
     if not hasattr(app, 'wsgi_app'):
         raise TypeError('Not a valid Flask app or middleware')
     # Apply the last middleware first, so that the first middleware is called
     # first upon the request.
-    wrapped_app = app.wsgi_app  # type: ignore
+    wrapped_app: IWSGIApp = app.wsgi_app
     for middleware in middlewares[::-1]:
-        wrapped_app = middleware(wrapped_app)
+        try:
+            wrapped_app = middleware(wrapped_app, config=app.config)
+        except TypeError:   # Maintain backward compatibility.
+            wrapped_app = middleware(wrapped_app)
     app.wsgi_app = wrapped_app  # type: ignore
     return app
