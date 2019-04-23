@@ -171,7 +171,7 @@ class BaseConsumer(object):
         else:
             self.position = None
         self.duration = duration
-        self.start_time = None
+        self.start_time: Optional[float] = None
         self.back_off = back_off
         self.batch_size = batch_size
         self.sleep_time = 5
@@ -221,7 +221,7 @@ class BaseConsumer(object):
                 ShardCount=1
             )
             logger.info(f'Created; waiting for {self.stream_name} again')
-            self.wait_for_stream(**self.retry_params)
+            self.wait_for_stream(**self.retry_params)   # type: ignore
 
         # Intercept SIGINT and SIGTERM so that we can checkpoint before exit.
         self.exit = False
@@ -358,7 +358,7 @@ class BaseConsumer(object):
         processed = 0
         try:
             time.sleep(self.sleep_time)   # Don't get carried away.
-            next_start, response = self.get_records(start, self.batch_size,
+            next_start, response = self.get_records(start, self.batch_size,   # type: ignore
                                                     **self.retry_params)
         except Exception as e:
             self._checkpoint()
