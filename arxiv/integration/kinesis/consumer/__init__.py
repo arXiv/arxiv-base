@@ -87,6 +87,7 @@ import warnings
 import boto3
 from botocore.exceptions import WaiterError, NoCredentialsError, \
     PartialCredentialsError, BotoCoreError, ClientError
+from retry.api import retry_call
 
 import logging
 from .exceptions import CheckpointError, StreamNotAvailable, StopProcessing, \
@@ -96,45 +97,6 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 
 NOW = datetime.now(tz=UTC).strftime('%Y-%m-%dT%H:%M:%S')
-
-
-def retry(retries: int = 5, wait: int = 5) -> Callable:
-    """
-    Generate a decorator for retrying Kinesis calls.
-
-    Parameters
-    ----------
-    retries : int
-        Number of times to retry before failing.
-    wait : int
-        Number of seconds to wait between retries.
-
-    Returns
-    -------
-    function
-        A decorator that retries the decorated func ``retries`` times before
-        raising :class:`.KinesisRequestFailed`.
-
-    """
-    __retries = retries
-
-    def decorator(func: Callable) -> Callable:
-        """Retry the decorated func on ClientErrors up to ``retries`` times."""
-        _retries = __retries
-
-        def inner(*args, **kwargs) -> Any:  # type: ignore
-            retries = _retries
-            while retries > 0:
-                try:
-                    return func(*args, **kwargs)
-                except ClientError as e:
-                    code = e.response['Error']['Code']
-                    logger.error('Caught ClientError %s, retrying', code)
-                    time.sleep(wait)
-                    retries -= 1
-            raise KinesisRequestFailed('Max retries; last code: {code}')
-        return inner
-    return decorator
 
 
 class DiskCheckpointManager(object):
@@ -263,8 +225,9 @@ class BaseConsumer(object):
         logger.error('Done')
         raise StopProcessing(f'Received signal {signal}')
 
-    @retry(5, 10)
-    def wait_for_stream(self) -> None:
+    def wait_for_stream(self, tries: int = 5, delay: int = 5,
+                        max_delay: Optional[int] = None, backoff: int = 1,
+                        jitter: Union[int, Tuple[int, int]] = 0) -> None:
         """
         Wait for the stream to become available.
 
@@ -278,19 +241,23 @@ class BaseConsumer(object):
 
         """
         waiter = self.client.get_waiter('stream_exists')
+        fkwargs = dict(StreamName=self.stream_name, Limit=1,
+                       ExclusiveStartShardId=self.shard_id)
         try:
             logger.error(f'Waiting for stream {self.stream_name}')
-            waiter.wait(
-                StreamName=self.stream_name,
-                Limit=1,
-                ExclusiveStartShardId=self.shard_id
-            )
+            retry_call(waiter.wait, fkwargs=fkwargs, exceptions=ClientError,
+                       tries=tries, delay=delay, max_delay=max_delay,
+                       backoff=backoff, jitter=jitter)
+
         except WaiterError as e:
             logger.error('Failed to get stream while waiting')
             raise StreamNotAvailable('Could not connect to stream') from e
         except (PartialCredentialsError, NoCredentialsError) as e:
             logger.error('Credentials missing or incomplete: %s', e.msg)
             raise ConfigurationError('Credentials missing') from e
+        except ClientError as e:
+            code = e.response['Error']['Code']
+            raise KinesisRequestFailed(f'Last code: {code}') from e
 
     def _get_iterator(self) -> str:
         """
@@ -346,12 +313,21 @@ class BaseConsumer(object):
             self.checkpointer.checkpoint(self.position)
             logger.debug(f'Set checkpoint at {self.position}')
 
-    @retry(retries=10, wait=5)
-    def get_records(self, iterator: str, limit: int) -> Tuple[str, dict]:
+    def get_records(self, iterator: str, limit: int, tries: int = 5,
+                    delay: int = 5, max_delay: Optional[int] = None,
+                    backoff: int = 1, jitter: Union[int, Tuple[int, int]] = 0)\
+            -> Tuple[str, dict]:
         """Get the next batch of ``limit`` or fewer records."""
         logger.debug(f'Get more records from {iterator}, limit {limit}')
-        response = self.client.get_records(ShardIterator=iterator,
-                                           Limit=limit)
+        fkwargs = dict(ShardIterator=iterator, Limit=limit)
+        try:
+            response = retry_call(self.client.get_records, fkwargs=fkwargs,
+                                  exceptions=ClientError, tries=tries,
+                                  delay=delay, max_delay=max_delay,
+                                  backoff=backoff, jitter=jitter)
+        except ClientError as e:
+            code = e.response['Error']['Code']
+            raise KinesisRequestFailed(f'Last code: {code}') from e
         iterator = response['NextShardIterator']
         return iterator, response
 
@@ -398,7 +374,7 @@ class BaseConsumer(object):
         return next_start, processed
 
     def go(self) -> None:
-        """Main processing routine."""
+        """Run the main processing routine."""
         self.start_time = time.time()
         logger.info(f'Starting processing from position {self.position}'
                     f' on stream {self.stream_name} and shard {self.shard_id}')
