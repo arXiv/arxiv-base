@@ -158,7 +158,9 @@ class BaseConsumer(object):
                  endpoint: Optional[str] = None, verify: bool = True,
                  duration: Optional[int] = None,
                  start_type: str = 'AT_TIMESTAMP',
-                 start_at: str = NOW) -> None:
+                 start_at: str = NOW, tries: int = 5, delay: int = 5,
+                 max_delay: Optional[int] = None, backoff: int = 1,
+                 jitter: Union[int, Tuple[int, int]] = 0) -> None:
         """Initialize a new stream consumer."""
         logger.info(f'New consumer for {stream_name} ({shard_id})')
         self.stream_name = stream_name
@@ -176,6 +178,15 @@ class BaseConsumer(object):
         self.start_at = start_at
         self.start_type = start_type
         logger.info(f'Got start_type={start_type} and start_at={start_at}')
+
+        # Retry parameters.
+        self.retry_params = {
+            'tries': tries,
+            'delay': delay,
+            'max_delay': max_delay,
+            'backoff': backoff,
+            'jitter': jitter
+        }
 
         if not self.stream_name or not self.shard_id:
             logger.info(
@@ -202,7 +213,7 @@ class BaseConsumer(object):
 
         logger.info(f'Waiting for {self.stream_name} to be available')
         try:
-            self.wait_for_stream()
+            self.wait_for_stream(tries=1)
         except (KinesisRequestFailed, StreamNotAvailable):
             logger.info('Could not connect to stream; attempting to create')
             self.client.create_stream(
@@ -210,7 +221,7 @@ class BaseConsumer(object):
                 ShardCount=1
             )
             logger.info(f'Created; waiting for {self.stream_name} again')
-            self.wait_for_stream()
+            self.wait_for_stream(**self.retry_params)
 
         # Intercept SIGINT and SIGTERM so that we can checkpoint before exit.
         self.exit = False
@@ -347,7 +358,8 @@ class BaseConsumer(object):
         processed = 0
         try:
             time.sleep(self.sleep_time)   # Don't get carried away.
-            next_start, response = self.get_records(start, self.batch_size)
+            next_start, response = self.get_records(start, self.batch_size,
+                                                    **self.retry_params)
         except Exception as e:
             self._checkpoint()
             raise StopProcessing('Unhandled exception: %s' % str(e)) from e
@@ -449,7 +461,12 @@ def process_stream(Consumer: type, config: dict,
             verify=config.get('KINESIS_VERIFY', 'true') == 'true',
             duration=duration,
             start_type=start_type,
-            start_at=start_at
+            start_at=start_at,
+            tries=config.get('KINESIS_RETRY_TRIES', 5),
+            delay=config.get('KINESIS_RETRY_DELAY', 5),
+            max_delay=config.get('KINESIS_RETRY_MAX_DELAY', None),
+            backoff=config.get('KINESIS_RETRY_BACKOFF', 1),
+            jitter=config.get('KINESIS_RETRY_JITTER', 0)
         )
         try:
             processor.go()
