@@ -1,11 +1,12 @@
 """Tests for :class:`.BaseConsumer`."""
 
 from unittest import TestCase, mock
+import time
 from botocore.exceptions import BotoCoreError, WaiterError, ClientError
 
 from ..consumer import BaseConsumer, CheckpointError, StopProcessing, \
     KinesisRequestFailed, ConfigurationError, StreamNotAvailable, \
-    process_stream
+    process_stream, RestartProcessing
 
 
 class TestBaseConsumer(TestCase):
@@ -17,24 +18,29 @@ class TestBaseConsumer(TestCase):
         self.checkpointer.position = None
 
     @mock.patch('boto3.client')
-    def test_init(self, mock_client_factory):
-        """On init, consumer should wait for stream to be available."""
+    def test_go(self, mock_client_factory):
+        """On go, consumer should wait for stream to be available."""
         mock_client = mock.MagicMock()
         mock_waiter = mock.MagicMock()
         mock_client.get_waiter.return_value = mock_waiter
+        mock_client.get_records.side_effect = StopProcessing
         mock_client_factory.return_value = mock_client
 
+        consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
+                                'us-east-1', self.checkpointer)
+        consumer.sleep_time = 0     # Don't wait.
         try:
-            BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop', 'us-east-1',
-                         self.checkpointer)
-        except Exception as e:
+            consumer.go()
+        except StopProcessing:
+            pass    # This was intentional; we needed to stop processing.
+        except Exception:
             self.fail('If the waiter returns without an exception, no'
                       ' exception should be raised.')
         self.assertEqual(mock_waiter.wait.call_count, 1,
                          "A boto3 waiter should be used")
 
     @mock.patch('boto3.client')
-    def test_init_stream_not_available(self, mock_client_factory):
+    def test_go_stream_not_available(self, mock_client_factory):
         """If the stream is not available, should raise an exception."""
         mock_client = mock.MagicMock()
         mock_waiter = mock.MagicMock()
@@ -45,9 +51,11 @@ class TestBaseConsumer(TestCase):
         mock_waiter.wait.side_effect = raise_waiter_error
         mock_client.get_waiter.return_value = mock_waiter
         mock_client_factory.return_value = mock_client
+        consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
+                                'us-east-1', self.checkpointer)
+        consumer.sleep_time = 0     # Don't wait.
         with self.assertRaises(StreamNotAvailable):
-            BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop', 'us-east-1',
-                         self.checkpointer)
+            consumer.go()
 
     @mock.patch('boto3.client')
     def test_iteration(self, mock_client_factory):
@@ -62,6 +70,9 @@ class TestBaseConsumer(TestCase):
         }
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
                                 'us-east-1', self.checkpointer)
+        consumer.sleep_time = 0     # Don't wait.
+        consumer.client = consumer.new_client()
+
         next_start, processed = consumer.process_records('0')
         self.assertGreater(mock_client.get_records.call_count, 0)
         self.assertEqual(processed, 10)
@@ -92,6 +103,7 @@ class TestBaseConsumer(TestCase):
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
                                 'us-east-1', self.checkpointer,
                                 batch_size=batch_size)
+        consumer.sleep_time = 0     # Don't wait.
         with self.assertRaises(StopProcessing):
             consumer.go()
         self.assertEqual(mock_client.get_records.call_count,
@@ -114,7 +126,8 @@ class TestBaseConsumer(TestCase):
         batch_size = 50
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
                                 'us-east-1', self.checkpointer,
-                                batch_size=batch_size)
+                                batch_size=batch_size, delay=0)
+        consumer.sleep_time = 0     # Don't wait.
         consumer.position = 'fooposition'
         try:
             consumer.go()
@@ -132,6 +145,8 @@ class TestBaseConsumer(TestCase):
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
                                 'us-east-1', self.checkpointer,
                                 start_type='AT_TIMESTAMP')
+        consumer.sleep_time = 0     # Don't wait.
+        consumer.client = consumer.new_client()
         consumer._get_iterator()
         args, kwargs = mock_client.get_shard_iterator.call_args
         self.assertEqual(kwargs['ShardIteratorType'], 'AT_TIMESTAMP')
@@ -147,6 +162,8 @@ class TestBaseConsumer(TestCase):
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
                                 'us-east-1', self.checkpointer,
                                 start_type='AT_TIMESTAMP')
+        consumer.sleep_time = 0     # Don't wait.
+        consumer.client = consumer.new_client()
         consumer.position = 'fooposition'
         consumer._get_iterator()
         args, kwargs = mock_client.get_shard_iterator.call_args
@@ -163,6 +180,8 @@ class TestBaseConsumer(TestCase):
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
                                 'us-east-1', self.checkpointer,
                                 start_type='TRIM_HORIZON')
+        consumer.sleep_time = 0     # Don't wait.
+        consumer.client = consumer.new_client()
         consumer._get_iterator()
         args, kwargs = mock_client.get_shard_iterator.call_args
         self.assertEqual(kwargs['ShardIteratorType'], 'TRIM_HORIZON')
@@ -201,7 +220,7 @@ class TestProcessStream(TestCase):
         class FooConsumer(BaseConsumer):
             def __init__(self, *args, **kwargs):
                 super(FooConsumer, self).__init__(*args, **kwargs)
-                self.sleep_time = 0.5
+                self.sleep_time = 0.01
 
             process_record = mock.MagicMock()
 
@@ -211,7 +230,45 @@ class TestProcessStream(TestCase):
 
             def checkpoint(self, position):
                 self.position = position
-
-        process_stream(FooConsumer, self.config, FooCheckpointer(), 5)
+        start = time.time()
+        process_stream(FooConsumer, self.config, FooCheckpointer(), 2)
+        self.assertGreaterEqual(time.time() - start, 2,
+                                "Should run for at least 2 seconds")
         self.assertGreater(FooConsumer.process_record.call_count, 0,
                            "Should be called at least several times")
+
+    @mock.patch('boto3.client')
+    def test_restart_processing(self, mock_client_factory):
+        """The record processor raises :class:`.RestartProcessing`."""
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+        mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
+        mock_client.get_records.return_value = {
+            "Records": [
+                {'SequenceNumber': '1', 'Data': 'bat'},
+                {'SequenceNumber': '2', 'Data': 'abt'},
+                {'SequenceNumber': '3', 'Data': 'tab'},
+                {'SequenceNumber': '4', 'Data': 'bta'},
+            ],
+            "NextShardIterator": "5"
+        }
+
+        class FooConsumer(BaseConsumer):
+            def __init__(self, *args, **kwargs):
+                super(FooConsumer, self).__init__(*args, **kwargs)
+                self.sleep_time = 0.01
+
+            go = mock.MagicMock(side_effect=[RestartProcessing,
+                                             RestartProcessing,
+                                             StopProcessing])
+
+        class FooCheckpointer(object):
+            def __init__(self):
+                self.position = None
+
+            def checkpoint(self, position):
+                self.position = position
+
+        process_stream(FooConsumer, self.config, FooCheckpointer(), 2)
+        self.assertEqual(FooConsumer.go.call_count, 3,
+                         'Should be retried')
