@@ -79,7 +79,7 @@ import json
 from pytz import UTC
 from datetime import datetime, timedelta
 import os
-from typing import Any, Optional, Tuple, Generator, Callable, Dict, Union
+from typing import Any, Optional, Tuple, Generator, Callable, Dict, Union, Any
 from contextlib import contextmanager
 import signal
 import warnings
@@ -162,7 +162,7 @@ class BaseConsumer(object):
                  start_type: str = 'AT_TIMESTAMP',
                  start_at: str = NOW, tries: int = 5, delay: int = 5,
                  max_delay: Optional[int] = None, backoff: int = 1,
-                 jitter: Union[int, Tuple[int, int]] = 0, **extra) -> None:
+                 jitter: Union[int, Tuple[int, int]] = 0, **extra: Any) -> None:
         """Initialize a new stream consumer."""
         logger.info(f'New consumer for {stream_name} ({shard_id})')
         self.stream_name = stream_name
@@ -207,6 +207,7 @@ class BaseConsumer(object):
         logger.info('Ready to start')
 
     def get_or_create_stream(self) -> None:
+        """Wait for the stream, and create it if it doesn't exist."""
         logger.info(f'Waiting for {self.stream_name} to be available')
         try:
             self.wait_for_stream(tries=1)
@@ -432,7 +433,7 @@ class BaseConsumer(object):
 def process_stream(Consumer: type, config: dict,
                    checkpointmanager: Optional[Any] = None,
                    duration: Optional[int] = None,
-                   **extra) -> None:
+                   **extra: Any) -> None:
     """
     Configure and run an agent (Kinesis consumer).
 
