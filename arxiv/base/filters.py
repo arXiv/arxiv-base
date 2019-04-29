@@ -109,3 +109,4 @@ def register_filters(app: Flask) -> None:
     app.template_filter('tidy_filesize')(tidy_filesize)
     app.template_filter('as_eastern')(as_eastern)
     app.template_filter('abs_doi_to_urls')(urlizer(['doi_field']))
+    app.template_filter('arxiv_id_urlize')(urlizer(['arxiv_id']))
