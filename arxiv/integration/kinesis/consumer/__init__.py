@@ -227,9 +227,9 @@ class BaseConsumer(object):
 
     def new_client(self) -> boto3.client:
         """Generate a new Kinesis client."""
-        params = {'region_name': self.region,
-                  'aws_access_key_id': self._access_key,
-                  'aws_secret_access_key': self._secret_key}
+        params: Dict[str, Any] = {'region_name': self.region,
+                                  'aws_access_key_id': self._access_key,
+                                  'aws_secret_access_key': self._secret_key}
         if self.endpoint:
             params['endpoint_url'] = self.endpoint
         if self.verify is False:
