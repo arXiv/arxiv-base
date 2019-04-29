@@ -189,7 +189,7 @@ class BaseConsumer(object):
             'delay': delay,
             'max_delay': max_delay,
             'backoff': backoff,
-            'jitter': jitter
+            'jitter': jitter  #  extra seconds added to delay between retry attempts.
         }
 
         if not self.stream_name or not self.shard_id:
