@@ -51,6 +51,19 @@ class Base(object):
         # Set the static url path.
         app_version = app.config.get("APP_VERSION", "null")
         app_static_path = f'/static/{app.name}/{app_version}'
+        app.static_url_path = app_static_path
+
+        # We also need to update the app's url_map, since that's how url_for()
+        # builds URLs.
+        # Remove the rule from the url_map.
+        for rule in app.url_map.iter_rules('static'):
+            app.url_map._rules.remove(rule)
+        # Werkzeug maintains this for faster lookup; we need to clear it, too.
+        app.url_map._rules_by_endpoint['static'] = []
+        # Add the updated rule.
+        app.add_url_rule(f'{app.static_url_path}/<path:filename>',
+                         endpoint='static',
+                         view_func=app.send_static_file)
 
         base_static_url_path = f'/static/base/{base_config.BASE_VERSION}'
 
@@ -63,8 +76,6 @@ class Base(object):
         if app.config.get('RELATIVE_STATIC_PATHS'):
             prefix = app.config.get('RELATIVE_STATIC_PREFIX', '').strip('/')
             base_static_url_path = f'/{prefix}{base_static_url_path}'
-
-        app.static_url_path = app_static_path
 
         # The base blueprint attaches static assets and templates. These are
         # used by many different apps.
