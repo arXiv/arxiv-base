@@ -218,20 +218,6 @@ class BaseConsumer(object):
             logger.info(f'Created; waiting for {self.stream_name} again')
             self.wait_for_stream(**self.retry_params)   # type: ignore
 
-    def new_client(self) -> boto3.client:
-        """Generate a new Kinesis client."""
-        logger.info(f'Getting a new connection to Kinesis at {self.endpoint}'
-                    f' in region {self.region}, with verify {self.verify}')
-        params = dict(endpoint_url=self.endpoint, verify=self.verify,
-                      region_name=self.region)
-        # Only add these if they are set/truthy. This allows us to use a
-        # shared credentials file via an environment variable.
-        if self._access_key and self._secret_key:
-            params.update(dict(aws_access_key_id=self._access_key,
-                               aws_secret_access_key=self._secret_key))
-        logger.debug('New client with parameters: %s', params)
-        return boto3.client('kinesis', **params)
-
     def stop(self, signal: int, frame: Any) -> None:
         """Set exit flag for a graceful stop."""
         logger.error(f'Received signal {signal}')
@@ -239,8 +225,23 @@ class BaseConsumer(object):
         logger.error('Done')
         raise StopProcessing(f'Received signal {signal}')
 
+    def new_client(self) -> boto3.client:
+        """Generate a new Kinesis client."""
+        params = {'region_name': self.region,
+                  'aws_access_key_id': self._access_key,
+                  'aws_secret_access_key': self._secret_key}
+        if self.endpoint:
+            params['endpoint_url'] = self.endpoint
+        if self.verify is False:
+            params['verify'] = False
+
+        logger.debug('New session with parameters: %s', params)
+        # We don't want to let boto3 manage the Session for us.
+        self._session = boto3.Session(**params)
+        return self._session.client('kinesis')
+
     def wait_for_stream(self, tries: int = 5, delay: int = 5,
-                        max_delay: Optional[int] = None, backoff: int = 1,
+                        max_delay: Optional[int] = None, backoff: int = 2,
                         jitter: Union[int, Tuple[int, int]] = 0) -> None:
         """
         Wait for the stream to become available.
@@ -255,27 +256,23 @@ class BaseConsumer(object):
 
         """
         waiter = self.client.get_waiter('stream_exists')
-
         try:
             logger.error(f'Waiting for stream {self.stream_name}')
-            waiter.wait(**dict(
-                StreamName=self.stream_name,
-                Limit=1,
-                ExclusiveStartShardId=self.shard_id,
-                WaiterConfig=dict(
-                    Delay=delay,
-                    MaxAttempts=tries
-                )
-            ))
-            # retry_call(waiter.wait, fkwargs=fkwargs, exceptions=ClientError,
-            #            tries=tries, delay=delay, max_delay=max_delay,
-            #            backoff=backoff, jitter=jitter)
-
+            fkwargs = {
+                'StreamName': self.stream_name,
+                'WaiterConfig': {
+                    'Delay': 1,
+                    'MaxAttempts': 10
+                }
+            }
+            retry_call(waiter.wait, fkwargs=fkwargs,
+                       tries=tries, delay=delay, max_delay=max_delay,
+                       backoff=backoff, jitter=jitter)
         except WaiterError as e:
             logger.error('Failed to get stream while waiting')
             raise StreamNotAvailable('Could not connect to stream') from e
         except (PartialCredentialsError, NoCredentialsError) as e:
-            logger.error('Credentials missing or incomplete: %s', e.msg)
+            logger.error('Credentials missing or incomplete: %s', e)
             raise ConfigurationError('Credentials missing') from e
         except ClientError as e:
             code = e.response['Error']['Code']
@@ -433,7 +430,7 @@ class BaseConsumer(object):
 def process_stream(Consumer: type, config: dict,
                    checkpointmanager: Optional[Any] = None,
                    duration: Optional[int] = None,
-                   **extra: Any) -> None:
+                   extra: Dict[str, Any] = {}) -> None:
     """
     Configure and run an agent (Kinesis consumer).
 

@@ -17,17 +17,18 @@ class TestBaseConsumer(TestCase):
         self.checkpointer = mock.MagicMock()
         self.checkpointer.position = None
 
-    @mock.patch('boto3.client')
-    def test_go(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_go(self, mock_session_factory):
         """On go, consumer should wait for stream to be available."""
         mock_client = mock.MagicMock()
         mock_waiter = mock.MagicMock()
         mock_client.get_waiter.return_value = mock_waiter
         mock_client.get_records.side_effect = StopProcessing
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
 
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
-                                'us-east-1', self.checkpointer)
+                                'us-east-1', self.checkpointer, delay=0)
         consumer.sleep_time = 0     # Don't wait.
         try:
             consumer.go()
@@ -39,8 +40,8 @@ class TestBaseConsumer(TestCase):
         self.assertEqual(mock_waiter.wait.call_count, 1,
                          "A boto3 waiter should be used")
 
-    @mock.patch('boto3.client')
-    def test_go_stream_not_available(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_go_stream_not_available(self, mock_session_factory):
         """If the stream is not available, should raise an exception."""
         mock_client = mock.MagicMock()
         mock_waiter = mock.MagicMock()
@@ -50,18 +51,20 @@ class TestBaseConsumer(TestCase):
 
         mock_waiter.wait.side_effect = raise_waiter_error
         mock_client.get_waiter.return_value = mock_waiter
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
-                                'us-east-1', self.checkpointer)
+                                'us-east-1', self.checkpointer, delay=0)
         consumer.sleep_time = 0     # Don't wait.
         with self.assertRaises(StreamNotAvailable):
             consumer.go()
 
-    @mock.patch('boto3.client')
-    def test_iteration(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_iteration(self, mock_session_factory):
         """Test iteration behavior."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_records.return_value = {
             'Records': [
                 {'SequenceNumber': str(i)} for i in range(10)
@@ -78,11 +81,12 @@ class TestBaseConsumer(TestCase):
         self.assertEqual(processed, 10)
         self.assertEqual(next_start, '10', "Should return NextShardIterator")
 
-    @mock.patch('boto3.client')
-    def test_process_records_until_shard_closes(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_process_records_until_shard_closes(self, mock_session_factory):
         """Should call GetRecords until no next iterator is available."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
 
         def get_records(**kwargs):
@@ -111,11 +115,12 @@ class TestBaseConsumer(TestCase):
                          "Should call Kinesis GetRecords until no iterator"
                          " is returned.")
 
-    @mock.patch('boto3.client')
-    def test_process_records_with_clienterror(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_process_records_with_clienterror(self, mock_session_factory):
         """Should try to checkpoint before exiting."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
 
         def raise_client_error(*args, **kwargs):
@@ -135,11 +140,12 @@ class TestBaseConsumer(TestCase):
             pass
         self.assertEqual(self.checkpointer.checkpoint.call_count, 1)
 
-    @mock.patch('boto3.client')
-    def test_start_from_timestamp(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_start_from_timestamp(self, mock_session_factory):
         """Consumer is initialized with start_type 'AT_TIMESTAMP'."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
 
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
@@ -152,11 +158,12 @@ class TestBaseConsumer(TestCase):
         self.assertEqual(kwargs['ShardIteratorType'], 'AT_TIMESTAMP')
         self.assertIn('Timestamp', kwargs)
 
-    @mock.patch('boto3.client')
-    def test_start_from_position(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_start_from_position(self, mock_session_factory):
         """Consumer is initialized with start_type 'AT_TIMESTAMP'."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
 
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
@@ -170,11 +177,12 @@ class TestBaseConsumer(TestCase):
         self.assertEqual(kwargs['ShardIteratorType'], 'AFTER_SEQUENCE_NUMBER')
         self.assertEqual(kwargs['StartingSequenceNumber'], 'fooposition')
 
-    @mock.patch('boto3.client')
-    def test_start_from_trim_horizon(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_start_from_trim_horizon(self, mock_session_factory):
         """Consumer is initialized with start_type 'AT_TIMESTAMP'."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
 
         consumer = BaseConsumer('foo', '1', 'a1b2c3d4', 'qwertyuiop',
@@ -201,11 +209,12 @@ class TestProcessStream(TestCase):
             'AWS_REGION': 'su-tsae-9'
         }
 
-    @mock.patch('boto3.client')
-    def test_process_stream(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_process_stream(self, mock_session_factory):
         """Run :func:`.process_stream` with a vanilla config."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
         mock_client.get_records.return_value = {
             "Records": [
@@ -237,11 +246,12 @@ class TestProcessStream(TestCase):
         self.assertGreater(FooConsumer.process_record.call_count, 0,
                            "Should be called at least several times")
 
-    @mock.patch('boto3.client')
-    def test_restart_processing(self, mock_client_factory):
+    @mock.patch('boto3.Session')
+    def test_restart_processing(self, mock_session_factory):
         """The record processor raises :class:`.RestartProcessing`."""
         mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
+        mock_session_factory.return_value = \
+            mock.MagicMock(client=mock.MagicMock(return_value=mock_client))
         mock_client.get_shard_iterator.return_value = {'ShardIterator': '1'}
         mock_client.get_records.return_value = {
             "Records": [
