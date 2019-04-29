@@ -79,7 +79,7 @@ import json
 from pytz import UTC
 from datetime import datetime, timedelta
 import os
-from typing import Any, Optional, Tuple, Generator, Callable, Dict, Union
+from typing import Any, Optional, Tuple, Generator, Callable, Dict, Union, Any
 from contextlib import contextmanager
 import signal
 import warnings
@@ -88,53 +88,17 @@ import boto3
 from botocore.exceptions import WaiterError, NoCredentialsError, \
     PartialCredentialsError, BotoCoreError, ClientError
 
+from retry.api import retry_call
+
 import logging
 from .exceptions import CheckpointError, StreamNotAvailable, StopProcessing, \
-    KinesisRequestFailed, ConfigurationError
+    KinesisRequestFailed, ConfigurationError, RestartProcessing
 
 logger = logging.getLogger(__name__)
-logger.propagate = False
+# logger.propagate = False
+logger.setLevel(10)
 
 NOW = datetime.now(tz=UTC).strftime('%Y-%m-%dT%H:%M:%S')
-
-
-def retry(retries: int = 5, wait: int = 5) -> Callable:
-    """
-    Generate a decorator for retrying Kinesis calls.
-
-    Parameters
-    ----------
-    retries : int
-        Number of times to retry before failing.
-    wait : int
-        Number of seconds to wait between retries.
-
-    Returns
-    -------
-    function
-        A decorator that retries the decorated func ``retries`` times before
-        raising :class:`.KinesisRequestFailed`.
-
-    """
-    __retries = retries
-
-    def decorator(func: Callable) -> Callable:
-        """Retry the decorated func on ClientErrors up to ``retries`` times."""
-        _retries = __retries
-
-        def inner(*args, **kwargs) -> Any:  # type: ignore
-            retries = _retries
-            while retries > 0:
-                try:
-                    return func(*args, **kwargs)
-                except ClientError as e:
-                    code = e.response['Error']['Code']
-                    logger.error('Caught ClientError %s, retrying', code)
-                    time.sleep(wait)
-                    retries -= 1
-            raise KinesisRequestFailed('Max retries; last code: {code}')
-        return inner
-    return decorator
 
 
 class DiskCheckpointManager(object):
@@ -196,7 +160,9 @@ class BaseConsumer(object):
                  endpoint: Optional[str] = None, verify: bool = True,
                  duration: Optional[int] = None,
                  start_type: str = 'AT_TIMESTAMP',
-                 start_at: str = NOW) -> None:
+                 start_at: str = NOW, tries: int = 5, delay: int = 5,
+                 max_delay: Optional[int] = None, backoff: int = 1,
+                 jitter: Union[int, Tuple[int, int]] = 0, **extra: Any) -> None:
         """Initialize a new stream consumer."""
         logger.info(f'New consumer for {stream_name} ({shard_id})')
         self.stream_name = stream_name
@@ -207,54 +173,50 @@ class BaseConsumer(object):
         else:
             self.position = None
         self.duration = duration
-        self.start_time = None
+        self.start_time: Optional[float] = None
         self.back_off = back_off
         self.batch_size = batch_size
-        self.sleep_time = 5
+        self.sleep_time = 1
         self.start_at = start_at
         self.start_type = start_type
+        self._access_key = access_key
+        self._secret_key = secret_key
         logger.info(f'Got start_type={start_type} and start_at={start_at}')
 
+        # Retry parameters.
+        self.retry_params = {
+            'tries': tries,
+            'delay': delay,
+            'max_delay': max_delay,
+            'backoff': backoff,
+            'jitter': jitter  #  extra seconds added to delay between retry attempts.
+        }
+
         if not self.stream_name or not self.shard_id:
-            logger.info(
-                'No stream indicated; making no attempt to connect to Kinesis'
-            )
-            return
+            logger.info('No stream set; no attempt to connect to Kinesis')
+            raise RuntimeError('Stream and shard must be specified')
 
-        logger.info(f'Getting a new connection to Kinesis at {endpoint}'
-                    f' in region {region}, with SSL verification={verify}')
-        params = dict(
-            endpoint_url=endpoint,
-            verify=verify,
-            region_name=region
-        )
-        # Only add these if they are set/truthy. This allows us to use a
-        # shared credentials file via an environment variable.
-        if access_key and secret_key:
-            params.update(dict(
-                aws_access_key_id=access_key,
-                aws_secret_access_key=secret_key
-            ))
-        logger.debug('New client with parameters: %s', params)
-        self.client = boto3.client('kinesis', **params)
-
-        logger.info(f'Waiting for {self.stream_name} to be available')
-        try:
-            self.wait_for_stream()
-        except (KinesisRequestFailed, StreamNotAvailable):
-            logger.info('Could not connect to stream; attempting to create')
-            self.client.create_stream(
-                StreamName=self.stream_name,
-                ShardCount=1
-            )
-            logger.info(f'Created; waiting for {self.stream_name} again')
-            self.wait_for_stream()
+        self.endpoint = endpoint
+        self.verify = verify
+        self.region = region
 
         # Intercept SIGINT and SIGTERM so that we can checkpoint before exit.
         self.exit = False
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
         logger.info('Ready to start')
+
+    def get_or_create_stream(self) -> None:
+        """Wait for the stream, and create it if it doesn't exist."""
+        logger.info(f'Waiting for {self.stream_name} to be available')
+        try:
+            self.wait_for_stream(tries=1)
+        except (KinesisRequestFailed, StreamNotAvailable):
+            logger.info('Could not connect to stream; attempting to create')
+            self.client.create_stream(StreamName=self.stream_name,
+                                      ShardCount=1)
+            logger.info(f'Created; waiting for {self.stream_name} again')
+            self.wait_for_stream(**self.retry_params)   # type: ignore
 
     def stop(self, signal: int, frame: Any) -> None:
         """Set exit flag for a graceful stop."""
@@ -263,8 +225,24 @@ class BaseConsumer(object):
         logger.error('Done')
         raise StopProcessing(f'Received signal {signal}')
 
-    @retry(5, 10)
-    def wait_for_stream(self) -> None:
+    def new_client(self) -> boto3.client:
+        """Generate a new Kinesis client."""
+        params: Dict[str, Any] = {'region_name': self.region,
+                                  'aws_access_key_id': self._access_key,
+                                  'aws_secret_access_key': self._secret_key}
+        if self.endpoint:
+            params['endpoint_url'] = self.endpoint
+        if self.verify is False:
+            params['verify'] = False
+
+        logger.debug('New session with parameters: %s', params)
+        # We don't want to let boto3 manage the Session for us.
+        self._session = boto3.Session(**params)
+        return self._session.client('kinesis')
+
+    def wait_for_stream(self, tries: int = 5, delay: int = 5,
+                        max_delay: Optional[int] = None, backoff: int = 2,
+                        jitter: Union[int, Tuple[int, int]] = 0) -> None:
         """
         Wait for the stream to become available.
 
@@ -280,17 +258,25 @@ class BaseConsumer(object):
         waiter = self.client.get_waiter('stream_exists')
         try:
             logger.error(f'Waiting for stream {self.stream_name}')
-            waiter.wait(
-                StreamName=self.stream_name,
-                Limit=1,
-                ExclusiveStartShardId=self.shard_id
-            )
+            fkwargs = {
+                'StreamName': self.stream_name,
+                'WaiterConfig': {
+                    'Delay': 1,
+                    'MaxAttempts': 10
+                }
+            }
+            retry_call(waiter.wait, fkwargs=fkwargs,
+                       tries=tries, delay=delay, max_delay=max_delay,
+                       backoff=backoff, jitter=jitter)
         except WaiterError as e:
             logger.error('Failed to get stream while waiting')
             raise StreamNotAvailable('Could not connect to stream') from e
         except (PartialCredentialsError, NoCredentialsError) as e:
-            logger.error('Credentials missing or incomplete: %s', e.msg)
+            logger.error('Credentials missing or incomplete: %s', e)
             raise ConfigurationError('Credentials missing') from e
+        except ClientError as e:
+            code = e.response['Error']['Code']
+            raise KinesisRequestFailed(f'Last code: {code}') from e
 
     def _get_iterator(self) -> str:
         """
@@ -346,12 +332,21 @@ class BaseConsumer(object):
             self.checkpointer.checkpoint(self.position)
             logger.debug(f'Set checkpoint at {self.position}')
 
-    @retry(retries=10, wait=5)
-    def get_records(self, iterator: str, limit: int) -> Tuple[str, dict]:
+    def get_records(self, iterator: str, limit: int, tries: int = 5,
+                    delay: int = 5, max_delay: Optional[int] = None,
+                    backoff: int = 1, jitter: Union[int, Tuple[int, int]] = 0)\
+            -> Tuple[str, dict]:
         """Get the next batch of ``limit`` or fewer records."""
         logger.debug(f'Get more records from {iterator}, limit {limit}')
-        response = self.client.get_records(ShardIterator=iterator,
-                                           Limit=limit)
+        fkwargs = dict(ShardIterator=iterator, Limit=limit)
+        try:
+            response = retry_call(self.client.get_records, fkwargs=fkwargs,
+                                  exceptions=ClientError, tries=tries,
+                                  delay=delay, max_delay=max_delay,
+                                  backoff=backoff, jitter=jitter)
+        except ClientError as e:
+            code = e.response['Error']['Code']
+            raise KinesisRequestFailed(f'Last code: {code}') from e
         iterator = response['NextShardIterator']
         return iterator, response
 
@@ -371,7 +366,8 @@ class BaseConsumer(object):
         processed = 0
         try:
             time.sleep(self.sleep_time)   # Don't get carried away.
-            next_start, response = self.get_records(start, self.batch_size)
+            next_start, response = self.get_records(start, self.batch_size,   # type: ignore
+                                                    **self.retry_params)
         except Exception as e:
             self._checkpoint()
             raise StopProcessing('Unhandled exception: %s' % str(e)) from e
@@ -398,7 +394,10 @@ class BaseConsumer(object):
         return next_start, processed
 
     def go(self) -> None:
-        """Main processing routine."""
+        """Run the main processing routine."""
+        self.client = self.new_client()
+        self.get_or_create_stream()
+
         self.start_time = time.time()
         logger.info(f'Starting processing from position {self.position}'
                     f' on stream {self.stream_name} and shard {self.shard_id}')
@@ -430,7 +429,8 @@ class BaseConsumer(object):
 
 def process_stream(Consumer: type, config: dict,
                    checkpointmanager: Optional[Any] = None,
-                   duration: Optional[int] = None) -> None:
+                   duration: Optional[int] = None,
+                   extra: Dict[str, Any] = {}) -> None:
     """
     Configure and run an agent (Kinesis consumer).
 
@@ -443,6 +443,8 @@ def process_stream(Consumer: type, config: dict,
     duration : int
         Time (in seconds) to consume records. If None (default), will
         run "forever".
+    extra : kwargs
+        Extra keyword arguments passed to the Consumer constructor.
 
     """
     # By default we use the on-disk checkpoint manager.
@@ -473,10 +475,16 @@ def process_stream(Consumer: type, config: dict,
             verify=config.get('KINESIS_VERIFY', 'true') == 'true',
             duration=duration,
             start_type=start_type,
-            start_at=start_at
+            start_at=start_at,
+            tries=config.get('KINESIS_RETRY_TRIES', 5),
+            delay=config.get('KINESIS_RETRY_DELAY', 5),
+            max_delay=config.get('KINESIS_RETRY_MAX_DELAY', None),
+            backoff=config.get('KINESIS_RETRY_BACKOFF', 1),
+            jitter=config.get('KINESIS_RETRY_JITTER', 0),
+            **extra
         )
         try:
-            processor.go()
+            retry_call(processor.go, exceptions=RestartProcessing)
         except StopProcessing:
             logger.info('Got StopProcessing; stopping.')
             return

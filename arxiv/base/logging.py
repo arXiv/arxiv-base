@@ -49,7 +49,7 @@ def getLogger(name: str, stream: IO = sys.stderr) -> logging.Logger:
     :class:`logging.Logger`
     """
     logger = logging.getLogger(name)
-    logger.propagate = False
+    # logger.propagate = False
     config = get_application_config()
 
     # Set the log level from the Flask app configuration.
