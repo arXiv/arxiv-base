@@ -325,7 +325,7 @@ def _deferred_thread_local_linker_of_kind(kind: str) -> Callable_Linker:
         if kind not in _t_local_linkers.__dict__:
             _t_local_linkers.__dict__[kind] = _get_linker_of_kind(kind)
 
-        return _t_local_linkers.__dict__[kind](instr)
+        return _t_local_linkers.__dict__[kind](instr)  # type: ignore
 
     return deferred
 
