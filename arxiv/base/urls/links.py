@@ -33,13 +33,12 @@ handle FTP addresses.
 Updated 20 March, 2019: refactored to provide independent bleach attribute
 callbacks for each kind of link.
 """
-from threading import local
 from typing import List, Pattern, Tuple, Callable, Dict, Union
 import re
 from functools import reduce
 from urllib.parse import quote, urlparse
 
-from flask import url_for
+from flask import url_for, g
 import bleach
 
 from arxiv.taxonomy import CATEGORIES
@@ -302,30 +301,19 @@ def _compose_list_of_funcs(fv: List[Callable_Linker]) -> Callable_Linker:
     return reduce(lambda f, g: lambda x: f(g(x)), fv[1:], fv[0])
 
 
-# We don't want to call local() at package import time because that would be
-# only on one of the WSGI theads.
-_t_local_linkers = None
-
-
 def _deferred_thread_local_linker_of_kind(kind: str) -> Callable_Linker:
-    # Bleach linkifiers are not thread safe. This thread localizes them.
+    # Bleach linkifiers are not thread safe. This puts them on Flask.g.
     #
-    # This will return a Callable that creates the bleach linkifier at
-    # only when called with the string to linkify. This is so the bleach
-    # linkifier can be put into a thead.local of each individual WSGI thread.
+    # This will return a Callable that creates the bleach linkifier
+    # only when called with the string to linkify. This is so the
+    # bleach linkifier can be put into a Flask.g of each
+    # individual WSGI thread.
 
     def deferred(instr: str) -> str:
-        # This must not be called while the app is starting up, only when the
-        # linkiers are being used in threads. So the function is created/cached
-        # at call time.
-        global _t_local_linkers
-        if _t_local_linkers is None:
-            _t_local_linkers = local()
-
-        if kind not in _t_local_linkers.__dict__:
-            _t_local_linkers.__dict__[kind] = _get_linker_of_kind(kind)
-
-        return _t_local_linkers.__dict__[kind](instr)  # type: ignore
+        # This must not be called while the app is starting up, only
+        # when the linkiers are being used in requests. So the
+        # function is created/cached at call time.
+        return g.get('linkers',{}).get(kind,_get_linker_of_kind(kind))(instr)
 
     return deferred
 
