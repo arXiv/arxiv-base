@@ -313,7 +313,12 @@ def _deferred_thread_local_linker_of_kind(kind: str) -> Callable_Linker:
         # This must not be called while the app is starting up, only
         # when the linkiers are being used in requests. So the
         # function is created/cached at call time.
-        return g.get('linkers',{}).get(kind,_get_linker_of_kind(kind))(instr)
+        if 'linkers' not in g:
+            g.linkers = {}
+        if kind not in g.linkers:
+            g.linkers[kind] = _get_linker_of_kind(kind)
+
+        return g.linkers[kind](instr)
 
     return deferred
 
