@@ -318,7 +318,7 @@ def _deferred_thread_local_linker_of_kind(kind: str) -> Callable_Linker:
         if kind not in g.linkers:
             g.linkers[kind] = _get_linker_of_kind(kind)
 
-        return g.linkers[kind](instr)
+        return g.linkers[kind](instr) #type: ignore
 
     return deferred
 
