@@ -1,5 +1,5 @@
 r"""
-Patterns and functions to detect arXiv ids and Urls in text.
+Patterns and functions to detect arXiv ids and URLs in text.
 
 Functions to detect arXiv ids, URLs and DOI in text.
 Functions to transform them to <a> tags.
@@ -19,8 +19,8 @@ HTTP URLs:      http://something.org/myPaper/1234.12345
 FTP URLs:       ftp://example.com/files/1234.12345
 
 Just matching for arXiv ids with \d{4}\.\d{4,5} will match several of
-these. To deal with this we are priortizing the matches and
-interupting once one is found.
+these. To deal with this we are prioritizing the matches and
+interrupting once one is found.
 
 We should probably match DOIs first because they are the source of a
 lot of false positives for arxiv matches.
@@ -38,7 +38,7 @@ import re
 from functools import reduce
 from urllib.parse import quote, urlparse
 
-from flask import url_for
+from flask import url_for, g
 import bleach
 
 from arxiv.taxonomy import CATEGORIES
@@ -64,7 +64,7 @@ DOI = re.compile(   # '10.1145/0001234.1234567'
 Pattern for matching DOIs.
 
 We should probably match DOIs first because they are the source of a
-lot of false positives for arxiv matches.
+lot of false positives for arxiv id matches.
 
 Only using the most general expression from
 https://www.crossref.org/blog/dois-and-matching-regular-expressions/
@@ -90,7 +90,7 @@ ARXIV_ID = re.compile(
 )
 
 OKCHARS = r'([a-z0-9,_.\-+~:]|%[a-f0-9]*)'
-"""Chacters that are acceptable during PATH, QUERY and ANCHOR parts"""
+"""Characters that are acceptable during PATH, QUERY and ANCHOR parts"""
 
 PATH = rf'(?P<PATH>(/{OKCHARS}*)+)?'
 """Regex for path part of URLs for use in urlize"""
@@ -145,7 +145,7 @@ def _extend_class_attr(attrs: Attrs, new_class: str) -> Attrs:
 
 
 def _add_rel(attrs: Attrs, new: bool = False) -> Attrs:
-    """Check if href is interal or external and adds attrs as appropriate."""
+    """Check if href is internal or external and adds attrs as appropriate."""
     o = urlparse(attrs[(None, 'href')])
     if not o.netloc.split(':')[0].endswith('arxiv.org'):   # External link?
         return _add_rel_external(attrs, new)
@@ -156,7 +156,7 @@ def _add_rel(attrs: Attrs, new: bool = False) -> Attrs:
 def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
     """Add an external rel."""
     # noopener for security reasons
-    # nofollow to disencentivie arXiv articles for SEO
+    # nofollow to disincentivize arXiv articles for SEO
     # external says that link is away from arxiv
     attrs[(None, 'rel')] = 'external noopener nofollow'
     _extend_class_attr(attrs, 'link-external')
@@ -164,7 +164,7 @@ def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
 
 
 def _add_rel_internal(attrs: Attrs, new: bool = False) -> Attrs:
-    """Add an interal rel."""
+    """Add an internal rel."""
     _extend_class_attr(attrs, 'link-internal')
     return attrs
 
@@ -282,11 +282,10 @@ def _get_pattern(kinds: List[str]) -> Pattern:
         re.IGNORECASE | re.VERBOSE | re.UNICODE
     )
 
-
 def _get_linker_of_kind(kind: str) -> Callable_Linker:
     # The returned object will attempt to match url_re in the input string.
     # For each url_re that matches, it will run all of the attribute
-    # adjsuting callbacks and then stick the tag in the output string
+    # adjusting callbacks and then stick the tag in the output string
     # replacing the matched text.
     linker: Callable[[str], str] = bleach.linkifier.Linker(
         callbacks=callbacks[kind],
@@ -302,11 +301,38 @@ def _compose_list_of_funcs(fv: List[Callable_Linker]) -> Callable_Linker:
     return reduce(lambda f, g: lambda x: f(g(x)), fv[1:], fv[0])
 
 
+def _deferred_thread_local_linker_of_kind(kind: str) -> Callable_Linker:
+    # Bleach linkifiers are not thread safe. This puts them on Flask.g.
+    #
+    # This will return a Callable that creates the bleach linkifier
+    # only when called with the string to linkify. This is so the
+    # bleach linkifier can be put into a Flask.g of each
+    # individual WSGI thread.
+
+    def deferred(instr: str) -> str:
+        # This must not be called while the app is starting up, only
+        # when the linkiers are being used in requests. So the
+        # function is created/cached at call time.
+        if 'linkers' not in g:
+            g.linkers = {}
+        if kind not in g.linkers:
+            g.linkers[kind] = _get_linker_of_kind(kind)
+
+        return g.linkers[kind](instr) #type: ignore
+
+    return deferred
+
+
 def _get_linker(kinds: List[str]) -> Callable_Linker:
+    # Gets composed, thread-local, deferred linkers.
+    # This is intended to be run as the flask app starts up
+    # or in the loading of packages.
+    # The actual creating of thread local bleach objects is
+    # done in _deferred_thread_local_linker_of_kind.
     if len(kinds) > 1 and 'doi_field' in kinds:
         raise ValueError(
             'doi_field should not be used in combination with other kinds')
-    ordered_linkers = [_get_linker_of_kind(kind) for kind
+    ordered_linkers = [_deferred_thread_local_linker_of_kind(kind) for kind
                        in sorted(kinds, key=lambda kind: ORDER.index(kind))]
     return _compose_list_of_funcs(ordered_linkers)
 
