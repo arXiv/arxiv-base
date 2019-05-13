@@ -87,21 +87,29 @@ class TestURLize(unittest.TestCase):
             )
 
             self.assertEqual(links.urlize('http://arxiv.org', ['url']),
-                             '<a class="link-internal link-http" href="http://arxiv.org">this http URL</a>')
+                             '<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>')
 
+            self.assertEqual(links.urlize('https://arxiv.org', ['url']),
+                             '<a class="link-internal link-https" href="https://arxiv.org">https://arxiv.org</a>')
+                        
             self.assertEqual(
                 links.urlize('in the front http://arxiv.org oth', ['url']),
-                'in the front <a class="link-internal link-http" href="http://arxiv.org">this http URL</a> oth'
+                'in the front <a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a> oth'
             )
 
             self.assertEqual(
                 links.urlize('.http://arxiv.org.', ['url']),
-                '.<a class="link-internal link-http" href="http://arxiv.org">this http URL</a>.'
+                '.<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>.'
             )
 
             self.assertEqual(
                 links.urlize('"http://arxiv.org"', ['url']),
-                '"<a class="link-internal link-http" href="http://arxiv.org">this http URL</a>"'
+                '"<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>"'
+            )
+
+            self.assertEqual(
+                links.urlize('"https://arxiv.org/help"', ['url']),
+                '"<a class="link-internal link-https" href="https://arxiv.org/help">https://arxiv.org/help</a>"'
             )
 
     @mock.patch(f'{links.__name__}.clickthrough')
@@ -347,3 +355,19 @@ class TestURLize(unittest.TestCase):
                              'category name math.CO should not get urlized')
             self.assertIn('href="http://supermath.co', urlize('supermath.co'),
                           'hostname close to category name should get urlized')
+
+    def test_dont_urlize_arxiv_dot_org(self):
+        with self.app.app_context():
+            urlize = links.urlizer()
+
+            self.assertNotRegex(urlize('something https://arxiv.org bla'), r'this.*URL',
+                             'arxiv.org should not get "this https URL" ARXIVNG-2130')
+
+            self.assertNotRegex(urlize('something arxiv.org bla'), r'this.*URL',
+                                'arxiv.org should not get "this https URL" ARXIVNG-2130')
+
+            self.assertRegex(urlize('something arXiv.org'), r'arXiv\.org',
+                             'arXiv.org should be preserved as text [ARXIVNG-2130]')
+
+            self.assertRegex(urlize('something arxiv.org'), r'arxiv\.org',
+                             'arXiv.org should be preserved as text [ARXIVNG-2130]')

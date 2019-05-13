@@ -171,7 +171,8 @@ def _add_rel_internal(attrs: Attrs, new: bool = False) -> Attrs:
 
 def _this_url_text(attrs: Attrs, new: bool = False) -> Attrs:
     o = urlparse(attrs[(None, 'href')])
-    attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
+    if o.hostname and not o.hostname.endswith('arxiv.org'):
+        attrs['_text'] = f'this {o.scheme} URL'    # Replaces the link text.
     return attrs
 
 
