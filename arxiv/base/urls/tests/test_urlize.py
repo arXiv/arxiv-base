@@ -360,8 +360,14 @@ class TestURLize(unittest.TestCase):
         with self.app.app_context():
             urlize = links.urlizer()
 
-            self.assertNotRegex(urlize('somethign https://arxiv.org bla'), r'this.*URL',
+            self.assertNotRegex(urlize('something https://arxiv.org bla'), r'this.*URL',
                              'arxiv.org should not get "this https URL" ARXIVNG-2130')
 
-            self.assertNotRegex(urlize('somethign arxiv.org bla'), r'this.*URL',
+            self.assertNotRegex(urlize('something arxiv.org bla'), r'this.*URL',
                                 'arxiv.org should not get "this https URL" ARXIVNG-2130')
+
+            self.assertRegex(urlize('something arXiv.org'), r'arXiv\.org',
+                             'arXiv.org should be preserved as text [ARXIVNG-2130]')
+
+            self.assertRegex(urlize('something arxiv.org'), r'arxiv\.org',
+                             'arXiv.org should be preserved as text [ARXIVNG-2130]')
