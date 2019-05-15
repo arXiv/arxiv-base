@@ -230,7 +230,7 @@ class BaseConsumer(object):
         params: Dict[str, Any] = {'region_name': self.region,
                                   'aws_access_key_id': self._access_key,
                                   'aws_secret_access_key': self._secret_key}
-        client_params: Dict[str, str] = {}
+        client_params: Dict[str, Any] = {}
         if self.endpoint:
             client_params['endpoint_url'] = self.endpoint
         if self.verify is False:
