@@ -230,15 +230,17 @@ class BaseConsumer(object):
         params: Dict[str, Any] = {'region_name': self.region,
                                   'aws_access_key_id': self._access_key,
                                   'aws_secret_access_key': self._secret_key}
+        client_params: Dict[str, Any] = {}
         if self.endpoint:
-            params['endpoint_url'] = self.endpoint
+            client_params['endpoint_url'] = self.endpoint
         if self.verify is False:
-            params['verify'] = False
+            client_params['verify'] = False
 
         logger.debug('New session with parameters: %s', params)
         # We don't want to let boto3 manage the Session for us.
         self._session = boto3.Session(**params)
-        return self._session.client('kinesis')
+
+        return self._session.client('kinesis', **client_params)
 
     def wait_for_stream(self, tries: int = 5, delay: int = 5,
                         max_delay: Optional[int] = None, backoff: int = 2,
