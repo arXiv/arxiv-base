@@ -189,7 +189,7 @@ class BaseConsumer(object):
             'delay': delay,
             'max_delay': max_delay,
             'backoff': backoff,
-            'jitter': jitter
+            'jitter': jitter  #  extra seconds added to delay between retry attempts.
         }
 
         if not self.stream_name or not self.shard_id:
@@ -239,6 +239,7 @@ class BaseConsumer(object):
         logger.debug('New session with parameters: %s', params)
         # We don't want to let boto3 manage the Session for us.
         self._session = boto3.Session(**params)
+
         return self._session.client('kinesis', **client_params)
 
     def wait_for_stream(self, tries: int = 5, delay: int = 5,
