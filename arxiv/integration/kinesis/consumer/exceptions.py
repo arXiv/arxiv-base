@@ -19,3 +19,7 @@ class StopProcessing(RuntimeError):
 
 class ConfigurationError(RuntimeError):
     """There was a problem with the configuration."""
+
+
+class RestartProcessing(RuntimeError):
+    """Something happened that requires a restart."""

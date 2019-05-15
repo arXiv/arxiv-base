@@ -13,6 +13,8 @@ wtforms = "*"
 bleach = "*"
 "flask-s3" = "*"
 "backports-datetime-fromisoformat" = "==1.0.0"
+retry = "*"
+typing-extensions = "*"
 
 [dev-packages]
 pydocstyle = "*"

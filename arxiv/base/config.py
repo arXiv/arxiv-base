@@ -70,10 +70,10 @@ for key, value in os.environ.items():
 
 ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
 
-BASE_VERSION = "0.15.6"
+BASE_VERSION = "0.15.7"
 """The version of the arxiv-base package."""
 
-APP_VERSION = "0.15.6"
+APP_VERSION = "0.15.7"
 """The version of the base test app."""
 
 """
