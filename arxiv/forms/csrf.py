@@ -110,6 +110,8 @@ class SessionCSRF(CSRF):
 
     def validate_csrf_token(self, form: 'CSRFForm', field: Field) -> None:
         """Validate the CSRF token passed with form data."""
+        if field.data is None:
+            raise ValidationError('Missing CSRF token')
         digest, expires = self._split(field.data)
         nonce = self.csrf_context['nonce']
         ip_address = self.csrf_context['ip_address']
