@@ -81,6 +81,10 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
     """
     Wrap a :class:`.Flask` app in WSGI middlewares.
 
+    Adds/updates ``app.middlewares: Dict[str, IWSGIApp]`` so that middleware
+    instances can be accessed later on. Keys are the ``__name__``s of the
+    middleware class/factory.
+
     Parameters
     ----------
     app : :class:`.Flask`
@@ -98,13 +102,21 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
     """
     if not hasattr(app, 'wsgi_app'):
         raise TypeError('Not a valid Flask app or middleware')
+
+    if not hasattr(app, 'middlewares'):
+        app.middlewares = {}
+
     # Apply the last middleware first, so that the first middleware is called
     # first upon the request.
     wrapped_app: IWSGIApp = app.wsgi_app
     for middleware in middlewares[::-1]:
         try:
             wrapped_app = middleware(wrapped_app, config=app.config)
-        except TypeError:   # Maintain backward compatibility.
+        except TypeError:
+            # Maintain backward compatibility with middlewares that don't
+            # accept kwargs.
             wrapped_app = middleware(wrapped_app)
+        app.middlwares[middleware.__name__] = wrapped_app
+
     app.wsgi_app = wrapped_app  # type: ignore
     return app
