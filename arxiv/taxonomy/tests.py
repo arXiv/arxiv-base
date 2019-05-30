@@ -154,7 +154,7 @@ class TestTaxonomy(TestCase):
             self.assertIn(f'{key} is an alias for {value}.',
                           CATEGORIES[key]['description'],
                           'Category description for an alias should indicate '
-                          'that it is an alias of some other category')
+                          'that it is an alias for some other category')
 
             category = Category(key)
             self.assertIsInstance(category.unalias(), Category)
