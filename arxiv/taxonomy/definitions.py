@@ -1245,9 +1245,10 @@ CATEGORIES = {
     'math.MP': {
         'name': 'Mathematical Physics',
         'in_archive': 'math',
-        'description': 'Mathematical methods in quantum field theory, quantum '
-                       'mechanics, statistical mechanics, condensed matter, '
-                       'nuclear and atomic physics',
+        'description': 'math.MP is an alias for math-ph. Mathematical methods '
+                       'in quantum field theory, quantum mechanics, '
+                       'statistical mechanics, condensed matter, nuclear and '
+                       'atomic physics',
         'is_active': True
     },
     'math.NA': {
@@ -1330,9 +1331,8 @@ CATEGORIES = {
     'math.ST': {
         'name': 'Statistics Theory',
         'in_archive': 'math',
-        'description': 'math.ST is an alias for stat.TH. Applied, '
-                       'computational and theoretical statistics: e.g. '
-                       'statistical inference, regression, time series, '
+        'description': 'Applied, computational and theoretical statistics: '
+                       'e.g. statistical inference, regression, time series, '
                        'multivariate analysis, data analysis, Markov chain '
                        'Monte Carlo, design of experiments, case studies',
         'is_active': True
@@ -1723,8 +1723,9 @@ CATEGORIES = {
     'stat.TH': {
         'name': 'Statistics Theory',
         'in_archive': 'stat',
-        'description': 'Asymptotics, Bayesian Inference, Decision Theory, '
-                       'Estimation, Foundations, Inference, Testing',
+        'description': 'stat.TH is an alias for math.ST. Asymptotics, '
+                       'Bayesian Inference, Decision Theory, Estimation, '
+                       'Foundations, Inference, Testing',
         'is_active': True
     },
     'supr-con': {
