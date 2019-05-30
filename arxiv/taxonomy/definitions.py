@@ -783,7 +783,8 @@ CATEGORIES = {
     'cs.NA': {
         'name': 'Numerical Analysis',
         'in_archive': 'cs',
-        'description': 'Roughly includes material in ACM Subject Class G.1.',
+        'description': 'cs.NA is an alias for math.NA. Roughly includes '
+                       'material in ACM Subject Class G.1.',
         'is_active': True
     },
     'cs.NE': {
@@ -1782,7 +1783,8 @@ CATEGORY_ALIASES = {
     'stat.TH': 'math.ST',
     'math.IT': 'cs.IT',
     'q-fin.EC': 'econ.GN',
-    'cs.SY': 'eess.SY'
+    'cs.SY': 'eess.SY',
+    'cs.NA': 'math.NA'
 }
 """
 Equivalences: category alias: canonical category
