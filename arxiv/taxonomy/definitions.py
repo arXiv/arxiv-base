@@ -903,18 +903,19 @@ CATEGORIES = {
     'cs.SY': {
         'name': 'Systems and Control',
         'in_archive': 'cs',
-        'description': 'This section includes theoretical and experimental '
-                       'research covering all facets of automatic control '
-                       'systems, having as focal point analysis and design '
-                       'methods using tools of modeling, simulation and '
-                       'optimization. Specific areas of research include '
-                       'nonlinear, distributed, adaptive, stochastic and '
-                       'robust control, hybrid and discrete event systems. '
-                       'Application areas include automotive, aerospace, '
-                       'process control, network control, biological systems, '
-                       'multiagent and cooperative control, sensor networks, '
-                       'control of cyberphysical and energy-related systems, '
-                       'control of computing systems.',
+        'description': 'cs.SY is an alias for eess.SY. This section includes '
+                       'theoretical and experimental research covering all '
+                       'facets of automatic control systems, having as focal '
+                       'point analysis and design methods using tools of '
+                       'modeling, simulation and optimization. Specific areas '
+                       'of research include nonlinear, distributed, adaptive, '
+                       'stochastic and robust control, hybrid and discrete '
+                       'event systems. Application areas include automotive, '
+                       'aerospace, process control, network control, '
+                       'biological systems, multiagent and cooperative '
+                       'control, sensor networks, control of cyberphysical '
+                       'and energy-related systems, control of computing '
+                       'systems.',
         'is_active': True
     },
     'dg-ga': {
@@ -1029,6 +1030,23 @@ CATEGORIES = {
                        'communication, analysis and optimization for cyber-'
                        'physical systems such as power grids and the Internet '
                        'of Things.',
+        'is_active': True
+    },
+    'eess.SY': {
+        'name': 'Systems and Control',
+        'in_archive': 'eess',
+        'description': 'This section includes theoretical and experimental '
+                       'research covering all facets of automatic control '
+                       'systems, having as focal point analysis and design '
+                       'methods using tools of modeling, simulation and '
+                       'optimization. Specific areas of research include '
+                       'nonlinear, distributed, adaptive, stochastic and '
+                       'robust control, hybrid and discrete event systems. '
+                       'Application areas include automotive, aerospace, '
+                       'process control, network control, biological systems, '
+                       'multiagent and cooperative control, sensor networks, '
+                       'control of cyberphysical and energy-related systems, '
+                       'control of computing systems.',
         'is_active': True
     },
     'funct-an': {
@@ -1763,7 +1781,8 @@ CATEGORY_ALIASES = {
     'math.MP': 'math-ph',
     'stat.TH': 'math.ST',
     'math.IT': 'cs.IT',
-    'q-fin.EC': 'econ.GN'
+    'q-fin.EC': 'econ.GN',
+    'cs.SY': 'eess.SY'
 }
 """
 Equivalences: category alias: canonical category
