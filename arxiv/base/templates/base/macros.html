@@ -138,7 +138,7 @@
     <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|arxiv_id_urlize|safe }}</h1>
     <div class="authors"><span class="descriptor">Authors:</span>{{ authors }}</div>
     <div class="dateline">{{ abs_date_line(arxiv_id, submitted_date, version, submission_history) }}</div>
-    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|tex2utf_no_symbols|abstract_lf_to_br|urlize|safe }}</blockquote>
+    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|tex2utf_no_symbols|abstract_lf_to_br|safe }}</blockquote>
     <!--CONTEXT-->
     <div class="metatable">
       <table summary="Additional metadata">
