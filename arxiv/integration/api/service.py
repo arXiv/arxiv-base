@@ -5,6 +5,10 @@ The goal of this module is to handle boilerplate connection and request
 handling that is invariant (or nearly so) among service integration modules
 that target HTTP APIs.
 
+.. todo::
+   Make retry parameters easier to configure.
+
+
 Specific goals
 --------------
 
@@ -14,9 +18,6 @@ Specific goals
 - Provide basic retry functionality.
 - Handle binding a service instance (with its persistent session) to the
   Flask application context.
-
-.. todo::
-   Make retry parameters easier to configure.
 
 """
 
@@ -88,8 +89,15 @@ class HTTPIntegration(metaclass=MetaIntegration):
 
        @app.route('/foo')
        def foo():
-           MyCoolIntegration.get_something('foo', request.environ['token'])
+           mci = MyCoolIntegration.current_session()
+           mci.get_something('foo', request.environ['token'])
            ...
+
+
+    Any additional parameters in your app config that start with the
+    ``service_name`` in upper case will be passed in as kwargs to the
+    constructor. By default, these are stored on ``._extra`` for internal
+    use.
 
     """
 
