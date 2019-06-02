@@ -103,7 +103,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         service_name = "base"
 
     def __init__(self, endpoint: str, verify: bool = True,
-                 headers: dict = {}) -> None:
+                 headers: dict = {}, **extra: Any) -> None:
         """
         Initialize an HTTP session.
 
@@ -115,6 +115,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
             Whether or not SSL certificate verification should enforced.
         headers : dict
             Headers to be included on all requests.
+        extra : kwargs
 
         """
         self._session = requests.Session()
@@ -236,12 +237,14 @@ class HTTPIntegration(metaclass=MetaIntegration):
             app = current_app
         name = cls.Meta.service_name.upper()
         try:
-            endpoint = app.config[f'{name}_ENDPOINT']
-            verify = app.config[f'{name}_VERIFY']
+            params = app.config.get_namespace(f'{name}_')
+            endpoint = params.pop('endpoint')
+            verify = params.pop('verify')
         except KeyError as e:
             raise RuntimeError('Must call init_app() on app before use') from e
+
         logger.debug('Create %s session at endpoint %s', name, endpoint)
-        return cls(endpoint, verify=verify)
+        return cls(endpoint, verify=verify, **params)
 
     @classmethod
     def current_session(cls) -> 'HTTPIntegration':

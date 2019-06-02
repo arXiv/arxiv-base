@@ -72,9 +72,13 @@ called first upon each request.
 """
 
 from typing import Type, Callable, List, Union
+import warnings
 from flask import Flask
 
 from .base import BaseMiddleware, IWSGIMiddlewareFactory, IWSGIApp
+from .. import logging
+
+logger = logging.getLogger(__name__)
 
 
 def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
@@ -112,11 +116,16 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
     for middleware in middlewares[::-1]:
         try:
             wrapped_app = middleware(wrapped_app, config=app.config)
-        except TypeError:
+        except TypeError as e:
             # Maintain backward compatibility with middlewares that don't
             # accept kwargs.
+            logger.debug('Encountered TypeError while initializing'
+                         ' midleware: %s', e)
+            warnings.warn('Middlewares that do not accept kwargs are'
+                          ' deprecated. You should update your middleware'
+                          ' to accept arbitrary kwargs', DeprecationWarning)
             wrapped_app = middleware(wrapped_app)
-        app.middlwares[middleware.__name__] = wrapped_app
+        app.middlewares[middleware.__name__] = wrapped_app
 
     app.wsgi_app = wrapped_app  # type: ignore
     return app
