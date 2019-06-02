@@ -125,7 +125,9 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
                           ' deprecated. You should update your middleware'
                           ' to accept arbitrary kwargs', DeprecationWarning)
             wrapped_app = middleware(wrapped_app)
-        app.middlewares[middleware.__name__] = wrapped_app
+
+        key = getattr(middleware, '__name__', str(middleware))
+        app.middlewares[key] = wrapped_app
 
     app.wsgi_app = wrapped_app  # type: ignore
     return app
