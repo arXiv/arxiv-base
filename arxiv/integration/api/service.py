@@ -118,6 +118,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         extra : kwargs
 
         """
+        self._extra = extra
         self._session = requests.Session()
         self._verify = verify
         self._retry = Retry(
