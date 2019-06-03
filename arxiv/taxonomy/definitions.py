@@ -1248,7 +1248,7 @@ CATEGORIES = {
         'description': 'math.MP is an alias for math-ph. Mathematical methods '
                        'in quantum field theory, quantum mechanics, '
                        'statistical mechanics, condensed matter, nuclear and '
-                       'atomic physics',
+                       'atomic physics.',
         'is_active': True
     },
     'math.NA': {
