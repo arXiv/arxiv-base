@@ -1725,7 +1725,7 @@ CATEGORIES = {
         'in_archive': 'stat',
         'description': 'stat.TH is an alias for math.ST. Asymptotics, '
                        'Bayesian Inference, Decision Theory, Estimation, '
-                       'Foundations, Inference, Testing',
+                       'Foundations, Inference, Testing.',
         'is_active': True
     },
     'supr-con': {
