@@ -5,6 +5,10 @@ The goal of this module is to handle boilerplate connection and request
 handling that is invariant (or nearly so) among service integration modules
 that target HTTP APIs.
 
+.. todo::
+   Make retry parameters easier to configure.
+
+
 Specific goals
 --------------
 
@@ -14,9 +18,6 @@ Specific goals
 - Provide basic retry functionality.
 - Handle binding a service instance (with its persistent session) to the
   Flask application context.
-
-.. todo::
-   Make retry parameters easier to configure.
 
 """
 
@@ -88,8 +89,15 @@ class HTTPIntegration(metaclass=MetaIntegration):
 
        @app.route('/foo')
        def foo():
-           MyCoolIntegration.get_something('foo', request.environ['token'])
+           mci = MyCoolIntegration.current_session()
+           mci.get_something('foo', request.environ['token'])
            ...
+
+
+    Any additional parameters in your app config that start with the
+    ``service_name`` in upper case will be passed in as kwargs to the
+    constructor. By default, these are stored on ``._extra`` for internal
+    use.
 
     """
 
@@ -103,7 +111,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
         service_name = "base"
 
     def __init__(self, endpoint: str, verify: bool = True,
-                 headers: dict = {}) -> None:
+                 headers: dict = {}, **extra: Any) -> None:
         """
         Initialize an HTTP session.
 
@@ -115,8 +123,10 @@ class HTTPIntegration(metaclass=MetaIntegration):
             Whether or not SSL certificate verification should enforced.
         headers : dict
             Headers to be included on all requests.
+        extra : kwargs
 
         """
+        self._extra = extra
         self._session = requests.Session()
         self._verify = verify
         self._retry = Retry(
@@ -236,12 +246,14 @@ class HTTPIntegration(metaclass=MetaIntegration):
             app = current_app
         name = cls.Meta.service_name.upper()
         try:
-            endpoint = app.config[f'{name}_ENDPOINT']
-            verify = app.config[f'{name}_VERIFY']
+            params = app.config.get_namespace(f'{name}_')     # type: ignore
+            endpoint = params.pop('endpoint')
+            verify = params.pop('verify')
         except KeyError as e:
             raise RuntimeError('Must call init_app() on app before use') from e
+
         logger.debug('Create %s session at endpoint %s', name, endpoint)
-        return cls(endpoint, verify=verify)
+        return cls(endpoint, verify=verify, **params)
 
     @classmethod
     def current_session(cls) -> 'HTTPIntegration':
