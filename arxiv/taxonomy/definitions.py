@@ -783,7 +783,8 @@ CATEGORIES = {
     'cs.NA': {
         'name': 'Numerical Analysis',
         'in_archive': 'cs',
-        'description': 'Roughly includes material in ACM Subject Class G.1.',
+        'description': 'cs.NA is an alias for math.NA. Roughly includes '
+                       'material in ACM Subject Class G.1.',
         'is_active': True
     },
     'cs.NE': {
@@ -903,18 +904,19 @@ CATEGORIES = {
     'cs.SY': {
         'name': 'Systems and Control',
         'in_archive': 'cs',
-        'description': 'This section includes theoretical and experimental '
-                       'research covering all facets of automatic control '
-                       'systems, having as focal point analysis and design '
-                       'methods using tools of modeling, simulation and '
-                       'optimization. Specific areas of research include '
-                       'nonlinear, distributed, adaptive, stochastic and '
-                       'robust control, hybrid and discrete event systems. '
-                       'Application areas include automotive, aerospace, '
-                       'process control, network control, biological systems, '
-                       'multiagent and cooperative control, sensor networks, '
-                       'control of cyberphysical and energy-related systems, '
-                       'control of computing systems.',
+        'description': 'cs.SY is an alias for eess.SY. This section includes '
+                       'theoretical and experimental research covering all '
+                       'facets of automatic control systems, having as focal '
+                       'point analysis and design methods using tools of '
+                       'modeling, simulation and optimization. Specific areas '
+                       'of research include nonlinear, distributed, adaptive, '
+                       'stochastic and robust control, hybrid and discrete '
+                       'event systems. Application areas include automotive, '
+                       'aerospace, process control, network control, '
+                       'biological systems, multiagent and cooperative '
+                       'control, sensor networks, control of cyberphysical '
+                       'and energy-related systems, control of computing '
+                       'systems.',
         'is_active': True
     },
     'dg-ga': {
@@ -1029,6 +1031,23 @@ CATEGORIES = {
                        'communication, analysis and optimization for cyber-'
                        'physical systems such as power grids and the Internet '
                        'of Things.',
+        'is_active': True
+    },
+    'eess.SY': {
+        'name': 'Systems and Control',
+        'in_archive': 'eess',
+        'description': 'This section includes theoretical and experimental '
+                       'research covering all facets of automatic control '
+                       'systems, having as focal point analysis and design '
+                       'methods using tools of modeling, simulation and '
+                       'optimization. Specific areas of research include '
+                       'nonlinear, distributed, adaptive, stochastic and '
+                       'robust control, hybrid and discrete event systems. '
+                       'Application areas include automotive, aerospace, '
+                       'process control, network control, biological systems, '
+                       'multiagent and cooperative control, sensor networks, '
+                       'control of cyberphysical and energy-related systems, '
+                       'control of computing systems.',
         'is_active': True
     },
     'funct-an': {
@@ -1226,9 +1245,10 @@ CATEGORIES = {
     'math.MP': {
         'name': 'Mathematical Physics',
         'in_archive': 'math',
-        'description': 'Mathematical methods in quantum field theory, quantum '
-                       'mechanics, statistical mechanics, condensed matter, '
-                       'nuclear and atomic physics',
+        'description': 'math.MP is an alias for math-ph. Mathematical methods '
+                       'in quantum field theory, quantum mechanics, '
+                       'statistical mechanics, condensed matter, nuclear and '
+                       'atomic physics.',
         'is_active': True
     },
     'math.NA': {
@@ -1311,9 +1331,8 @@ CATEGORIES = {
     'math.ST': {
         'name': 'Statistics Theory',
         'in_archive': 'math',
-        'description': 'math.ST is an alias for stat.TH. Applied, '
-                       'computational and theoretical statistics: e.g. '
-                       'statistical inference, regression, time series, '
+        'description': 'Applied, computational and theoretical statistics: '
+                       'e.g. statistical inference, regression, time series, '
                        'multivariate analysis, data analysis, Markov chain '
                        'Monte Carlo, design of experiments, case studies',
         'is_active': True
@@ -1704,8 +1723,9 @@ CATEGORIES = {
     'stat.TH': {
         'name': 'Statistics Theory',
         'in_archive': 'stat',
-        'description': 'Asymptotics, Bayesian Inference, Decision Theory, '
-                       'Estimation, Foundations, Inference, Testing',
+        'description': 'stat.TH is an alias for math.ST. Asymptotics, '
+                       'Bayesian Inference, Decision Theory, Estimation, '
+                       'Foundations, Inference, Testing.',
         'is_active': True
     },
     'supr-con': {
@@ -1763,7 +1783,9 @@ CATEGORY_ALIASES = {
     'math.MP': 'math-ph',
     'stat.TH': 'math.ST',
     'math.IT': 'cs.IT',
-    'q-fin.EC': 'econ.GN'
+    'q-fin.EC': 'econ.GN',
+    'cs.SY': 'eess.SY',
+    'cs.NA': 'math.NA'
 }
 """
 Equivalences: category alias: canonical category
