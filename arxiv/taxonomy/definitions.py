@@ -906,16 +906,18 @@ CATEGORIES = {
         'in_archive': 'cs',
         'description': 'cs.SY is an alias for eess.SY. This section includes '
                        'theoretical and experimental research covering all '
-                       'facets of automatic control systems, having as focal '
-                       'point analysis and design methods using tools of '
-                       'modeling, simulation and optimization. Specific areas '
-                       'of research include nonlinear, distributed, adaptive, '
-                       'stochastic and robust control, hybrid and discrete '
-                       'event systems. Application areas include automotive, '
-                       'aerospace, process control, network control, '
+                       'facets of automatic control systems. The section is '
+                       'focused on methods of control system analysis and '
+                       'design using tools of modeling, simulation and '
+                       'optimization. Specific areas of research include '
+                       'nonlinear, distributed, adaptive, stochastic and '
+                       'robust control in addition to hybrid and discrete '
+                       'event systems. Application areas include automotive '
+                       'and aerospace control systems, network control, '
                        'biological systems, multiagent and cooperative '
-                       'control, sensor networks, control of cyberphysical '
-                       'and energy-related systems, control of computing '
+                       'control, robotics, reinforcement learning, sensor '
+                       'networks, control of cyber-physical and '
+                       'energy-related systems, and control of computing '
                        'systems.',
         'is_active': True
     },
@@ -1038,16 +1040,18 @@ CATEGORIES = {
         'in_archive': 'eess',
         'description': 'This section includes theoretical and experimental '
                        'research covering all facets of automatic control '
-                       'systems, having as focal point analysis and design '
-                       'methods using tools of modeling, simulation and '
-                       'optimization. Specific areas of research include '
-                       'nonlinear, distributed, adaptive, stochastic and '
-                       'robust control, hybrid and discrete event systems. '
-                       'Application areas include automotive, aerospace, '
-                       'process control, network control, biological systems, '
-                       'multiagent and cooperative control, sensor networks, '
-                       'control of cyberphysical and energy-related systems, '
-                       'control of computing systems.',
+                       'systems. The section is focused on methods of control '
+                       'system analysis and design using tools of modeling, '
+                       'simulation and optimization. Specific areas of '
+                       'research include nonlinear, distributed, adaptive, '
+                       'stochastic and robust control in addition to hybrid '
+                       'and discrete event systems. Application areas include '
+                       'automotive and aerospace control systems, network '
+                       'control, biological systems, multiagent and '
+                       'cooperative control, robotics, reinforcement '
+                       'learning, sensor networks, control of cyber-physical '
+                       'and energy-related systems, and control of computing '
+                       'systems.',
         'is_active': True
     },
     'funct-an': {
