@@ -79,6 +79,7 @@ class SessionCSRF(CSRF):
         """Grab the CSRF context and secret from the form."""
         self.csrf_context = form.meta.csrf_context
         self.csrf_secret = form.meta.csrf_secret
+        self.csrf_timeout = form.meta.csrf_timeout
         return super(SessionCSRF, self).setup_form(form)
 
     @staticmethod
@@ -88,8 +89,11 @@ class SessionCSRF(CSRF):
         return csrf_hmac.hexdigest()
 
     @staticmethod
-    def _new_expiry() -> str:
-        return (datetime.now() + timedelta(seconds=300)).isoformat()
+    def _new_expiry(timeout) -> str:
+        if timeout:
+            return (datetime.now() + timedelta(seconds=timeout)).isoformat()
+        else:
+            return "never"
 
     @staticmethod
     def _join(digest: str, expires: str) -> str:
@@ -102,7 +106,7 @@ class SessionCSRF(CSRF):
 
     def generate_csrf_token(self, field: 'CSRFForm') -> str:
         """Generate a new CSRF token using the CSRF secret and context."""
-        expires = self._new_expiry()
+        expires = self._new_expiry(self.csrf_timeout)
         nonce = self.csrf_context['nonce']
         ip_address = self.csrf_context['ip_address']
         digest = self._hash(self.csrf_secret, nonce, ip_address, expires)
@@ -116,7 +120,7 @@ class SessionCSRF(CSRF):
         nonce = self.csrf_context['nonce']
         ip_address = self.csrf_context['ip_address']
         expected = self._hash(self.csrf_secret, nonce, ip_address, expires)
-        if dateutil.parser.parse(expires) <= datetime.now():
+        if self.csrf_timeout and dateutil.parser.parse(expires) <= datetime.now():
             raise ValidationError('CSRF token has expired')
         if not hmac.compare_digest(expected, digest):
             raise ValidationError('CSRF token is invalid')
@@ -131,6 +135,7 @@ class CSRFForm(Form):
         csrf = True
         csrf_field_name = "csrf_token"
         csrf_class = SessionCSRF    # Set the CSRF implementation
+        csrf_timeout = 30 * 60  # seconds
 
         @property
         def csrf_secret(self) -> str:

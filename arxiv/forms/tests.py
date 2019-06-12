@@ -34,10 +34,6 @@ class TestCSRFForm(TestCase):
         ip_address = '10.10.10.10'
         nonce = 'foononce123'
         secret = 'foosecret'
-        expires = csrf.SessionCSRF._new_expiry()
-        digest = csrf.SessionCSRF._hash(secret, nonce, ip_address, expires)
-        csrf_token = csrf.SessionCSRF._join(digest, expires)
-
         mock_request.remote_addr = ip_address
         mock_request.session = mock.MagicMock(nonce=nonce)
         mock_get_config.return_value = {'CSRF_SECRET': secret}
@@ -46,6 +42,12 @@ class TestCSRFForm(TestCase):
             """A CSRF-protected form."""
 
             something_sensitive = StringField('Something sensitive')
+
+        form = ProtectedForm()
+
+        expires = csrf.SessionCSRF._new_expiry(form.meta.csrf_timeout)
+        digest = csrf.SessionCSRF._hash(secret, nonce, ip_address, expires)
+        csrf_token = csrf.SessionCSRF._join(digest, expires)
 
         data = MultiDict({'something_sensitive': 'foo',
                           'csrf_token': csrf_token})
