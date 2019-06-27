@@ -89,7 +89,7 @@ class SessionCSRF(CSRF):
         return csrf_hmac.hexdigest()
 
     @staticmethod
-    def _new_expiry(timeout) -> str:
+    def _new_expiry(timeout: int) -> str:
         if timeout:
             return (datetime.now() + timedelta(seconds=timeout)).isoformat()
         else:
