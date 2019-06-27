@@ -120,7 +120,8 @@ class SessionCSRF(CSRF):
         nonce = self.csrf_context['nonce']
         ip_address = self.csrf_context['ip_address']
         expected = self._hash(self.csrf_secret, nonce, ip_address, expires)
-        if self.csrf_timeout and dateutil.parser.parse(expires) <= datetime.now():
+        if self.csrf_timeout and \
+                dateutil.parser.parse(expires) <= datetime.now():
             raise ValidationError('CSRF token has expired')
         if not hmac.compare_digest(expected, digest):
             raise ValidationError('CSRF token is invalid')
@@ -139,7 +140,7 @@ class CSRFForm(Form):
 
         @property
         def csrf_secret(self) -> str:
-            """The CSRF secret from the current application configuration."""
+            """CSRF secret from the current application configuration."""
             config = get_application_config()
             try:
                 secret: str = config['CSRF_SECRET']
