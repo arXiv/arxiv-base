@@ -24,6 +24,8 @@ class Category(str):
     @property
     def canonical(self) -> 'Category':
         """Get the canonicalized category, if there is one."""
+        if self in CATEGORY_ALIASES:
+            return Category(CATEGORY_ALIASES[self])
         if self in ARCHIVES_SUBSUMED:
             return Category(ARCHIVES_SUBSUMED[self])
         return self
