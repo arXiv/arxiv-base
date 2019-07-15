@@ -2,6 +2,14 @@
 
 FROM centos:centos7
 
+LABEL maintainer="arXiv <nextgen@arxiv.org>" \
+  org.label-schema.schema-version="1.0" \
+  org.label-schema.name="arXiv Base" \
+  org.label-schema.description="Base image for arXiv NG applications" \
+  org.label-schema.url="https://arxiv.github.io/arxiv-base" \
+  org.label-schema.vcs-url="https://github.com/arxiv/arxiv-base" \
+  org.label-schema.vendor="arXiv.org"
+
 # Below we use && chaining and an embedded script in a single RUN
 # command to keep image size and layer count to a minimum, while
 # the embedded script will make 'docker build' fail fast
@@ -9,7 +17,6 @@ FROM centos:centos7
 #
 RUN yum -y install epel-release \
   && yum -y install https://centos7.iuscommunity.org/ius-release.rpm \
-  && yum -y update \
   && echo $'#!/bin/bash\n\
 PKGS_TO_INSTALL=$(cat <<-END\n\
   ca-certificates\n\
@@ -44,14 +51,6 @@ ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     APPLICATION_ROOT="/"
 
-LABEL version="0.15.9" \
-  maintainer="arXiv <nextgen@arxiv.org>" \
-  org.label-schema.schema-version="1.0" \
-  org.label-schema.name="arXiv Base" \
-  org.label-schema.description="Base image for arXiv NG applications" \
-  org.label-schema.url="https://arxiv.github.io/arxiv-base" \
-  org.label-schema.vcs-url="https://github.com/arxiv/arxiv-base" \
-  org.label-schema.vendor="arXiv.org" \
-  org.label-schema.version="0.15.9"
+LABEL version="0.15.9"
 
 CMD /bin/bash
