@@ -5,14 +5,15 @@ The blueprint instantiated here is **not** for use in a production application;
 it is not attached by :class:`arxiv.base.Base`.
 """
 
-from typing import Any, Tuple, Callable, Dict
+from typing import Any, Tuple, Callable, Dict, Type
 from datetime import datetime
 from flask import Blueprint, render_template, current_app, make_response, \
     Response, flash, url_for
 
 from http import HTTPStatus as status
 from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
-    MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError
+    MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError, \
+    default_exceptions
 
 from . import alerts
 
@@ -75,43 +76,16 @@ def test_macros() -> Response:
     return response
 
 
-@blueprint.route('/404', methods=['GET'])
-def test_404() -> Response:
-    """Test the 404 error page."""
-    raise NotFound()
+def make_route(exception: Type) -> Callable[[], Response]:
+    """Create a route that generates a Werkzeug HTTP exception."""
+    def _route() -> Response:
+        raise exception()
+    return _route
 
 
-@blueprint.route('/403', methods=['GET'])
-def test_403() -> Response:
-    """Test the 403 error page."""
-    raise Forbidden()
-
-
-@blueprint.route('/401', methods=['GET'])
-def test_401() -> Response:
-    """Test the 401 error page."""
-    raise Unauthorized()
-
-
-@blueprint.route('/405', methods=['GET'])
-def test_405() -> Response:
-    """Test the 405 error page."""
-    raise MethodNotAllowed()
-
-
-@blueprint.route('/413', methods=['GET'])
-def test_413() -> Response:
-    """Test the 413 error page."""
-    raise RequestEntityTooLarge()
-
-
-@blueprint.route('/400', methods=['GET'])
-def test_400() -> Response:
-    """Test the 400 error page."""
-    raise BadRequest()
-
-
-@blueprint.route('/500', methods=['GET'])
-def test_500() -> Response:
-    """Test the 500 error page."""
-    raise InternalServerError()
+# Programatically generate exception-generating routes to test custom error
+# pages.
+for code, exception in default_exceptions.items():
+    register = blueprint.route(f'/{code}', methods=['GET'],
+                               endpoint=f'test_{code}')
+    register(make_route(exception))
