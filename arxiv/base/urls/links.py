@@ -43,6 +43,7 @@ import bleach
 
 from arxiv.taxonomy import CATEGORIES
 from arxiv import identifier
+from arxiv.base.globals import get_application_config
 from . import clickthrough
 
 
@@ -176,6 +177,44 @@ def _this_url_text(attrs: Attrs, new: bool = False) -> Attrs:
     return attrs
 
 
+def _shorten_text_to_30_characters(attrs: Attrs, new: bool = False) -> Attrs:
+    href = attrs[(None, 'href')]
+    o = urlparse(href)
+    if o.hostname:
+        N_MAX= int(get_application_config().get('MAX_URL_DISPLAY_LENGTH', 30))
+        N_ELLIPSIS = 3  # Length of the ellipsis.
+        N_AT_END = 3
+        N_ALLOW = N_MAX - N_ELLIPSIS
+
+        if len(href) > N_MAX:
+            # The netloc is the hostname and port.
+            netloc = str(o.netloc)
+            N_netloc = len(netloc)
+
+            # The remainder is everything after the netloc, i.e. the path,
+            # query, and fragment.
+            _, remainder = href.split(f'{o.scheme}://{o.netloc}', 1)
+            N_remainder = len(remainder)
+
+            # If the netloc part is too big on its own, make room in the netloc
+            # part so that we can use at least the last three characters of the
+            # remainder.
+            if N_netloc >= N_MAX or (N_netloc > (N_ALLOW - N_ELLIPSIS) and N_remainder > 0):
+                N_remove_from_netloc = N_netloc - N_ALLOW
+                if N_remainder > 0:
+                    N_remove_from_netloc += N_AT_END
+                netloc = netloc[:-N_remove_from_netloc]
+                N_netloc = len(netloc)
+
+            # Now truncate the beginning of the remainder, and insert an
+            # ellipsis. Well, the ASCII equivalent of an ellipsis...
+            N_to_remove = (N_netloc + N_remainder) - N_ALLOW
+            if N_to_remove > 0:
+                remainder = remainder[N_to_remove:]
+            attrs['_text'] = f'{netloc}...{remainder}'
+    return attrs
+
+
 def _add_scheme_info(attrs: Attrs, new: bool = False) -> Attrs:
     o = urlparse(attrs[(None, 'href')])
     if (None, 'class') not in attrs:
@@ -271,7 +310,8 @@ callbacks = {
     'doi':      [_handle_doi_url, _add_scheme_info, _add_rel_external],
     'doi_field': [_handle_doi_url, _add_scheme_info, _add_rel_external],
     'arxiv_id': [_handle_arxiv_url, _add_scheme_info],
-    'url':      [_dont_urlize_arxiv_categories, _this_url_text, _add_rel, _add_scheme_info]
+    'url':      [_dont_urlize_arxiv_categories, _shorten_text_to_30_characters,
+                 _add_rel, _add_scheme_info]
 }
 """Bleach attribute callbacks for each kind."""
 
