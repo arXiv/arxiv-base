@@ -185,7 +185,7 @@ def _remove_scheme_from_label(attrs: Attrs, new: bool = False) -> Attrs:
     return attrs
 
 
-def _shorten_text_to_30_characters(attrs: Attrs, new: bool = False) -> Attrs:
+def _shorten_label_to_n_characters(attrs: Attrs, new: bool = False) -> Attrs:
     href = attrs[(None, 'href')]
     o = urlparse(href)
     if o.hostname:
@@ -319,7 +319,7 @@ callbacks = {
     'doi':      [_handle_doi_url, _add_scheme_info, _add_rel_external],
     'doi_field': [_handle_doi_url, _add_scheme_info, _add_rel_external],
     'arxiv_id': [_handle_arxiv_url, _add_scheme_info],
-    'url':      [_dont_urlize_arxiv_categories, _shorten_text_to_30_characters,
+    'url':      [_dont_urlize_arxiv_categories, _shorten_text_to_n_characters,
                  _add_rel, _add_scheme_info, _remove_scheme_from_label]
 }
 """Bleach attribute callbacks for each kind."""
