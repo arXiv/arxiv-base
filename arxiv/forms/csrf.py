@@ -151,15 +151,18 @@ class CSRFForm(Form):
         @property
         def csrf_context(self) -> Dict[str, str]:
             """Session information used to generate a CSRF token."""
-            if not request or not request.session:
+            if not request or (not request.session and not request.auth):
                 raise RuntimeError('Missing active user session')
+
+            # Per ARXIVNG-1944 in arxiv-auth v0.4.1 the session will be called
+            # request.auth by default.
+            session = request.auth or request.session
 
             # Sessions provided by arxiv.auth should have a nonce that was
             # generated when the session was created. Legacy sessions, however,
             # do not support this. So we'll fall back to using the session ID
             # instead.
-            nonce = getattr(request.session, 'nonce',
-                            request.session.session_id)
+            nonce = getattr(session, 'nonce', session.session_id)
             return {
                 'ip_address': request.remote_addr,
                 'nonce': nonce
