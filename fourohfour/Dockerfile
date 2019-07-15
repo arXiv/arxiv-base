@@ -4,8 +4,8 @@ ARG BASE_VERSION=latest
 
 FROM arxiv/base:${BASE_VERSION}
 
-LABEL org.label-schema.name="arXiv FourOhFour" \
-  org.label-schema.description="Default error backend for arXiv k8s clusters"
+LABEL org.opencontainers.image.title="arXiv FourOhFour" \
+  org.opencontainers.image.description="Default error backend for arXiv k8s clusters"
 
 WORKDIR /opt/arxiv
 
