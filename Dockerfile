@@ -46,4 +46,14 @@ ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     APPLICATION_ROOT="/"
 
+LABEL version="0.15.9" \
+  maintainer="arXiv <nextgen@arxiv.org>" \
+  org.label-schema.schema-version="1.0" \
+  org.label-schema.name="arXiv Base" \
+  org.label-schema.description="Base image for arXiv NG applications" \
+  org.label-schema.url="https://arxiv.github.io/arxiv-base" \
+  org.label-schema.vcs-url="https://github.com/arxiv/arxiv-base" \
+  org.label-schema.vendor="arXiv.org" \
+  org.label-schema.version="0.15.9"
+
 CMD /bin/bash
