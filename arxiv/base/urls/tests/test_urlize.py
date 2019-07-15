@@ -88,29 +88,29 @@ class TestURLize(unittest.TestCase):
             )
 
             self.assertEqual(links.urlize('http://arxiv.org', ['url']),
-                             '<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>')
+                             '<a class="link-internal link-http" href="http://arxiv.org">arxiv.org</a>')
 
             self.assertEqual(links.urlize('https://arxiv.org', ['url']),
-                             '<a class="link-internal link-https" href="https://arxiv.org">https://arxiv.org</a>')
+                             '<a class="link-internal link-https" href="https://arxiv.org">arxiv.org</a>')
 
             self.assertEqual(
                 links.urlize('in the front http://arxiv.org oth', ['url']),
-                'in the front <a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a> oth'
+                'in the front <a class="link-internal link-http" href="http://arxiv.org">arxiv.org</a> oth'
             )
 
             self.assertEqual(
                 links.urlize('.http://arxiv.org.', ['url']),
-                '.<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>.'
+                '.<a class="link-internal link-http" href="http://arxiv.org">arxiv.org</a>.'
             )
 
             self.assertEqual(
                 links.urlize('"http://arxiv.org"', ['url']),
-                '"<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>"'
+                '"<a class="link-internal link-http" href="http://arxiv.org">arxiv.org</a>"'
             )
 
             self.assertEqual(
                 links.urlize('"https://arxiv.org/help"', ['url']),
-                '"<a class="link-internal link-https" href="https://arxiv.org/help">https://arxiv.org/help</a>"'
+                '"<a class="link-internal link-https" href="https://arxiv.org/help">arxiv.org/help</a>"'
             )
 
     @mock.patch(f'{links.__name__}.clickthrough')
@@ -120,17 +120,17 @@ class TestURLize(unittest.TestCase):
             mock_clickthrough.clickthrough_url.return_value = 'foo'
             self.assertEqual(
                 links.urlize('http://example.com/'),
-                '<a class="link-external link-http" href="http://example.com/" rel="external noopener nofollow">http://example.com/</a>',
+                '<a class="link-external link-http" href="http://example.com/" rel="external noopener nofollow">example.com/</a>',
                 'urlize (URL linking) 1/6'
             )
             self.assertEqual(
                 links.urlize('https://example.com/'),
-                '<a class="link-external link-https" href="https://example.com/" rel="external noopener nofollow">https://example.com/</a>',
+                '<a class="link-external link-https" href="https://example.com/" rel="external noopener nofollow">example.com/</a>',
                 'urlize (URL linking) 2/6'
             )
             self.assertEqual(
                 links.urlize('ftp://example.com/'),
-                '<a class="link-external link-ftp" href="ftp://example.com/" rel="external noopener nofollow">ftp://example.com/</a>',
+                '<a class="link-external link-ftp" href="ftp://example.com/" rel="external noopener nofollow">example.com/</a>',
                 'urlize (URL linking) 3/6'
             )
 
@@ -179,7 +179,7 @@ class TestURLize(unittest.TestCase):
 
             self.assertEqual(
                 links.urlize('http://onion.com/?q=something funny'),
-                '<a class="link-external link-http" href="http://onion.com/?q=something" rel="external noopener nofollow">http://onion.com/?q=something</a> funny',
+                '<a class="link-external link-http" href="http://onion.com/?q=something" rel="external noopener nofollow">onion.com/?q=something</a> funny',
                 'Spaces CANNOT be expected to be part of URLs'
             )
 
@@ -192,7 +192,7 @@ class TestURLize(unittest.TestCase):
             )
 
             self.assertEqual(links.urlize('< http://example.com/1<2 ><'),
-                             '&lt; <a class="link-external link-http" href="http://example.com/1" rel="external noopener nofollow">http://example.com/1</a>&lt;2 &gt;&lt;',
+                             '&lt; <a class="link-external link-http" href="http://example.com/1" rel="external noopener nofollow">example.com/1</a>&lt;2 &gt;&lt;',
                              'urlize (URL linking) 5/6')
 
             self.assertEqual(
