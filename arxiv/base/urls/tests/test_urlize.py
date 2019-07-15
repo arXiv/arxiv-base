@@ -15,7 +15,7 @@ def mock_url_for(endpoint, **kwargs):
 class Id_Patterns_Test(unittest.TestCase):
     def setUp(self):
         self.app = Flask('bogus')
-        
+
     def test_arxiv_ids(self):
         def find_match(txt):
             with self.app.app_context():
@@ -59,12 +59,12 @@ class Id_Patterns_Test(unittest.TestCase):
 class TestURLize(unittest.TestCase):
     def setUp(self):
         self.app = Flask('bogus')
-        
+
     def test_dont_urlize_cats( self ):
         self.assertGreater(len(links.CATEGORIES_THAT_COULD_BE_HOSTNAMES), 0,
                            'The links.CATEGORIES_THAT_COULD_BE_HOSTNAMES must not be empty or it will match everything')
 
-        
+
     @mock.patch(f'{links.__name__}.clickthrough')
     def test_doi(self, mock_clickthrough):
         with self.app.app_context():
@@ -91,7 +91,7 @@ class TestURLize(unittest.TestCase):
 
             self.assertEqual(links.urlize('https://arxiv.org', ['url']),
                              '<a class="link-internal link-https" href="https://arxiv.org">https://arxiv.org</a>')
-                        
+
             self.assertEqual(
                 links.urlize('in the front http://arxiv.org oth', ['url']),
                 'in the front <a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a> oth'
@@ -348,13 +348,39 @@ class TestURLize(unittest.TestCase):
             # https://dx.doi.org/10.1175%2F1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2
 
 
+    def test_dont_urlize_without_scheme(self):
+        """
+        Per ARXIVNG-2182, tokens without an explicit scheme are not links.
+
+        Things like ASP.net, arxiv.org, and other.things.that.look.like.this
+        should not be converted to links.
+        """
+        with self.app.app_context():
+            urlize = links.urlizer()
+            self.assertEqual(urlize('arxiv.org'), 'arxiv.org',
+                             'arxiv.org should not be converted to a link')
+            self.assertIn('href="https://arxiv.org',
+                          urlize('https://arxiv.org'),
+                          'but if scheme is present, should be urlized')
+            self.assertEqual(urlize('ASP.net'), 'ASP.net',
+                             'asp.net should not be converted to a link')
+            self.assertIn('href="http://ASP.net', urlize('http://ASP.net'),
+                          'but if scheme is present, should be urlized')
+            self.assertEqual(urlize('other.things.that.look.like.this'),
+                             'other.things.that.look.like.this',
+                             'no scheme, no link, mkay?')
+            self.assertIn('href="ftp://other.things.that.look.like.this',
+                          urlize('ftp://other.things.that.look.like.this'),
+                          'but if scheme is present, should be urlized')
+
     def test_dont_urlize_category_name(self):
         with self.app.app_context():
             urlize = links.urlizer()
             self.assertEqual(urlize('math.CO'), 'math.CO',
                              'category name math.CO should not get urlized')
-            self.assertIn('href="http://supermath.co', urlize('supermath.co'),
-                          'hostname close to category name should get urlized')
+            self.assertNotIn('href="http://supermath.co',
+                             urlize('supermath.co'),
+                            'hostname without scheme should not be urlized')
 
     def test_dont_urlize_arxiv_dot_org(self):
         with self.app.app_context():

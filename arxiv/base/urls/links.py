@@ -107,7 +107,7 @@ PROTOCOLS = '|'.join(bleach.linkifier.html5lib_shim.allowed_protocols)
 URL = re.compile(
     rf"""(?:{FTP.pattern})|
     (?:\(*  # Match any opening parentheses.
-    \b(?<![@/])(?:(?:{PROTOCOLS}):/{{0,3}}(?:(?:\w+:)?\w+@)?)?  # http://
+    \b(?<![@/])(?:(?:{PROTOCOLS}):/{{0,3}}(?:(?:\w+:)?\w+@)?)  # http://
     (?:
         (?:([\w-]+\.)+(?:{TLDS}))   # Conventional URL
         |(?:{IP_ADDRESS})           # IP address
