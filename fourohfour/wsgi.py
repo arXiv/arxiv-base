@@ -21,9 +21,14 @@ def create_web_app() -> Flask:
     return app
 
 
+__flask_app__ = create_web_app()
+
+
 def application(environ, start_response):
     """WSGI application factory."""
     for key, value in environ.items():
+        if key == 'SERVER_NAME':    # This will only confuse Flask.
+            continue
         os.environ[key] = str(value)
-    app = create_web_app()
-    return app(environ, start_response)
+        __flask_app__.config[key] = value
+    return __flask_app__(environ, start_response)
