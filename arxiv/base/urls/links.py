@@ -207,7 +207,8 @@ def _shorten_text_to_30_characters(attrs: Attrs, new: bool = False) -> Attrs:
             # If the netloc part is too big on its own, make room in the netloc
             # part so that we can use at least the last three characters of the
             # remainder.
-            if N_netloc >= N_MAX or (N_netloc > (N_ALLOW - N_ELLIPSIS) and N_remainder > 0):
+            if N_netloc >= N_MAX
+                    or (N_netloc > (N_ALLOW - N_ELLIPSIS) and N_remainder > 0):
                 N_remove_from_netloc = N_netloc - N_ALLOW
                 if N_remainder > 0:
                     N_remove_from_netloc += N_AT_END
