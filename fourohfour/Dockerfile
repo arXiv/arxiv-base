@@ -9,14 +9,14 @@ LABEL org.opencontainers.image.title="arXiv FourOhFour" \
 
 WORKDIR /opt/arxiv
 
+LABEL org.label-schema.version="0.15.9"
+
 RUN pipenv install arxiv-base arxiv-auth \
     && rm -rf ~/.cache/pip
 
 EXPOSE 8000
 
 COPY wsgi.py uwsgi.ini /opt/arxiv/
-
-LABEL org.label-schema.version="0.15.9"
 
 ENTRYPOINT ["pipenv", "run"]
 CMD ["uwsgi", "--ini", "/opt/arxiv/uwsgi.ini"]

@@ -12,6 +12,8 @@ LABEL maintainer="arXiv <nextgen@arxiv.org>" \
   org.opencontainers.image.vendor="arXiv.org" \
   org.opencontainers.image.licenses="MIT"
 
+LABEL version="0.15.9"
+
 ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     APPLICATION_ROOT="/"
@@ -52,7 +54,5 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
   && python3.6 get-pip.py \
   && pip install -U pip pipenv uwsgi \
   && rm -rf ~/.cache/pip
-
-LABEL version="0.15.9"
 
 CMD /bin/bash
