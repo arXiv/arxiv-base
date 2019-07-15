@@ -9,6 +9,8 @@ RUN pipenv install arxiv-base arxiv-auth \
 
 EXPOSE 8000
 
+WORKDIR /opt/arxiv
+
 COPY wsgi.py uwsgi.ini /opt/arxiv/
 
 LABEL version="0.15.9" \

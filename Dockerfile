@@ -2,8 +2,6 @@
 
 FROM centos:centos7
 
-WORKDIR /opt/arxiv
-
 # Below we use && chaining and an embedded script in a single RUN
 # command to keep image size and layer count to a minimum, while
 # the embedded script will make 'docker build' fail fast
