@@ -36,6 +36,7 @@ PKGS_TO_INSTALL=$(cat <<-END\n\
   which\n\
   wget\n\
   mariadb-devel\n\
+  sqlite\n\
 END\n\
 )\n\
 for pkg in ${PKGS_TO_INSTALL}; do\n\
