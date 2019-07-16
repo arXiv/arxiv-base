@@ -13,7 +13,7 @@ from flask import Blueprint, render_template, current_app, make_response, \
 from http import HTTPStatus as status
 from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
     MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError, \
-    default_exceptions
+    default_exceptions, HTTPException
 
 from . import alerts
 
@@ -72,11 +72,12 @@ def test_macros() -> Response:
         'doi': '10.1000/182',
         'pagetitle': 'Home'
     }
-    response: Response = render_template("base/testmacros.html", **context)
+    response: Response = make_response(render_template("base/testmacros.html",
+                                                       **context))
     return response
 
 
-def make_route(exception: Type) -> Callable[[], Response]:
+def make_exception_route(exception: Type[HTTPException]) -> Callable[[], Response]:
     """Create a route that generates a Werkzeug HTTP exception."""
     def _route() -> Response:
         raise exception()
@@ -88,4 +89,4 @@ def make_route(exception: Type) -> Callable[[], Response]:
 for code, exception in default_exceptions.items():
     register = blueprint.route(f'/{code}', methods=['GET'],
                                endpoint=f'test_{code}')
-    register(make_route(exception))
+    register(make_exception_route(exception))

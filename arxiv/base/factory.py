@@ -16,7 +16,7 @@ def create_web_app() -> Flask:
     """Initialize and configure the base application."""
     app = Flask('base_test')
     # .config is an instance of a dict subclass with some methods.
-    app.config.from_object(config)  # type: ignore
+    app.config.from_object(config)
 
     Base(app)    # Gives us access to the base UI templates and resources.
     app.register_blueprint(routes.blueprint)
