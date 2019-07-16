@@ -31,12 +31,12 @@ PKGS_TO_INSTALL=$(cat <<-END\n\
   gcc\n\
   gcc-c++ \n\
   git\n\
+  mariadb-devel\n\
   python36u\n\
   python36u-devel\n\
-  which\n\
-  wget\n\
-  mariadb-devel\n\
   sqlite\n\
+  wget\n\
+  which\n\
 END\n\
 )\n\
 for pkg in ${PKGS_TO_INSTALL}; do\n\
