@@ -99,3 +99,11 @@ AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 # static paths for blueprints.
 RELATIVE_STATIC_PATHS = bool(int(os.environ.get('RELATIVE_STATIC_PATHS', '0')))
 RELATIVE_STATIC_PREFIX = os.environ.get('RELATIVE_STATIC_PREFIX', '')
+
+MAX_URL_DISPLAY_LENGTH = os.environ.get('MAX_URL_DISPLAY_LENGTH', 100)
+"""
+Total characters allowed for the display text of converted URLs.
+
+Display text longer than this will have characters excised in the middle to
+bring the total length down to this value.
+"""

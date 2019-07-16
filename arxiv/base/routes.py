@@ -56,7 +56,17 @@ def test_macros() -> Response:
                     " type $\omega ^{2}(t)\propto\omega_{o}^{2}sec^{2}(\omega_"
                     "{o}t)$, where $\omega_{u}$ and $\omega_{o}$ are the"
                     " underdamped and overdamped frequency parameters,"
-                    " respectively.\n This has an \"abstract\" linefeed.""",
+                    " respectively. You can read more at this moderately long"
+                    " URL "
+                    " http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20"
+                    " in the middle of the sentence. Here is another one"
+                    " http://www3.interscience.wiley.com/cgi-bin/abstract/116836954/ABSTRACT"
+                    " and a third one"
+                    " http://links.jstor.org/sici?sici=0090-5364%28198912%2917%3A4%3C1749%3AEPEFSP%3E"
+                    " also note"
+                    " http://nvo.sdsc.edu/NVO/JCSG/get_SRB_mime_file2.cgi//home/tamara.sdsc/test/demo.zip?F=/home/tamara.sdsc/test/demo.zip&M=application/x-gtar"
+                    " as a final example of a really long URL in an abstract."
+                    "\n This has an \"abstract\" linefeed.",
         'comments': "This version (physics/9707012v2) was not stored by arXiv."
                     " A subsequent replacement was made before versioning was"
                     " introduced.",

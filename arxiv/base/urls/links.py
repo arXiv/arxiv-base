@@ -189,7 +189,7 @@ def _shorten_label_to_n_characters(attrs: Attrs, new: bool = False) -> Attrs:
     href = attrs[(None, 'href')]
     o = urlparse(href)
     if o.hostname:
-        N_MAX= int(get_application_config().get('MAX_URL_DISPLAY_LENGTH', 30))
+        N_MAX= int(get_application_config().get('MAX_URL_DISPLAY_LENGTH', 50))
         N_ELLIPSIS = 3  # Length of the ellipsis.
         N_AT_END = 3
         N_ALLOW = N_MAX - N_ELLIPSIS
@@ -198,6 +198,7 @@ def _shorten_label_to_n_characters(attrs: Attrs, new: bool = False) -> Attrs:
             # The netloc is the hostname and port.
             netloc = str(o.netloc)
             N_netloc = len(netloc)
+            N_scheme = len(o.scheme) + 3    # ://
 
             # The remainder is everything after the netloc, i.e. the path,
             # query, and fragment.
@@ -207,9 +208,10 @@ def _shorten_label_to_n_characters(attrs: Attrs, new: bool = False) -> Attrs:
             # If the netloc part is too big on its own, make room in the netloc
             # part so that we can use at least the last three characters of the
             # remainder.
-            if N_netloc >= N_MAX \
-                    or (N_netloc > (N_ALLOW - N_ELLIPSIS) and N_remainder > 0):
-                N_remove_from_netloc = N_netloc - N_ALLOW
+            if N_netloc + N_scheme >= N_MAX \
+                    or ((N_netloc + N_scheme) > (N_ALLOW - N_ELLIPSIS)
+                        and N_remainder > 0):
+                N_remove_from_netloc = (N_netloc + N_scheme) - N_ALLOW
                 if N_remainder > 0:
                     N_remove_from_netloc += N_AT_END
                 netloc = netloc[:-N_remove_from_netloc]
@@ -217,10 +219,10 @@ def _shorten_label_to_n_characters(attrs: Attrs, new: bool = False) -> Attrs:
 
             # Now truncate the beginning of the remainder, and insert an
             # ellipsis. Well, the ASCII equivalent of an ellipsis...
-            N_to_remove = (N_netloc + N_remainder) - N_ALLOW
+            N_to_remove = (N_netloc + N_scheme + N_remainder) - N_ALLOW
             if N_to_remove > 0:
                 remainder = remainder[N_to_remove:]
-            attrs['_text'] = f'{netloc}...{remainder}'
+            attrs['_text'] = f'{o.scheme}://{netloc}...{remainder}'
     return attrs
 
 
@@ -320,7 +322,7 @@ callbacks = {
     'doi_field': [_handle_doi_url, _add_scheme_info, _add_rel_external],
     'arxiv_id': [_handle_arxiv_url, _add_scheme_info],
     'url':      [_dont_urlize_arxiv_categories, _shorten_label_to_n_characters,
-                 _add_rel, _add_scheme_info, _remove_scheme_from_label]
+                 _add_rel, _add_scheme_info]
 }
 """Bleach attribute callbacks for each kind."""
 
