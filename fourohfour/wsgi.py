@@ -1,5 +1,12 @@
 """
-Web Server Gateway Interface entry-point."""
+Default backend for NGINX HTTP errors.
+
+NGINX will delegate the generation of a response in the case that it generates
+an HTTP error. This allows us to return customized (arXiv-branded) error pages
+even if the error orginated with NGINX rather than an upstream application. For
+details on the API, see
+`https://kubernetes.github.io/ingress-nginx/user-guide/custom-errors/`_.
+"""
 
 import os
 from http import HTTPStatus as status
@@ -9,6 +16,49 @@ from flask import Flask, Response, make_response, request, jsonify
 from werkzeug.exceptions import default_exceptions, NotFound, HTTPException
 
 from arxiv.base import Base, exceptions
+
+
+def application(environ, start_response):
+    """
+    Main WSGI application.
+
+    Updates the Flask app config before using it to handle the request.
+    """
+    for key, value in environ.items():
+        if key == 'SERVER_NAME':
+            continue
+        os.environ[key] = str(value)
+        if key in __flask_app__.config:
+            __flask_app__.config[key] = value
+    return __flask_app__(environ, start_response)
+
+
+def create_web_app() -> Flask:
+    """Create a new :class:`.Flask` app and define the API."""
+    app = Flask("fourohfour")
+    Base(app)
+
+    # Override the default error handlers to provide content negotation.
+    for _, error in default_exceptions.items():
+        app.errorhandler(error)(content_aware_exception_handler)
+
+    app.route('/healthz')(healthz)
+    app.route('/')(echo)
+    return app
+
+
+def healthz() -> Response:
+    """Health check endpoint."""
+    response: Response = make_response("i'm still here", status.OK)
+    return response
+
+
+def echo() -> None:
+    """Propagate an exception from NGINX."""
+    try:
+        make_error_response()
+    except KeyError:    # Fall back to a 404 if error info is not available.
+        raise NotFound('Nope')
 
 
 def make_error_response() -> None:
@@ -35,45 +85,4 @@ def content_aware_exception_handler(error: HTTPException) -> Response:
     return exceptions.handle_exception(error)
 
 
-def echo() -> None:
-    """Propagate an exception from NGINX."""
-    try:
-        make_error_response()
-    except KeyError:    # Fall back to a 404 if error info is not available.
-        raise NotFound('Nope')
-
-
-def healthz() -> Response:
-    """Health check endpoint."""
-    response: Response = make_response("i'm still here", status.OK)
-    return response
-
-
-def create_web_app() -> Flask:
-    """Create a :class:`.Flask` app."""
-    app = Flask("fourohfour")
-    Base(app)
-
-    # Override the default error handlers to provide content negotation.
-    for _, error in default_exceptions.items():
-        app.errorhandler(error)(content_aware_exception_handler)
-
-    app.route('/healthz')(healthz)
-    app.route('/')(echo)
-    return app
-
-
 __flask_app__ = create_web_app()
-app = __flask_app__
-
-
-def application(environ, start_response):
-    """WSGI application factory."""
-    for key, value in environ.items():
-        if key == 'SERVER_NAME':
-            continue
-        os.environ[key] = str(value)
-        if key in __flask_app__.config:
-            __flask_app__.config[key] = value
-
-    return app(environ, start_response)
