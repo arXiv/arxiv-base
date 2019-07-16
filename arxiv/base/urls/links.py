@@ -160,13 +160,13 @@ def _add_rel_external(attrs: Attrs, new: bool = False) -> Attrs:
     # nofollow to disincentivize arXiv articles for SEO
     # external says that link is away from arxiv
     attrs[(None, 'rel')] = 'external noopener nofollow'
-    _extend_class_attr(attrs, 'link-external')
+    _extend_class_attr(attrs, 'link-auto link-external')
     return attrs
 
 
 def _add_rel_internal(attrs: Attrs, new: bool = False) -> Attrs:
     """Add an internal rel."""
-    _extend_class_attr(attrs, 'link-internal')
+    _extend_class_attr(attrs, 'link-auto link-internal')
     return attrs
 
 
@@ -230,7 +230,7 @@ def _add_scheme_info(attrs: Attrs, new: bool = False) -> Attrs:
     o = urlparse(attrs[(None, 'href')])
     if (None, 'class') not in attrs:
         attrs[(None, 'class')] = ''
-    _extend_class_attr(attrs, f'link-{o.scheme}')
+    _extend_class_attr(attrs, f'link-auto link-{o.scheme}')
     return attrs
 
 

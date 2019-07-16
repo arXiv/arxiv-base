@@ -100,7 +100,7 @@ AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 RELATIVE_STATIC_PATHS = bool(int(os.environ.get('RELATIVE_STATIC_PATHS', '0')))
 RELATIVE_STATIC_PREFIX = os.environ.get('RELATIVE_STATIC_PREFIX', '')
 
-MAX_URL_DISPLAY_LENGTH = os.environ.get('MAX_URL_DISPLAY_LENGTH', 100)
+MAX_URL_DISPLAY_LENGTH = os.environ.get('MAX_URL_DISPLAY_LENGTH', 1000)
 """
 Total characters allowed for the display text of converted URLs.
 
