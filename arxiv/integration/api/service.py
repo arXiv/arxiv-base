@@ -246,7 +246,7 @@ class HTTPIntegration(metaclass=MetaIntegration):
             app = current_app
         name = cls.Meta.service_name.upper()
         try:
-            params = app.config.get_namespace(f'{name}_')     # type: ignore
+            params = app.config.get_namespace(f'{name}_')
             endpoint = params.pop('endpoint')
             verify = params.pop('verify')
         except KeyError as e:

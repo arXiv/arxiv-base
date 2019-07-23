@@ -11,6 +11,7 @@ script:
 - pip install pipenv
 - pipenv install --dev
 - pipenv install ./
+- pipenv run nose2 -s fourohfour
 - pipenv run nose2 -s arxiv --with-coverage
 - "./tests/lintstats.sh"
 - pipenv run python tests/run_app_tests.py
