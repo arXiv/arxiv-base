@@ -49,7 +49,9 @@ done\n\
 yum -y install ${PKGS_TO_INSTALL}\n' >> /tmp/safe_yum.sh \
   && /bin/bash /tmp/safe_yum.sh \
   && yum clean all \
-  && rm /tmp/safe_yum.sh
+  && rm /tmp/safe_yum.sh \
+  && rm -rf /tmp/* /var/tmp/* \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN wget https://bootstrap.pypa.io/get-pip.py \
   && python3.6 get-pip.py \
