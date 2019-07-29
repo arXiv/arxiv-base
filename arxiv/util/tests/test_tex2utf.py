@@ -11,7 +11,7 @@ class TextTex2Utf(TestCase):
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, test_str)
 
-        utf_out = tex2utf(test_str, letters=False)
+        utf_out = tex2utf(test_str, greek=False)
         self.assertEqual(utf_out, test_str)
 
         test_str = "\\'e"
@@ -24,12 +24,12 @@ class TextTex2Utf(TestCase):
             0xc9))
 
         test_str = "\\'E"
-        utf_out = tex2utf(test_str, letters=True)
+        utf_out = tex2utf(test_str, greek=True)
         self.assertEqual(utf_out, chr(
             0xc9))
 
         test_str = "\\'E"
-        utf_out = tex2utf(test_str, letters=False)
+        utf_out = tex2utf(test_str, greek=False)
         self.assertEqual(utf_out, chr(0xc9))
 
         test_str = "\\'E"
@@ -186,18 +186,12 @@ class TextTex2Utf(TestCase):
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, 'ARXIVDEV-2322 ' + chr(0x110) + ' fix')
 
-        #     (tex, err) =  arXiv:: Filters: : Tex2UTF: : UTF2tex("Test Test_String. \x{03bb}" )
-        #     self.assertEqual(tex,
-        #                       "Test Test_String. {\\lambda}",
-        #                       "arXiv::Filters::Tex2UTF::UTF2tex()")
-        #
-        # self.assertEqual(arXiv:: Filters: : Tex2UTF: : escapeUTF8("\x{03bb}"),
-        #                   "&#x3BB;",
-        #                   'arXiv::Filters::Tex2UTF::escapeUTF8("\x{03bb}")')
-        #
-        #     latin1 = "\x{91}\x{92}\x{93}\x{94}\x{96}\x{97}\x{98}\x{A0}\x{A6}\x{B1}\x{B2}\x{B3}\x{B5}\x{BC}\x{BD}\x{BE}"
-        #     latin1expected = "`'\"\"----~ |{\\pm}^2^3{\\mu}1/41/23/4"
-        #     is (arXiv: : Filters: : Tex2UTF: : latin2tex("Test Test_String. \x{03bb} latin1" ),
-        #         "Test Test_String. {\\lambda} latin1expected",
-        #         "arXiv::Filters::Tex2UTF::latin2tex(`'\"\"----~ |{\\pm}^2^3{\\mu}1/41/23/4)")
-        #     done_testing
+    def test_ARXIVOPS805(self):
+        self.assertEqual(tex2utf("ARXIVOPS-805 \\aa  fix"),
+                         'ARXIVOPS-805 å fix')
+
+        self.assertEqual(tex2utf("ARXIVOPS-805 \\aa  fix", greek=False),
+                         'ARXIVOPS-805 å fix')
+
+        self.assertEqual(tex2utf("ARXIVOPS-805 \\aa  fix", greek=True),
+                         'ARXIVOPS-805 å fix')

@@ -43,12 +43,12 @@ def abstract_lf_to_br(text: JinjaFilterInput) -> Markup:
 
 
 def f_tex2utf(text: JinjaFilterInput,
-              letters: bool = True) -> Markup:
+              greek: bool = True) -> Markup:
     """Return output of tex2utf function as escaped Markup."""
     if isinstance(text, Markup):
-        return escape(tex2utf(text.unescape(), letters=letters))
+        return escape(tex2utf(text.unescape(), greek=greek))
     else:
-        return Markup(escape(tex2utf(text, letters=letters)))
+        return Markup(escape(tex2utf(text, greek=greek)))
 
 
 def embed_content(path: str) -> Markup:
@@ -98,8 +98,8 @@ def register_filters(app: Flask) -> None:
     """
     app.template_filter('abstract_lf_to_br')(abstract_lf_to_br)
     app.template_filter('urlize')(urlizer())
-    app.template_filter('tex2utf')(partial(f_tex2utf, letters=True))
-    app.template_filter('tex2utf_no_symbols')(partial(f_tex2utf, letters=False))
+    app.template_filter('tex2utf')(partial(f_tex2utf, greek=True))
+    app.template_filter('tex2utf_no_symbols')(partial(f_tex2utf, greek=False))
     app.template_filter('canonical_url')(canonical_url)
     app.template_filter('clickthrough_url')(clickthrough_url)
     app.template_filter('get_category_display')(get_category_display)
