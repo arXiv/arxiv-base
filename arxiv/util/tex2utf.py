@@ -74,6 +74,9 @@ textlet = {
     'dh': 0x00f0, 'dj': 0x0111, 'eth': 0x00f0, 'i': 0x0131,
     'l': 0x0142, 'ng': 0x014b, 'o': 0x00f8, 'ss': 0x00df,
     'th': 0x00fe,
+    }
+
+textgreek = {
     # Greek (upper)
     'Gamma': 0x0393, 'Delta': 0x0394, 'Theta': 0x0398,
     'Lambda': 0x039b, 'Xi': 0x039E, 'Pi': 0x03a0,
@@ -101,6 +104,7 @@ def _p_to_match(tex_to_chr: Dict[str, int]) -> Pattern:
 
 
 textlet_pattern = _p_to_match(textlet)
+textgreek_pattern = _p_to_match(textgreek)
 
 textsym = {
     'P': 0x00b6, 'S': 0x00a7, 'copyright': 0x00a9,
@@ -119,6 +123,10 @@ def _textsym_sub(match: Match) -> str:
     return chr(textsym[match.group(2)])
 
 
+def _textgreek_sub(match: Match) -> str:
+    return chr(textgreek[match.group(2)])
+
+
 def texch2UTF(acc: str) -> str:
     """Convert single character TeX accents to UTF-8.
 
@@ -134,12 +142,12 @@ def texch2UTF(acc: str) -> str:
         return re.sub(r'[^\w]+', '', acc, flags=re.IGNORECASE)
 
 
-def tex2utf(tex: str, letters: bool = True) -> str:
+def tex2utf(tex: str, greek: bool = True) -> str:
     r"""Convert some TeX accents and greek symbols to UTF-8 characters.
 
     :param tex: Text to filter.
 
-    :param letters: If False, do not convert greek letters or
+    :param greek: If False, do not convert greek letters or
     ligatures.  Greek symbols can cause problems. Ex. \phi is not
     suppose to look like φ. φ looks like \varphi.  See ARXIVNG-1612
 
@@ -150,8 +158,10 @@ def tex2utf(tex: str, letters: bool = True) -> str:
     utf = re.sub(r"/(\\['`\^\"\~\=\.uvH])\{\\([ij])\}", r"\g<1>\{\g<2>\}", tex)
 
     # Now work on the Tex sequences, first those with letters only match
-    if letters:
-        utf = textlet_pattern.sub(_textlet_sub, utf)
+    utf = textlet_pattern.sub(_textlet_sub, utf)
+
+    if greek:
+        utf = textgreek_pattern.sub(_textgreek_sub, utf)
 
     utf = textsym_pattern.sub(_textsym_sub, utf)
 
