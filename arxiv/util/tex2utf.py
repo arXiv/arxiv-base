@@ -154,7 +154,6 @@ def tex2utf(tex: str, greek: bool = True) -> str:
     :returns: string, possibly with some TeX replaced with UTF8
 
     """
-
     # Do dotless i,j -> plain i,j where they are part of an accented i or j
     utf = re.sub(r"/(\\['`\^\"\~\=\.uvH])\{\\([ij])\}", r"\g<1>\{\g<2>\}", tex)
 
