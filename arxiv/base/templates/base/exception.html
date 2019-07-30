@@ -1,21 +1,15 @@
 {% extends "base/base.html" %}
 
+{% import "base/error_macros.html" as error_macros %}
+
 {% block content %}
 <div class="has-text-centered">
   <h1 class="title is-size-1">
-    {% block error_title %}Page Not Found{% endblock %}
+    {% block error_title %}{{ error.name }}{% endblock %}
   </h1>
   <div class="status-code columns is-gapless">
     {% block error_illustration %}
-    <div class="column">
-      <span>4</span>
-    </div>
-    <div class="column">
-      <img src="{{ url_for('base.static', filename='images/smileybones.svg') }}" alt="0" />
-    </div>
-    <div class="column">
-      <span>4</span>
-    </div>
+      {{ error_macros.render_error_code(error.code) }}
     {% endblock %}
   </div>
   <p class="is-size-5">

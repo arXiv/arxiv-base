@@ -33,7 +33,8 @@ handle FTP addresses.
 Updated 20 March, 2019: refactored to provide independent bleach attribute
 callbacks for each kind of link.
 """
-from typing import List, Pattern, Tuple, Callable, Dict, Union
+from typing import List, Pattern, Tuple, Callable, Dict, Union, Text, Any, \
+    MutableMapping
 import re
 from functools import reduce
 from urllib.parse import quote, urlparse
@@ -46,7 +47,7 @@ from arxiv import identifier
 from . import clickthrough
 
 
-Attrs = Dict[Union[str, Tuple[None, str]], str]
+Attrs = MutableMapping[Any, Text]
 Callback = Callable[[Attrs, bool], Attrs]
 Callable_Linker = Callable[[str], str]
 
