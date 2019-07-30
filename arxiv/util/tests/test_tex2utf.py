@@ -187,6 +187,7 @@ class TextTex2Utf(TestCase):
         self.assertEqual(utf_out, 'ARXIVDEV-2322 ' + chr(0x110) + ' fix')
 
     def test_ARXIVOPS805(self):
+        """{\aa} wasn't being converted correctly in /abs abstract field to å"""
         self.assertEqual(tex2utf("ARXIVOPS-805 \\aa  fix"),
                          'ARXIVOPS-805 å fix')
 
