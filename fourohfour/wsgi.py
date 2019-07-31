@@ -10,7 +10,7 @@ details on the API, see
 
 import os
 from http import HTTPStatus as status
-from typing import Mapping
+from typing import Mapping, Optional
 
 from flask import Flask, Response, make_response, request, jsonify
 from werkzeug.exceptions import default_exceptions, NotFound, HTTPException
@@ -28,8 +28,10 @@ def application(environ, start_response):
         if key == 'SERVER_NAME':
             continue
         os.environ[key] = str(value)
-        if key in __flask_app__.config:
+        if __flask_app__ is not None and key in __flask_app__.config:
             __flask_app__.config[key] = value
+    if __flask_app__ is None:
+        __flask_app__ = create_web_app()
     return __flask_app__(environ, start_response)
 
 
@@ -46,7 +48,7 @@ def create_web_app() -> Flask:
     app.route('/')(echo)
     return app
 
-
+  
 def healthz() -> Response:
     """Health check endpoint."""
     response: Response = make_response("i'm still here", status.OK)
@@ -85,4 +87,4 @@ def content_aware_exception_handler(error: HTTPException) -> Response:
     return exceptions.handle_exception(error)
 
 
-__flask_app__ = create_web_app()
+__flask_app__: Optional[Flask] = None
