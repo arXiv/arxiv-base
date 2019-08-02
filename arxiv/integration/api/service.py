@@ -110,6 +110,15 @@ class HTTPIntegration(metaclass=MetaIntegration):
 
         service_name = "base"
 
+    default_retry_config = Retry(
+        total=10,
+        read=10,
+        connect=10,
+        status=10,
+        backoff_factor=0.5
+    )
+    """Default retry behavior for HTTP request."""
+
     def __init__(self, endpoint: str, verify: bool = True,
                  headers: dict = {}, **extra: Any) -> None:
         """
@@ -129,19 +138,24 @@ class HTTPIntegration(metaclass=MetaIntegration):
         self._extra = extra
         self._session = requests.Session()
         self._verify = verify
-        self._retry = Retry(
-            total=10,
-            read=10,
-            connect=10,
-            status=10,
-            backoff_factor=0.5
-        )
+        self._retry = self.get_retry_config()
         self._adapter = requests.adapters.HTTPAdapter(max_retries=self._retry)
         self._session.mount(f'{urlparse(endpoint).scheme}://', self._adapter)
         if not endpoint.endswith('/'):
             endpoint += '/'
         self._endpoint = endpoint
         self._session.headers.update(headers)
+
+    def get_retry_config(self) -> Retry:
+        """
+        Defines the retry behavior for HTTP requests.
+
+        This is defined as an instance method so that it can be defined in
+        relation to an app config or other contextual information.
+
+        See :class:`urllib3.util.retry.Retry`.
+        """
+        return self.default_retry_config
 
     def _path(self, path: str, query: dict = {}) -> str:
         """Generate a full path for a request."""
