@@ -1,0 +1,23 @@
+
+{% macro render_error_code_digit(digit, idx, code) -%}
+    {% if digit == '0' %}
+    <img src="{{ url_for('base.static', filename='images/smileybones.svg') }}"
+        alt="0"
+        width="170"
+        height="170"
+        {% if code % 100 == 0 %}
+        style="padding-{% if idx == 2 %}right{% elif idx == 3 %}left{% endif %}: 10px;"
+        {% endif %}
+        />
+    {% else %}
+    <span>{{ digit }}</span>
+    {% endif %}
+{%- endmacro %}
+
+{% macro render_error_code(code) %}
+    {% for digit in code|string %}
+    <div class="column">
+        {{ render_error_code_digit(digit, loop.index, code) }}
+    </div>
+    {% endfor %}
+{% endmacro %}

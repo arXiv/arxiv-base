@@ -123,4 +123,15 @@ dist/
 *.egg-info/
 *.DS_Store
 .sass-cache/
-.pytest_cache/
+
+*tests/*
+.*
+README.md
+update-docs.sh
+LICENSE
+.pylintrc
+.coverage
+.coveragerc
+.gitignore
+docs/*
+four
