@@ -156,7 +156,7 @@ class CSRFForm(Form):
 
             # Per ARXIVNG-1944 in arxiv-auth v0.4.1 the session will be called
             # request.auth by default.
-            session = request.auth or request.session
+            session = getattr(request, 'auth') or getattr(request, 'session')
 
             # Sessions provided by arxiv.auth should have a nonce that was
             # generated when the session was created. Legacy sessions, however,
@@ -164,6 +164,6 @@ class CSRFForm(Form):
             # instead.
             nonce = getattr(session, 'nonce', session.session_id)
             return {
-                'ip_address': request.remote_addr,
+                'ip_address': getattr(request, 'remote_addr'),
                 'nonce': nonce
             }
