@@ -1277,7 +1277,7 @@ CATEGORIES = {
         'description': 'Mathematical material of general interest, topics not '
                        'covered elsewhere',
         'is_active': True,
-        'is_general': True
+        'is_general': True    
     },
     'math.GN': {
         'name': 'General Topology',
