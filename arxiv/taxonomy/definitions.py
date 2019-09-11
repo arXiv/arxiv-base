@@ -333,7 +333,7 @@ CATEGORIES = {
         'name': 'Astrophysics',
         'in_archive': 'astro-ph',
         'is_active': False,
-        'is_general': True
+        'is_general': False
     },
     'astro-ph.CO': {
         'name': 'Cosmology and Nongalactic Astrophysics',
@@ -450,7 +450,7 @@ CATEGORIES = {
         'name': 'Condensed Matter',
         'in_archive': 'cond-mat',
         'is_active': False,
-        'is_general': True
+        'is_general': False
     },
     'cond-mat.dis-nn': {
         'name': 'Disordered Systems and Neural Networks',
@@ -873,7 +873,7 @@ CATEGORIES = {
         'description': 'This is the classification to use for documents that '
                        'do not fit anywhere else.',
         'is_active': True,
-        'is_general': False
+        'is_general': True
     },
     'cs.OS': {
         'name': 'Operating Systems',
@@ -1277,7 +1277,7 @@ CATEGORIES = {
         'description': 'Mathematical material of general interest, topics not '
                        'covered elsewhere',
         'is_active': True,
-        'is_general': False
+        'is_general': True
     },
     'math.GN': {
         'name': 'General Topology',
@@ -1670,7 +1670,7 @@ CATEGORIES = {
         'name': 'Quantitative Biology',
         'in_archive': 'q-bio',
         'is_active': False,
-        'is_general': True
+        'is_general': False
     },
     'q-bio.BM': {
         'name': 'Biomolecules',
@@ -1724,7 +1724,7 @@ CATEGORIES = {
         'description': 'Work in quantitative biology that does not fit into '
                        'the other q-bio classifications',
         'is_active': True,
-        'is_general': False
+        'is_general': True
     },
     'q-bio.PE': {
         'name': 'Populations and Evolution',
