@@ -1,7 +1,7 @@
-arxiv.base.tests.test\_alerts module
+arxiv.integration.api.service module
 ====================================
 
-.. automodule:: arxiv.base.tests.test_alerts
+.. automodule:: arxiv.integration.api.service
     :members:
     :undoc-members:
     :show-inheritance:

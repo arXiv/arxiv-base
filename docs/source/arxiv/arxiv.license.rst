@@ -6,10 +6,4 @@ arxiv.license package
     :undoc-members:
     :show-inheritance:
 
-Submodules
-----------
-
-.. toctree::
-
-   arxiv.license.tests
 

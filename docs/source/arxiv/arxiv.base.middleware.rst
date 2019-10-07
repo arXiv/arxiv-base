@@ -13,5 +13,4 @@ Submodules
 
    arxiv.base.middleware.base
    arxiv.base.middleware.request_logs
-   arxiv.base.middleware.tests
 

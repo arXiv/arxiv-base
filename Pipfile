@@ -24,7 +24,7 @@ pylint = "<2"
 hypothesis = "*"
 sphinx = "*"
 sphinxcontrib-websupport = "*"
-sphinx-autodoc-typehints = "*"
+sphinx-autodoc-typehints = "==1.8.0"
 astroid = "<2.2"
 
 [pipenv]

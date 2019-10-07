@@ -6,13 +6,6 @@ arxiv.base.urls package
     :undoc-members:
     :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-
-    arxiv.base.urls.tests
-
 Submodules
 ----------
 

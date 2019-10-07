@@ -1,15 +1,16 @@
-arxiv.forms package
-===================
+arxiv.mail package
+==================
 
-.. automodule:: arxiv.forms
+.. automodule:: arxiv.mail
     :members:
     :undoc-members:
     :show-inheritance:
+
 
 Submodules
 ----------
 
 .. toctree::
 
-   arxiv.forms.csrf
+   arxiv.mail.mail
 
