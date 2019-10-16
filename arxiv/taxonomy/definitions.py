@@ -788,9 +788,12 @@ CATEGORIES = {
     'cs.LG': {
         'name': 'Machine Learning',
         'in_archive': 'cs',
-        'description': 'Covers machine learning and computational (PAC) '
-                       'learning. Roughly includes material in ACM Subject '
-                       'Class I.2.6.',
+        'description': 'Papers on all aspects of machine learning research '
+                       '(supervised, unsupervised, reinforcement learning, '
+                       'bandit problems, and so on) including also '
+                       'robustness, explanation, fairness, and methodology. '
+                       'cs.LG is also an appropriate primary category for '
+                       'applications of machine learning methods.',
         'is_active': True,
         'is_general': False
     },
@@ -1277,7 +1280,7 @@ CATEGORIES = {
         'description': 'Mathematical material of general interest, topics not '
                        'covered elsewhere',
         'is_active': True,
-        'is_general': True    
+        'is_general': True
     },
     'math.GN': {
         'name': 'General Topology',
