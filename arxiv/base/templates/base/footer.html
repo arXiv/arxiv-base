@@ -1,7 +1,7 @@
 <div class="columns is-desktop" role="navigation" aria-label="Secondary">
   <!-- MetaColumn 1 -->
   <div class="column">
-    <div class="columns">
+    <div class="columns is-mobile">
       <div class="column">
         <ul class="nav-spaced">
           <li><a href="{{ url_for('about')}}">About arXiv</a></li>
@@ -11,14 +11,14 @@
       <div class="column">
         <ul class="nav-spaced">
           <li><span class="icon"><i class="fa fa-envelope"></i></span><a href="{{ url_for('contact') }}"> Contact</a></li>
-          <li><span class="icon"><i class="fa fa-twitter"></i></span><a href="{{ url_for('twitter') }}"> Follow us on Twitter</a></li>
+          <li><span class="icon"><i class="fa fa-twitter"></i></span><a href="{{ url_for('twitter') }}"> Twitter</a></li>
         </ul>
       </div>
     </div>
   </div> <!-- end MetaColumn 1 -->
   <!-- MetaColumn 2 -->
   <div class="column">
-    <div class="columns">
+    <div class="columns is-mobile">
       <div class="column">
         <ul class="nav-spaced">
           <li><a href="{{ url_for('help') }}">Help</a></li>
