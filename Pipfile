@@ -26,6 +26,7 @@ sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "==1.8.0"
 astroid = "<2.2"
+mypy-extensions = "==0.4.2"
 
 [pipenv]
 allow_prereleases = true
