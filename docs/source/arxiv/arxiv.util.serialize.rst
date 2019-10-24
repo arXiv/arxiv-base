@@ -1,7 +1,7 @@
-arxiv.taxonomy.tests module
+arxiv.util.serialize module
 ===========================
 
-.. automodule:: arxiv.taxonomy.tests
+.. automodule:: arxiv.util.serialize
     :members:
     :undoc-members:
     :show-inheritance:

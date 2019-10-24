@@ -21,7 +21,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.append(os.path.abspath('../..'))
+from arxiv.base.factory import create_web_app
 
+app = create_web_app()
+app.app_context().push()
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

@@ -14,7 +14,6 @@ appears in the other (canonical), but that most of the arXiv code for display,
 search, etc. does not need to understand the break with hierarchy.
 
 """
-from typing import Optional
 from .definitions import CATEGORIES, CATEGORIES_ACTIVE, ARCHIVES, \
     ARCHIVES_ACTIVE, ARCHIVES_SUBSUMED, CATEGORY_ALIASES
 from .category import Category, Archive, Group
@@ -37,6 +36,7 @@ def get_category_display(category: str, canonical: bool = True) -> str:
     str
         Display name for the category, e.g. ``Adaptation and Self-Organizing
         Systems (nlin.AO)``.
+
     """
     if canonical:
         return Category(category).canonical.display
@@ -59,6 +59,7 @@ def get_archive_display(archive: str, canonical: bool = True) -> str:
     -------
     str
         Display name for the category, e.g. ``Astrophysics (astro-ph)``.
+
     """
     if canonical:
         return Archive(archive).canonical.display
@@ -78,5 +79,6 @@ def get_group_display(group: str) -> str:
     -------
     str
         Display name for the group, e.g. ``Mathematics (grp_math)``.
+
     """
     return Group(group).display

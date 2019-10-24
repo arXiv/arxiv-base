@@ -11,9 +11,7 @@ Subpackages
 
 .. toctree::
 
-    arxiv.base.agent
     arxiv.base.middleware
-    arxiv.base.tests
     arxiv.base.urls
 
 Submodules
@@ -21,7 +19,9 @@ Submodules
 
 .. toctree::
 
+   arxiv.base.agent
    arxiv.base.alerts
+   arxiv.base.app_tests
    arxiv.base.config
    arxiv.base.context_processors
    arxiv.base.converter

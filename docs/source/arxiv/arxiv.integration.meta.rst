@@ -1,7 +1,7 @@
-arxiv.base.agent.tests module
+arxiv.integration.meta module
 =============================
 
-.. automodule:: arxiv.base.agent.tests
+.. automodule:: arxiv.integration.meta
     :members:
     :undoc-members:
     :show-inheritance:

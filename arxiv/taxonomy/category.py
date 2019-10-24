@@ -33,11 +33,12 @@ class Category(str):
     @property
     def display(self) -> str:
         """
-        String to use in display of a category.
+        Output the display string for a category.
 
         Examples
         --------
         Earth and Planetary Astrophysics (astro-ph.EP)
+
         """
         if self in self.lookup:
             catname = self.lookup[self]['name']

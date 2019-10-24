@@ -9,13 +9,14 @@
   <body>
   {% import "base/macros.html" as macros %}
   <noscript><p><img src="https://webstats.arxiv.org/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+  <a href="#main-container" class="is-sr-only">Skip to main content</a>
   <header>
     {% block header %}
     {% include "base/header.html" %}
     {% endblock header %}
   </header>
 
-  <main role="main" class="container">
+  <main role="main" class="container" id="main-container">
     {% with messages = get_alerts() -%}
       {% if messages -%}
         <div class="notifications" role="alert">
