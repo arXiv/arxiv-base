@@ -9955,7 +9955,7 @@ main {
 }
 main a {
   border-bottom: 1px solid transparent;
-  font-weight: bold;
+  /*font-weight: bold*/
 }
 main a:hover {
   border-bottom: 1px dotted #0068ac;
