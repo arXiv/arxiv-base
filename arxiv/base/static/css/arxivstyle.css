@@ -9957,13 +9957,13 @@ footer .nav-spaced li {
   display: flex;
   align-items: center;
 }
-
 /**** Primary content default styling ****/
 main {
   padding: 3rem 1.5rem;
 }
 main a {
   border-bottom: 1px solid transparent;
+  /*font-weight: bold*/
 }
 main a:hover {
   border-bottom: 1px dotted #0068ac;
