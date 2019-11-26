@@ -9949,7 +9949,13 @@ footer a:hover, footer a:active {
   background-color: #999999;
 }
 footer .icon {
-  vertical-align: text-bottom;
+  height: 0.9rem;
+  width: 0.9rem;
+  margin-right: 0.45em;
+}
+footer .nav-spaced li {
+  display: flex;
+  align-items: center;
 }
 
 /**** Primary content default styling ****/
