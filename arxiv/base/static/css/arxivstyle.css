@@ -9948,7 +9948,15 @@ footer a:hover, footer a:active {
   border-bottom: 1px dotted #fff;
   background-color: #999999;
 }
-
+footer .icon {
+  height: 0.9rem;
+  width: 0.9rem;
+  margin-right: 0.45em;
+}
+footer .nav-spaced li {
+  display: flex;
+  align-items: center;
+}
 /**** Primary content default styling ****/
 main {
   padding: 3rem 1.5rem;
