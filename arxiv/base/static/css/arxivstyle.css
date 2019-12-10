@@ -9957,6 +9957,7 @@ footer .nav-spaced li {
   display: flex;
   align-items: center;
 }
+
 /**** Primary content default styling ****/
 main {
   padding: 3rem 1.5rem;
@@ -10278,6 +10279,45 @@ li.is-success p:before {
 
 .pagination-list li + li {
   margin: 0;
+}
+
+/*icon styles*/
+svg.icon {
+  height: 1em !important;
+}
+
+.icon.filter-white {
+  fill: #FFFFFF;
+}
+
+.icon.filter-black {
+  fill: #000000;
+}
+
+.icon.filter-grey {
+  fill: #f5f5f5;
+}
+
+.icon.filter-blue {
+  fill: #0068ac;
+}
+
+.icon.filter-red {
+  fill: #b31b1b;
+}
+
+a .icon {
+  transition: fill 0.3s ease;
+}
+
+a:hover .icon.filter-white {
+  fill: #f5f5f5;
+}
+a:hover .icon.filter-black,
+a:hover .icon.filter-grey,
+a:hover .icon.filter-blue,
+a:hover .icon.filter-red {
+  fill: #ffffff;
 }
 
 /*# sourceMappingURL=arxivstyle.css.map */
