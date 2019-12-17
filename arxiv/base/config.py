@@ -73,7 +73,7 @@ ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
 BASE_VERSION = "0.16.4"
 """The version of the arxiv-base package."""
 
-APP_VERSION = "0.16.3"
+APP_VERSION = "0.16.4"
 """The version of the base test app."""
 
 """
