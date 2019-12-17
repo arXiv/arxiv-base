@@ -23,12 +23,19 @@ footer
     &:active
       border-bottom: 1px dotted #fff
       background-color: $grey-light
-
+  .icon
+    height:.9rem
+    width:.9rem
+    margin-right:.45em
+  .nav-spaced li
+    display: flex
+    align-items: center
 /**** Primary content default styling ****/
 main
   padding: 3rem 1.5rem
   a
     border-bottom: 1px solid transparent
+    /*font-weight: bold*/
     &:hover
       border-bottom: 1px dotted $blue
   p,
@@ -81,7 +88,6 @@ main
 
 .nav-spaced
   line-height: 2
-
 .attribution
   align-items: center
   background-color: $cul-gray
@@ -279,3 +285,32 @@ li.is-success
 
 .pagination-list li + li // fixes override from content li + li
   margin: 0
+
+/*icon styles*/
+svg.icon
+    height: 1em !important
+
+.icon.filter-white
+  fill: #FFFFFF
+.icon.filter-black
+  fill: #000000
+.icon.filter-grey
+  fill: #f5f5f5
+.icon.filter-blue
+  fill: #0068ac
+.icon.filter-red
+  fill: #b31b1b
+
+a
+  .icon
+    transition: fill 0.3s ease
+
+a:hover
+  .icon.filter-white
+    fill: #f5f5f5
+
+  .icon.filter-black,
+  .icon.filter-grey,
+  .icon.filter-blue,
+  .icon.filter-red
+    fill: #ffffff
