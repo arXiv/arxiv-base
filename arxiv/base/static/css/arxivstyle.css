@@ -10302,8 +10302,28 @@ svg.icon {
   fill: #0068ac;
 }
 
+.icon.filter-dark_blue {
+  fill: #00558d;
+}
+
 .icon.filter-red {
   fill: #b31b1b;
+}
+
+.icon.filter-red-alert {
+  fill: #cd0200;
+}
+
+.icon.filter-orange {
+  fill: #d47500;
+}
+
+.icon.filter-yellow {
+  fill: #f7d012;
+}
+
+.icon.filter-green {
+  fill: #3cb521;
 }
 
 a .icon {
@@ -10316,7 +10336,12 @@ a:hover .icon.filter-white {
 a:hover .icon.filter-black,
 a:hover .icon.filter-grey,
 a:hover .icon.filter-blue,
-a:hover .icon.filter-red {
+a:hover .icon.filter-dark-blue,
+a:hover .icon.filter-red,
+a:hover .icon.filter-red-alert,
+a:hover .icon.filter-orange,
+a:hover .icon.filter-yellow,
+a:hover .icon.filter-green {
   fill: #ffffff;
 }
 

@@ -19,7 +19,7 @@
   <main class="container" id="main-container">
     {% with messages = get_alerts() -%}
       {% if messages -%}
-        <div class="notifications" role="alert">
+        <div class="notifications" role="alert" aria-atomic="true">
           {% for category, message in messages -%}
             <div class="notification is-{{ category }}">
               {% if message.dismissable %}<button class="delete notification-dismiss"></button>{% endif %}
