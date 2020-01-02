@@ -9921,6 +9921,10 @@ main {
   color: #fff;
 }
 
+.message.is-success .message-header {
+  color: #000;
+}
+
 /** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. **/
 header h1 {
   font-size: 2em;
