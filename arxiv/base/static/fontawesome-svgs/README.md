@@ -23,7 +23,8 @@ The following color classes are available:
 .filter-blue
 .filter-red
 .filter-green
-All non-white icons have a white hover color. White icons have a grey hover color. Add more color and hover classes as needed to the custom sass file.
+
+All non-grey icons have a grey hover color. Grey icons have a black hover color. Add more color and hover classes as needed to the custom sass file.
 
 The icon will scale based on the font size of it's container so you shouldn't need to adjust height or width manually with css (though you can if you need to).
 
