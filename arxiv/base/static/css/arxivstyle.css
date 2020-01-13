@@ -10288,6 +10288,9 @@ li.is-success p:before {
 /*icon styles*/
 svg.icon {
   height: 1em !important;
+  width: 1em !important;
+  top: 0.125em;
+  position: relative;
 }
 
 .icon.filter-white {
