@@ -10337,8 +10337,8 @@ a .icon {
   transition: fill 0.3s ease;
 }
 
-a:hover .icon.filter-white {
-  fill: #f5f5f5;
+a:hover .icon.filter-grey {
+  fill: #000000;
 }
 a:hover .icon.filter-black,
 a:hover .icon.filter-grey,
@@ -10349,7 +10349,7 @@ a:hover .icon.filter-red-alert,
 a:hover .icon.filter-orange,
 a:hover .icon.filter-yellow,
 a:hover .icon.filter-green {
-  fill: #ffffff;
+  fill: #f5f5f5;
 }
 
 /*# sourceMappingURL=arxivstyle.css.map */
