@@ -57,7 +57,7 @@ would write:
 Or if you want to install a specific working branch (dev only) the Pipfile line
 might read:
 
-``arxiv-base = {git = "https://github.com/cul-it/arxiv-base.git@task/ARXIVNG-1215"}``
+``arxiv-base = {git = "https://github.com/arXiv/arxiv-base.git@task/ARXIVNG-1215"}``
 
 
 See the [pip documentation](https://pip.pypa.io/en/latest/reference/pip_install/#git)
@@ -69,7 +69,7 @@ Example:
 
 ```bash
 pipenv uninstall arxiv-base
-pipenv install git+https://github.com/cul-it/arxiv-base.git@task/ARXIVNG-1010#egg=arxiv-base
+pipenv install git+https://github.com/arXiv/arxiv-base.git@task/ARXIVNG-1010#egg=arxiv-base
 ```
 
 In your ``config.py``, be sure to set ``APP_VERSION`` to the current semantic
