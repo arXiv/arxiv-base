@@ -9921,6 +9921,10 @@ main {
   color: #fff;
 }
 
+.message.is-success .message-header {
+  color: #000;
+}
+
 /** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. **/
 header h1 {
   font-size: 2em;
@@ -10284,6 +10288,9 @@ li.is-success p:before {
 /*icon styles*/
 svg.icon {
   height: 1em !important;
+  width: 1em !important;
+  top: 0.125em;
+  position: relative;
 }
 
 .icon.filter-white {
@@ -10302,22 +10309,47 @@ svg.icon {
   fill: #0068ac;
 }
 
+.icon.filter-dark_blue {
+  fill: #00558d;
+}
+
 .icon.filter-red {
   fill: #b31b1b;
+}
+
+.icon.filter-red-alert {
+  fill: #cd0200;
+}
+
+.icon.filter-orange {
+  fill: #d47500;
+}
+
+.icon.filter-yellow {
+  fill: #f7d012;
+}
+
+.icon.filter-green {
+  fill: #3cb521;
 }
 
 a .icon {
   transition: fill 0.3s ease;
 }
 
-a:hover .icon.filter-white {
-  fill: #f5f5f5;
+a:hover .icon.filter-grey {
+  fill: #000000;
 }
 a:hover .icon.filter-black,
 a:hover .icon.filter-grey,
 a:hover .icon.filter-blue,
-a:hover .icon.filter-red {
-  fill: #ffffff;
+a:hover .icon.filter-dark-blue,
+a:hover .icon.filter-red,
+a:hover .icon.filter-red-alert,
+a:hover .icon.filter-orange,
+a:hover .icon.filter-yellow,
+a:hover .icon.filter-green {
+  fill: #f5f5f5;
 }
 
 /*# sourceMappingURL=arxivstyle.css.map */
