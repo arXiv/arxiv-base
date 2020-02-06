@@ -27,7 +27,7 @@ from semantic_version import Version
 from .dist_version import get_version, write_version
 
 NO_TAG_MSG = "OK: Skipping publish version check since no git tag found in TRAVIS_TAG"
-REGRESSIVE_MSG = "NOT OK: Filed tag check"
+REGRESSIVE_MSG = "NOT OK: Tag did not pass tag check"
 
 
 def prepare_for_version(dist_name):
@@ -37,27 +37,19 @@ def prepare_for_version(dist_name):
     to a python file that will be used by both the app code
     and setup.py.
 
-    This will call sys.exit() if there are problems."""
-    tag = check_tag_version()
-    topkg = write_version(dist_name, tag)
-    print(f"Wrote version {tag} to {topkg}")
-
-
-def check_tag_version():
-    """Check if there is a git tag and it is good, die if it is bad.
-
-    This will use sys.exit and print to stdout so do not use in Flask
-    etc.  Checks that a version exits and is higher than latest.
+    This will call sys.exit() if there are problems.
     """
     tag_to_publish = os.environ.get('TRAVIS_TAG', None)
-    if tag_to_publish is None:
+    if not tag_to_publish:
         print(NO_TAG_MSG)
+        sys.exit(0)
 
     if is_regressive_version(tag_to_publish, git_tags()):
         print(REGRESSIVE_MSG)
         sys.exit(1)
 
-    return tag_to_publish
+    topkg = write_version(dist_name, tag_to_publish)
+    print(f"Wrote version {tag_to_publish} to {topkg}")
 
 
 def git_tags():
