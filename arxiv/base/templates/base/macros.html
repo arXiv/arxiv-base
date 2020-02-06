@@ -1,7 +1,6 @@
 {# macros to be available to all templates across arxiv #}
 
 {% macro alerts(messages=[]) %}
-
 {% if messages -%}
 <div class="notifications" role="alert" aria-atomic="true">
     {% for category, message in messages -%}
@@ -13,12 +12,8 @@
     {%- endfor %}
 </div>
 {%- endif %}
-
 {% endmacro %}
 
-{% macro noscripttracker() -%}
-<noscript><p><img src="https://webstats.arxiv.org/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
-{% endmacro %}
 
 {% macro compactsearch(alignstyle="level-right") -%}
   {# Creates an inline search widget with one input box, a dropdown for field
