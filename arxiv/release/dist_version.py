@@ -15,8 +15,7 @@ from datetime import datetime
 
 
 def get_version(dist_name):
-    """Gets the version written by write_version(), or the git describe
-    version.
+    """Get the version written by write_version(), or the git describe version.
 
     Parameters
     ----------
@@ -31,10 +30,8 @@ def get_version(dist_name):
         The version.__version__ value if it exists or the git describe
         version if it exists or the string 'no-git-or-release-version'
     """
-
     # TODO We might want to make it an error if we are under git
     # and there is a version.py file? It doesn't seem like a good state.
-
     pkg = '.'.join(dist_name.split('-')) + ".version"
     try:
         name = '__version__'
@@ -50,8 +47,7 @@ def get_version(dist_name):
 
 
 def write_version(dist_name, version):
-    """Writes the version to a version.py file in a package that
-    corresponds with the dist_name.
+    """Write the version to a version.py file in a package that corresponds with the dist_name.
 
     Parameters
     ----------
@@ -63,10 +59,10 @@ def write_version(dist_name, version):
     version: str
         A string with a semantic version.
 
-    Returns:
+    Returns
     -------
     This returns the path to the version.py file.
-"""
+    """
     dir = '/'.join(dist_name.split('-')) + "/version.py"
     path = pathlib.Path(dir)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -79,27 +75,18 @@ def write_version(dist_name, version):
 
 
 def get_git_version(abbrev=7):
-    # First try to get the current version using “git describe”.
-    version = call_git_describe(abbrev)
-    if version is None:
-        raise ValueError("Cannot get the version number from git")
-    return version
-
-
-def call_git_describe(abbrev):
+    """Get the current version using `git describe`."""
     try:
         p = Popen(['git', 'describe', '--dirty', '--abbrev=%d' % abbrev],
                   stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         line = p.stdout.readlines()[0]
         return line.strip().decode('utf-8')
-
     except Exception:
-        return None
+        raise ValueError("Cannot get the version number from git")
 
 
-"""Below is intended to let this module be used in CI scripts:
-``export APP_VER=$(python -m arxiv.release.get_version arxiv-hatsize-agent)``
-"""
+# Below is intended to let this module be used in CI scripts:
+# ``export APP_VER=$(python -m arxiv.release.get_version arxiv-hatsize-agent)``
 if __name__ == '__main__':
     print(get_version(sys.argv[1]))
