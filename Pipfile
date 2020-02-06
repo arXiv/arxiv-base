@@ -15,6 +15,7 @@ bleach = "*"
 "backports-datetime-fromisoformat" = "==1.0.0"
 retry = "*"
 typing-extensions = "*"
+semantic-version = "*"
 
 [dev-packages]
 pydocstyle = "*"
