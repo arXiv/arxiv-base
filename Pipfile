@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
+flask = "~=1.1"
 jsonschema = "*"
 pytz = "*"
 uwsgi = "*"
@@ -16,6 +16,7 @@ bleach = "*"
 retry = "*"
 typing-extensions = "*"
 semantic-version = "*"
+aiohttp = "*"
 
 [dev-packages]
 pydocstyle = "*"
