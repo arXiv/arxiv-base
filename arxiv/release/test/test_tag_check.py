@@ -1,7 +1,7 @@
 """Tests version tag."""
 from unittest import TestCase
 
-from .tag_check import is_regressive_version
+from arxiv.release.tag_check import is_regressive_version
 
 
 class TestVersions(TestCase):

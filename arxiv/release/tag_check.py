@@ -37,6 +37,9 @@ def prepare_for_version(dist_name):
     good. Then it will write the version to a python file that will be
     used by both the app code and setup.py.
 
+    This does not check if the tag is redundent since by the time travis
+    runs anything, the tag will already be in git.
+
     This will call sys.exit() if there are problems.
 
     """
@@ -45,7 +48,10 @@ def prepare_for_version(dist_name):
         print(NO_TAG_MSG)
         sys.exit(0)
 
-    if is_regressive_version(tag_to_publish, git_tags()):
+    # TRAVIS_TAG will already bin in existing tags
+    existing = git_tags().remove(tag_to_publish)
+
+    if is_regressive_version(tag_to_publish, existing):
         print(REGRESSIVE_MSG)
         sys.exit(1)
 
