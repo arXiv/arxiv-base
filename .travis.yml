@@ -7,10 +7,11 @@ os:
 - linux
 python:
 - '3.6'
-script:
+install:
 - pip install pipenv
 - pipenv install --dev
 - pipenv install ./
+script:
 - pipenv run nose2 -s fourohfour
 - pipenv run nose2 -s arxiv --with-coverage
 - "./tests/lintstats.sh"
