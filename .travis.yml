@@ -8,15 +8,10 @@ os:
 python:
 - '3.6'
 install:
-- ls arxiv
 - pip install pipenv
 - pipenv sync --dev
 - pip install -e ./
-- git describe
-- ls $(pipenv --venv)/lib/python3.6/site-packages || true
-- ls $(pipenv --venv)/lib/python3.6/site-packages/arxiv_base* || true
-- ls $(pipenv --venv)/lib/python3.6/site-packages/arxiv || true
-- pip show arxiv-base || true
+- pip show arxiv-base
 script:
 - pipenv run nose2 -s fourohfour
 - pipenv run nose2 -s arxiv --with-coverage
