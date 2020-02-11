@@ -12,7 +12,6 @@ should be set only by the continuous integration tools from git
 tags. If there is no tag a version, this will fall back to the result
 from `git describe`.
 
-
 # How to setup travis-ci to set versions
 ```yaml
 language: python
@@ -38,7 +37,6 @@ deploy:
  on: 
    tags: true
 ```
-
 
 # Dealing with versions from git tags
 
@@ -68,5 +66,4 @@ local changes.
 
 ## Do not check in any generated version.py files
 These are not intended to be in the source code. They are only
-intended to be in released sdist pacakges.
-   
+intended to be in released sdist pacakges.  
