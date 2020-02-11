@@ -11,7 +11,7 @@ install:
 - ls arxiv
 - pip install pipenv
 - pipenv sync --dev
-- pip -e install ./
+- pip install -e ./
 - git describe
 - ls $(pipenv --venv)/lib/python3.6/site-packages && true
 - ls $(pipenv --venv)/lib/python3.6/site-packages/arxiv_base* && true
