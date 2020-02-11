@@ -3,6 +3,7 @@
 from typing import Optional
 import os
 from urllib.parse import urlparse
+from arxiv.release.dist_version import get_version
 
 SERVER_NAME = None
 
@@ -71,11 +72,12 @@ for key, value in os.environ.items():
 
 ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
 
-BASE_VERSION = "0.16.5"
+BASE_VERSION = get_version('arxiv-base')
 """The version of the arxiv-base package."""
 
-APP_VERSION = "0.16.5"
-"""The version of the base test app."""
+APP_VERSION = get_version('arxiv-base')
+"""The version of the base test app. This is used to build the paths
+to static assets, see :mod:`arxiv.base`."""
 
 """
 Flask-S3 plugin settings.
