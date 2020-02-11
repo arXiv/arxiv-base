@@ -11,6 +11,9 @@ install:
 - pip install pipenv
 - pipenv install --dev
 - pipenv install ./
+- git describe
+- ls $(pipenv --venv)/lib/python3.6/site-packages/arxiv_base* && true
+- ls $(pipenv --venv)/lib/python3.6/site-packages/arxiv && true
 script:
 - pipenv run nose2 -s fourohfour
 - pipenv run nose2 -s arxiv --with-coverage
