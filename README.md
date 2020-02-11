@@ -45,14 +45,10 @@ You should be able to view the rendered ``styleguide.html`` at
 
 ## Flask
 
-To use the base UI package in a Flask application...
-
-Add it to your ``Pipfile``. For the time being, we'll
-distribute directly from GitHub. To use a specific version, for example, you
-would write:
+To use the base UI package in a Flask application add it to your
+``Pipfile``.  To use a specific version, for example, you would write:
 
 ``arxiv-base = "==0.11.1rc5"``
-
 
 Or if you want to install a specific working branch (dev only) the Pipfile line
 might read:
@@ -70,13 +66,6 @@ Example:
 ```bash
 pipenv uninstall arxiv-base
 pipenv install git+https://github.com/arXiv/arxiv-base.git@task/ARXIVNG-1010#egg=arxiv-base
-```
-
-In your ``config.py``, be sure to set ``APP_VERSION`` to the current semantic
-version of the app. For example:
-
-```python
-APP_VERSION = "1.4.2rc5"
 ```
 
 In your application factory, instantiate the Base component. This makes
@@ -116,22 +105,27 @@ And use static files in your templates, e.g.:
 
 ## Static files and paths
 
-Base does a little bit of work for you to keep static files from different
-apps and versions sorted. The ``Base`` component will automatically set  your
-app's
+In order to serve static assets for multiple versions of the an app at
+the same time, arxiv-base prefixes the app name and app version to
+asset urls. This is to allow gracefully upgrades with no broken links
+to css, js or images.
+
+The ``Base`` component will automatically set your app's
 [``static_url_path``](http://flask.pocoo.org/docs/1.0/api/#flask.Flask.static_url_path)
-using the name of the app and the value of  ``APP VERSION`` in your config (see
-above) to ``/static/[app name]/[ app version ]``. It will also rewrite blueprint
+using the name of the app and the value of ``APP VERSION`` in your
+config to ``/static/[app name]/[ app version ]``. It will also rewrite
+blueprint
 [``static_url_path``](http://flask.pocoo.org/docs/1.0/api/#flask.Blueprint.static_url_path)
 to ``/static/[app name]/[ app version ]/[ blueprint name]``.
 
 ### Serving static files on S3
+**TODO Add actual step by step instructions on how to deploy static assets to S3**
 
 We use [Flask-S3](https://flask-s3.readthedocs.io/en/latest/) to serve static
 files via S3. Given the URL strategy above, following the instructions for
 Flask-S3 should just work.
 
-Be sure to initialize the integration after  instantiating ``Base`` and
+Be sure to initialize the integration after instantiating ``Base`` and
 registering your blueprints. For example:
 
 ```python
@@ -152,6 +146,8 @@ Some tests to check app configuration and pattern compliance are provided in
 ``arxiv.base.app_tests``. See that module for usage.
 
 ## Editing and compiling sass
+
+**TODO: compile sass at app start up, stop checking compiled artifacts into to git.**
 
 The file arxivstyle.css should never be edited directly. It is compiled from
 arxivstyle.sass with this command from project directory root:
