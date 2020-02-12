@@ -1,7 +1,7 @@
 """Install arXiv-base as an importable package."""
 
 from setuptools import setup, find_packages
-from arxiv.release.tag_check import get_version
+from arxiv.release.dist_version import get_version
 
 setup(
     name='arxiv-base',

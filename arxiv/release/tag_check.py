@@ -48,7 +48,7 @@ def prepare_for_version(dist_name):
         print(NO_TAG_MSG)
         sys.exit(0)
 
-    # TRAVIS_TAG will already bin in existing tags
+    # TRAVIS_TAG will already be in existing tags
     existing = git_tags()
     existing.remove(tag_to_publish)
 
