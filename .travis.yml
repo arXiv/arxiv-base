@@ -9,8 +9,9 @@ python:
 - '3.6'
 install:
 - pip install pipenv
-- pipenv install --dev
-- pipenv install ./
+- pipenv sync --dev
+- pip install -e ./
+- pip show arxiv-base
 script:
 - pipenv run nose2 -s fourohfour
 - pipenv run nose2 -s arxiv --with-coverage
