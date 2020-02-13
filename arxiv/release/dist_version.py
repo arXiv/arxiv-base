@@ -68,9 +68,10 @@ def write_version(dist_name, version):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, 'w+') as ff:  # overwrite existing version
         when = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        ff.write("#  Created by tag_check.write_version \n")
-        ff.write(f"__when__='{when}'\n")
-        ff.write(f"__version__='{version}'\n")
+        ff.write("#  Created by tag_check.write_version\n")
+        ff.write("#  NEVER CHECK THIS INTO GIT.\n")
+        ff.write(f"__when__ = '{when}'\n")
+        ff.write(f"__version__ = '{version}'\n")
     return path
 
 
