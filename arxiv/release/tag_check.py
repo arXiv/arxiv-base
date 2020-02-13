@@ -2,10 +2,18 @@
 
 This is intended as a check to use in travis ci.
 
-It will:
-1. Check if there is a git tag on the commit.
-2. Check that the tag is a semver
-3. Check it aginst all other git tags to avoid duplicates or regressions
+This will look to see if there is a TRAVIS_TAG env var,
+if there is it means we have a tag in the CI system.
+
+It will check that tag to see if it is a valid public python version
+that pypi will accept.
+
+If it is valid, it will make a version.py file.
+
+If there is no TRAVIS_TAG or it is invalid, this will do nothing.
+
+Invalid tags should be prevented from getting into pypi by pypi
+just rejecting the upload.
 
 It can be used in a travis.yml:
 script:
@@ -13,9 +21,11 @@ script:
 - python deploy/prepare_for_version.py
 
 
+This can also be used to check if a version string is valid:
+``TRAVIS_TAG=0.2.3-somethingX python -m arxiv.release.tag_check``
+
 This does not write or update a RELEASE-VERSION file.
 """
-
 
 from typing import List
 from subprocess import Popen, PIPE
@@ -29,7 +39,7 @@ from .dist_version import get_version, write_version
 
 NO_TAG_MSG = "OK: Skipping publish version check since no git tag found in TRAVIS_TAG"
 REGRESSIVE_MSG = "NOT OK: Tag did not pass tag check"
-INVALID_MSG = "NOT OK: Tag is not a valid PEP440 public python version. See https://www.python.org/dev/peps/pep-0440/#version-scheme"
+INVALID_MSG = "OK: skipping publish version since the tag is not a valid PEP440 public python version. See https://www.python.org/dev/peps/pep-0440/#version-scheme"
 
 
 def prepare_for_version(dist_name):
@@ -42,126 +52,25 @@ def prepare_for_version(dist_name):
 
     This does not check if the tag is redundent since by the time travis
     runs anything, the tag will already be in git.
-
-    This will call sys.exit() if there are problems.
-
     """
     tag_to_publish = os.environ.get('TRAVIS_TAG', None)
 
-    xit = _prep_for_version(dist_name, tag_to_publish, git_tags())
-    if xit is not None:
-        sys.exit(xit)
-
-
-def _prep_for_version(dist_name, tag_to_publish, existing):
     if not tag_to_publish:
         print(NO_TAG_MSG)
         return 0
 
-    # TRAVIS_TAG will already be in existing tags
-    if tag_to_publish in existing:
-        existing.remove(tag_to_publish)
-
     if not is_valid_python_public_version(tag_to_publish):
         print(INVALID_MSG)
-        return 1
-
-    if is_regressive_version(tag_to_publish, existing):
-        print(REGRESSIVE_MSG)
-        return 1
+        return 0
 
     topkg = write_version(dist_name, tag_to_publish)
     print(f"Wrote version {tag_to_publish} to {topkg}")
 
 
+
 def is_valid_python_public_version(tag):
     """Check if tag is valid PEP440 public python version."""
     return bool(_pep440public_ver.match(tag))
-
-
-def git_tags():
-    """Get all git tags."""
-    p = Popen(['git', 'tag'], stdout=PIPE, stderr=PIPE)
-    p.stderr.close()
-    lines = p.stdout.readlines()
-    return [tag.decode('utf-8').strip() for tag in lines]
-
-
-def tags_to_versions(tags):
-    """Convert tags to versions but drop all tags that do not convert."""
-    rv = []
-    for tag in tags:
-        try:
-            rv.append(Version.coerce(tag))
-        except ValueError:
-            pass
-    return rv
-
-
-def is_regressive_version(tag, existing):
-    """Check if a tag is regressive."""
-    isreg, msg = is_regressive_version_with_msg(tag, existing)
-    print(msg)
-    return isreg
-
-
-def is_regressive_version_with_msg(tag: str, existing: List[str]):
-    """Check if sver is before any semver in existing.
-
-    Here we use semver not python versions becasue some of the
-    tags in the arxiv git repos from before these tests might not be
-    valid python public versions.
-    """
-    tagsv = Version.coerce(tag)
-    existing_vers = tags_to_versions(existing)
-
-    def _cmp(a, b):
-        return (a > b) - (a < b)
-
-    _, same_major, ahead_major = \
-        order_for_level(existing_vers,
-                        lambda ex: _cmp(ex.major, tagsv.major))
-    if not same_major:
-        if not ahead_major:
-            return False, f'{tagsv} is a new major'
-        else:
-            return True, f'{tagsv} regressive major behind {ahead_major[0]}'
-
-    _, same_minor, ahead_minor = \
-        order_for_level(same_major,
-                        lambda ex: _cmp(ex.minor, tagsv.minor))
-    if not same_minor:
-        if not ahead_minor:
-            return False, f'{tagsv} is a new minor for existing major'
-        else:
-            return True, f'{tagsv} regressive minor behind {ahead_minor[0]}'
-
-    _, same_patch, ahead_patch = \
-        order_for_level(same_minor,
-                        lambda ex: _cmp(ex.patch, tagsv.patch))
-    if not same_patch:
-        if not ahead_patch:
-            return False, f'{tagsv} is a new patch for existing minor'
-        else:
-            return True, f'{tagsv} regressive patch behind {ahead_patch[0]}'
-
-    _, same_pre, ahead_pre = \
-        order_for_level(same_patch, lambda ex: _cmp(ex, tagsv))
-    if same_pre:
-        return True, f'{tagsv} is same as {same_pre[0]}'
-    if ahead_pre:
-        return True, f'{len(ahead_pre)} versions are ahead of {tagsv}'
-    else:
-        return False, f'{tagsv}: nothing the same or ahead'
-
-
-def order_for_level(existing_vers, checker):
-    """Get before, same_level and ahead versons using checker."""
-    checked = [(ex, checker(ex)) for ex in existing_vers]
-    before = [ex for ex, excp in checked if excp < 0]
-    same_level = [ex for ex, excp in checked if excp == 0]
-    ahead = [ex for ex, excp in checked if excp > 0]
-    return before, same_level, ahead
 
 
 # Patern from PEP440 with local removed
