@@ -18,7 +18,7 @@
     {% endblock header %}
   </header>
   <main class="container" id="main-container">
-    {%block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
+    {% block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
     {% block content %}
     {% endblock content %}
   </main>
