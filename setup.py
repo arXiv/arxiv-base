@@ -1,4 +1,38 @@
-"""Install arXiv-base as an importable package."""
+"""Install arXiv-base as an importable package.
+
+This needs to be able to install from a directory that has a
+version.py file or from a directory that has no version file but does
+have git
+
+To test with no version but with git:
+```
+$ cd tmp
+$ git clone git@github.com:arXiv/arxiv-base.git
+$ cd arxiv-base
+$ pip install ./
+...
+$ pip show arxiv-base | grep Version
+Version: 0.16.6.2-dev-3-ga5af154 
+```
+
+To test with a version file but no git:
+```
+$ cd tmp
+$ git clone git@github.com:arXiv/arxiv-base.git
+$ cd arxiv-base
+$ rm -rf .git
+$ python 
+Python 3.6.9 (default, Dec 23 2019, 12:56:30)[GCC 7.4.0] on linux
+>>> import arxiv.release.dist_version
+>>> arxiv.release.dist_version.write_version('arxiv-base', '10.9.9')
+CTRL-D
+$ pip install ./
+...
+$ pip show arxiv-base | grep Version
+Version: 10.9.9
+```
+
+"""
 
 import codecs
 import os
@@ -7,6 +41,7 @@ import re
 from subprocess import Popen, PIPE
 
 from setuptools import setup, find_packages
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -31,7 +66,7 @@ def find_version(*file_paths):
         line = p.stdout.readlines()[0]
         return line.strip().decode('utf-8')
     except Exception:
-        raise RuntimeError("Unable to find version string in version file or git.")
+        raise RuntimeError("Unable to find version string in version file or git. See setup.py for instructions.")
 
 
 setup(
