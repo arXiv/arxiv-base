@@ -15,12 +15,14 @@ def read(*parts):
         return fp.read()
 
 def find_version(*file_paths):
-
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+    try:
+        version_file = read(*file_paths)
+        version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
                               version_file, re.M)
-    if version_match:
-        return version_match.group(1)
+        if version_match:
+            return version_match.group(1)
+    except Exception:
+        pass # no file is find, just try to get it from git
 
     try:
         p = Popen(['git', 'describe', '--dirty'],
@@ -29,8 +31,8 @@ def find_version(*file_paths):
         line = p.stdout.readlines()[0]
         return line.strip().decode('utf-8')
     except Exception:
-        raise ValueError("Cannot get the version number from git")
-    raise RuntimeError("Unable to find version string.")
+        raise RuntimeError("Unable to find version string in version file or git.")
+
 
 setup(
     name='arxiv-base',
