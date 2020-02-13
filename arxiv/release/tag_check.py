@@ -21,12 +21,15 @@ from typing import List
 from subprocess import Popen, PIPE
 import sys
 import os
+import re
 from datetime import datetime
 from semantic_version import Version
 from .dist_version import get_version, write_version
 
+
 NO_TAG_MSG = "OK: Skipping publish version check since no git tag found in TRAVIS_TAG"
 REGRESSIVE_MSG = "NOT OK: Tag did not pass tag check"
+INVALID_MSG = "NOT OK: Tag is not a valid PEP440 public python version. See https://www.python.org/dev/peps/pep-0440/#version-scheme"
 
 
 def prepare_for_version(dist_name):
@@ -44,20 +47,36 @@ def prepare_for_version(dist_name):
 
     """
     tag_to_publish = os.environ.get('TRAVIS_TAG', None)
+
+    xit = _prep_for_version(dist_name, tag_to_publish, git_tags())
+    if xit is not None:
+        sys.exit(xit)
+
+
+def _prep_for_version(dist_name, tag_to_publish, existing):
     if not tag_to_publish:
         print(NO_TAG_MSG)
-        sys.exit(0)
+        return 0
 
     # TRAVIS_TAG will already be in existing tags
-    existing = git_tags()
-    existing.remove(tag_to_publish)
+    if tag_to_publish in existing:
+        existing.remove(tag_to_publish)
+
+    if not is_valid_python_public_version(tag_to_publish):
+        print(INVALID_MSG)
+        return 1
 
     if is_regressive_version(tag_to_publish, existing):
         print(REGRESSIVE_MSG)
-        sys.exit(1)
+        return 1
 
     topkg = write_version(dist_name, tag_to_publish)
     print(f"Wrote version {tag_to_publish} to {topkg}")
+
+
+def is_valid_python_public_version(tag):
+    """Check if tag is valid PEP440 public python version."""
+    return bool(_pep440public_ver.match(tag))
 
 
 def git_tags():
@@ -87,7 +106,12 @@ def is_regressive_version(tag, existing):
 
 
 def is_regressive_version_with_msg(tag: str, existing: List[str]):
-    """Check if sver is before any semver in existing."""
+    """Check if sver is before any semver in existing.
+
+    Here we use semver not python versions becasue some of the
+    tags in the arxiv git repos from before these tests might not be
+    valid python public versions.
+    """
     tagsv = Version(tag)
     existing_vers = tags_to_versions(existing)
 
@@ -122,7 +146,7 @@ def is_regressive_version_with_msg(tag: str, existing: List[str]):
             return True, f'{tagsv} regressive patch behind {ahead_patch[0]}'
 
     _, same_pre, ahead_pre = \
-        order_for_level(same_patch, lambda ex: _cmp(ex,tagsv))
+        order_for_level(same_patch, lambda ex: _cmp(ex, tagsv))
     if same_pre:
         return True, f'{tagsv} is same as {same_pre[0]}'
     if ahead_pre:
@@ -139,6 +163,42 @@ def order_for_level(existing_vers, checker):
     ahead = [ex for ex, excp in checked if excp > 0]
     return before, same_level, ahead
 
+
+# Patern from PEP440 with local removed
+VERSION_PATTERN = r"""
+    v?
+    (?:
+        (?:(?P<epoch>[0-9]+)!)?                           # epoch
+        (?P<release>[0-9]+(?:\.[0-9]+)*)                  # release segment
+        (?P<pre>                                          # pre-release
+            [-_\.]?
+            (?P<pre_l>(a|b|c|rc|alpha|beta|pre|preview))
+            [-_\.]?
+            (?P<pre_n>[0-9]+)?
+        )?
+        (?P<post>                                         # post release
+            (?:-(?P<post_n1>[0-9]+))
+            |
+            (?:
+                [-_\.]?
+                (?P<post_l>post|rev|r)
+                [-_\.]?
+                (?P<post_n2>[0-9]+)?
+            )
+        )?
+        (?P<dev>                                          # dev release
+            [-_\.]?
+            (?P<dev_l>dev)
+            [-_\.]?
+            (?P<dev_n>[0-9]+)?
+        )?
+    )
+"""
+
+_pep440public_ver = re.compile(
+    r"^\s*" + VERSION_PATTERN + r"\s*$",
+    re.VERBOSE | re.IGNORECASE,
+)
 
 if __name__ == '__main__':
     """ This is intended to let this module be used in CI scripts:
