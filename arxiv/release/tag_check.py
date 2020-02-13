@@ -112,7 +112,7 @@ def is_regressive_version_with_msg(tag: str, existing: List[str]):
     tags in the arxiv git repos from before these tests might not be
     valid python public versions.
     """
-    tagsv = Version(tag)
+    tagsv = Version.coerce(tag)
     existing_vers = tags_to_versions(existing)
 
     def _cmp(a, b):
