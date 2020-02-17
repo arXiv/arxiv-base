@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 
-def get_version(dist_name: str) -> str:
+def get_version(dist_name: str) -> Optional[str]:
     """Get the version written by write_version(), or the git describe version.
 
     Parameters
@@ -37,9 +37,9 @@ def get_version(dist_name: str) -> str:
     """
     # TODO We might want to make it an error if we are under git
     # and there is a version.py file? It doesn't seem like a good state.
-    pkg = '.'.join(dist_name.split('-')) + ".version"
+    pkg = ".".join(dist_name.split("-")) + ".version"
     try:
-        name = '__version__'
+        name = "__version__"
         dist_version = str(getattr(__import__(pkg, fromlist=[name]), name))
         return dist_version
     except ModuleNotFoundError:
@@ -52,7 +52,7 @@ def get_version(dist_name: str) -> str:
         return get_git_version()
     except ValueError:
         pass
-    return 'no-git-or-release-version'
+    return "no-git-or-release-version"
 
 
 def write_version(dist_name: str, version: str) -> Path:
@@ -74,22 +74,24 @@ def write_version(dist_name: str, version: str) -> Path:
         This returns the path to the version.py file.
 
     """
-    dir = '/'.join(dist_name.split('-')) + "/version.py"
+    dir = "/".join(dist_name.split("-")) + "/version.py"
     path = pathlib.Path(dir)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, 'w+') as ff:  # overwrite existing version
+    with open(path, "w+") as ff:  # overwrite existing version
         when = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         ff.write("#  Created by tag_check.write_version\n")
         ff.write("#  NEVER CHECK THIS version.py file INTO GIT.\n")
-        ff.write("#  It should be generated when the package is build for distribution.\n")
+        ff.write(
+            "#  It should be generated when the package is build for distribution.\n"
+        )
         ff.write(f"__when__ = '{when}'\n")
         ff.write(f"__version__ = '{version}'\n")
     return path
 
-  
+
 def get_pkg_version(pkg: Any) -> Optional[str]:
     """Get the python package version.
-    
+
     pkg needs to be the package name from setup.py or the name used to
     install from pypi.
     """
@@ -98,20 +100,23 @@ def get_pkg_version(pkg: Any) -> Optional[str]:
     except Exception:
         return None
 
-      
+
 def get_git_version(abbrev: int = 7) -> str:
     """Get the current version using `git describe`."""
     try:
-        p = Popen(['git', 'describe', '--dirty', '--abbrev=%d' % abbrev],
-                  stdout=PIPE, stderr=PIPE)
+        p = Popen(
+            ["git", "describe", "--dirty", "--abbrev=%d" % abbrev],
+            stdout=PIPE,
+            stderr=PIPE,
+        )
         p.stderr.close()
         line = p.stdout.readlines()[0]
-        return str(line.strip().decode('utf-8'))
+        return str(line.strip().decode("utf-8"))
     except Exception:
         raise ValueError("Cannot get the version number from git")
 
 
 # Below is intended to let this module be used in CI scripts:
 # ``export APP_VER=$(python -m arxiv.release.get_version arxiv-hatsize-agent)``
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(get_version(sys.argv[1]))

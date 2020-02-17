@@ -28,12 +28,10 @@ This does not write or update a RELEASE-VERSION file.
 """
 
 
-from typing import Any, Callable, List, Tuple
-from subprocess import Popen, PIPE
+from typing import Any
 import sys
 import os
 import re
-from semantic_version import Version
 from .dist_version import write_version
 
 NO_TAG_MSG = (
@@ -56,7 +54,7 @@ def prepare_for_version(dist_name: str) -> Any:
     runs anything, the tag will already be in git.
     """
     tag_to_publish = os.environ.get("TRAVIS_TAG", None)
-    
+
     if not tag_to_publish:
         print(NO_TAG_MSG)
         return 0
@@ -69,7 +67,7 @@ def prepare_for_version(dist_name: str) -> Any:
     print(f"Wrote version {tag_to_publish} to {topkg}")
 
 
-def is_valid_python_public_version(tag):
+def is_valid_python_public_version(tag: str) -> bool:
     """Check if tag is valid PEP440 public python version."""
     return bool(_pep440public_ver.match(tag))
 
@@ -106,8 +104,7 @@ VERSION_PATTERN = r"""
 """
 
 _pep440public_ver = re.compile(
-    r"^\s*" + VERSION_PATTERN + r"\s*$",
-    re.VERBOSE | re.IGNORECASE,
+    r"^\s*" + VERSION_PATTERN + r"\s*$", re.VERBOSE | re.IGNORECASE,
 )
 
 if __name__ == "__main__":
