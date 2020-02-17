@@ -9952,14 +9952,36 @@ footer a:hover, footer a:active {
   border-bottom: 1px dotted #fff;
   background-color: #999999;
 }
-footer .icon {
+footer svg.icon {
   height: 0.9rem;
   width: 0.9rem;
   margin-right: 0.45em;
+  top: 0;
 }
 footer .nav-spaced li {
   display: flex;
   align-items: center;
+}
+footer .sorry-app-links .is-link:not(.button) {
+  border-bottom: 1px dotted #fff;
+}
+footer .sorry-app-links .button.is-link.is-outlined {
+  background-color: transparent;
+  border-color: #c3c3c3;
+  color: #ffffff;
+  padding: 0 0.4em 0.1em 0.4em;
+  height: auto;
+  margin-bottom: 0.25em;
+}
+footer .sorry-app-links svg.icon,
+footer .sorry-app-links .button svg.icon,
+footer .sorry-app-links .button svg.icon:first-child:last-child {
+  margin-right: 2px;
+  margin-left: 2px;
+  top: 0.09em;
+}
+footer .sorry-app-links .help {
+  font-size: 0.75rem;
 }
 
 /**** Primary content default styling ****/
