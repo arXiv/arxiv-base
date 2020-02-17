@@ -12,9 +12,10 @@ import sys
 import pathlib
 from subprocess import Popen, PIPE
 from datetime import datetime
+from pathlib import Path
 
 
-def get_version(dist_name):
+def get_version(dist_name: str) -> str:
     """Get the version written by write_version(), or the git describe version.
 
     Parameters
@@ -29,13 +30,14 @@ def get_version(dist_name):
     str
         The version.__version__ value if it exists or the git describe
         version if it exists or the string 'no-git-or-release-version'
+
     """
     # TODO We might want to make it an error if we are under git
     # and there is a version.py file? It doesn't seem like a good state.
     pkg = '.'.join(dist_name.split('-')) + ".version"
     try:
         name = '__version__'
-        dist_version = getattr(__import__(pkg, fromlist=[name]), name)
+        dist_version = str(getattr(__import__(pkg, fromlist=[name]), name))
         return dist_version
     except ModuleNotFoundError:
         pass
@@ -46,8 +48,8 @@ def get_version(dist_name):
     return 'no-git-or-release-version'
 
 
-def write_version(dist_name, version):
-    """Write the version to a version.py file in a package that corresponds with the dist_name.
+def write_version(dist_name: str, version: str) -> Path:
+    """Write version to version.py in package corresponding with dist_name.
 
     Parameters
     ----------
@@ -61,7 +63,9 @@ def write_version(dist_name, version):
 
     Returns
     -------
-    This returns the path to the version.py file.
+    Path
+        This returns the path to the version.py file.
+
     """
     dir = '/'.join(dist_name.split('-')) + "/version.py"
     path = pathlib.Path(dir)
@@ -74,14 +78,14 @@ def write_version(dist_name, version):
     return path
 
 
-def get_git_version(abbrev=7):
+def get_git_version(abbrev: int = 7) -> str:
     """Get the current version using `git describe`."""
     try:
         p = Popen(['git', 'describe', '--dirty', '--abbrev=%d' % abbrev],
                   stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         line = p.stdout.readlines()[0]
-        return line.strip().decode('utf-8')
+        return str(line.strip().decode('utf-8'))
     except Exception:
         raise ValueError("Cannot get the version number from git")
 

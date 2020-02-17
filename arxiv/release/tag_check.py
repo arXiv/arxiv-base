@@ -1,4 +1,4 @@
-"""Functions to ensure version of git tag is correct for travis and to get that version.
+"""Functions to ensure git tag version is correct for travis and to get ver.
 
 This is intended as a check to use in travis ci.
 
@@ -17,19 +17,20 @@ This does not write or update a RELEASE-VERSION file.
 """
 
 
-from typing import List
+from typing import Any, Callable, List, Tuple
 from subprocess import Popen, PIPE
 import sys
 import os
-from datetime import datetime
 from semantic_version import Version
-from .dist_version import get_version, write_version
+from .dist_version import write_version
 
-NO_TAG_MSG = "OK: Skipping publish version check since no git tag found in TRAVIS_TAG"
+NO_TAG_MSG = (
+    "OK: Skipping publish version check since no git tag found in TRAVIS_TAG"
+)
 REGRESSIVE_MSG = "NOT OK: Tag did not pass tag check"
 
 
-def prepare_for_version(dist_name):
+def prepare_for_version(dist_name: str) -> Any:
     """Prepare for a version on travis-ci.
 
     Intended to be used when prepareing a version on travis-ci or
@@ -43,7 +44,7 @@ def prepare_for_version(dist_name):
     This will call sys.exit() if there are problems.
 
     """
-    tag_to_publish = os.environ.get('TRAVIS_TAG', None)
+    tag_to_publish = os.environ.get("TRAVIS_TAG", None)
     if not tag_to_publish:
         print(NO_TAG_MSG)
         sys.exit(0)
@@ -60,15 +61,15 @@ def prepare_for_version(dist_name):
     print(f"Wrote version {tag_to_publish} to {topkg}")
 
 
-def git_tags():
+def git_tags() -> List[str]:
     """Get all git tags."""
-    p = Popen(['git', 'tag'], stdout=PIPE, stderr=PIPE)
+    p = Popen(["git", "tag"], stdout=PIPE, stderr=PIPE)
     p.stderr.close()
     lines = p.stdout.readlines()
-    return [tag.decode('utf-8').strip() for tag in lines]
+    return [tag.decode("utf-8").strip() for tag in lines]
 
 
-def tags_to_versions(tags):
+def tags_to_versions(tags: List[str]) -> List[str]:
     """Convert tags to versions but drop all tags that do not convert."""
     rv = []
     for tag in tags:
@@ -79,59 +80,64 @@ def tags_to_versions(tags):
     return rv
 
 
-def is_regressive_version(tag, existing):
+def is_regressive_version(tag: str, existing: List[str]) -> bool:
     """Check if a tag is regressive."""
     isreg, msg = is_regressive_version_with_msg(tag, existing)
     print(msg)
     return isreg
 
 
-def is_regressive_version_with_msg(tag: str, existing: List[str]):
+def is_regressive_version_with_msg(
+    tag: str, existing: List[str]
+) -> Tuple[bool, str]:
     """Check if sver is before any semver in existing."""
     tagsv = Version(tag)
     existing_vers = tags_to_versions(existing)
 
-    def _cmp(a, b):
+    def _cmp(a, b):  # type:ignore
         return (a > b) - (a < b)
 
-    _, same_major, ahead_major = \
-        order_for_level(existing_vers,
-                        lambda ex: _cmp(ex.major, tagsv.major))
+    _, same_major, ahead_major = order_for_level(
+        existing_vers, lambda ex: _cmp(ex.major, tagsv.major)
+    )
     if not same_major:
         if not ahead_major:
-            return False, f'{tagsv} is a new major'
+            return False, f"{tagsv} is a new major"
         else:
-            return True, f'{tagsv} regressive major behind {ahead_major[0]}'
+            return True, f"{tagsv} regressive major behind {ahead_major[0]}"
 
-    _, same_minor, ahead_minor = \
-        order_for_level(same_major,
-                        lambda ex: _cmp(ex.minor, tagsv.minor))
+    _, same_minor, ahead_minor = order_for_level(
+        same_major, lambda ex: _cmp(ex.minor, tagsv.minor)
+    )
     if not same_minor:
         if not ahead_minor:
-            return False, f'{tagsv} is a new minor for existing major'
+            return False, f"{tagsv} is a new minor for existing major"
         else:
-            return True, f'{tagsv} regressive minor behind {ahead_minor[0]}'
+            return True, f"{tagsv} regressive minor behind {ahead_minor[0]}"
 
-    _, same_patch, ahead_patch = \
-        order_for_level(same_minor,
-                        lambda ex: _cmp(ex.patch, tagsv.patch))
+    _, same_patch, ahead_patch = order_for_level(
+        same_minor, lambda ex: _cmp(ex.patch, tagsv.patch)
+    )
     if not same_patch:
         if not ahead_patch:
-            return False, f'{tagsv} is a new patch for existing minor'
+            return False, f"{tagsv} is a new patch for existing minor"
         else:
-            return True, f'{tagsv} regressive patch behind {ahead_patch[0]}'
+            return True, f"{tagsv} regressive patch behind {ahead_patch[0]}"
 
-    _, same_pre, ahead_pre = \
-        order_for_level(same_patch, lambda ex: _cmp(ex,tagsv))
+    _, same_pre, ahead_pre = order_for_level(
+        same_patch, lambda ex: _cmp(ex, tagsv)
+    )
     if same_pre:
-        return True, f'{tagsv} is same as {same_pre[0]}'
+        return True, f"{tagsv} is same as {same_pre[0]}"
     if ahead_pre:
-        return True, f'{len(ahead_pre)} versions are ahead of {tagsv}'
+        return True, f"{len(ahead_pre)} versions are ahead of {tagsv}"
     else:
-        return False, f'{tagsv}: nothing the same or ahead'
+        return False, f"{tagsv}: nothing the same or ahead"
 
 
-def order_for_level(existing_vers, checker):
+def order_for_level(
+    existing_vers: List[str], checker: Callable
+) -> Tuple[List[str], List[str], List[str]]:
     """Get before, same_level and ahead versons using checker."""
     checked = [(ex, checker(ex)) for ex in existing_vers]
     before = [ex for ex, excp in checked if excp < 0]
@@ -140,7 +146,7 @@ def order_for_level(existing_vers, checker):
     return before, same_level, ahead
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """ This is intended to let this module be used in CI scripts:
     ``python -m arxiv.release.tag_check``
     """
