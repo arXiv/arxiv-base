@@ -10,7 +10,8 @@ message categories/severity.
 
    For security purposes, alerts are not treated as safe in the template by
    default. To treat a message as safe, use ``safe=True`` when generating the
-   flash notification.
+   flash notification. If you use ``safe=True`` you must escape any
+   user input that goes into the alert.
 
 
 For example:
@@ -19,12 +20,15 @@ For example:
 
    from flask import url_for
    from arxiv.base import alerts
+   from jinja2 import escape
 
    def handle_request():
        ...
 
+       danger_txt = request.form.somefield.value
        help_url = url_for('help')
        alerts.flash_warning(f'This is a warning, see <a href="{help_url}">'
+                            f'your input {escape(danger_txt)} was not found'
                             f'the docs</a> for more information',
                             title='Warning title', safe=True)
        alerts.flash_info('This is some info', title='Info title')

@@ -13,8 +13,11 @@ import pathlib
 from subprocess import Popen, PIPE
 from datetime import datetime
 import pkg_resources
+from pathlib import Path
+from typing import Any, Optional
 
-def get_version(dist_name):
+
+def get_version(dist_name: str) -> str:
     """Get the version written by write_version(), or the git describe version.
 
     Parameters
@@ -37,7 +40,7 @@ def get_version(dist_name):
     pkg = '.'.join(dist_name.split('-')) + ".version"
     try:
         name = '__version__'
-        dist_version = getattr(__import__(pkg, fromlist=[name]), name)
+        dist_version = str(getattr(__import__(pkg, fromlist=[name]), name))
         return dist_version
     except ModuleNotFoundError:
         pass
@@ -52,8 +55,8 @@ def get_version(dist_name):
     return 'no-git-or-release-version'
 
 
-def write_version(dist_name, version):
-    """Write the version to a version.py file in a package that corresponds with the dist_name.
+def write_version(dist_name: str, version: str) -> Path:
+    """Write version to version.py in package corresponding with dist_name.
 
     Parameters
     ----------
@@ -67,7 +70,9 @@ def write_version(dist_name, version):
 
     Returns
     -------
-    This returns the path to the version.py file.
+    Path
+        This returns the path to the version.py file.
+
     """
     dir = '/'.join(dist_name.split('-')) + "/version.py"
     path = pathlib.Path(dir)
@@ -81,8 +86,8 @@ def write_version(dist_name, version):
         ff.write(f"__version__ = '{version}'\n")
     return path
 
-
-def get_pkg_version(pkg):
+  
+def get_pkg_version(pkg: Any) -> Optional[str]:
     """Get the python package version.
     
     pkg needs to be the package name from setup.py or the name used to
@@ -92,15 +97,16 @@ def get_pkg_version(pkg):
         return pkg_resources.get_distribution(pkg).version
     except Exception:
         return None
-    
-def get_git_version(abbrev=7):
+
+      
+def get_git_version(abbrev: int = 7) -> str:
     """Get the current version using `git describe`."""
     try:
         p = Popen(['git', 'describe', '--dirty', '--abbrev=%d' % abbrev],
                   stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         line = p.stdout.readlines()[0]
-        return line.strip().decode('utf-8')
+        return str(line.strip().decode('utf-8'))
     except Exception:
         raise ValueError("Cannot get the version number from git")
 

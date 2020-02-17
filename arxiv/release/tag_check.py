@@ -1,4 +1,4 @@
-"""Functions to ensure version of git tag is correct for travis and to get that version.
+"""Functions to ensure git tag version is correct for travis and to get ver.
 
 This is intended as a check to use in travis ci.
 
@@ -27,22 +27,24 @@ This can also be used to check if a version string is valid:
 This does not write or update a RELEASE-VERSION file.
 """
 
-from typing import List
+
+from typing import Any, Callable, List, Tuple
 from subprocess import Popen, PIPE
 import sys
 import os
 import re
-from datetime import datetime
 from semantic_version import Version
-from .dist_version import get_version, write_version
+from .dist_version import write_version
 
+NO_TAG_MSG = (
+    "OK: Skipping publish version check since no git tag found in TRAVIS_TAG"
+)
 
-NO_TAG_MSG = "OK: Skipping publish version check since no git tag found in TRAVIS_TAG"
 REGRESSIVE_MSG = "NOT OK: Tag did not pass tag check"
 INVALID_MSG = "OK: skipping publish version since the tag is not a valid PEP440 public python version. See https://www.python.org/dev/peps/pep-0440/#version-scheme"
 
 
-def prepare_for_version(dist_name):
+def prepare_for_version(dist_name: str) -> Any:
     """Prepare for a version on travis-ci.
 
     Intended to be used when prepareing a version on travis-ci or
@@ -53,8 +55,8 @@ def prepare_for_version(dist_name):
     This does not check if the tag is redundent since by the time travis
     runs anything, the tag will already be in git.
     """
-    tag_to_publish = os.environ.get('TRAVIS_TAG', None)
-
+    tag_to_publish = os.environ.get("TRAVIS_TAG", None)
+    
     if not tag_to_publish:
         print(NO_TAG_MSG)
         return 0
@@ -65,7 +67,6 @@ def prepare_for_version(dist_name):
 
     topkg = write_version(dist_name, tag_to_publish)
     print(f"Wrote version {tag_to_publish} to {topkg}")
-
 
 
 def is_valid_python_public_version(tag):
@@ -109,7 +110,7 @@ _pep440public_ver = re.compile(
     re.VERBOSE | re.IGNORECASE,
 )
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """ This is intended to let this module be used in CI scripts:
     ``python -m arxiv.release.tag_check``
     """
