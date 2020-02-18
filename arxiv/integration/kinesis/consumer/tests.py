@@ -9,6 +9,10 @@ from ..consumer import BaseConsumer, CheckpointError, StopProcessing, \
     process_stream, RestartProcessing
 
 
+import logging
+logging.getLogger('integration.kinesis.consumer').setLevel(logging.WARNING)
+
+
 class TestBaseConsumer(TestCase):
     """Test :class:`.BaseConsumer` behavior and public methods."""
 
