@@ -116,11 +116,11 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
     for middleware in middlewares[::-1]:
         try:
             wrapped_app = middleware(wrapped_app, config=app.config)
-        except TypeError as e:
+        except TypeError as ex:
             # Maintain backward compatibility with middlewares that don't
             # accept kwargs.
             logger.debug('Encountered TypeError while initializing'
-                         ' midleware: %s', e)
+                         ' midleware: %s', ex)
             warnings.warn('Middlewares that do not accept kwargs are'
                           ' deprecated. You should update your middleware'
                           ' to accept arbitrary kwargs', DeprecationWarning)

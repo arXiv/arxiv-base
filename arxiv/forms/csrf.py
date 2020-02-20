@@ -144,8 +144,8 @@ class CSRFForm(Form):
             config = get_application_config()
             try:
                 secret: str = config['CSRF_SECRET']
-            except KeyError as e:
-                raise RuntimeError('Parameter CSRF_SECRET must be set') from e
+            except KeyError as ex:
+                raise RuntimeError('Parameter CSRF_SECRET must be set') from ex
             return secret
 
         @property
