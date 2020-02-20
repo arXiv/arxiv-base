@@ -32,8 +32,8 @@ def load(schema_path: str) -> Callable:
     try:
         with open(schema_path) as f:
             schema = json.load(f)
-    except json.decoder.JSONDecodeError as e:
-        raise IOError('Could not load %s: %s' % (schema_path, e)) from e
+    except json.decoder.JSONDecodeError as ex:
+        raise IOError('Could not load %s: %s' % (schema_path, ex)) from ex
 
     schema_base_path = os.path.dirname(os.path.realpath(schema_path))
     resolver = jsonschema.RefResolver(referrer=schema,
@@ -91,9 +91,9 @@ def validate_request(schema_path: str) -> Callable:
         def _wrapper(*args: Any, **kwargs: Any) -> Tuple[dict, int, dict]:
             try:
                 validate(request.get_json())
-            except ValidationError as e:
+            except ValidationError as ex:
                 # A summary of the exception is on the first line of the repr.
-                msg = str(e).split('\n')[0]
+                msg = str(ex).split('\n')[0]
                 return (
                     {'reason': 'Metadata validation failed: %s' % msg},
                     HTTP_400_BAD_REQUEST,

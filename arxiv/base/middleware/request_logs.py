@@ -81,6 +81,6 @@ try:
             uwsgi.set_logvar('ttfb', str(ttfb).encode('ascii'))
             return response
 
-except ImportError as e:     # Not running in uWSGI.
+except ImportError as ex:     # Not running in uWSGI.
     # BaseMiddleware does nothing.
     ClassicLogsMiddleware = BaseMiddleware  # type: ignore

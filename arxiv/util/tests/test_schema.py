@@ -109,14 +109,14 @@ class TestValidateSchema(TestCase):
 
         try:
             validator = schema.load(self.schema_path)
-        except Exception as e:
-            self.fail('Failed to load valid schema: %s' % e)
+        except Exception as ex:
+            self.fail('Failed to load valid schema: %s' % ex)
         self.assertTrue(hasattr(validator, '__call__'))
 
         try:
             validator({'baz': 'asdf', 'bat': -1})
-        except schema.ValidationError as e:
-            self.fail('Validation failed on valid data: %s' % e)
+        except schema.ValidationError as ex:
+            self.fail('Validation failed on valid data: %s' % ex)
 
     def test_load_invalid_schema(self):
         """:func:`.schema.load` raises IOError if schema is not valid JSON."""

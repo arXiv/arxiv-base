@@ -79,9 +79,9 @@ class TestHTTPIntegration(TestCase):
         with self.app_one.app_context():
             try:
                 service.HTTPIntegration.request('get', '/one')
-            except Exception as e:
-                self.assertIsInstance(e, exceptions.RequestFailed)
-                self.assertEqual(e.status_code,
+            except Exception as ex:
+                self.assertIsInstance(ex, exceptions.RequestFailed)
+                self.assertEqual(ex.status_code,
                                  status.SERVICE_UNAVAILABLE)
 
     @mock.patch(f'{service.__name__}.requests.Session')
@@ -95,9 +95,9 @@ class TestHTTPIntegration(TestCase):
         with self.app_one.app_context():
             try:
                 service.HTTPIntegration.request('get', '/one')
-            except Exception as e:
-                self.assertIsInstance(e, exceptions.RequestUnauthorized)
-                self.assertEqual(e.status_code,
+            except Exception as ex:
+                self.assertIsInstance(ex, exceptions.RequestUnauthorized)
+                self.assertEqual(ex.status_code,
                                  status.UNAUTHORIZED)
 
     @mock.patch(f'{service.__name__}.requests.Session')
@@ -111,9 +111,9 @@ class TestHTTPIntegration(TestCase):
         with self.app_one.app_context():
             try:
                 service.HTTPIntegration.request('get', '/one')
-            except Exception as e:
-                self.assertIsInstance(e, exceptions.RequestForbidden)
-                self.assertEqual(e.status_code,
+            except Exception as ex:
+                self.assertIsInstance(ex, exceptions.RequestForbidden)
+                self.assertEqual(ex.status_code,
                                  status.FORBIDDEN)
 
     @mock.patch(f'{service.__name__}.requests.Session')
@@ -127,9 +127,9 @@ class TestHTTPIntegration(TestCase):
         with self.app_one.app_context():
             try:
                 service.HTTPIntegration.request('get', '/one')
-            except Exception as e:
-                self.assertIsInstance(e, exceptions.NotFound)
-                self.assertEqual(e.status_code,
+            except Exception as ex:
+                self.assertIsInstance(ex, exceptions.NotFound)
+                self.assertEqual(ex.status_code,
                                  status.NOT_FOUND)
 
     @mock.patch(f'{service.__name__}.requests.Session')
@@ -143,9 +143,9 @@ class TestHTTPIntegration(TestCase):
         with self.app_one.app_context():
             try:
                 service.HTTPIntegration.request('get', '/one')
-            except Exception as e:
-                self.assertIsInstance(e, exceptions.BadRequest)
-                self.assertEqual(e.status_code,
+            except Exception as ex:
+                self.assertIsInstance(ex, exceptions.BadRequest)
+                self.assertEqual(ex.status_code,
                                  status.BAD_REQUEST)
 
     @mock.patch(f'{service.__name__}.requests.Session')
@@ -159,9 +159,9 @@ class TestHTTPIntegration(TestCase):
         with self.app_one.app_context():
             try:
                 service.HTTPIntegration.request('get', '/one')
-            except Exception as e:
-                self.assertIsInstance(e, exceptions.RequestFailed)
-                self.assertEqual(e.status_code,
+            except Exception as ex:
+                self.assertIsInstance(ex, exceptions.RequestFailed)
+                self.assertEqual(ex.status_code,
                                  status.USE_PROXY)
 
         session_one = self.session(status.OK)
@@ -176,6 +176,6 @@ class TestHTTPIntegration(TestCase):
                     '/one',
                     expected_code=[status.GONE]
                 )
-            except Exception as e:
-                self.assertIsInstance(e, exceptions.RequestFailed)
-                self.assertEqual(e.status_code, status.OK)
+            except Exception as ex:
+                self.assertIsInstance(ex, exceptions.RequestFailed)
+                self.assertEqual(ex.status_code, status.OK)

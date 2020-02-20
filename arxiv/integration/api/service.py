@@ -195,10 +195,10 @@ class HTTPIntegration(metaclass=MetaIntegration):
             make_request = getattr(self._session, method)
             resp = make_request(self._path(path), **kwargs)
             logger.debug('Got response %s', resp)
-        except requests.exceptions.SSLError as e:
-            raise SecurityException('SSL failed: %s' % e) from e
-        except requests.exceptions.ConnectionError as e:
-            raise ConnectionFailed('Could not connect: %s' % e) from e
+        except requests.exceptions.SSLError as ex:
+            raise SecurityException('SSL failed: %s' % ex) from ex
+        except requests.exceptions.ConnectionError as ex:
+            raise ConnectionFailed('Could not connect: %s' % ex) from ex
 
         # 200-series redirects are a common pattern on our projects, so these
         # should be supported.
@@ -232,8 +232,8 @@ class HTTPIntegration(metaclass=MetaIntegration):
         response = self.request(method, path, token, expected_code, **kwargs)
         try:
             return response.json(), response.status_code, response.headers
-        except json.decoder.JSONDecodeError as e:
-            raise BadResponse(f'Could not decode', response) from e
+        except json.decoder.JSONDecodeError as ex:
+            raise BadResponse(f'Could not decode', response) from ex
 
     def get_status(self) -> dict:
         """Get the status of the service."""
@@ -263,8 +263,8 @@ class HTTPIntegration(metaclass=MetaIntegration):
             params = app.config.get_namespace(f'{name}_')
             endpoint = params.pop('endpoint')
             verify = params.pop('verify')
-        except KeyError as e:
-            raise RuntimeError('Must call init_app() on app before use') from e
+        except KeyError as ex:
+            raise RuntimeError('Must call init_app() on app before use') from ex
 
         logger.debug('Create %s session at endpoint %s', name, endpoint)
         return cls(endpoint, verify=verify, **params)

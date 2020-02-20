@@ -42,7 +42,7 @@ OLD_STYLE = re.compile(
 
 STANDARD = re.compile(
     r'(?<![\d=\.])(?:%s)?(?P<arxiv_id>\d{4}\.\d{4,5}(v\d*)?)'
-    % (_prefix),
+    % _prefix,
     re.I
 )
 
