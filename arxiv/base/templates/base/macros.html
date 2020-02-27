@@ -93,7 +93,7 @@
     {% set latest_version = submission_history[-1].version %}
   {% endif %}
 
-  (Submitted on {{ first_version_submitted_date.strftime('%-d %b %Y') }}
+  [Submitted on {{ first_version_submitted_date.strftime('%-d %b %Y') }}
   {%- if this_is_the_first_version and there_are_more_versions %} (this version){%- endif -%}
   {%- if not this_is_the_first_version %} (<a href="{{ url_for('abs', paper_id=arxiv_id, version=1) }}">v1</a>){%- endif %}
   {%- if not this_is_the_first_version and not this_is_the_latest_version -%}
@@ -104,7 +104,7 @@
   {%- elif not this_is_the_first_version and this_is_the_latest_version -%}
     , last revised {{ latest_version_submitted_date.strftime('%-d %b %Y') }} (this version, v{{ version }})
   {%- endif -%}
-  )
+  ]
 {%- endmacro -%}
 
 {%- macro version_atag(arxiv_id, version, primary_category) -%}
@@ -149,11 +149,20 @@
 {% endif %}
 <div id="content-inner">
   <div id="abs">
-
+    <div class="dateline">{{ abs_date_line(arxiv_id, submitted_date, version, submission_history) }}</div>
     <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|arxiv_id_urlize|safe }}</h1>
     <div class="authors"><span class="descriptor">Authors:</span>{{ authors }}</div>
-    <div class="dateline">{{ abs_date_line(arxiv_id, submitted_date, version, submission_history) }}</div>
-    <blockquote class="abstract mathjax"><span class="descriptor">Abstract:</span>{{ abstract|tex2utf_no_symbols|abstract_lf_to_br|urlize|safe }}</blockquote>
+
+    {% if formats|length > 0 and ('pdf' in formats or 'pdfonly' in formats) %}
+      <a class="mobile-submission-download" href="{{url_for('.pdf', arxiv_id=requested_id)}}">Download PDF</a>
+    {% else %}
+      <a class="mobile-submission-download mobile-download-grey" href="#other">No PDF available. Click to view other formats</a>
+    {% endif %}
+
+    <blockquote class="abstract mathjax">
+      <span class="descriptor">Abstract:</span>{{ abstract|tex2utf_no_symbols|abstract_lf_to_br|urlize|safe }}
+    </blockquote>
+
     <!--CONTEXT-->
     <div class="metatable">
       <table summary="Additional metadata">
