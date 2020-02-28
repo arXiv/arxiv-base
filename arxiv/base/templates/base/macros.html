@@ -137,7 +137,8 @@
     submission_history = [],
     secondary_categories = [],
     include_stylesheet = 1,
-    embed_stylesheet = 0) -%}
+    embed_stylesheet = 0,
+    download_button_markup = None) -%}
 
 {% if include_stylesheet and not embed_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/abs.css') }}">
@@ -153,10 +154,9 @@
     <h1 class="title mathjax"><span class="descriptor">Title:</span>{{ title|tex2utf|arxiv_id_urlize|safe }}</h1>
     <div class="authors"><span class="descriptor">Authors:</span>{{ authors }}</div>
 
-    {% if formats|length > 0 and ('pdf' in formats or 'pdfonly' in formats) %}
-      <a class="mobile-submission-download" href="{{url_for('.pdf', arxiv_id=requested_id)}}">Download PDF</a>
-    {% else %}
-      <a class="mobile-submission-download mobile-download-grey" href="#other">No PDF available. Click to view other formats</a>
+    {#- optionally include markup for the download button -#}
+    {% if download_button_markup %}
+      {{ download_button_markup }}
     {% endif %}
 
     <blockquote class="abstract mathjax">
