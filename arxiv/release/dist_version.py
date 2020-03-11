@@ -53,7 +53,7 @@ def get_version(dist_name: str) -> Optional[str]:
         return get_git_version()
     except ValueError:
         pass
-    return "no-git-or-release-version"
+    return "0.0.1+no-git-or-release-version"
 
 
 def write_version(dist_name: str, version: str) -> Path:
