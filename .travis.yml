@@ -20,6 +20,8 @@ script:
 - pipenv run python -m arxiv.release.tag_check arxiv-base
 after_success:
 - coveralls
+- docker --version
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 deploy:
 - provider: pypi
   user: arxiv
@@ -30,11 +32,11 @@ deploy:
   on:
     tags: true
 - provider: script
-  script: deploy/docker_build_and_push.sh ./ arxiv/base:$TRAVIS_TAG
+  script: deploy/docker_build_and_push.sh ./ "$DOCKER_USERNAME/base:$TRAVIS_TAG"
   on:
     tags: true
 - provider: script
-  script: deploy/docker_build_and_push.sh ./fourohfour arxiv/fourohfour:$TRAVIS_TAG
+  script: deploy/docker_build_and_push.sh ./fourohfour "$DOCKER_USERNAME/fourohfour:$TRAVIS_TAG"
   on:
     tags: true
 # - provider: script
