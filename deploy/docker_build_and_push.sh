@@ -18,7 +18,7 @@ TAG=$3
 echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
 
 docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
-docker build -t ${IMAGE_NAME}:${TAG} --build-arg BUILD_TIME="$(date)"
+docker build -t ${IMAGE_NAME}:${TAG} --build-arg BUILD_TIME="$(date)" "$BUILD_DIR"
 docker push ${IMAGE_NAME}:${TAG}
 
 # echo "docker build $1 -t $2"
