@@ -20,8 +20,6 @@ script:
 - pipenv run python -m arxiv.release.tag_check arxiv-base
 after_success:
 - coveralls
-- docker --version
-- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
 - provider: pypi
   user: arxiv

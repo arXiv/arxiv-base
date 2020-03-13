@@ -8,6 +8,6 @@ if [ -z $2 ]; then
     echo 'docker name:tag required'; exit 1
 fi
 
-echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
 echo "docker build $1 -t $2"
 echo "docker push $2"
