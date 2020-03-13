@@ -21,9 +21,5 @@ docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
 docker build -t ${IMAGE_NAME}:${TAG} --build-arg BUILD_TIME="$(date)" "$BUILD_DIR"
 docker push ${IMAGE_NAME}:${TAG}
 
-# echo "docker build $1 -t $2"
-# docker build "$1" -t "$2"
-# echo "docker push $2"
-# docker push "$2"
 docker logout
 
