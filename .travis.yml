@@ -30,11 +30,11 @@ deploy:
   on:
     tags: true
 - provider: script
-  script: deploy/docker_build_and_push.sh ./ "arxiv/base:$TRAVIS_TAG"
+  script: deploy/docker_build_and_push.sh ./ "arxiv/base" "$TRAVIS_TAG"
   on:
     tags: true
 - provider: script
-  script: deploy/docker_build_and_push.sh ./fourohfour "arxiv/fourohfour:$TRAVIS_TAG"
+  script: deploy/docker_build_and_push.sh ./fourohfour "arxiv/fourohfour" "$TRAVIS_TAG"
   on:
     tags: true
 # - provider: script
