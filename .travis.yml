@@ -30,11 +30,11 @@ deploy:
   on:
     tags: true
 - provider: script
-  script: python -m arxiv.release.docker_build_and_push ./ "base" "$TRAVIS_TAG"
+  script: python -m arxiv.release.docker_build_push ./ "base" "$TRAVIS_TAG"
   on:
     tags: true
 - provider: script
-  script: python -m arxiv.release.docker_build_and_push ./fourohfour "fourohfour" "$TRAVIS_TAG"
+  script: python -m arxiv.release.docker_build_push ./fourohfour "fourohfour" "$TRAVIS_TAG"
   on:
     tags: true
 # - provider: script
