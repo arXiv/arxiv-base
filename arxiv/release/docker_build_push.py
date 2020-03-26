@@ -1,6 +1,14 @@
 """Runs docker login, build and push commands.
 
-For use in travis ci."""
+For use in travis ci and command line.
+
+```
+$export DOCKERHUB_USERNAME=frank
+$export DOCKERHUB_PASSWORD=1234
+$export TRAVIS_TAG=1.2.3
+python -m arxiv.release.docker_build_push ./ submission-agent
+```
+"""
 
 import os
 import sys
