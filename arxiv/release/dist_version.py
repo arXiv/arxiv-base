@@ -44,10 +44,11 @@ def get_version(dist_name: str) -> Optional[str]:
         return dist_version
     except ModuleNotFoundError:
         pass
-    try:
-        return get_pkg_version(dist_name)
-    except Exception:
-        pass
+
+    pkv=get_pkg_version(dist_name)
+    if pkv is not None:
+        return pkv
+
     try:
         return get_git_version()
     except ValueError:
@@ -97,7 +98,7 @@ def get_pkg_version(pkg: Any) -> Optional[str]:
     """
     try:
         return pkg_resources.get_distribution(pkg).version
-    except Exception:
+    except:
         return None
 
 

@@ -9922,7 +9922,7 @@ main {
 }
 
 .message.is-success .message-header {
-  color: #000;
+  color: #ffffff;
 }
 
 /** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. **/

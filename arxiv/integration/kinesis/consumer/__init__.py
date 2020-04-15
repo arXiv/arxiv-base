@@ -126,8 +126,8 @@ class DiskCheckpointManager(object):
             try:
                 with open(self.file_path, 'w') as f:
                     f.write('')
-            except Exception as e:   # The containing path doesn't exist.
-                raise ValueError(f'Could not use {self.file_path}') from e
+            except Exception as ex:   # The containing path doesn't exist.
+                raise ValueError(f'Could not use {self.file_path}') from ex
 
         with open(self.file_path) as f:
             position = f.read()
@@ -139,8 +139,8 @@ class DiskCheckpointManager(object):
             with open(self.file_path, 'w') as f:
                 f.write(position)
             self.position = position
-        except Exception as e:
-            raise CheckpointError('Could not checkpoint') from e
+        except Exception as ex:
+            raise CheckpointError('Could not checkpoint') from ex
 
 
 class BaseConsumer(object):
@@ -270,15 +270,15 @@ class BaseConsumer(object):
             retry_call(waiter.wait, fkwargs=fkwargs,
                        tries=tries, delay=delay, max_delay=max_delay,
                        backoff=backoff, jitter=jitter)
-        except WaiterError as e:
+        except WaiterError as ex:
             logger.error('Failed to get stream while waiting')
-            raise StreamNotAvailable('Could not connect to stream') from e
-        except (PartialCredentialsError, NoCredentialsError) as e:
-            logger.error('Credentials missing or incomplete: %s', e)
-            raise ConfigurationError('Credentials missing') from e
-        except ClientError as e:
-            code = e.response['Error']['Code']
-            raise KinesisRequestFailed(f'Last code: {code}') from e
+            raise StreamNotAvailable('Could not connect to stream') from ex
+        except (PartialCredentialsError, NoCredentialsError) as ex:
+            logger.error('Credentials missing or incomplete: %s', ex)
+            raise ConfigurationError('Credentials missing') from ex
+        except ClientError as ex:
+            code = ex.response['Error']['Code']
+            raise KinesisRequestFailed(f'Last code: {code}') from ex
 
     def _get_iterator(self) -> str:
         """
@@ -315,8 +315,8 @@ class BaseConsumer(object):
         try:
             it: str = self.client.get_shard_iterator(**params)['ShardIterator']
             return it
-        except self.client.exceptions.InvalidArgumentException as e:
-            logger.info('Got InvalidArgumentException: %s', str(e))
+        except self.client.exceptions.InvalidArgumentException as ex:
+            logger.info('Got InvalidArgumentException: %s', str(ex))
             # Iterator may not have come from this stream/shard.
             if self.position is not None:
                 self.position = None
@@ -346,9 +346,9 @@ class BaseConsumer(object):
                                   exceptions=ClientError, tries=tries,
                                   delay=delay, max_delay=max_delay,
                                   backoff=backoff, jitter=jitter)
-        except ClientError as e:
-            code = e.response['Error']['Code']
-            raise KinesisRequestFailed(f'Last code: {code}') from e
+        except ClientError as ex:
+            code = ex.response['Error']['Code']
+            raise KinesisRequestFailed(f'Last code: {code}') from ex
         iterator = response['NextShardIterator']
         return iterator, response
 
@@ -370,9 +370,9 @@ class BaseConsumer(object):
             time.sleep(self.sleep_time)   # Don't get carried away.
             next_start, response = self.get_records(start, self.batch_size,   # type: ignore
                                                     **self.retry_params)
-        except Exception as e:
+        except Exception as ex:
             self._checkpoint()
-            raise StopProcessing('Unhandled exception: %s' % str(e)) from e
+            raise StopProcessing('Unhandled exception: %s' % str(ex)) from ex
 
         logger.debug('Got %i records', len(response['Records']))
         for record in response['Records']:

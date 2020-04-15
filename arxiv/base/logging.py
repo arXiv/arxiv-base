@@ -28,7 +28,7 @@ class RequestFormatter(logging.Formatter):
         """Attach the request ID from the request environ to the log record."""
         try:
             request_id = request.environ.get('REQUEST_ID', None)
-        except RuntimeError as e:
+        except RuntimeError:
             request_id = None
         record.requestid = request_id   # type: ignore
         if 'paperid' not in record.__dict__:
