@@ -43,6 +43,8 @@ URLS = [
     ("about", "/about", BASE_SERVER),
     ("team", "/about/people/leadership_team", BASE_SERVER),
     ("privacy_policy", "/help/policies/privacy_policy", BASE_SERVER),
+    ("copyright", "/help/license", BASE_SERVER),
+    ("a11y", "/help/web_accessibility", BASE_SERVER),
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
     ("clickthrough", "/ct", BASE_SERVER),
