@@ -194,7 +194,7 @@
         {%- if journal_ref %}
         <tr>
           <td class="tablecell label">Journal&nbsp;reference:</td>
-          <td class="tablecell jref">{{ journal_ref }}</td>
+          <td class="tablecell jref">{{ journal_ref|tex2utf }}</td>
         </tr>
         {% endif -%}
         {%- if doi %}

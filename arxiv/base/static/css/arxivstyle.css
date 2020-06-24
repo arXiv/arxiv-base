@@ -9936,8 +9936,8 @@ header .columns .column {
 }
 
 footer {
-  background-color: #757575;
-  color: #fff;
+  background-color: #f2f2f2;
+  color: #000;
   padding: 1em 2em;
 }
 footer h2 {
@@ -9945,25 +9945,33 @@ footer h2 {
   text-transform: uppercase;
 }
 footer a {
-  color: #fff;
+  color: #000;
+  font-size: 0.9rem;
   border-bottom: 1px solid transparent;
 }
 footer a:hover, footer a:active {
-  border-bottom: 1px dotted #fff;
-  background-color: #999999;
+  border-bottom: 1px dotted #005e9d;
+  color: #005e9d;
 }
 footer svg.icon {
-  height: 0.9rem;
-  width: 0.9rem;
+  height: 0.85rem;
+  width: 0.85rem;
   margin-right: 0.45em;
   top: 0;
+}
+footer .nav-spaced {
+  line-height: 1.75;
 }
 footer .nav-spaced li {
   display: flex;
   align-items: center;
 }
+footer .sorry-app-links .a11y-main-link {
+  font-size: 120%;
+  line-height: 0px;
+}
 footer .sorry-app-links .is-link:not(.button) {
-  border-bottom: 1px dotted #fff;
+  border-bottom: 1px dotted #000;
 }
 footer .sorry-app-links .button.is-link.is-outlined {
   background-color: transparent;
@@ -9979,9 +9987,15 @@ footer .sorry-app-links .button svg.icon:first-child:last-child {
   margin-right: 2px;
   margin-left: 2px;
   top: 0.09em;
+  height: 0.85em !important;
+  width: 0.85em !important;
 }
 footer .sorry-app-links .help {
   font-size: 0.75rem;
+  line-height: 1.75em;
+}
+footer .sorry-app-links a:hover .filter-black {
+  fill: #005e9d;
 }
 
 /**** Primary content default styling ****/
