@@ -1,10 +1,26 @@
 <!-- contains Cornell logo and sponsor statement -->
-<div class="attribution level is-marginless" role="banner">
-  <div class="level-left">
-    <a class="level-item" href="{{ url_for('university') }}"><img src="{{ url_for('base.static', filename='images/cornell-reduced-white-SMALL.svg') }}" alt="Cornell University" width="200" aria-label="logo" /></a>
+<div class="columns is-vcentered is-hidden-mobile" id="cu-identity">
+  <div class="column" id="cu-logo">
+    <a href="{{ url_for('university') }}"><img src="{{ url_for('base.static', filename='images/cornell-reduced-white-SMALL.svg') }}" alt="Cornell University" aria-label="cornell-university-logo" /></a>
   </div>
-  <div class="level-right is-marginless"><p class="sponsors level-item is-marginless"><a href="{{ url_for('acknowledgment') }}">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions.</a></p></div>
+
+  <!-- timeboxed column -->
+
+  <div class="column message-header message-yellow" id="contintent-demo">
+    <img role="presentation" class="message-main-icon" src="{{ url_for('base.static', filename='images/smileybones-pixel.png') }}" alt="arXiv smileybones icon" />
+    <p><strong>Global survey:</strong> In under 2 minutes help us understand how arXiv is perceived around the world!
+    <a class="btn-slim" target="_blank" href="https://cornell.qualtrics.com/jfe/form/SV_3POhYLQEALfIMLz?continent=TEST">Take survey</a></p>
+  </div>
+
+  <!-- /end timeboxed column -->
+
+  <div class="column sponsors">
+    <a href="{{ url_for('acknowledgment') }}">We gratefully acknowledge support from<br>the Simons Foundation and member institutions.</a>
+  </div>
 </div>
+
+
+
 <!-- contains arXiv identity and search bar -->
 <div class="identity level is-marginless">
   <div class="level-left">
