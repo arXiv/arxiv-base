@@ -10146,8 +10146,7 @@ main li {
 }
 
 .status-code {
-  background-color: #0a0a0a;
-  color: #00FF00;
+  color: #585858;
   font-size: 16em;
   font-family: "Courier", monospace;
   font-weight: bold;
