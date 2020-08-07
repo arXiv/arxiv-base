@@ -24,7 +24,7 @@ ENV LC_ALL=en_US.UTF-8 \
 # if a package is missing.
 #
 RUN yum -y install epel-release \
-  && yum -y install https://centos7.iuscommunity.org/ius-release.rpm \
+  && yum -y install https://repo.ius.io/ius-release-el7.rpm \
   && echo $'#!/bin/bash\n\
 PKGS_TO_INSTALL=$(cat <<-END\n\
   ca-certificates\n\
