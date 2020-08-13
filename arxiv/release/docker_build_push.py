@@ -19,7 +19,7 @@ try:
     user = 'arxiv'
     context = sys.argv[1]
     label = sys.argv[2]
-except:
+except Exception:
     print('Example of use:')
     print('TRAVIS_TAG=1.2.3 DOCKERHUB_PASSWORD=1234 DOCKERHUB_USERNAME=frank python -m arxiv.release.docker_build_push ./fourohfour fourohfour')
     exit(1)
