@@ -10,31 +10,37 @@ header
       padding-bottom: 0
 
 footer
-  background-color: $grey
-  color: #fff
+  background-color: $grey-lightest
+  color: #000
   padding: 1em 2em
   h2
     margin-bottom: .5em
     text-transform: uppercase
   a
-    color: #fff
+    color: #000
+    font-size: .9rem
     border-bottom: 1px solid transparent
     &:hover,
     &:active
-      border-bottom: 1px dotted #fff
-      background-color: $grey-light
+      border-bottom: 1px dotted #005e9d
+      color: #005e9d
   svg.icon
-    height: .9rem
-    width: .9rem
+    height: .85rem
+    width: .85rem
     margin-right: .45em
     top: 0
+  .nav-spaced
+    line-height: 1.75
   .nav-spaced li
     display: flex
     align-items: center
   .sorry-app-links
+    .a11y-main-link
+      font-size: 120%
+      line-height: 0px
     .is-link
       &:not(.button)
-        border-bottom: 1px dotted #fff
+        border-bottom: 1px dotted #000
     .button.is-link.is-outlined
       background-color: transparent
       border-color: #c3c3c3
@@ -48,8 +54,13 @@ footer
       margin-right: 2px
       margin-left: 2px
       top: 0.09em
+      height: .85em !important
+      width: .85em !important
     .help
       font-size: .75rem
+      line-height: 1.75em
+    a:hover .filter-black
+      fill: #005e9d
 
 /**** Primary content default styling ****/
 main
