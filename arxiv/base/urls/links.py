@@ -72,11 +72,12 @@ https://www.crossref.org/blog/dois-and-matching-regular-expressions/
 """
 
 
-BROAD_DOI = re.compile(r'(?P<doi>10\.\d{4,5}\/\S+)', re.I)
+BROAD_DOI = re.compile(r'(?P<doi>\d{2,3}.\d{4,5}\/\S+)', re.I)
 """
 Very broad pattern for matching DOIs in the abs DOI field.
 
 Ex. 10.1175/1520-0469(1996)053<0946:ASTFHH>2.0.CO;2
+Ex. 21.11130/00-1735-0000-0005-146A-E
 """
 
 ARXIV_PATTERNS = [
@@ -235,6 +236,22 @@ def _handle_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
     return attrs
 
 
+def _handle_broad_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
+    """
+    Handle doi from DOI field.
+
+    It is always just a DOI so turn it into a DOI link.
+    """
+    doi_attrs = _handle_doi_url(attrs, new)
+    if (None, 'data-doi') in doi_attrs:
+        return doi_attrs
+    else:
+        target = attrs['_text']
+        attrs[(None, 'href')] = clickthrough_url_for_doi(target)
+        attrs[(None, 'data-doi')] = target
+        return attrs
+
+
 ENDS_WITH_TLD = r".*\.(" + TLDS + ")$"
 CATEGORIES_THAT_COULD_BE_HOSTNAMES = '|'.join([cat_id for cat_id in CATEGORIES.keys()
                                                if re.search(ENDS_WITH_TLD, cat_id, re.IGNORECASE)])
@@ -270,7 +287,7 @@ for just the abs DOI field."""
 
 callbacks = {
     'doi':      [_handle_doi_url, _add_scheme_info, _add_rel_external],
-    'doi_field': [_handle_doi_url, _add_scheme_info, _add_rel_external],
+    'doi_field': [_handle_broad_doi_url, _add_scheme_info, _add_rel_external],
     'arxiv_id': [_handle_arxiv_url, _add_scheme_info],
     'url':      [_dont_urlize_arxiv_categories, _this_url_text, _add_rel, _add_scheme_info]
 }

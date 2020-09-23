@@ -22,7 +22,7 @@ script:
 
 
 This can also be used to check if a version string is valid:
-``TRAVIS_TAG=0.2.3-somethingX python -m arxiv.release.tag_check``
+``TRAVIS_TAG=0.2.3-somethingX python -m arxiv.release.tag_check arxiv-base``
 
 This does not write or update a RELEASE-VERSION file.
 """

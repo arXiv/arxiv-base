@@ -310,6 +310,10 @@ class TestURLize(unittest.TestCase):
 
             broad_doi_fn = links.urlizer(['doi_field'])
 
+            # ARXIVNG-3523 unusual DOI
+            self.assertRegex(broad_doi_fn('21.11130/00-1735-0000-0005-146A-E'),
+                             r'<a.*href="https://.*21.11130.*>21.11130/00-1735-0000-0005-146A-E</a>')
+            
             self.assertRegex(broad_doi_fn('10.1088/1475-7516/2018/07/009'),
                              r'<a.*href="https://.*10.1088/1475-7516/2018/07/009".*>10.1088/1475-7516/2018/07/009</a>')
 
