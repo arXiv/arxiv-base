@@ -1888,7 +1888,11 @@ CATEGORIES = {
     'stat.ML': {
         'name': 'Machine Learning',
         'in_archive': 'stat',
-        'description': 'Covers machine learning papers (supervised, unsupervised, semi-supervised learning, graphical models, reinforcement learning, bandits, high dimensional inference, etc.) with a statistical or theoretical grounding',
+        'description': 'Covers machine learning papers (supervised, '
+                       'unsupervised, semi-supervised learning, graphical '
+                       'models, reinforcement learning, bandits, '
+                       'high dimensional inference, etc.) with a statistical '
+                       'or theoretical grounding',
         'is_active': True,
         'is_general': False
     },
