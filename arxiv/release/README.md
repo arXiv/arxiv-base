@@ -103,15 +103,15 @@ an accurate description of the version and local changes.
 ## How the version is set and found
 
 ### If I install a package from PyPY
-1. Someone tags a commit in github to arxiv-shoehorn
+1. Someone tags a commit in github to arxiv-example
 2. Travis-ci builds that commit, with the tag in TRAVIS_TAG
 3. The travis step ```python -m arxiv.release.tag_check
-   arxiv-shoehorn``` picks up the tag. If it is a valid python public
-   version, it gets written to the file ```arxiv/shoehorn/version.py```.
+   arxiv-example``` picks up the tag. If it is a valid python public
+   version, it gets written to the file ```arxiv/example/version.py```.
 4. Travis-ci uploads the built python package to PyPI. This version.py
    file is includded in that upload.
 5. When someone installs that package from PyPI,
-   ```arxiv.release.dist_version.get_version('arxiv-shoehorn')``` will
+   ```arxiv.release.dist_version.get_version('arxiv-example')``` will
    first check the version.py file and return the version from that.
 
 ### If I install a package with pip install -e ../somegitclone
@@ -127,7 +127,7 @@ In this case there is no version.py file
 6. ```get_version()``` finds no version.py file, and it finds no
    ```pkg_resources``` version
 7. So get_version() trys to run ```git describe --dirty``` and that
-   works since it is in a git check
+   works since it is in a git checked out directory.
 8. setup.py uses the git describe value as the package version during the install.
 9. arxiv.release.dist_version.get_version() will first check the
    version.py file and find nothing, then it will check the

@@ -53,7 +53,7 @@ def get_version(dist_name: str) -> Optional[str]:
         return get_git_version()
     except ValueError:
         pass
-    return "no-git-or-release-version"
+    return "0.0.1+no-git-or-release-version"
 
 
 def write_version(dist_name: str, version: str) -> Path:
@@ -80,10 +80,10 @@ def write_version(dist_name: str, version: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w+") as ff:  # overwrite existing version
         when = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        ff.write("#  Created by tag_check.write_version\n")
+        ff.write("'Created by tag_check.write_version'\n")
         ff.write("#  NEVER CHECK THIS version.py file INTO GIT.\n")
         ff.write(
-            "#  It should be generated when the package is build for distribution.\n"
+            "#  Generated when the package was build for distribution.\n"
         )
         ff.write(f"__when__ = '{when}'\n")
         ff.write(f"__version__ = '{version}'\n")
