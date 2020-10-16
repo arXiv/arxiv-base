@@ -32,8 +32,8 @@ PKGS_TO_INSTALL=$(cat <<-END\n\
   gcc-c++ \n\
   git\n\
   mariadb-devel\n\
-  python36u\n\
-  python36u-devel\n\
+  python36\n\
+  python36-devel\n\
   sqlite\n\
   wget\n\
   which\n\
