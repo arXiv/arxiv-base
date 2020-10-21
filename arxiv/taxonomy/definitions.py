@@ -1312,7 +1312,7 @@ CATEGORIES = {
         'in_archive': 'math',
         'description': 'Biographies, philosophy of mathematics, mathematics '
                        'education, recreational mathematics, communication of '
-                       'mathematics',
+                       'mathematics, ethics in mathematics',
         'is_active': True,
         'is_general': False
     },
