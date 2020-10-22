@@ -1011,7 +1011,7 @@ CATEGORIES = {
     'econ.GN': {
         'name': 'General Economics',
         'in_archive': 'econ',
-        'description': 'General methodological and applied contributions to '
+        'description': 'General methodological, applied, and empirical contributions to '
                        'economics.',
         'is_active': True,
         'is_general': False
@@ -1312,7 +1312,7 @@ CATEGORIES = {
         'in_archive': 'math',
         'description': 'Biographies, philosophy of mathematics, mathematics '
                        'education, recreational mathematics, communication of '
-                       'mathematics',
+                       'mathematics, ethics in mathematics',
         'is_active': True,
         'is_general': False
     },
