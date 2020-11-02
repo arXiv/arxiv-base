@@ -4,40 +4,49 @@
 LICENSE_ICON_BASE_URI = '/icons/licenses'
 LICENSES = {
     # key is the license URI
+    'http://creativecommons.org/licenses/by/4.0/': {
+        'label': 'Creative Commons Attribution license',
+        'order': 1,
+        'is_current': True,
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
+
+    'http://creativecommons.org/licenses/by-sa/4.0/': {
+        'order': 2,
+        'label': 'Creative Commons Attribution-ShareAlike license',
+        'is_current': True,
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-sa-4.0.png'},
+
+    'http://creativecommons.org/licenses/by-nc-sa/4.0/': {
+        'order': 3,
+        'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
+                 'license',
+        'is_current': True,
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
+
+    'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
+        'order': 4,
+        'label': 'Creative Commons Attribution-Noncommercial-NoDerivatives '
+                 'license',
+        'is_current': True,
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-nd-4.0.png'},
+
     'http://arxiv.org/licenses/nonexclusive-distrib/1.0/': {
         'label': 'arXiv.org perpetual, non-exclusive license to '
                  'distribute this article',
         'note': '(Minimal rights required by arXiv.org. Select this '
                 'unless you understand the implications of other '
                 'licenses)',
-        'order': 1,
-        'is_current': True,
-    },
-    'http://creativecommons.org/licenses/by/4.0/': {
-        'label': 'Creative Commons Attribution license',
         'order': 5,
         'is_current': True,
-        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
-
-    'http://creativecommons.org/licenses/by-sa/4.0/': {
-        'order': 6,
-        'label': 'Creative Commons Attribution-ShareAlike license',
-        'is_current': True,
-        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-sa-4.0.png'},
-
-    'http://creativecommons.org/licenses/by-nc-sa/4.0/': {
-        'order': 7,
-        'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
-                 'license',
-        'is_current': True,
-        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
+    },
 
     'http://creativecommons.org/publicdomain/zero/1.0/': {
         'label': 'Creative Commons Public Domain Declaration',
-        'order': 8,
+        'order': 6,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/zero-1.0.png'
     },
+
 
     'http://arxiv.org/licenses/assumed-1991-2003/': {
         'label': 'Assumed arXiv.org perpetual, non-exclusive license to '
@@ -49,7 +58,7 @@ LICENSES = {
 
     'http://creativecommons.org/licenses/by/3.0/': {
         'label': 'Creative Commons Attribution license',
-        'order': 2,
+        'order': 10,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-3.0.png'
     },
@@ -57,14 +66,14 @@ LICENSES = {
     'http://creativecommons.org/licenses/by-nc-sa/3.0/': {
         'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
                  'license',
-        'order': 3,
+        'order': 11,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-3.0.png'
     },
     'http://creativecommons.org/licenses/publicdomain/': {
         'label': 'Creative Commons Public Domain Declaration',
         'note': '(Suitable for US government employees, for example)',
-        'order': 4,
+        'order': 12,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/publicdomain.png'
     }
