@@ -9,7 +9,7 @@ LICENSES = {
         'note': 'This license allows reusers to distribute, remix, adapt, and '
                 'build upon the material in any medium or format, so long as '
                 'attribution is given to the creator. The license allows for '
-                'commercial use. '
+                'commercial use.',
         'order': 1,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
