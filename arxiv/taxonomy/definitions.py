@@ -1783,6 +1783,19 @@ CATEGORIES = {
     'physics.plasm-ph': {
         'name': 'Plasma Physics',
         'in_archive': 'physics',
+        'description': 'Fundamental plasma physics. Magnetically Confined '
+                       'Plasmas (includes magnetic fusion energy research). '
+                       'High Energy Density Plasmas (inertial confinement '
+                       'plasmas, laser-plasma interactions). Ionospheric, '
+                       'Heliophysical, and Astrophysical plasmas (includes sun '
+                       'and solar system plasmas). Lasers, Accelerators, and '
+                       'Radiation Generation. Low temperature plasmas and '
+                       'plasma applications (include dusty plasmas, '
+                       'semiconductor etching, plasma-based nanotechnology, '
+                       'medical applications). Plasma Diagnostics, Engineering '
+                       'and Enabling Technologies (includes fusion reactor '
+                       'design, heating systems, diagnostics, experimental '
+                       'techniques)',
         'is_active': True,
         'is_general': False
     },
