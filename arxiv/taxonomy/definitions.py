@@ -1170,6 +1170,9 @@ CATEGORIES = {
     'hep-lat': {
         'name': 'High Energy Physics - Lattice',
         'in_archive': 'hep-lat',
+        'description': 'Lattice field theory. Phenomenology from lattice field '
+                       'theory. Algorithms for lattice field theory.  Hardware '
+                       'for lattice field theory.',
         'is_active': True,
         'is_general': False
     },
