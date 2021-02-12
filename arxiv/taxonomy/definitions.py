@@ -1615,6 +1615,11 @@ CATEGORIES = {
     'physics.atom-ph': {
         'name': 'Atomic Physics',
         'in_archive': 'physics',
+        'description': 'Atomic and molecular structure, spectra, collisions, '
+                       'and data. Atoms and molecules in external fields. '
+                       'Molecular dynamics and coherent and optical control. '
+                       'Cold atoms and molecules. Cold collisions. Optical '
+                       'lattices.',
         'is_active': True,
         'is_general': False
     },
