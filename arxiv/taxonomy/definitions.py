@@ -1808,12 +1808,22 @@ CATEGORIES = {
     'physics.soc-ph': {
         'name': 'Physics and Society',
         'in_archive': 'physics',
+        'description': 'Structure, dynamics and collective behavior of '
+                       'societies and groups (human or otherwise). Quantitative '
+                       'analysis of social networks and other complex networks. '
+                       'Physics and engineering of infrastructure and systems '
+                       'of broad societal impact (e.g., energy grids, '
+                       'transportation networks).',
         'is_active': True,
         'is_general': False
     },
     'physics.space-ph': {
         'name': 'Space Physics',
         'in_archive': 'physics',
+        'description': 'Space plasma physics. Heliophysics. Space weather. '
+                       'Planetary magnetospheres, ionospheres and magnetotail. '
+                       'Auroras. Interplanetary space. Cosmic rays. Synchrotron '
+                       'radiation. Radio astronomy.',
         'is_active': True,
         'is_general': False
     },
