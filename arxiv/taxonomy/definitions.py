@@ -1697,6 +1697,15 @@ CATEGORIES = {
     'physics.flu-dyn': {
         'name': 'Fluid Dynamics',
         'in_archive': 'physics',
+        'description': 'Turbulence, instabilities, incompressible/compressible '
+                       'flows, reacting flows. Aero/hydrodynamics, fluid-'
+                       'structure interactions, acoustics. Biological fluid '
+                       'dynamics, micro/nanofluidics, interfacial phenomena. '
+                       'Complex fluids, suspensions and granular flows, porous '
+                       'media flows. Geophysical flows, thermoconvective and '
+                       'stratified flows. Mathematical and computational methods '
+                       'for fluid dynamics, fluid flow models, experimental '
+                       'techniques.',
         'is_active': True,
         'is_general': False
     },
