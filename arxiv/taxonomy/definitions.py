@@ -1740,6 +1740,11 @@ CATEGORIES = {
     'physics.ins-det': {
         'name': 'Instrumentation and Detectors',
         'in_archive': 'physics',
+        'description': 'Instrumentation and Detectors for research in natural '
+                       'science, including optical, molecular, atomic, nuclear '
+                       'and particle physics instrumentation and the associated '
+                       'electronics, services, infrastructure and control '
+                       'equipment. ',
         'is_active': True,
         'is_general': False
     },
