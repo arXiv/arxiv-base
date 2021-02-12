@@ -1190,6 +1190,8 @@ CATEGORIES = {
     'hep-th': {
         'name': 'High Energy Physics - Theory',
         'in_archive': 'hep-th',
+        'description': 'Formal aspects of quantum field theory. String theory, '
+                       'supersymmetry and supergravity.',
         'is_active': True,
         'is_general': False
     },
