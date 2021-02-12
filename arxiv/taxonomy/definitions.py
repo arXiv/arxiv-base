@@ -1718,6 +1718,13 @@ CATEGORIES = {
     'physics.geo-ph': {
         'name': 'Geophysics',
         'in_archive': 'physics',
+        'description': 'Atmospheric physics. Biogeosciences. Computational '
+                       'geophysics. Geographic location. Geoinformatics. '
+                       'Geophysical techniques. Hydrospheric geophysics. '
+                       'Magnetospheric physics. Mathematical geophysics. '
+                       'Planetology. Solar system. Solid earth geophysics. '
+                       'Space plasma physics. Mineral physics. High pressure '
+                       'physics.',
         'is_active': True,
         'is_general': False
     },
