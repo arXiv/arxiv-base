@@ -1640,6 +1640,14 @@ CATEGORIES = {
     'physics.chem-ph': {
         'name': 'Chemical Physics',
         'in_archive': 'physics',
+        'description': 'Experimental, computational, and theoretical physics of '
+                       'atoms, molecules, and clusters – Classical and quantum '
+                       'description of states, processes, and dynamics; '
+                       'spectroscopy, electronic structure, conformations, '
+                       'reactions, interactions, and phases. Chemical '
+                       'thermodynamics. Disperse systems. High pressure '
+                       'chemistry. Solid state chemistry. Surface and interface '
+                       'chemistry.',
         'is_active': True,
         'is_general': False
     },
