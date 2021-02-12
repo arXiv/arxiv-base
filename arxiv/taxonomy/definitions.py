@@ -455,6 +455,10 @@ CATEGORIES = {
     'cond-mat.dis-nn': {
         'name': 'Disordered Systems and Neural Networks',
         'in_archive': 'cond-mat',
+        'description': 'Glasses and spin glasses; properties of random, '
+                       'aperiodic and quasiperiodic systems; transport in '
+                       'disordered media; localization; phenomena mediated by '
+                       'defects and disorder; neural networks',
         'is_active': True,
         'is_general': False
     },
