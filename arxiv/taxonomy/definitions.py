@@ -1751,6 +1751,10 @@ CATEGORIES = {
     'physics.med-ph': {
         'name': 'Medical Physics',
         'in_archive': 'physics',
+        'description': 'Radiation therapy. Radiation dosimetry. Biomedical '
+                       'imaging modelling.  Reconstruction, processing, and '
+                       'analysis. Biomedical system modelling and analysis. '
+                       'Health physics. New imaging or therapy modalities.',
         'is_active': True,
         'is_general': False
     },
