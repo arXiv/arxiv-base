@@ -1731,6 +1731,9 @@ CATEGORIES = {
     'physics.hist-ph': {
         'name': 'History and Philosophy of Physics',
         'in_archive': 'physics',
+        'description': 'History and philosophy of all branches of physics, '
+                       'astrophysics, and cosmology, including appreciations of '
+                       'physicists.',
         'is_active': True,
         'is_general': False
     },
