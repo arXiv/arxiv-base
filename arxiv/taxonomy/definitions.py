@@ -1198,6 +1198,17 @@ CATEGORIES = {
     'math-ph': {
         'name': 'Mathematical Physics',
         'in_archive': 'math-ph',
+        'description': 'Articles in this category focus on areas of research '
+                       'that illustrate the application of mathematics to 
+                       'problems in physics, develop mathematical methods for '
+                       'such applications, or provide mathematically rigorous '
+                       'formulations of existing physical theories. Submissions '
+                       'to math-ph should be of interest to both physically '
+                       'oriented mathematicians and mathematically oriented '
+                       'physicists; submissions which are primarily of interest '
+                       'to theoretical physicists or to mathematicians should '
+                       'probably be directed to the respective physics/math '
+                       'categories',
         'is_active': True,
         'is_general': False
     },
