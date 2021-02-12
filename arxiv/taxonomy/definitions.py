@@ -1685,6 +1685,12 @@ CATEGORIES = {
     'physics.ed-ph': {
         'name': 'Physics Education',
         'in_archive': 'physics',
+        'description': 'Report of results of a research study, laboratory '
+                       'experience, assessment or classroom practice that '
+                       'represents a way to improve teaching and learning in '
+                       'physics. Also, report on misconceptions of students, '
+                       'textbook errors, and other similar information relative '
+                       'to promoting physics understanding.',
         'is_active': True,
         'is_general': False
     },
