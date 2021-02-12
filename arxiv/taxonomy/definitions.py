@@ -1626,6 +1626,14 @@ CATEGORIES = {
     'physics.bio-ph': {
         'name': 'Biological Physics',
         'in_archive': 'physics',
+        'description': 'Molecular biophysics, cellular biophysics, neurological '
+                       'biophysics, membrane biophysics, single-molecule '
+                       'biophysics, ecological biophysics, quantum phenomena in '
+                       'biological systems (quantum biophysics), theoretical '
+                       'biophysics, molecular dynamics / modelling and '
+                       'simulation, game theory, biomechanics, bioinformatics, '
+                       'microorganisms, virology, evolution, biophysical '
+                       'methods.',
         'is_active': True,
         'is_general': False
     },
