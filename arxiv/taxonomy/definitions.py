@@ -308,12 +308,6 @@ CATEGORIES = {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_archive': 'acc-phys',
-        'description': 'Accelerator theory and simulation. Accelerator '
-                       'technology. Accelerator experiments. Beam Physics. '
-                       'Accelerator design and optimization. Advanced '
-                       'accelerator concepts. Radiation sources including '
-                       'synchrotron light sources and free electron lasers. '
-                       'Applications of accelerators.',
         'is_active': False,
         'is_general': False
     },
@@ -1576,6 +1570,12 @@ CATEGORIES = {
     'physics.acc-ph': {
         'name': 'Accelerator Physics',
         'in_archive': 'physics',
+        'description': 'Accelerator theory and simulation. Accelerator '
+                       'technology. Accelerator experiments. Beam Physics. '
+                       'Accelerator design and optimization. Advanced '
+                       'accelerator concepts. Radiation sources including '
+                       'synchrotron light sources and free electron lasers. '
+                       'Applications of accelerators.',       
         'is_active': True,
         'is_general': False
     },
