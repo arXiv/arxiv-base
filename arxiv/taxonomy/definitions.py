@@ -1641,7 +1641,7 @@ CATEGORIES = {
         'name': 'Chemical Physics',
         'in_archive': 'physics',
         'description': 'Experimental, computational, and theoretical physics of '
-                       'atoms, molecules, and clusters – Classical and quantum '
+                       'atoms, molecules, and clusters - Classical and quantum '
                        'description of states, processes, and dynamics; '
                        'spectroscopy, electronic structure, conformations, '
                        'reactions, interactions, and phases. Chemical '
@@ -1654,6 +1654,14 @@ CATEGORIES = {
     'physics.class-ph': {
         'name': 'Classical Physics',
         'in_archive': 'physics',
+        'description': 'Newtonian and relativistic dynamics; many particle '
+                       'systems; planetary motions; chaos in classical dynamics. '
+                       'Maxwell\'s  equations and  dynamics of charged systems '
+                       'and  electromagnetic forces in materials. Vibrating '
+                       'systems such as membranes and cantilevers; optomechanics. '
+                       'Classical waves, including acoustics and elasticity; '
+                       'physics of music and musical instruments. Classical '
+                       'thermodynamics and  heat flow problems.'
         'is_active': True,
         'is_general': False
     },
