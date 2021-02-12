@@ -1761,6 +1761,22 @@ CATEGORIES = {
     'physics.optics': {
         'name': 'Optics',
         'in_archive': 'physics',
+        'description': 'Adaptive optics. Astronomical optics. Atmospheric '
+                       'optics. Biomedical optics. Cardinal points. '
+                       'Collimation. Doppler effect. Fiber optics. Fourier '
+                       'optics. Geometrical optics (Gradient index optics. '
+                       'Holography. Infrared optics. Integrated optics. Laser '
+                       'applications. Laser optical systems. Lasers. Light '
+                       'amplification. Light diffraction. Luminescence. '
+                       'Microoptics. Nano optics. Ocean optics. Optical '
+                       'computing. Optical devices. Optical imaging. Optical '
+                       'materials. Optical metrology. Optical microscopy. '
+                       'Optical properties. Optical signal processing. Optical '
+                       'testing techniques. Optical wave propagation. Paraxial '
+                       'optics. Photoabsorption. Photoexcitations. Physical '
+                       'optics. Physiological optics. Quantum optics. Segmented '
+                       'optics. Spectra. Statistical optics. Surface optics. '
+                       'Ultrafast optics. Wave optics. X-ray optics.',
         'is_active': True,
         'is_general': False
     },
