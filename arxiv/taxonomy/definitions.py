@@ -1674,6 +1674,10 @@ CATEGORIES = {
     },
     'physics.data-an': {
         'name': 'Data Analysis, Statistics and Probability',
+        'description': 'Methods, software and hardware for physics data '
+                       'analysis: data processing and storage; measurement '
+                       'methodology; statistical and mathematical aspects such '
+                       'as parametrization and uncertainties.',
         'in_archive': 'physics',
         'is_active': True,
         'is_general': False
