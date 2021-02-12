@@ -1588,6 +1588,10 @@ CATEGORIES = {
     'physics.app-ph': {
         'name': 'Applied Physics',
         'in_archive': 'physics',
+        'description': 'Applications of physics to new technology, including '
+                       'electronic devices, optics, photonics, microwaves, '
+                       'spintronics, advanced materials, metamaterials, '
+                       'nanotechnology, and energy sciences.',
         'is_active': True,
         'is_general': False
     },
