@@ -1582,6 +1582,8 @@ CATEGORIES = {
     'physics.ao-ph': {
         'name': 'Atmospheric and Oceanic Physics',
         'in_archive': 'physics',
+        'description': 'Atmospheric and oceanic physics and physical chemistry, '
+                       'biogeophysics, and climate science',
         'is_active': True,
         'is_general': False
     },
