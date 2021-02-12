@@ -1661,13 +1661,14 @@ CATEGORIES = {
                        'systems such as membranes and cantilevers; optomechanics. '
                        'Classical waves, including acoustics and elasticity; '
                        'physics of music and musical instruments. Classical '
-                       'thermodynamics and  heat flow problems.'
+                       'thermodynamics and  heat flow problems.',
         'is_active': True,
         'is_general': False
     },
     'physics.comp-ph': {
         'name': 'Computational Physics',
         'in_archive': 'physics',
+        'description': 'All aspects of computational science applied to physics.',
         'is_active': True,
         'is_general': False
     },
