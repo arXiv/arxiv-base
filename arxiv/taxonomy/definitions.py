@@ -455,6 +455,10 @@ CATEGORIES = {
     'cond-mat.dis-nn': {
         'name': 'Disordered Systems and Neural Networks',
         'in_archive': 'cond-mat',
+        'description': 'Glasses and spin glasses; properties of random, '
+                       'aperiodic and quasiperiodic systems; transport in '
+                       'disordered media; localization; phenomena mediated by '
+                       'defects and disorder; neural networks',
         'is_active': True,
         'is_general': False
     },
@@ -1141,36 +1145,74 @@ CATEGORIES = {
     'gr-qc': {
         'name': 'General Relativity and Quantum Cosmology',
         'in_archive': 'gr-qc',
+        'description': 'General Relativity and Quantum Cosmology Areas of '
+                       'gravitational physics, including experiments and '
+                       'observations related to the detection and '
+                       'interpretation of gravitational waves, experimental '
+                       'tests of gravitational theories, computational general '
+                       'relativity, relativistic astrophysics, solutions to '
+                       'Einstein\'s equations and their properties, alternative'
+                       ' theories of gravity, classical and quantum cosmology, '
+                       'and quantum gravity.',
         'is_active': True,
         'is_general': False
     },
     'hep-ex': {
         'name': 'High Energy Physics - Experiment',
         'in_archive': 'hep-ex',
+        'descrption': 'Results from high-energy/particle physics experiments '
+                      'and prospects for future experimental results, including '
+                      'tests of the standard model, measurements of standard '
+                      'model parameters, searches for physics beyond the '
+                      'standard model, and astroparticle physics experimental '
+                      'results. Does not include: detectors and '
+                      'instrumentation nor analysis methods to conduct '
+                      'experiments.',
         'is_active': True,
         'is_general': False
     },
     'hep-lat': {
         'name': 'High Energy Physics - Lattice',
         'in_archive': 'hep-lat',
+        'description': 'Lattice field theory. Phenomenology from lattice field '
+                       'theory. Algorithms for lattice field theory.  Hardware '
+                       'for lattice field theory.',
         'is_active': True,
         'is_general': False
     },
     'hep-ph': {
         'name': 'High Energy Physics - Phenomenology',
         'in_archive': 'hep-ph',
+        'description': 'Theoretical particle physics and its interrelation '
+                       'with experiment. Prediction of particle physics '
+                       'observables: models, effective field theories, '
+                       'calculation techniques. Particle physics: analysis of '
+                       'theory through experimental results.',
         'is_active': True,
         'is_general': False
     },
     'hep-th': {
         'name': 'High Energy Physics - Theory',
         'in_archive': 'hep-th',
+        'description': 'Formal aspects of quantum field theory. String theory, '
+                       'supersymmetry and supergravity.',
         'is_active': True,
         'is_general': False
     },
     'math-ph': {
         'name': 'Mathematical Physics',
         'in_archive': 'math-ph',
+        'description': 'Articles in this category focus on areas of research '
+                       'that illustrate the application of mathematics to 
+                       'problems in physics, develop mathematical methods for '
+                       'such applications, or provide mathematically rigorous '
+                       'formulations of existing physical theories. Submissions '
+                       'to math-ph should be of interest to both physically '
+                       'oriented mathematicians and mathematically oriented '
+                       'physicists; submissions which are primarily of interest '
+                       'to theoretical physicists or to mathematicians should '
+                       'probably be directed to the respective physics/math '
+                       'categories',
         'is_active': True,
         'is_general': False
     },
@@ -1354,10 +1396,18 @@ CATEGORIES = {
     'math.MP': {
         'name': 'Mathematical Physics',
         'in_archive': 'math',
-        'description': 'math.MP is an alias for math-ph. Mathematical methods '
-                       'in quantum field theory, quantum mechanics, '
-                       'statistical mechanics, condensed matter, nuclear and '
-                       'atomic physics.',
+        'description': 'This category is an alias to math-ph. '
+                       'Articles in this category focus on areas of research '
+                       'that illustrate the application of mathematics to 
+                       'problems in physics, develop mathematical methods for '
+                       'such applications, or provide mathematically rigorous '
+                       'formulations of existing physical theories. Submissions '
+                       'to math-ph should be of interest to both physically '
+                       'oriented mathematicians and mathematically oriented '
+                       'physicists; submissions which are primarily of interest '
+                       'to theoretical physicists or to mathematicians should '
+                       'probably be directed to the respective physics/math '
+                       'categories',
         'is_active': True,
         'is_general': False
     },
@@ -1528,59 +1578,114 @@ CATEGORIES = {
     'physics.acc-ph': {
         'name': 'Accelerator Physics',
         'in_archive': 'physics',
+        'description': 'Accelerator theory and simulation. Accelerator '
+                       'technology. Accelerator experiments. Beam Physics. '
+                       'Accelerator design and optimization. Advanced '
+                       'accelerator concepts. Radiation sources including '
+                       'synchrotron light sources and free electron lasers. '
+                       'Applications of accelerators.',       
         'is_active': True,
         'is_general': False
     },
     'physics.ao-ph': {
         'name': 'Atmospheric and Oceanic Physics',
         'in_archive': 'physics',
+        'description': 'Atmospheric and oceanic physics and physical chemistry, '
+                       'biogeophysics, and climate science',
         'is_active': True,
         'is_general': False
     },
     'physics.app-ph': {
         'name': 'Applied Physics',
         'in_archive': 'physics',
+        'description': 'Applications of physics to new technology, including '
+                       'electronic devices, optics, photonics, microwaves, '
+                       'spintronics, advanced materials, metamaterials, '
+                       'nanotechnology, and energy sciences.',
         'is_active': True,
         'is_general': False
     },
     'physics.atm-clus': {
         'name': 'Atomic and Molecular Clusters',
         'in_archive': 'physics',
+        'description': 'Atomic and molecular clusters, nanoparticles: geometric, '
+                       'electronic, optical, chemical, magnetic properties, '
+                       'shell structure, phase transitions, optical spectroscopy, '
+                       'mass spectrometry, photoelectron spectroscopy, '
+                       'ionization potential,electron affinity, interaction '
+                       'with intense light pulses, electron diffraction, light '
+                       'scattering, ab initio calculations, DFT theory, '
+                       'fragmentation, Coulomb explosion, hydrodynamic '
+                       'expansion.',
         'is_active': True,
         'is_general': False
     },
     'physics.atom-ph': {
         'name': 'Atomic Physics',
         'in_archive': 'physics',
+        'description': 'Atomic and molecular structure, spectra, collisions, '
+                       'and data. Atoms and molecules in external fields. '
+                       'Molecular dynamics and coherent and optical control. '
+                       'Cold atoms and molecules. Cold collisions. Optical '
+                       'lattices.',
         'is_active': True,
         'is_general': False
     },
     'physics.bio-ph': {
         'name': 'Biological Physics',
         'in_archive': 'physics',
+        'description': 'Molecular biophysics, cellular biophysics, neurological '
+                       'biophysics, membrane biophysics, single-molecule '
+                       'biophysics, ecological biophysics, quantum phenomena in '
+                       'biological systems (quantum biophysics), theoretical '
+                       'biophysics, molecular dynamics / modelling and '
+                       'simulation, game theory, biomechanics, bioinformatics, '
+                       'microorganisms, virology, evolution, biophysical '
+                       'methods.',
         'is_active': True,
         'is_general': False
     },
     'physics.chem-ph': {
         'name': 'Chemical Physics',
         'in_archive': 'physics',
+        'description': 'Experimental, computational, and theoretical physics of '
+                       'atoms, molecules, and clusters - Classical and quantum '
+                       'description of states, processes, and dynamics; '
+                       'spectroscopy, electronic structure, conformations, '
+                       'reactions, interactions, and phases. Chemical '
+                       'thermodynamics. Disperse systems. High pressure '
+                       'chemistry. Solid state chemistry. Surface and interface '
+                       'chemistry.',
         'is_active': True,
         'is_general': False
     },
     'physics.class-ph': {
         'name': 'Classical Physics',
         'in_archive': 'physics',
+        'description': 'Newtonian and relativistic dynamics; many particle '
+                       'systems; planetary motions; chaos in classical dynamics. '
+                       'Maxwell\'s  equations and  dynamics of charged systems '
+                       'and  electromagnetic forces in materials. Vibrating '
+                       'systems such as membranes and cantilevers; optomechanics. '
+                       'Classical waves, including acoustics and elasticity; '
+                       'physics of music and musical instruments. Classical '
+                       'thermodynamics and  heat flow problems.',
         'is_active': True,
         'is_general': False
     },
     'physics.comp-ph': {
         'name': 'Computational Physics',
         'in_archive': 'physics',
+        'description': 'All aspects of computational science applied to physics.',
         'is_active': True,
         'is_general': False
     },
     'physics.data-an': {
         'name': 'Data Analysis, Statistics and Probability',
+        'description': 'Methods, software and hardware for physics data '
+                       'analysis: data processing and storage; measurement '
+                       'methodology; statistical and mathematical aspects such '
+                       'as parametrization and uncertainties.',
         'in_archive': 'physics',
         'is_active': True,
         'is_general': False
@@ -1588,12 +1693,27 @@ CATEGORIES = {
     'physics.ed-ph': {
         'name': 'Physics Education',
         'in_archive': 'physics',
+        'description': 'Report of results of a research study, laboratory '
+                       'experience, assessment or classroom practice that '
+                       'represents a way to improve teaching and learning in '
+                       'physics. Also, report on misconceptions of students, '
+                       'textbook errors, and other similar information relative '
+                       'to promoting physics understanding.',
         'is_active': True,
         'is_general': False
     },
     'physics.flu-dyn': {
         'name': 'Fluid Dynamics',
         'in_archive': 'physics',
+        'description': 'Turbulence, instabilities, incompressible/compressible '
+                       'flows, reacting flows. Aero/hydrodynamics, fluid-'
+                       'structure interactions, acoustics. Biological fluid '
+                       'dynamics, micro/nanofluidics, interfacial phenomena. '
+                       'Complex fluids, suspensions and granular flows, porous '
+                       'media flows. Geophysical flows, thermoconvective and '
+                       'stratified flows. Mathematical and computational methods '
+                       'for fluid dynamics, fluid flow models, experimental '
+                       'techniques.',
         'is_active': True,
         'is_general': False
     },
@@ -1606,36 +1726,84 @@ CATEGORIES = {
     'physics.geo-ph': {
         'name': 'Geophysics',
         'in_archive': 'physics',
+        'description': 'Atmospheric physics. Biogeosciences. Computational '
+                       'geophysics. Geographic location. Geoinformatics. '
+                       'Geophysical techniques. Hydrospheric geophysics. '
+                       'Magnetospheric physics. Mathematical geophysics. '
+                       'Planetology. Solar system. Solid earth geophysics. '
+                       'Space plasma physics. Mineral physics. High pressure '
+                       'physics.',
         'is_active': True,
         'is_general': False
     },
     'physics.hist-ph': {
         'name': 'History and Philosophy of Physics',
         'in_archive': 'physics',
+        'description': 'History and philosophy of all branches of physics, '
+                       'astrophysics, and cosmology, including appreciations of '
+                       'physicists.',
         'is_active': True,
         'is_general': False
     },
     'physics.ins-det': {
         'name': 'Instrumentation and Detectors',
         'in_archive': 'physics',
+        'description': 'Instrumentation and Detectors for research in natural '
+                       'science, including optical, molecular, atomic, nuclear '
+                       'and particle physics instrumentation and the associated '
+                       'electronics, services, infrastructure and control '
+                       'equipment. ',
         'is_active': True,
         'is_general': False
     },
     'physics.med-ph': {
         'name': 'Medical Physics',
         'in_archive': 'physics',
+        'description': 'Radiation therapy. Radiation dosimetry. Biomedical '
+                       'imaging modelling.  Reconstruction, processing, and '
+                       'analysis. Biomedical system modelling and analysis. '
+                       'Health physics. New imaging or therapy modalities.',
         'is_active': True,
         'is_general': False
     },
     'physics.optics': {
         'name': 'Optics',
         'in_archive': 'physics',
+        'description': 'Adaptive optics. Astronomical optics. Atmospheric '
+                       'optics. Biomedical optics. Cardinal points. '
+                       'Collimation. Doppler effect. Fiber optics. Fourier '
+                       'optics. Geometrical optics (Gradient index optics. '
+                       'Holography. Infrared optics. Integrated optics. Laser '
+                       'applications. Laser optical systems. Lasers. Light '
+                       'amplification. Light diffraction. Luminescence. '
+                       'Microoptics. Nano optics. Ocean optics. Optical '
+                       'computing. Optical devices. Optical imaging. Optical '
+                       'materials. Optical metrology. Optical microscopy. '
+                       'Optical properties. Optical signal processing. Optical '
+                       'testing techniques. Optical wave propagation. Paraxial '
+                       'optics. Photoabsorption. Photoexcitations. Physical '
+                       'optics. Physiological optics. Quantum optics. Segmented '
+                       'optics. Spectra. Statistical optics. Surface optics. '
+                       'Ultrafast optics. Wave optics. X-ray optics.',
         'is_active': True,
         'is_general': False
     },
     'physics.plasm-ph': {
         'name': 'Plasma Physics',
         'in_archive': 'physics',
+        'description': 'Fundamental plasma physics. Magnetically Confined '
+                       'Plasmas (includes magnetic fusion energy research). '
+                       'High Energy Density Plasmas (inertial confinement '
+                       'plasmas, laser-plasma interactions). Ionospheric, '
+                       'Heliophysical, and Astrophysical plasmas (includes sun '
+                       'and solar system plasmas). Lasers, Accelerators, and '
+                       'Radiation Generation. Low temperature plasmas and '
+                       'plasma applications (include dusty plasmas, '
+                       'semiconductor etching, plasma-based nanotechnology, '
+                       'medical applications). Plasma Diagnostics, Engineering '
+                       'and Enabling Technologies (includes fusion reactor '
+                       'design, heating systems, diagnostics, experimental '
+                       'techniques)',
         'is_active': True,
         'is_general': False
     },
@@ -1648,12 +1816,22 @@ CATEGORIES = {
     'physics.soc-ph': {
         'name': 'Physics and Society',
         'in_archive': 'physics',
+        'description': 'Structure, dynamics and collective behavior of '
+                       'societies and groups (human or otherwise). Quantitative '
+                       'analysis of social networks and other complex networks. '
+                       'Physics and engineering of infrastructure and systems '
+                       'of broad societal impact (e.g., energy grids, '
+                       'transportation networks).',
         'is_active': True,
         'is_general': False
     },
     'physics.space-ph': {
         'name': 'Space Physics',
         'in_archive': 'physics',
+        'description': 'Space plasma physics. Heliophysics. Space weather. '
+                       'Planetary magnetospheres, ionospheres and magnetotail. '
+                       'Auroras. Interplanetary space. Cosmic rays. Synchrotron '
+                       'radiation. Radio astronomy.',
         'is_active': True,
         'is_general': False
     },
