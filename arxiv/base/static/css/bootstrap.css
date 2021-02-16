@@ -1,0 +1,117 @@
+/* adobe typekit fonts */
+@import url("https://use.typekit.net/qlb0eey.css");
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: freight-sans-pro, arial, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+}
+
+a {
+  color: #1f5e96;
+}
+
+.btn-primary {
+  background-color: #a5d6fe;
+  color: black;
+  border: none;
+}
+
+.btn-secondary {
+  background-color: #7c7469;
+  color: #f9f7f7;
+  border: none;
+}
+
+/* Header */
+header .arxiv-nav {
+  border-bottom: 1px solid #dcdad5;
+  font-size: 1em;
+}
+header .arxiv-nav nav {
+  padding: 0;
+}
+header .arxiv-nav nav .navbar-brand {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+header .arxiv-nav nav .navbar-brand .arxiv-logo {
+  height: 2.5em;
+}
+header .arxiv-nav nav li a {
+  font-size: 1.2em;
+  color: #6b6459;
+}
+header .arxiv-nav nav li a:hover {
+  color: #1f5e96;
+}
+header .arxiv-nav nav navbar-toggler svg {
+  color: #6b6459;
+}
+header .arxiv-prenav {
+  padding: 0.3em;
+  border-bottom: 2px solid red;
+  font-size: 0.85em;
+}
+header .arxiv-prenav p {
+  margin-bottom: 0;
+}
+header .arxiv-search input {
+  border: 1px solid #dcdad5;
+  border-right: none;
+  margin-right: 0 !important;
+  height: 2em;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 1em;
+  border-bottom-left-radius: 1em;
+  min-width: 20em;
+}
+header .arxiv-search button.btn {
+  border: 1px solid #dcdad5;
+  color: #a5d6fe;
+  font-weight: 900;
+  background-color: #f7fafc;
+  margin-left: 0;
+  height: 2em;
+  border-top-right-radius: 1em;
+  border-bottom-right-radius: 1em;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+header .arxiv-search button.btn svg {
+  color: #a5d6fe;
+  position: relative;
+  top: -4px;
+}
+
+/* Sticky footer */
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  /* Negative indent footer by it's height */
+  margin: 0 auto -60px;
+}
+
+/* Set the fixed height of the footer */
+#push,
+#footer {
+  height: 60px;
+}
+
+#footer {
+  background-color: #f5f5f5;
+  /* apply responsive CSS fixes as necessary */
+}
+@media (max-width: 767px) {
+  #footer {
+    border: 1px solid red;
+  }
+}
+
+/*# sourceMappingURL=bootstrap.css.map */

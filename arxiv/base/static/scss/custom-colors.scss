@@ -1,0 +1,24 @@
+// Custom colors
+$dark-blue:  #1f5e96 !default;
+$light-blue: #a5d6fe !default;
+$cool-wash:  #f7fafc !default;
+$warm-grey: #6b6459 !default;
+$light-warm-grey:  #7c7469 !default;
+$cornell-red: #b31b1b !default;
+$salmon: #fb595a !default;
+$warm-wash: #f9f7f7 !default;
+
+$custom-colors: () !default;
+
+$custom-colors: map-merge(
+  (
+    "dark-blue":       $dark-blue,
+    "light-blue":     $light-blue,
+    "cool-wash":     $cool-wash,
+    "warm-grey":       $warm-grey,
+    "light-warm-grey":        $light-warm-grey,
+    "cornell-red":     $cornell-red,
+    "warm-wash":     $warm-wash,
+  ),
+  $custom-colors
+);

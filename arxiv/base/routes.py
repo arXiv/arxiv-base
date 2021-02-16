@@ -39,6 +39,19 @@ def test_page() -> Response:
                            dismissable=False)
     return response
 
+@blueprint.route('/testing-bootstrap', methods=['GET'])
+def bootstrap() -> Response:
+    """Render the test page."""
+    rendered = render_template("base/testing-bootstrap.html", pagetitle='Home')
+    response: Response = make_response(rendered, status.OK)
+    return response
+
+@blueprint.route('/testing-blocks', methods=['GET'])
+def blocks() -> Response:
+    """Render the test page."""
+    rendered = render_template("base/testing-blocks.html", pagetitle='Home')
+    response: Response = make_response(rendered, status.OK)
+    return response
 
 @blueprint.route('/macros', methods=['GET'])
 def test_macros() -> Response:
