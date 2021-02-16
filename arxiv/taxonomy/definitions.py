@@ -1638,7 +1638,7 @@ CATEGORIES = {
                        'biophysics, membrane biophysics, single-molecule '
                        'biophysics, ecological biophysics, quantum phenomena in '
                        'biological systems (quantum biophysics), theoretical '
-                       'biophysics, molecular dynamics / modelling and '
+                       'biophysics, molecular dynamics/modeling and '
                        'simulation, game theory, biomechanics, bioinformatics, '
                        'microorganisms, virology, evolution, biophysical '
                        'methods.',
