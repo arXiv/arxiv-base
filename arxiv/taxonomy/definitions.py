@@ -1612,7 +1612,7 @@ CATEGORIES = {
                        'electronic, optical, chemical, magnetic properties, '
                        'shell structure, phase transitions, optical spectroscopy, '
                        'mass spectrometry, photoelectron spectroscopy, '
-                       'ionization potential,electron affinity, interaction '
+                       'ionization potential, electron affinity, interaction '
                        'with intense light pulses, electron diffraction, light '
                        'scattering, ab initio calculations, DFT theory, '
                        'fragmentation, Coulomb explosion, hydrodynamic '
