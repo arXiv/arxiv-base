@@ -14,6 +14,12 @@ a {
   color: #1f5e96;
 }
 
+p {
+  font-family: freight-text-pro, georgia, serif;
+  font-style: normal;
+  font-weight: 300;
+}
+
 .btn-primary {
   background-color: #a5d6fe;
   color: black;
@@ -27,34 +33,15 @@ a {
 }
 
 /* Header */
-header .arxiv-nav {
-  border-bottom: 1px solid #dcdad5;
-  font-size: 1em;
-}
-header .arxiv-nav nav {
-  padding: 0;
-}
-header .arxiv-nav nav .navbar-brand {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-header .arxiv-nav nav .navbar-brand .arxiv-logo {
-  height: 2.5em;
-}
-header .arxiv-nav nav li a {
-  font-size: 1.2em;
-  color: #6b6459;
-}
-header .arxiv-nav nav li a:hover {
-  color: #1f5e96;
-}
-header .arxiv-nav nav navbar-toggler svg {
-  color: #6b6459;
+header {
+  /*custom nav styles*/
+  /*end arxiv-nav*/
 }
 header .arxiv-prenav {
   padding: 0.3em;
-  border-bottom: 2px solid red;
+  border-bottom: 2px solid #b31b1b;
   font-size: 0.85em;
+  background-color: #f9f7f7;
 }
 header .arxiv-prenav p {
   margin-bottom: 0;
@@ -86,6 +73,95 @@ header .arxiv-search button.btn svg {
   color: #a5d6fe;
   position: relative;
   top: -4px;
+}
+header .arxiv-nav {
+  border-bottom: 1px solid #dcdad5;
+  font-size: 1em;
+  /*end nav element*/
+}
+header .arxiv-nav nav {
+  padding: 0;
+  /*end @media*/
+}
+header .arxiv-nav nav .navbar-brand {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+header .arxiv-nav nav .navbar-brand .arxiv-logo {
+  height: 2.5em;
+}
+header .arxiv-nav nav .navbar-nav a.nav-link {
+  font-size: 1.2em;
+  color: #6b6459;
+}
+header .arxiv-nav nav .navbar-nav a.nav-link:hover {
+  color: #1f5e96;
+}
+header .arxiv-nav nav .navbar-nav navbar-toggler svg {
+  color: #6b6459;
+}
+@media (min-width: 992px) {
+  header .arxiv-nav nav {
+    /*end navbar-nav*/
+  }
+  header .arxiv-nav nav .arxiv-navbar-container {
+    height: 5em;
+    margin-left: 3em;
+  }
+  header .arxiv-nav nav .navbar-nav {
+    position: relative;
+    height: 100%;
+    align-items: center;
+    /*end nav-item*/
+  }
+  header .arxiv-nav nav .navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 100%;
+  }
+  header .arxiv-nav nav .navbar-nav .nav-item a.nav-link {
+    min-width: 7em;
+    position: relative;
+    z-index: 2;
+    padding: 0;
+  }
+  header .arxiv-nav nav .navbar-nav .nav-item .arxiv-nav-link-description {
+    display: none;
+    border: 1px solid #b31b1b;
+    background-color: #fff;
+    position: absolute;
+    z-index: 1;
+    top: -1px;
+    left: -1em;
+    padding-left: 1em;
+    right: 1em;
+    padding-right: 0.5em;
+    height: 7em;
+    -webkit-box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.25);
+    -moz-box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.25);
+    box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.25);
+  }
+  header .arxiv-nav nav .navbar-nav .nav-item .arxiv-nav-link-description span {
+    display: block;
+    margin-top: 4.5em;
+    font-family: freight-text-pro;
+    font-size: 13px;
+    line-height: 13px;
+    color: #6b6459;
+  }
+  header .arxiv-nav nav .navbar-nav .nav-item:hover .arxiv-nav-link-description, header .arxiv-nav nav .navbar-nav .nav-item:focus .arxiv-nav-link-description, header .arxiv-nav nav .navbar-nav .nav-item:focus-within .arxiv-nav-link-description {
+    display: block;
+  }
+  header .arxiv-nav nav .navbar-nav .nav-item:hover a.nav-link, header .arxiv-nav nav .navbar-nav .nav-item:focus a.nav-link, header .arxiv-nav nav .navbar-nav .nav-item:focus-within a.nav-link {
+    color: #1f5e96;
+  }
+}
+
+/*end header*/
+/* Grid and layout customizations */
+.container-wide {
+  max-width: 95% !important;
 }
 
 /* Sticky footer */

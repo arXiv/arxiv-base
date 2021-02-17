@@ -14,6 +14,11 @@ body {
 a {
   color: $dark-blue;
 }
+p {
+  font-family: freight-text-pro, georgia, serif;
+  font-style: normal;
+  font-weight: 300;
+}
 .btn-primary {
   background-color: $light-blue;
   color: black;
@@ -27,36 +32,11 @@ a {
 
 /* Header */
 header {
-  .arxiv-nav {
-    border-bottom: 1px solid #dcdad5;
-    font-size: 1em;
-    nav {
-      padding: 0;
-      .navbar-brand {
-        margin-top: .5em;
-        margin-bottom: .5em;
-        .arxiv-logo {
-          height: 2.5em;
-        }
-      }
-      li a {
-        font-size: 1.2em;
-        color: $warm-grey;
-        &:hover {
-          color: $dark-blue;
-        }
-      }
-      navbar-toggler {
-        svg {
-          color: $warm-grey;
-        }
-      }
-    }
-  }
   .arxiv-prenav {
     padding: .3em;
-    border-bottom: 2px solid red;
+    border-bottom: 2px solid $cornell-red;
     font-size: .85em;
+    background-color: $warm-wash;
     p {
       margin-bottom: 0;
     }
@@ -91,8 +71,100 @@ header {
       }
     }
   }
-}
+  /*custom nav styles*/
+  .arxiv-nav {
+    border-bottom: 1px solid #dcdad5;
+    font-size: 1em;
+    nav {
+      padding: 0;
+      .navbar-brand {
+        margin-top: .5em;
+        margin-bottom: .5em;
+        .arxiv-logo {
+          height: 2.5em;
+        }
+      }
+      .navbar-nav {
+        a.nav-link {
+          font-size: 1.2em;
+          color: $warm-grey;
+          &:hover {
+            color: $dark-blue;
+          }
+        }
+        navbar-toggler {
+          svg {
+            color: $warm-grey;
+          }
+        }
+      }
+      @media (min-width: 992px) {
+        .arxiv-navbar-container {
+          height: 5em;
+          margin-left: 3em;
+        }
+        .navbar-nav {
+          position: relative;
+          height: 100%;
+          align-items: center;
+          .nav-item {
+            display: flex;
+            align-items: center;
+            position: relative;
+            height: 100%;
+            a.nav-link {
+              min-width: 7em;
+              position: relative;
+              z-index: 2;
+              padding: 0;
+            }
+            .arxiv-nav-link-description {
+              display: none;
+              border: 1px solid $cornell-red;
+              background-color: #fff;
+              position: absolute;
+              z-index: 1;
+              top: -1px;
+              left: -1em;
+              padding-left: 1em;
+              right: 1em;
+              padding-right: .5em;
+              height: 7em;
+              -webkit-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
+              -moz-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
+              box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
+              span {
+                display: block;
+                margin-top: 4.5em;
+                font-family: freight-text-pro;
+                font-size: 13px;
+                line-height: 13px;
+                color: $warm-grey;
+              }
+            }
+            &:hover .arxiv-nav-link-description,
+            &:focus .arxiv-nav-link-description,
+            &:focus-within .arxiv-nav-link-description {
+              display: block;
+            }
+            &:hover a.nav-link,
+            &:focus a.nav-link,
+            &:focus-within a.nav-link {
+              color: $dark-blue;
+            }
+          }/*end nav-item*/
+        }/*end navbar-nav*/
+      }/*end @media*/
 
+
+    }/*end nav element*/
+  }/*end arxiv-nav*/
+}/*end header*/
+
+/* Grid and layout customizations */
+.container-wide {
+  max-width: 95% !important;
+}
 
 /* Sticky footer */
 /* Wrapper for page content to push down footer */

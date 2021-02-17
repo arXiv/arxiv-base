@@ -1,9 +1,59 @@
 {% extends "base/base-bootstrap.html" %}
 
 {% block content %}
-<h1>arXiv UI patterns: Bootstrap</h1>
-<p>add cards and search results, buttons, various forms, etc.</p>
+<h1>Welcome [name]</h1>
+<br><br><br>
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">My selected feeds</h5>
+        <p class="card-text">List selected feeds here (ie: cs.AI, or an author name)</p>
+        <a href="#" class="btn btn-primary">Edit my feeds</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Recent activity on my papers</h5>
+        <p class="card-text">List views and downloads for this author's papers.</p>
+        <a href="#" class="btn btn-primary">Papers missing?</a>
+      </div>
+    </div>
+  </div>
+</div>
 
+<br><br><br>
+
+<div class="list-group">
+  <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">List group item heading</h5>
+      <small>3 days ago</small>
+    </div>
+    <p class="mb-1">Some placeholder content in a paragraph.</p>
+    <small>And some small print.</small>
+  </a>
+  <a href="#" class="list-group-item list-group-item-action">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">List group item heading</h5>
+      <small class="text-muted">3 days ago</small>
+    </div>
+    <p class="mb-1">Some placeholder content in a paragraph.</p>
+    <small class="text-muted">And some muted small print.</small>
+  </a>
+  <a href="#" class="list-group-item list-group-item-action">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">List group item heading</h5>
+      <small class="text-muted">3 days ago</small>
+    </div>
+    <p class="mb-1">Some placeholder content in a paragraph.</p>
+    <small class="text-muted">And some muted small print.</small>
+  </a>
+</div>
+
+<br><br><br>
 
 <h2>An accordion</h2>
 <div class="accordion" id="accordionExample">
@@ -88,7 +138,7 @@
 <br><br>
 
 <h2>A form with various elements</h2>
-<form>
+<form class="border p-5">
   <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Email address</label>
     <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
@@ -98,41 +148,29 @@
     <label for="exampleInputPassword1" class="form-label">Password</label>
     <input type="password" class="form-control" id="exampleInputPassword1">
   </div>
-  <div class="mb-3 form-check">
-    <input type="checkbox" class="form-check-input" id="exampleCheck1">
-    <label class="form-check-label" for="exampleCheck1">Check me out</label>
-  </div>
   <select class="form-select" aria-label="Default select example">
     <option selected>Open this select menu</option>
     <option value="1">One</option>
     <option value="2">Two</option>
     <option value="3">Three</option>
   </select>
-  <div class="form-check">
-    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-    <label class="form-check-label" for="flexCheckDefault">
-      Default checkbox
-    </label>
-  </div>
-  <div class="form-check">
-    <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
-    <label class="form-check-label" for="flexCheckChecked">
-      Checked checkbox
-    </label>
-  </div>
-  <div class="input-group mb-3">
-    <div class="input-group-text">
-      <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
-    </div>
-    <input type="text" class="form-control" aria-label="Text input with checkbox">
-  </div>
 
-  <div class="input-group">
-    <div class="input-group-text">
-      <input class="form-check-input mt-0" type="radio" value="" aria-label="Radio button for following text input">
+  <fieldset>
+    <legend>I am interested in the following (check all that apply):</legend>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+      <label class="form-check-label" for="flexCheckDefault">
+        Default checkbox
+      </label>
     </div>
-    <input type="text" class="form-control" aria-label="Text input with radio button">
-  </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+      <label class="form-check-label" for="flexCheckChecked">
+        Checked checkbox
+      </label>
+    </div>
+  </fieldset>
+
   <div class="input-group mb-3">
     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
     <ul class="dropdown-menu">
@@ -143,38 +181,6 @@
       <li><a class="dropdown-item" href="#">Separated link</a></li>
     </ul>
     <input type="text" class="form-control" aria-label="Text input with dropdown button">
-  </div>
-
-  <div class="input-group mb-3">
-    <input type="text" class="form-control" aria-label="Text input with dropdown button">
-    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
-    <ul class="dropdown-menu dropdown-menu-end">
-      <li><a class="dropdown-item" href="#">Action</a></li>
-      <li><a class="dropdown-item" href="#">Another action</a></li>
-      <li><a class="dropdown-item" href="#">Something else here</a></li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="#">Separated link</a></li>
-    </ul>
-  </div>
-
-  <div class="input-group">
-    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
-    <ul class="dropdown-menu">
-      <li><a class="dropdown-item" href="#">Action before</a></li>
-      <li><a class="dropdown-item" href="#">Another action before</a></li>
-      <li><a class="dropdown-item" href="#">Something else here</a></li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="#">Separated link</a></li>
-    </ul>
-    <input type="text" class="form-control" aria-label="Text input with 2 dropdown buttons">
-    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
-    <ul class="dropdown-menu dropdown-menu-end">
-      <li><a class="dropdown-item" href="#">Action</a></li>
-      <li><a class="dropdown-item" href="#">Another action</a></li>
-      <li><a class="dropdown-item" href="#">Something else here</a></li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="#">Separated link</a></li>
-    </ul>
   </div>
 
   <button type="submit" class="btn btn-primary">Submit</button>
