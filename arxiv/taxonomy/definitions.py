@@ -1203,7 +1203,7 @@ CATEGORIES = {
         'name': 'Mathematical Physics',
         'in_archive': 'math-ph',
         'description': 'Articles in this category focus on areas of research '
-                       'that illustrate the application of mathematics to 
+                       'that illustrate the application of mathematics to '
                        'problems in physics, develop mathematical methods for '
                        'such applications, or provide mathematically rigorous '
                        'formulations of existing physical theories. Submissions '
@@ -1396,9 +1396,9 @@ CATEGORIES = {
     'math.MP': {
         'name': 'Mathematical Physics',
         'in_archive': 'math',
-        'description': 'This category is an alias to math-ph. '
+        'description': 'math.MP is an alias for math-ph. '
                        'Articles in this category focus on areas of research '
-                       'that illustrate the application of mathematics to 
+                       'that illustrate the application of mathematics to '
                        'problems in physics, develop mathematical methods for '
                        'such applications, or provide mathematically rigorous '
                        'formulations of existing physical theories. Submissions '
