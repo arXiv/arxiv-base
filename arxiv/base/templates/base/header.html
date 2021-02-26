@@ -1,22 +1,45 @@
-<!-- contains Cornell logo and sponsor statement -->
-<div class="attribution level is-marginless" role="banner">
-  <div class="level-left">
-    <a class="level-item" href="{{ url_for('university') }}"><img src="{{ url_for('base.static', filename='images/cornell-reduced-white-SMALL.svg') }}" alt="Cornell University" width="200" aria-label="logo" /></a>
-  </div>
-  <div class="level-right is-marginless"><p class="sponsors level-item is-marginless"><a href="{{ url_for('acknowledgment') }}">We gratefully acknowledge support from<br /> the Simons Foundation and member institutions.</a></p></div>
-</div>
-<!-- contains arXiv identity and search bar -->
-<div class="identity level is-marginless">
-  <div class="level-left">
-    <div class="level-item">
-      <a class="arxiv" href="{{ url_for('home') }}" aria-label="arxiv-logo"><img src="{{ url_for('base.static', filename='images/arxiv-logo-web.svg') }}" alt="arXiv" aria-label="logo" width="85" /></a>
+<div class="arxiv-prenav"><div class="container container-wide">
+    <div class="row">
+    <div class="col">
+      <p>Under the stewardship of Cornell Tech and supported by member institutions. <a href="">Learn More</a></p>
+    </div>
+    <div class="col-md-auto" role="navigation" aria-label="User account menu">
+      {% if request.session and request.session.user and request.session.user.name %}
+        Welcome <span class="has-text-weight-bold">{{ request.session.user.name.forename }}</span> | <a href="{{ url_for('account') }}">My Account</a> | <a href="">My Feeds</a> | <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="#">Create Account</a> | <a href="{{ url_for('login') }}">Login</a>
+      {% endif %}
     </div>
   </div>
-  {{ macros.compactsearch('level-right') }}
-</div> <!-- closes identity -->
+</div></div>
 
-<div class="container">
-    <div class="user-tools is-size-7 has-text-right has-text-weight-bold" role="navigation" aria-label="User menu">
-      {% if request.session and request.session.user and request.session.user.name %}Logged in as <span class="has-text-weight-bold">{{ request.session.user.name.forename }} {{ request.session.user.name.surname }} {{ request.session.user.name.suffix }}</span> | <a href="{{ url_for('account') }}">My Account</a> | <a href="{{ url_for('logout') }}">Logout</a>{% else %}<a href="{{ url_for('login') }}">Login</a>{% endif %}
+<div class="arxiv-nav"><div class="container container-wide">
+  <nav class="navbar navbar-expand-lg" aria-label="main menu">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"><img src="{{ url_for('base.static', filename='images/arxiv-logo.svg') }}" class="arxiv-logo" alt="arXiv logo"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M2.5 11.5A.5.5 0 0 1 3 11h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 3h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+        </svg>
+      </button>
+      <div class="collapse navbar-collapse arxiv-navbar-container" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Papers</a>
+            <div class="arxiv-nav-link-description" role="presentation"><span>Search and read everything on arXiv for free.</span></div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Submit</a>
+            <div class="arxiv-nav-link-description" role="presentation"><span>Share your research, make an impact.</span></div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Labs</a>
+            <div class="arxiv-nav-link-description" role="presentation"><span>Partner projects that extend arXiv functionality.</span></div>
+          </li>
+        </ul>
+        {{ macros.headersearch('level-right') }}
+        <div class="arxiv-search-links"><a href="{{ url_for('help') }}">Help</a> | <a href="{{ url_for('search_advanced') }}">Advanced Search</a></div>
+      </div>
     </div>
-</div>
+  </nav>
+</div></div>

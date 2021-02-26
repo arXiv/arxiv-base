@@ -1,7 +1,14 @@
-/* adobe typekit fonts */
+//////Fonts
 @import url('https://use.typekit.net/qlb0eey.css');
+
+//////Bootstrap source
+@import "../bootstrap/scss/bootstrap";
+
+//////Bootstrap overrides and extensions
 @import 'custom-colors';
 
+//////Custom styles
+//defaults
 html,
 body {
   height: 100%;
@@ -19,6 +26,8 @@ p {
   font-style: normal;
   font-weight: 300;
 }
+
+//buttons
 .btn-primary {
   background-color: $light-blue;
   color: black;
@@ -30,7 +39,7 @@ p {
   border: none;
 }
 
-/* Header */
+//header
 header {
   .arxiv-prenav {
     padding: .3em;
@@ -71,7 +80,8 @@ header {
       }
     }
   }
-  /*custom nav styles*/
+
+//customize nav
   .arxiv-nav {
     border-bottom: 1px solid #dcdad5;
     font-size: 1em;
@@ -154,6 +164,12 @@ header {
             }
           }/*end nav-item*/
         }/*end navbar-nav*/
+        .arxiv-search-links {
+          position: absolute;
+          right: 2em;
+          bottom: .25em;
+          font-size: 12px;
+        }
       }/*end @media*/
 
 
@@ -161,29 +177,49 @@ header {
   }/*end arxiv-nav*/
 }/*end header*/
 
-/* Grid and layout customizations */
+//Grid and layout customizations
 .container-wide {
   max-width: 95% !important;
 }
 
-/* Sticky footer */
-/* Wrapper for page content to push down footer */
-#wrap {
-  min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  /* Negative indent footer by it's height */
-  margin: 0 auto -60px;
+//Footer
+.arxiv-footer {
+  border-top: .25em solid $cornell-red;
+  background: $warm-wash;
+  li {
+    background-color: transparent;
+    .notification-options {
+      font-size: .8em;
+    }
+  }
+  li a {
+    text-decoration: none;
+  }
+  svg {
+    fill: $light-warm-grey;
+    width: 1em;
+  }
+  svg.icon-small {
+    width: .5em;
+  }
+  @media (min-width: 768px) {
+    ul {
+      margin-top: 10px;
+    }
+  }
 }
-/* Set the fixed height of the footer */
-#push,
-#footer {
-  height: 60px;
-}
-#footer {
-  background-color: #f5f5f5;
-/* apply responsive CSS fixes as necessary */
-  @media (max-width: 767px) {
-    border: 1px solid red;
+
+//Sticky footer (fixed height) on tablet and up
+@media (min-width: 768px) {
+  #wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    /* Negative indent footer by it's height */
+    margin: 0 auto -160px;
+  }
+  #push,
+  .arxiv-footer {
+    height: 160px;
   }
 }

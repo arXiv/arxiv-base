@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<h1>Welcome [name]</h1>
+<br><br><br>
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">My selected feeds</h5>
+        <p class="card-text">List selected feeds here (ie: cs.AI, or an author name)</p>
+        <a href="#" class="btn btn-primary">Edit my feeds</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Recent activity on my papers</h5>
+        <p class="card-text">List views and downloads for this author's papers.</p>
+        <a href="#" class="btn btn-primary">Papers missing?</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br><br><br>
+
+{% endblock content %}

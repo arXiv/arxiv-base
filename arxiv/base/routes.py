@@ -21,10 +21,10 @@ blueprint = Blueprint('ui', __name__, url_prefix='',
                       static_folder='./static_test')
 
 
-@blueprint.route('/styleguide', methods=['GET'])
-def test_page() -> Response:
+@blueprint.route('/phoenix', methods=['GET'])
+def phoenix() -> Response:
     """Render the test page."""
-    rendered = render_template("base/styleguide.html", pagetitle='Home')
+    rendered = render_template("base/phoenix.html", pagetitle='Home')
     response: Response = make_response(rendered, status.OK)
 
     # Demonstrate flash alerts. To see these alerts, reload the page.
@@ -39,17 +39,10 @@ def test_page() -> Response:
                            dismissable=False)
     return response
 
-@blueprint.route('/testing-bootstrap', methods=['GET'])
-def bootstrap() -> Response:
+@blueprint.route('/phoenix-short-test', methods=['GET'])
+def phoenixshort() -> Response:
     """Render the test page."""
-    rendered = render_template("base/testing-bootstrap.html", pagetitle='Home')
-    response: Response = make_response(rendered, status.OK)
-    return response
-
-@blueprint.route('/testing-blocks', methods=['GET'])
-def blocks() -> Response:
-    """Render the test page."""
-    rendered = render_template("base/testing-blocks.html", pagetitle='Home')
+    rendered = render_template("base/phoenix-short-test.html", pagetitle='Home')
     response: Response = make_response(rendered, status.OK)
     return response
 

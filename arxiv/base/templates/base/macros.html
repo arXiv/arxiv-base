@@ -1,5 +1,25 @@
 {# macros to be available to all templates across arxiv #}
 
+{% macro headersearch(placeholder="Search") -%}
+  {# Creates a simple styled universal search in the header #}
+  <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_box') }}">
+    <input class="form-control me-2" type="search" placeholder="Search by author or keyword" aria-label="Search" name="query">
+    <button class="btn" type="submit">
+      <span class="visually-hidden">Search</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" class="bi bi-chevron-right" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+      </svg>
+    </button>
+  </form>
+{%- endmacro %}
+
+
+
+
+
+
+
+<!-- *OLD macros -->
 {% macro alerts(messages=[]) %}
 {% if messages -%}
 <div class="notifications" role="alert" aria-atomic="true">
