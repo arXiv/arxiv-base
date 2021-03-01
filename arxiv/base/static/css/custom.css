@@ -10664,6 +10664,47 @@ svg {
   border: none;
 }
 
+.alert .btn-close {
+  float: right;
+  margin-top: -0.5em;
+  margin-right: -0.5em;
+}
+
+.alert-primary {
+  background-color: #f7fafc;
+  border-color: #a5d6fe;
+  color: #1f5e96;
+}
+.alert-primary .alert-link {
+  color: #1f5e96;
+}
+
+.alert-secondary {
+  background-color: #f9f7f7;
+  border-color: #97938b;
+  color: #6b6459;
+}
+.alert-secondary .alert-link {
+  color: #6b6459;
+}
+
+.alert-light {
+  border-color: #97938b;
+  color: #6b6459;
+}
+.alert-light .alert-link {
+  color: #6b6459;
+}
+
+.alert-dark {
+  background-color: #151412;
+  border-color: #97938b;
+  color: #f9f7f7;
+}
+.alert-dark .alert-link {
+  color: #f9f7f7;
+}
+
 header {
   /*end arxiv-nav*/
 }

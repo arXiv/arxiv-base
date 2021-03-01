@@ -43,6 +43,48 @@ svg {
   border: none;
 }
 
+//alerts
+.alert {
+  .btn-close {
+    float: right;
+    margin-top: -.5em;
+    margin-right: -.5em;
+  }
+}
+.alert-primary {
+  background-color: $cool-wash;
+  border-color: $light-blue;
+  color: $dark-blue;
+  .alert-link {
+    color: $dark-blue;
+  }
+}
+.alert-secondary {
+  background-color: $warm-wash;
+  border-color: $warm-grey-500;
+  color: $warm-grey;
+  .alert-link {
+    color: $warm-grey;
+  }
+}
+.alert-light {
+  border-color: $warm-grey-500;
+  color: $warm-grey;
+  .alert-link {
+    color: $warm-grey;
+  }
+}
+.alert-dark {
+  background-color: $warm-grey-900;
+  border-color: $warm-grey-500;
+  color: $warm-wash;
+  .alert-link {
+    color: $warm-wash;
+  }
+}
+
+
+
 //header styles
 header {
   .arxiv-prenav {

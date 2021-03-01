@@ -19,3 +19,23 @@ $custom-colors: (
 );
 // Merge the maps with bootstrap
 $theme-colors: map-merge($theme-colors, $custom-colors);
+
+//mapping custom color $tooltip-font-size$red-100: tint-color($red, 80%) !default;
+$cornell-red-200: tint-color($cornell-red, 80%);
+$cornell-red-300: tint-color($cornell-red, 70%);
+$cornell-red-400: tint-color($cornell-red, 50%);
+$cornell-red-500: tint-color($cornell-red, 40%);
+$cornell-red-600: tint-color($cornell-red, 30%);
+$cornell-red-700: tint-color($cornell-red, 20%);
+$cornell-red-800: tint-color($cornell-red, 10%);
+$cornell-red-900: $cornell-red;
+
+$warm-grey-100: tint-color($warm-grey, 80%);
+$warm-grey-200: tint-color($warm-grey, 60%);
+$warm-grey-300: tint-color($warm-grey, 50%);
+$warm-grey-400: tint-color($warm-grey, 40%);
+$warm-grey-500: tint-color($warm-grey, 30%);
+$warm-grey-600: tint-color($warm-grey, 20%);
+$warm-grey-700: tint-color($warm-grey, 10%);
+$warm-grey-800: $warm-grey !default;
+$warm-grey-900: shade-color($warm-grey, 80%);
