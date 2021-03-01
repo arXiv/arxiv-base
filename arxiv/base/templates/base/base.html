@@ -8,24 +8,21 @@
     {% endblock addl_head %}
   </head>
   <body>
-    <div id="wrap">
-      {% import "base/macros.html" as macros %}
-      <header>
-        <a class="visually-hidden" href="#content">Skip to main content</a>
-        {% block header %}
-        {% include "base/header.html" %}
-        {% endblock header %}
-      </header>
-      {% include "base/breadcrumbs.html" %}
-      <main>
-        {% block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
-        <div class="container" id="content">
-          {% block content %}
-          {% endblock content %}
-        </div>
-      </main>
-      <div id="push"></div>
-    </div>
+    {% import "base/macros.html" as macros %}
+    <header>
+      <a class="visually-hidden" href="#content">Skip to main content</a>
+      {% block header %}
+      {% include "base/header.html" %}
+      {% endblock header %}
+    </header>
+    {% include "base/breadcrumbs.html" %}
+    <main>
+      {% block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
+      <div class="container" id="content">
+        {% block content %}
+        {% endblock content %}
+      </div>
+    </main>
     <footer>
       {% block footer %}
       {% include "base/footer.html" %}

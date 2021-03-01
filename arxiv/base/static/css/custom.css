@@ -10647,6 +10647,11 @@ p {
   font-weight: 300;
 }
 
+svg {
+  width: 1em;
+  margin-top: -0.15em;
+}
+
 .btn-primary {
   background-color: #a5d6fe;
   color: black;
@@ -10797,6 +10802,10 @@ header .arxiv-nav nav .navbar-nav navbar-toggler svg {
 .arxiv-footer {
   border-top: 0.25em solid #b31b1b;
   background: #f9f7f7;
+  padding: 2em 0;
+}
+.arxiv-footer ul {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
 .arxiv-footer li {
   background-color: transparent;
@@ -10809,30 +10818,42 @@ header .arxiv-nav nav .navbar-nav navbar-toggler svg {
 }
 .arxiv-footer svg {
   fill: #7c7469;
-  width: 1em;
 }
 .arxiv-footer svg.icon-small {
   width: 0.5em;
 }
+.arxiv-footer .arxiv-membership {
+  margin-top: 1.5em;
+}
+.arxiv-footer .arxiv-membership p {
+  font-size: 0.9em;
+}
+.arxiv-footer .arxiv-membership img {
+  width: 100%;
+}
 @media (min-width: 768px) {
+  .arxiv-footer .arxiv-membership {
+    margin-top: 0;
+    padding-left: 2em;
+  }
   .arxiv-footer ul {
-    margin-top: 10px;
+    border-bottom-width: 0;
   }
 }
 
-@media (min-width: 768px) {
-  #wrap {
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
-    /* Negative indent footer by it's height */
-    margin: 0 auto -160px;
-  }
+html, body {
+  height: 100%;
+}
 
-  #push,
-.arxiv-footer {
-    height: 160px;
-  }
+body {
+  background: #ffffff;
+  display: flex;
+  flex-flow: column;
+}
+
+footer {
+  margin-top: auto;
+  background-color: #222;
 }
 
 /*# sourceMappingURL=custom.css.map */

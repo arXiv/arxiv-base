@@ -26,6 +26,10 @@ p {
   font-style: normal;
   font-weight: 300;
 }
+svg {
+  width: 1em;
+  margin-top: -.15em;
+}
 
 //buttons
 .btn-primary {
@@ -39,7 +43,7 @@ p {
   border: none;
 }
 
-//header
+//header styles
 header {
   .arxiv-prenav {
     padding: .3em;
@@ -182,10 +186,14 @@ header {
   max-width: 95% !important;
 }
 
-//Footer
+//Footer styles
 .arxiv-footer {
   border-top: .25em solid $cornell-red;
   background: $warm-wash;
+  padding: 2em 0;
+  ul {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  }
   li {
     background-color: transparent;
     .notification-options {
@@ -197,29 +205,40 @@ header {
   }
   svg {
     fill: $light-warm-grey;
-    width: 1em;
   }
   svg.icon-small {
     width: .5em;
   }
+  .arxiv-membership {
+    margin-top: 1.5em;
+    p {
+      font-size: .9em;
+    }
+    img {
+      width: 100%;
+    }
+  }
   @media (min-width: 768px) {
+    .arxiv-membership {
+      margin-top: 0;
+      padding-left: 2em;
+    }
     ul {
-      margin-top: 10px;
+      border-bottom-width: 0;
     }
   }
 }
 
-//Sticky footer (fixed height) on tablet and up
-@media (min-width: 768px) {
-  #wrap {
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
-    /* Negative indent footer by it's height */
-    margin: 0 auto -160px;
-  }
-  #push,
-  .arxiv-footer {
-    height: 160px;
-  }
+//Sticky footer
+html, body {
+  height: 100%;
+}
+body {
+  background: #ffffff;
+  display: flex;
+  flex-flow: column;
+}
+footer {
+  margin-top: auto;
+  background-color: #222;
 }
