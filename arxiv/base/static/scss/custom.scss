@@ -36,11 +36,19 @@ svg {
   background-color: $light-blue;
   color: black;
   border: none;
+  &:hover {
+    background-color: $dark-blue;
+    color: $cool-wash;
+  }
 }
 .btn-secondary {
-  background-color: $light-warm-grey;
-  color: $warm-wash;
+  background-color: $warm-grey-200;
+  color: black;
   border: none;
+  &:hover {
+    background-color: $warm-grey;
+    color: $warm-wash;
+  }
 }
 
 //alerts
@@ -61,14 +69,14 @@ svg {
 }
 .alert-secondary {
   background-color: $warm-wash;
-  border-color: $warm-grey-500;
+  border-color: $warm-grey-300;
   color: $warm-grey;
   .alert-link {
     color: $warm-grey;
   }
 }
 .alert-light {
-  border-color: $warm-grey-500;
+  border-color: $warm-wash;
   color: $warm-grey;
   .alert-link {
     color: $warm-grey;
@@ -216,7 +224,20 @@ header {
           bottom: .25em;
           font-size: 12px;
         }
-      }/*end @media*/
+      }
+      @media (max-width: 767px) {
+        .arxiv-nav-link-description {
+          display: none;
+        }
+        .navbar-nav {
+          border-bottom: 2px solid $warm-wash;
+        }
+        .arxiv-search-links {
+          text-align: right;
+          font-size: .8em;
+          margin-bottom: 1em;
+        }
+      }/*end @media queries for nav*/
 
 
     }/*end nav element*/
@@ -232,7 +253,7 @@ header {
 .arxiv-footer {
   border-top: .25em solid $cornell-red;
   background: $warm-wash;
-  padding: 2em 0;
+  padding: 1.5em 0;
   ul {
     border-bottom: 1px solid rgba(0, 0, 0, 0.125);
   }
@@ -263,7 +284,7 @@ header {
   @media (min-width: 768px) {
     .arxiv-membership {
       margin-top: 0;
-      padding-left: 2em;
+      padding-left: 3em;
     }
     ul {
       border-bottom-width: 0;
