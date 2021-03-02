@@ -146,6 +146,117 @@ header {
     }
   }
 
+
+
+
+  //customize nav TEST
+    .arxiv-nav-test {
+      border-bottom: 1px solid #dcdad5;
+      font-size: 1em;
+      nav {
+        padding: 0;
+        .navbar-brand {
+          margin-top: .5em;
+          margin-bottom: .5em;
+          .arxiv-logo {
+            height: 2.5em;
+          }
+        }
+        .navbar-nav {
+          a.nav-link {
+            font-size: 1.1em;
+            color: black;
+            font-family: 'freight-text-pro';
+            &:hover {
+              color: $dark-blue;
+            }
+          }
+          navbar-toggler {
+            svg {
+              color: $warm-grey;
+            }
+          }
+        }
+        @media (min-width: 992px) {
+          .arxiv-navbar-container {
+            height: 5em;
+            margin-left: 3em;
+          }
+          .navbar-nav {
+            position: relative;
+            height: 100%;
+            align-items: center;
+            .nav-item {
+              display: flex;
+              position: relative;
+              height: 100%;
+              a.nav-link {
+                display: block;
+                width: 100%;
+                border-style: solid;
+                border-width: 2px;
+                border-color: transparent;
+                position: relative;
+                top: -.1em;
+                padding-left: 1em;
+                padding-right: .5em;
+                height: 4.5em;
+                width: 7em;
+                line-height: 13px;
+                span {
+                  display: block;
+                  margin-top: 1.3em;
+                  margin-bottom: .5em;
+                }
+                div {
+                  display: none;
+                  font-size: 13px;
+                  color: $warm-grey;
+                }
+                &:hover,
+                &:focus,
+                &:focus-within {
+                  height: 7em;
+                  border-color: $cornell-red;
+                  background-color: #fff;
+                  color: $dark-blue;
+                  -webkit-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
+                  -moz-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
+                  box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
+                  div {
+                    display: inline;
+                  }
+                }
+              }
+
+
+            }/*end nav-item*/
+          }/*end navbar-nav*/
+          .arxiv-search-links {
+            position: absolute;
+            right: 2em;
+            bottom: .25em;
+            font-size: 12px;
+          }
+        }
+        @media (max-width: 767px) {
+          a.nav-link {
+            div {
+              display: none;
+            }
+          }
+          .arxiv-search-links {
+            text-align: right;
+            font-size: .8em;
+            margin-bottom: 1em;
+          }
+        }/*end @media queries */
+      }/*end nav element*/
+    }/*end arxiv-nav*/
+
+
+
+
 //customize nav
   .arxiv-nav {
     border-bottom: 1px solid #dcdad5;

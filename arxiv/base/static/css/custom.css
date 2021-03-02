@@ -10733,6 +10733,7 @@ h4, .h4 {
 
 header {
   /*end arxiv-nav*/
+  /*end arxiv-nav*/
 }
 header .arxiv-prenav {
   padding: 0.3em;
@@ -10770,6 +10771,105 @@ header .arxiv-search button.btn svg {
   color: #a5d6fe;
   position: relative;
   top: -4px;
+}
+header .arxiv-nav-test {
+  border-bottom: 1px solid #dcdad5;
+  font-size: 1em;
+  /*end nav element*/
+}
+header .arxiv-nav-test nav {
+  padding: 0;
+  /*end @media queries */
+}
+header .arxiv-nav-test nav .navbar-brand {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+header .arxiv-nav-test nav .navbar-brand .arxiv-logo {
+  height: 2.5em;
+}
+header .arxiv-nav-test nav .navbar-nav a.nav-link {
+  font-size: 1.1em;
+  color: black;
+  font-family: "freight-text-pro";
+}
+header .arxiv-nav-test nav .navbar-nav a.nav-link:hover {
+  color: #1f5e96;
+}
+header .arxiv-nav-test nav .navbar-nav navbar-toggler svg {
+  color: #6b6459;
+}
+@media (min-width: 992px) {
+  header .arxiv-nav-test nav {
+    /*end navbar-nav*/
+  }
+  header .arxiv-nav-test nav .arxiv-navbar-container {
+    height: 5em;
+    margin-left: 3em;
+  }
+  header .arxiv-nav-test nav .navbar-nav {
+    position: relative;
+    height: 100%;
+    align-items: center;
+    /*end nav-item*/
+  }
+  header .arxiv-nav-test nav .navbar-nav .nav-item {
+    display: flex;
+    position: relative;
+    height: 100%;
+  }
+  header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link {
+    display: block;
+    width: 100%;
+    border-style: solid;
+    border-width: 2px;
+    border-color: transparent;
+    position: relative;
+    top: -0.1em;
+    padding-left: 1em;
+    padding-right: 0.5em;
+    height: 4.5em;
+    width: 7em;
+    line-height: 13px;
+  }
+  header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link span {
+    display: block;
+    margin-top: 1.3em;
+    margin-bottom: 0.5em;
+  }
+  header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link div {
+    display: none;
+    font-size: 13px;
+    color: #6b6459;
+  }
+  header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link:hover, header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link:focus, header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link:focus-within {
+    height: 7em;
+    border-color: #b31b1b;
+    background-color: #fff;
+    color: #1f5e96;
+    -webkit-box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.25);
+    -moz-box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.25);
+    box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.25);
+  }
+  header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link:hover div, header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link:focus div, header .arxiv-nav-test nav .navbar-nav .nav-item a.nav-link:focus-within div {
+    display: inline;
+  }
+  header .arxiv-nav-test nav .arxiv-search-links {
+    position: absolute;
+    right: 2em;
+    bottom: 0.25em;
+    font-size: 12px;
+  }
+}
+@media (max-width: 767px) {
+  header .arxiv-nav-test nav a.nav-link div {
+    display: none;
+  }
+  header .arxiv-nav-test nav .arxiv-search-links {
+    text-align: right;
+    font-size: 0.8em;
+    margin-bottom: 1em;
+  }
 }
 header .arxiv-nav {
   border-bottom: 1px solid #dcdad5;

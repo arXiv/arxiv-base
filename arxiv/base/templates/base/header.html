@@ -13,7 +13,7 @@
   </div>
 </div></div>
 
-<div class="arxiv-nav"><div class="container container-wide">
+<div class="arxiv-nav-test"><div class="container container-wide">
   <nav class="navbar navbar-expand-lg" aria-label="main menu">
     <div class="container-fluid">
       <a class="navbar-brand" href="#"><img src="{{ url_for('base.static', filename='images/logo-arxiv.svg') }}" class="arxiv-logo" alt="arXiv logo"></a>
@@ -25,19 +25,25 @@
       <div class="collapse navbar-collapse arxiv-navbar-container" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Papers</a>
-            <div class="arxiv-nav-link-description" role="presentation"><span>Search and read everything on arXiv for free.</span></div>
+            <a class="nav-link" aria-current="page" href="#">
+              <span>Papers</span>
+              <div role="presentation">Search and read everything on arXiv for free.</div>
+            </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Submit</a>
-            <div class="arxiv-nav-link-description" role="presentation"><span>Share your research, make an impact.</span></div>
+            <a class="nav-link" href="#">
+              <span>Submit</span>
+              <div role="presentation">Share your research, make an impact.</div>
+            </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Labs</a>
-            <div class="arxiv-nav-link-description" role="presentation"><span>Partner projects that extend arXiv functionality.</span></div>
+            <a class="nav-link" href="#">
+              <span>Labs</span>
+              <div role="presentation">Partner projects that extend arXiv functionality.</div>
+            </a>
           </li>
         </ul>
-        {{ macros.headersearch('level-right') }}
+        {{ macros.headersearch() }}
         <div class="arxiv-search-links"><a href="{{ url_for('help') }}">Help</a> | <a href="{{ url_for('search_advanced') }}">Advanced Search</a></div>
       </div>
     </div>
