@@ -10671,6 +10671,12 @@ h4, .h4 {
   font-size: 1.1em;
 }
 
+.btn-tiny {
+  padding: 0.1rem 0.25rem;
+  font-size: 0.6rem;
+  border-radius: 0.15rem;
+}
+
 .btn-primary {
   background-color: #a5d6fe;
   color: black;
@@ -10689,6 +10695,16 @@ h4, .h4 {
 .btn-secondary:hover {
   background-color: #6b6459;
   color: #f9f7f7;
+}
+
+.btn-outline-primary {
+  border-color: #a5d6fe;
+  color: #1f5e96;
+}
+
+.btn-outline-secondary {
+  border-color: #6b6459;
+  color: #6b6459;
 }
 
 .alert-dismissible .btn-close {
@@ -11039,6 +11055,13 @@ body {
 footer {
   margin-top: auto;
   background-color: #222;
+}
+
+/******* PAGE SPECIFIC STYLES ********/
+.arxiv-home-form label {
+  font-size: 1.5em;
+  font-weight: 500;
+  color: #fb595a;
 }
 
 /*# sourceMappingURL=custom.css.map */

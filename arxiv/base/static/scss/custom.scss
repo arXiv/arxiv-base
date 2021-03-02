@@ -46,6 +46,11 @@ h4 {
   font-size: 1.1em;
 }
 //buttons
+.btn-tiny {
+    padding: .1rem .25rem;
+    font-size: .6rem;
+    border-radius: .15rem;
+}
 .btn-primary {
   background-color: $light-blue;
   color: black;
@@ -63,6 +68,14 @@ h4 {
     background-color: $warm-grey;
     color: $warm-wash;
   }
+}
+.btn-outline-primary {
+  border-color: $light-blue;
+  color: $dark-blue;
+}
+.btn-outline-secondary {
+  border-color: $warm-grey;
+  color: $warm-grey;
 }
 
 //alerts
@@ -431,4 +444,15 @@ body {
 footer {
   margin-top: auto;
   background-color: #222;
+}
+
+/******* PAGE SPECIFIC STYLES ********/
+
+//home
+.arxiv-home-form {
+  label {
+    font-size: 1.5em;
+    font-weight: 500;
+    color: $salmon;
+  }
 }
