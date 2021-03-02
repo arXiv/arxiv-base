@@ -31,15 +31,15 @@
                       <use xlink:href="{{ url_for('base.static', filename='bootstrap/bootstrap-icons.svg') }}#chevron-right"/>
                     </svg>
                   </a><br>
-                  <p class="notification-options">Status notifications via
-                    <a class="is-link" href="https://subscribe.sorryapp.com/24846f03/email/new" target="_blank">
+                  <p class="notification-options">Get status notifications via<br>
+                    <a href="https://subscribe.sorryapp.com/24846f03/email/new" target="_blank">
                       <svg width="20" height="20" fill="currentColor" role="presentation">
                         <use xlink:href="{{ url_for('base.static', filename='bootstrap/bootstrap-icons.svg') }}#envelope-fill"/>
                       </svg>
                       email
                     </a>
                     or
-                    <a class="is-link" href="https://subscribe.sorryapp.com/24846f03/slack/new" target="_blank">
+                    <a href="https://subscribe.sorryapp.com/24846f03/slack/new" target="_blank">
                       <svg width="20" height="20" fill="currentColor" role="presentation">
                         <use xlink:href="{{ url_for('base.static', filename='bootstrap/bootstrap-icons.svg') }}#slack"/>
                       </svg>
@@ -53,14 +53,14 @@
       </div>
 
 
-      <div class="col-sm col-md-4 arxiv-membership">
+      <div class="col-sm col-md-5 arxiv-membership">
         <p>We gratefully acknowledge support from the Simons Foundation and {{ session['institution'] if ('institution' in session and session['institution'] != None) else 'member institutions' }}. <a href="{{ url_for('acknowledgment') }}">Learn more.</a></p>
         <div class="row">
           <div class="col">
             <img src="{{ url_for('base.static', filename='images/logo-simons-trnsp.png') }}" alt="Simons Foundation logo">
           </div>
           <div class="col">
-            {{ session['institution'] if ('institution' in session and session['institution'] != None) else 'Is your institution a member?' }} <a href="{{ url_for('acknowledgment') }}">Find out.</a>
+            {{ session['institution'] if ('institution' in session and session['institution'] != None) else '[member institution logo here]' }}
           </div>
         </div>
       </div>

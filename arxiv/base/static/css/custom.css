@@ -10652,6 +10652,25 @@ svg {
   margin-top: -0.15em;
 }
 
+h1, .h1 {
+  font-size: 3em;
+}
+
+h2, .h2 {
+  font-size: 2em;
+}
+
+h3, .h3 {
+  font-family: "freight-text-pro";
+  font-weight: 500;
+  font-size: 1.3em;
+}
+
+h4, .h4 {
+  font-weight: 500;
+  font-size: 1.1em;
+}
+
 .btn-primary {
   background-color: #a5d6fe;
   color: black;
@@ -10672,10 +10691,9 @@ svg {
   color: #f9f7f7;
 }
 
-.alert .btn-close {
-  float: right;
-  margin-top: -0.5em;
-  margin-right: -0.5em;
+.alert-dismissible .btn-close {
+  top: -0.5em;
+  right: -0.25em;
 }
 
 .alert-primary {
@@ -10870,14 +10888,18 @@ header .arxiv-nav nav .navbar-nav navbar-toggler svg {
 .arxiv-footer ul {
   border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
-.arxiv-footer li {
+.arxiv-footer li.list-group-item {
   background-color: transparent;
+  padding: 0.25em 0;
 }
-.arxiv-footer li .notification-options {
+.arxiv-footer li.list-group-item a {
+  text-decoration: none;
+}
+.arxiv-footer li.list-group-item .notification-options {
   font-size: 0.8em;
 }
-.arxiv-footer li a {
-  text-decoration: none;
+.arxiv-footer li.list-group-item .notification-options a {
+  text-decoration: underline;
 }
 .arxiv-footer svg {
   fill: #7c7469;

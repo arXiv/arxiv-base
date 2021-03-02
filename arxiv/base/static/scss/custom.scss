@@ -30,7 +30,21 @@ svg {
   width: 1em;
   margin-top: -.15em;
 }
-
+h1 {
+  font-size: 3em;
+}
+h2 {
+  font-size: 2em;
+}
+h3 {
+  font-family: 'freight-text-pro';
+  font-weight: 500;
+  font-size: 1.3em;
+}
+h4 {
+  font-weight: 500;
+  font-size: 1.1em;
+}
 //buttons
 .btn-primary {
   background-color: $light-blue;
@@ -52,12 +66,9 @@ svg {
 }
 
 //alerts
-.alert {
-  .btn-close {
-    float: right;
-    margin-top: -.5em;
-    margin-right: -.5em;
-  }
+.alert-dismissible .btn-close {
+  top: -.5em;
+  right: -.25em;
 }
 .alert-primary {
   background-color: $cool-wash;
@@ -258,14 +269,18 @@ header {
   ul {
     border-bottom: 1px solid rgba(0, 0, 0, 0.125);
   }
-  li {
+  li.list-group-item {
     background-color: transparent;
+    padding: .25em 0;
+    a {
+      text-decoration: none;
+    }
     .notification-options {
       font-size: .8em;
+      a {
+        text-decoration: underline;
+      }
     }
-  }
-  li a {
-    text-decoration: none;
   }
   svg {
     fill: $light-warm-grey;
