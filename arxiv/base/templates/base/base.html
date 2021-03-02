@@ -8,9 +8,9 @@
     {% endblock addl_head %}
   </head>
   <body>
-    <div class="visually-hidden-focusable overflow-hidden"><a href="#content">Skip to main content</a></div>
     {% import "base/macros.html" as macros %}
     <header>
+      <div class="visually-hidden-focusable overflow-hidden"><a href="#content">Skip to main content</a></div>
       {% block header %}
       {% include "base/header.html" %}
       {% endblock header %}

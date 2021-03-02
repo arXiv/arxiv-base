@@ -10671,12 +10671,6 @@ h4, .h4 {
   font-size: 1.1em;
 }
 
-.btn-tiny {
-  padding: 0.1rem 0.25rem;
-  font-size: 0.6rem;
-  border-radius: 0.15rem;
-}
-
 .btn-primary {
   background-color: #a5d6fe;
   color: black;
@@ -10705,6 +10699,12 @@ h4, .h4 {
 .btn-outline-secondary {
   border-color: #6b6459;
   color: #6b6459;
+}
+
+.btn-tiny {
+  padding: 0.1rem 0.25rem;
+  font-size: 0.6rem;
+  border-radius: 0.15rem;
 }
 
 .alert-dismissible .btn-close {

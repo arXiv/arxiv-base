@@ -46,11 +46,6 @@ h4 {
   font-size: 1.1em;
 }
 //buttons
-.btn-tiny {
-    padding: .1rem .25rem;
-    font-size: .6rem;
-    border-radius: .15rem;
-}
 .btn-primary {
   background-color: $light-blue;
   color: black;
@@ -76,6 +71,11 @@ h4 {
 .btn-outline-secondary {
   border-color: $warm-grey;
   color: $warm-grey;
+}
+.btn-tiny {
+  padding: .1rem .25rem;
+  font-size: .6rem;
+  border-radius: .15rem;
 }
 
 //alerts
