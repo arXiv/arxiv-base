@@ -10770,8 +10770,9 @@ header .arxiv-nav nav .navbar-brand .arxiv-logo {
   height: 2.5em;
 }
 header .arxiv-nav nav .navbar-nav a.nav-link {
-  font-size: 1.2em;
-  color: #6b6459;
+  font-size: 1.1em;
+  color: black;
+  font-family: "freight-text-pro";
 }
 header .arxiv-nav nav .navbar-nav a.nav-link:hover {
   color: #1f5e96;
@@ -10824,13 +10825,13 @@ header .arxiv-nav nav .navbar-nav navbar-toggler svg {
   header .arxiv-nav nav .navbar-nav .nav-item .arxiv-nav-link-description span {
     display: block;
     margin-top: 4.5em;
-    font-family: freight-text-pro;
     font-size: 13px;
     line-height: 13px;
     color: #6b6459;
   }
   header .arxiv-nav nav .navbar-nav .nav-item:hover .arxiv-nav-link-description, header .arxiv-nav nav .navbar-nav .nav-item:focus .arxiv-nav-link-description, header .arxiv-nav nav .navbar-nav .nav-item:focus-within .arxiv-nav-link-description {
     display: block;
+    cursor: pointer;
   }
   header .arxiv-nav nav .navbar-nav .nav-item:hover a.nav-link, header .arxiv-nav nav .navbar-nav .nav-item:focus a.nav-link, header .arxiv-nav nav .navbar-nav .nav-item:focus-within a.nav-link {
     color: #1f5e96;

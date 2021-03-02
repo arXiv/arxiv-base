@@ -150,8 +150,9 @@ header {
       }
       .navbar-nav {
         a.nav-link {
-          font-size: 1.2em;
-          color: $warm-grey;
+          font-size: 1.1em;
+          color: black;
+          font-family: 'freight-text-pro';
           &:hover {
             color: $dark-blue;
           }
@@ -200,7 +201,6 @@ header {
               span {
                 display: block;
                 margin-top: 4.5em;
-                font-family: freight-text-pro;
                 font-size: 13px;
                 line-height: 13px;
                 color: $warm-grey;
@@ -210,6 +210,7 @@ header {
             &:focus .arxiv-nav-link-description,
             &:focus-within .arxiv-nav-link-description {
               display: block;
+              cursor: pointer;
             }
             &:hover a.nav-link,
             &:focus a.nav-link,
