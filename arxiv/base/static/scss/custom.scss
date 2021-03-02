@@ -450,9 +450,14 @@ footer {
 
 //home
 .arxiv-home-form {
-  label {
-    font-size: 1.5em;
-    font-weight: 500;
-    color: $salmon;
+  h3 {
+    margin-bottom: 0;
+  }
+}
+.arxiv-home-messages {
+  margin-top: 1em;
+  .card-title {
+    border-bottom: 2px solid $warm-grey;
+    background-color: $warm-wash;
   }
 }

@@ -11058,10 +11058,16 @@ footer {
 }
 
 /******* PAGE SPECIFIC STYLES ********/
-.arxiv-home-form label {
-  font-size: 1.5em;
-  font-weight: 500;
-  color: #fb595a;
+.arxiv-home-form h3, .arxiv-home-form .h3 {
+  margin-bottom: 0;
+}
+
+.arxiv-home-messages {
+  margin-top: 1em;
+}
+.arxiv-home-messages .card-title {
+  border-bottom: 2px solid #6b6459;
+  background-color: #f9f7f7;
 }
 
 /*# sourceMappingURL=custom.css.map */
