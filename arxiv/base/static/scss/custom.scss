@@ -142,7 +142,7 @@ h4 {
 
 //Cards
 .arxiv-cards-warm {
-  .card {
+  .card, .card + .card {
     border-color: $warm-wash;
     background-color: $warm-wash-200;
     border-width: .15em;
@@ -159,10 +159,10 @@ h4 {
   }
 }
 .arxiv-cards-warm.card-group > .card:not(:last-child) {
-  margin-right: .25em;
+  margin-right: .45em;
 }
 .arxiv-cards-warm.card-group > .card:not(:first-child) {
-  margin-left: .25em;
+  margin-left: .45em;
 }
 
 //header styles

@@ -10769,7 +10769,7 @@ h4, .h4 {
   color: #f9f7f7;
 }
 
-.arxiv-cards-warm .card {
+.arxiv-cards-warm .card, .arxiv-cards-warm .card + .card {
   border-color: #f9f7f7;
   background-color: #fdfdfd;
   border-width: 0.15em;
@@ -10786,11 +10786,11 @@ h4, .h4 {
 }
 
 .arxiv-cards-warm.card-group > .card:not(:last-child) {
-  margin-right: 0.25em;
+  margin-right: 0.45em;
 }
 
 .arxiv-cards-warm.card-group > .card:not(:first-child) {
-  margin-left: 0.25em;
+  margin-left: 0.45em;
 }
 
 header .arxiv-prenav {
