@@ -10772,7 +10772,7 @@ h4, .h4 {
 .arxiv-cards-warm .card {
   border-color: #f9f7f7;
   background-color: #f0f0ee;
-  border-width: 0.5em;
+  border-width: 0.15em;
   -webkit-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
   -moz-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
   box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
@@ -10783,6 +10783,12 @@ h4, .h4 {
   font-family: "freight-text-pro";
   font-weight: 600;
   color: #6b6459;
+}
+.arxiv-cards-warm .card-group > .card:not(:last-child) {
+  margin-right: 0.25em;
+}
+.arxiv-cards-warm .card-group > .card:not(:first-child) {
+  margin-left: 0.25em;
 }
 
 header .arxiv-prenav {
