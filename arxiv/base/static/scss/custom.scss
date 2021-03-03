@@ -46,6 +46,13 @@ h4 {
   font-size: 1.1em;
 }
 
+//Forms
+//fix for FF:
+.form-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
 //buttons
 .btn-primary {
   background-color: $light-blue;
