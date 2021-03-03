@@ -46,6 +46,11 @@ h4 {
   font-size: 1.1em;
 }
 
+//Grid and layout customizations
+.container-wide {
+  max-width: 95% !important;
+}
+
 //Forms
 //fix for FF:
 .form-select {
@@ -131,6 +136,23 @@ h4 {
   color: $warm-wash;
   .alert-link {
     color: $warm-wash;
+  }
+}
+
+//Cards
+.arxiv-cards-warm {
+  .card {
+    border-color: $warm-wash;
+    border-width: .5em;
+    -webkit-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
+    -moz-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
+    box-shadow: 2px 2px 4px 0px rgb(0 0 0 / 10%);
+  }
+  .card-title {
+    border-bottom: 2px solid $warm-wash;
+    padding-bottom: .25em;
+    font-family: 'freight-text-pro';
+    font-weight: 600;
   }
 }
 
@@ -278,29 +300,6 @@ header {
     }/*end @media queries */
   }/*end nav element*/
 }/*end arxiv-nav*/
-
-//Grid and layout customizations
-.container-wide {
-  max-width: 95% !important;
-}
-
-//Cards
-.arxiv-special-cards {
-  .card {
-    border-color: $warm-wash;
-    border-width: .5em;
-    -webkit-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
-    -moz-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
-    box-shadow: 2px 2px 4px 0px rgb(0 0 0 / 10%);
-  }
-  .card-title {
-    border-bottom: 2px solid $warm-wash;
-    padding-bottom: .25em;
-    font-family: 'freight-text-pro';
-    font-weight: 600;
-  }
-}
-
 
 //Footer styles
 .arxiv-footer {

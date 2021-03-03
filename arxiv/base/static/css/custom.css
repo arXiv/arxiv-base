@@ -1,9 +1,9 @@
 /* Error: expected "}".
  *     ,
- * 376 | }
+ * 375 | }
  *     |  ^
  *     '
- *   arxiv/base/static/scss/custom.scss 376:2  root stylesheet */
+ *   arxiv/base/static/scss/custom.scss 375:2  root stylesheet */
 
 body::before {
   font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
@@ -13,5 +13,5 @@ body::before {
   padding: 1em;
   margin-bottom: 1em;
   border-bottom: 2px solid black;
-  content: 'Error: expected "}".\a     \2577 \a 376 \2502  }\a     \2502   ^\a     \2575 \a   arxiv/base/static/scss/custom.scss 376:2  root stylesheet';
+  content: 'Error: expected "}".\a     \2577 \a 375 \2502  }\a     \2502   ^\a     \2575 \a   arxiv/base/static/scss/custom.scss 375:2  root stylesheet';
 }
