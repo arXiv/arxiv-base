@@ -97,9 +97,10 @@ h4 {
   color: $warm-grey;
 }
 .btn-tiny {
-  padding: .1rem .25rem;
-  font-size: .6rem;
-  border-radius: .15rem;
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  line-height: 0.9rem;
+  border-radius: 0.2rem;
 }
 
 //alerts
@@ -143,6 +144,7 @@ h4 {
 .arxiv-cards-warm {
   .card {
     border-color: $warm-wash;
+    background-color: $warm-grey-100;
     border-width: .5em;
     -webkit-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
     -moz-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
@@ -153,6 +155,7 @@ h4 {
     padding-bottom: .25em;
     font-family: 'freight-text-pro';
     font-weight: 600;
+    color: $warm-grey;
   }
 }
 
