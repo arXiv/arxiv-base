@@ -142,12 +142,6 @@ h4 {
 
 //Cards
 .arxiv-cards-warm {
-  .card, .card + .card {
-    background-color: $warm-wash-200;
-    -webkit-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
-    -moz-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
-    box-shadow: 2px 2px 4px 0px rgb(0 0 0 / 10%);
-  }
   .card-title {
     border-bottom: 2px solid $warm-wash;
     padding-bottom: .25em;
@@ -162,8 +156,13 @@ h4 {
 .arxiv-cards-warm.card-group > .card:not(:first-child) {
   margin-left: .45em;
 }
-.arxiv-cards-warm.card-group > .card + .card {
+.arxiv-cards-warm.card-group > .card + .card,
+.arxiv-cards-warm .card {
   border: 1px solid $warm-wash;
+  background-color: $warm-wash-200;
+  -webkit-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
+  -moz-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
+  box-shadow: 2px 2px 4px 0px rgb(0 0 0 / 10%);
 }
 
 //header styles

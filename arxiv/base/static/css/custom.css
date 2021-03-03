@@ -10769,12 +10769,6 @@ h4, .h4 {
   color: #f9f7f7;
 }
 
-.arxiv-cards-warm .card, .arxiv-cards-warm .card + .card {
-  background-color: #fdfdfd;
-  -webkit-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
-  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
-}
 .arxiv-cards-warm .card-title {
   border-bottom: 2px solid #f9f7f7;
   padding-bottom: 0.25em;
@@ -10791,8 +10785,13 @@ h4, .h4 {
   margin-left: 0.45em;
 }
 
-.arxiv-cards-warm.card-group > .card + .card {
+.arxiv-cards-warm.card-group > .card + .card,
+.arxiv-cards-warm .card {
   border: 1px solid #f9f7f7;
+  background-color: #fdfdfd;
+  -webkit-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 header .arxiv-prenav {
