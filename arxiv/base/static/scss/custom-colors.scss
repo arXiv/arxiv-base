@@ -39,3 +39,13 @@ $warm-grey-600: tint-color($warm-grey, 20%);
 $warm-grey-700: tint-color($warm-grey, 10%);
 $warm-grey-800: $warm-grey !default;
 $warm-grey-900: shade-color($warm-grey, 80%);
+
+$warm-wash-100: tint-color($warm-wash, 90%);
+$warm-wash-200: tint-color($warm-wash, 70%);
+$warm-wash-300: tint-color($warm-wash, 50%);
+$warm-wash-400: tint-color($warm-wash, 20%);
+$warm-wash-500: $warm-wash !default;
+$warm-wash-600: shade-color($warm-wash, 20%);
+$warm-wash-700: shade-color($warm-wash, 30%);
+$warm-wash-800: shade-color($warm-wash, 60%);
+$warm-wash-900: shade-color($warm-wash, 80%);

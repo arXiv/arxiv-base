@@ -10784,10 +10784,12 @@ h4, .h4 {
   font-weight: 600;
   color: #6b6459;
 }
-.arxiv-cards-warm .card-group > .card:not(:last-child) {
+
+.arxiv-cards-warm.card-group > .card:not(:last-child) {
   margin-right: 0.25em;
 }
-.arxiv-cards-warm .card-group > .card:not(:first-child) {
+
+.arxiv-cards-warm.card-group > .card:not(:first-child) {
   margin-left: 0.25em;
 }
 

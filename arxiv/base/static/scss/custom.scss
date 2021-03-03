@@ -157,12 +157,12 @@ h4 {
     font-weight: 600;
     color: $warm-grey;
   }
-  .card-group > .card:not(:last-child) {
-    margin-right: .25em;
-  }
-  .card-group > .card:not(:first-child) {
-    margin-left: .25em;
-  }
+}
+.arxiv-cards-warm.card-group > .card:not(:last-child) {
+  margin-right: .25em;
+}
+.arxiv-cards-warm.card-group > .card:not(:first-child) {
+  margin-left: .25em;
 }
 
 //header styles
