@@ -10716,10 +10716,20 @@ h4, .h4 {
   border-color: #a5d6fe;
   color: #1f5e96;
 }
+.btn-outline-primary:hover {
+  background-color: #f7fafc;
+  color: #1f5e96;
+  border-color: #1f5e96;
+}
 
 .btn-outline-secondary {
-  border-color: #6b6459;
+  border-color: #7a746a;
   color: #6b6459;
+}
+.btn-outline-secondary:hover {
+  background-color: #f9f7f7;
+  color: black;
+  border-color: #6b6459;
 }
 
 .btn-tiny {
@@ -10787,11 +10797,19 @@ h4, .h4 {
 
 .arxiv-cards-warm.card-group > .card + .card,
 .arxiv-cards-warm .card {
-  border: 1px solid #f9f7f7;
+  border: 1px solid #a6a29b;
   background-color: #fdfdfd;
   -webkit-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
   -moz-box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
   box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+}
+
+.breadcrumbs {
+  margin-top: 0.5rem;
+}
+.breadcrumbs .breadcrumb-item {
+  font-size: 0.9em;
 }
 
 header .arxiv-prenav {
@@ -10882,10 +10900,10 @@ header .arxiv-search button.btn svg {
     display: block;
     width: 100%;
     border-style: solid;
-    border-width: 2px;
+    border-width: 1px;
     border-color: transparent;
     position: relative;
-    top: -0.1em;
+    top: -1px;
     padding-left: 1em;
     padding-right: 0.5em;
     height: 4.5em;

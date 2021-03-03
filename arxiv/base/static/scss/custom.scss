@@ -91,10 +91,20 @@ h4 {
 .btn-outline-primary {
   border-color: $light-blue;
   color: $dark-blue;
+  &:hover {
+    background-color: $cool-wash;
+    color: $dark-blue;
+    border-color: $dark-blue;
+  }
 }
 .btn-outline-secondary {
-  border-color: $warm-grey;
+  border-color: $warm-grey-700;
   color: $warm-grey;
+  &:hover {
+    background-color: $warm-wash;
+    color: black;
+    border-color: $warm-grey;
+  }
 }
 .btn-tiny {
   padding: 0 0.4rem;
@@ -158,11 +168,20 @@ h4 {
 }
 .arxiv-cards-warm.card-group > .card + .card,
 .arxiv-cards-warm .card {
-  border: 1px solid $warm-wash;
+  border: 1px solid $warm-grey-400;
   background-color: $warm-wash-200;
   -webkit-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
   -moz-box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.10);
   box-shadow: 2px 2px 4px 0px rgb(0 0 0 / 10%);
+  border-radius: 0;
+}
+
+//breadcrumbs
+.breadcrumbs {
+  margin-top: .5rem;
+  .breadcrumb-item {
+    font-size: .9em;
+  }
 }
 
 //header styles
@@ -207,6 +226,7 @@ header {
     }
   }
 }
+
 //customize nav
 .arxiv-nav {
   border-bottom: 1px solid #dcdad5;
@@ -252,10 +272,10 @@ header {
             display: block;
             width: 100%;
             border-style: solid;
-            border-width: 2px;
+            border-width: 1px;
             border-color: transparent;
             position: relative;
-            top: -.1em;
+            top: -1px;
             padding-left: 1em;
             padding-right: .5em;
             height: 4.5em;
