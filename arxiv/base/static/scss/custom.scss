@@ -391,6 +391,16 @@ footer {
   background-color: #222;
 }
 
+//print styles
+@media print {
+  header, footer, .arxiv-nav {
+    display: none !important;
+  }
+  .container {
+    margin: 1em 0;
+  }
+}
+
 // PAGE SPECIFIC STYLES
 //home
 .arxiv-home-form {

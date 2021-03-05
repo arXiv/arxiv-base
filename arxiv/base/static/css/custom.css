@@ -11012,6 +11012,15 @@ footer {
   background-color: #222;
 }
 
+@media print {
+  header, footer, .arxiv-nav {
+    display: none !important;
+  }
+
+  .container {
+    margin: 1em 0;
+  }
+}
 .arxiv-home-form {
   max-width: 700px;
 }
