@@ -429,65 +429,66 @@ footer {
 }
 
 //ABS
-//labs display and toggles
-.toggle {
-  border: 1px dotted #c7d3db;
-  padding: .5em;
-  background-color: #eef5f9;
-  .switch-container {
-    flex-grow: 0;
-    label.switch {
-      position: relative;
-      display: inline-block;
-      width: 38px;
-      height: 20px;
-      padding: 0;
-      background-color: transparent;
-      margin: 0;
+//labs section
+.arxiv-labs {
+  margin-top: 1em;
+  .nav-link {
+    padding-left: 1.5em;
+    padding-right: 1.25em;
+    background-color: $warm-wash-600;
+    &:not(.active) {
+      height: calc(100% - 3px);
     }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
+  }
+  .nav-link.active {
+    background-color: $warm-wash-300;
+    border-color: $warm-wash-700 $warm-wash-700 $warm-wash-300;
+  }
+  .nav-item {
+    margin-right: .2em;
+    &:first-child {
+      margin-left: 1em;
+    }
+  }
+  .tab-content {
+    background-color: $warm-wash-300;
+    padding: 1em;
+    .toggles {
+      padding: 1em 1em 1em 2em;
+      border: 1px dotted $warm-wash-800;
+      margin-bottom: 1.5em;
+      .row:not(:first-child) {
+        margin-top: 1em;
       }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      border-radius: 24px;
-      background-color: #ccc;
-      -webkit-transition: .4s;
-      transition: .4s;
+      em {
+        font-size: .8em;
+      }
     }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 2px;
-      bottom: 2px;
-      border-radius: 50%;
-      background-color: white;
-      -webkit-transition: .4s;
-      transition: .4s;
+    .labs-icon {
+      width: 50%;
     }
-    input.enabled + .slider {
-      background-color: #1c8bd6;
+    h2 {
+      font-size: 1.3em;
     }
-    input.enabled + .slider {
-      box-shadow: 0 0 1px #2196F3;
+  }
+  @media (min-width: 576px) {
+    margin-top: 2em;
+    .nav-item:first-child {
+      margin-left: 3em;
     }
-    input.enabled + .slider:before {
-      -webkit-transform: translateX(18px);
-      -ms-transform: translateX(86px);
-      transform: translateX(18px);
+    .nav-link {
+      padding-left: 1em;
+      padding-right: 1em;
+    }
+    .tab-content {
+      padding: 2em 3em;
+      .labs-icon {
+        width: 6em;
+      }
     }
   }
 }
-/*added by Papers With Code*/
+//added by Papers With Code
 #pwc-output {
     padding: 7px;
     margin-bottom: 10px;
@@ -508,5 +509,19 @@ footer {
 .pwc-avatar-box {
     display: inline-block;
 }
-/*END Papers With Code*/
-/**** END Labs ****/
+//END Papers With Code
+
+//CORE custom styles
+#coreRecommenderOutput {
+  background-color: transparent !important;
+  max-width: none !important;
+  margin: 0 !important;
+  .tabs>li.active>a,
+  .tabs>li.active>a:hover,
+  .tabs>li.active>a:focus {
+    background-color: transparent !important;
+  }
+  .coreRecommender li {
+    border-right: none !important;
+  }
+}
