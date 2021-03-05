@@ -52,19 +52,17 @@
         </div>
       </div>
 
-
       <div class="col-sm col-md-5 arxiv-membership">
-        <p>We gratefully acknowledge support from the Simons Foundation and {{ session['institution'] if ('institution' in session and session['institution'] != None) else 'member institutions' }}. <a href="{{ url_for('acknowledgment') }}">Learn more.</a></p>
+        <p>We gratefully acknowledge support from Cornell Tech, the Simons Foundation, and {{ session['institution'] if ('institution' in session and session['institution'] != None) else 'member institutions' }}. <a href="{{ url_for('acknowledgment') }}">Learn more.</a></p>
         <div class="row">
           <div class="col">
-            <img src="{{ url_for('base.static', filename='images/logo-simons-trnsp.png') }}" alt="Simons Foundation logo">
+            <img class="w-75" src="{{ url_for('base.static', filename='images/logo-cornell-tech.png') }}" alt="Cornell Tech logo">
           </div>
           <div class="col">
             {{ session['institution'] if ('institution' in session and session['institution'] != None) else '[member institution logo here]' }}
           </div>
         </div>
       </div>
-
 
     </div>
 </div></div>

@@ -1,6 +1,6 @@
 // Custom colors
 $dark-blue:  #1f5e96;
-$light-blue: #a5d6fe;
+$bright-blue: #a5d6fe;
 $cool-wash:  #f7fafc;
 $warm-grey: #6b6459;
 $light-warm-grey:  #7c7469;
@@ -10,7 +10,7 @@ $warm-wash: #f9f7f7;
 // Create custom map
 $custom-colors: (
     "dark-blue":       $dark-blue,
-    "light-blue":     $light-blue,
+    "light-blue":     $bright-blue,
     "cool-wash":     $cool-wash,
     "warm-grey":       $warm-grey,
     "light-warm-grey":        $light-warm-grey,
@@ -49,3 +49,23 @@ $warm-wash-600: shade-color($warm-wash, 20%);
 $warm-wash-700: shade-color($warm-wash, 30%);
 $warm-wash-800: shade-color($warm-wash, 60%);
 $warm-wash-900: shade-color($warm-wash, 80%);
+
+$bright-blue-100: tint-color($bright-blue, 90%);
+$bright-blue-200: tint-color($bright-blue, 70%);
+$bright-blue-300: tint-color($bright-blue, 50%);
+$bright-blue-400: tint-color($bright-blue, 20%);
+$bright-blue-500: $bright-blue !default;
+$bright-blue-600: shade-color($bright-blue, 20%);
+$bright-blue-700: shade-color($bright-blue, 30%);
+$bright-blue-800: shade-color($bright-blue, 60%);
+$bright-blue-900: shade-color($bright-blue, 80%);
+
+$dark-blue-100: tint-color($dark-blue, 90%);
+$dark-blue-200: tint-color($dark-blue, 70%);
+$dark-blue-300: tint-color($dark-blue, 50%);
+$dark-blue-400: tint-color($dark-blue, 20%);
+$dark-blue-500: $dark-blue !default;
+$dark-blue-600: shade-color($dark-blue, 20%);
+$dark-blue-700: shade-color($dark-blue, 30%);
+$dark-blue-800: shade-color($dark-blue, 60%);
+$dark-blue-900: shade-color($dark-blue, 80%);
