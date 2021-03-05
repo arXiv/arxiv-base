@@ -427,3 +427,86 @@ footer {
 .arxiv-home-messages {
   margin-top: 2em;
 }
+
+//ABS
+//labs display and toggles
+.toggle {
+  border: 1px dotted #c7d3db;
+  padding: .5em;
+  background-color: #eef5f9;
+  .switch-container {
+    flex-grow: 0;
+    label.switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+      padding: 0;
+      background-color: transparent;
+      margin: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 24px;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      border-radius: 50%;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    input.enabled + .slider {
+      background-color: #1c8bd6;
+    }
+    input.enabled + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+    input.enabled + .slider:before {
+      -webkit-transform: translateX(18px);
+      -ms-transform: translateX(86px);
+      transform: translateX(18px);
+    }
+  }
+}
+/*added by Papers With Code*/
+#pwc-output {
+    padding: 7px;
+    margin-bottom: 10px;
+}
+#pwc-output > h3 {
+    margin-top: 25px;
+}
+.pwc-icon {
+    width: 23px;
+    height: 23px;
+    position: relative;
+    top: 5px;
+    margin-right: 5px;
+}
+.pwc-icon-primary {
+    top: 6px;
+}
+.pwc-avatar-box {
+    display: inline-block;
+}
+/*END Papers With Code*/
+/**** END Labs ****/
