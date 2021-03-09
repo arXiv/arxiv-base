@@ -1,9 +1,17 @@
+{% block breadcrumbs %}
 <div class="container container-wide">
   <nav class="arxiv-breadcrumb" aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="#">Build</a></li>
-      <li class="breadcrumb-item"><a href="#">Dynamic</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Breadcrumbs</li>
+      <li class="breadcrumb-item"><a href="{{ url_for('.home') }}">home</a></li>
+      {% if breadcrumb is defined %}
+      {% for link, label in breadcrumb.items() %}<li class="breadcrumb-item"><a href="{{link}}">{{label}}</a></li>{% endfor %}
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{% if pagetitle is defined and variable|length %}
+      {{ pagetitle }}
+      {% else %}
+      Where is my page title? let's fix!
+      {% endif %}</li>
     </ol>
   </nav>
 </div>
+{% endblock %}
