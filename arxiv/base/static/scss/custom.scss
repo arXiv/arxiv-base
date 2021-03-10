@@ -447,6 +447,10 @@ footer {
   h1.title {
     font-size: 2em;
   }
+  .dateline {
+    font-weight: 600;
+    font-size: .95em;
+  }
   .abstract {
     font-family: 'freight-text-pro';
     margin-top: 1.5em;
@@ -458,9 +462,11 @@ footer {
 
 .arxiv-sidebar {
   h4 {
-    margin-bottom: .2em;
+    margin-top: .6em;
+    margin-bottom: .1em;
   }
-  .arxiv-sidebar-more {
+
+  .arxiv-sidebar-more { /* styles for sidebar accordions */
     padding-bottom: .5em;
     margin-bottom: .5em;
     .accordion-button {
@@ -482,6 +488,7 @@ footer {
       padding: .5em 0;
     }
   }
+
   .arxiv-citation-block {
     margin: 0 0 .5em 0;
     line-height: 1em;
@@ -489,6 +496,7 @@ footer {
       margin-top: .25em;
     }
   }
+
   .arxiv-browse-context {
     background-color: $cool-wash;
     .arxiv-search {
@@ -496,6 +504,23 @@ footer {
         background-color: #ffffff;
         svg {
           color: #ababab;
+        }
+      }
+    }
+    .abs-switch-cat {
+      margin-top: 1em;
+      line-height: 1.1em;
+      font-size: 13px;
+      .context-change {
+        a {
+          font-size: 16px;
+          &:not(:last-child):after {
+            content: ",";
+            margin-right: .25em;
+          }
+        }
+        a.subclass {
+          font-style: italic;
         }
       }
     }
@@ -508,18 +533,12 @@ footer {
         font-weight: 600;
       }
     }
-    .abs-switch-cat {
-      margin-top: 1em;
-      line-height: 1.1em;
-      font-size: 13px;
-      a {
-        font-size: 16px;
-      }
-    }
   }
+
   .arxiv-bookmarks {
     margin: 0 0 1em 0;
   }
+
   .arxiv-submission-history {
     margin: 0 0 1em 0;
     line-height: 1em;
@@ -536,6 +555,7 @@ footer {
     }
   }
 }
+
 //LABS
 .arxiv-labs {
   margin-top: 1em;

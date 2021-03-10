@@ -254,7 +254,7 @@
     {% set latest_version = submission_history[-1].version %}
   {% endif %}
 
-  [Submitted on {{ first_version_submitted_date.strftime('%-d %b %Y') }}
+  Submitted on {{ first_version_submitted_date.strftime('%-d %b %Y') }}
   {%- if this_is_the_first_version and there_are_more_versions %} (this version){%- endif -%}
   {%- if not this_is_the_first_version %} (<a href="{{ url_for('abs', paper_id=arxiv_id, version=1) }}">v1</a>){%- endif %}
   {%- if not this_is_the_first_version and not this_is_the_latest_version -%}
@@ -265,7 +265,6 @@
   {%- elif not this_is_the_first_version and this_is_the_latest_version -%}
     , last revised {{ latest_version_submitted_date.strftime('%-d %b %Y') }} (this version, v{{ version }})
   {%- endif -%}
-  ]
 {%- endmacro -%}
 
 {%- macro version_atag(arxiv_id, version, primary_category) -%}

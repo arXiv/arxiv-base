@@ -11063,6 +11063,10 @@ footer {
 .arxiv-abstract h1.title, .arxiv-abstract .title.h1 {
   font-size: 2em;
 }
+.arxiv-abstract .dateline {
+  font-weight: 600;
+  font-size: 0.95em;
+}
 .arxiv-abstract .abstract {
   font-family: "freight-text-pro";
   margin-top: 1.5em;
@@ -11072,9 +11076,11 @@ footer {
 }
 
 .arxiv-sidebar h4, .arxiv-sidebar .h4 {
-  margin-bottom: 0.2em;
+  margin-top: 0.6em;
+  margin-bottom: 0.1em;
 }
 .arxiv-sidebar .arxiv-sidebar-more {
+  /* styles for sidebar accordions */
   padding-bottom: 0.5em;
   margin-bottom: 0.5em;
 }
@@ -11112,6 +11118,21 @@ footer {
 .arxiv-sidebar .arxiv-browse-context .arxiv-search button.btn svg {
   color: #ababab;
 }
+.arxiv-sidebar .arxiv-browse-context .abs-switch-cat {
+  margin-top: 1em;
+  line-height: 1.1em;
+  font-size: 13px;
+}
+.arxiv-sidebar .arxiv-browse-context .abs-switch-cat .context-change a {
+  font-size: 16px;
+}
+.arxiv-sidebar .arxiv-browse-context .abs-switch-cat .context-change a:not(:last-child):after {
+  content: ",";
+  margin-right: 0.25em;
+}
+.arxiv-sidebar .arxiv-browse-context .abs-switch-cat .context-change a.subclass {
+  font-style: italic;
+}
 .arxiv-sidebar .arxiv-browse-context .arxiv-prevnext {
   margin: 0.5em 0;
 }
@@ -11120,14 +11141,6 @@ footer {
 }
 .arxiv-sidebar .arxiv-browse-context .arxiv-browse-new-papers strong {
   font-weight: 600;
-}
-.arxiv-sidebar .arxiv-browse-context .abs-switch-cat {
-  margin-top: 1em;
-  line-height: 1.1em;
-  font-size: 13px;
-}
-.arxiv-sidebar .arxiv-browse-context .abs-switch-cat a {
-  font-size: 16px;
 }
 .arxiv-sidebar .arxiv-bookmarks {
   margin: 0 0 1em 0;
