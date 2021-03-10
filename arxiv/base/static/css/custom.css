@@ -10671,6 +10671,16 @@ h4, .h4 {
   font-size: 1.1em;
 }
 
+h5, .h5 {
+  font-weight: 500;
+  font-size: 0.95em;
+}
+
+h6, .h6 {
+  font-weight: 500;
+  font-size: 0.85em;
+}
+
 .container-wide {
   max-width: 95% !important;
 }
@@ -10822,6 +10832,10 @@ header .arxiv-prenav p {
   margin-bottom: 0;
 }
 header .arxiv-search input {
+  min-width: 20em;
+}
+
+.arxiv-search input {
   border: 1px solid #dcdad5;
   border-right: none;
   margin-right: 0 !important;
@@ -10830,9 +10844,8 @@ header .arxiv-search input {
   border-bottom-right-radius: 0;
   border-top-left-radius: 1em;
   border-bottom-left-radius: 1em;
-  min-width: 20em;
 }
-header .arxiv-search button.btn {
+.arxiv-search button.btn {
   border: 1px solid #dcdad5;
   color: #a5d6fe;
   font-weight: 900;
@@ -10844,7 +10857,7 @@ header .arxiv-search button.btn {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-header .arxiv-search button.btn svg {
+.arxiv-search button.btn svg {
   color: #a5d6fe;
   position: relative;
   top: -4px;
@@ -11045,6 +11058,94 @@ footer {
 
 .arxiv-home-messages {
   margin-top: 2em;
+}
+
+.arxiv-abstract h1.title, .arxiv-abstract .title.h1 {
+  font-size: 2em;
+}
+.arxiv-abstract .abstract {
+  font-family: "freight-text-pro";
+  margin-top: 1.5em;
+}
+.arxiv-abstract .metadata {
+  margin-top: 1.5em;
+}
+
+.arxiv-sidebar h4, .arxiv-sidebar .h4 {
+  margin-bottom: 0.2em;
+}
+.arxiv-sidebar .arxiv-sidebar-more {
+  padding-bottom: 0.5em;
+  margin-bottom: 0.5em;
+}
+.arxiv-sidebar .arxiv-sidebar-more .accordion-button {
+  margin: 0;
+  padding: 0.5em 0;
+  font-size: 0.4em;
+  width: auto;
+}
+.arxiv-sidebar .arxiv-sidebar-more .accordion-button::after {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-left: 0.5em;
+  background-size: 0.75rem;
+}
+.arxiv-sidebar .arxiv-sidebar-more .accordion-collapse {
+  border-bottom-width: 0;
+}
+.arxiv-sidebar .arxiv-sidebar-more .accordion-body {
+  padding: 0.5em 0;
+}
+.arxiv-sidebar .arxiv-citation-block {
+  margin: 0 0 0.5em 0;
+  line-height: 1em;
+}
+.arxiv-sidebar .arxiv-citation-block .extra-ref-cite {
+  margin-top: 0.25em;
+}
+.arxiv-sidebar .arxiv-browse-context {
+  background-color: #f7fafc;
+}
+.arxiv-sidebar .arxiv-browse-context .arxiv-search button.btn {
+  background-color: #ffffff;
+}
+.arxiv-sidebar .arxiv-browse-context .arxiv-search button.btn svg {
+  color: #ababab;
+}
+.arxiv-sidebar .arxiv-browse-context .arxiv-prevnext {
+  margin: 0.5em 0;
+}
+.arxiv-sidebar .arxiv-browse-context .arxiv-browse-new-papers {
+  margin: 0.25em 0;
+}
+.arxiv-sidebar .arxiv-browse-context .arxiv-browse-new-papers strong {
+  font-weight: 600;
+}
+.arxiv-sidebar .arxiv-browse-context .abs-switch-cat {
+  margin-top: 1em;
+  line-height: 1.1em;
+  font-size: 13px;
+}
+.arxiv-sidebar .arxiv-browse-context .abs-switch-cat a {
+  font-size: 16px;
+}
+.arxiv-sidebar .arxiv-bookmarks {
+  margin: 0 0 1em 0;
+}
+.arxiv-sidebar .arxiv-submission-history {
+  margin: 0 0 1em 0;
+  line-height: 1em;
+}
+.arxiv-sidebar .arxiv-submission-history span {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+.arxiv-sidebar .arxiv-submission-history .submitter, .arxiv-sidebar .arxiv-submission-history .version {
+  margin: 0 0 0.65em 0.5em;
+  font-size: 0.95em;
+}
+.arxiv-sidebar .arxiv-submission-history .arxiv-endorsers-link {
+  font-size: 0.85em;
 }
 
 .arxiv-labs {

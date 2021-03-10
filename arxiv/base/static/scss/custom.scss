@@ -45,6 +45,14 @@ h4 {
   font-weight: 500;
   font-size: 1.1em;
 }
+h5 {
+  font-weight: 500;
+  font-size: .95em;
+}
+h6 {
+  font-weight: 500;
+  font-size: .85em;
+}
 
 //Grid and layout customizations
 .container-wide {
@@ -197,32 +205,38 @@ header {
   }
   .arxiv-search {
     input {
-      border: 1px solid #dcdad5;
-      border-right: none;
-      margin-right: 0 !important;
-      height: 2em;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      border-top-left-radius: 1em;
-      border-bottom-left-radius: 1em;
       min-width: 20em;
     }
-    button.btn {
-      border: 1px solid #dcdad5;
+  }
+}
+
+//Search
+.arxiv-search {
+  input {
+    border: 1px solid #dcdad5;
+    border-right: none;
+    margin-right: 0 !important;
+    height: 2em;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
+  }
+  button.btn {
+    border: 1px solid #dcdad5;
+    color: $bright-blue;
+    font-weight: 900;
+    background-color: $cool-wash;
+    margin-left: 0;
+    height: 2em;
+    border-top-right-radius: 1em;
+    border-bottom-right-radius: 1em;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    svg {
       color: $bright-blue;
-      font-weight: 900;
-      background-color: $cool-wash;
-      margin-left: 0;
-      height: 2em;
-      border-top-right-radius: 1em;
-      border-bottom-right-radius: 1em;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      svg {
-        color: $bright-blue;
-        position: relative;
-        top: -4px;
-      }
+      position: relative;
+      top: -4px;
     }
   }
 }
@@ -429,7 +443,100 @@ footer {
 }
 
 //ABS
-//labs section
+.arxiv-abstract {
+  h1.title {
+    font-size: 2em;
+  }
+  .abstract {
+    font-family: 'freight-text-pro';
+    margin-top: 1.5em;
+  }
+  .metadata {
+    margin-top: 1.5em;
+  }
+}
+
+.arxiv-sidebar {
+  h4 {
+    margin-bottom: .2em;
+  }
+  .arxiv-sidebar-more {
+    padding-bottom: .5em;
+    margin-bottom: .5em;
+    .accordion-button {
+      margin: 0;
+      padding: .5em 0;
+      font-size: .4em;
+      width: auto;
+      &::after {
+        width: .75rem;
+        height: .75rem;
+        margin-left: .5em;
+        background-size: .75rem;
+      }
+    }
+    .accordion-collapse {
+      border-bottom-width: 0;
+    }
+    .accordion-body {
+      padding: .5em 0;
+    }
+  }
+  .arxiv-citation-block {
+    margin: 0 0 .5em 0;
+    line-height: 1em;
+    .extra-ref-cite {
+      margin-top: .25em;
+    }
+  }
+  .arxiv-browse-context {
+    background-color: $cool-wash;
+    .arxiv-search {
+      button.btn {
+        background-color: #ffffff;
+        svg {
+          color: #ababab;
+        }
+      }
+    }
+    .arxiv-prevnext {
+      margin: .5em 0;
+    }
+    .arxiv-browse-new-papers {
+      margin: .25em 0;
+      strong {
+        font-weight: 600;
+      }
+    }
+    .abs-switch-cat {
+      margin-top: 1em;
+      line-height: 1.1em;
+      font-size: 13px;
+      a {
+        font-size: 16px;
+      }
+    }
+  }
+  .arxiv-bookmarks {
+    margin: 0 0 1em 0;
+  }
+  .arxiv-submission-history {
+    margin: 0 0 1em 0;
+    line-height: 1em;
+    span {
+      font-size: .9em;
+      font-weight: 600;
+    }
+    .submitter, .version {
+      margin: 0 0 .65em .5em;
+      font-size: .95em;
+    }
+    .arxiv-endorsers-link {
+      font-size: .85em;
+    }
+  }
+}
+//LABS
 .arxiv-labs {
   margin-top: 1em;
   .nav-link {
@@ -510,7 +617,6 @@ footer {
     display: inline-block;
 }
 //END Papers With Code
-
 //CORE custom styles
 #coreRecommenderOutput {
   background-color: transparent !important;
