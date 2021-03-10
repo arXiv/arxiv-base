@@ -10822,11 +10822,19 @@ h6, .h6 {
   border-radius: 0;
 }
 
-.breadcrumbs {
+.arxiv-breadcrumb {
+  margin-bottom: 3em;
+}
+.arxiv-breadcrumb .breadcrumbs {
   margin-top: 0.5rem;
 }
-.breadcrumbs .breadcrumb-item {
+.arxiv-breadcrumb .breadcrumbs .breadcrumb-item {
   font-size: 0.9em;
+}
+@media (max-width: 767px) {
+  .arxiv-breadcrumb {
+    margin-bottom: 1.5em;
+  }
 }
 
 header .arxiv-prenav {

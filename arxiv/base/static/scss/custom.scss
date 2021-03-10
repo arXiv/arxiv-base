@@ -191,10 +191,16 @@ h6 {
 }
 
 //breadcrumbs
-.breadcrumbs {
-  margin-top: .5rem;
-  .breadcrumb-item {
-    font-size: .9em;
+.arxiv-breadcrumb {
+  margin-bottom: 3em;
+  .breadcrumbs {
+    margin-top: .5rem;
+    .breadcrumb-item {
+      font-size: .9em;
+    }
+  }
+  @media (max-width: 767px) {
+    margin-bottom: 1.5em;
   }
 }
 
