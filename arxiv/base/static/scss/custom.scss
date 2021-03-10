@@ -29,6 +29,7 @@ p {
 svg {
   width: 1em;
   margin-top: -.15em;
+  pointer-events: none; /*fix for tooltip icons*/
 }
 h1 {
   font-size: 3em;
@@ -57,6 +58,11 @@ h6 {
 //Grid and layout customizations
 .container-wide {
   max-width: 95% !important;
+}
+@media (max-width: 768px) {
+  .container {
+    max-width: 95%;
+  }
 }
 
 //Forms
@@ -458,6 +464,9 @@ footer {
   .metadata {
     margin-top: 1.5em;
   }
+  .arxiv-mobile-download {
+    margin-top: 1em;
+  }
 }
 
 .arxiv-sidebar {
@@ -553,6 +562,10 @@ footer {
     .arxiv-endorsers-link {
       font-size: .85em;
     }
+  }
+  @media (max-width: 768px) {
+    border: none !important;
+    margin-top: 1em;
   }
 }
 

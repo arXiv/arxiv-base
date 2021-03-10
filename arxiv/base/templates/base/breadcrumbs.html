@@ -6,11 +6,7 @@
       {% if breadcrumb is defined %}
       {% for link, label in breadcrumb.items() %}<li class="breadcrumb-item"><a href="{{link}}">{{label}}</a></li>{% endfor %}
       {% endif %}
-      <li class="breadcrumb-item active" aria-current="page">{% if pagetitle is defined and variable|length %}
-      {{ pagetitle }}
-      {% else %}
-      Where is my page title? let's fix!
-      {% endif %}</li>
+      <li class="breadcrumb-item active" aria-current="page">{{ pagetitle }}</li>
     </ol>
   </nav>
 </div>

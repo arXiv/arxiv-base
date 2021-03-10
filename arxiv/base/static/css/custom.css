@@ -10650,6 +10650,8 @@ p {
 svg {
   width: 1em;
   margin-top: -0.15em;
+  pointer-events: none;
+  /*fix for tooltip icons*/
 }
 
 h1, .h1 {
@@ -10685,6 +10687,11 @@ h6, .h6 {
   max-width: 95% !important;
 }
 
+@media (max-width: 768px) {
+  .container {
+    max-width: 95%;
+  }
+}
 .form-select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -11074,6 +11081,9 @@ footer {
 .arxiv-abstract .metadata {
   margin-top: 1.5em;
 }
+.arxiv-abstract .arxiv-mobile-download {
+  margin-top: 1em;
+}
 
 .arxiv-sidebar h4, .arxiv-sidebar .h4 {
   margin-top: 0.6em;
@@ -11159,6 +11169,12 @@ footer {
 }
 .arxiv-sidebar .arxiv-submission-history .arxiv-endorsers-link {
   font-size: 0.85em;
+}
+@media (max-width: 768px) {
+  .arxiv-sidebar {
+    border: none !important;
+    margin-top: 1em;
+  }
 }
 
 .arxiv-labs {

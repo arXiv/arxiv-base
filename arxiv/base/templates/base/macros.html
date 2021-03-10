@@ -68,6 +68,14 @@
     </div>
 
     <ul class="metadata list-group list-group-flush border">
+      <li class="list-group-item">
+        <strong>arXiv identifier:</strong>
+        arXiv:{{ arxiv_id }}
+      </li>
+      <li class="list-group-item">
+        <strong>Date submitted:</strong>
+        {{ submitted_date }}
+      </li>
       {%- if comments %}
       <li class="list-group-item">
         <strong>Comments:</strong>
