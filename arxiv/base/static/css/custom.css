@@ -11221,6 +11221,67 @@ footer {
 .arxiv-labs .tab-content .toggles em {
   font-size: 0.8em;
 }
+.arxiv-labs .tab-content .toggles .md_switch {
+  display: inline-flex;
+  align-items: center;
+  margin: 5px 0;
+  /* default states */
+}
+.arxiv-labs .tab-content .toggles .md_switch .md_switch__toggle {
+  position: relative;
+  cursor: pointer;
+}
+.arxiv-labs .tab-content .toggles .md_switch .md_switch__toggle::before,
+.arxiv-labs .tab-content .toggles .md_switch .md_switch__toggle::after {
+  content: "";
+  display: block;
+  margin: 0 3px;
+  transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.arxiv-labs .tab-content .toggles .md_switch .md_switch__toggle::before {
+  height: 1.3em;
+  width: 3em;
+  border-radius: 0.65em;
+  opacity: 0.6;
+  background: #b5b2ac;
+  margin-right: 0.5em;
+}
+.arxiv-labs .tab-content .toggles .md_switch .md_switch__toggle::after {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+  height: 1.5em;
+  width: 1.5em;
+  border-radius: 50%;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.3);
+  background: #6b6459;
+}
+.arxiv-labs .tab-content .toggles .md_switch [type=checkbox] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  /* special states */
+  /* checked states */
+}
+.arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:focus + .md_switch__toggle {
+  outline: #1f5e96 solid 1px;
+  box-shadow: 0 0 8px #1f5e96;
+}
+.arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:disabled + .md_switch__toggle {
+  cursor: not-allowed;
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+.arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:disabled + .md_switch__toggle::after {
+  box-shadow: none;
+}
+.arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:checked + .md_switch__toggle::before {
+  background: #d2ebff;
+}
+.arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:checked + .md_switch__toggle::after {
+  transform: translate(calc(3em - 100%), -50%);
+  background: #a5d6fe;
+}
 .arxiv-labs .tab-content .labs-icon {
   width: 50%;
 }

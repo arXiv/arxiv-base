@@ -609,6 +609,68 @@ footer {
       em {
         font-size: .8em;
       }
+      .md_switch {
+        display: inline-flex;
+        align-items: center;
+        margin: 5px 0;
+        .md_switch__toggle {
+          position: relative;
+          cursor: pointer;
+        }
+        /* default states */
+        .md_switch__toggle::before,
+        .md_switch__toggle::after {
+          content: '';
+          display: block;
+          margin: 0 3px;
+          transition: all 100ms cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .md_switch__toggle::before {
+          height: 1.3em;
+          width: 3em;
+          border-radius: 0.65em;
+          opacity: 0.6;
+          background: $warm-grey-300;
+          margin-right: .5em;
+        }
+        .md_switch__toggle::after {
+          position: absolute;
+          top: 50%;
+          transform: translate(0, -50%);
+          height: 1.5em;
+          width: 1.5em;
+          border-radius: 50%;
+          box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.3);
+          background: $warm-grey;
+        }
+      }
+      .md_switch [type=checkbox] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        /* special states */
+        &:focus+.md_switch__toggle {
+          outline: $dark-blue solid 1px;
+          box-shadow: 0 0 8px $dark-blue;
+        }
+        &:disabled+.md_switch__toggle {
+          cursor: not-allowed;
+          filter: grayscale(100%);
+          opacity: 0.6;
+        }
+        &:disabled+.md_switch__toggle::after {
+          box-shadow: none;
+        }
+        /* checked states */
+        &:checked+.md_switch__toggle::before {
+          background: $bright-blue-300;
+        }
+        &:checked+.md_switch__toggle::after {
+          transform: translate(calc(3em - 100%), -50%);
+          background: $bright-blue;
+        }
+      }
+
     }
     .labs-icon {
       width: 50%;
