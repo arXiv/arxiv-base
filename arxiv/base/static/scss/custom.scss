@@ -127,6 +127,28 @@ h6 {
   border-radius: 0.2rem;
 }
 
+//tooltips
+.arxiv-tooltip.tooltip > .tooltip-inner {
+  background-color: $warm-grey-600;
+  color: white;
+  -webkit-box-shadow: 2px 3px 5px 0px rgba(0,0,0,0.20);
+  -moz-box-shadow: 2px 3px 5px 0px rgba(0,0,0,0.20);
+  box-shadow: 2px 3px 5px 0px rgb(0 0 0 / 20%);
+}
+.arxiv-tooltip.tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: $warm-grey-600;
+}
+.arxiv-tooltip.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: $warm-grey-600;
+}
+.arxiv-tooltip.tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: $warm-grey-600;
+}
+.arxiv-tooltip.tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: $warm-grey-600;
+}
+
+
 //alerts
 .alert-dismissible .btn-close {
   top: -.5em;
