@@ -84,7 +84,7 @@
       {% endif -%}
       <li class="list-group-item">
         <strong>Subjects:</strong>
-        {{ primary_category|get_category_display }}
+        <span class="primary-subject">{{ primary_category|get_category_display }}</span>
         {%- for category in secondary_categories|sort(attribute='id') -%}; {{ category|get_category_display }}{%- endfor -%}
       </li>
       {%- if msc_class %}
