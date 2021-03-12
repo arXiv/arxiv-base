@@ -476,9 +476,33 @@ footer {
 }
 
 .arxiv-sidebar {
+  .card {
+    border: 0;
+    padding: 0;
+    .card-body {
+      padding: 0;
+      strong {
+        font-weight: 600;
+      }
+      p {
+        font-size: 13px;
+        margin-bottom: .15em;
+        font-family: 'freight-sans-pro';
+      }
+    }
+    .card-text {
+      margin-left: 1em;
+    }
+  }
   h4 {
     margin-top: .6em;
     margin-bottom: .1em;
+  }
+  h5 {
+    margin: .5em 0 0 0;
+  }
+  .bib-sidebar {
+    border-bottom: 0;
   }
 
   .arxiv-sidebar-more { /* styles for sidebar accordions */
@@ -501,14 +525,6 @@ footer {
     }
     .accordion-body {
       padding: .5em 0;
-    }
-  }
-
-  .arxiv-citation-block {
-    margin: 0 0 .5em 0;
-    line-height: 1em;
-    .extra-ref-cite {
-      margin-top: .25em;
     }
   }
 
@@ -547,26 +563,6 @@ footer {
       strong {
         font-weight: 600;
       }
-    }
-  }
-
-  .arxiv-bookmarks {
-    margin: 0 0 1em 0;
-  }
-
-  .arxiv-submission-history {
-    margin: 0 0 1em 0;
-    line-height: 1em;
-    span {
-      font-size: .9em;
-      font-weight: 600;
-    }
-    .submitter, .version {
-      margin: 0 0 .65em .5em;
-      font-size: .95em;
-    }
-    .arxiv-endorsers-link {
-      font-size: .85em;
     }
   }
   @media (max-width: 768px) {

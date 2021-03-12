@@ -11093,9 +11093,33 @@ footer {
   margin-top: 1em;
 }
 
+.arxiv-sidebar .card {
+  border: 0;
+  padding: 0;
+}
+.arxiv-sidebar .card .card-body {
+  padding: 0;
+}
+.arxiv-sidebar .card .card-body strong {
+  font-weight: 600;
+}
+.arxiv-sidebar .card .card-body p {
+  font-size: 13px;
+  margin-bottom: 0.15em;
+  font-family: "freight-sans-pro";
+}
+.arxiv-sidebar .card .card-text {
+  margin-left: 1em;
+}
 .arxiv-sidebar h4, .arxiv-sidebar .h4 {
   margin-top: 0.6em;
   margin-bottom: 0.1em;
+}
+.arxiv-sidebar h5, .arxiv-sidebar .h5 {
+  margin: 0.5em 0 0 0;
+}
+.arxiv-sidebar .bib-sidebar {
+  border-bottom: 0;
 }
 .arxiv-sidebar .arxiv-sidebar-more {
   /* styles for sidebar accordions */
@@ -11119,13 +11143,6 @@ footer {
 }
 .arxiv-sidebar .arxiv-sidebar-more .accordion-body {
   padding: 0.5em 0;
-}
-.arxiv-sidebar .arxiv-citation-block {
-  margin: 0 0 0.5em 0;
-  line-height: 1em;
-}
-.arxiv-sidebar .arxiv-citation-block .extra-ref-cite {
-  margin-top: 0.25em;
 }
 .arxiv-sidebar .arxiv-browse-context {
   background-color: #f7fafc;
@@ -11159,24 +11176,6 @@ footer {
 }
 .arxiv-sidebar .arxiv-browse-context .arxiv-browse-new-papers strong {
   font-weight: 600;
-}
-.arxiv-sidebar .arxiv-bookmarks {
-  margin: 0 0 1em 0;
-}
-.arxiv-sidebar .arxiv-submission-history {
-  margin: 0 0 1em 0;
-  line-height: 1em;
-}
-.arxiv-sidebar .arxiv-submission-history span {
-  font-size: 0.9em;
-  font-weight: 600;
-}
-.arxiv-sidebar .arxiv-submission-history .submitter, .arxiv-sidebar .arxiv-submission-history .version {
-  margin: 0 0 0.65em 0.5em;
-  font-size: 0.95em;
-}
-.arxiv-sidebar .arxiv-submission-history .arxiv-endorsers-link {
-  font-size: 0.85em;
 }
 @media (max-width: 768px) {
   .arxiv-sidebar {
