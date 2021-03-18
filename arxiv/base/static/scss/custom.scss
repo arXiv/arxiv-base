@@ -6,6 +6,7 @@
 
 //////Bootstrap overrides and extensions
 @import 'custom-colors';
+@import 'custom-borders';
 
 //////Custom styles
 //defaults
@@ -25,6 +26,9 @@ p {
   font-family: freight-text-pro, georgia, serif;
   font-style: normal;
   font-weight: 300;
+}
+p strong {
+  font-weight: 600;
 }
 svg {
   width: 1em;
@@ -274,6 +278,7 @@ header {
     }
   }
 }
+
 
 //customize nav
 .arxiv-nav {
@@ -748,5 +753,35 @@ footer {
   }
   .coreRecommender li {
     border-right: none !important;
+  }
+}
+
+
+//Search pages
+.arxiv-search-tips {
+  margin-top: 3em;
+  background-color: $warm-wash-300;
+  font-size: .9em;
+}
+.arxiv-search-form {
+  max-width: 900px;
+  margin-top: 1em;
+  h3 {
+    margin-bottom: 0;
+  }
+  select, input {
+    border-radius: 2em;
+  }
+  @media (min-width: 576px) {
+    .arxiv-search-field {
+      min-width: 300px;
+    }
+  }
+  @media (min-width: 768px) {
+    .arxiv-search-field {
+      min-width: 500px;
+    }
+    margin-top: 3em;
+    margin-bottom: 1em;
   }
 }
