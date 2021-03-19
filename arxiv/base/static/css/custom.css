@@ -11418,6 +11418,13 @@ footer {
     margin: 1em 0;
   }
 }
+.text-note {
+  font-size: smaller;
+  font-weight: 400;
+  font-family: "freight-text-pro";
+  color: #7a746a;
+}
+
 .arxiv-home-form {
   max-width: 700px;
 }
@@ -11716,7 +11723,7 @@ footer {
 
 .arxiv-search-tips {
   margin-top: 3em;
-  background-color: #fcfbfb;
+  background-color: #f7fafc;
   font-size: 0.9em;
 }
 
@@ -11729,6 +11736,16 @@ footer {
 }
 .arxiv-search-form select, .arxiv-search-form input {
   border-radius: 2em;
+}
+.arxiv-search-form .search-terms-row {
+  margin-bottom: 1em;
+}
+.arxiv-search-form .search-terms-row .boolean-select {
+  flex: none;
+  width: 90px;
+}
+.arxiv-search-form .search-terms-row:first-child > .boolean-select {
+  display: none;
 }
 @media (min-width: 576px) {
   .arxiv-search-form .arxiv-search-field {

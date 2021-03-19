@@ -248,7 +248,7 @@ header {
   }
 }
 
-//Search
+//Search universal
 .arxiv-search {
   input {
     border: 1px solid #dcdad5;
@@ -453,6 +453,15 @@ footer {
     margin: 1em 0;
   }
 }
+
+//font-related styles
+.text-note {
+  font-size: smaller;
+  font-weight: 400;
+  font-family: 'freight-text-pro';
+  color: $warm-grey-700;
+}
+
 
 // PAGE SPECIFIC STYLES
 //home
@@ -760,7 +769,7 @@ footer {
 //Search pages
 .arxiv-search-tips {
   margin-top: 3em;
-  background-color: $warm-wash-300;
+  background-color: $cool-wash;
   font-size: .9em;
 }
 .arxiv-search-form {
@@ -771,6 +780,17 @@ footer {
   }
   select, input {
     border-radius: 2em;
+  }
+
+  .search-terms-row {
+    margin-bottom: 1em;
+    .boolean-select {
+      flex: none;
+      width: 90px;
+    }
+    &:first-child > .boolean-select {
+      display: none;
+    }
   }
   @media (min-width: 576px) {
     .arxiv-search-field {
