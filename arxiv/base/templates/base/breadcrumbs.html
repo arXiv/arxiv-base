@@ -2,7 +2,7 @@
 <div class="container container-wide">
   <nav class="arxiv-breadcrumb" aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <!-- TODO: fix this home url link so it also works in search repo: url_for('.home') -->
+      <!-- TODO: fix this home url link so it also works in search repo, not just browse: url_for('.home') -->
       <li class="breadcrumb-item"><a href="">home</a></li>
       {% if breadcrumb is defined %}
       {% for link, label in breadcrumb.items() %}<li class="breadcrumb-item"><a href="{{link}}">{{label}}</a></li>{% endfor %}

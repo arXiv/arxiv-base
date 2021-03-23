@@ -7,6 +7,7 @@
 //////Bootstrap overrides and extensions
 @import 'custom-colors';
 @import 'custom-borders';
+@import 'custom-hover-animations';
 
 //////Custom styles
 //defaults
@@ -26,6 +27,9 @@ p {
   font-family: freight-text-pro, georgia, serif;
   font-style: normal;
   font-weight: 300;
+}
+strong {
+  font-weight: 600;
 }
 p strong {
   font-weight: 600;
@@ -610,17 +614,18 @@ footer {
 //LABS
 .arxiv-labs {
   margin-top: 1em;
+  border-bottom: 3px solid $cool-wash-900;
   .nav-link {
     padding-left: 1.5em;
     padding-right: 1.25em;
-    background-color: $warm-wash-600;
+    background-color: $cool-wash-600;
     &:not(.active) {
       height: calc(100% - 3px);
     }
   }
   .nav-link.active {
-    background-color: $warm-wash-300;
-    border-color: $warm-wash-700 $warm-wash-700 $warm-wash-300;
+    background-color: $cool-wash;
+    border-color: $cool-wash-700 $cool-wash-700 $cool-wash-300;
   }
   .nav-item {
     margin-right: .2em;
@@ -629,11 +634,11 @@ footer {
     }
   }
   .tab-content {
-    background-color: $warm-wash-300;
+    background-color: $cool-wash;
     padding: 1em;
     .toggles {
       padding: 1em 1em 1em 2em;
-      border: 1px dotted $warm-wash-800;
+      border: 1px dotted $cool-wash-800;
       margin-bottom: 1.5em;
       .row:not(:first-child) {
         margin-top: 1em;
@@ -766,7 +771,122 @@ footer {
 }
 
 
+
 //Search pages
+.new-search-options {
+  line-height: 0;
+}
+.arxiv-search-content {
+  margin-top: 3em;
+}
+.arxiv-pagination {
+  background-color: $bright-blue-100;
+  border: 1px solid $bright-blue-200;
+  padding: 1em 2em;
+  p, nav, ul {
+    margin: 0;
+  }
+  .filter label {
+    background-color: transparent;
+    border: 0;
+  }
+}
+.pagination {
+  .page-item {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    line-height: .75em;
+    margin: 0 .2em;
+    border: 0;
+    .page-link {
+      display: flex;
+      align-content: center;
+      justify-content: center;
+      align-items: center;
+      color: $dark-blue;
+      width: 1.5em;
+      height: 1.5em;
+      padding: 0;
+      border-width: 0;
+      border-color: $bright-blue;
+      font-size: 1em;
+    }
+    .page-link.active {
+      background-color: $bright-blue;
+      color: black;
+      font-size: 1em;
+    }
+    .page-link:hover {
+      color: black;
+    }
+  }
+  .page-item.next, .page-item.prev {
+    border: 0 !important;
+    background-color: transparent;
+    a.page-link {
+      background-color: transparent;
+    }
+    span.page-link {
+      color: $warm-grey;
+      background-color: transparent;
+    }
+  }
+}
+.arxiv-results-list {
+  li {
+    margin: 1em 0;
+    .paper-id {
+      font-size: smaller;
+    }
+    .paper-date {
+      font-size: smaller;
+    }
+    .paper-download {
+      font-size: smaller;
+    }
+    .paper-title {
+      margin-bottom: 0;
+      margin-top: .35em;
+      a {
+        text-decoration: none;
+        color: black;
+        &:hover {
+          color: $dark-blue;
+        }
+      }
+    }
+    .paper-abstract {
+      .paper-abstract-toggle {
+        color: $dark-blue;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: .9em;
+        svg {
+          font-size: .75em;
+        }
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    .paper-authors {
+      font-size: .9em;
+      margin-bottom: .35em;
+    }
+    .paper-category {
+      list-style: none;
+      border-left: 5px solid $salmon;
+      padding: 0 .5em;
+      min-height: 2em;
+      li {
+        line-height: 1em;
+        font-size: .9em;
+        margin: 0;
+      }
+    }
+  }
+}
 .arxiv-search-tips {
   margin-top: 3em;
   background-color: $cool-wash;
@@ -781,7 +901,6 @@ footer {
   select, input {
     border-radius: 2em;
   }
-
   .search-terms-row {
     margin-bottom: 1em;
     .boolean-select {

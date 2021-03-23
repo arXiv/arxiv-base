@@ -69,3 +69,13 @@ $dark-blue-600: shade-color($dark-blue, 20%);
 $dark-blue-700: shade-color($dark-blue, 30%);
 $dark-blue-800: shade-color($dark-blue, 60%);
 $dark-blue-900: shade-color($dark-blue, 80%);
+
+$cool-wash-100: tint-color($cool-wash, 90%);
+$cool-wash-200: tint-color($cool-wash, 70%);
+$cool-wash-300: tint-color($cool-wash, 50%);
+$cool-wash-400: tint-color($cool-wash, 20%);
+$cool-wash-500: $cool-wash !default;
+$cool-wash-600: shade-color($cool-wash, 5%);
+$cool-wash-700: shade-color($cool-wash, 10%);
+$cool-wash-800: shade-color($cool-wash, 20%);
+$cool-wash-900: shade-color($cool-wash, 30%);
