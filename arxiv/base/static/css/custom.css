@@ -11872,6 +11872,21 @@ h6, .h6 {
   border-right-color: #89837a;
 }
 
+.arxiv-error-code {
+  margin: 2em 0;
+}
+.arxiv-error-code p {
+  margin: -2rem 0 0 0;
+  padding: 0;
+  font-size: 10rem;
+  line-height: 0;
+}
+.arxiv-error-code svg {
+  width: 7em;
+  height: 7em;
+  margin-top: 0;
+}
+
 .alert-dismissible .btn-close {
   top: -0.5em;
   right: -0.25em;
