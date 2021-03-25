@@ -11764,6 +11764,17 @@ h6, .h6 {
   font-size: 0.85em;
 }
 
+/* Focusing with a mouse, touch, or stylus will not display an outline (but focus with a keyboard will). */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  border-color: #a5d6fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
 .container-wide {
   max-width: 95% !important;
 }
@@ -12298,7 +12309,7 @@ footer {
 
 .arxiv-labs {
   margin-top: 1em;
-  border-bottom: 3px solid #adafb0;
+  border-bottom: 3px solid #c6c8ca;
 }
 .arxiv-labs .nav-link {
   padding-left: 1.5em;
@@ -12375,9 +12386,10 @@ footer {
   /* special states */
   /* checked states */
 }
-.arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:focus + .md_switch__toggle {
-  outline: #1f5e96 solid 1px;
-  box-shadow: 0 0 8px #1f5e96;
+.arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:focus-visible + .md_switch__toggle {
+  border-color: #a5d6fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 .arxiv-labs .tab-content .toggles .md_switch [type=checkbox]:disabled + .md_switch__toggle {
   cursor: not-allowed;

@@ -62,6 +62,15 @@ h6 {
   font-weight: 500;
   font-size: .85em;
 }
+/* Focusing with a mouse, touch, or stylus will not display an outline (but focus with a keyboard will). */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+:focus-visible {
+  border-color: $bright-blue;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
 
 //Grid and layout customizations
 .container-wide {
@@ -614,7 +623,7 @@ footer {
 //LABS
 .arxiv-labs {
   margin-top: 1em;
-  border-bottom: 3px solid $cool-wash-900;
+  border-bottom: 3px solid $cool-wash-800;
   .nav-link {
     padding-left: 1.5em;
     padding-right: 1.25em;
@@ -686,9 +695,10 @@ footer {
         opacity: 0;
         pointer-events: none;
         /* special states */
-        &:focus+.md_switch__toggle {
-          outline: $dark-blue solid 1px;
-          box-shadow: 0 0 8px $dark-blue;
+        &:focus-visible+.md_switch__toggle {
+          border-color: $bright-blue;
+          outline: 0;
+          box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
         }
         &:disabled+.md_switch__toggle {
           cursor: not-allowed;
