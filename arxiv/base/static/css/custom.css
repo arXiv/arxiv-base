@@ -12657,7 +12657,7 @@ footer {
   margin-bottom: 2em;
 }
 .docs-sidebar .arxiv-search-form .arxiv-search-field {
-  min-width: auto;
+  min-width: auto !important;
 }
 .docs-sidebar .arxiv-search-form button.btn svg {
   margin-right: 0;
