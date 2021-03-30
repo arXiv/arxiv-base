@@ -962,16 +962,24 @@ footer {
   }
 }
 
-//docs
+//docs, marxdown
 .docs-sidebar {
-  .arxiv-search {
+  .arxiv-search-form {
     margin-top: 2em;
+    margin-bottom: 2em;
+    .arxiv-search-field {
+      min-width: auto;
+    }
+    button.btn svg {
+      margin-right: 0;
+      margin-left: 0;
+    }
   }
   .nav-link {
     padding: .25em 0 .25em .5em;
     &.active {
       padding-left: 1em;
-      color: $salmon;
+      color: $warm-grey;
     }
   }
 }

@@ -12652,15 +12652,23 @@ footer {
   }
 }
 
-.docs-sidebar .arxiv-search {
+.docs-sidebar .arxiv-search-form {
   margin-top: 2em;
+  margin-bottom: 2em;
+}
+.docs-sidebar .arxiv-search-form .arxiv-search-field {
+  min-width: auto;
+}
+.docs-sidebar .arxiv-search-form button.btn svg {
+  margin-right: 0;
+  margin-left: 0;
 }
 .docs-sidebar .nav-link {
   padding: 0.25em 0 0.25em 0.5em;
 }
 .docs-sidebar .nav-link.active {
   padding-left: 1em;
-  color: #fb595a;
+  color: #6b6459;
 }
 
 /*# sourceMappingURL=custom.css.map */
