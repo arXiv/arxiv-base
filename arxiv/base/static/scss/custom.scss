@@ -28,6 +28,10 @@ p {
   font-style: normal;
   font-weight: 300;
 }
+p.small {
+  font-size: .8em;
+  font-weight: 300;
+}
 strong {
   font-weight: 600;
 }
@@ -947,5 +951,19 @@ footer {
     }
     margin-top: 3em;
     margin-bottom: 1em;
+  }
+}
+
+//docs
+.docs-sidebar {
+  .arxiv-search {
+    margin-top: 2em;
+  }
+  .nav-link {
+    padding: .25em 0 .25em .5em;
+    &.active {
+      padding-left: 1em;
+      color: $salmon;
+    }
   }
 }

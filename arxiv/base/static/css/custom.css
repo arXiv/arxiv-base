@@ -11720,6 +11720,11 @@ p {
   font-weight: 300;
 }
 
+p.small {
+  font-size: 0.8em;
+  font-weight: 300;
+}
+
 strong {
   font-weight: 600;
 }
@@ -12637,6 +12642,17 @@ footer {
   .arxiv-search-form .arxiv-search-field {
     min-width: 500px;
   }
+}
+
+.docs-sidebar .arxiv-search {
+  margin-top: 2em;
+}
+.docs-sidebar .nav-link {
+  padding: 0.25em 0 0.25em 0.5em;
+}
+.docs-sidebar .nav-link.active {
+  padding-left: 1em;
+  color: #fb595a;
 }
 
 /*# sourceMappingURL=custom.css.map */
