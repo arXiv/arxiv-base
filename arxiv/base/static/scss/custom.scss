@@ -940,6 +940,14 @@ footer {
       display: none;
     }
   }
+  button.btn:last-child {
+    border-top-right-radius: 1.5em;
+    border-bottom-right-radius: 1.5em;
+    svg {
+      margin-right: .4em;
+      margin-left: .4em;
+    }
+  }
   @media (min-width: 576px) {
     .arxiv-search-field {
       min-width: 300px;
