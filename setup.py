@@ -60,7 +60,7 @@ def find_version(*file_paths):
         pass # no file is find, just try to get it from git
 
     try:
-        p = Popen(['git', 'describe', '--dirty'],
+        p = Popen(['git', 'describe', '--dirty', '--always'],
                   stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         line = p.stdout.readlines()[0]
