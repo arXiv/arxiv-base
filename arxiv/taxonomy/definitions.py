@@ -1560,12 +1560,24 @@ CATEGORIES = {
     'nucl-ex': {
         'name': 'Nuclear Experiment',
         'in_archive': 'nucl-ex',
+        'description': 'Nuclear Experiment Results from experimental nuclear physics '
+                       'including the areas of fundamental interactions, measurements '
+                       'at low- and medium-energy, as well as relativistic heavy-ion '
+                       'collisions.  Does not include: detectors and instrumentation nor '
+                       'analysis methods to conduct experiments; descriptions of '
+                       'experimental programs (present or future); comments on published results.',
         'is_active': True,
         'is_general': False
     },
     'nucl-th': {
         'name': 'Nuclear Theory',
         'in_archive': 'nucl-th',
+        'description': 'Nuclear Theory Theory of nuclear structure covering wide area '
+                       'from models of hadron structure to neutron stars. Nuclear '
+                       'equation of states at different external conditions. Theory of '
+                       'nuclear reactions including heavy-ion reactions at low and high '
+                       'energies. It does not include problems of data analysis, physics '
+                       'of nuclear reactors, problems of safety, reactor construction.',
         'is_active': True,
         'is_general': False
     },
