@@ -11794,6 +11794,16 @@ h6, .h6 {
   -moz-appearance: none;
 }
 
+.arxiv-styled-form input {
+  border: 1px solid #dcdad5;
+  border-radius: 0.75em;
+}
+.arxiv-styled-form button.btn svg {
+  color: #1f5e96;
+  position: relative;
+  top: -4px;
+}
+
 .btn-primary {
   background-color: #a5d6fe;
   color: black;

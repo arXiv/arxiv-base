@@ -92,6 +92,20 @@ h6 {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+//adds simple styling and brand colors to common form elements
+.arxiv-styled-form {
+  input {
+    border: 1px solid #dcdad5;
+    border-radius: .75em;
+  }
+  button.btn {
+    svg {
+      color: $dark-blue;
+      position: relative;
+      top: -4px;
+    }
+  }
+}
 
 //buttons
 .btn-primary {
@@ -762,7 +776,7 @@ footer {
     }
   }
 }
-//added by Papers With Code
+//Papers With Code custom styles
 #pwc-output {
     padding: 7px;
     margin-bottom: 10px;
@@ -798,7 +812,7 @@ footer {
     border-right: none !important;
   }
 }
-
+//END CORE
 
 
 //Search pages
