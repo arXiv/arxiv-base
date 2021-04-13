@@ -1,13 +1,13 @@
 <div class="arxiv-prenav"><div class="container container-wide">
     <div class="row">
     <div class="col">
-      <p>arXiv is stewarded by Cornell Tech and supported by our global community. <a href="">Learn More</a></p>
+      <p>arXiv is stewarded by Cornell Tech and supported by our global community. <a href="{{ url_for('about') }}/membership">Learn More</a></p>
     </div>
     <div class="col-md-auto" role="navigation" aria-label="User account menu">
       {% if request.session and request.session.user and request.session.user.name %}
         Welcome <span class="has-text-weight-bold">{{ request.session.user.name.forename }}</span> | <a href="{{ url_for('account') }}">My Account</a> | <a href="">My Feeds</a> | <a href="{{ url_for('logout') }}">Logout</a>
       {% else %}
-        <a href="#">Create Account</a> | <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('account') }}/register">Create Account</a> | <a href="{{ url_for('login') }}">Login</a>
       {% endif %}
     </div>
   </div>
@@ -25,19 +25,19 @@
       <div class="collapse navbar-collapse arxiv-navbar-container" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#">
+            <a class="nav-link" aria-current="page" href="{{ url_for('search_box') }}">
               <span>Papers</span>
               <div role="presentation">Search and read everything on arXiv for free.</div>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{{ url_for('submit') }}">
               <span>Submit</span>
               <div role="presentation">Share your research, make an impact.</div>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="https://labs.arxiv.org/">
               <span>Labs</span>
               <div role="presentation">Partner projects that extend arXiv functionality.</div>
             </a>

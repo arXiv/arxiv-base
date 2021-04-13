@@ -41,6 +41,7 @@ URLS = [
     ("subscribe", "/help/subscribe", BASE_SERVER),
     ("submit", "/submit", BASE_SERVER),
     ("about", "/about", BASE_SERVER),
+    ("donate", "/about/donate", BASE_SERVER),
     ("team", "/about/people/leadership_team", BASE_SERVER),
     ("privacy_policy", "/help/policies/privacy_policy", BASE_SERVER),
     ("copyright", "/help/license", BASE_SERVER),
