@@ -12639,10 +12639,6 @@ footer {
 .arxiv-search-form .search-terms-row:first-child > .boolean-select {
   display: none;
 }
-.arxiv-search-form button.btn:last-child {
-  border-top-right-radius: 1.5em;
-  border-bottom-right-radius: 1.5em;
-}
 .arxiv-search-form button.btn:last-child svg {
   margin-right: 0.4em;
   margin-left: 0.4em;
