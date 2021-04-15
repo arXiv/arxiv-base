@@ -953,6 +953,9 @@ footer {
     &:first-child > .boolean-select {
       display: none;
     }
+    &:first-child > .btn-outline-secondary {
+      visibility: hidden;
+    }
   }
   button.btn:last-child {
     // border-top-right-radius: 1.5em;

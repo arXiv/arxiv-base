@@ -12639,6 +12639,9 @@ footer {
 .arxiv-search-form .search-terms-row:first-child > .boolean-select {
   display: none;
 }
+.arxiv-search-form .search-terms-row:first-child > .btn-outline-secondary {
+  visibility: hidden;
+}
 .arxiv-search-form button.btn:last-child svg {
   margin-right: 0.4em;
   margin-left: 0.4em;
