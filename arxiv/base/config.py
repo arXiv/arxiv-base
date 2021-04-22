@@ -14,6 +14,7 @@ A11Y_URL = os.environ.get(
 
 EXTERNAL_URL_SCHEME = os.environ.get("EXTERNAL_URL_SCHEME", "https")
 BASE_SERVER = os.environ.get("BASE_SERVER", "phoenix.arxiv.org")
+SEARCH_SERVER = os.environ.get("SEARCH_SERVER", "search.phoenix.arxiv.org")
 
 URLS = [
     ("help", "/help", BASE_SERVER),
@@ -22,9 +23,12 @@ URLS = [
     ("help_mathjax", "/help/mathjax", BASE_SERVER),
     ("help_social_bookmarking", "/help/social_bookmarking", BASE_SERVER),
     ("contact", "/help/contact", BASE_SERVER),
-    ("search_box", "/search", BASE_SERVER),
-    ("search_archive", "/search/<archive>", BASE_SERVER),
-    ("search_advanced", "/search/advanced", BASE_SERVER),
+    # ("search_box", "/search", BASE_SERVER),
+    # ("search_archive", "/search/<archive>", BASE_SERVER),
+    # ("search_advanced", "/search/advanced", BASE_SERVER),
+    ("search_box", "/", SEARCH_SERVER),
+    ("search_archive", "/<archive>", SEARCH_SERVER),
+    ("search_advanced", "/advanced", SEARCH_SERVER),
     ("account", "/user", BASE_SERVER),
     ("login", "/login", BASE_SERVER),
     ("logout", "/logout", BASE_SERVER),
