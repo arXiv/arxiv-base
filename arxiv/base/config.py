@@ -13,7 +13,7 @@ A11Y_URL = os.environ.get(
 )
 
 EXTERNAL_URL_SCHEME = os.environ.get("EXTERNAL_URL_SCHEME", "https")
-BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
+BASE_SERVER = os.environ.get("BASE_SERVER", "phoenix.arxiv.org")
 
 URLS = [
     ("help", "/help", BASE_SERVER),
@@ -29,7 +29,7 @@ URLS = [
     ("login", "/login", BASE_SERVER),
     ("logout", "/logout", BASE_SERVER),
     ("home", "/", BASE_SERVER),
-    ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honneypot.
+    ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honeypot.
     ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
     ("twitter", "/arxiv", "twitter.com"),
     ("blog", "/arxiv", "blogs.cornell.edu"),
