@@ -12619,6 +12619,10 @@ footer {
   font-size: 0.9em;
 }
 
+.marxdown .arxiv-search-form .input-group button {
+  border-radius: 2em;
+}
+
 .arxiv-search-form {
   max-width: 900px;
   margin-top: 1em;

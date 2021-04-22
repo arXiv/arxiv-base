@@ -935,6 +935,15 @@ footer {
   background-color: $cool-wash;
   font-size: .9em;
 }
+.marxdown {
+  .arxiv-search-form {
+    .input-group {
+      button {
+        border-radius: 2em;
+      }
+    }
+  }
+}
 .arxiv-search-form {
   max-width: 900px;
   margin-top: 1em;
@@ -958,8 +967,6 @@ footer {
     }
   }
   button.btn:last-child {
-    // border-top-right-radius: 1.5em;
-    // border-bottom-right-radius: 1.5em;
     svg {
       margin-right: .4em;
       margin-left: .4em;
