@@ -71,7 +71,7 @@ h6 {
   outline: none;
 }
 :focus-visible {
-  border-color: $bright-blue;
+  border-color: $dark-blue;
   outline: 0;
   box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
 }
@@ -80,9 +80,13 @@ h6 {
 .container-wide {
   max-width: 95% !important;
 }
-@media (max-width: 768px) {
+.container {
+  margin-bottom: 1em;
+}
+@media (min-width: 769px) {
   .container {
     max-width: 95%;
+    margin-bottom: 0;
   }
 }
 
@@ -297,7 +301,7 @@ header {
 //Search universal
 .arxiv-search {
   input {
-    border: 1px solid #dcdad5;
+    border: 1px solid #959595;
     border-right: none;
     margin-right: 0 !important;
     height: 2em;
@@ -307,18 +311,21 @@ header {
     border-bottom-left-radius: 1em;
   }
   button.btn {
-    border: 1px solid #dcdad5;
-    color: $bright-blue;
+    border: 1px solid #959595;
+    color: $dark-blue;
     font-weight: 900;
-    background-color: $cool-wash;
+    background-color: $bright-blue;
     margin-left: 0;
     height: 2em;
     border-top-right-radius: 1em;
     border-bottom-right-radius: 1em;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+    &:hover {
+      background-color: $cool-wash;
+    }
     svg {
-      color: $bright-blue;
+      color: $dark-blue;
       position: relative;
       top: -4px;
     }
@@ -524,11 +531,17 @@ footer {
     &:hover {
       background-color: $dark-blue-400;
     }
+    &:focus {
+      color: black;
+    }
   }
   input:nth-child(4) {
     background-color: $bright-blue-200;
     &:hover {
       background-color: $dark-blue-400;
+    }
+    &:focus {
+      color: black;
     }
   }
 }

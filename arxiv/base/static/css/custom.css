@@ -11775,7 +11775,7 @@ h6, .h6 {
 }
 
 :focus-visible {
-  border-color: #a5d6fe;
+  border-color: #1f5e96;
   outline: 0;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
@@ -11784,9 +11784,14 @@ h6, .h6 {
   max-width: 95% !important;
 }
 
-@media (max-width: 768px) {
+.container {
+  margin-bottom: 1em;
+}
+
+@media (min-width: 769px) {
   .container {
     max-width: 95%;
+    margin-bottom: 0;
   }
 }
 .form-select {
@@ -11997,7 +12002,7 @@ header .arxiv-search input {
 }
 
 .arxiv-search input {
-  border: 1px solid #dcdad5;
+  border: 1px solid #959595;
   border-right: none;
   margin-right: 0 !important;
   height: 2em;
@@ -12007,10 +12012,10 @@ header .arxiv-search input {
   border-bottom-left-radius: 1em;
 }
 .arxiv-search button.btn {
-  border: 1px solid #dcdad5;
-  color: #a5d6fe;
+  border: 1px solid #959595;
+  color: #1f5e96;
   font-weight: 900;
-  background-color: #f7fafc;
+  background-color: #a5d6fe;
   margin-left: 0;
   height: 2em;
   border-top-right-radius: 1em;
@@ -12018,8 +12023,11 @@ header .arxiv-search input {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+.arxiv-search button.btn:hover {
+  background-color: #f7fafc;
+}
 .arxiv-search button.btn svg {
-  color: #a5d6fe;
+  color: #1f5e96;
   position: relative;
   top: -4px;
 }
@@ -12217,11 +12225,17 @@ footer {
 .arxiv-home-form input:nth-child(3):hover {
   background-color: #4c7eab;
 }
+.arxiv-home-form input:nth-child(3):focus {
+  color: black;
+}
 .arxiv-home-form input:nth-child(4) {
   background-color: #e4f3ff;
 }
 .arxiv-home-form input:nth-child(4):hover {
   background-color: #4c7eab;
+}
+.arxiv-home-form input:nth-child(4):focus {
+  color: black;
 }
 
 .arxiv-home-messages {
