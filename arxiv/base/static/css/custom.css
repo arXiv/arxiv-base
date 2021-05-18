@@ -11829,16 +11829,27 @@ h6, .h6 {
   color: #f9f7f7;
 }
 
-.btn-bright {
+.btn-hot {
   background-color: #fb595a;
   color: black;
   font-weight: 500;
   border-color: transparent;
 }
-.btn-bright:hover {
+.btn-hot:hover {
   background-color: white;
   color: #fb595a;
   border-color: #fb595a;
+}
+
+.btn-cool {
+  background-color: #1f5e96;
+  color: #f7fafc;
+  font-weight: 500;
+  border: none;
+}
+.btn-cool:hover {
+  background-color: #f7fafc;
+  color: #1f5e96;
 }
 
 .btn-outline-primary {
@@ -12168,6 +12179,8 @@ header .arxiv-search input {
 }
 .arxiv-footer .arxiv-membership img {
   width: 100%;
+  max-width: 200px;
+  margin-bottom: 1em;
 }
 @media (min-width: 768px) {
   .arxiv-footer .arxiv-membership {

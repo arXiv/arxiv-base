@@ -130,7 +130,7 @@ h6 {
     color: $warm-wash;
   }
 }
-.btn-bright {
+.btn-hot {
   background-color: $salmon;
   color: black;
   font-weight: 500;
@@ -139,6 +139,16 @@ h6 {
     background-color: white;
     color: $salmon;
     border-color: $salmon;
+  }
+}
+.btn-cool {
+  background-color: $dark-blue;
+  color: $cool-wash;
+  font-weight: 500;
+  border: none;
+  &:hover {
+    background-color: $cool-wash;
+    color: $dark-blue;
   }
 }
 .btn-outline-primary {
@@ -470,6 +480,8 @@ header {
     }
     img {
       width: 100%;
+      max-width: 200px;
+      margin-bottom: 1em;
     }
   }
   @media (min-width: 768px) {

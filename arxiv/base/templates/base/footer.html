@@ -54,9 +54,9 @@
 
       <div class="col-sm col-md-5 arxiv-membership">
         <p>We gratefully acknowledge support from Cornell tech, the Simons Foundation, {{ session['institution'] if ('institution' in session and session['institution'] != None) else 'arXiv members' }}, and all <a href="{{ url_for('about') }}/membership">our contributors</a>.</p>
-        <div class="row">
+        <div class="row row-cols-1 row-cols-xxl-2">
           <div class="col">
-            <img class="w-75" src="{{ url_for('base.static', filename='images/logo-cornell-tech.png') }}" alt="Cornell Tech logo">
+            <img class="logo-cornell-tech" src="{{ url_for('base.static', filename='images/logo-cornell-tech.png') }}" alt="Cornell Tech logo">
           </div>
           <div class="col">
             {{ session['institution'] if ('institution' in session and session['institution'] != None) else '[member institution logo here]' }}
