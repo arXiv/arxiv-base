@@ -1,5 +1,9 @@
 {# macros to be available to all templates across arxiv #}
 
+{% macro a11y-name() -%}
+<span aria-hidden="true">arXiv</span><span class="sr-only">Archive</span>
+{%- endmacro %}
+
 {% macro universalsearch(placeholder, append_action) -%}
   {# Creates a simple, styled universal search bar. You can customize the placeholder text and append search actions #}
   <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_box') }}{{ append_action }}">
