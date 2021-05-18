@@ -12002,7 +12002,7 @@ header .arxiv-search input {
 }
 
 .arxiv-search input {
-  border: 1px solid #959595;
+  border: 1px solid #949494;
   border-right: none;
   margin-right: 0 !important;
   height: 2em;
@@ -12012,7 +12012,7 @@ header .arxiv-search input {
   border-bottom-left-radius: 1em;
 }
 .arxiv-search button.btn {
-  border: 1px solid #959595;
+  border: 1px solid #949494;
   color: #1f5e96;
   font-weight: 900;
   background-color: #a5d6fe;

@@ -1,7 +1,7 @@
 {# macros to be available to all templates across arxiv #}
 
-{% macro a11y-name() -%}
-<span aria-hidden="true">arXiv</span><span class="sr-only">Archive</span>
+{%- macro accessible_name() -%}
+<span aria-hidden="true">arXiv</span><span class="visually-hidden">Archive</span>
 {%- endmacro %}
 
 {% macro universalsearch(placeholder, append_action) -%}
@@ -15,7 +15,7 @@
       </svg>
     </button>
   </form>
-{%- endmacro %}
+{%- endmacro -%}
 
 {% macro alerts(messages=[]) %}
 {% if messages -%}
