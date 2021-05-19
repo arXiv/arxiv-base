@@ -15,8 +15,8 @@
       </svg>
     </button>
     {% if append_params -%}
-      {% for param in append_params -%}
-        <input id="param" type="hidden" name="{{param.name}}" value="{{param.value}}">
+      {% for name, value in append_params -%}
+      <input id="param" type="hidden" name="{{name}}" value="{{value}}">
       {%- endfor %}
     {%- endif %}
   </form>
