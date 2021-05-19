@@ -11794,6 +11794,16 @@ h6, .h6 {
     margin-bottom: 0;
   }
 }
+.form-control:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+.form-control:focus-visible {
+  border-color: #a5d6fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(31, 94, 150, 0.5);
+}
+
 .form-select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -12022,7 +12032,7 @@ header .arxiv-search input {
 }
 
 .arxiv-search input {
-  border: 1px solid #949494;
+  border: 0.5px solid #949494;
   border-right: none;
   margin-right: 0 !important;
   height: 2em;
@@ -12032,7 +12042,7 @@ header .arxiv-search input {
   border-bottom-left-radius: 1em;
 }
 .arxiv-search button.btn {
-  border: 1px solid #949494;
+  border: 0.5px solid #949494;
   color: #1f5e96;
   font-weight: 900;
   background-color: #a5d6fe;
@@ -12240,6 +12250,7 @@ footer {
 }
 .arxiv-home-form select, .arxiv-home-form input {
   border-radius: 2em;
+  border: 0.5px solid #949494;
 }
 .arxiv-home-form input:nth-child(3) {
   background-color: #d2ebff;

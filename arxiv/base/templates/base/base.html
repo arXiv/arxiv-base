@@ -15,7 +15,9 @@
       {% include "base/header.html" %}
       {% endblock header %}
     </header>
+    {%- if request.path != "/" %}
     {% include "base/breadcrumbs.html" %}
+    {% endif %}
     <main>
       {% block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
       <div class="container" id="content">

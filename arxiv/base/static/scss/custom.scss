@@ -92,6 +92,17 @@ h6 {
 
 //Forms
 //fix for FF:
+.form-control {
+  &:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+  &:focus-visible {
+    border-color: $bright-blue;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(31,94,150,.5);
+  }
+}
 .form-select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -321,7 +332,7 @@ header {
 //Search universal
 .arxiv-search {
   input {
-    border: 1px solid #949494;
+    border: .5px solid #949494;
     border-right: none;
     margin-right: 0 !important;
     height: 2em;
@@ -331,7 +342,7 @@ header {
     border-bottom-left-radius: 1em;
   }
   button.btn {
-    border: 1px solid #949494;
+    border: .5px solid #949494;
     color: $dark-blue;
     font-weight: 900;
     background-color: $bright-blue;
@@ -537,7 +548,6 @@ footer {
   color: $warm-grey-700;
 }
 
-
 // PAGE SPECIFIC STYLES
 //home
 .arxiv-home-form {
@@ -547,6 +557,7 @@ footer {
   }
   select, input {
     border-radius: 2em;
+    border: .5px solid #949494;
   }
   input:nth-child(3) {
     background-color: $bright-blue-300;
