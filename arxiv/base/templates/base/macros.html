@@ -4,9 +4,9 @@
 <span aria-hidden="true">arXiv</span><span class="visually-hidden">Archive</span>
 {%- endmacro %}
 
-{% macro universalsearch(placeholder, append_action) -%}
-  {# Creates a simple, styled universal search bar. You can customize the placeholder text and append search actions #}
-  <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_box') }}{{ append_action }}">
+{% macro universalsearch(placeholder, append_params=[]) -%}
+  {# Creates a simple, styled universal search bar. You can customize the placeholder text and append search parameters #}
+  <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_box') }}">
     <input class="form-control me-2" type="search" placeholder="{{ placeholder }}" aria-label="Search" name="query">
     <button class="btn" type="submit">
       <span class="visually-hidden">Search</span>
@@ -14,6 +14,11 @@
         <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
       </svg>
     </button>
+    {% if append_params -%}
+      {% for param in append_params -%}
+        <input id="param" type="hidden" name="{{param.name}}" value="{{param.value}}">
+      {%- endfor %}
+    {%- endif %}
   </form>
 {%- endmacro -%}
 
@@ -28,7 +33,6 @@
 </div>
 {%- endif %}
 {% endmacro %}
-
 
 {% macro abs(
     arxiv_id,
