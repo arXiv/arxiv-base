@@ -77,16 +77,17 @@ h6 {
 }
 
 //Grid and layout customizations
-.container-wide {
-  max-width: 95% !important;
-}
 .container {
-  margin-bottom: 1em;
+
+}
+@media (min-width: 576px) {
+  .container-wide {
+    max-width: 95% !important;
+  }
 }
 @media (min-width: 769px) {
   .container {
     max-width: 95%;
-    margin-bottom: 0;
   }
 }
 
@@ -321,9 +322,16 @@ header {
     p {
       margin-bottom: 0;
     }
+    .container {
+      margin-bottom: 0;
+    }
   }
   .arxiv-search {
+    min-width: 10em;
     input {
+      min-width: 10em;
+    }
+    @media (min-width: 576px) {
       min-width: 20em;
     }
   }
@@ -371,10 +379,25 @@ header {
   nav {
     padding: 0;
     .navbar-brand {
-      margin-top: .5em;
-      margin-bottom: .5em;
+      margin-top: .25em;
+      margin-bottom: .25em;
+      @media (min-width: 576px) {
+        margin-top: .5em;
+        margin-bottom: .5em;
+      }
       .arxiv-logo {
         height: 2.5em;
+      }
+    }
+    .navbar-toggler {
+      padding: 0.25rem 0.5rem;
+      font-size: 2.25rem;
+      line-height: .75;
+      svg {
+        color: $dark-blue;
+      }
+      &:focus {
+        box-shadow: 0 0 0 0.25rem rgba(31,94,150,.5) !important;
       }
     }
     .navbar-nav {
@@ -385,12 +408,19 @@ header {
         &:hover {
           color: $dark-blue;
         }
-      }
-      navbar-toggler {
-        svg {
-          color: $warm-grey;
+        @media (max-width: 767px) {
+          div {
+            display: none;
+          }
         }
       }
+    }
+    .arxiv-search-links {
+      font-size: .85em;
+      font-size: 0.85em;
+      text-align: right;
+      margin-right: 1em;
+      margin-bottom: .25em;
     }
     @media (min-width: 992px) {
       .arxiv-navbar-container {
@@ -417,16 +447,14 @@ header {
             height: 4.5em;
             width: 7.5em;
             line-height: 13px;
-            span {
+            .anchor {
               display: block;
               margin-top: 1.3em;
               margin-bottom: .5em;
               font-size: 1em;
             }
-            div {
+            .text-note {
               display: none;
-              font-size: 13px;
-              color: $warm-grey;
             }
             &:hover,
             &:focus,
@@ -438,7 +466,7 @@ header {
               -webkit-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
               -moz-box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
               box-shadow: 3px 3px 5px 0px rgba(0,0,0,0.25);
-              div {
+              .text-note {
                 display: inline;
               }
             }
@@ -447,23 +475,10 @@ header {
       }/*end navbar-nav*/
       .arxiv-search-links {
         position: absolute;
-        right: 2em;
-        bottom: .25em;
-        font-size: 12px;
+        right: 0;
+        bottom: .1em;
       }
-    }
-    @media (max-width: 767px) {
-      a.nav-link {
-        div {
-          display: none;
-        }
-      }
-      .arxiv-search-links {
-        text-align: right;
-        font-size: .8em;
-        margin-bottom: 1em;
-      }
-    }/*end @media queries */
+    }/*end @media query */
   }/*end nav element*/
 }/*end arxiv-nav*/
 
@@ -546,6 +561,7 @@ footer {
   font-weight: 400;
   font-family: 'freight-text-pro';
   color: $warm-grey-700;
+  line-height: calc(1em + 5px);
 }
 
 // PAGE SPECIFIC STYLES

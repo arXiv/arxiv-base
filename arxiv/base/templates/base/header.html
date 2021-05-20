@@ -1,6 +1,6 @@
 <div class="arxiv-prenav"><div class="container container-wide">
     <div class="row">
-    <div class="col">
+    <div class="col d-none d-sm-block">
       <p>arXiv is stewarded by Cornell Tech and <a href="{{ url_for('about') }}/membership">supported by our global community.</a></p>
     </div>
     <div class="col-md-auto" role="navigation" aria-label="User account menu">
@@ -15,7 +15,7 @@
 
 <div class="arxiv-nav"><div class="container container-wide">
   <nav class="navbar navbar-expand-lg" aria-label="main menu">
-    <div class="container-fluid">
+    <div class="container-fluid px-0 px-sm-1">
       <a class="navbar-brand" href="{{ url_for('home') }}"><img src="{{ url_for('base.static', filename='images/logo-arxiv.svg') }}" class="arxiv-logo" alt="arXiv logo" width="112"></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
@@ -26,20 +26,20 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('search_box') }}">
-              <span>Papers</span>
-              <div role="presentation">Search and read everything on arXiv for free.</div>
+              <div class="anchor">Papers</div>
+              <div class="text-note" role="presentation">Search and read everything on {{ accessible_name() }} for free.</div>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('submit') }}">
-              <span>Submit</span>
-              <div role="presentation">Share your research, make an impact.</div>
+              <div class="anchor">Submit</div>
+              <div class="text-note" role="presentation">Share and archive your research.</div>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="https://labs.arxiv.org/">
-              <span>Labs</span>
-              <div role="presentation">Partner projects that extend arXiv functionality.</div>
+              <div class="anchor">Labs</div>
+              <div class="text-note" role="presentation">Partner projects that extend {{ accessible_name() }}.</div>
             </a>
           </li>
         </ul>
