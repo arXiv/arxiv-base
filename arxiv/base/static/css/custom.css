@@ -12110,11 +12110,6 @@ header .arxiv-search input {
 .arxiv-nav nav .navbar-nav a.nav-link:hover {
   color: #1f5e96;
 }
-@media (max-width: 767px) {
-  .arxiv-nav nav .navbar-nav a.nav-link div {
-    display: none;
-  }
-}
 .arxiv-nav nav .arxiv-search-links {
   font-size: 0.85em;
   font-size: 0.85em;

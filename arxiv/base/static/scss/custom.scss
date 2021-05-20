@@ -408,11 +408,6 @@ header {
         &:hover {
           color: $dark-blue;
         }
-        @media (max-width: 767px) {
-          div {
-            display: none;
-          }
-        }
       }
     }
     .arxiv-search-links {
