@@ -4,7 +4,7 @@
 <span aria-hidden="true">arXiv</span><span class="visually-hidden">Archive</span>
 {%- endmacro %}
 
-{% macro universalsearch(placeholder, append_params=[]) -%}
+{% macro universalsearch(placeholder, append_params={}) -%}
   {# Creates a simple, styled universal search bar. You can customize the placeholder text and append search parameters #}
   <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_box') }}">
     <input class="form-control me-2" type="search" placeholder="{{ placeholder }}" aria-label="Search" name="query">
@@ -15,8 +15,8 @@
       </svg>
     </button>
     {% if append_params -%}
-      {% for name, value in append_params -%}
-      <input id="param" type="hidden" name="{{name}}" value="{{value}}">
+      {% for name in append_params -%}
+      <input id="param" type="hidden" name="{{name}}" value="{{append_params[name]}}">
       {%- endfor %}
     {%- endif %}
   </form>
