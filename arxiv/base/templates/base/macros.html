@@ -7,16 +7,19 @@
 {% macro universalsearch(placeholder, append_params={}) -%}
   {# Creates a simple, styled universal search bar. You can customize the placeholder text and append search parameters #}
   <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_advanced') }}">
-    <input class="form-control me-2" type="search" placeholder="{{ placeholder }}" aria-label="Search" name="query">
+    <input class="form-control me-2" type="search" placeholder="{{ placeholder }}" aria-label="Search" name="terms-1-term">
     <button class="btn" type="submit">
       <span class="visually-hidden">Search</span>
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" class="bi bi-chevron-right" viewBox="0 0 16 16">
         <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
       </svg>
     </button>
+    <input type="hidden" name="advanced" value="">
+    <input type="hidden" name="terms-1-field" value="all">
+    <input type="hidden" name="terms-1-operator" value="AND">
     {% if append_params -%}
       {% for name in append_params -%}
-      <input id="param" type="hidden" name="{{name}}" value="{{append_params[name]}}">
+    <input type="hidden" name="{{name}}" value="{{append_params[name]}}">
       {%- endfor %}
     {%- endif %}
   </form>
