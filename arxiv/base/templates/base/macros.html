@@ -6,7 +6,7 @@
 
 {% macro universalsearch(placeholder, append_params={}) -%}
   {# Creates a simple, styled universal search bar. You can customize the placeholder text and append search parameters #}
-  <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_box') }}">
+  <form class="d-flex arxiv-search" method="GET" action="{{ url_for('search_advanced') }}">
     <input class="form-control me-2" type="search" placeholder="{{ placeholder }}" aria-label="Search" name="query">
     <button class="btn" type="submit">
       <span class="visually-hidden">Search</span>
