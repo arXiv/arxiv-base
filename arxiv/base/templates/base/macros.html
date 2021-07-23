@@ -90,7 +90,7 @@
       {%- if comments %}
       <li class="list-group-item">
         <strong>Comments:</strong>
-        {{ comments|tex2utf|urlize|safe }}
+        <span class="comments">{{ comments|tex2utf|urlize|safe }}</span>
       </li>
       {% endif -%}
       <li class="list-group-item">
