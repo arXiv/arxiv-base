@@ -4,8 +4,8 @@
       <p>arXiv is stewarded by Cornell Tech and <a href="{{ url_for('about') }}/membership">supported by our global community.</a></p>
     </div>
     <div class="col-md-auto" role="navigation" aria-label="User account menu">
-      {% if request.session and request.session.user and request.session.user.name %}
-        Welcome <span class="has-text-weight-bold">{{ request.session.user.name.forename }}</span> | <a href="{{ url_for('account') }}">My Account</a> | <a href="">My Feeds</a> | <a href="{{ url_for('logout') }}">Logout</a>
+      {% if request.auth and request.auth.user and request.auth.user.name %}
+        Welcome <span class="has-text-weight-bold">{{ request.auth.user.name.forename }}</span> | <a href="{{ url_for('account') }}">My Account</a> | <a href="">My Feeds</a> | <a href="{{ url_for('logout') }}">Logout</a>
       {% else %}
         <a href="{{ url_for('account') }}/register">Create Account</a> | <a href="{{ url_for('login') }}">Login</a>
       {% endif %}
