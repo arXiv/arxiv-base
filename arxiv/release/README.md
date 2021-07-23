@@ -1,3 +1,8 @@
+# How to make a new version arxiv-base
+To make a new version of arxiv-base that gets uploaded to PyPI, commit
+a tag that is a valid python version in git and travis should upload
+the package to PyPI. Other repos can be set up in a similar manner.
+
 # Get the version in app code
 ```python
 from arxiv.release.dist_version import get_version
@@ -6,9 +11,9 @@ print(f"arxiv base version: {get_version('arxiv-base')}"
 ```
 
 # How to set the version
-
 To set the version, tag the commit you want a version on. The version
-will then be the continuous integration tools from git tags. 
+will then be detected by the continuous integration tools from git
+tags, packaged and uploaded to PyPI.
 
 Outside of the continuous integration tools, if there is no tag, this
 will fall back to the result from `git describe`.
@@ -42,10 +47,10 @@ deploy:
 
 ## Do not check in any generated version.py files
 These are not intended to be in the source code. They are only
-intended to be in released sdist pacakges.
+intended to be in released sdist packages.
 
 # What format for versions
-Tags in github should be in the PEP440 "python public version" format.
+Tags in GitHub should be in the PEP440 "python public version" format.
 https://www.python.org/dev/peps/pep-0440/
 Some examples from that page:
 0.1 
@@ -90,8 +95,8 @@ an accurate description of the version and local changes.
 2. Have one source of the version. The git tag is saved to a
    version.py file and that is used in setup.py and
    arxiv/SOMEPKG/version.py.
-3. Avoid hardcoded versions in web pages. We have had problems where
-   the version gets hardcoded in a config file and never updated,
+3. Avoid hard coded versions in web pages. We have had problems where
+   the version gets hard coded in a config file and never updated,
    especially for point, patch and build releases. 
 4. Keep the version out of source code. Version information belongs in
    the source control system. This is natural when there is always a
@@ -103,13 +108,13 @@ an accurate description of the version and local changes.
 ## How the version is set and found
 
 ### If I install a package from PyPY
-1. Someone tags a commit in github to arxiv-example
+1. Someone tags a commit in GitHub to arxiv-example
 2. Travis-ci builds that commit, with the tag in TRAVIS_TAG
 3. The travis step ```python -m arxiv.release.tag_check
    arxiv-example``` picks up the tag. If it is a valid python public
    version, it gets written to the file ```arxiv/example/version.py```.
 4. Travis-ci uploads the built python package to PyPI. This version.py
-   file is includded in that upload.
+   file is included in that upload.
 5. When someone installs that package from PyPI,
    ```arxiv.release.dist_version.get_version('arxiv-example')``` will
    first check the version.py file and return the version from that.
@@ -126,7 +131,7 @@ In this case there is no version.py file
    ```arxiv.release.dist_version.get_version('arxiv-base')```
 6. ```get_version()``` finds no version.py file, and it finds no
    ```pkg_resources``` version
-7. So get_version() trys to run ```git describe --dirty``` and that
+7. So get_version() tries to run ```git describe --dirty``` and that
    works since it is in a git checked out directory.
 8. setup.py uses the git describe value as the package version during the install.
 9. arxiv.release.dist_version.get_version() will first check the
