@@ -243,7 +243,7 @@ def _add_affiliation(author_line: str,
 
     # Now see if we have enumerated references (just commas, digits, &, and)
     affils = m.group(1).rstrip().lstrip()
-    affils = re.sub(r'(&|and)/,', ',', affils, flags=re.IGNORECASE)
+    affils = re.sub(r'\s+(&|and)\s+', ',', affils, flags=re.IGNORECASE)
 
     if re.match(r'^[\d,\s]+$', affils):
         for affil in affils.split(','):
