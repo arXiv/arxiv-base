@@ -1018,7 +1018,7 @@ CATEGORIES = {
         'description': 'General methodological, applied, and empirical contributions to '
                        'economics.',
         'is_active': True,
-        'is_general': False
+        'is_general': True
     },
     'econ.TH': {
         'name': 'Theoretical Economics',
@@ -1595,7 +1595,7 @@ CATEGORIES = {
                        'Accelerator design and optimization. Advanced '
                        'accelerator concepts. Radiation sources including '
                        'synchrotron light sources and free electron lasers. '
-                       'Applications of accelerators.',       
+                       'Applications of accelerators.',
         'is_active': True,
         'is_general': False
     },
