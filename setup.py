@@ -81,7 +81,7 @@ setup(
         'pytz',
         'uwsgi',
         'boto3',
-        'bleach==3.1.0',
+        'bleach==3.3.0',
         'backports-datetime-fromisoformat==1.0.0',
         'typing-extensions'
     ],
