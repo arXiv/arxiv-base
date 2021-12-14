@@ -1018,7 +1018,7 @@ CATEGORIES = {
         'description': 'General methodological, applied, and empirical contributions to '
                        'economics.',
         'is_active': True,
-        'is_general': False
+        'is_general': True
     },
     'econ.TH': {
         'name': 'Theoretical Economics',
@@ -1517,7 +1517,7 @@ CATEGORIES = {
     'nlin.AO': {
         'name': 'Adaptation and Self-Organizing Systems',
         'in_archive': 'nlin',
-        'description': 'adaptation, self-organizing systems, statistical '
+        'description': 'Adaptation, self-organizing systems, statistical '
                        'physics, fluctuating systems, stochastic processes, '
                        'interacting particle systems, machine learning',
         'is_active': True,
@@ -1526,7 +1526,7 @@ CATEGORIES = {
     'nlin.CD': {
         'name': 'Chaotic Dynamics',
         'in_archive': 'nlin',
-        'description': 'dynamical systems, chaos, quantum chaos, topological '
+        'description': 'Dynamical systems, chaos, quantum chaos, topological '
                        'dynamics, cycle expansions, turbulence, '
                        'propagation',
         'is_active': True,
@@ -1535,7 +1535,7 @@ CATEGORIES = {
     'nlin.CG': {
         'name': 'Cellular Automata and Lattice Gases',
         'in_archive': 'nlin',
-        'description': 'computational methods, time series analysis, signal '
+        'description': 'Computational methods, time series analysis, signal '
                        'processing, wavelets, lattice gases',
         'is_active': True,
         'is_general': False
@@ -1543,14 +1543,14 @@ CATEGORIES = {
     'nlin.PS': {
         'name': 'Pattern Formation and Solitons',
         'in_archive': 'nlin',
-        'description': 'pattern formation, coherent structures, solitons',
+        'description': 'Pattern formation, coherent structures, solitons',
         'is_active': True,
         'is_general': False
     },
     'nlin.SI': {
         'name': 'Exactly Solvable and Integrable Systems',
         'in_archive': 'nlin',
-        'description': 'exactly solvable systems, integrable PDEs, integrable '
+        'description': 'Exactly solvable systems, integrable PDEs, integrable '
                        'ODEs, Painleve analysis, integrable discrete maps, '
                        'solvable lattice models, integrable quantum '
                        'systems',
@@ -1560,12 +1560,24 @@ CATEGORIES = {
     'nucl-ex': {
         'name': 'Nuclear Experiment',
         'in_archive': 'nucl-ex',
+        'description': 'Nuclear Experiment Results from experimental nuclear physics '
+                       'including the areas of fundamental interactions, measurements '
+                       'at low- and medium-energy, as well as relativistic heavy-ion '
+                       'collisions.  Does not include: detectors and instrumentation nor '
+                       'analysis methods to conduct experiments; descriptions of '
+                       'experimental programs (present or future); comments on published results',
         'is_active': True,
         'is_general': False
     },
     'nucl-th': {
         'name': 'Nuclear Theory',
         'in_archive': 'nucl-th',
+        'description': 'Nuclear Theory Theory of nuclear structure covering wide area '
+                       'from models of hadron structure to neutron stars. Nuclear '
+                       'equation of states at different external conditions. Theory of '
+                       'nuclear reactions including heavy-ion reactions at low and high '
+                       'energies. It does not include problems of data analysis, physics '
+                       'of nuclear reactors, problems of safety, reactor construction',
         'is_active': True,
         'is_general': False
     },
@@ -1583,7 +1595,7 @@ CATEGORIES = {
                        'Accelerator design and optimization. Advanced '
                        'accelerator concepts. Radiation sources including '
                        'synchrotron light sources and free electron lasers. '
-                       'Applications of accelerators.',       
+                       'Applications of accelerators.',
         'is_active': True,
         'is_general': False
     },

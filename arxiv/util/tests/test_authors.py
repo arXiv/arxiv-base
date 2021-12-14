@@ -268,6 +268,42 @@ class TestAuthorAffiliationParsing(TestCase):
             'jr issue (Anatoly Zlotnik and Jr-Shin Li)'
         )
 
+        self.assertListEqual(
+            # 2106.08865; back propagation with comma (1,2), (4,5)
+            parse_author_affil(
+                "E. Trigueros P\'aez (1 and 2) and R. H. Barb\'a (3) and I. Negueruela (1) "
+                "and J. Ma\'iz Apell\'aniz (2) and S. Sim\'on-D\'iaz (4 and 5) and G.Holgado (2) "
+                "((1) Departamento de F\'isica Aplicada - Universidad de Alicante, (2) "
+                "Centro de Astrobiolog\'ia - CSIC-INTA, (3) Departamento de Astronom\'ia - Universidad "
+                "de La Serena, (4) Instituto de Astrof\'isica de Canarias, (5) Departamento "
+                "de Astrof\'isica - Universidad de La Laguna)"),            [["P'aez", 'E. Trigueros', '', "Departamento de F'isica Aplicada - Universidad de Alicante", "Centro de Astrobiolog'ia - CSIC-INTA"],
+             ["Barb'a", 'R. H.', '', "Departamento de Astronom'ia - Universidad de La Serena"],
+             ['Negueruela', 'I.', '', "Departamento de F'isica Aplicada - Universidad de Alicante"],
+             ["Apell'aniz", "J. Ma'iz", '', "Centro de Astrobiolog'ia - CSIC-INTA"],
+             ["Sim'on-D'iaz", 'S.', '', "Instituto de Astrof'isica de Canarias", "Departamento de Astrof'isica - Universidad de La Laguna"],
+             ['Holgado', 'G.', '', "Centro de Astrobiolog'ia - CSIC-INTA"]],
+             'back propagation for 2106.08865 with comma as separator'
+        )
+
+        self.assertListEqual(
+            # 2106.08865; back propagation with "and", e.g. Some Author (1 and 2), Another Author (4 and 5)
+            parse_author_affil(
+                "E. Trigueros P\'aez (1 and 2) and R. H. Barb\'a (3) and I. Negueruela (1) "
+                "and J. Ma\'iz Apell\'aniz (2) and S. Sim\'on-D\'iaz (4 and 5) and G.Holgado (2) "
+                "((1) Departamento de F\'isica Aplicada - Universidad de Alicante, (2) "
+                "Centro de Astrobiolog\'ia - CSIC-INTA, (3) Departamento de Astronom\'ia - Universidad "
+                "de La Serena, (4) Instituto de Astrof\'isica de Canarias, (5) Departamento "
+                "de Astrof\'isica - Universidad de La Laguna)"),
+            [["P'aez", 'E. Trigueros', '', "Departamento de F'isica Aplicada - Universidad de Alicante", "Centro de Astrobiolog'ia - CSIC-INTA"],
+             ["Barb'a", 'R. H.', '', "Departamento de Astronom'ia - Universidad de La Serena"],
+             ['Negueruela', 'I.', '', "Departamento de F'isica Aplicada - Universidad de Alicante"],
+             ["Apell'aniz", "J. Ma'iz", '', "Centro de Astrobiolog'ia - CSIC-INTA"],
+             ["Sim'on-D'iaz", 'S.', '', "Instituto de Astrof'isica de Canarias", "Departamento de Astrof'isica - Universidad de La Laguna"],
+             ['Holgado', 'G.', '', "Centro de Astrobiolog'ia - CSIC-INTA"]],
+             'back propagation for 2106.08865 with "and" as separator'
+        )
+
+
         # ====== Extra tests for arXiv::AuthorAffil ARXIVDEV-728 ======
 
         # [parse_author_affil]

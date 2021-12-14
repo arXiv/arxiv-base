@@ -138,7 +138,9 @@
     secondary_categories = [],
     include_stylesheet = 1,
     embed_stylesheet = 0,
-    download_button_markup = None) -%}
+    download_button_markup = None,
+    preprint_doi = None
+) -%}
 
 {% if include_stylesheet and not embed_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/abs.css') }}">
@@ -207,6 +209,12 @@
         <tr>
           <td class="tablecell label">Report&nbsp;number:</td>
           <td class="tablecell jref">{{ report_num }}</td>
+        </tr>
+        {% endif -%}
+        {%- if preprint_doi %}
+        <tr>
+          <td class="tablecell label"><abbr title="Preprint Digital Object Identifier">Preprint DOI</abbr>:</td>
+          <td class="tablecell msc_classes"><a href="https://doi.org/{{ preprint_doi }}">https://doi.org/{{ preprint_doi }}</a></td>
         </tr>
         {% endif -%}
         <tr>
