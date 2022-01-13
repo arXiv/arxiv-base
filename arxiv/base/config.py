@@ -36,7 +36,7 @@ URLS = [
     ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
     ("library", "/", "library.cornell.edu"),
     ("university", "/", "cornell.edu"),
-    ("acknowledgment", "/x/ALlRF", "confluence.cornell.edu"),
+    ("acknowledgment", "/about/ourmembers", BASE_SERVER),
     ("faq", "/help/faq", BASE_SERVER),
     ("subscribe", "/help/subscribe", BASE_SERVER),
     ("submit", "/submit", BASE_SERVER),
