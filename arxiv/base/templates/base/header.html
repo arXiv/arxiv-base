@@ -9,7 +9,9 @@
 <div class="identity level is-marginless">
   <div class="level-left">
     <div class="level-item">
-      <a class="arxiv" href="{{ url_for('home') }}" aria-label="arxiv-logo"><img src="{{ url_for('base.static', filename='images/arxiv-logo-web.svg') }}" alt="arXiv" aria-label="logo" width="85" /></a>
+      <a class="arxiv" href="{{ url_for('home') }}" aria-label="arxiv-logo">
+        <img src="{{ url_for('base.static', filename='images/arxiv-logo-one-color-white.svg') }}" aria-label="logo" alt="arxiv logo" width="85" style="width:85px;"/>
+      </a>
     </div>
   </div>
   {{ macros.compactsearch('level-right') }}
