@@ -46,7 +46,7 @@ def f_tex2utf(text: JinjaFilterInput,
               greek: bool = True) -> Markup:
     """Return output of tex2utf function as escaped Markup."""
     if isinstance(text, Markup):
-        return escape(tex2utf(text.unescape(), greek=greek))
+        return Markup(escape(tex2utf(text.unescape(), greek=greek)))
     else:
         return Markup(escape(tex2utf(text, greek=greek)))
 
