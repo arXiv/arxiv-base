@@ -1,6 +1,13 @@
 """Runs docker login, build and push commands.
 
-For use in travis ci.
+For use in travis ci and command line.
+
+```
+$export DOCKERHUB_USERNAME=frank
+$export DOCKERHUB_PASSWORD=1234
+$export TRAVIS_TAG=1.2.3
+python -m arxiv.release.docker_build_push ./ submission-agent
+```
 """
 
 import os
@@ -17,15 +24,15 @@ except Exception:
     print('TRAVIS_TAG=1.2.3 DOCKERHUB_PASSWORD=1234 DOCKERHUB_USERNAME=frank python -m arxiv.release.docker_build_push ./fourohfour fourohfour')
     exit(1)
 
-try:
+try:    
     labeltag = f"{user}/{label}:{tag}"
-    login = 'docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"'
+    login = f'docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"'
     build = f"""docker build -t {labeltag} {context}"""
     push = f"""docker push {labeltag}"""
-    logout = "docker logout"
+    logout = "docker logout"    
     cmds = ' ' + ' && '.join([login, build, push, logout])
 
-    # Running all the commands in a single subshell to keep docker login
+    #Running all the commands in a single subshell to keep docker login
     retcode = call(cmds, shell=True)
     if retcode < 0:
         print("Child was terminated by signal", -retcode, file=sys.stderr)
