@@ -106,13 +106,13 @@ def get_git_version(abbrev: int = 7) -> str:
     """Get the current version using `git describe`."""
     try:
         p = Popen(
-            ["git", "describe", "--dirty", "--abbrev=%d" % abbrev],
+            ["git", "describe", "--dirty", "--all", "--abbrev=%d" % abbrev],
             stdout=PIPE,
             stderr=PIPE,
         )
         p.stderr.close()
         line = p.stdout.readlines()[0]
-        return str(line.strip().decode("utf-8"))
+        return str(line.strip().decode("utf-8")).strip("tags/")
     except Exception:
         raise ValueError("Cannot get the version number from git")
 
