@@ -11,6 +11,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.6
+          cache: 'pipenv'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
