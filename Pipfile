@@ -17,6 +17,7 @@ retry = "*"
 typing-extensions = "*"
 semantic-version = "*"
 aiohttp = "*"
+dataclasses = "*"
 
 [dev-packages]
 pydocstyle = "*"

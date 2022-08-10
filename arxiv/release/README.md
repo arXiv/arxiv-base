@@ -3,6 +3,20 @@ To make a new version of arxiv-base that gets uploaded to PyPI, commit
 a tag that is a valid python version in git and travis should upload
 the package to PyPI. Other repos can be set up in a similar manner.
 
+# How to upload a new version to pypi
+```
+git tag v0.19.23
+
+# this sets the version as the git tag
+python -m arxiv.release.tag_check arxiv-browse
+
+rm -rfI dist/*
+python setup.py sdist
+
+pip install twine
+twine upload dist/*
+```
+
 # Get the version in app code
 ```python
 from arxiv.release.dist_version import get_version

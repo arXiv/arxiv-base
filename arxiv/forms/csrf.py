@@ -99,11 +99,6 @@ class SessionCSRF(CSRF):
     def _join(digest: str, expires: str) -> str:
         return f"{digest}::{expires}"
 
-    @staticmethod
-    def _split(csrf_token: str) -> Tuple[str, str]:
-        digest, expires = csrf_token.split('::', 1)
-        return digest, expires
-
     def generate_csrf_token(self, field: 'CSRFForm') -> str:
         """Generate a new CSRF token using the CSRF secret and context."""
         expires = self._new_expiry(self.csrf_timeout)
@@ -116,7 +111,12 @@ class SessionCSRF(CSRF):
         """Validate the CSRF token passed with form data."""
         if field.data is None:
             raise ValidationError('Missing CSRF token')
-        digest, expires = self._split(field.data)
+
+        parts = field.data.split('::',1)
+        if len(parts) != 2:
+            raise ValidationError('CSRF token is malformed')
+
+        digest, expires = parts
         nonce = self.csrf_context['nonce']
         ip_address = self.csrf_context['ip_address']
         expected = self._hash(self.csrf_secret, nonce, ip_address, expires)
