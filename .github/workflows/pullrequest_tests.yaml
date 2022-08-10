@@ -1,0 +1,28 @@
+name: Run Python Tests
+on:
+  pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pipenv
+          pipenv sync --dev
+      - name: Run tests
+        run:  |
+          pipenv run nose2 -s fourohfour
+          pipenv run nose2 -s arxiv --with-coverage
+      - name: linter
+        run: ./tests/lintstats.sh
+      - name: app tests
+        run: pipenv run python tests/run_app_tests.py
+
+
