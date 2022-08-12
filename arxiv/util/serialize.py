@@ -3,8 +3,6 @@
 from typing import Any, Union, List
 import json
 from datetime import datetime, date
-from backports.datetime_fromisoformat import MonkeyPatch
-MonkeyPatch.patch_fromisoformat()
 
 
 class ISO8601JSONEncoder(json.JSONEncoder):

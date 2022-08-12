@@ -8,7 +8,7 @@ from pytz import timezone
 from typing import Union
 
 from flask import Flask
-from jinja2 import Markup, escape
+from markupsafe import Markup, escape
 
 from arxiv.base.urls import urlizer, canonical_url, clickthrough_url
 from arxiv.util.tex2utf import tex2utf

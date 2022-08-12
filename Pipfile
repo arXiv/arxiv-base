@@ -4,32 +4,31 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "~=1.1"
+flask = "~=2.2"
 jsonschema = "*"
 pytz = "*"
 uwsgi = "*"
-"boto3" = "==1.9.108"
+"boto3" = "==1.*"
 wtforms = "*"
 bleach = "*"
 "flask-s3" = "*"
-"backports-datetime-fromisoformat" = "==1.0.0"
 retry = "*"
 typing-extensions = "*"
 semantic-version = "*"
 aiohttp = "*"
+markupsafe = "*"
 
 [dev-packages]
 pydocstyle = "*"
-mypy = "==0.720"
-pylint = "<2"
+mypy = "*"
+pylint = "*"
 "nose2" = "*"
 hypothesis = "*"
 sphinx = "*"
 sphinxcontrib-websupport = "*"
-sphinx-autodoc-typehints = "==1.8.0"
-astroid = "<2.2"
-mypy-extensions = "==0.4.2"
+sphinx-autodoc-typehints = "*"
+mypy-extensions = "*"
 click = "*"
 
-[pipenv]
-allow_prereleases = true
+[requires]
+python_version = "~=3.10"

@@ -1,8 +1,7 @@
 import unittest
 from unittest import mock
-import re
 from flask import Flask
-from jinja2 import escape
+from markupsafe import escape
 from .. import links
 
 
@@ -76,7 +75,7 @@ class TestURLize(unittest.TestCase):
                 links.urlize(
                     "here is a rando doi doi:10.1109/5.771073 that needs a link"
                 ),
-                'here is a rando doi doi:<a class="link-https link-external" data-doi="10.1109/5.771073" href="https://doi.org/10.1109/5.771073" rel="external noopener nofollow">https://doi.org/10.1109/5.771073</a> that needs a link',
+                'here is a rando doi doi:<a href="https://doi.org/10.1109/5.771073" data-doi="10.1109/5.771073" class="link-https link-external" rel="external noopener nofollow">https://doi.org/10.1109/5.771073</a> that needs a link',
             )
 
     def test_transform_token(self):
@@ -92,32 +91,32 @@ class TestURLize(unittest.TestCase):
 
             self.assertEqual(
                 links.urlize("http://arxiv.org", ["url"]),
-                '<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>',
+                '<a href="http://arxiv.org" class="link-internal link-http">http://arxiv.org</a>',
             )
 
             self.assertEqual(
                 links.urlize("https://arxiv.org", ["url"]),
-                '<a class="link-internal link-https" href="https://arxiv.org">https://arxiv.org</a>',
+                '<a href="https://arxiv.org" class="link-internal link-https">https://arxiv.org</a>',
             )
 
             self.assertEqual(
                 links.urlize("in the front http://arxiv.org oth", ["url"]),
-                'in the front <a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a> oth',
+                'in the front <a href="http://arxiv.org" class="link-internal link-http">http://arxiv.org</a> oth',
             )
 
             self.assertEqual(
                 links.urlize(".http://arxiv.org.", ["url"]),
-                '.<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>.',
+                '.<a href="http://arxiv.org" class="link-internal link-http">http://arxiv.org</a>.',
             )
 
             self.assertEqual(
                 links.urlize('"http://arxiv.org"', ["url"]),
-                '"<a class="link-internal link-http" href="http://arxiv.org">http://arxiv.org</a>"',
+                '"<a href="http://arxiv.org" class="link-internal link-http">http://arxiv.org</a>"',
             )
 
             self.assertEqual(
                 links.urlize('"https://arxiv.org/help"', ["url"]),
-                '"<a class="link-internal link-https" href="https://arxiv.org/help">https://arxiv.org/help</a>"',
+                '"<a href="https://arxiv.org/help" class="link-internal link-https">https://arxiv.org/help</a>"',
             )
 
     @mock.patch(f"{links.__name__}.clickthrough")
@@ -127,23 +126,23 @@ class TestURLize(unittest.TestCase):
             mock_clickthrough.clickthrough_url.return_value = "foo"
             self.assertEqual(
                 links.urlize("http://example.com/"),
-                '<a class="link-external link-http" href="http://example.com/" rel="external noopener nofollow">this http URL</a>',
+                '<a href="http://example.com/" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
                 "urlize (URL linking) 1/6",
             )
             self.assertEqual(
                 links.urlize("https://example.com/"),
-                '<a class="link-external link-https" href="https://example.com/" rel="external noopener nofollow">this https URL</a>',
+                '<a href="https://example.com/" rel="external noopener nofollow" class="link-external link-https">this https URL</a>',
                 "urlize (URL linking) 2/6",
             )
             self.assertEqual(
                 links.urlize("ftp://example.com/"),
-                '<a class="link-external link-ftp" href="ftp://example.com/" rel="external noopener nofollow">this ftp URL</a>',
+                '<a href="ftp://example.com/" rel="external noopener nofollow" class="link-external link-ftp">this ftp URL</a>',
                 "urlize (URL linking) 3/6",
             )
 
             self.assertEqual(
                 links.urlize("http://projecteuclid.org/euclid.bj/1151525136"),
-                '<a class="link-external link-http" href="http://projecteuclid.org/euclid.bj/1151525136" rel="external noopener nofollow">this http URL</a>',
+                '<a href="http://projecteuclid.org/euclid.bj/1151525136" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
                 "urlize (URL linking) 6/6",
             )
 
@@ -180,35 +179,35 @@ class TestURLize(unittest.TestCase):
 
             self.assertEqual(
                 links.urlize("cond-mat/97063007"),
-                '<a class="link-https" data-arxiv-id="cond-mat/9706300" href="https://arxiv.org/abs/cond-mat/9706300">cond-mat/9706300</a>7',
+                '<a href="https://arxiv.org/abs/cond-mat/9706300" data-arxiv-id="cond-mat/9706300" class="link-https">cond-mat/9706300</a>7',
                 "urlize (should match) 7/9",
             )
 
             self.assertEqual(
                 links.urlize("[http://onion.com/something-funny-about-arxiv-1234]"),
-                '[<a class="link-external link-http" href="http://onion.com/something-funny-about-arxiv-1234" rel="external noopener nofollow">this http URL</a>]',
+                '[<a href="http://onion.com/something-funny-about-arxiv-1234" rel="external noopener nofollow" class="link-external link-http">this http URL</a>]',
             )
 
             self.assertEqual(
                 links.urlize("[http://onion.com/?q=something-funny-about-arxiv.1234]"),
-                '[<a class="link-external link-http" href="http://onion.com/?q=something-funny-about-arxiv.1234" rel="external noopener nofollow">this http URL</a>]',
+                '[<a href="http://onion.com/?q=something-funny-about-arxiv.1234" rel="external noopener nofollow" class="link-external link-http">this http URL</a>]',
             )
 
             self.assertEqual(
                 links.urlize("http://onion.com/?q=something funny"),
-                '<a class="link-external link-http" href="http://onion.com/?q=something" rel="external noopener nofollow">this http URL</a> funny',
+                '<a href="http://onion.com/?q=something" rel="external noopener nofollow" class="link-external link-http">this http URL</a> funny',
                 "Spaces CANNOT be expected to be part of URLs",
             )
 
             self.assertEqual(
                 links.urlize('"http://onion.com/something-funny-about-arxiv-1234"'),
-                '"<a class="link-external link-http" href="http://onion.com/something-funny-about-arxiv-1234" rel="external noopener nofollow">this http URL</a>"',
+                '"<a href="http://onion.com/something-funny-about-arxiv-1234" rel="external noopener nofollow" class="link-external link-http">this http URL</a>"',
                 "Should handle URL surrounded by double quotes",
             )
 
             self.assertEqual(
                 links.urlize("< http://example.com/1<2 ><"),
-                '&lt; <a class="link-external link-http" href="http://example.com/1" rel="external noopener nofollow">this http URL</a>&lt;2 &gt;&lt;',
+                '&lt; <a href="http://example.com/1" rel="external noopener nofollow" class="link-external link-http">this http URL</a>&lt;2 &gt;&lt;',
                 "urlize (URL linking) 5/6",
             )
 
@@ -216,26 +215,26 @@ class TestURLize(unittest.TestCase):
                 links.urlize(
                     'Accepted for publication in A&A. The data will be available via CDS, and can be found "http://atlasgal.mpifr-bonn.mpg.de/cgi-bin/ATLASGAL_FILAMENTS.cgi"'
                 ),
-                'Accepted for publication in A&amp;A. The data will be available via CDS, and can be found "<a class="link-external link-http" href="http://atlasgal.mpifr-bonn.mpg.de/cgi-bin/ATLASGAL_FILAMENTS.cgi" rel="external noopener nofollow">this http URL</a>"',
+                'Accepted for publication in A&amp;A. The data will be available via CDS, and can be found "<a href="http://atlasgal.mpifr-bonn.mpg.de/cgi-bin/ATLASGAL_FILAMENTS.cgi" rel="external noopener nofollow" class="link-external link-http">this http URL</a>"',
             )
 
             self.assertEqual(
                 links.urlize(
                     "see http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20"
                 ),
-                'see <a class="link-external link-http" href="http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20" rel="external noopener nofollow">this http URL</a>',
+                'see <a href="http://www.tandfonline.com/doi/abs/doi:10.1080/15980316.2013.860928?journalCode=tjid20" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
             )
 
             self.assertEqual(
                 links.urlize("http://authors.elsevier.com/a/1TcSd,Ig45ZtO"),
-                '<a class="link-external link-http" href="http://authors.elsevier.com/a/1TcSd,Ig45ZtO" rel="external noopener nofollow">this http URL</a>',
+                '<a href="http://authors.elsevier.com/a/1TcSd,Ig45ZtO" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
             )
 
         @mock.patch(f"{links.__name__}.url_for", mock_url_for)
         def test_category_id(self):
             self.assertEqual(
                 links.urlize("version of arXiv.math.GR/0512484 (2011).", ["arxiv_id"]),
-                'version of arXiv.<a class="link-https" data-arxiv-id="math.GR/0512484" href="https://arxiv.org/abs/math.GR/0512484">math.GR/0512484</a> (2011).',
+                'version of arXiv.<a data-arxiv-id="math.GR/0512484" href="https://arxiv.org/abs/math.GR/0512484" class="link-https">math.GR/0512484</a> (2011).',
             )
 
     @mock.patch(f"{links.__name__}.url_for", mock_url_for)
@@ -246,7 +245,7 @@ class TestURLize(unittest.TestCase):
                 links.urlize(
                     "http://www-nuclear.univer.kharkov.ua/lib/1017_3(55)_12_p28-59.pdf"
                 ),
-                '<a class="link-external link-http" href="http://www-nuclear.univer.kharkov.ua/lib/1017_3(55)_12_p28-59.pdf" rel="external noopener nofollow">this http URL</a>',
+                '<a href="http://www-nuclear.univer.kharkov.ua/lib/1017_3(55)_12_p28-59.pdf" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
             )
 
     @mock.patch(f"{links.__name__}.url_for", mock_url_for)
@@ -256,14 +255,14 @@ class TestURLize(unittest.TestCase):
                 links.urlize(
                     "can be downloaded from http://rwcc.bao.ac.cn:8001/swap/NLFFF_DBIE_code/HeHan_NLFFF_JGR.pdf"
                 ),
-                'can be downloaded from <a class="link-external link-http" href="http://rwcc.bao.ac.cn:8001/swap/NLFFF_DBIE_code/HeHan_NLFFF_JGR.pdf" rel="external noopener nofollow">this http URL</a>',
+                'can be downloaded from <a href="http://rwcc.bao.ac.cn:8001/swap/NLFFF_DBIE_code/HeHan_NLFFF_JGR.pdf" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
                 "Should deal with ports correctly",
             )
             self.assertEqual(
                 links.urlize(
                     "images is at http://85.20.11.14/hosting/punsly/APJLetter4.2.07/"
                 ),
-                'images is at <a class="link-external link-http" href="http://85.20.11.14/hosting/punsly/APJLetter4.2.07/" rel="external noopener nofollow">this http URL</a>',
+                'images is at <a href="http://85.20.11.14/hosting/punsly/APJLetter4.2.07/" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
                 "should deal with numeric IP correctly",
             )
 
@@ -274,7 +273,7 @@ class TestURLize(unittest.TestCase):
                 links.urlize(
                     "http://www.fkf.mpg.de/andersen/docs/pub/abstract2004+/pavarini_02.pdf"
                 ),
-                '<a class="link-external link-http" href="http://www.fkf.mpg.de/andersen/docs/pub/abstract2004+/pavarini_02.pdf" rel="external noopener nofollow">this http URL</a>',
+                '<a href="http://www.fkf.mpg.de/andersen/docs/pub/abstract2004+/pavarini_02.pdf" rel="external noopener nofollow" class="link-external link-http">this http URL</a>',
             )
 
     @mock.patch(f"{links.__name__}.url_for", mock_url_for)
@@ -295,16 +294,19 @@ class TestURLize(unittest.TestCase):
                 links.urlize(
                     "7 Pages; ftp://ftp%40micrognu%2Ecom:anon%40anon@ftp.micrognu.com/pnenp/conclusion.pdf"
                 ),
-                '7 Pages; <a class="link-external link-ftp" href="ftp://ftp%40micrognu%2Ecom:anon%40anon@ftp.micrognu.com/pnenp/conclusion.pdf" rel="external noopener nofollow">this ftp URL</a>',
+                '7 Pages; <a href="ftp://ftp%40micrognu%2Ecom:anon%40anon@ftp.micrognu.com/pnenp/conclusion.pdf" rel="external noopener nofollow" class="link-external link-ftp">this ftp URL</a>',
             )
 
     @mock.patch(f"{links.__name__}.url_for", mock_url_for)
     def test_arxiv_prefix(self):
         with self.app.app_context():
-            self.assertEqual(
-                links.urlize("see arxiv:1201.12345"),
-                'see <a class="link-https" data-arxiv-id="1201.12345" href="https://arxiv.org/abs/1201.12345">arXiv:1201.12345</a>',
-            )
+            urlized = links.urlize("see arxiv:1201.12345")
+            self.assertIn('see <a ', urlized)
+            self.assertIn('class="link-https"', urlized)
+            self.assertIn('data-arxiv-id="1201.12345"', urlized)
+            self.assertIn('href="https://arxiv.org/abs/1201.12345"', urlized)
+            self.assertIn('>arXiv:1201.12345</a>', urlized)
+
 
     @mock.patch(f"{links.__name__}.clickthrough")
     def test_doi_2(self, mock_clickthrough):
@@ -419,7 +421,7 @@ class TestURLize(unittest.TestCase):
                 "Should not have odd second <A> tag for DOI urlize for ao-sci/9503001 see ARXIVNG-2049",
             )
 
-            leg_rx = r'<a .* href="https://doi.org/10.1175/1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2".*'
+            leg_rx = r'<a.* href="https://doi.org/10.1175/1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2".*'
             self.assertRegex(
                 urlized_doi,
                 leg_rx,

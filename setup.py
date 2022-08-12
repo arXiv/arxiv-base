@@ -72,6 +72,7 @@ def find_version(*file_paths):
 setup(
     name='arxiv-base',
     version=find_version('arxiv', 'base', 'version.py'),
+    python_requires="~=3.10",
     packages=[f'arxiv.{package}' for package
               in find_packages('arxiv', exclude=['*test*'])],
     zip_safe=False,
@@ -81,8 +82,7 @@ setup(
         'pytz',
         'uwsgi',
         'boto3',
-        'bleach==3.3.0',
-        'backports-datetime-fromisoformat==1.0.0',
+        'bleach',
         'typing-extensions'
     ],
     include_package_data=True

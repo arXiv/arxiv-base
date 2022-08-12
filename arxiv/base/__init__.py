@@ -60,6 +60,8 @@ class Base(object):
             app.url_map._rules.remove(rule)
         # Werkzeug maintains this for faster lookup; we need to clear it, too.
         app.url_map._rules_by_endpoint['static'] = []
+        # Need to clear flask endpoint tools
+        del app.view_functions['static']
         # Add the updated rule.
         app.add_url_rule(f'{app.static_url_path}/<path:filename>',
                          endpoint='static',
