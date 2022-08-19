@@ -1,65 +1,14 @@
+"""CSRF protection for arXiv forms.
+
+DO NOT USE THIS PACKAGE.
+
+This package is flawed and not currently used in production. It
+assumes the client will respond on the same IP address that it used to
+request the form.
+
+Look at the wtforms CSRF docs and use the examples there.
 """
-CSRF protection for arXiv forms.
-
-To protect a form, inherit from :class:`CSRFForm`. When the form is handled,
-this class expects that:
-
-- There is an active :class:`flask.Request`.
-- The object ``flask.request.session`` exists, and has a ``str`` attribute
-  ``nonce``. See :class:`arxiv.users.domain.Session` and
-  :class:`arxiv.users.auth.Auth`.
-- A parameter called ``CSRF_SECRET`` is set in the application configuration.
-
-Here's an example:
-
-.. code-block:: python
-
-
-   from typing import Tuple
-   from werkzeug import MultiDict
-   from wtforms import StringField
-   from http import HTTPStatus as status
-   from arxiv.forms import csrf
-
-   ResponseData = Tuple[dict, int, dict]
-
-
-   class ProtectedForm(csrf.CSRFForm):
-       '''A CSRF-protected form.'''
-
-       something_sensitive = StringField('Something sensitive')
-
-
-   def some_controller(method: str, form_data: MultiDict) -> ResponseData:
-       '''Handle a form-based view.'''
-       headers = {}
-       if method == 'POST':
-           form = ProtectedForm(form_data)
-           data = {'form': form}
-           if not form.validate():    # Checks the CSRF token, too!
-               return data, status.BAD_REQUEST, headers
-
-           # do something sensitive
-           return data, status.CREATED, headers
-
-       form = ProtectedForm()
-       return {'form': form}, status.OK, headers
-
-
-And in your template:
-
-.. code-block:: html
-
-   {% extends "base/base.html" %}
-   {% block content %}
-   <form method="POST" action="{{ url_for('ui.some_view') }}">
-     {{ form.csrf_token }}
-     {{ form.something_sensitive }}
-     <input type="submit" class="button is-link is-small"></input>
-   </form>
-   {% endblock content %}
-
-"""
+import warnings
 
 import hmac
 from typing import Dict, Tuple, Any
@@ -71,12 +20,15 @@ from wtforms import Form, Field, ValidationError
 from wtforms.csrf.core import CSRF
 from arxiv.base.globals import get_application_config
 
+warnings.warn("Deprecated: Do not use. each package should use WTForms CSRF as needed", DeprecationWarning)
 
 class SessionCSRF(CSRF):
     """Session-based CSRF protection."""
 
     def setup_form(self, form: 'CSRFForm') -> Any:
         """Grab the CSRF context and secret from the form."""
+        warnings.warn("Deprecated: Do not use.", DeprecationWarning)
+
         self.csrf_context = form.meta.csrf_context
         self.csrf_secret = form.meta.csrf_secret
         self.csrf_timeout = form.meta.csrf_timeout

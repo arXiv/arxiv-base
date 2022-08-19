@@ -1,12 +1,12 @@
 """Tests for :mod:`arxiv.forms`."""
 
-from unittest import TestCase, mock
+from unittest import TestCase, mock, skip
 from datetime import datetime
 from werkzeug.datastructures import MultiDict
 from wtforms import StringField
 from . import csrf
 
-
+@skip("The class under test is deprecated")
 class TestCSRFForm(TestCase):
     """Tests for :class:`arxiv.forms.csrf.CSRFForm`."""
 
@@ -80,7 +80,7 @@ class TestCSRFForm(TestCase):
         form = ProtectedForm(data)
         self.assertFalse(form.validate(), "The form is not valid")
 
-
+@skip("The class under test is deprecated")
 class TestCSRFFormWithNewSessionRef(TestCase):
     """Test using the ``request.auth`` session ref in accounts v0.4.1."""
 

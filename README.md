@@ -23,8 +23,6 @@ files may also be imported and included.
 These files set the default display styles and layout for all pages on
 arxiv-NG, and can be overridden as needed by submodules.
 
-**TODO:** Add autoprefixer in postcss and autocompile sass/scss
-
 A template is included for rapid evaluation of display layer CSS within this
 repo, prepopulated with sample content.
 The ``styleguide.html`` template (route: /styleguide) shows error message
@@ -37,36 +35,35 @@ verification/testing purposes. To run the dev server (assuming that you are
 working in the root of this repository):
 
 ```bash
-$ FLASK_APP=app.py FLASK_DEBUG=1 pipenv run flask run
+poetry install
+$ FLASK_APP=app.py FLASK_DEBUG=1 poetry run flask run
 ```
 
 You should be able to view the rendered ``styleguide.html`` at
 ``http://127.0.0.1:5000/styleguide``.
 
-## Flask
+## Installing `arxiv-base`
 
-To use the base UI package in a Flask application add it to your
-``Pipfile``.  To use a specific version, for example, you would write:
+To use the base package in a Flask application add it to your
+dependency manager.  To use a specific version, for example, you would write:
 
 ``arxiv-base = "==0.11.1rc5"``
 
-Or if you want to install a specific working branch (dev only) the Pipfile line
+Or if you want to install a specific working branch (dev only) the line
 might read:
 
 ``arxiv-base = {git = "https://github.com/arXiv/arxiv-base.git@task/ARXIVNG-1215"}``
 
-
-See the [pip documentation](https://pip.pypa.io/en/latest/reference/pip_install/#git)
-for details.
-
-You can use ``pipenv`` from the command line to install a selected unpublished
-branch. First uninstall existing, then reinstall using pip syntax above.
-Example:
+You can use ``pip`` from the command line to install a selected
+unpublished branch. First uninstall existing, then reinstall using pip
+syntax above.  Example:
 
 ```bash
-pipenv uninstall arxiv-base
-pipenv install git+https://github.com/arXiv/arxiv-base.git@task/ARXIVNG-1010#egg=arxiv-base
+pip uninstall arxiv-base
+pip install git+https://github.com/arXiv/arxiv-base.git@task/ARXIVNG-1010#egg=arxiv-base
 ```
+
+## Using `arxiv-base` with Flask
 
 In your application factory, instantiate the Base component. This makes
 templates and static files available to you. For example, in your
@@ -146,8 +143,6 @@ Some tests to check app configuration and pattern compliance are provided in
 ``arxiv.base.app_tests``. See that module for usage.
 
 ## Editing and compiling sass
-
-**TODO: compile sass at app start up, stop checking compiled artifacts into to git.**
 
 The file arxivstyle.css should never be edited directly. It is compiled from
 arxivstyle.sass with this command from project directory root:
