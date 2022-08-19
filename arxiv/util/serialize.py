@@ -18,7 +18,7 @@ class ISO8601JSONEncoder(json.JSONEncoder):
             pass
         else:
             return list(iterable)
-        return json.JSONEncoder.default(self, obj)  # type: ignore
+        return json.JSONEncoder.default(self, obj=obj)  # type: ignore
 
 
 class ISO8601JSONDecoder(json.JSONDecoder):

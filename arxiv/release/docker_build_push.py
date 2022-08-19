@@ -24,12 +24,12 @@ except Exception:
     print('TRAVIS_TAG=1.2.3 DOCKERHUB_PASSWORD=1234 DOCKERHUB_USERNAME=frank python -m arxiv.release.docker_build_push ./fourohfour fourohfour')
     exit(1)
 
-try:    
+try:
     labeltag = f"{user}/{label}:{tag}"
-    login = f'docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"'
+    login = 'docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"'
     build = f"""docker build -t {labeltag} {context}"""
     push = f"""docker push {labeltag}"""
-    logout = "docker logout"    
+    logout = "docker logout"
     cmds = ' ' + ' && '.join([login, build, push, logout])
 
     #Running all the commands in a single subshell to keep docker login

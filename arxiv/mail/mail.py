@@ -13,10 +13,14 @@ from arxiv.base.globals import get_application_config
 NOREPLY = 'noreply@arxiv.org'
 
 
-def send(recipient: str, subject: str, text_body: str,
-         html_body: Optional[str] = None, sender: Optional[str] = None,
-         headers: Dict[str, str] = {}, cc_recipients: List[str] = [],
-         bcc_recipients: List[str] = []) -> None:
+def send(recipient: str,
+         subject: str,
+         text_body: str,
+         html_body: Optional[str] = None,
+         sender: Optional[str] = None,
+         headers: Optional[Dict[str, str]] = None,
+         cc_recipients: Optional[List[str]] = None,
+         bcc_recipients: Optional[List[str]] = None) -> None:
     """
     Send an e-mail.
 

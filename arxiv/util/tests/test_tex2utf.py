@@ -79,37 +79,36 @@ class TextTex2Utf(TestCase):
         self.assertEqual(utf_out, r'\alpha')
 
         # simple test_string of greek
-        test_str = '\\alpha\\beta\gamma'
+        test_str = '\\alpha\\beta\\gamma'
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, chr(0x03b1) + chr(0x03b2) + chr(
             0x03b3))
 
         # test_string of greek textlet with nested curlies
-        test_str = '\\alpha{\\beta{\gamma}}'
+        test_str = '\\alpha{\\beta{\\gamma}}'
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, chr(
             0x03b1) + '{' + chr(0x03b2) + chr(0x03b3) + '}')
 
         # another test_string of greek with nested curlies
-        test_str = '\\alpha{\\beta{\gamma}\macro}'
+        test_str = '\\alpha{\\beta{\\gamma\macro}'
         utf_out = tex2utf(test_str)
-        self.assertEqual(utf_out, chr(
-            0x03b1) + '{' + chr(0x03b2) + chr(0x03b3) + '\macro}')
+        self.assertEqual(utf_out, 'α{β{γ\\macro}')
 
         # use "\ " as textlet delimiter
-        test_str = 'foo \\alpha\ bar'
+        test_str = 'foo \\alpha\\ bar'
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, 'foo ' + chr(0x03b1) +
                          ' bar')
 
         # use "\ " as textlet delimiter
-        test_str = '\\alpha\ \\beta{something}'
+        test_str = '\\alpha\\ \\beta{something}'
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, chr(0x03b1) + ' ' +
                          chr(0x03b2) + '{something}')
 
         # use "\ " as textlet delimiter
-        test_str = 'foo \OE\ bar'
+        test_str = 'foo \\OE\\ bar'
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, 'foo ' + chr(0x0152) +
                          ' bar')
