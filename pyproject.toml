@@ -6,6 +6,11 @@ authors = ["arxiv.org"]
 packages = [
    { include = "arxiv" }
    ]
+include = [
+   "arxiv/base/static/*",
+   "arxiv/base/templates/*",
+   "arxiv/mail/templates/*"
+]
    
 [tool.poetry.dependencies]
 python = "3.10"
@@ -32,6 +37,8 @@ sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
 mypy-extensions = "*"
 click = "*"
+
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
