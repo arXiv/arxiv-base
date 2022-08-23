@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arxiv-base"
-version = "1.0.0a2"
+version = "1.0.0a3"
 description = "Common code for arXiv NG"
 authors = ["arxiv.org"]
 packages = [
@@ -13,7 +13,7 @@ include = [
 ]
    
 [tool.poetry.dependencies]
-python = "3.10"
+python = "^3.10"
 flask = "~=2.2"
 pytz = "*"
 uwsgi = "*"
