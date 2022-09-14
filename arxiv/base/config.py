@@ -52,6 +52,23 @@ URLS = [
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
     ("clickthrough", "/ct", BASE_SERVER),
+    ("help_submit", "/help/policies/instructions_for_submission.html", DOCS_SERVER),
+    ("new", "/new/index.html", DOCS_SERVER),
+    ("about_give", "/about/give.html", DOCS_SERVER),
+    ("about_people", "/about/people/index.html", DOCS_SERVER),
+    ("about_peole_developers", "/about/people/developers.html", DOCS_SERVER),
+    ("labs", "/labs/index.html", DOCS_SERVER),
+    ("help_robots", "/help/robots.html", DOCS_SERVER),
+    ("corr", "/corr/index.html", DOCS_SERVER),
+    # a bit of indirection for descriptions since they are scatted around
+    ("desc_physics", "/help/physics/index.html", DOCS_SERVER),
+    ("desc_math", "/help/math/index.html", DOCS_SERVER),
+    ("desc_cs", "/corr/subjectclasses.html", DOCS_SERVER),
+    ("desc_q-bio", "/help/q-bio/index.html", DOCS_SERVER),
+    ("desc_q-fin", "/help/q-fin/index.html", DOCS_SERVER),
+    ("desc_stat", "/help/statistics/index.html", DOCS_SERVER),
+    ("desc_eess", "/help/eess/index.html", DOCS_SERVER),
+    ("desc_econ", "/help/econ/index.html", DOCS_SERVER),
 ]
 """
 URLs for external services, for use with :func:`flask.url_for`.
