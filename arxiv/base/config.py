@@ -60,6 +60,7 @@ URLS = [
     ("labs", "/labs/index.html", DOCS_SERVER),
     ("help_robots", "/help/robots.html", DOCS_SERVER),
     ("corr", "/corr/index.html", DOCS_SERVER),
+    ("help_email_protection", "/help/email-protection.html", DOCS_SERVER),
     # a bit of indirection for descriptions since they are scatted around
     ("desc_physics", "/help/physics/index.html", DOCS_SERVER),
     ("desc_math", "/help/math/index.html", DOCS_SERVER),
