@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arxiv-base"
-version = "1.0.0a3"
+version = "1.0.0a4"
 description = "Common code for arXiv NG"
 authors = ["arxiv.org"]
 packages = [
