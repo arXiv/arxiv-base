@@ -16,7 +16,6 @@ include = [
 python = "^3.10"
 flask = "~=2.2"
 pytz = "*"
-uwsgi = "*"
 boto3 = "==1.*"
 wtforms = "*"
 bleach = "*"
@@ -37,7 +36,7 @@ sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
 mypy-extensions = "*"
 click = "*"
-
+uwsgi = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
