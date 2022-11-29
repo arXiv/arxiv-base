@@ -37,6 +37,13 @@ verification/testing purposes. To run the dev server (assuming that you are
 working in the root of this repository):
 
 ```bash
+# Some workarounds:
+pip install pipenv==2021.5.29
+pip install dataclasses
+FLASK_APP=app.py FLASK_DEBUG=1 pipenv run flask run
+```
+
+```bash
 $ FLASK_APP=app.py FLASK_DEBUG=1 pipenv run flask run
 ```
 
