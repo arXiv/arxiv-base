@@ -177,10 +177,22 @@ file has been written to do this; do not edit it.
 Adding ``class="beta"`` to the main content div will create a beta watermark at
  the top left of pages having this class.
 
-## Upload to pypi
+## Make a new version and Upload to pypi
 
 ```bash
+# Do a tag because in arxiv-base the pypi version is extracted from the git tag
+# using the code in arxiv.release and setup.py
+# Add your version instead of 1.2.3, it should be a python acceptable semver
+
+git tag -a 1.2.3 -m "Better than before"
+
 pip install --upgrade setuptools wheel twine
 python setup.py sdist bdist_wheel
 twine --upload dist/*  # Enter username and password from lastpass
+
+# MAKE SURE TO UPLOAD STATIC ASSETS TO S3
+
+AWS_ACCESS_KEY_ID=x AWS_SECRET_ACCESS_KEY=x \
+ AWS_REGION=us-east-1 FLASKS3_BUCKET_NAME=arxiv-web-static1 \
+ pipenv run python upload_static_assets.py
 ```
