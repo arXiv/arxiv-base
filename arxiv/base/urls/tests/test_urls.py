@@ -197,4 +197,4 @@ class TestWithClient(TestCase):
         self.assertEqual(self.client.get('/bat_location').data,
                          b'https://bat.org/bat/1')
         self.assertEqual(self.client.get('/acknowledgment_location').data,
-                         b'https://docs.arxiv.org/about/ourmembers.html')
+                         b'https://info.arxiv.org/about/ourmembers.html')

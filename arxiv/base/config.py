@@ -16,7 +16,7 @@ EXTERNAL_URL_SCHEME = os.environ.get("EXTERNAL_URL_SCHEME", "https")
 BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
 """Hostname of arxiv"""
 
-DOCS_SERVER = os.environ.get("DOCS_SERVER", "docs.arxiv.org")
+DOCS_SERVER = os.environ.get("DOCS_SERVER", "info.arxiv.org")
 """Hostname of arxiv docs"""
 
 URLS = [
