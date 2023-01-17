@@ -42,6 +42,7 @@ from subprocess import Popen, PIPE
 
 from setuptools import setup, find_packages
 
+from arxiv.release.dist_version import get_git_version
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -49,29 +50,10 @@ def read(*parts):
     with codecs.open(os.path.join(here, *parts), 'r') as fp:
         return fp.read()
 
-def find_version(*file_paths):
-    try:
-        version_file = read(*file_paths)
-        version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-        if version_match:
-            return version_match.group(1)
-    except Exception:
-        pass # no file is find, just try to get it from git
-
-    try:
-        p = Popen(['git', 'describe', '--dirty', '--always'],
-                  stdout=PIPE, stderr=PIPE)
-        p.stderr.close()
-        line = p.stdout.readlines()[0]
-        return line.strip().decode('utf-8')
-    except Exception:
-        raise RuntimeError("Unable to find version string in version file or git. See setup.py for instructions.")
-
 
 setup(
     name='arxiv-base',
-    version=find_version('arxiv', 'base', 'version.py'),
+    version = get_git_version(),
     packages=[f'arxiv.{package}' for package
               in find_packages('arxiv', exclude=['*test*'])],
     zip_safe=False,
