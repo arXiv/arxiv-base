@@ -13,7 +13,9 @@ A11Y_URL = os.environ.get(
 )
 
 EXTERNAL_URL_SCHEME = os.environ.get("EXTERNAL_URL_SCHEME", "https")
-BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
+BASE_SERVER = os.environ.get("BASE_SERVER", "phoenix.arxiv.org")
+BASE_SEARCH_SERVER = os.environ.get("BASE_SEARCH_SERVER",
+                                    "search.phoenix.arxiv.org")
 
 URLS = [
     ("help", "/help", BASE_SERVER),
@@ -22,14 +24,17 @@ URLS = [
     ("help_mathjax", "/help/mathjax", BASE_SERVER),
     ("help_social_bookmarking", "/help/social_bookmarking", BASE_SERVER),
     ("contact", "/help/contact", BASE_SERVER),
-    ("search_box", "/search", BASE_SERVER),
-    ("search_archive", "/search/<archive>", BASE_SERVER),
-    ("search_advanced", "/search/advanced", BASE_SERVER),
+    # ("search_box", "/search", BASE_SERVER),
+    # ("search_archive", "/search/<archive>", BASE_SERVER),
+    # ("search_advanced", "/search/advanced", BASE_SERVER),
+    ("search_box", "/", BASE_SEARCH_SERVER),
+    ("search_archive", "/<archive>", BASE_SEARCH_SERVER),
+    ("search_advanced", "/advanced", BASE_SEARCH_SERVER),
     ("account", "/user", BASE_SERVER),
     ("login", "/login", BASE_SERVER),
     ("logout", "/logout", BASE_SERVER),
     ("home", "/", BASE_SERVER),
-    ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honneypot.
+    ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honeypot.
     ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
     ("twitter", "/arxiv", "twitter.com"),
     ("blog", "/arxiv", "blogs.cornell.edu"),
@@ -41,6 +46,7 @@ URLS = [
     ("subscribe", "/help/subscribe", BASE_SERVER),
     ("submit", "/submit", BASE_SERVER),
     ("about", "/about", BASE_SERVER),
+    ("donate", "/about/donate", BASE_SERVER),
     ("team", "/about/people/leadership_team", BASE_SERVER),
     ("privacy_policy", "/help/policies/privacy_policy", BASE_SERVER),
     ("copyright", "/help/license", BASE_SERVER),

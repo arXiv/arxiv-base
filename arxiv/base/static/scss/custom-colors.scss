@@ -1,0 +1,81 @@
+// Custom colors
+$dark-blue:  #1f5e96;
+$bright-blue: #a5d6fe;
+$cool-wash:  #f7fafc;
+$warm-grey: #6b6459;
+$light-warm-grey:  #7c7469;
+$cornell-red: #b31b1b;
+$salmon: #fb595a;
+$warm-wash: #f9f7f7;
+// Create custom map
+$custom-colors: (
+    "dark-blue":       $dark-blue,
+    "light-blue":     $bright-blue,
+    "cool-wash":     $cool-wash,
+    "warm-grey":       $warm-grey,
+    "light-warm-grey":        $light-warm-grey,
+    "cornell-red":     $cornell-red,
+    "warm-wash":     $warm-wash
+);
+// Merge the maps with bootstrap
+$theme-colors: map-merge($theme-colors, $custom-colors);
+
+//mapping custom color $tooltip-font-size$red-100: tint-color($red, 80%) !default;
+$cornell-red-200: tint-color($cornell-red, 80%);
+$cornell-red-300: tint-color($cornell-red, 70%);
+$cornell-red-400: tint-color($cornell-red, 50%);
+$cornell-red-500: tint-color($cornell-red, 40%);
+$cornell-red-600: tint-color($cornell-red, 30%);
+$cornell-red-700: tint-color($cornell-red, 20%);
+$cornell-red-800: tint-color($cornell-red, 10%);
+$cornell-red-900: $cornell-red;
+
+$warm-grey-100: tint-color($warm-grey, 90%);
+$warm-grey-200: tint-color($warm-grey, 70%);
+$warm-grey-300: tint-color($warm-grey, 50%);
+$warm-grey-400: tint-color($warm-grey, 40%);
+$warm-grey-500: tint-color($warm-grey, 30%);
+$warm-grey-600: tint-color($warm-grey, 20%);
+$warm-grey-700: tint-color($warm-grey, 10%);
+$warm-grey-800: $warm-grey !default;
+$warm-grey-900: shade-color($warm-grey, 80%);
+
+$warm-wash-100: tint-color($warm-wash, 90%);
+$warm-wash-200: tint-color($warm-wash, 70%);
+$warm-wash-300: tint-color($warm-wash, 50%);
+$warm-wash-400: tint-color($warm-wash, 20%);
+$warm-wash-500: $warm-wash !default;
+$warm-wash-600: shade-color($warm-wash, 5%);
+$warm-wash-700: shade-color($warm-wash, 10%);
+$warm-wash-800: shade-color($warm-wash, 20%);
+$warm-wash-900: shade-color($warm-wash, 30%);
+
+$bright-blue-100: tint-color($bright-blue, 90%);
+$bright-blue-200: tint-color($bright-blue, 70%);
+$bright-blue-300: tint-color($bright-blue, 50%);
+$bright-blue-400: tint-color($bright-blue, 20%);
+$bright-blue-500: $bright-blue !default;
+$bright-blue-600: shade-color($bright-blue, 20%);
+$bright-blue-700: shade-color($bright-blue, 30%);
+$bright-blue-800: shade-color($bright-blue, 60%);
+$bright-blue-900: shade-color($bright-blue, 80%);
+
+$dark-blue-100: tint-color($dark-blue, 90%);
+$dark-blue-200: tint-color($dark-blue, 70%);
+$dark-blue-300: tint-color($dark-blue, 50%);
+$dark-blue-400: tint-color($dark-blue, 20%);
+$dark-blue-500: $dark-blue !default;
+$dark-blue-600: shade-color($dark-blue, 20%);
+$dark-blue-700: shade-color($dark-blue, 30%);
+$dark-blue-800: shade-color($dark-blue, 60%);
+$dark-blue-900: shade-color($dark-blue, 80%);
+
+$cool-wash-100: tint-color($cool-wash, 90%);
+$cool-wash-200: tint-color($cool-wash, 70%);
+$cool-wash-300: tint-color($cool-wash, 50%);
+$cool-wash-400: tint-color($cool-wash, 20%);
+$cool-wash-500: $cool-wash !default;
+$cool-wash-600: shade-color($cool-wash, 5%);
+$cool-wash-700: shade-color($cool-wash, 10%);
+$cool-wash-800: shade-color($cool-wash, 20%);
+$cool-wash-900: shade-color($cool-wash, 30%);

@@ -1,48 +1,18 @@
+<title>{{ pagetitle }} | arXiv e-print repository</title>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<!-- new favicon config and versions by realfavicongenerator.net -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta name="viewport" content="width=device-width"/>
+<link rel="shortcut icon" href="{{ url_for('base.static', filename='images/icons/favicon.ico') }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('base.static', filename='images/icons/apple-touch-icon.png') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('base.static', filename='images/icons/favicon-32x32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('base.static', filename='images/icons/favicon-16x16.png') }}">
-<link rel="manifest" href="{{ url_for('base.static', filename='images/icons/site.webmanifest') }}">
-<link rel="mask-icon" href="{{ url_for('base.static', filename='images/icons/safari-pinned-tab.svg') }}" color="#b31b1b">
-<link rel="shortcut icon" href="{{ url_for('base.static', filename='images/icons/favicon.ico') }}">
+<link rel="manifest" href="{{ url_for('base.static', filename='images/icons/site.webmanifest') }}>
+<link rel="mask-icon" href="{{ url_for('base.static', filename='images/icons/safari-pinned-tab.svg') }} color="#5bbad5">
+<meta name="msapplication-TileImage" content="images/icons/favicon-32x32.png"/>
 <meta name="msapplication-TileColor" content="#b31b1b">
 <meta name="msapplication-config" content="images/icons/browserconfig.xml">
 <meta name="theme-color" content="#b31b1b">
-<!-- end favicon config -->
-<title>{{ pagetitle }} | arXiv e-print repository</title>
-<script defer src="{{ url_for('base.static', filename='fontawesome-free-5.11.2-web/js/all.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('base.static', filename='css/arxivstyle.css')}}" />
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    messageStyle: "none",
-    extensions: ["tex2jax.js"],
-    jax: ["input/TeX", "output/HTML-CSS"],
-    tex2jax: {
-      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-      processEscapes: true,
-      ignoreClass: '.*',
-      processClass: 'mathjax.*'
-    },
-    TeX: {
-        extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js"],
-        noErrors: {
-          inlineDelimiters: ["$","$"],
-          multiLine: false,
-          style: {
-            "font-size": "normal",
-            "border": ""
-          }
-        }
-    },
-    "HTML-CSS": { availableFonts: ["TeX"] }
-  });
-</script>
-<script src='//static.arxiv.org/MathJax-2.7.3/MathJax.js'></script>
+<meta name="application-name" content="VARIABLE GOES HERE"/>
+<link rel="canonical" href="https://arxiv.org/"/>
 <script src="{{ url_for('base.static', filename='js/notification.js') }}"></script>
-{% import "base/analytics_macros.html" as analytics_macros %}
-{%- if config['ANALYTICS_ENABLED'] -%}
-{{ analytics_macros.render_analytics_script(config['ANALYTICS_BASE_URL'], config['ANALYTICS_SITE_ID'], config['ANALYTICS_COOKIE_DOMAIN']) }}
-{%- endif -%}
+<link href="{{ url_for('base.static', filename='css/custom.css') }}" rel="stylesheet">

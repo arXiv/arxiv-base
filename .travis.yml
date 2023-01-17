@@ -5,11 +5,15 @@ services:
 cache: pip
 os:
 - linux
+git:
+  depth: 400
 python:
 - '3.6'
 install:
+- pip install --upgrade pip
 - pip install pipenv
 - pipenv sync --dev
+- git describe --dirty --always
 - pip install -e ./
 - pip show arxiv-base
 script:

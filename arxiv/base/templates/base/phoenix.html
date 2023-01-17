@@ -1,0 +1,237 @@
+{% extends "base/base.html" %}
+
+{% set pagetitle %}Phoenix style reference{% endset %}
+
+{% block content %}
+<h1>Welcome [name]</h1>
+<br><br><br>
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">My selected feeds</h5>
+        <p class="card-text">List selected feeds here (ie: cs.AI, or an author name)</p>
+        <a href="#" class="btn btn-primary">Edit my feeds</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Recent activity on my papers</h5>
+        <p class="card-text">List views and downloads for this author's papers.</p>
+        <a href="#" class="btn btn-primary">Papers missing?</a>
+        <a href="#" class="btn btn-secondary">See all activity</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br><br><br>
+
+<h1>Only one of these h1 tags per page</h1>
+<h2>A smaller h2 tag.</h2>
+<h3>This is a heavy lifter in long text blocks, the h3 tag.</h3>
+<h4>Used less often, the humble h4.</h4>
+
+<br><br><br>
+
+<h2>Section title</h2>
+<p>Vivamus eget arcu a augue condimentum dapibus at nec justo. Quisque ac porttitor mi, sed imperdiet eros.</p>
+<h3>This is a subsection</h3>
+<p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Maecenas nibh lacus, auctor eu accumsan eget, scelerisque vel leo. Nam nec ultrices purus. Sed et ligula sodales, semper est ut, egestas metus. Vestibulum vehicula elementum convallis. Donec pretium mauris laoreet elit pretium, ut accumsan sem pharetra. Fusce eget nulla lectus. Aliquam eros nisl, scelerisque nec enim ultricies, <a href="#">dictum sagittis dui</a>. Donec convallis vel enim id suscipit. Morbi risus libero, tristique id massa sed, lacinia rhoncus ipsum.</p>
+<h3>Another subtitle goes here</h3>
+<p>Vestibulum ante ipsum primis in <a href="#">faucibus orci luctus et ultrices</a> posuere cubilia curae; Maecenas nibh lacus, auctor eu accumsan eget, scelerisque vel leo. Nam nec ultrices purus. Sed et ligula sodales, semper est ut, egestas metus. Vestibulum vehicula elementum convallis. Donec pretium mauris laoreet elit pretium, ut accumsan sem pharetra. Fusce eget nulla lectus. Aliquam eros nisl, scelerisque nec enim ultricies, dictum sagittis dui. Donec convallis vel enim id suscipit. Morbi risus libero, tristique id massa sed, lacinia rhoncus ipsum.</p>
+
+<br><br><br>
+
+<div class="alert alert-primary" role="alert" aria-atomic="true">
+  A simple primary alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+</div>
+<div class="alert alert-secondary" role="alert" aria-atomic="true">
+  A simple secondary alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+</div>
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" aria-atomic="true">
+  <h4 class="alert-heading">This success alert is dismissible</h4>
+  You successfully read this important success message. Here is <a href="#" class="alert-link">an example link</a>. Give it a click if you like. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.
+  <hr>
+  <p class="mb-0">Whenever you need to, be sure to use margin utilities to keep things nice and tidy. Here is <a href="#" class="alert-link">an example link</a>. Give it a click if you like.</p>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" tabindex="1"></button>
+</div>
+
+<div class="alert alert-danger" role="alert" aria-atomic="true">
+  A simple danger alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+</div>
+<div class="alert alert-warning" role="alert" aria-atomic="true">
+  A simple warning alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+</div>
+<div class="alert alert-info" role="alert" aria-atomic="true">
+  A simple info alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+</div>
+
+<br><br><br>
+
+<div class="list-group">
+  <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">List group item heading</h5>
+      <small>3 days ago</small>
+    </div>
+    <p class="mb-1">Some placeholder content in a paragraph.</p>
+    <small>And some small print.</small>
+  </a>
+  <a href="#" class="list-group-item list-group-item-action">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">List group item heading</h5>
+      <small class="text-muted">3 days ago</small>
+    </div>
+    <p class="mb-1">Some placeholder content in a paragraph.</p>
+    <small class="text-muted">And some muted small print.</small>
+  </a>
+  <a href="#" class="list-group-item list-group-item-action">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">List group item heading</h5>
+      <small class="text-muted">3 days ago</small>
+    </div>
+    <p class="mb-1">Some placeholder content in a paragraph.</p>
+    <small class="text-muted">And some muted small print.</small>
+  </a>
+</div>
+
+<br><br><br>
+
+<h2>An accordion</h2>
+<div class="accordion" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        Accordion Item #1
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the first item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTwo">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+        Accordion Item #2
+      </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingThree">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        Accordion Item #3
+      </button>
+    </h2>
+    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+</div>
+
+<br><br>
+
+<h2>How are tabs doing</h2>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Home</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Profile</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact</button>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">The first tab shows this content.</div>
+  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">This content displays for the second tab.</div>
+  <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">You've reached the third and last tab.</div>
+</div>
+
+<br><br>
+
+<h2>Text and Button Tooltips</h2>
+
+<p class="muted">Placeholder text to demonstrate some <a href="#" data-bs-toggle="tooltip" title="" data-bs-original-title="Default tooltip">inline links</a> with tooltips. This is now just filler, no killer. Content placed here just to mimic the presence of <a href="#" data-bs-toggle="tooltip" title="Another tooltip">real text</a>. And all that just to give you an idea of how tooltips would look when used in real-world situations. So hopefully you've now seen how <a href="#" data-bs-toggle="tooltip" title="Another one here too">these tooltips on links</a> can work in practice, once you use them on <a href="#" data-bs-toggle="tooltip" title="" data-bs-original-title="The last tip!">your own</a> site or project.
+</p>
+
+<button id="mytooltip" type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top">
+  Tooltip on top
+</button>
+<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="right" title="Tooltip on right">
+  Tooltip on right
+</button>
+<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tooltip on bottom">
+  Tooltip on bottom
+</button>
+<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="left" title="Tooltip on left">
+  Tooltip on left
+</button>
+
+<br><br>
+
+<h2>A form with various elements</h2>
+<form class="border p-5">
+  <div class="mb-3">
+    <label for="exampleInputEmail1" class="form-label">Email address</label>
+    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+  </div>
+  <div class="mb-3">
+    <label for="exampleInputPassword1" class="form-label">Password</label>
+    <input type="password" class="form-control" id="exampleInputPassword1">
+  </div>
+  <select class="form-select" aria-label="Default select example">
+    <option selected>Open this select menu</option>
+    <option value="1">One</option>
+    <option value="2">Two</option>
+    <option value="3">Three</option>
+  </select>
+
+  <fieldset>
+    <legend>I am interested in the following (check all that apply):</legend>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+      <label class="form-check-label" for="flexCheckDefault">
+        Default checkbox
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+      <label class="form-check-label" for="flexCheckChecked">
+        Checked checkbox
+      </label>
+    </div>
+  </fieldset>
+
+  <div class="input-group mb-3">
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="#">Action</a></li>
+      <li><a class="dropdown-item" href="#">Another action</a></li>
+      <li><a class="dropdown-item" href="#">Something else here</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" href="#">Separated link</a></li>
+    </ul>
+    <input type="text" class="form-control" aria-label="Text input with dropdown button">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<br><br>
+
+{% endblock content %}

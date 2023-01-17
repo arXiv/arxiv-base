@@ -2,30 +2,37 @@
 <html lang="en">
   <head>
     {% include "base/head.html" %}
-    {% block addl_head %}{# Custom style sheets or other head includes #}
+    {% block addl_head %}
+      {# Custom style sheets or other head includes #}
+      {% include "base/analytics.html" %}
     {% endblock addl_head %}
   </head>
   <body>
-  {% import "base/macros.html" as macros %}
-  {% import "base/analytics_macros.html" as analytics_macros %}
-  <header>
-    {%- if config['ANALYTICS_ENABLED'] -%}
-    {{ analytics_macros.render_analytics_noscript(config['ANALYTICS_BASE_URL'], config['ANALYTICS_SITE_ID']) }}
-    {%- endif -%}
-    <a href="#main-container" class="is-sr-only">Skip to main content</a>
-    {% block header %}
-    {% include "base/header.html" %}
-    {% endblock header %}
-  </header>
-  <main class="container" id="main-container">
-    {% block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
-    {% block content %}
-    {% endblock content %}
-  </main>
-  <footer>
-    {% block footer %}
-    {% include "base/footer.html" %}
-    {% endblock footer %}
-  </footer>
+    {% import "base/macros.html" as macros %}
+    <header>
+      <div class="visually-hidden-focusable overflow-hidden"><a href="#content">Skip to main content</a></div>
+      {% block header %}
+      {% include "base/header.html" %}
+      {% endblock header %}
+    </header>
+    {%- if request.path != "/" %}
+    {% include "base/breadcrumbs.html" %}
+    {% endif %}
+    <main>
+      {% block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
+      <div class="container" id="content">
+        {% block content %}
+        {% endblock content %}
+      </div>
+      {% block content_extra %}
+      {% endblock content_extra %}
+    </main>
+    <footer>
+      {% block footer %}
+      {% include "base/footer.html" %}
+      {% endblock footer %}
+    </footer>
+    <script src="{{ url_for('base.static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('base.static', filename='js/custom.js') }}"></script>
   </body>
 </html>

@@ -112,7 +112,10 @@ def get_git_version(abbrev: int = 7) -> str:
         )
         p.stderr.close()
         line = p.stdout.readlines()[0]
-        return str(line.strip().decode("utf-8"))
+        ver = line.strip().decode("utf-8")
+        ver = ver.replace('-','+',1) # to try to make it PEP 440 compliant
+        return ver
+
     except Exception:
         raise ValueError("Cannot get the version number from git")
 

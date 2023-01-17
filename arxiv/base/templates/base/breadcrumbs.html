@@ -1,0 +1,13 @@
+{% block breadcrumbs %}
+<div class="container container-wide">
+  <nav class="arxiv-breadcrumb" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('home') }}">home</a></li>
+      {% if breadcrumb is defined %}
+      {% for link, label in breadcrumb.items() %}<li class="breadcrumb-item"><a href="{{link}}">{{label}}</a></li>{% endfor %}
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ pagetitle }}</li>
+    </ol>
+  </nav>
+</div>
+{% endblock %}

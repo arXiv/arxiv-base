@@ -145,6 +145,9 @@ def create_web_app() -> Flask:
 Some tests to check app configuration and pattern compliance are provided in
 ``arxiv.base.app_tests``. See that module for usage.
 
+## Making a new version and upload to pypi
+See [Documentation for release](arxiv/release/README.md)
+
 ## Editing and compiling sass
 
 **TODO: compile sass at app start up, stop checking compiled artifacts into to git.**

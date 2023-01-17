@@ -1,49 +1,68 @@
-<div class="columns is-desktop" role="navigation" aria-label="Secondary">
-  <!-- MetaColumn 1 -->
-  <div class="column">
-    <div class="columns">
-      <div class="column">
-        <ul class="nav-spaced">
-          <li><a href="{{ url_for('about')}}">About</a></li>
-          <li><a href="{{ url_for('help') }}">Help</a></li>
-        </ul>
+<div class="arxiv-footer"><div class="container container-wide">
+    <div class="row">
+      <div class="col-sm">
+        <div class="row">
+          <div class="col-md">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item"><a href="{{ url_for('about')}}">About</a></li>
+              <li class="list-group-item"><a href="{{ url_for('help') }}">Help</a></li>
+              <li class="list-group-item"><a href="{{ url_for('contact') }}"> Contact</a></li>
+            </ul>
+          </div>
+          <div class="col-md">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item"><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
+              <li class="list-group-item"><a href="{{ url_for('a11y') }}">Web Accessibility Assistance</a></li>
+              <li class="list-group-item"><a href="{{ url_for('donate')}}">Support arXiv</a></li>
+            </ul>
+          </div>
+          <div class="col-md">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                <svg width="20" height="20" role="presentation">
+                  <use xlink:href="{{ url_for('base.static', filename='images/icons/custom-icons.svg') }}#smileybones-small"/>
+                </svg>
+                <a href="{{ url_for('subscribe') }}"> Subscribe</a>
+              </li>
+              <li class="list-group-item">
+                  <a class="a11y-main-link" href="https://status.arxiv.org" target="_blank">
+                    arXiv Operational Status
+                    <svg class="icon-small" width="20" height="20" fill="currentColor" role="presentation">
+                      <use xlink:href="{{ url_for('base.static', filename='bootstrap/bootstrap-icons.svg') }}#chevron-right"/>
+                    </svg>
+                  </a><br>
+                  <p class="notification-options">Get status notifications via<br>
+                    <a href="https://subscribe.sorryapp.com/24846f03/email/new" target="_blank">
+                      <svg width="20" height="20" fill="currentColor" role="presentation">
+                        <use xlink:href="{{ url_for('base.static', filename='bootstrap/bootstrap-icons.svg') }}#envelope-fill"/>
+                      </svg>
+                      email
+                    </a>
+                    or
+                    <a href="https://subscribe.sorryapp.com/24846f03/slack/new" target="_blank">
+                      <svg width="20" height="20" fill="currentColor" role="presentation">
+                        <use xlink:href="{{ url_for('base.static', filename='bootstrap/bootstrap-icons.svg') }}#slack"/>
+                      </svg>
+                      slack
+                    </a>
+                  </p>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="column">
-        <ul class="nav-spaced">
-          <li>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon filter-black" role="presentation"><title>contact arXiv</title><desc>Click here to contact arXiv</desc><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg>
-            <a href="{{ url_for('contact') }}"> Contact</a>
-          </li>
-          <li>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon filter-black" role="presentation"><title>subscribe to arXiv mailings</title><desc>Click here to subscribe</desc><path d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"/></svg>
-            <a href="{{ url_for('subscribe') }}"> Subscribe</a>
-          </li>
-        </ul>
+
+      <div class="col-sm col-md-5 arxiv-membership">
+        <p>We gratefully acknowledge support from Cornell Tech, the Simons Foundation, {{ session['institution'] if ('institution' in session and session['institution'] != None) else 'arXiv members' }}, and all <a href="{{ url_for('about') }}/membership">our contributors</a>.</p>
+        <div class="row row-cols-1 row-cols-xxl-2">
+          <div class="col">
+            <img class="logo-cornell-tech" src="{{ url_for('base.static', filename='images/logo-cornell-tech.png') }}" alt="Cornell Tech logo">
+          </div>
+          <div class="col">
+            {{ session['institution'] if ('institution' in session and session['institution'] != None) else '[member institution logo here]' }}
+          </div>
+        </div>
       </div>
+
     </div>
-  </div> <!-- end MetaColumn 1 -->
-  <!-- MetaColumn 2 -->
-  <div class="column">
-    <div class="columns">
-      <div class="column">
-        <ul class="nav-spaced">
-          <li><a href="{{ url_for('copyright') }}">Copyright</a></li>
-          <li><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
-        </ul>
-      </div>
-      <div class="column sorry-app-links">
-        <ul class="nav-spaced">
-          <li><a href="{{ url_for('a11y') }}">Web Accessibility Assistance</a></li>
-          <li>
-            <p class="help">
-              <a class="a11y-main-link" href="https://status.arxiv.org" target="_blank">arXiv Operational Status <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" class="icon filter-dark_grey" role="presentation"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"/></svg></a><br>
-              Get status notifications via
-              <a class="is-link" href="https://subscribe.sorryapp.com/24846f03/email/new" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon filter-black" role="presentation"><path d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"/></svg>email</a>
-              or <a class="is-link" href="https://subscribe.sorryapp.com/24846f03/slack/new" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="icon filter-black" role="presentation"><path d="M94.12 315.1c0 25.9-21.16 47.06-47.06 47.06S0 341 0 315.1c0-25.9 21.16-47.06 47.06-47.06h47.06v47.06zm23.72 0c0-25.9 21.16-47.06 47.06-47.06s47.06 21.16 47.06 47.06v117.84c0 25.9-21.16 47.06-47.06 47.06s-47.06-21.16-47.06-47.06V315.1zm47.06-188.98c-25.9 0-47.06-21.16-47.06-47.06S139 32 164.9 32s47.06 21.16 47.06 47.06v47.06H164.9zm0 23.72c25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06H47.06C21.16 243.96 0 222.8 0 196.9s21.16-47.06 47.06-47.06H164.9zm188.98 47.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06h-47.06V196.9zm-23.72 0c0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06V79.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06V196.9zM283.1 385.88c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06v-47.06h47.06zm0-23.72c-25.9 0-47.06-21.16-47.06-47.06 0-25.9 21.16-47.06 47.06-47.06h117.84c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06H283.1z"/></svg>slack</a>
-            </p>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div> <!-- end MetaColumn 2 -->
-</div>
+</div></div>
