@@ -1,4 +1,4 @@
-flask==0.12.2
+flask==2.3.2
 nose2==0.7.3
 jsonschema==2.6.0
 mypy==0.560
