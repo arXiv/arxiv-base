@@ -2,12 +2,13 @@
 
 from typing import Optional
 import os
+import secrets
 from urllib.parse import urlparse
 from arxiv.release.dist_version import get_version
 
 SERVER_NAME = None
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "yes123")
+SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(16))
 A11Y_URL = os.environ.get(
     "ARXIV_ACCESSIBILITY_URL", "mailto:web-accessibility@cornell.edu"
 )
