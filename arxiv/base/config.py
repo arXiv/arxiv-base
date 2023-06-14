@@ -15,14 +15,15 @@ A11Y_URL = os.environ.get(
 
 EXTERNAL_URL_SCHEME = os.environ.get("EXTERNAL_URL_SCHEME", "https")
 BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
+HELP_SERVER = os.environ.get("HELP_SERVER", "info.arxiv.org")
 
 URLS = [
-    ("help", "/help", BASE_SERVER),
-    ("help_identifier", "/help/arxiv_identifier", BASE_SERVER),
-    ("help_trackback", "/help/trackback", BASE_SERVER),
-    ("help_mathjax", "/help/mathjax", BASE_SERVER),
-    ("help_social_bookmarking", "/help/social_bookmarking", BASE_SERVER),
-    ("contact", "/help/contact", BASE_SERVER),
+    ("help", "/help", HELP_SERVER),
+    ("help_identifier", "/help/arxiv_identifier.html", HELP_SERVER),
+    ("help_trackback", "/help/trackback.html", HELP_SERVER),
+    ("help_mathjax", "/help/mathjax.html", HELP_SERVER),
+    ("help_social_bookmarking", "/help/social_bookmarking", HELP_SERVER), # Does not resolve
+    ("contact", "/help/contact.html", HELP_SERVER),
     ("search_box", "/search", BASE_SERVER),
     ("search_archive", "/search/<archive>", BASE_SERVER),
     ("search_advanced", "/search/advanced", BASE_SERVER),
@@ -37,15 +38,15 @@ URLS = [
     ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
     ("library", "/", "library.cornell.edu"),
     ("university", "/", "cornell.edu"),
-    ("acknowledgment", "/about/ourmembers", BASE_SERVER),
-    ("faq", "/help/faq", BASE_SERVER),
-    ("subscribe", "/help/subscribe", BASE_SERVER),
+    ("acknowledgment", "/about/ourmembers.html", HELP_SERVER),
+    ("faq", "/help/faq/index.html", HELP_SERVER),
+    ("subscribe", "/help/subscribe", HELP_SERVER),
     ("submit", "/submit", BASE_SERVER),
-    ("about", "/about", BASE_SERVER),
-    ("team", "/about/people/leadership_team", BASE_SERVER),
-    ("privacy_policy", "/help/policies/privacy_policy", BASE_SERVER),
-    ("copyright", "/help/license", BASE_SERVER),
-    ("a11y", "/help/web_accessibility", BASE_SERVER),
+    ("about", "/about", HELP_SERVER),
+    ("team", "/about/people/leadership_team.html", HELP_SERVER),
+    ("privacy_policy", "/help/policies/privacy_policy.html", HELP_SERVER),
+    ("copyright", "/help/license/index.html", HELP_SERVER),
+    ("a11y", "/help/web_accessibility.html", HELP_SERVER),
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
     ("clickthrough", "/ct", BASE_SERVER),
