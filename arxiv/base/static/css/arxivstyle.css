@@ -9866,7 +9866,16 @@ main {
 }
 
 #support-ack-url {
-  color: white;
+  color: #fff;
+}
+
+#support-ack-url a {
+  color: #fff;
+  border: none;
+  text-decoration: underline;
+}
+#support-ack-url a:hover {
+  color: #1e8bc3;
 }
 
 /** All of the custom styles for arXiv-NG - related to specific graphical style rather than overrides of Bulma - are placed here. **/
