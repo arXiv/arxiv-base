@@ -16,6 +16,12 @@ EXTERNAL_URL_SCHEME = os.environ.get("EXTERNAL_URL_SCHEME", "https")
 BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
 
 URLS = [
+    # these are missing keys from the browse homepage:
+    ("help_submit", "/help", BASE_SERVER),
+    ("new", "/", BASE_SERVER),
+    ("about_give", "/about", BASE_SERVER),
+    ("about_people", "/about", BASE_SERVER),
+
     ("help", "/help", BASE_SERVER),
     ("help_identifier", "/help/arxiv_identifier", BASE_SERVER),
     ("help_trackback", "/help/trackback", BASE_SERVER),
