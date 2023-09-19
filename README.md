@@ -169,3 +169,11 @@ file has been written to do this; do not edit it.
 
 Adding ``class="beta"`` to the main content div will create a beta watermark at
  the top left of pages having this class.
+
+## Upload to pypi
+
+```bash
+pip install --upgrade setuptools wheel twine
+python setup.py sdist bdist_wheel
+twine --upload dist/*  # Enter username and password from lastpass
+```

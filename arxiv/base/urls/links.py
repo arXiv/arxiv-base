@@ -113,7 +113,7 @@ IP_ADDRESS = (
 )
 """Regex to match an IP address."""
 
-TLDS = "|".join(bleach.linkifier.TLDS)
+TLDS = "|".join( list(set(bleach.linkifier.TLDS + ['xyz'])) )
 PROTOCOLS = "|".join(bleach.linkifier.html5lib_shim.allowed_protocols)
 URL = re.compile(
     rf"""(?:{FTP.pattern})|
