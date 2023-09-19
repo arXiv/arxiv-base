@@ -23,7 +23,7 @@ URLS = [
     ("help_trackback", "/help/trackback.html", HELP_SERVER),
     ("help_mathjax", "/help/mathjax.html", HELP_SERVER),
     ("help_social_bookmarking", "/help/social_bookmarking", HELP_SERVER), # Does not resolve
-    ("help_archive_description", "/help/<archive>", HELP_SERVER),
+    ("help_archive_description", "/help/<archive>/index.html", HELP_SERVER),
     ("contact", "/help/contact.html", HELP_SERVER),
     ("search_box", "/search", BASE_SERVER),
     ("search_archive", "/search/<archive>", BASE_SERVER),
