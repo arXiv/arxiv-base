@@ -18,44 +18,46 @@ BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
 HELP_SERVER = os.environ.get("HELP_SERVER", "info.arxiv.org")
 
 URLS = [
+    ("a11y", "/help/web_accessibility.html", HELP_SERVER),
+    ("about", "/about", HELP_SERVER),
+    ("about_give", "/about/give.html", HELP_SERVER),
+    ("about_people", "/about/people/index.html", HELP_SERVER),
+    ("acknowledgment", "/about/ourmembers.html", HELP_SERVER),
+    ("contact", "/help/contact.html", HELP_SERVER),
+    ("copyright", "/help/license/index.html", HELP_SERVER),
+    ("faq", "/help/faq/index.html", HELP_SERVER),
     ("help", "/help", HELP_SERVER),
+    ("help_archive_description", "/help/<archive>/index.html", HELP_SERVER),
     ("help_identifier", "/help/arxiv_identifier.html", HELP_SERVER),
-    ("help_trackback", "/help/trackback.html", HELP_SERVER),
     ("help_mathjax", "/help/mathjax.html", HELP_SERVER),
     ("help_social_bookmarking", "/help/social_bookmarking", HELP_SERVER), # Does not resolve
-    ("help_archive_description", "/help/<archive>/index.html", HELP_SERVER),
     ("help_submit", "/help/submit/index.html", HELP_SERVER),
-    ("contact", "/help/contact.html", HELP_SERVER),
-    ("about_people", "/about/people/index.html", HELP_SERVER),
-    ("about_give", "/about/give.html", HELP_SERVER),
+    ("help_trackback", "/help/trackback.html", HELP_SERVER),
     ("new", "/", HELP_SERVER),    # this help page might be gone, use to go to very old news
-    ("faq", "/help/faq/index.html", HELP_SERVER),
-    ("subscribe", "/help/subscribe", HELP_SERVER),
-    ("acknowledgment", "/about/ourmembers.html", HELP_SERVER),
-    ("about", "/about", HELP_SERVER),
-    ("team", "/about/people/leadership_team.html", HELP_SERVER),
     ("privacy_policy", "/help/policies/privacy_policy.html", HELP_SERVER),
-    ("copyright", "/help/license/index.html", HELP_SERVER),
-    ("a11y", "/help/web_accessibility.html", HELP_SERVER),
+    ("subscribe", "/help/subscribe", HELP_SERVER),
+    ("team", "/about/people/leadership_team.html", HELP_SERVER),
 
-    ("search_box", "/search", BASE_SERVER),
-    ("search_archive", "/search/<archive>", BASE_SERVER),
-    ("search_advanced", "/search/advanced", BASE_SERVER),
-    ("account", "/user", BASE_SERVER),
-    ("login", "/login", BASE_SERVER),
-    ("logout", "/logout", BASE_SERVER),
-    ("home", "/", BASE_SERVER),
-    ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honneypot.
-    ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
-    ("twitter", "/arxiv", "twitter.com"),
-    ("blog", "/arxiv", "blogs.cornell.edu"),
-    ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
-    ("library", "/", "library.cornell.edu"),
-    ("university", "/", "cornell.edu"),
-    ("submit", "/submit", BASE_SERVER),
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
+    ("account", "/user", BASE_SERVER),
+
     ("clickthrough", "/ct", BASE_SERVER),
+    ("home", "/", BASE_SERVER),
+    ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honneypot.
+    ("login", "/login", BASE_SERVER),
+    ("logout", "/logout", BASE_SERVER),
+    ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
+    ("search_advanced", "/search/advanced", BASE_SERVER),
+    ("search_archive", "/search/<archive>", BASE_SERVER),
+    ("search_box", "/search", BASE_SERVER),
+    ("submit", "/submit", BASE_SERVER),
+
+    ("blog", "/arxiv", "blogs.cornell.edu"),
+    ("library", "/", "library.cornell.edu"),
+    ("twitter", "/arxiv", "twitter.com"),
+    ("university", "/", "cornell.edu"),
+    ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
 ]
 """
 URLs for external services, for use with :func:`flask.url_for`.
