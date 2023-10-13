@@ -13,16 +13,17 @@ _verregex = re.compile(r'v\d+$')
 
 _deleted_data = None
 
-def ensure_deleted_data(location=None) -> None:
+def ensure_deleted_data(location: Optional[str] = None) -> None:
     """Checks that deleted data loads from Google storage and is not empty.
 
-    Raises an Exception if there are problems."""
+    Raises an Exception if there are problems.
+    """
     rd = get_deleted_data(location)
     if not rd:
         raise Exception("Deleted data was empty")
 
 
-def get_deleted_data(location=None)->dict:
+def get_deleted_data(location: Optional[str] = None)->dict:
     """Get the deleted data.
 
     `get_deleted_data()` will attempt to get the data from GS only

@@ -35,7 +35,7 @@ class ISO8601JSONDecoder(json.JSONDecoder):
             return value
         try:
             # Switched from dateutil.parser because it was too liberal.
-            return datetime.fromisoformat(value)  # type: ignore
+            return datetime.fromisoformat(value)
         except ValueError:
             return value
 

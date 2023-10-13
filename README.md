@@ -3,15 +3,14 @@
 This project provides a base Flask application and base Docker image for
 arXiv-NG services.
 
-Each component of this project **must** meet all of the following criteria:
+Each component of this project **must** meet all the following criteria:
 
 1. It is likely that the component will be utilized in many or all arXiv
    services.
 2. Once stable, it is unlikely to change often.
 3. It is unlikely that implementing new features in specific services
    would require changes to the component.
-4. When a component does change, it **must** change in the same way for all of
-   the services that use it.
+4. When a component does change, it **must** change in the same way for all    the services that use it.
 
 ## Base CSS and Templates for arXiv.org-NG
 
@@ -74,16 +73,18 @@ templates and static files available to you. For example, in your
 ```python
 from flask import Flask
 from arxiv.base import Base
-from someapp import routes
-
 
 def create_web_app() -> Flask:
-   app = Flask('someapp')
+   app = Flask('mega_tool')
    app.config.from_pyfile('config.py')
 
    Base(app)   # Registers the base/UI blueprint.
-   app.register_blueprint(routes.blueprint)    # Your blueprint.
-return app
+   @app.route("/mega_tool")
+   def mega_tool():
+       # TODO use something from arxiv-base 
+       return "<p>Mega_tool!</p>"
+
+   return app
 ```
 
 You can now extend base templates, e.g.:
@@ -104,7 +105,7 @@ And use static files in your templates, e.g.:
 
 ## Static files and paths
 
-In order to serve static assets for multiple versions of the an app at
+In order to serve static assets for multiple versions of the app at
 the same time, arxiv-base prefixes the app name and app version to
 asset urls. This is to allow gracefully upgrades with no broken links
 to css, js or images.
@@ -131,15 +132,16 @@ Be sure to initialize the integration after instantiating ``Base`` and
 registering your blueprints. For example:
 
 ```python
-def create_web_app() -> Flask:
-    """Initialize and configure the application."""
-
-    app = Flask('coolapp')
-    app.config.from_object(config)
-    Base(app)    # Gives us access to the base UI templates and resources.
-    app.register_blueprint(routes.blueprint)
-    s3.init_app(app)    # <- Down here!
-    return app
+# TODO just have a s3 script
+# def create_web_app() -> Flask:
+#     """Initialize and configure the application."""
+# 
+#     app = Flask('cool_app')
+#     app.config.from_object(config)
+#     Base(app)    # Gives us access to the base UI templates and resources.
+#     app.register_blueprint(routes.blueprint)
+#     s3.init_app(app)    # <- Down here!
+#     return app
 ```
 
 ## App tests
@@ -149,8 +151,8 @@ Some tests to check app configuration and pattern compliance are provided in
 
 ## Editing and compiling sass
 
-The file arxivstyle.css should never be edited directly. It is compiled from
-arxivstyle.sass with this command from project directory root:
+The file `arxivstyle.css` should never be edited directly. It is compiled from
+`arxivstyle.sass` with this command from project directory root:
 ``sass arxiv/base/static/sass/arxivstyle.sass:arxiv/base/static/css/arxivstyle.css``
 
 or you can use the ``--watch`` option to autocompile on any changed file:

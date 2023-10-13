@@ -108,7 +108,7 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
         raise TypeError('Not a valid Flask app or middleware')
 
     if not hasattr(app, 'middlewares'):
-        app.middlewares = {}
+        app.middlewares = {}  #type: ignore
 
     # Apply the last middleware first, so that the first middleware is called
     # first upon the request.
@@ -127,7 +127,7 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
             wrapped_app = middleware(wrapped_app)
 
         key = getattr(middleware, '__name__', str(middleware))
-        app.middlewares[key] = wrapped_app
+        app.middlewares[key] = wrapped_app #type: ignore
 
     app.wsgi_app = wrapped_app  # type: ignore
     return app
