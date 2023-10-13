@@ -1,10 +1,9 @@
 """Flask configuration."""
-
+import importlib.metadata
 from typing import Optional
 import os
 import secrets
 from urllib.parse import urlparse
-from arxiv.release.dist_version import get_version
 
 SERVER_NAME = None
 
@@ -84,10 +83,10 @@ for key, value in os.environ.items():
 
 ARXIV_BUSINESS_TZ = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
 
-BASE_VERSION = get_version('arxiv-base')
+BASE_VERSION = os.environ.get("BASE_VERSION", importlib.metadata.version('arxiv-base'))
 """The version of the arxiv-base package."""
 
-APP_VERSION = get_version('arxiv-base')
+APP_VERSION = os.environ.get("APP_VERSION", BASE_VERSION)
 """The version of the base test app. This is used to build the paths
 to static assets, see :mod:`arxiv.base`."""
 

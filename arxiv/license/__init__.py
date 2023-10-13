@@ -123,5 +123,5 @@ CURRENT_LICENSES = {
 }
 
 CURRENT_LICENSE_URIS = \
-    sorted(CURRENT_LICENSES, key=lambda x: CURRENT_LICENSES[x]['order'])
+    sorted(CURRENT_LICENSES, key=lambda x: CURRENT_LICENSES[x]['order'])  # type: ignore
 """Current license URIs by display order."""
