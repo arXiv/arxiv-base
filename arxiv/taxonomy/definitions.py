@@ -1160,7 +1160,7 @@ CATEGORIES = {
     'hep-ex': {
         'name': 'High Energy Physics - Experiment',
         'in_archive': 'hep-ex',
-        'descrption': 'Results from high-energy/particle physics experiments '
+        'description': 'Results from high-energy/particle physics experiments '
                       'and prospects for future experimental results, including '
                       'tests of the standard model, measurements of standard '
                       'model parameters, searches for physics beyond the '
