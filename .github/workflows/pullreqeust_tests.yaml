@@ -8,9 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Python 3
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.10
+          python-version: "3.10"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -25,5 +25,3 @@ jobs:
         run: poetry run pydocstyle --convention=numpy --add-ignore=D401 arxiv
       - name: Run App Tests
         run: poetry run python tests/run_app_tests.py
-
-
