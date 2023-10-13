@@ -15,6 +15,31 @@ A11Y_URL = os.environ.get(
 
 EXTERNAL_URL_SCHEME = os.environ.get("EXTERNAL_URL_SCHEME", "https")
 BASE_SERVER = os.environ.get("BASE_SERVER", "arxiv.org")
+
+AUTH_SERVER = os.environ.get("AUTH_SERVER", BASE_SERVER)
+"""Hostname for auth paths like /login and /logout.
+
+Usually the same as BASE_SERVER but can be configured.
+"""
+
+SEARCH_SERVER = os.environ.get("SEARCH_SERVER", BASE_SERVER)
+"""Hostname for search paths.
+
+Usually the same as BASE_SERVER but can be configured.
+"""
+
+SUBMIT_SERVER = os.environ.get("SUBMIT_SERVER", BASE_SERVER)
+"""Hostname for submit paths.
+
+Usually the same as BASE_SERVER but can be configured.
+"""
+
+CANONICAL_SERVER = os.environ.get("CANONICAL_SERVER", BASE_SERVER)
+"""Hostname for use in canonical URLs.
+
+Usually the same as BASE_SERVER but can be configured.
+"""
+
 HELP_SERVER = os.environ.get("HELP_SERVER", "info.arxiv.org")
 
 URLS = [
@@ -40,18 +65,27 @@ URLS = [
 
     ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
     ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
-    ("account", "/user", BASE_SERVER),
+    ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
+
+    ("canonical_pdf", "/pdf/<arxiv:paper_id>v<string:version>", CANONICAL_SERVER),
+    ("canonical_pdf_by_id", "/pdf/<arxiv:paper_id>", CANONICAL_SERVER),
+    ("canonical_abs", "/abs/<arxiv:paper_id>v<string:version>", CANONICAL_SERVER),
+    ("canonical_abs_by_id", "/abs/<arxiv:paper_id>", CANONICAL_SERVER),
 
     ("clickthrough", "/ct", BASE_SERVER),
     ("home", "/", BASE_SERVER),
     ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honneypot.
-    ("login", "/login", BASE_SERVER),
-    ("logout", "/logout", BASE_SERVER),
-    ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
-    ("search_advanced", "/search/advanced", BASE_SERVER),
-    ("search_archive", "/search/<archive>", BASE_SERVER),
-    ("search_box", "/search", BASE_SERVER),
-    ("submit", "/submit", BASE_SERVER),
+
+    ("account", "/user", AUTH_SERVER),
+    ("login", "/login", AUTH_SERVER),
+    ("logout", "/logout", AUTH_SERVER),
+
+    ("create", "/user/create", SUBMIT_SERVER),
+    ("submit", "/submit", SUBMIT_SERVER),
+
+    ("search_advanced", "/search/advanced", SEARCH_SERVER),
+    ("search_archive", "/search/<archive>", SEARCH_SERVER),
+    ("search_box", "/search", SEARCH_SERVER),
 
     ("blog", "/arxiv", "blogs.cornell.edu"),
     ("library", "/", "library.cornell.edu"),
