@@ -19,19 +19,17 @@ _verregex = re.compile(r'v\d+$')
 
 _reasons_data = None
 
-def ensure_reasons_data(location=None) -> None:
-    """Checks that reasons data loads from Google storage and is not
-    empty.
+def ensure_reasons_data(location:Optional[str]=None) -> None:
+    """Checks that reasons data loads from Google storage and is not empty.
 
     Raises an Exception if there are problems.
-
     """
     rd = get_reasons_data(location)
     if not rd:
         raise Exception("Reasons data was empty")
 
 
-def get_reasons_data(location=None)->dict:
+def get_reasons_data(location:Optional[str]=None)->dict:
     """Get the reasons data.
 
     `get_reasons_data()` will attempt to get the data from GS only
@@ -61,6 +59,9 @@ def get_reasons_data(location=None)->dict:
     if location is None:
         location = os.environ.get("REASONS_GS_URL", DEFAULT_REASONS_GS_URL)
 
+    if location is None:
+        raise ValueError("Must pass location or set env var REASONS_GS_URL")
+
     blob = None
     try:
         bucket_name = location.strip('gs://').split('/')[0]
@@ -86,6 +87,8 @@ def get_reasons_data(location=None)->dict:
 
 def reasons(id: str, format: FORMATS)-> Optional[str] :
     """
+    Find any reasons for inability to process this paper.
+    
     Find all the recorded reasons for inability to process this paper (if any),
     that are either general ($id recorded in reasons file with no extension) or
     specific to $format ($id.format recorded in reasons file). If $id includes a
