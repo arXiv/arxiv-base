@@ -27,6 +27,8 @@ typing-extensions = "*"
 semantic-version = "*"
 markupsafe = "*"
 google-cloud-storage = "^2.5.0"
+google-cloud-logging = "^3.8.0"
+google-cloud-pubsub = "^2.18.4"
 
 [tool.poetry.dev-dependencies]
 pydocstyle = "*"
