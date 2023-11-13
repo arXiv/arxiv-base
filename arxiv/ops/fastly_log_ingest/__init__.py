@@ -31,6 +31,7 @@ def _status_to_severity(status: int):
 
 
 def to_log_entry(req: dict):
+    """Convert a `dict` to a `dict` for a GCP log entry."""
     entry = {
         "severity": _status_to_severity(req.get("status", 500)),
         "timestamp": req["timestamp"],
@@ -67,6 +68,8 @@ if __name__ == "__main__":
 
 
 class Rate:
+    """Class to record the rate of events."""
+
     def __init__(self, window_sec: float = 360.0, bins: int = 20, plural_noun=""):
         self.window = window_sec
         self.window_start = perf_counter()
@@ -77,6 +80,7 @@ class Rate:
         self.noun = plural_noun.strip() + " "
 
     def event(self, at: Optional[float] = None, quantity=1):
+        """Record a `quantity` of events at time `at`."""
         if not at:
             at = perf_counter()
 
@@ -88,6 +92,7 @@ class Rate:
             self.fifo.append(count)
 
     def rate_msg(self):
+        """Returns a rate message."""
         qsize = len(self.fifo)
         if qsize == 0:
             return f"Zero {self.noun} happened"

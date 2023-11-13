@@ -36,6 +36,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 class WorkItem:
+    """An item of work which is a Pub/Sub message and an arrival time."""
+
     def __init__(self, message: Message, arrival_time: float):
         self.message = message
         self.arrival_time = arrival_time
@@ -53,7 +55,7 @@ last_pubsub_info = perf_counter()
 lock = Lock()  # lock protects the above three objects
 
 
-def logging_thread():
+def _logging_thread():
     log_write_rate = Rate(plural_noun="log entries")
     logging.debug("About to get logging_v2 client.")
     log_client = logging_v2.Client(project=PROJECT_ID)
@@ -86,7 +88,7 @@ def logging_thread():
     logger.info(log_write_rate.rate_msg())
 
 
-def pubsub_callback(message: Message) -> None:
+def _pubsub_callback(message: Message) -> None:
     global last_pubsub_info
     arrival = perf_counter()
     with lock:
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     logger.debug("about to start logging threads")
     threads = []
     for _ in range(0, THREADS):
-        threads.append(Thread(target=logging_thread))
+        threads.append(Thread(target=_logging_thread))
     [t.start() for t in threads]
     logger.info(f"Started {len(threads)} log writer threads.")
 
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     # in the form `projects/{project_id}/subscriptions/{subscription_id}`
     subscription_path = subscriber.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
 
-    streaming_pull_future = subscriber.subscribe(subscription_path, callback=pubsub_callback)
+    streaming_pull_future = subscriber.subscribe(subscription_path, callback=_pubsub_callback)
     logger.info(f"Listening for pub/sub messages on {subscription_path}..\n")
     with subscriber:
         try:
