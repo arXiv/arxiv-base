@@ -6,6 +6,7 @@ offer sending files to GS, send to pub/sub, sending to a REST endpoint and sendi
 
 A docker file for this is at ./deploy/Dockerfile-fastlylogingest.
 """
+import math
 from collections import deque
 from time import perf_counter
 from typing import Optional, Iterator, Sequence
@@ -77,24 +78,28 @@ class Rate:
         self.window_start = perf_counter()
         self.bins = bins
         self.bin_sec = self.window / self.bins
-        self.fifo = deque(maxlen=bins)
+        self.fifo: deque[float] = deque(maxlen=bins)
         self.fifo.append(0)
         self.noun = plural_noun.strip() + " "
 
     def event(self, at: Optional[float] = None, quantity=1):
         """Record a `quantity` of events at time `at`."""
-        if not at:
-            at = perf_counter()
-
-        if at > self.window_start + self.bin_sec:
-            self.fifo.append(1)
-        else:
+        at = at or perf_counter()
+        dt = at - self.window_start
+        if dt <= self.bin_sec:
             count = self.fifo.pop()
             count = count + quantity
             self.fifo.append(count)
+            return
+
+        missing_bins = math.floor(dt / self.bin_sec)
+        [self.fifo.append(0) for _ in range(missing_bins - 1)]
+        self.fifo.append(quantity)
+        self.window_start = perf_counter()
 
     def rate_msg(self):
         """Returns a rate message."""
+        self.event(quantity=0) # catch up on any missing bins
         qsize = len(self.fifo)
         if qsize == 0:
             return f"Zero {self.noun} happened"
