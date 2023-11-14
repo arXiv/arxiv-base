@@ -88,7 +88,6 @@ def _logging_thread():
         if now - last_info_msg >= INFO_PERIOD:
             last_info_msg = now
             logger.info(log_write_rate.rate_msg())
-        pass
     logger.info(log_write_rate.rate_msg())  # on exit
 
 

@@ -3,6 +3,8 @@ Script to send fastly request log pub/sub events to GCP logging.
 
 Fastly does not offer a way to directly send reqeust logging to GCP logging. They do
 offer sending files to GS, send to pub/sub, sending to a REST endpoint and sending to BigTable.
+
+A docker file for this is at ./deploy/Dockerfile-fastlylogingest.
 """
 from collections import deque
 from time import perf_counter

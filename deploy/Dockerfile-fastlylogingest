@@ -1,0 +1,46 @@
+# Dockerfile for fastly log ingest
+#
+# Runs arxiv.ops.fastly_log_ingest.app
+# see arxiv/ops/fastly_log_ingest/__init__.py
+#
+# Needs to be run with a SA that can read from the pub/sub subscription
+# and write to the project logs.
+# Use this like this:
+#
+# make a servcie account fastly-logs-ingest
+# grant it Pub/Sub subscriber, logging writer, Artifact Registry reader on us-central1-docker.pkg.dev/arxiv-production/arxiv-docker
+
+# Build:
+# gcloud auth configure-docker us-central1-docker.pkg.dev # one time setup
+# docker build -f deploy/Dockerfile-fastlylogingest -t arxiv-fastly-log-ingest .
+# TAG=us-central1-docker.pkg.dev/arxiv-production/arxiv-docker/arxiv-fastly-log-ingest
+# docker tag arxiv-fastly-log-ingest:latest $TAG
+# docker push $TAG
+#
+# Then create a small VM with a that docker image and the
+# service account fastly-logs-ingest, set it to run the docker image, set the image to run prilvinged,
+# set logging to on.
+# Chech the logs of the VM to see if there are the expected debugging messages.
+#
+# Since this is reading from pub/sub, it is safe to stop and restart the service.
+# Any messages sent while down will be kept in the pub/sub subscription queue.
+
+FROM python:3.10.13-bookworm
+LABEL authors="bdc34"
+
+RUN useradd --create-home busybody
+WORKDIR /home/busybody
+USER busybody
+
+ENV VENV=/home/busybody/venv
+RUN python3 -m venv $VENV
+ENV PATH="$VENV/bin:$PATH"
+
+RUN pip install poetry
+COPY poetry.lock pyproject.toml ./
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-root --only main
+
+COPY ./arxiv/ ./arxiv/
+RUN poetry install --only main
+CMD ["python3", "arxiv/ops/fastly_log_ingest/app.py"]
