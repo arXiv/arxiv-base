@@ -53,23 +53,6 @@ def logs_to_gcp(client: logging_v2.Client, items: Sequence[dict]):
                                      )
 
 
-if __name__ == "__main__":
-    log_client = logging_v2.Client(project="arxiv-production")
-
-    """Testing this by getting a example of the pub/sub that fastly would send and
-    pasting it here."""
-
-    data = {"timestamp": "2023-11-07T21:15:59Z", "remote_addr": "67.249.88.118", "geo_country": "united states",
-            "geo_city": "candor", "geo_lat": "42.200", "geo_long": "-76.320", "host": "web3.arxiv.org",
-            "path": "/list/astro-ph/new", "method": "GET", "protocol": "HTTP/1.1",
-            "referer": "http://web3.arxiv.org.global.prod.fastly.net/",
-            "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-            "state": "PASS", "status": 200, "reason": "OK", "body_size": 102030, "fastly_server": "cache-lga21947-LGA",
-            "fastly_is_edge": True, "ttfb": 0.579}
-
-    logs_to_gcp(log_client, [to_log_entry(data)])
-
-
 class Rate:
     """Class to record the rate of events."""
 
@@ -106,3 +89,22 @@ class Rate:
         ave_per_bin = sum(self.fifo) / qsize
         ave_per_sec = ave_per_bin / self.bin_sec
         return f"{ave_per_sec:.4f} {self.noun}per sec over last {self.window} sec"
+
+
+def _smoke_test():
+    log_client = logging_v2.Client(project="arxiv-production")
+    """Testing this by getting a example of the pub/sub that fastly would send and
+    pasting it here."""
+    data = {"timestamp": "2023-11-07T21:15:59Z", "remote_addr": "67.249.88.118", "geo_country": "united states",
+            "geo_city": "candor", "geo_lat": "42.200", "geo_long": "-76.320", "host": "web3.arxiv.org",
+            "path": "/list/astro-ph/new", "method": "GET", "protocol": "HTTP/1.1",
+            "referer": "http://web3.arxiv.org.global.prod.fastly.net/",
+            "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            "state": "PASS", "status": 200, "reason": "OK", "body_size": 102030, "fastly_server": "cache-lga21947-LGA",
+            "fastly_is_edge": True, "ttfb": 0.579}
+
+    logs_to_gcp(log_client, [to_log_entry(data)])
+
+
+if __name__ == "__main__":
+    _smoke_test()

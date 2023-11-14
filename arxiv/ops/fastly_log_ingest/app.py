@@ -77,7 +77,7 @@ def _logging_thread():
                 batch.extend([shared_messages.pop() for _ in range(min([msg_count, MAX_PER_BATCH]))])
             pass
         if batch:
-            logger.debug(f"Got batch of %d pub/sub messages", len(batch))
+            logger.debug("Got batch of %d pub/sub messages", len(batch))
             logs_to_gcp(log_client, [item.to_log_entry() for item in batch])
             logger.debug("Finished sending entries to gcp logging.")
             for item in batch:
@@ -129,10 +129,10 @@ if __name__ == "__main__":
         try:
             streaming_pull_future.result(timeout=None)
         except Exception as ex:
+            RUN = False
             logger.error("Error with pub/sub subscription", exc_info=ex)
             if isinstance(ex, PermissionDenied):
                 _log_credentials(credentials)
-            RUN = False
             streaming_pull_future.cancel()  # Trigger the shutdown.
             streaming_pull_future.result()  # Block until the shutdown is complete.
 
