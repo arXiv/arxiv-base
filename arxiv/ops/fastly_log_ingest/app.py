@@ -20,7 +20,7 @@ SUBSCRIPTION_ID = os.environ.get("SUBSCRIPTION_ID", "logs-fastly-arxiv-org-sub")
 VERBOSE = os.environ.get("VERBOSE", "verbose_off_by_default") == "1"
 THREADS = int(os.environ.get("THREADS", 1))  # threads to send logs
 SEND_PERIOD = int(os.environ.get("SEND_PERIOD", 8.0))  # seconds to wait for messages to accumulate
-INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 80.0))  # seconds between info logging
+INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 120.0))  # seconds between info logging
 
 """Number of log records in a batch.
 GCP Logging limits (https://cloud.google.com/logging/quotas#api-limits) say 10MB as of 2023-11.
