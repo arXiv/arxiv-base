@@ -11,7 +11,7 @@ WORKDIR /opt/arxiv
 
 LABEL org.label-schema.version="0.15.9"
 
-RUN pipenv install arxiv-base arxiv-auth \
+RUN pipenv install arxiv-base arxiv-auth uwsgi \
     && rm -rf ~/.cache/pip
 
 EXPOSE 8000
