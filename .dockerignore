@@ -135,3 +135,5 @@ LICENSE
 .gitignore
 docs/*
 four
+
+fastly_hourly_stats.ini

@@ -8,6 +8,7 @@ To use this:
    poetry install --extras=mysql
    poetry run python arxiv/ops/fastly_hourly_stats.py config_file_example > fastly_hourly_stats.ini
    vim fastly_hourly_stats.ini  # setup configs
+   export GOOGLE_APPLICATION_CREDENTIALS=~/somefile.json # needs monitoring.timeSeries.list permission
    poetry python arxiv/ops/fastly_hourly_stats.py --config-file fastly_hourly_stats.ini
 
 This reads from a GCP metric named "arxiv-org-fastly-requests" and uses the fitler:
@@ -31,6 +32,7 @@ from typing import Tuple, MutableMapping
 import click
 import configparser
 
+import google.auth
 from google.cloud.monitoring_v3 import TimeInterval, Aggregation, MetricServiceClient, ListTimeSeriesRequest
 
 from sqlalchemy import create_engine
@@ -68,6 +70,12 @@ def last_hour(dry_run: bool, config_file: str, verbose: bool):
     now, start, end = _get_default_time()
     if verbose:
         print(f"Getting all requests between start time {start} and {end}")
+        credentials, project_id = google.auth.default()
+        if hasattr(credentials, "service_account_email"):
+            print(f"Using service account: {credentials.service_account_email}")
+        else:
+            print("WARNING: no service account credentials.")
+
     count = _get_count_from_gcp_v2(config, start, end, verbose)
     _load_count_to_db(config, count, now, dry_run, verbose)
 
