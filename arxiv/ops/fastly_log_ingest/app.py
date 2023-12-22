@@ -2,17 +2,20 @@
 import json
 import os
 from collections import deque
+from datetime import datetime
 from threading import Condition, Thread
 import logging
 
 from time import perf_counter
 from typing import List
+from zoneinfo import ZoneInfo
 
 from google.api_core.exceptions import PermissionDenied
-from google.cloud import pubsub_v1, logging_v2
+from google.cloud import pubsub_v1, logging as gcp_logging
 import google.auth
+from google.cloud.logging_v2.entries import Resource
 from google.cloud.pubsub_v1.subscriber.message import Message
-from arxiv.ops.fastly_log_ingest import logs_to_gcp, to_log_entry, Rate
+from arxiv.ops.fastly_log_ingest import Rate
 
 PROJECT_ID = os.environ.get("PROJECT_ID", "arxiv-production")
 SUBSCRIPTION_ID = os.environ.get("SUBSCRIPTION_ID", "logs-fastly-arxiv-org-sub")
@@ -20,18 +23,20 @@ SUBSCRIPTION_ID = os.environ.get("SUBSCRIPTION_ID", "logs-fastly-arxiv-org-sub")
 VERBOSE = os.environ.get("VERBOSE", "verbose_off_by_default") == "1"
 THREADS = int(os.environ.get("THREADS", 1))  # threads to send logs
 SEND_PERIOD = int(os.environ.get("SEND_PERIOD", 8.0))  # seconds to wait for messages to accumulate
-INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 120.0))  # seconds between info logging
+INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 12.0))  # seconds between info logging
 
-"""Number of log records in a batch.
-GCP Logging limits (https://cloud.google.com/logging/quotas#api-limits) say 10MB as of 2023-11.
-If we guess an average of 1024 bytes per message, 2048 entries would be 2MB. 
-"""
-MAX_PER_BATCH = int(os.environ.get("MAX_PER_BATCH", 2048))
+LOGGER_NAME = os.environ.get("LOGGER_NAME", "fastly_log_ingest")
+# name of logger in GCP, don't prefix with project-id or anything
+
+"""Number of log records in a batch. Limit seems to be 16kb but not sure."""
+MAX_PER_BATCH = int(os.environ.get("MAX_PER_BATCH", 10))
 
 logging.basicConfig(encoding='utf-8', level=logging.INFO)
 logger = logging.getLogger(__name__)
 if VERBOSE:
     logger.setLevel(logging.DEBUG)
+
+utc_zone = ZoneInfo("UTC")
 
 
 def _log_credentials(cred):
@@ -44,13 +49,34 @@ def _log_credentials(cred):
 class WorkItem:
     """An item of work which is a Pub/Sub message and an arrival time."""
 
+    def _status_to_severity(self, status: int):
+        if not status:
+            return "ERROR"
+        if status < 400:
+            return "INFO"
+        if status < 500:
+            return "WARNING"
+        return "ERROR"
+
     def __init__(self, message: Message, arrival_time: float):
         self.message = message
         self.arrival_time = arrival_time
+        self.data: dict = json.loads(message.data.decode('utf-8').strip())
 
-    def to_log_entry(self) -> dict:
-        """Extracts the JSON to a python dict from the Pub/Sub message."""
-        return to_log_entry(json.loads(self.message.data.decode('utf-8').strip()))
+    def to_payload(self) -> dict:
+        return {key: value for key, value in self.data.items() if key != "timestamp"}
+
+    def to_metadata(self) -> dict:
+        return {
+            "severity": self._status_to_severity(self.data.get("status", 500)),
+            # This cause the log line to show up in GCP at the date of the original http request
+            "timestamp": datetime.strptime(self.data["timestamp"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=utc_zone),
+            "resource": Resource(type="generic_node",
+                                 labels={"project_id": PROJECT_ID,
+                                         "namespace": "fastly",
+                                         "node_id": self.data.get("fastly_server", "server_unknown")})
+
+        }
 
 
 RUN = True
@@ -64,26 +90,39 @@ cv = Condition()  # lock protects the above three objects
 def _logging_thread():
     log_write_rate = Rate(plural_noun="log entries")
     logging.info("About to get logging_v2 client.")
-    log_client = logging_v2.Client(project=PROJECT_ID)
+    log_client = gcp_logging.Client(project=PROJECT_ID)
+    fastly_logger = log_client.logger(name=LOGGER_NAME)
+
     logging.info("Got logging_v2 client.")
     last_info_msg = perf_counter()
     while RUN:
-        batch: List[WorkItem] = []
+        work_items: List[WorkItem] = []
         with cv:
             cv.wait_for(lambda: shared_messages, timeout=2.0)  # timeout to allow exit or periodic message
             now = perf_counter()
             msg_count = len(shared_messages)
             if msg_count and (msg_count > MAX_PER_BATCH or (now - shared_messages[0].arrival_time) > SEND_PERIOD):
-                batch.extend([shared_messages.pop() for _ in range(min([msg_count, MAX_PER_BATCH]))])
-            pass
-        if batch:
-            logger.debug("Got batch of %d pub/sub messages", len(batch))
-            logs_to_gcp(log_client, [item.to_log_entry() for item in batch])
-            logger.debug("Finished sending entries to gcp logging.")
-            for item in batch:
+                work_items.extend([shared_messages.pop() for _ in range(min([msg_count, MAX_PER_BATCH]))])
+
+        if work_items:
+            logger.debug("About to log batch of %d pub/sub messages", len(work_items))
+            log_items = []
+            for item in work_items:
+                try:
+                    log_items.append((item.to_payload(), item.to_metadata()))
+                except Exception as exc:
+                    logger.error("Skipping line, problem while converting log line", exc)
+
+            with fastly_logger.batch() as batch:
+                [batch.log_struct(info=info, **kv) for info, kv in log_items]
+
+            aki = 0
+            for item in work_items:
                 item.message.ack()
-                logger.debug("ack pub/sub message %s", item.message.message_id)
-            log_write_rate.event(quantity=len(batch))
+                aki += 1
+
+            logger.debug("Acked %d pubsub messages", aki)
+            log_write_rate.event(quantity=len(work_items))
         now = perf_counter()
         if now - last_info_msg >= INFO_PERIOD:
             last_info_msg = now
@@ -96,7 +135,6 @@ def _pubsub_callback(message: Message) -> None:
     arrival = perf_counter()
     with cv:
         shared_messages.append(WorkItem(message, arrival))
-        logger.debug("got message %s and added to queue", message.message_id)
         msg_rate.event()
         now = perf_counter()
         if now - last_pubsub_info > INFO_PERIOD:
