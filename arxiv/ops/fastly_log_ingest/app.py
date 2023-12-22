@@ -64,9 +64,15 @@ class WorkItem:
         self.data: dict = json.loads(message.data.decode('utf-8').strip())
 
     def to_payload(self) -> dict:
+        """Convert the message into a `payload` for the log entry."""
         return {key: value for key, value in self.data.items() if key != "timestamp"}
 
     def to_metadata(self) -> dict:
+        """Convert the message into the metadata the log entry.
+
+        Seting `timestamp` here causes the time of the log line to be the time
+        of the original http request instead of the time of the line entry into GCP.
+        """
         return {
             "severity": self._status_to_severity(self.data.get("status", 500)),
             # This cause the log line to show up in GCP at the date of the original http request
