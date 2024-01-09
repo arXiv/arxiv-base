@@ -64,17 +64,24 @@ def _invert_keyed(data) -> str:
 def k_way_merge(
         in_files: List[Path],
         out_file: Path) -> None:
-    """
-    Outline: open all N files,
+    """Merges k different log files in time order.
+
+    Outline:
+    Open all N files,
     until done:
       read 1 line from each and put on heap, save one line from heap
+
+    This will time order the files if they files are in order to begin with.  If
+    they are not in order it should preserve some semblance of order in as much
+    as the original files were ordered. Perfect order is not necessary for the
+    web logs since they are not usually in order to begin with.
 
     Parameters
     ----------
     files: Paths to read from
     output: Path to write output to
-    """
 
+    """
     #files = [gzip.open(filename) for filename in in_files]
     files = [open(filename) for filename in in_files]
     line_heap = []
