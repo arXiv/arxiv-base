@@ -37,7 +37,7 @@ UTC_NOW = _previous_hour.strftime("%Y-%m-%dT%H")
 UTC_DATE = _previous_hour.date()
 UTC_HOUR = _previous_hour.hour
 
-DEFAULT_OUT_DIR=f"/data/logs_archive/site/fastly/{_previous_hour.year}/"
+DEFAULT_OUT_DIR=f"/data/logs_archive/site/fastly/{_previous_hour.year}"
 
 TIME_PATTERN=r"\[([^\]]+)\]"
 """Pattern to caputre time from a log line
@@ -200,10 +200,11 @@ def get_fastly_logs(date_of_logs: date = _previous_hour.date(),
 
     Will overwrite already existing out file and will overwrite any already downloaded log files.
     """
+    out_dir = Path(tmp_dir)
+    out_dir.mkdir(exist_ok=True)
+    
     if out_file is None:
-        out_dir = Path(tmp_dir)
-        out_dir.mkdir(exist_ok=True)
-        out_file = out_dir / f"fastly_access_logs.{date_of_logs.strftime('%Y-%m-%d')}T{hour}.log"
+        out_file = Path(DEFAULT_OUT_DIR) / f"fastly_access_logs.{date_of_logs.strftime('%Y-%m-%d')}T{hour}.log"
 
     files = download_files(date=date_of_logs, hour=hour)
     k_way_merge(files, out_file=out_file)
