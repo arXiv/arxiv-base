@@ -256,11 +256,11 @@ def fn_combine_day(date_eastern: datetime|str=None):
     if not files:
         raise RuntimeError(f"No log files found in {la_dir} for date_eastern.strftime('%Y-%m-%d')")
 
-    outfile = la_dir / f"fastly_access_logs.{date_eastern.strftime('%Y-%m-%d')}.log"
+    outfile = la_dir / f"fastly_access_log.{date_eastern.strftime('%Y-%m-%d')}.log"
     if outfile.exists():
         raise RuntimeError(f"Was going to write log to {outfile} but it already exists. Aborting")
 
-    outfile_gz = la_dir / f"fastly_access_logs.{date_eastern.strftime('%Y-%m-%d')}.log.gz"
+    outfile_gz = la_dir / f"fastly_access_log.{date_eastern.strftime('%Y-%m-%d')}.log.gz"
     if outfile_gz.exists():
         raise RuntimeError(f"Was going to write log to {outfile_gz} but it already exists. Aborting")
 
