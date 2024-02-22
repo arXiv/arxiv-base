@@ -1,17 +1,16 @@
 """Representations of arXiv document metadata."""
-import re
 from collections import abc
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Iterator, List, Optional, Set, Literal
 
-from ..taxonomy.category import Category
+from ..taxonomy import definitions
+from ..taxonomy.category import Category, Group, Archive
 from ..identifier import Identifier
 from ..license import License
 from .version import VersionEntry
 
 from ..base.urls import canonical_url
-
 
 
 @dataclass(frozen=True)
@@ -39,14 +38,6 @@ class AuthorList:
     def __str__(self) -> str:
         """Return the string representation of AuthorList."""
         return self.raw
-
-
-class Archive(taxonomy.Archive):
-    """Represents an arXiv archive--the middle level of the taxonomy."""
-
-
-class Group(taxonomy.Group):
-    """Represents an arXiv group--the highest (most general) taxonomy level."""
 
 
 @dataclass(frozen=True)
@@ -170,14 +161,14 @@ class DocMetadata:
         if self.primary_category:
             options = {
                 self.primary_category.id: True,
-                taxonomy.definitions.CATEGORIES[self.primary_category.id]['in_archive']: True
+                definitions.CATEGORIES[self.primary_category.id]['in_archive']: True
             }
         else:
             options = {}
 
         for category in self.secondary_categories:
             options[category.id] = True
-            in_archive = taxonomy.definitions.CATEGORIES[category.id]['in_archive']
+            in_archive = definitions.CATEGORIES[category.id]['in_archive']
             options[in_archive] = True
         return sorted(options.keys())
 
