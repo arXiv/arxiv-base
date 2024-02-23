@@ -4,15 +4,26 @@ generate a class model for every table rather than create a Table object for the
 association tables- Mark Nazzaro 2024
 """
 
+import re
+import hashlib
+from datetime import datetime
+from dateutil.tz import gettz, tzutc
+from validators import url as is_valid_url
+
 from sqlalchemy import BINARY, BigInteger, Column, Date, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, JSON, MetaData, Numeric, SmallInteger, String, Text
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql.enumerated import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 
+from ..base.config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
+
 Base = declarative_base()
 LaTeXMLBase = declarative_base()
 metadata = Base.metadata
+
+tb_secret = TRACKBACK_SECRET
+tz = ARXIV_BUSINESS_TZ
 
 class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'
@@ -1226,7 +1237,29 @@ class TrackbackPing(Base):
     status = Column(ENUM('pending', 'pending2', 'accepted', 'rejected', 'spam'), nullable=False, index=True, server_default=FetchedValue())
     site_id = Column(Integer)
 
+    @property
+    def posted_datetime(self) -> DateTime:
+        """Get posted_date as UTC datetime."""
+        dt = datetime.fromtimestamp(self.posted_date, tz=tz)
+        return dt.astimezone(tz=tzutc())
 
+    @property
+    def display_url(self) -> str:
+        """Get the URL without the protocol, for display."""
+        return str(re.sub(r"^[a-z]+:\/\/", "", self.url.strip(), flags=re.IGNORECASE,))
+
+    @property
+    def has_valid_url(self) -> bool:
+        """Determine whether the trackback URL is valid."""
+        return bool(is_valid_url(self.url, public=False))
+
+    # TODO: Make settings for base so we can import them like everyone else does
+    # Then I'll include the trackback secret
+    @property
+    def hashed_document_id(self) -> str:
+        """Get the hashed document_id."""
+        s = f"{self.document_id}{self.trackback_id}{tb_secret}"
+        return hashlib.md5(s.encode()).hexdigest()[0:9]
 
 class TrackbackSite(Base):
     __tablename__ = 'arXiv_trackback_sites'

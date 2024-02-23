@@ -157,6 +157,11 @@ ANALYTICS_COOKIE_DOMAIN = os.environ.get("ANALYTICS_COOKIE_DOMAIN", "*.arxiv.org
 ANALYTICS_SITE_ID = os.environ.get("ANALYTICS_SITE_ID", "1")
 """Analytics tracker site ID."""
 
+TRACKBACK_SECRET = os.environ.get("TRACKBACK_SECRET", "baz")
+
 DEFAULT_DB = "sqlite:///../tests/data/browse.db"
+DEFAULT_LATEXML_DB = "sqlite:///..test/data/latexml.db"
+
 CLASSIC_DB_URI = os.environ.get("CLASSIC_DB_URI", DEFAULT_DB)
+LATEXML_DB_URI = os.environ.get("LATEXML_DB_URI", DEFAULT_LATEXML_DB)
 ECHO_SQL = os.environ.get("ECHO_SQL", True)
