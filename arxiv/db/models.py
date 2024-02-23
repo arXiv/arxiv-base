@@ -11,9 +11,10 @@ from sqlalchemy.dialects.mysql.enumerated import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+LaTeXMLBase = declarative_base()
 metadata = Base.metadata
 
-class SubscriptionUniversalInstitution(Base):
+class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'
 
     resolver_URL = Column(String(255))
@@ -26,7 +27,7 @@ class SubscriptionUniversalInstitution(Base):
 
 
 
-class SubscriptionUniversalInstitutionContact(Base):
+class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitutionContact'
 
     email = Column(String(255))
@@ -37,11 +38,11 @@ class SubscriptionUniversalInstitutionContact(Base):
     phone = Column(String(255))
     note = Column(String(2048))
 
-    Subscription_UniversalInstitution = relationship('SubscriptionUniversalInstitution', primaryjoin='SubscriptionUniversalInstitutionContact.sid == SubscriptionUniversalInstitution.id', backref='subscription_universal_institution_contacts')
+    Subscription_UniversalInstitution = relationship('MemberInstitution', primaryjoin='MemberInstitutionContact.sid == MemberInstitution.id')
 
 
 
-class SubscriptionUniversalInstitutionIP(Base):
+class MemberInstitutionIP(Base):
     __tablename__ = 'Subscription_UniversalInstitutionIP'
     __table_args__ = (
         Index('ip', 'start', 'end'),
@@ -53,7 +54,7 @@ class SubscriptionUniversalInstitutionIP(Base):
     end = Column(BigInteger, nullable=False, index=True)
     start = Column(BigInteger, nullable=False, index=True)
 
-    Subscription_UniversalInstitution = relationship('SubscriptionUniversalInstitution', primaryjoin='SubscriptionUniversalInstitutionIP.sid == SubscriptionUniversalInstitution.id', backref='subscription_universal_institution_ips')
+    Subscription_UniversalInstitution = relationship('MemberInstitution', primaryjoin='MemberInstitutionIP.sid == MemberInstitution.id')
 
 
 
@@ -362,7 +363,7 @@ class DataciteDois(Base):
 
 
 
-class DblpAuthor(Base):
+class DBLPAuthor(Base):
     __tablename__ = 'arXiv_dblp_authors'
 
     author_id = Column(Integer, primary_key=True, unique=True)
@@ -370,15 +371,15 @@ class DblpAuthor(Base):
 
 
 
-class DblpDocumentAuthor(Base):
+class DBLPDocumentAuthor(Base):
     __tablename__ = 'arXiv_dblp_document_authors'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), primary_key=True, nullable=False, index=True)
     author_id = Column(ForeignKey('arXiv_dblp_authors.author_id'), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
     position = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    author = relationship('DblpAuthor', primaryjoin='DblpDocumentAuthor.author_id == DblpAuthor.author_id', backref='arXiv_dblp_document_authors')
-    document = relationship('Document', primaryjoin='DblpDocumentAuthor.document_id == Document.document_id', backref='arXiv_dblp_document_authors')
+    author = relationship('DBLPAuthor', primaryjoin='DBLPDocumentAuthor.author_id == DBLPAuthor.author_id', backref='arXiv_dblp_document_authors')
+    document = relationship('Document', primaryjoin='DBLPDocumentAuthor.document_id == Document.document_id', backref='arXiv_dblp_document_authors')
 
 
 
@@ -410,7 +411,7 @@ class Document(Base):
     submitter = relationship('TapirUser', primaryjoin='Document.submitter_id == TapirUser.user_id', backref='arXiv_documents')
 
 
-class Dblp(Document):
+class DBLP(Document):
     __tablename__ = 'arXiv_dblp'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())
@@ -786,7 +787,7 @@ class OwnershipRequestsPaper(Base):
 
 
 
-class PaperOwner(Base):
+class PaperOwners(Base):
     __tablename__ = 'arXiv_paper_owners'
     __table_args__ = (
         Index('document_id', 'document_id', 'user_id'),
@@ -803,9 +804,9 @@ class PaperOwner(Base):
     flag_author = Column(Integer, nullable=False, server_default=FetchedValue())
     flag_auto = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    tapir_user = relationship('TapirUser', primaryjoin='PaperOwner.added_by == TapirUser.user_id', backref='tapiruser_arXiv_paper_owners')
-    document = relationship('Document', primaryjoin='PaperOwner.document_id == Document.document_id', backref='arXiv_paper_owners')
-    user = relationship('TapirUser', primaryjoin='PaperOwner.user_id == TapirUser.user_id', backref='tapiruser_arXiv_paper_owners_0')
+    tapir_user = relationship('TapirUser', primaryjoin='PaperOwners.added_by == TapirUser.user_id', backref='tapiruser_arXiv_paper_owners')
+    document = relationship('Document', primaryjoin='PaperOwners.document_id == Document.document_id', backref='arXiv_paper_owners')
+    user = relationship('TapirUser', primaryjoin='PaperOwners.user_id == TapirUser.user_id', backref='tapiruser_arXiv_paper_owners_0')
 
 
 
@@ -1806,7 +1807,7 @@ class TapirUser(Base):
     tapir_policy_class = relationship('TapirPolicyClass', primaryjoin='TapirUser.policy_class == TapirPolicyClass.class_id', backref='tapir_users')
 
 
-class AuthorId(TapirUser):
+class AuthorIds(TapirUser):
     __tablename__ = 'arXiv_author_ids'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True)
@@ -1849,7 +1850,7 @@ class Demographic(TapirUser):
     arXiv_category = relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='arXiv_demographics')
 
 
-class OrcidId(TapirUser):
+class OrcidIds(TapirUser):
     __tablename__ = 'arXiv_orcid_ids'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True)
@@ -1912,3 +1913,47 @@ class TapirUsersPassword(TapirUser):
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())
     password_storage = Column(Integer, nullable=False, server_default=FetchedValue())
     password_enc = Column(String(50), nullable=False, server_default=FetchedValue())
+
+class DBLaTeXMLDocuments(LaTeXMLBase):
+    __tablename__ = 'arXiv_latexml_doc'
+
+    paper_id = Column(String(20), primary_key=True)
+    document_version = Column(Integer, primary_key=True)
+    # conversion_status codes:
+    #   - 0 = in progress
+    #   - 1 = success
+    #   - 2 = failure
+    conversion_status = Column(Integer, nullable=False)
+    latexml_version = Column(String(40), nullable=False)
+    tex_checksum = Column(String)
+    conversion_start_time = Column(Integer)
+    conversion_end_time = Column(Integer)
+    publish_dt = Column(DateTime(timezone=True))
+
+class DBLaTeXMLSubmissions (LaTeXMLBase):
+    __tablename__ = 'arXiv_latexml_sub'
+
+    submission_id = Column(Integer, primary_key=True)
+    # conversion_status codes: 
+    #   - 0 = in progress
+    #   - 1 = success
+    #   - 2 = failure
+    conversion_status = Column(Integer, nullable=False)
+    latexml_version = Column(String(40), nullable=False)
+    tex_checksum = Column(String)
+    conversion_start_time = Column(Integer)
+    conversion_end_time = Column(Integer)
+
+class DBLaTeXMLFeedback (LaTeXMLBase):
+    __tablename__ = 'feedback'
+    
+    id = Column(String(40), nullable=False)
+    canonical_url = Column(String)
+    conversion_url = Column(String)
+    report_time = Column(BigInteger)
+    browser_info = Column(String)
+    location_low = Column(String)
+    location_high = Column(String)
+    description = Column(String)
+    selected_html = Column(String)
+    initiation_mode = Column(String)
