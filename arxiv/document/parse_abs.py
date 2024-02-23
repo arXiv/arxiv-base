@@ -10,7 +10,7 @@ from dateutil import parser
 from flask import current_app
 
 from ..taxonomy import definitions
-from ..files.object_store import BaseAccessor
+from ..files import BaseAccessor
 
 from .metadata import Archive, AuthorList, Category, \
     DocMetadata, Group, Submitter
