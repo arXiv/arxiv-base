@@ -61,7 +61,10 @@ class WorkItem:
     def __init__(self, message: Message, arrival_time: float):
         self.message = message
         self.arrival_time = arrival_time
-        self.data: dict = json.loads(message.data.decode('utf-8').strip())
+        try:
+            self.data: dict = json.loads(message.data.decode('utf-8').strip())
+        except:
+            logger.warning(f'Failed to log the following message: {message.data.decode("utf-8")}')
 
     def to_payload(self) -> dict:
         """Convert the message into a `payload` for the log entry."""

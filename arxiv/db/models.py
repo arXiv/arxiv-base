@@ -57,7 +57,7 @@ class SubscriptionUniversalInstitutionIP(Base):
 
 
 
-class ArXivAdminLog(Base):
+class AdminLog(Base):
     __tablename__ = 'arXiv_admin_log'
 
     id = Column(Integer, primary_key=True)
@@ -75,7 +75,7 @@ class ArXivAdminLog(Base):
 
 
 
-class ArXivAdminMetadatum(Base):
+class AdminMetadata(Base):
     __tablename__ = 'arXiv_admin_metadata'
     __table_args__ = (
         Index('pidv', 'paper_id', 'version'),
@@ -107,11 +107,11 @@ class ArXivAdminMetadatum(Base):
     modtime = Column(Integer)
     is_current = Column(Integer, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivAdminMetadatum.document_id == ArXivDocument.document_id', backref='ar_xiv_admin_metadata')
+    document = relationship('Document', primaryjoin='AdminMetadata.document_id == Document.document_id', backref='arXiv_admin_metadata')
 
 
 
-class ArXivAdminState(Base):
+class AdminState(Base):
     __tablename__ = 'arXiv_admin_state'
 
     document_id = Column(Integer, unique=True)
@@ -124,7 +124,7 @@ class ArXivAdminState(Base):
 
 
 
-class ArXivArchiveCategory(Base):
+class ArchiveCategory(Base):
     __tablename__ = 'arXiv_archive_category'
 
     archive_id = Column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -132,7 +132,7 @@ class ArXivArchiveCategory(Base):
 
 
 
-class ArXivArchiveDef(Base):
+class ArchiveDef(Base):
     __tablename__ = 'arXiv_archive_def'
 
     archive = Column(String(16), primary_key=True, server_default=FetchedValue())
@@ -140,7 +140,7 @@ class ArXivArchiveDef(Base):
 
 
 
-class ArXivArchiveGroup(Base):
+class ArchiveGroup(Base):
     __tablename__ = 'arXiv_archive_group'
 
     archive_id = Column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -148,7 +148,7 @@ class ArXivArchiveGroup(Base):
 
 
 
-class ArXivArchive(Base):
+class Archive(Base):
     __tablename__ = 'arXiv_archives'
 
     archive_id = Column(String(16), primary_key=True, server_default=FetchedValue())
@@ -158,11 +158,11 @@ class ArXivArchive(Base):
     end_date = Column(String(4), nullable=False, server_default=FetchedValue())
     subdivided = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_group = relationship('ArXivGroup', primaryjoin='ArXivArchive.in_group == ArXivGroup.group_id', backref='ar_xiv_archives')
+    arXiv_group = relationship('Group', primaryjoin='Archive.in_group == Group.group_id', backref='arXiv_archives')
 
 
 
-class ArXivAwsConfig(Base):
+class AwsConfig(Base):
     __tablename__ = 'arXiv_aws_config'
 
     domain = Column(String(75), primary_key=True, nullable=False)
@@ -171,7 +171,7 @@ class ArXivAwsConfig(Base):
 
 
 
-class ArXivAwsFile(Base):
+class AwsFile(Base):
     __tablename__ = 'arXiv_aws_files'
 
     type = Column(String(10), nullable=False, index=True, server_default=FetchedValue())
@@ -188,16 +188,16 @@ class ArXivAwsFile(Base):
 
 
 
-class ArXivBadPw(Base):
+class BadPw(Base):
     __tablename__ = 'arXiv_bad_pw'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
 
-    user = relationship('TapirUser', primaryjoin='ArXivBadPw.user_id == TapirUser.user_id', backref='ar_xiv_bad_pws')
+    user = relationship('TapirUser', primaryjoin='BadPw.user_id == TapirUser.user_id', backref='arXiv_bad_pws')
 
 
 
-class ArXivBibFeed(Base):
+class BibFeed(Base):
     __tablename__ = 'arXiv_bib_feeds'
 
     bib_id = Column(Integer, primary_key=True)
@@ -216,7 +216,7 @@ class ArXivBibFeed(Base):
 
 
 
-class ArXivBibUpdate(Base):
+class BibUpdate(Base):
     __tablename__ = 'arXiv_bib_updates'
 
     update_id = Column(Integer, primary_key=True)
@@ -228,21 +228,21 @@ class ArXivBibUpdate(Base):
 
 
 
-class ArXivBlackEmail(Base):
+class BlackEmail(Base):
     __tablename__ = 'arXiv_black_email'
 
     pattern = Column(String(64))
 
 
 
-class ArXivBlockEmail(Base):
+class BlockEmail(Base):
     __tablename__ = 'arXiv_block_email'
 
     pattern = Column(String(64))
 
 
 
-class ArXivBogusCountry(Base):
+class BogusCountry(Base):
     __tablename__ = 'arXiv_bogus_countries'
 
     user_id = Column(Integer, primary_key=True, server_default=FetchedValue())
@@ -250,17 +250,17 @@ class ArXivBogusCountry(Base):
 
 
 
-class ArXivBogusSubjectClas(Base):
+class BogusSubjectClas(Base):
     __tablename__ = 'arXiv_bogus_subject_class'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue())
     category_name = Column(String(255), nullable=False, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivBogusSubjectClas.document_id == ArXivDocument.document_id', backref='ar_xiv_bogus_subject_class')
+    document = relationship('Document', primaryjoin='BogusSubjectClas.document_id == Document.document_id', backref='arXiv_bogus_subject_class')
 
 
 
-class ArXivCategory(Base):
+class Category(Base):
     __tablename__ = 'arXiv_categories'
 
     archive = Column(ForeignKey('arXiv_archives.archive_id'), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -273,11 +273,11 @@ class ArXivCategory(Base):
     papers_to_endorse = Column(SmallInteger, nullable=False, server_default=FetchedValue())
     endorsement_domain = Column(ForeignKey('arXiv_endorsement_domains.endorsement_domain'), index=True)
 
-    arXiv_archive = relationship('ArXivArchive', primaryjoin='ArXivCategory.archive == ArXivArchive.archive_id', backref='ar_xiv_categories')
-    arXiv_endorsement_domain = relationship('ArXivEndorsementDomain', primaryjoin='ArXivCategory.endorsement_domain == ArXivEndorsementDomain.endorsement_domain', backref='ar_xiv_categories')
+    arXiv_archive = relationship('Archive', primaryjoin='Category.archive == Archive.archive_id', backref='arXiv_categories')
+    arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', backref='arXiv_categories')
 
 
-class ArXivQuestionableCategory(ArXivCategory):
+class QuestionableCategory(Category):
     __tablename__ = 'arXiv_questionable_categories'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -288,7 +288,7 @@ class ArXivQuestionableCategory(ArXivCategory):
 
 
 
-class ArXivCategoryDef(Base):
+class CategoryDef(Base):
     __tablename__ = 'arXiv_category_def'
 
     category = Column(String(32), primary_key=True)
@@ -297,7 +297,7 @@ class ArXivCategoryDef(Base):
 
 
 
-class ArXivControlHold(Base):
+class ControlHold(Base):
     __tablename__ = 'arXiv_control_holds'
     __table_args__ = (
         Index('control_id', 'control_id', 'hold_type'),
@@ -313,12 +313,12 @@ class ArXivControlHold(Base):
     placed_by = Column(ForeignKey('tapir_users.user_id'), index=True)
     last_changed_by = Column(ForeignKey('tapir_users.user_id'), index=True)
 
-    tapir_user = relationship('TapirUser', primaryjoin='ArXivControlHold.last_changed_by == TapirUser.user_id', backref='tapiruser_ar_xiv_control_holds')
-    tapir_user1 = relationship('TapirUser', primaryjoin='ArXivControlHold.placed_by == TapirUser.user_id', backref='tapiruser_ar_xiv_control_holds_0')
+    tapir_user = relationship('TapirUser', primaryjoin='ControlHold.last_changed_by == TapirUser.user_id', backref='tapiruser_arXiv_control_holds')
+    tapir_user1 = relationship('TapirUser', primaryjoin='ControlHold.placed_by == TapirUser.user_id', backref='tapiruser_arXiv_control_holds_0')
 
 
 
-class ArXivCrossControl(Base):
+class CrossControl(Base):
     __tablename__ = 'arXiv_cross_control'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -339,13 +339,13 @@ class ArXivCrossControl(Base):
     freeze_date = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_category = relationship('ArXivCategory', primaryjoin='and_(ArXivCrossControl.archive == ArXivCategory.archive, ArXivCrossControl.subject_class == ArXivCategory.subject_class)', backref='ar_xiv_cross_controls')
-    document = relationship('ArXivDocument', primaryjoin='ArXivCrossControl.document_id == ArXivDocument.document_id', backref='ar_xiv_cross_controls')
-    user = relationship('TapirUser', primaryjoin='ArXivCrossControl.user_id == TapirUser.user_id', backref='ar_xiv_cross_controls')
+    arXiv_category = relationship('Category', primaryjoin='and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)', backref='arXiv_cross_controls')
+    document = relationship('Document', primaryjoin='CrossControl.document_id == Document.document_id', backref='arXiv_cross_controls')
+    user = relationship('TapirUser', primaryjoin='CrossControl.user_id == TapirUser.user_id', backref='arXiv_cross_controls')
 
 
 
-class ArXivDataciteDois(Base):
+class DataciteDois(Base):
     __tablename__ = 'arXiv_datacite_dois'
     __table_args__ = (
         Index('account_paper_id', 'account', 'paper_id'),
@@ -358,11 +358,11 @@ class ArXivDataciteDois(Base):
     created = Column(DateTime, server_default=FetchedValue())
     updated = Column(DateTime, server_default=FetchedValue())
 
-    metadata = relationship('ArXivMetadatum', primaryjoin='ArXivDataciteDois.metadata_id == ArXivMetadatum.metadata_id', backref='ar_xiv_datacite_dois')
+    metadata = relationship('Metadata', primaryjoin='DataciteDois.metadata_id == Metadata.metadata_id', backref='arXiv_datacite_dois')
 
 
 
-class ArXivDblpAuthor(Base):
+class DblpAuthor(Base):
     __tablename__ = 'arXiv_dblp_authors'
 
     author_id = Column(Integer, primary_key=True, unique=True)
@@ -370,31 +370,31 @@ class ArXivDblpAuthor(Base):
 
 
 
-class ArXivDblpDocumentAuthor(Base):
+class DblpDocumentAuthor(Base):
     __tablename__ = 'arXiv_dblp_document_authors'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), primary_key=True, nullable=False, index=True)
     author_id = Column(ForeignKey('arXiv_dblp_authors.author_id'), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
     position = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    author = relationship('ArXivDblpAuthor', primaryjoin='ArXivDblpDocumentAuthor.author_id == ArXivDblpAuthor.author_id', backref='ar_xiv_dblp_document_authors')
-    document = relationship('ArXivDocument', primaryjoin='ArXivDblpDocumentAuthor.document_id == ArXivDocument.document_id', backref='ar_xiv_dblp_document_authors')
+    author = relationship('DblpAuthor', primaryjoin='DblpDocumentAuthor.author_id == DblpAuthor.author_id', backref='arXiv_dblp_document_authors')
+    document = relationship('Document', primaryjoin='DblpDocumentAuthor.document_id == Document.document_id', backref='arXiv_dblp_document_authors')
 
 
 
-class ArXivDocumentCategory(Base):
+class DocumentCategory(Base):
     __tablename__ = 'arXiv_document_category'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id', ondelete='CASCADE'), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
     category = Column(ForeignKey('arXiv_category_def.category'), primary_key=True, nullable=False, index=True)
     is_primary = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_category_def = relationship('ArXivCategoryDef', primaryjoin='ArXivDocumentCategory.category == ArXivCategoryDef.category', backref='ar_xiv_document_categories')
-    document = relationship('ArXivDocument', primaryjoin='ArXivDocumentCategory.document_id == ArXivDocument.document_id', backref='ar_xiv_document_categories')
+    arXiv_category_def = relationship('CategoryDef', primaryjoin='DocumentCategory.category == CategoryDef.category', backref='arXiv_document_categories')
+    document = relationship('Document', primaryjoin='DocumentCategory.document_id == Document.document_id', backref='arXiv_document_categories')
 
 
 
-class ArXivDocument(Base):
+class Document(Base):
     __tablename__ = 'arXiv_documents'
 
     document_id = Column(Integer, primary_key=True)
@@ -407,17 +407,17 @@ class ArXivDocument(Base):
     primary_subject_class = Column(String(16))
     created = Column(DateTime)
 
-    submitter = relationship('TapirUser', primaryjoin='ArXivDocument.submitter_id == TapirUser.user_id', backref='ar_xiv_documents')
+    submitter = relationship('TapirUser', primaryjoin='Document.submitter_id == TapirUser.user_id', backref='arXiv_documents')
 
 
-class ArXivDblp(ArXivDocument):
+class Dblp(Document):
     __tablename__ = 'arXiv_dblp'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())
     url = Column(String(80))
 
 
-class ArXivPaperPw(ArXivDocument):
+class PaperPw(Document):
     __tablename__ = 'arXiv_paper_pw'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())
@@ -426,18 +426,18 @@ class ArXivPaperPw(ArXivDocument):
 
 
 
-class ArXivDuplicate(Base):
+class Duplicate(Base):
     __tablename__ = 'arXiv_duplicates'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
     email = Column(String(255))
     username = Column(String(255))
 
-    user = relationship('TapirUser', primaryjoin='ArXivDuplicate.user_id == TapirUser.user_id', backref='ar_xiv_duplicates')
+    user = relationship('TapirUser', primaryjoin='Duplicate.user_id == TapirUser.user_id', backref='arXiv_duplicates')
 
 
 
-class ArXivEndorsementDomain(Base):
+class EndorsementDomain(Base):
     __tablename__ = 'arXiv_endorsement_domains'
 
     endorsement_domain = Column(String(32), primary_key=True, server_default=FetchedValue())
@@ -448,7 +448,7 @@ class ArXivEndorsementDomain(Base):
 
 
 
-class ArXivEndorsementRequest(Base):
+class EndorsementRequest(Base):
     __tablename__ = 'arXiv_endorsement_requests'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -465,11 +465,11 @@ class ArXivEndorsementRequest(Base):
     issued_when = Column(Integer, nullable=False, server_default=FetchedValue())
     point_value = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_category = relationship('ArXivCategory', primaryjoin='and_(ArXivEndorsementRequest.archive == ArXivCategory.archive, ArXivEndorsementRequest.subject_class == ArXivCategory.subject_class)', backref='ar_xiv_endorsement_requests')
-    endorsee = relationship('TapirUser', primaryjoin='ArXivEndorsementRequest.endorsee_id == TapirUser.user_id', backref='ar_xiv_endorsement_requests')
+    arXiv_category = relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', backref='arXiv_endorsement_requests')
+    endorsee = relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', backref='arXiv_endorsement_requests')
 
 
-class ArXivEndorsementRequestsAudit(ArXivEndorsementRequest):
+class EndorsementRequestsAudit(EndorsementRequest):
     __tablename__ = 'arXiv_endorsement_requests_audit'
 
     request_id = Column(ForeignKey('arXiv_endorsement_requests.request_id'), primary_key=True, server_default=FetchedValue())
@@ -480,7 +480,7 @@ class ArXivEndorsementRequestsAudit(ArXivEndorsementRequest):
 
 
 
-class ArXivEndorsement(Base):
+class Endorsement(Base):
     __tablename__ = 'arXiv_endorsements'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -499,13 +499,13 @@ class ArXivEndorsement(Base):
     issued_when = Column(Integer, nullable=False, server_default=FetchedValue())
     request_id = Column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
 
-    arXiv_category = relationship('ArXivCategory', primaryjoin='and_(ArXivEndorsement.archive == ArXivCategory.archive, ArXivEndorsement.subject_class == ArXivCategory.subject_class)', backref='ar_xiv_endorsements')
-    endorsee = relationship('TapirUser', primaryjoin='ArXivEndorsement.endorsee_id == TapirUser.user_id', backref='tapiruser_ar_xiv_endorsements')
-    endorser = relationship('TapirUser', primaryjoin='ArXivEndorsement.endorser_id == TapirUser.user_id', backref='tapiruser_ar_xiv_endorsements_0')
-    request = relationship('ArXivEndorsementRequest', primaryjoin='ArXivEndorsement.request_id == ArXivEndorsementRequest.request_id', backref='ar_xiv_endorsements')
+    arXiv_category = relationship('Category', primaryjoin='and_(Endorsement.archive == Category.archive, Endorsement.subject_class == Category.subject_class)', backref='arXiv_endorsements')
+    endorsee = relationship('TapirUser', primaryjoin='Endorsement.endorsee_id == TapirUser.user_id', backref='tapiruser_arXiv_endorsements')
+    endorser = relationship('TapirUser', primaryjoin='Endorsement.endorser_id == TapirUser.user_id', backref='tapiruser_arXiv_endorsements_0')
+    request = relationship('EndorsementRequest', primaryjoin='Endorsement.request_id == EndorsementRequest.request_id', backref='arXiv_endorsements')
 
 
-class ArXivEndorsementsAudit(ArXivEndorsement):
+class EndorsementsAudit(Endorsement):
     __tablename__ = 'arXiv_endorsements_audit'
 
     endorsement_id = Column(ForeignKey('arXiv_endorsements.endorsement_id'), primary_key=True, server_default=FetchedValue())
@@ -519,14 +519,14 @@ class ArXivEndorsementsAudit(ArXivEndorsement):
 
 
 
-class ArXivFreezeLog(Base):
+class FreezeLog(Base):
     __tablename__ = 'arXiv_freeze_log'
 
     date = Column(Integer, primary_key=True, server_default=FetchedValue())
 
 
 
-class ArXivGroupDef(Base):
+class GroupDef(Base):
     __tablename__ = 'arXiv_group_def'
 
     archive_group = Column(String(16), primary_key=True, server_default=FetchedValue())
@@ -534,7 +534,7 @@ class ArXivGroupDef(Base):
 
 
 
-class ArXivGroup(Base):
+class Group(Base):
     __tablename__ = 'arXiv_groups'
 
     group_id = Column(String(16), primary_key=True, server_default=FetchedValue())
@@ -543,7 +543,7 @@ class ArXivGroup(Base):
 
 
 
-class ArXivInCategory(Base):
+class InCategory(Base):
     __tablename__ = 'arXiv_in_category'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -556,12 +556,12 @@ class ArXivInCategory(Base):
     subject_class = Column(String(16), nullable=False, server_default=FetchedValue())
     is_primary = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_category = relationship('ArXivCategory', primaryjoin='and_(ArXivInCategory.archive == ArXivCategory.archive, ArXivInCategory.subject_class == ArXivCategory.subject_class)', backref='ar_xiv_in_categories')
-    document = relationship('ArXivDocument', primaryjoin='ArXivInCategory.document_id == ArXivDocument.document_id', backref='ar_xiv_in_categories')
+    arXiv_category = relationship('Category', primaryjoin='and_(InCategory.archive == Category.archive, InCategory.subject_class == Category.subject_class)', backref='arXiv_in_categories')
+    document = relationship('Document', primaryjoin='InCategory.document_id == Document.document_id', backref='arXiv_in_categories')
 
 
 
-class ArXivJrefControl(Base):
+class JrefControl(Base):
     __tablename__ = 'arXiv_jref_control'
     __table_args__ = (
         Index('document_id', 'document_id', 'version'),
@@ -578,12 +578,12 @@ class ArXivJrefControl(Base):
     freeze_date = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivJrefControl.document_id == ArXivDocument.document_id', backref='ar_xiv_jref_controls')
-    user = relationship('TapirUser', primaryjoin='ArXivJrefControl.user_id == TapirUser.user_id', backref='ar_xiv_jref_controls')
+    document = relationship('Document', primaryjoin='JrefControl.document_id == Document.document_id', backref='arXiv_jref_controls')
+    user = relationship('TapirUser', primaryjoin='JrefControl.user_id == TapirUser.user_id', backref='arXiv_jref_controls')
 
 
 
-class ArXivLicense(Base):
+class License(Base):
     __tablename__ = 'arXiv_licenses'
 
     name = Column(String(255), primary_key=True)
@@ -594,7 +594,7 @@ class ArXivLicense(Base):
 
 
 
-class ArXivLogPosition(Base):
+class LogPosition(Base):
     __tablename__ = 'arXiv_log_positions'
 
     id = Column(String(255), primary_key=True, server_default=FetchedValue())
@@ -603,7 +603,7 @@ class ArXivLogPosition(Base):
 
 
 
-class ArXivMetadatum(Base):
+class Metadata(Base):
     __tablename__ = 'arXiv_metadata'
     __table_args__ = (
         Index('pidv', 'paper_id', 'version'),
@@ -637,13 +637,13 @@ class ArXivMetadatum(Base):
     is_current = Column(Integer, server_default=FetchedValue())
     is_withdrawn = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivMetadatum.document_id == ArXivDocument.document_id', backref='ar_xiv_metadata')
-    arXiv_license = relationship('ArXivLicense', primaryjoin='ArXivMetadatum.license == ArXivLicense.name', backref='ar_xiv_metadata')
-    submitter = relationship('TapirUser', primaryjoin='ArXivMetadatum.submitter_id == TapirUser.user_id', backref='ar_xiv_metadata')
+    document = relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', backref='arXiv_metadata')
+    arXiv_license = relationship('License', primaryjoin='Metadata.license == License.name', backref='arXiv_metadata')
+    submitter = relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', backref='arXiv_metadata')
 
 
 
-class ArXivMirrorList(Base):
+class MirrorList(Base):
     __tablename__ = 'arXiv_mirror_list'
 
     mirror_list_id = Column(Integer, primary_key=True)
@@ -655,11 +655,11 @@ class ArXivMirrorList(Base):
     write_abs = Column(Integer, nullable=False, server_default=FetchedValue())
     is_written = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivMirrorList.document_id == ArXivDocument.document_id', backref='ar_xiv_mirror_lists')
+    document = relationship('Document', primaryjoin='MirrorList.document_id == Document.document_id', backref='arXiv_mirror_lists')
 
 
 
-class ArXivModeratorApiKey(Base):
+class ModeratorApiKey(Base):
     __tablename__ = 'arXiv_moderator_api_key'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -669,11 +669,11 @@ class ArXivModeratorApiKey(Base):
     issued_to = Column(String(16), nullable=False, server_default=FetchedValue())
     remote_host = Column(String(255), nullable=False, server_default=FetchedValue())
 
-    user = relationship('TapirUser', primaryjoin='ArXivModeratorApiKey.user_id == TapirUser.user_id', backref='ar_xiv_moderator_api_keys')
+    user = relationship('TapirUser', primaryjoin='ModeratorApiKey.user_id == TapirUser.user_id', backref='arXiv_moderator_api_keys')
 
 
 
-class ArXivModerator(Base):
+class Moderator(Base):
     __tablename__ = 'arXiv_moderators'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -689,13 +689,13 @@ class ArXivModerator(Base):
     no_reply_to = Column(Integer, index=True, server_default=FetchedValue())
     daily_update = Column(Integer, server_default=FetchedValue())
 
-    arXiv_category = relationship('ArXivCategory', primaryjoin='and_(ArXivModerator.archive == ArXivCategory.archive, ArXivModerator.subject_class == ArXivCategory.subject_class)', backref='ar_xiv_moderators')
-    arXiv_archive_group = relationship('ArXivArchiveGroup', primaryjoin='ArXivModerator.archive == ArXivArchiveGroup.archive_id', backref='ar_xiv_moderators')
-    user = relationship('TapirUser', primaryjoin='ArXivModerator.user_id == TapirUser.user_id', backref='ar_xiv_moderators')
+    arXiv_category = relationship('Category', primaryjoin='and_(Moderator.archive == Category.archive, Moderator.subject_class == Category.subject_class)', backref='arXiv_moderators')
+    arXiv_archive_group = relationship('ArchiveGroup', primaryjoin='Moderator.archive == ArchiveGroup.archive_id', backref='arXiv_moderators')
+    user = relationship('TapirUser', primaryjoin='Moderator.user_id == TapirUser.user_id', backref='arXiv_moderators')
 
 
 
-class ArXivMonitorKlog(Base):
+class MonitorKlog(Base):
     __tablename__ = 'arXiv_monitor_klog'
 
     t = Column(Integer, primary_key=True, server_default=FetchedValue())
@@ -703,7 +703,7 @@ class ArXivMonitorKlog(Base):
 
 
 
-class ArXivMonitorMailq(Base):
+class MonitorMailq(Base):
     __tablename__ = 'arXiv_monitor_mailq'
 
     t = Column(Integer, primary_key=True, server_default=FetchedValue())
@@ -716,7 +716,7 @@ class ArXivMonitorMailq(Base):
 
 
 
-class ArXivMonitorMailsent(Base):
+class MonitorMailsent(Base):
     __tablename__ = 'arXiv_monitor_mailsent'
 
     t = Column(Integer, primary_key=True, server_default=FetchedValue())
@@ -724,7 +724,7 @@ class ArXivMonitorMailsent(Base):
 
 
 
-class ArXivNextMail(Base):
+class NextMail(Base):
     __tablename__ = 'arXiv_next_mail'
     __table_args__ = (
         Index('arXiv_next_mail_idx_document_id_version', 'document_id', 'version'),
@@ -742,7 +742,7 @@ class ArXivNextMail(Base):
 
 
 
-class ArXivOrcidConfig(Base):
+class OrcidConfig(Base):
     __tablename__ = 'arXiv_orcid_config'
 
     domain = Column(String(75), primary_key=True, nullable=False)
@@ -751,7 +751,7 @@ class ArXivOrcidConfig(Base):
 
 
 
-class ArXivOwnershipRequest(Base):
+class OwnershipRequest(Base):
     __tablename__ = 'arXiv_ownership_requests'
 
     request_id = Column(Integer, primary_key=True)
@@ -759,11 +759,11 @@ class ArXivOwnershipRequest(Base):
     endorsement_request_id = Column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
     workflow_status = Column(ENUM('pending', 'accepted', 'rejected'), nullable=False, server_default=FetchedValue())
 
-    endorsement_request = relationship('ArXivEndorsementRequest', primaryjoin='ArXivOwnershipRequest.endorsement_request_id == ArXivEndorsementRequest.request_id', backref='ar_xiv_ownership_requests')
-    user = relationship('TapirUser', primaryjoin='ArXivOwnershipRequest.user_id == TapirUser.user_id', backref='ar_xiv_ownership_requests')
+    endorsement_request = relationship('EndorsementRequest', primaryjoin='OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id', backref='arXiv_ownership_requests')
+    user = relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', backref='arXiv_ownership_requests')
 
 
-class ArXivOwnershipRequestsAudit(ArXivOwnershipRequest):
+class OwnershipRequestsAudit(OwnershipRequest):
     __tablename__ = 'arXiv_ownership_requests_audit'
 
     request_id = Column(ForeignKey('arXiv_ownership_requests.request_id'), primary_key=True, server_default=FetchedValue())
@@ -775,7 +775,7 @@ class ArXivOwnershipRequestsAudit(ArXivOwnershipRequest):
 
 
 
-class ArXivOwnershipRequestsPaper(Base):
+class OwnershipRequestsPaper(Base):
     __tablename__ = 'arXiv_ownership_requests_papers'
     __table_args__ = (
         Index('request_id', 'request_id', 'document_id'),
@@ -786,7 +786,7 @@ class ArXivOwnershipRequestsPaper(Base):
 
 
 
-class ArXivPaperOwner(Base):
+class PaperOwner(Base):
     __tablename__ = 'arXiv_paper_owners'
     __table_args__ = (
         Index('document_id', 'document_id', 'user_id'),
@@ -803,13 +803,13 @@ class ArXivPaperOwner(Base):
     flag_author = Column(Integer, nullable=False, server_default=FetchedValue())
     flag_auto = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    tapir_user = relationship('TapirUser', primaryjoin='ArXivPaperOwner.added_by == TapirUser.user_id', backref='tapiruser_ar_xiv_paper_owners')
-    document = relationship('ArXivDocument', primaryjoin='ArXivPaperOwner.document_id == ArXivDocument.document_id', backref='ar_xiv_paper_owners')
-    user = relationship('TapirUser', primaryjoin='ArXivPaperOwner.user_id == TapirUser.user_id', backref='tapiruser_ar_xiv_paper_owners_0')
+    tapir_user = relationship('TapirUser', primaryjoin='PaperOwner.added_by == TapirUser.user_id', backref='tapiruser_arXiv_paper_owners')
+    document = relationship('Document', primaryjoin='PaperOwner.document_id == Document.document_id', backref='arXiv_paper_owners')
+    user = relationship('TapirUser', primaryjoin='PaperOwner.user_id == TapirUser.user_id', backref='tapiruser_arXiv_paper_owners_0')
 
 
 
-class ArXivPaperSession(Base):
+class PaperSession(Base):
     __tablename__ = 'arXiv_paper_sessions'
 
     paper_session_id = Column(Integer, primary_key=True)
@@ -820,7 +820,7 @@ class ArXivPaperSession(Base):
 
 
 
-class ArXivPilotFile(Base):
+class PilotFile(Base):
     __tablename__ = 'arXiv_pilot_files'
 
     file_id = Column(Integer, primary_key=True)
@@ -830,18 +830,18 @@ class ArXivPilotFile(Base):
     description = Column(String(80))
     byRef = Column(Integer, server_default=FetchedValue())
 
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivPilotFile.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_pilot_files')
+    submission = relationship('Submission', primaryjoin='PilotFile.submission_id == Submission.submission_id', backref='arXiv_pilot_files')
 
 
 
-class ArXivPublishLog(Base):
+class PublishLog(Base):
     __tablename__ = 'arXiv_publish_log'
 
     date = Column(Integer, primary_key=True, server_default=FetchedValue())
 
 
 
-class ArXivRefreshList(Base):
+class RefreshList(Base):
     __tablename__ = 'arXiv_refresh_list'
 
     filename = Column(String(255))
@@ -849,14 +849,14 @@ class ArXivRefreshList(Base):
 
 
 
-class ArXivRejectSessionUsername(Base):
+class RejectSessionUsername(Base):
     __tablename__ = 'arXiv_reject_session_usernames'
 
     username = Column(String(64), primary_key=True, server_default=FetchedValue())
 
 
 
-class ArXivSciencewisePing(Base):
+class SciencewisePing(Base):
     __tablename__ = 'arXiv_sciencewise_pings'
 
     paper_id_v = Column(String(32), primary_key=True)
@@ -864,7 +864,7 @@ class ArXivSciencewisePing(Base):
 
 
 
-class ArXivShowEmailRequest(Base):
+class ShowEmailRequest(Base):
     __tablename__ = 'arXiv_show_email_requests'
     __table_args__ = (
         Index('user_id', 'user_id', 'dated'),
@@ -880,12 +880,12 @@ class ArXivShowEmailRequest(Base):
     tracking_cookie = Column(String(255), nullable=False, server_default=FetchedValue())
     request_id = Column(Integer, primary_key=True)
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivShowEmailRequest.document_id == ArXivDocument.document_id', backref='ar_xiv_show_email_requests')
-    user = relationship('TapirUser', primaryjoin='ArXivShowEmailRequest.user_id == TapirUser.user_id', backref='ar_xiv_show_email_requests')
+    document = relationship('Document', primaryjoin='ShowEmailRequest.document_id == Document.document_id', backref='arXiv_show_email_requests')
+    user = relationship('TapirUser', primaryjoin='ShowEmailRequest.user_id == TapirUser.user_id', backref='arXiv_show_email_requests')
 
 
 
-class ArXivState(Base):
+class State(Base):
     __tablename__ = 'arXiv_state'
 
     id = Column(Integer, primary_key=True)
@@ -894,7 +894,7 @@ class ArXivState(Base):
 
 
 
-class ArXivStatsHourly(Base):
+class StatsHourly(Base):
     __tablename__ = 'arXiv_stats_hourly'
 
     ymd = Column(Date, nullable=False, index=True)
@@ -905,7 +905,7 @@ class ArXivStatsHourly(Base):
 
 
 
-class ArXivStatsMonthlyDownload(Base):
+class StatsMonthlyDownload(Base):
     __tablename__ = 'arXiv_stats_monthly_downloads'
 
     ym = Column(Date, primary_key=True)
@@ -913,7 +913,7 @@ class ArXivStatsMonthlyDownload(Base):
 
 
 
-class ArXivStatsMonthlySubmission(Base):
+class StatsMonthlySubmission(Base):
     __tablename__ = 'arXiv_stats_monthly_submissions'
 
     ym = Column(Date, primary_key=True, server_default=FetchedValue())
@@ -922,7 +922,7 @@ class ArXivStatsMonthlySubmission(Base):
 
 
 
-class ArXivSubmissionAgreement(Base):
+class SubmissionAgreement(Base):
     __tablename__ = 'arXiv_submission_agreements'
 
     agreement_id = Column(SmallInteger, primary_key=True)
@@ -932,7 +932,7 @@ class ArXivSubmissionAgreement(Base):
 
 
 
-class ArXivSubmissionCategory(Base):
+class SubmissionCategory(Base):
     __tablename__ = 'arXiv_submission_category'
 
     submission_id = Column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
@@ -940,12 +940,12 @@ class ArXivSubmissionCategory(Base):
     is_primary = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     is_published = Column(Integer, index=True, server_default=FetchedValue())
 
-    arXiv_category_def = relationship('ArXivCategoryDef', primaryjoin='ArXivSubmissionCategory.category == ArXivCategoryDef.category', backref='ar_xiv_submission_categories')
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivSubmissionCategory.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_submission_categories')
+    arXiv_category_def = relationship('CategoryDef', primaryjoin='SubmissionCategory.category == CategoryDef.category', backref='arXiv_submission_categories')
+    submission = relationship('Submission', primaryjoin='SubmissionCategory.submission_id == Submission.submission_id', backref='arXiv_submission_categories')
 
 
 
-class ArXivSubmissionCategoryProposal(Base):
+class SubmissionCategoryProposal(Base):
     __tablename__ = 'arXiv_submission_category_proposal'
 
     proposal_id = Column(Integer, primary_key=True, nullable=False, index=True)
@@ -958,15 +958,15 @@ class ArXivSubmissionCategoryProposal(Base):
     proposal_comment_id = Column(ForeignKey('arXiv_admin_log.id'), index=True)
     response_comment_id = Column(ForeignKey('arXiv_admin_log.id'), index=True)
 
-    arXiv_category_def = relationship('ArXivCategoryDef', primaryjoin='ArXivSubmissionCategoryProposal.category == ArXivCategoryDef.category', backref='ar_xiv_submission_category_proposals')
-    proposal_comment = relationship('ArXivAdminLog', primaryjoin='ArXivSubmissionCategoryProposal.proposal_comment_id == ArXivAdminLog.id', backref='arxivadminlog_ar_xiv_submission_category_proposals')
-    response_comment = relationship('ArXivAdminLog', primaryjoin='ArXivSubmissionCategoryProposal.response_comment_id == ArXivAdminLog.id', backref='arxivadminlog_ar_xiv_submission_category_proposals_0')
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivSubmissionCategoryProposal.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_submission_category_proposals')
-    user = relationship('TapirUser', primaryjoin='ArXivSubmissionCategoryProposal.user_id == TapirUser.user_id', backref='ar_xiv_submission_category_proposals')
+    arXiv_category_def = relationship('CategoryDef', primaryjoin='SubmissionCategoryProposal.category == CategoryDef.category', backref='arXiv_submission_category_proposals')
+    proposal_comment = relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.proposal_comment_id == AdminLog.id', backref='arxivadminlog_arXiv_submission_category_proposals')
+    response_comment = relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.response_comment_id == AdminLog.id', backref='arxivadminlog_arXiv_submission_category_proposals_0')
+    submission = relationship('Submission', primaryjoin='SubmissionCategoryProposal.submission_id == Submission.submission_id', backref='arXiv_submission_category_proposals')
+    user = relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', backref='arXiv_submission_category_proposals')
 
 
 
-class ArXivSubmissionControl(Base):
+class SubmissionControl(Base):
     __tablename__ = 'arXiv_submission_control'
     __table_args__ = (
         Index('document_id', 'document_id', 'version'),
@@ -983,12 +983,12 @@ class ArXivSubmissionControl(Base):
     freeze_date = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivSubmissionControl.document_id == ArXivDocument.document_id', backref='ar_xiv_submission_controls')
-    user = relationship('TapirUser', primaryjoin='ArXivSubmissionControl.user_id == TapirUser.user_id', backref='ar_xiv_submission_controls')
+    document = relationship('Document', primaryjoin='SubmissionControl.document_id == Document.document_id', backref='arXiv_submission_controls')
+    user = relationship('TapirUser', primaryjoin='SubmissionControl.user_id == TapirUser.user_id', backref='arXiv_submission_controls')
 
 
 
-class ArXivSubmissionFlag(Base):
+class SubmissionFlag(Base):
     __tablename__ = 'arXiv_submission_flag'
     __table_args__ = (
         Index('uniq_one_flag_per_mod', 'submission_id', 'user_id'),
@@ -1000,12 +1000,12 @@ class ArXivSubmissionFlag(Base):
     flag = Column(Integer, nullable=False, server_default=FetchedValue())
     updated = Column(DateTime, nullable=False, server_default=FetchedValue())
 
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivSubmissionFlag.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_submission_flags')
-    user = relationship('TapirUser', primaryjoin='ArXivSubmissionFlag.user_id == TapirUser.user_id', backref='ar_xiv_submission_flags')
+    submission = relationship('Submission', primaryjoin='SubmissionFlag.submission_id == Submission.submission_id', backref='arXiv_submission_flags')
+    user = relationship('TapirUser', primaryjoin='SubmissionFlag.user_id == TapirUser.user_id', backref='arXiv_submission_flags')
 
 
 
-class ArXivSubmissionHoldReason(Base):
+class SubmissionHoldReason(Base):
     __tablename__ = 'arXiv_submission_hold_reason'
 
     reason_id = Column(Integer, primary_key=True, nullable=False)
@@ -1015,13 +1015,13 @@ class ArXivSubmissionHoldReason(Base):
     type = Column(String(30))
     comment_id = Column(ForeignKey('arXiv_admin_log.id'), index=True)
 
-    comment = relationship('ArXivAdminLog', primaryjoin='ArXivSubmissionHoldReason.comment_id == ArXivAdminLog.id', backref='ar_xiv_submission_hold_reasons')
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivSubmissionHoldReason.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_submission_hold_reasons')
-    user = relationship('TapirUser', primaryjoin='ArXivSubmissionHoldReason.user_id == TapirUser.user_id', backref='ar_xiv_submission_hold_reasons')
+    comment = relationship('AdminLog', primaryjoin='SubmissionHoldReason.comment_id == AdminLog.id', backref='arXiv_submission_hold_reasons')
+    submission = relationship('Submission', primaryjoin='SubmissionHoldReason.submission_id == Submission.submission_id', backref='arXiv_submission_hold_reasons')
+    user = relationship('TapirUser', primaryjoin='SubmissionHoldReason.user_id == TapirUser.user_id', backref='arXiv_submission_hold_reasons')
 
 
 
-class ArXivSubmissionNearDuplicate(Base):
+class SubmissionNearDuplicate(Base):
     __tablename__ = 'arXiv_submission_near_duplicates'
     __table_args__ = (
         Index('match', 'submission_id', 'matching_id'),
@@ -1032,11 +1032,11 @@ class ArXivSubmissionNearDuplicate(Base):
     similarity = Column(Numeric(2, 1), nullable=False)
     last_update = Column(DateTime, nullable=False, server_default=FetchedValue())
 
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivSubmissionNearDuplicate.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_submission_near_duplicates')
+    submission = relationship('Submission', primaryjoin='SubmissionNearDuplicate.submission_id == Submission.submission_id', backref='arXiv_submission_near_duplicates')
 
 
 
-class ArXivSubmissionQaReport(Base):
+class SubmissionQaReport(Base):
     __tablename__ = 'arXiv_submission_qa_reports'
 
     id = Column(Integer, primary_key=True)
@@ -1047,11 +1047,11 @@ class ArXivSubmissionQaReport(Base):
     report = Column(JSON, nullable=False)
     report_uri = Column(String(256))
 
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivSubmissionQaReport.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_submission_qa_reports')
+    submission = relationship('Submission', primaryjoin='SubmissionQaReport.submission_id == Submission.submission_id', backref='arXiv_submission_qa_reports')
 
 
 
-class ArXivSubmissionViewFlag(Base):
+class SubmissionViewFlag(Base):
     __tablename__ = 'arXiv_submission_view_flag'
 
     submission_id = Column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, nullable=False)
@@ -1059,12 +1059,12 @@ class ArXivSubmissionViewFlag(Base):
     user_id = Column(ForeignKey('tapir_users.user_id', ondelete='CASCADE'), primary_key=True, nullable=False, index=True)
     updated = Column(DateTime)
 
-    submission = relationship('ArXivSubmission', primaryjoin='ArXivSubmissionViewFlag.submission_id == ArXivSubmission.submission_id', backref='ar_xiv_submission_view_flags')
-    user = relationship('TapirUser', primaryjoin='ArXivSubmissionViewFlag.user_id == TapirUser.user_id', backref='ar_xiv_submission_view_flags')
+    submission = relationship('Submission', primaryjoin='SubmissionViewFlag.submission_id == Submission.submission_id', backref='arXiv_submission_view_flags')
+    user = relationship('TapirUser', primaryjoin='SubmissionViewFlag.user_id == TapirUser.user_id', backref='arXiv_submission_view_flags')
 
 
 
-class ArXivSubmission(Base):
+class Submission(Base):
     __tablename__ = 'arXiv_submissions'
 
     submission_id = Column(Integer, primary_key=True)
@@ -1116,14 +1116,14 @@ class ArXivSubmission(Base):
     is_locked = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     agreement_id = Column(ForeignKey('arXiv_submission_agreements.agreement_id'), index=True)
 
-    agreement = relationship('ArXivSubmissionAgreement', primaryjoin='ArXivSubmission.agreement_id == ArXivSubmissionAgreement.agreement_id', backref='ar_xiv_submissions')
-    document = relationship('ArXivDocument', primaryjoin='ArXivSubmission.document_id == ArXivDocument.document_id', backref='ar_xiv_submissions')
-    arXiv_license = relationship('ArXivLicense', primaryjoin='ArXivSubmission.license == ArXivLicense.name', backref='ar_xiv_submissions')
-    submitter = relationship('TapirUser', primaryjoin='ArXivSubmission.submitter_id == TapirUser.user_id', backref='ar_xiv_submissions')
-    sword = relationship('ArXivTracking', primaryjoin='ArXivSubmission.sword_id == ArXivTracking.sword_id', backref='ar_xiv_submissions')
+    agreement = relationship('SubmissionAgreement', primaryjoin='Submission.agreement_id == SubmissionAgreement.agreement_id', backref='arXiv_submissions')
+    document = relationship('Document', primaryjoin='Submission.document_id == Document.document_id', backref='arXiv_submissions')
+    arXiv_license = relationship('License', primaryjoin='Submission.license == License.name', backref='arXiv_submissions')
+    submitter = relationship('TapirUser', primaryjoin='Submission.submitter_id == TapirUser.user_id', backref='arXiv_submissions')
+    sword = relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', backref='arXiv_submissions')
 
 
-class ArXivPilotDataset(ArXivSubmission):
+class PilotDataset(Submission):
     __tablename__ = 'arXiv_pilot_datasets'
 
     submission_id = Column(ForeignKey('arXiv_submissions.submission_id'), primary_key=True)
@@ -1135,7 +1135,7 @@ class ArXivPilotDataset(ArXivSubmission):
     last_checked = Column(DateTime, nullable=False, server_default=FetchedValue())
 
 
-class ArXivSubmissionAbsClassifierDatum(ArXivSubmission):
+class SubmissionAbsClassifierDatum(Submission):
     __tablename__ = 'arXiv_submission_abs_classifier_data'
 
     submission_id = Column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
@@ -1152,7 +1152,7 @@ class ArXivSubmissionAbsClassifierDatum(ArXivSubmission):
     classifier_model_version = Column(Text)
 
 
-class ArXivSubmissionClassifierDatum(ArXivSubmission):
+class SubmissionClassifierDatum(Submission):
     __tablename__ = 'arXiv_submission_classifier_data'
 
     submission_id = Column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
@@ -1164,7 +1164,7 @@ class ArXivSubmissionClassifierDatum(ArXivSubmission):
 
 
 
-class ArXivSubmitterFlag(Base):
+class SubmitterFlag(Base):
     __tablename__ = 'arXiv_submitter_flags'
 
     flag_id = Column(Integer, primary_key=True)
@@ -1173,7 +1173,7 @@ class ArXivSubmitterFlag(Base):
 
 
 
-class ArXivSuspectEmail(Base):
+class SuspectEmail(Base):
     __tablename__ = 'arXiv_suspect_emails'
 
     id = Column(Integer, primary_key=True)
@@ -1184,7 +1184,7 @@ class ArXivSuspectEmail(Base):
 
 
 
-class ArXivTitle(Base):
+class Title(Base):
     __tablename__ = 'arXiv_titles'
 
     paper_id = Column(String(64), primary_key=True)
@@ -1194,7 +1194,7 @@ class ArXivTitle(Base):
 
 
 
-class ArXivTopPaper(Base):
+class TopPaper(Base):
     __tablename__ = 'arXiv_top_papers'
 
     from_week = Column(Date, primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1203,11 +1203,11 @@ class ArXivTopPaper(Base):
     document_id = Column(ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue())
     viewers = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivTopPaper.document_id == ArXivDocument.document_id', backref='ar_xiv_top_papers')
+    document = relationship('Document', primaryjoin='TopPaper.document_id == Document.document_id', backref='arXiv_top_papers')
 
 
 
-class ArXivTrackbackPing(Base):
+class TrackbackPing(Base):
     __tablename__ = 'arXiv_trackback_pings'
 
     trackback_id = Column(Integer, primary_key=True)
@@ -1227,7 +1227,7 @@ class ArXivTrackbackPing(Base):
 
 
 
-class ArXivTrackbackSite(Base):
+class TrackbackSite(Base):
     __tablename__ = 'arXiv_trackback_sites'
 
     pattern = Column(String(255), nullable=False, index=True, server_default=FetchedValue())
@@ -1236,7 +1236,7 @@ class ArXivTrackbackSite(Base):
 
 
 
-class ArXivTracking(Base):
+class Tracking(Base):
     __tablename__ = 'arXiv_tracking'
 
     tracking_id = Column(Integer, primary_key=True)
@@ -1247,7 +1247,7 @@ class ArXivTracking(Base):
 
 
 
-class ArXivUpdate(Base):
+class Update(Base):
     __tablename__ = 'arXiv_updates'
     __table_args__ = (
         Index('document_id', 'document_id', 'date', 'action', 'category'),
@@ -1262,7 +1262,7 @@ class ArXivUpdate(Base):
 
 
 
-class ArXivUpdatesTmp(Base):
+class UpdatesTmp(Base):
     __tablename__ = 'arXiv_updates_tmp'
     __table_args__ = (
         Index('document_id', 'document_id', 'date', 'action', 'category'),
@@ -1275,7 +1275,7 @@ class ArXivUpdatesTmp(Base):
 
 
 
-class ArXivVersion(Base):
+class Version(Base):
     __tablename__ = 'arXiv_versions'
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1285,10 +1285,10 @@ class ArXivVersion(Base):
     publish_date = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     flag_current = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    document = relationship('ArXivDocument', primaryjoin='ArXivVersion.document_id == ArXivDocument.document_id', backref='ar_xiv_versions')
+    document = relationship('Document', primaryjoin='Version.document_id == Document.document_id', backref='arXiv_versions')
 
 
-class ArXivVersionsChecksum(ArXivVersion):
+class VersionsChecksum(Version):
     __tablename__ = 'arXiv_versions_checksum'
     __table_args__ = (
         ForeignKeyConstraint(['document_id', 'version'], ['arXiv_versions.document_id', 'arXiv_versions.version']),
@@ -1305,14 +1305,14 @@ class ArXivVersionsChecksum(ArXivVersion):
 
 
 
-class ArXivWhiteEmail(Base):
+class WhiteEmail(Base):
     __tablename__ = 'arXiv_white_email'
 
     pattern = Column(String(64), unique=True)
 
 
 
-class ArXivXmlNotification(Base):
+class XmlNotification(Base):
     __tablename__ = 'arXiv_xml_notifications'
 
     control_id = Column(Integer, index=True)
@@ -1806,7 +1806,7 @@ class TapirUser(Base):
     tapir_policy_class = relationship('TapirPolicyClass', primaryjoin='TapirUser.policy_class == TapirPolicyClass.class_id', backref='tapir_users')
 
 
-class ArXivAuthorId(TapirUser):
+class AuthorId(TapirUser):
     __tablename__ = 'arXiv_author_ids'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True)
@@ -1814,7 +1814,7 @@ class ArXivAuthorId(TapirUser):
     updated = Column(DateTime, nullable=False, server_default=FetchedValue())
 
 
-class ArXivDemographic(TapirUser):
+class Demographic(TapirUser):
     __tablename__ = 'arXiv_demographics'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -1846,10 +1846,10 @@ class ArXivDemographic(TapirUser):
     flag_group_econ = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     veto_status = Column(ENUM('ok', 'no-endorse', 'no-upload', 'no-replace'), nullable=False, server_default=FetchedValue())
 
-    arXiv_category = relationship('ArXivCategory', primaryjoin='and_(ArXivDemographic.archive == ArXivCategory.archive, ArXivDemographic.subject_class == ArXivCategory.subject_class)', backref='ar_xiv_demographics')
+    arXiv_category = relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='arXiv_demographics')
 
 
-class ArXivOrcidId(TapirUser):
+class OrcidId(TapirUser):
     __tablename__ = 'arXiv_orcid_ids'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True)
@@ -1858,7 +1858,7 @@ class ArXivOrcidId(TapirUser):
     updated = Column(DateTime, nullable=False, server_default=FetchedValue())
 
 
-class ArXivQueueView(TapirUser):
+class QueueView(TapirUser):
     __tablename__ = 'arXiv_queue_view'
 
     user_id = Column(ForeignKey('tapir_users.user_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
@@ -1867,14 +1867,14 @@ class ArXivQueueView(TapirUser):
     total_views = Column(Integer, nullable=False, server_default=FetchedValue())
 
 
-class ArXivSuspiciousName(TapirUser):
+class SuspiciousName(TapirUser):
     __tablename__ = 'arXiv_suspicious_names'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())
     full_name = Column(String(255), nullable=False, server_default=FetchedValue())
 
 
-class ArXivSwordLicense(TapirUser):
+class SwordLicense(TapirUser):
     __tablename__ = 'arXiv_sword_licenses'
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True)

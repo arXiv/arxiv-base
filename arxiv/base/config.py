@@ -156,3 +156,7 @@ ANALYTICS_COOKIE_DOMAIN = os.environ.get("ANALYTICS_COOKIE_DOMAIN", "*.arxiv.org
 """Analytics tracker cookie domain."""
 ANALYTICS_SITE_ID = os.environ.get("ANALYTICS_SITE_ID", "1")
 """Analytics tracker site ID."""
+
+DEFAULT_DB = "sqlite:///../tests/data/browse.db"
+CLASSIC_DB_URI = os.environ.get("CLASSIC_DB_URI", DEFAULT_DB)
+ECHO_SQL = os.environ.get("ECHO_SQL", True)
