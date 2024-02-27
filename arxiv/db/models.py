@@ -1943,7 +1943,7 @@ class DBLaTeXMLSubmissions (LaTeXMLBase):
 class DBLaTeXMLFeedback (LaTeXMLBase):
     __tablename__ = 'feedback'
     
-    id = Column(String(40), nullable=False)
+    id = Column(String(40), primary_key=True)
     canonical_url = Column(String)
     conversion_url = Column(String)
     report_time = Column(BigInteger)
