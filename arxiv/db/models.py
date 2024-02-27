@@ -571,7 +571,7 @@ t_arXiv_in_category = Table(
 class JrefControl(Base):
     __tablename__ = 'arXiv_jref_control'
     __table_args__ = (
-        Index('document_id', 'version'),
+        Index('version'),
     )
 
     control_id = Column(Integer, primary_key=True)
