@@ -1429,6 +1429,25 @@ class TapirCountry(Base):
     rank = Column(Integer, nullable=False, server_default=FetchedValue())
 
 
+class TapirEmailChangeToken(Base):
+    __tablename__ = 'tapir_email_change_tokens'
+
+    user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())
+    old_email = Column(String(255))
+    new_email = Column(String(255))
+    secret = Column(String(32), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
+    tapir_dest = Column(String(255), nullable=False, server_default=FetchedValue())
+    issued_when = Column(Integer, nullable=False, server_default=FetchedValue())
+    issued_to = Column(String(16), nullable=False, server_default=FetchedValue())
+    remote_host = Column(String(16), nullable=False, server_default=FetchedValue())
+    tracking_cookie = Column(String(255), nullable=False, server_default=FetchedValue())
+    used = Column(Integer, nullable=False, server_default=FetchedValue())
+    session_id = Column(Integer, nullable=False, server_default=FetchedValue())
+    consumed_when = Column(Integer)
+    consumed_from = Column(String(16))
+
+    user = relationship('TapirUser', primaryjoin='TapirEmailChangeToken.user_id == TapirUser.user_id', backref='tapir_email_change_tokens')
+
 
 t_tapir_email_change_tokens_used = Table(
     'tapir_email_change_tokens_used', metadata,
@@ -1439,21 +1458,6 @@ t_tapir_email_change_tokens_used = Table(
     Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
     Column('session_id', ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
 )
-
-
-class TapirEmailChangeTokensUsed(Base):
-    __tablename__ = 'tapir_email_change_tokens_used'
-
-    user_id = Column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
-    secret = Column(String(32), nullable=False, server_default=FetchedValue())
-    used_when = Column(Integer, nullable=False, server_default=FetchedValue())
-    used_from = Column(String(16), nullable=False, server_default=FetchedValue())
-    remote_host = Column(String(255), nullable=False, server_default=FetchedValue())
-    session_id = Column(ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
-
-    session = relationship('TapirSession', primaryjoin='TapirEmailChangeTokensUsed.session_id == TapirSession.session_id', backref='tapir_email_change_tokens_useds')
-    user = relationship('TapirUser', primaryjoin='TapirEmailChangeTokensUsed.user_id == TapirUser.user_id', backref='tapir_email_change_tokens_useds')
-
 
 
 class TapirEmailHeader(Base):
