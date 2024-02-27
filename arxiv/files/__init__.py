@@ -238,7 +238,7 @@ class LocalFileAccessor(BaseAccessor):
         return None
     
     def modtime(self) -> float:
-        return os.stat(self.local_path).st_mtime()
+        return os.stat(self.local_path).st_mtime
 
 
     pass
