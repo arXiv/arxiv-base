@@ -21,7 +21,7 @@ from .path_mapper import arxiv_id_to_local_orig, local_path_to_blob_key, \
     arxiv_id_to_local_pdf_path, arxiv_id_to_local_paper
 import logging
 
-logger = logging.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 def make_subpath(path_str: str) -> str:
     """Make a subpath from a path string. If the path string starts with /, remove it."""

@@ -5,7 +5,7 @@ from os.path import dirname
 from arxiv.identifier import Identifier as arXivID
 import logging
 
-logger = logging.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 class PathConstant:
     """Paths used on webX."""
