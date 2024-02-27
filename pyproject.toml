@@ -15,7 +15,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.10"
 
-flask = "~2.2.5"
+flask = "~3.0.2"
 Werkzeug = "~2.3.8"
 pytz = "*"
 boto3 = "==1.*"
@@ -29,7 +29,7 @@ google-cloud-storage = "^2.5.0"
 google-cloud-logging = "^3.8.0"
 google-cloud-pubsub = "^2.18.4"
 PyMySQL = { version = "~=1.1", optional= true}
-SqlAlchemy = { version = "~=1.4", optional= true}
+sqlalchemy = { version = "~=2.0.27", optional= true}
 google-auth = "^2.23.4"
 google-cloud-monitoring = "^2.16.0"
 fire = "^0.5.0"
