@@ -103,7 +103,7 @@ class AdminLog(Base):
 class AdminMetadata(Base):
     __tablename__ = 'arXiv_admin_metadata'
     __table_args__ = (
-        Index('pidv', 'paper_id', 'version'),
+        Index('admin_metadata_pidv', 'paper_id', 'version'),
     )
 
     metadata_id = Column(Integer, primary_key=True, index=True)
@@ -499,7 +499,7 @@ class Endorsement(Base):
     __tablename__ = 'arXiv_endorsements'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
-        Index('archive', 'archive', 'subject_class'),
+        Index('endorsement_archive', 'archive', 'subject_class'),
         Index('endorser_id_2', 'endorser_id', 'endorsee_id', 'archive', 'subject_class')
     )
 
@@ -565,7 +565,7 @@ t_arXiv_in_category = Table(
     Column('subject_class', String(16), nullable=False, server_default=FetchedValue()),
     Column('is_primary', Integer, nullable=False, server_default=FetchedValue()),
     ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
-    Index('archive', 'archive', 'subject_class', 'document_id'),
+    Index('in_cat_archive', 'archive', 'subject_class', 'document_id'),
     Index('arXiv_in_category_mp', 'archive', 'subject_class')
 )
 
@@ -573,7 +573,7 @@ t_arXiv_in_category = Table(
 class JrefControl(Base):
     __tablename__ = 'arXiv_jref_control'
     __table_args__ = (
-        Index('document_id', 'document_id', 'version'),
+        Index('jref_ctrl_document_id', 'document_id', 'version'),
     )
 
     control_id = Column(Integer, primary_key=True)
@@ -693,7 +693,7 @@ t_arXiv_moderators = Table(
     Column('no_reply_to', Integer, index=True, server_default=FetchedValue()),
     Column('daily_update', Integer, server_default=FetchedValue()),
     ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
-    Index('user_id', 'archive', 'subject_class', 'user_id')
+    Index('mod_user_id', 'archive', 'subject_class', 'user_id')
 )
 
 
@@ -798,7 +798,7 @@ t_arXiv_paper_owners = Table(
     Column('valid', Integer, nullable=False, server_default=FetchedValue()),
     Column('flag_author', Integer, nullable=False, server_default=FetchedValue()),
     Column('flag_auto', Integer, nullable=False, server_default=FetchedValue()),
-    # Index('document_id', 'document_id', 'user_id')
+    Index('owners_document_id', 'document_id', 'user_id')
 )
 
 
@@ -859,7 +859,7 @@ class SciencewisePing(Base):
 class ShowEmailRequest(Base):
     __tablename__ = 'arXiv_show_email_requests'
     __table_args__ = (
-        Index('user_id', 'user_id', 'dated'),
+        Index('email_reqs_user_id', 'user_id', 'dated'),
     )
 
     document_id = Column(ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue())
@@ -962,7 +962,7 @@ class SubmissionCategoryProposal(Base):
 class SubmissionControl(Base):
     __tablename__ = 'arXiv_submission_control'
     __table_args__ = (
-        Index('document_id', 'document_id', 'version'),
+        Index('sub_ctrl_document_id', 'document_id', 'version'),
     )
 
     control_id = Column(Integer, primary_key=True)
@@ -1270,7 +1270,7 @@ t_arXiv_updates = Table(
     Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
     Column('archive', String(20), index=True),
     Column('category', String(20), index=True),
-    # Index('document_id', 'document_id', 'date', 'action', 'category')
+    Index('updates_document_id', 'document_id', 'date', 'action', 'category')
 )
 
 
@@ -1281,7 +1281,7 @@ t_arXiv_updates_tmp = Table(
     Column('date', Date),
     Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
     Column('category', String(20)),
-    # Index('document_id', 'document_id', 'date', 'action', 'category')
+    Index('updates_temp_document_id', 'document_id', 'date', 'action', 'category')
 )
 
 
@@ -1812,7 +1812,7 @@ class Demographic(TapirUser):
     __tablename__ = 'arXiv_demographics'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
-        Index('archive', 'archive', 'subject_class')
+        Index('dem_archive', 'archive', 'subject_class')
     )
 
     user_id = Column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())
