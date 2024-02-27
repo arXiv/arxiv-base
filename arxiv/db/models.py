@@ -51,7 +51,7 @@ class MemberInstitution(Base):
 
 
 
-class MemberInstitution(Base):
+class MemberInstitutionContact(Base):
     __tablename__ = 'Subscription_UniversalInstitutionContact'
 
     email = Column(String(255))
