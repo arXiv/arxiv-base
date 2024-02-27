@@ -44,7 +44,8 @@ For example:
 
 from arxiv.base import logging
 from typing import Optional, List, Tuple, Union
-from flask import flash, Markup, get_flashed_messages
+from flask import flash, get_flashed_messages
+from markupsafe import Markup
 
 INFO = 'info'
 WARNING = 'warning'
