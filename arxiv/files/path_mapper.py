@@ -2,7 +2,7 @@
 Cornell Server Farm file and GCP storage object path mapping.
 """
 from os.path import dirname
-from arxiv.identifier import Identifier as arXivID
+from ..identifier import Identifier as arXivID
 import logging
 
 logger = logging.getLogger(__name__)

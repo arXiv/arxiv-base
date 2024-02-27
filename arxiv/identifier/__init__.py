@@ -90,7 +90,7 @@ RE_ARXIV_OLD_ID = re.compile(
 # For use with the Identifier class
 RE_ARXIV_NEW_ID = re.compile(
     r'^(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))\.(?P<num>\d{4,5})'
-    r'(v(?P<version>[1-9]\d*))?([#\/].*)?$'
+    r'(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$'
 )
 
 Sub_type = List[Tuple[str, Union[str, Callable[[Match[str]], str]],
