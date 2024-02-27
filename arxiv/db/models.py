@@ -5,6 +5,7 @@ association tables- Mark Nazzaro 2024
 """
 
 import re
+import os
 import hashlib
 from datetime import datetime
 from dateutil.tz import gettz, tzutc
@@ -16,11 +17,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql.enumerated import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 
-from ..base.config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
 from . import Base, LaTeXMLBase
 
-tb_secret = TRACKBACK_SECRET
-tz = ARXIV_BUSINESS_TZ
+tb_secret = os.environ.get("TRACKBACK_SECRET", "baz")
+tz = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
 
 class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'
