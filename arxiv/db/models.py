@@ -26,10 +26,10 @@ from sqlalchemy import (
     String, 
     Text, 
     Table,
+    Enum
 )
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.mysql.enumerated import ENUM
 
 from ..config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
 
@@ -142,7 +142,7 @@ t_arXiv_admin_state = Table(
     Column('timestamp', DateTime, nullable=False, server_default=FetchedValue()),
     Column('abs_timestamp', Integer),
     Column('src_timestamp', Integer),
-    Column('state', ENUM('pending', 'ok', 'bad'), nullable=False, server_default=FetchedValue()),
+    Column('state', Enum('pending', 'ok', 'bad'), nullable=False, server_default=FetchedValue()),
     Column('admin', String(32)),
     Column('comment', String(255))
 )
@@ -287,8 +287,8 @@ class Category(Base):
     definitive = Column(Integer, nullable=False, server_default=FetchedValue())
     active = Column(Integer, nullable=False, server_default=FetchedValue())
     category_name = Column(String(255))
-    endorse_all = Column(ENUM('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
-    endorse_email = Column(ENUM('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
+    endorse_all = Column(Enum('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
+    endorse_email = Column(Enum('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
     papers_to_endorse = Column(SmallInteger, nullable=False, server_default=FetchedValue())
     endorsement_domain = Column(ForeignKey('arXiv_endorsement_domains.endorsement_domain'), index=True)
 
@@ -324,11 +324,11 @@ class ControlHold(Base):
 
     hold_id = Column(Integer, primary_key=True)
     control_id = Column(Integer, nullable=False, server_default=FetchedValue())
-    hold_type = Column(ENUM('submission', 'cross', 'jref'), nullable=False, index=True, server_default=FetchedValue())
-    hold_status = Column(ENUM('held', 'extended', 'accepted', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
+    hold_type = Column(Enum('submission', 'cross', 'jref'), nullable=False, index=True, server_default=FetchedValue())
+    hold_status = Column(Enum('held', 'extended', 'accepted', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
     hold_reason = Column(String(255), nullable=False, index=True, server_default=FetchedValue())
     hold_data = Column(String(255), nullable=False, server_default=FetchedValue())
-    origin = Column(ENUM('auto', 'user', 'admin', 'moderator'), nullable=False, index=True, server_default=FetchedValue())
+    origin = Column(Enum('auto', 'user', 'admin', 'moderator'), nullable=False, index=True, server_default=FetchedValue())
     placed_by = Column(ForeignKey('tapir_users.user_id'), index=True)
     last_changed_by = Column(ForeignKey('tapir_users.user_id'), index=True)
 
@@ -350,8 +350,8 @@ class CrossControl(Base):
     version = Column(Integer, nullable=False, server_default=FetchedValue())
     desired_order = Column(Integer, nullable=False, server_default=FetchedValue())
     user_id = Column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
-    status = Column(ENUM('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
-    flag_must_notify = Column(ENUM('0', '1'), server_default=FetchedValue())
+    status = Column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
+    flag_must_notify = Column(Enum('0', '1'), server_default=FetchedValue())
     archive = Column(String(16), nullable=False, server_default=FetchedValue())
     subject_class = Column(String(16), nullable=False, server_default=FetchedValue())
     request_date = Column(Integer, nullable=False, server_default=FetchedValue())
@@ -371,7 +371,7 @@ class DataciteDois(Base):
     )
 
     doi = Column(String(255), primary_key=True)
-    account = Column(ENUM('test', 'prod'))
+    account = Column(Enum('test', 'prod'))
     metadata_id = Column(ForeignKey('arXiv_metadata.metadata_id'), nullable=False, index=True)
     paper_id = Column(String(64), nullable=False)
     created = Column(DateTime, server_default=FetchedValue())
@@ -457,9 +457,9 @@ class EndorsementDomain(Base):
     __tablename__ = 'arXiv_endorsement_domains'
 
     endorsement_domain = Column(String(32), primary_key=True, server_default=FetchedValue())
-    endorse_all = Column(ENUM('y', 'n'), nullable=False, server_default=FetchedValue())
-    mods_endorse_all = Column(ENUM('y', 'n'), nullable=False, server_default=FetchedValue())
-    endorse_email = Column(ENUM('y', 'n'), nullable=False, server_default=FetchedValue())
+    endorse_all = Column(Enum('y', 'n'), nullable=False, server_default=FetchedValue())
+    mods_endorse_all = Column(Enum('y', 'n'), nullable=False, server_default=FetchedValue())
+    endorse_email = Column(Enum('y', 'n'), nullable=False, server_default=FetchedValue())
     papers_to_endorse = Column(SmallInteger, nullable=False, server_default=FetchedValue())
 
 
@@ -510,7 +510,7 @@ class Endorsement(Base):
     archive = Column(String(16), nullable=False, server_default=FetchedValue())
     subject_class = Column(String(16), nullable=False, server_default=FetchedValue())
     flag_valid = Column(Integer, nullable=False, server_default=FetchedValue())
-    type = Column(ENUM('user', 'admin', 'auto'))
+    type = Column(Enum('user', 'admin', 'auto'))
     point_value = Column(Integer, nullable=False, server_default=FetchedValue())
     issued_when = Column(Integer, nullable=False, server_default=FetchedValue())
     request_id = Column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
@@ -581,8 +581,8 @@ class JrefControl(Base):
     document_id = Column(ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue())
     version = Column(Integer, nullable=False, server_default=FetchedValue())
     user_id = Column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
-    status = Column(ENUM('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
-    flag_must_notify = Column(ENUM('0', '1'), server_default=FetchedValue())
+    status = Column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
+    flag_must_notify = Column(Enum('0', '1'), server_default=FetchedValue())
     jref = Column(String(255), nullable=False, server_default=FetchedValue())
     request_date = Column(Integer, nullable=False, server_default=FetchedValue())
     freeze_date = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
@@ -760,7 +760,7 @@ class OwnershipRequest(Base):
     request_id = Column(Integer, primary_key=True)
     user_id = Column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
     endorsement_request_id = Column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
-    workflow_status = Column(ENUM('pending', 'accepted', 'rejected'), nullable=False, server_default=FetchedValue())
+    workflow_status = Column(Enum('pending', 'accepted', 'rejected'), nullable=False, server_default=FetchedValue())
 
     endorsement_request = relationship('EndorsementRequest', primaryjoin='OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id', backref='arXiv_ownership_requests')
     user = relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', backref='arXiv_ownership_requests')
@@ -971,8 +971,8 @@ class SubmissionControl(Base):
     version = Column(Integer, nullable=False, server_default=FetchedValue())
     pending_paper_id = Column(String(20), nullable=False, index=True, server_default=FetchedValue())
     user_id = Column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
-    status = Column(ENUM('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
-    flag_must_notify = Column(ENUM('0', '1'), server_default=FetchedValue())
+    status = Column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())
+    flag_must_notify = Column(Enum('0', '1'), server_default=FetchedValue())
     request_date = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     freeze_date = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date = Column(Integer, nullable=False, server_default=FetchedValue())
@@ -1135,7 +1135,7 @@ class SubmissionAbsClassifierDatum(Submission):
     submission_id = Column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
     json = Column(Text)
     last_update = Column(DateTime, nullable=False, server_default=FetchedValue())
-    status = Column(ENUM('processing', 'success', 'failed', 'no connection'))
+    status = Column(Enum('processing', 'success', 'failed', 'no connection'))
     message = Column(Text)
     is_oversize = Column(Integer, server_default=FetchedValue())
     suggested_primary = Column(Text)
@@ -1152,7 +1152,7 @@ class SubmissionClassifierDatum(Submission):
     submission_id = Column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
     json = Column(Text)
     last_update = Column(DateTime, nullable=False, server_default=FetchedValue())
-    status = Column(ENUM('processing', 'success', 'failed', 'no connection'))
+    status = Column(Enum('processing', 'success', 'failed', 'no connection'))
     message = Column(Text)
     is_oversize = Column(Integer, server_default=FetchedValue())
 
@@ -1216,7 +1216,7 @@ class TrackbackPing(Base):
     is_stale = Column(Integer, nullable=False, server_default=FetchedValue())
     approved_by_user = Column(Integer, nullable=False, server_default=FetchedValue())
     approved_time = Column(Integer, nullable=False, server_default=FetchedValue())
-    status = Column(ENUM('pending', 'pending2', 'accepted', 'rejected', 'spam'), nullable=False, index=True, server_default=FetchedValue())
+    status = Column(Enum('pending', 'pending2', 'accepted', 'rejected', 'spam'), nullable=False, index=True, server_default=FetchedValue())
     site_id = Column(Integer)
 
     @property
@@ -1248,7 +1248,7 @@ class TrackbackSite(Base):
 
     pattern = Column(String(255), nullable=False, index=True, server_default=FetchedValue())
     site_id = Column(Integer, primary_key=True)
-    action = Column(ENUM('neutral', 'accept', 'reject', 'spam'), nullable=False, server_default=FetchedValue())
+    action = Column(Enum('neutral', 'accept', 'reject', 'spam'), nullable=False, server_default=FetchedValue())
 
 
 
@@ -1268,7 +1268,7 @@ t_arXiv_updates = Table(
     Column('document_id', Integer, index=True),
     Column('version', Integer, nullable=False, server_default=FetchedValue()),
     Column('date', Date, index=True),
-    Column('action', ENUM('new', 'replace', 'absonly', 'cross', 'repcro')),
+    Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
     Column('archive', String(20), index=True),
     Column('category', String(20), index=True),
     Index('document_id', 'document_id', 'date', 'action', 'category')
@@ -1280,7 +1280,7 @@ t_arXiv_updates_tmp = Table(
     'arXiv_updates_tmp', metadata,
     Column('document_id', Integer),
     Column('date', Date),
-    Column('action', ENUM('new', 'replace', 'absonly', 'cross', 'repcro')),
+    Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
     Column('category', String(20)),
     Index('document_id', 'document_id', 'date', 'action', 'category')
 )
@@ -1328,10 +1328,10 @@ t_arXiv_white_email = Table(
 t_arXiv_xml_notifications = Table(
     'arXiv_xml_notifications', metadata,
     Column('control_id', Integer, index=True),
-    Column('type', ENUM('submission', 'cross', 'jref')),
+    Column('type', Enum('submission', 'cross', 'jref')),
     Column('queued_date', Integer, nullable=False, server_default=FetchedValue()),
     Column('sent_date', Integer, nullable=False, server_default=FetchedValue()),
-    Column('status', ENUM('unsent', 'sent', 'failed'), index=True)
+    Column('status', Enum('unsent', 'sent', 'failed'), index=True)
 )
 
 
@@ -1368,7 +1368,7 @@ t_demographics_backup = Table(
     Column('flag_group_q_bio', Integer, nullable=False, server_default=FetchedValue()),
     Column('flag_no_upload', Integer, nullable=False, server_default=FetchedValue()),
     Column('flag_no_endorse', Integer, nullable=False, server_default=FetchedValue()),
-    Column('veto_status', ENUM('ok', 'no-endorse', 'no-upload'), server_default=FetchedValue())
+    Column('veto_status', Enum('ok', 'no-endorse', 'no-upload'), server_default=FetchedValue())
 )
 
 
@@ -1841,7 +1841,7 @@ class Demographic(TapirUser):
     flag_group_stat = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     flag_group_eess = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
     flag_group_econ = Column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    veto_status = Column(ENUM('ok', 'no-endorse', 'no-upload', 'no-replace'), nullable=False, server_default=FetchedValue())
+    veto_status = Column(Enum('ok', 'no-endorse', 'no-upload', 'no-replace'), nullable=False, server_default=FetchedValue())
 
     arXiv_category = relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='arXiv_demographics')
 
