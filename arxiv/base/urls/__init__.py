@@ -61,7 +61,6 @@ See ARXIVNG-2085.
 import sys
 from typing import Dict, Any, List
 from urllib.parse import parse_qs
-from werkzeug.urls import url_encode, url_parse, url_unparse
 from werkzeug.routing import Map, Rule, BuildError, MapAdapter
 from flask import current_app, g, Flask
 
