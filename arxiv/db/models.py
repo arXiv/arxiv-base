@@ -17,10 +17,7 @@ from sqlalchemy.dialects.mysql.enumerated import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 
 from ..base.config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
-
-Base = declarative_base()
-LaTeXMLBase = declarative_base()
-metadata = Base.metadata
+from . import Base, LaTeXMLBase
 
 tb_secret = TRACKBACK_SECRET
 tz = ARXIV_BUSINESS_TZ

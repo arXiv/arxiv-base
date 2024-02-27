@@ -9,9 +9,15 @@ from flask import current_app
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
 
 from ..base import config
 from .models import Base, LaTeXMLBase
+
+
+Base = declarative_base()
+LaTeXMLBase = declarative_base()
+metadata = Base.metadata
 
 logger = logging.getLogger(__name__)
 
