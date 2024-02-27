@@ -5,6 +5,7 @@ File accessor classes that abstracts the storage and path for each file type.
 # design. There is a room for redesign.
 
 import os.path
+import os
 import shutil
 import typing
 from abc import abstractmethod
@@ -109,6 +110,11 @@ class BaseAccessor(AccessorFlavor):
     def basename(self) -> str:
         """Base name of the file"""
         raise NotImplementedError("Not implemented")
+    
+    @abstractmethod
+    def modtime(self) -> float:
+        """Last modified as float POSIX timestamp"""
+        raise NotImplementedError("Not implemented")
 
     pass
 
@@ -177,6 +183,9 @@ class GCPBlobAccessor(BaseAccessor):
             self.blob.reload()
             return self.blob.size  # type: ignore
         return None
+    
+    def modtime(self) -> float:
+        return self.blob.updated.timestamp()
 
     pass
 
@@ -227,6 +236,10 @@ class LocalFileAccessor(BaseAccessor):
     @property
     def blob_name(self) -> str | None:
         return None
+    
+    def modtime(self) -> float:
+        return os.stat(self.local_path).st_mtime()
+
 
     pass
 
