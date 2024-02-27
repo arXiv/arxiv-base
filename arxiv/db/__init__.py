@@ -11,9 +11,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
-from ..base import config
 from .models import Base, LaTeXMLBase
-
+from ..config import (
+    CLASSIC_DB_URI,
+    ECHO_SQL,
+    LATEXML_DB_URI
+)
 
 Base = declarative_base()
 LaTeXMLBase = declarative_base()
@@ -21,10 +24,10 @@ metadata = Base.metadata
 
 logger = logging.getLogger(__name__)
 
-engine = create_engine(config.CLASSIC_DB_URI,
-                       echo=config.ECHO_SQL)
-latexml_engine = create_engine(config.LATEXML_DB_URI,
-                               echo=config.ECHO_SQL)
+engine = create_engine(CLASSIC_DB_URI,
+                       echo=ECHO_SQL)
+latexml_engine = create_engine(LATEXML_DB_URI,
+                               echo=ECHO_SQL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 SessionLocal.configure(binds={
     Base: engine,

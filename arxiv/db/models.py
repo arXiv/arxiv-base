@@ -15,12 +15,13 @@ from sqlalchemy import BINARY, BigInteger, Column, Date, DateTime, ForeignKey, F
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql.enumerated import ENUM
-from sqlalchemy.ext.declarative import declarative_base
+
+from ..config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
 
 from . import Base, LaTeXMLBase
 
-tb_secret = os.environ.get("TRACKBACK_SECRET", "baz")
-tz = os.environ.get("ARXIV_BUSINESS_TZ", "US/Eastern")
+tb_secret = TRACKBACK_SECRET
+tz = ARXIV_BUSINESS_TZ
 
 class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'
