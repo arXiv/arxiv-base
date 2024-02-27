@@ -4,7 +4,7 @@ from sqlalchemy import or_
 
 from ..db import get_db
 from ..db.models import Metadata
-from ..identifier import Identifier
+from . import Identifier
 from ..taxonomy.category import Category
 from ..document.version import SOURCE_FORMAT
 

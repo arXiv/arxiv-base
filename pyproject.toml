@@ -15,8 +15,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.10"
 
-flask = "~3.0.2"
-Werkzeug = "~2.3.8"
+flask = "3.0.2"
 pytz = "*"
 boto3 = "==1.*"
 wtforms = "*"
