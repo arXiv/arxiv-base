@@ -799,7 +799,7 @@ t_arXiv_paper_owners = Table(
     Column('valid', Integer, nullable=False, server_default=FetchedValue()),
     Column('flag_author', Integer, nullable=False, server_default=FetchedValue()),
     Column('flag_auto', Integer, nullable=False, server_default=FetchedValue()),
-    Index('document_id', 'document_id', 'user_id')
+    # Index('document_id', 'document_id', 'user_id')
 )
 
 
@@ -1271,7 +1271,7 @@ t_arXiv_updates = Table(
     Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
     Column('archive', String(20), index=True),
     Column('category', String(20), index=True),
-    Index('document_id', 'document_id', 'date', 'action', 'category')
+    # Index('document_id', 'document_id', 'date', 'action', 'category')
 )
 
 
@@ -1282,10 +1282,8 @@ t_arXiv_updates_tmp = Table(
     Column('date', Date),
     Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
     Column('category', String(20)),
-    Index('document_id', 'document_id', 'date', 'action', 'category')
+    # Index('document_id', 'document_id', 'date', 'action', 'category')
 )
-
-
 
 
 class Version(Base):
