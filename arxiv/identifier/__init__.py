@@ -84,7 +84,7 @@ class IdentifierIsArchiveException(IdentifierException):
 RE_ARXIV_OLD_ID = re.compile(
     r'^(?P<archive>[a-z]{1,}(\-[a-z]{2,})?)(\.([a-zA-Z\-]{2,}))?\/'
     r'(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))(?P<num>\d\d\d)'
-    r'(v(?P<version>[1-9]\d*))?([#\/].*)?$')
+    r'(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$')
 
 # arXiv ID format used from 2007-04 to present
 # For use with the Identifier class
