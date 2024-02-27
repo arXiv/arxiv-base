@@ -377,7 +377,7 @@ class DataciteDois(Base):
     created = Column(DateTime, server_default=FetchedValue())
     updated = Column(DateTime, server_default=FetchedValue())
 
-    metadata = relationship('Metadata', primaryjoin='DataciteDois.metadata_id == Metadata.metadata_id', backref='arXiv_datacite_dois')
+    metadata_ = relationship('Metadata', primaryjoin='DataciteDois.metadata_id == Metadata.metadata_id', backref='arXiv_datacite_dois')
 
 
 
