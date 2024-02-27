@@ -11,7 +11,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
-from .models import Base, LaTeXMLBase
 from ..config import (
     CLASSIC_DB_URI,
     ECHO_SQL,
