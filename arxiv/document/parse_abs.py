@@ -73,9 +73,9 @@ def parse_abs_file(absfile: BaseAccessor) -> DocMetadata:
         with absfile.open(mode='r', encoding='latin-1') as absf:
             raw = absf.read()
             if current_app:
-                modified = datetime.fromtimestamp(absfile.stat().st_mtime, tz=_get_tz())
+                modified = datetime.fromtimestamp(absfile.modtime(), tz=_get_tz())
             else:
-                modified = datetime.fromtimestamp(absfile.stat().st_mtime)
+                modified = datetime.fromtimestamp(absfile.modtime())
             modified = modified.astimezone(ZoneInfo("UTC"))
             return parse_abs(raw, modified)
 
