@@ -127,5 +127,6 @@ class Base(object):
 
         @app.teardown_appcontext
         def remove_scoped_session (response_or_exc):
+            print ("Removed session")
             get_scoped_session().remove()
             return response_or_exc
