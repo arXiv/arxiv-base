@@ -224,7 +224,7 @@ class LocalFileAccessor(BaseAccessor):
 
     def open(self, **kwargs: typing.Any) -> BlobReader | BinaryIO | TextIO:
         mode: str = kwargs.pop("mode", "rb")
-        return open(self.local_path, mode=mode)
+        return open(self.local_path, mode=mode, **kwargs)
 
     @property
     def bytesize(self) -> typing.Optional[int]:
