@@ -34,6 +34,7 @@ SessionLocal.configure(binds={
 })
 
 def _app_ctx_id () -> int:
+    print (id(current_app._get_current_object()))
     return id(current_app._get_current_object())
 
 def get_scoped_session() -> scoped_session:
