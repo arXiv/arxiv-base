@@ -164,4 +164,4 @@ DEFAULT_LATEXML_DB = "sqlite:///tests/data/latexml.db"
 
 CLASSIC_DB_URI = os.environ.get("CLASSIC_DB_URI", DEFAULT_DB)
 LATEXML_DB_URI = os.environ.get("LATEXML_DB_URI", DEFAULT_LATEXML_DB)
-ECHO_SQL = os.environ.get("ECHO_SQL", True)
+ECHO_SQL = os.environ.get("ECHO_SQL", False)
