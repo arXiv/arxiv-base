@@ -50,7 +50,7 @@ def get_db () -> Generator[Session, None, None]:
 @contextmanager
 def transaction () -> Generator[Session, None, None]:
     in_flask = True if current_app else False
-    db = get_scoped_session() if in_flask else SessionLocal() 
+    db = session if in_flask else SessionLocal() 
     try:
         yield db
 
