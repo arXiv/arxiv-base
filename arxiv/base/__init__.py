@@ -33,7 +33,7 @@ from werkzeug.exceptions import NotFound
 from . import exceptions, urls, alerts, context_processors, filters
 from . import config as base_config
 from .converter import ArXivConverter
-from ..db import get_scoped_session
+from ..db import session
 
 
 class Base(object):
@@ -128,5 +128,5 @@ class Base(object):
         @app.teardown_appcontext
         def remove_scoped_session (response_or_exc):
             print ("Removed session")
-            get_scoped_session().remove()
+            session.remove()
             return response_or_exc
