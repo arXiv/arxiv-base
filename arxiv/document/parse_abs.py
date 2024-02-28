@@ -18,6 +18,7 @@ from .metadata import Archive, AuthorList, Category, \
 from .version import VersionEntry, SourceFlag
 from ..license import License
 from ..identifier import Identifier
+from ..files.anypath import to_anypath
 from .exceptions import \
     AbsException, AbsParsingException, AbsNotFoundException
 
@@ -69,14 +70,17 @@ def parse_abs_file(filename: str) -> DocMetadata:
     The modified time on the abs file will be used as the modified time for the
     abstract. It will be pulled from `flask.config` if in a app_context. It
     can be specified with tz arg.
+    
     """
+
+    absfile = to_anypath(filename)
     try:
-        with filename.open(mode='r', encoding='latin-1') as absf:
+        with absfile.open(mode='r', encoding='latin-1') as absf:
             raw = absf.read()
             if current_app:
-                modified = datetime.fromtimestamp(os.stat(filename).st_mtime, tz=_get_tz())
+                modified = datetime.fromtimestamp(absfile.stat().st_mtime, tz=_get_tz())
             else:
-                modified = datetime.fromtimestamp(os.stat(filename).st_mtime)
+                modified = datetime.fromtimestamp(absfile.stat().st_mtime)
             modified = modified.astimezone(ZoneInfo("UTC"))
             return parse_abs(raw, modified)
 

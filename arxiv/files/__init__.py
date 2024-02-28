@@ -342,4 +342,4 @@ class GCPAbsAccessor(GCPBlobAccessor, AbsFlavor):
 
 class GCPOutcomeAccessor(GCPBlobAccessor, OutcomeFlavor):
     """GCP outcome accessor for a given arXiv ID."""
-    pass
+    pass    
