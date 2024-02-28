@@ -1,5 +1,6 @@
 """Parse fields from a single arXiv abstract (.abs) file."""
 
+import os
 import re
 from typing import Any, Dict, List, Tuple, Optional
 from datetime import datetime
@@ -62,7 +63,29 @@ The latest versions of these papers should always have the "Categories:" line.
 _fs_tz: Optional[ZoneInfo] = None
 """FS timezone if in a flask app."""
 
-def parse_abs_file(absfile: BaseAccessor) -> DocMetadata:
+def parse_abs_file(filename: str) -> DocMetadata:
+    """Parse an arXiv .abs file in the file system.
+
+    The modified time on the abs file will be used as the modified time for the
+    abstract. It will be pulled from `flask.config` if in a app_context. It
+    can be specified with tz arg.
+    """
+    try:
+        with filename.open(mode='r', encoding='latin-1') as absf:
+            raw = absf.read()
+            if current_app:
+                modified = datetime.fromtimestamp(os.stat(filename).st_mtime, tz=_get_tz())
+            else:
+                modified = datetime.fromtimestamp(os.stat(filename).st_mtime)
+            modified = modified.astimezone(ZoneInfo("UTC"))
+            return parse_abs(raw, modified)
+
+    except FileNotFoundError:
+        raise AbsNotFoundException
+    except UnicodeDecodeError as e:
+        raise AbsParsingException(f'Failed to decode .abs file "{filename.canonical_name}": {e}')
+
+def parse_abs_file_accessor(absfile: BaseAccessor) -> DocMetadata:
     """Parse an arXiv .abs file.
 
     The modified time on the abs file will be used as the modified time for the
@@ -83,6 +106,7 @@ def parse_abs_file(absfile: BaseAccessor) -> DocMetadata:
         raise AbsNotFoundException
     except UnicodeDecodeError as e:
         raise AbsParsingException(f'Failed to decode .abs file "{absfile.canonical_name}": {e}')
+    
 
 
 def parse_abs(raw: str, modified: datetime) -> DocMetadata:
