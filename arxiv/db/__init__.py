@@ -37,8 +37,7 @@ def _app_ctx_id () -> int:
     print (id(current_app._get_current_object()))
     return id(current_app._get_current_object())
 
-def get_scoped_session() -> scoped_session:
-    return scoped_session(SessionLocal, scopefunc=_app_ctx_id)
+session = scoped_session(SessionLocal, scopefunc=_app_ctx_id)
 
 @contextmanager
 def get_db () -> Generator[Session, None, None]:
