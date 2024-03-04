@@ -15,6 +15,7 @@ from validators import url as is_valid_url
 from sqlalchemy import (
     BINARY, 
     BigInteger, 
+    Column,
     Date, 
     DateTime, 
     ForeignKey, 
@@ -145,13 +146,13 @@ class AdminMetadata(Base):
 
 t_arXiv_admin_state = Table(
     'arXiv_admin_state', metadata,
-    mapped_column('document_id', Integer, unique=True),
-    mapped_column('timestamp', DateTime, nullable=False, server_default=FetchedValue()),
-    mapped_column('abs_timestamp', Integer),
-    mapped_column('src_timestamp', Integer),
-    mapped_column('state', Enum('pending', 'ok', 'bad'), nullable=False, server_default=FetchedValue()),
-    mapped_column('admin', String(32)),
-    mapped_column('comment', String(255))
+    Column('document_id', Integer, unique=True),
+    Column('timestamp', DateTime, nullable=False, server_default=FetchedValue()),
+    Column('abs_timestamp', Integer),
+    Column('src_timestamp', Integer),
+    Column('state', Enum('pending', 'ok', 'bad'), nullable=False, server_default=FetchedValue()),
+    Column('admin', String(32)),
+    Column('comment', String(255))
 )
 
 
@@ -222,7 +223,7 @@ class AwsFile(Base):
 
 t_arXiv_bad_pw = Table(
     'arXiv_bad_pw', metadata,
-    mapped_column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
+    Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
 )
 
 
@@ -259,14 +260,14 @@ class BibUpdate(Base):
 
 t_arXiv_black_email = Table(
     'arXiv_black_email', metadata,
-    mapped_column('pattern', String(64))
+    Column('pattern', String(64))
 )
 
 
 
 t_arXiv_block_email = Table(
     'arXiv_block_email', metadata,
-    mapped_column('pattern', String(64))
+    Column('pattern', String(64))
 )
 
 
@@ -281,8 +282,8 @@ class BogusCountry(Base):
 
 t_arXiv_bogus_subject_class = Table(
     'arXiv_bogus_subject_class', metadata,
-    mapped_column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('category_name', String(255), nullable=False, server_default=FetchedValue())
+    Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('category_name', String(255), nullable=False, server_default=FetchedValue())
 )
 
 
@@ -454,9 +455,9 @@ class PaperPw(Document):
 
 t_arXiv_duplicates = Table(
     'arXiv_duplicates', metadata,
-    mapped_column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('email', String(255)),
-    mapped_column('username', String(255))
+    Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('email', String(255)),
+    Column('username', String(255))
 )
 
 
@@ -567,10 +568,10 @@ class Group(Base):
 
 t_arXiv_in_category = Table(
     'arXiv_in_category', metadata,
-    mapped_column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('archive', String(16), nullable=False, server_default=FetchedValue()),
-    mapped_column('subject_class', String(16), nullable=False, server_default=FetchedValue()),
-    mapped_column('is_primary', Integer, nullable=False, server_default=FetchedValue()),
+    Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('archive', String(16), nullable=False, server_default=FetchedValue()),
+    Column('subject_class', String(16), nullable=False, server_default=FetchedValue()),
+    Column('is_primary', Integer, nullable=False, server_default=FetchedValue()),
     ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
     Index('in_cat_archive', 'archive', 'subject_class', 'document_id'),
     Index('arXiv_in_category_mp', 'archive', 'subject_class')
@@ -691,14 +692,14 @@ class ModeratorApiKey(Base):
 
 t_arXiv_moderators = Table(
     'arXiv_moderators', metadata,
-    mapped_column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('archive', ForeignKey('arXiv_archive_group.archive_id'), nullable=False, server_default=FetchedValue()),
-    mapped_column('subject_class', String(16), nullable=False, server_default=FetchedValue()),
-    mapped_column('is_public', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('no_email', Integer, index=True, server_default=FetchedValue()),
-    mapped_column('no_web_email', Integer, index=True, server_default=FetchedValue()),
-    mapped_column('no_reply_to', Integer, index=True, server_default=FetchedValue()),
-    mapped_column('daily_update', Integer, server_default=FetchedValue()),
+    Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('archive', ForeignKey('arXiv_archive_group.archive_id'), nullable=False, server_default=FetchedValue()),
+    Column('subject_class', String(16), nullable=False, server_default=FetchedValue()),
+    Column('is_public', Integer, nullable=False, server_default=FetchedValue()),
+    Column('no_email', Integer, index=True, server_default=FetchedValue()),
+    Column('no_web_email', Integer, index=True, server_default=FetchedValue()),
+    Column('no_reply_to', Integer, index=True, server_default=FetchedValue()),
+    Column('daily_update', Integer, server_default=FetchedValue()),
     ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
     Index('mod_user_id', 'archive', 'subject_class', 'user_id')
 )
@@ -786,8 +787,8 @@ class OwnershipRequestsAudit(OwnershipRequest):
 
 t_arXiv_ownership_requests_papers = Table(
     'arXiv_ownership_requests_papers', metadata,
-    mapped_column('request_id', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('document_id', Integer, nullable=False, index=True, server_default=FetchedValue()),
+    Column('request_id', Integer, nullable=False, server_default=FetchedValue()),
+    Column('document_id', Integer, nullable=False, index=True, server_default=FetchedValue()),
     Index('request_id', 'request_id', 'document_id')
 )
 
@@ -795,16 +796,16 @@ t_arXiv_ownership_requests_papers = Table(
 
 t_arXiv_paper_owners = Table(
     'arXiv_paper_owners', metadata,
-    mapped_column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue()),
-    mapped_column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('date', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('added_by', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('remote_addr', String(16), nullable=False, server_default=FetchedValue()),
-    mapped_column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('tracking_cookie', String(32), nullable=False, server_default=FetchedValue()),
-    mapped_column('valid', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_author', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_auto', Integer, nullable=False, server_default=FetchedValue()),
+    Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue()),
+    Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('date', Integer, nullable=False, server_default=FetchedValue()),
+    Column('added_by', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('remote_addr', String(16), nullable=False, server_default=FetchedValue()),
+    Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
+    Column('tracking_cookie', String(32), nullable=False, server_default=FetchedValue()),
+    Column('valid', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_author', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_auto', Integer, nullable=False, server_default=FetchedValue()),
     Index('owners_document_id', 'document_id', 'user_id')
 )
 
@@ -843,8 +844,8 @@ class PublishLog(Base):
 
 t_arXiv_refresh_list = Table(
     'arXiv_refresh_list', metadata,
-    mapped_column('filename', String(255)),
-    mapped_column('mtime', Integer, index=True)
+    Column('filename', String(255)),
+    Column('mtime', Integer, index=True)
 )
 
 
@@ -895,11 +896,11 @@ class State(Base):
 
 t_arXiv_stats_hourly = Table(
     'arXiv_stats_hourly', metadata,
-    mapped_column('ymd', Date, nullable=False, index=True),
-    mapped_column('hour', Integer, nullable=False, index=True),
-    mapped_column('node_num', Integer, nullable=False, index=True),
-    mapped_column('access_type', String(1), nullable=False, index=True),
-    mapped_column('connections', Integer, nullable=False)
+    Column('ymd', Date, nullable=False, index=True),
+    Column('hour', Integer, nullable=False, index=True),
+    Column('node_num', Integer, nullable=False, index=True),
+    Column('access_type', String(1), nullable=False, index=True),
+    Column('connections', Integer, nullable=False)
 )
 
 class StatsHourly(Base):
@@ -1298,10 +1299,10 @@ class Updates(Base):
 
 t_arXiv_updates_tmp = Table(
     'arXiv_updates_tmp', metadata,
-    mapped_column('document_id', Integer),
-    mapped_column('date', Date),
-    mapped_column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
-    mapped_column('category', String(20)),
+    Column('document_id', Integer),
+    Column('date', Date),
+    Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
+    Column('category', String(20)),
     Index('updates_temp_document_id', 'document_id', 'date', 'action', 'category')
 )
 
@@ -1345,11 +1346,11 @@ t_arXiv_white_email = Table(
 
 t_arXiv_xml_notifications = Table(
     'arXiv_xml_notifications', metadata,
-    mapped_column('control_id', Integer, index=True),
-    mapped_column('type', Enum('submission', 'cross', 'jref')),
-    mapped_column('queued_date', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('sent_date', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('status', Enum('unsent', 'sent', 'failed'), index=True)
+    Column('control_id', Integer, index=True),
+    Column('type', Enum('submission', 'cross', 'jref')),
+    Column('queued_date', Integer, nullable=False, server_default=FetchedValue()),
+    Column('sent_date', Integer, nullable=False, server_default=FetchedValue()),
+    Column('status', Enum('unsent', 'sent', 'failed'), index=True)
 )
 
 
@@ -1364,29 +1365,29 @@ class DbixClassSchemaVersion(Base):
 
 t_demographics_backup = Table(
     'demographics_backup', metadata,
-    mapped_column('user_id', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('country', String(2), nullable=False, server_default=FetchedValue()),
-    mapped_column('affiliation', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('url', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('type', SmallInteger),
-    mapped_column('os', SmallInteger),
-    mapped_column('archive', String(16)),
-    mapped_column('subject_class', String(16)),
-    mapped_column('original_subject_classes', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_group_physics', Integer),
-    mapped_column('flag_group_math', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_group_cs', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_group_nlin', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_proxy', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_journal', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_xml', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('dirty', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_group_test', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_suspect', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_group_q_bio', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_no_upload', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('flag_no_endorse', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('veto_status', Enum('ok', 'no-endorse', 'no-upload'), server_default=FetchedValue())
+    Column('user_id', Integer, nullable=False, server_default=FetchedValue()),
+    Column('country', String(2), nullable=False, server_default=FetchedValue()),
+    Column('affiliation', String(255), nullable=False, server_default=FetchedValue()),
+    Column('url', String(255), nullable=False, server_default=FetchedValue()),
+    Column('type', SmallInteger),
+    Column('os', SmallInteger),
+    Column('archive', String(16)),
+    Column('subject_class', String(16)),
+    Column('original_subject_classes', String(255), nullable=False, server_default=FetchedValue()),
+    Column('flag_group_physics', Integer),
+    Column('flag_group_math', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_group_cs', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_group_nlin', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_proxy', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_journal', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_xml', Integer, nullable=False, server_default=FetchedValue()),
+    Column('dirty', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_group_test', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_suspect', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_group_q_bio', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_no_upload', Integer, nullable=False, server_default=FetchedValue()),
+    Column('flag_no_endorse', Integer, nullable=False, server_default=FetchedValue()),
+    Column('veto_status', Enum('ok', 'no-endorse', 'no-upload'), server_default=FetchedValue())
 )
 
 
@@ -1469,12 +1470,12 @@ class TapirEmailChangeToken(Base):
 
 t_tapir_email_change_tokens_used = Table(
     'tapir_email_change_tokens_used', metadata,
-    mapped_column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('secret', String(32), nullable=False, server_default=FetchedValue()),
-    mapped_column('used_when', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('used_from', String(16), nullable=False, server_default=FetchedValue()),
-    mapped_column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('session_id', ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
+    Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('secret', String(32), nullable=False, server_default=FetchedValue()),
+    Column('used_when', Integer, nullable=False, server_default=FetchedValue()),
+    Column('used_from', String(16), nullable=False, server_default=FetchedValue()),
+    Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
+    Column('session_id', ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
 )
 
 
@@ -1563,27 +1564,27 @@ class TapirEmailToken(Base):
 
 t_tapir_email_tokens_used = Table(
     'tapir_email_tokens_used', metadata,
-    mapped_column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('secret', String(32), nullable=False, server_default=FetchedValue()),
-    mapped_column('used_when', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('used_from', String(16), nullable=False, server_default=FetchedValue()),
-    mapped_column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('session_id', ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
+    Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('secret', String(32), nullable=False, server_default=FetchedValue()),
+    Column('used_when', Integer, nullable=False, server_default=FetchedValue()),
+    Column('used_from', String(16), nullable=False, server_default=FetchedValue()),
+    Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
+    Column('session_id', ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
 )
 
 
 
 t_tapir_error_log = Table(
     'tapir_error_log', metadata,
-    mapped_column('error_date', Integer, nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('user_id', Integer, index=True),
-    mapped_column('session_id', Integer, index=True),
-    mapped_column('ip_addr', String(16), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('tracking_cookie', String(32), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('message', String(32), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('url', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('error_url', String(255), nullable=False, server_default=FetchedValue())
+    Column('error_date', Integer, nullable=False, index=True, server_default=FetchedValue()),
+    Column('user_id', Integer, index=True),
+    Column('session_id', Integer, index=True),
+    Column('ip_addr', String(16), nullable=False, index=True, server_default=FetchedValue()),
+    Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
+    Column('tracking_cookie', String(32), nullable=False, index=True, server_default=FetchedValue()),
+    Column('message', String(32), nullable=False, index=True, server_default=FetchedValue()),
+    Column('url', String(255), nullable=False, server_default=FetchedValue()),
+    Column('error_url', String(255), nullable=False, server_default=FetchedValue())
 )
 
 
@@ -1628,20 +1629,20 @@ class TapirNicknamesAudit(Base):
 
 t_tapir_no_cookies = Table(
     'tapir_no_cookies', metadata,
-    mapped_column('log_date', Integer, nullable=False, server_default=FetchedValue()),
-    mapped_column('ip_addr', String(16), nullable=False, server_default=FetchedValue()),
-    mapped_column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('tracking_cookie', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('session_data', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('user_agent', String(255), nullable=False, server_default=FetchedValue())
+    Column('log_date', Integer, nullable=False, server_default=FetchedValue()),
+    Column('ip_addr', String(16), nullable=False, server_default=FetchedValue()),
+    Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
+    Column('tracking_cookie', String(255), nullable=False, server_default=FetchedValue()),
+    Column('session_data', String(255), nullable=False, server_default=FetchedValue()),
+    Column('user_agent', String(255), nullable=False, server_default=FetchedValue())
 )
 
 
 
 t_tapir_periodic_tasks_log = Table(
     'tapir_periodic_tasks_log', metadata,
-    mapped_column('t', Integer, nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('entry', Text)
+    Column('t', Integer, nullable=False, index=True, server_default=FetchedValue()),
+    Column('entry', Text)
 )
 
 
@@ -1664,12 +1665,12 @@ class TapirPermanentToken(Base):
 
 t_tapir_permanent_tokens_used = Table(
     'tapir_permanent_tokens_used', metadata,
-    mapped_column('user_id', ForeignKey('tapir_users.user_id'), index=True),
-    mapped_column('secret', String(32), nullable=False, server_default=FetchedValue()),
-    mapped_column('used_when', Integer),
-    mapped_column('used_from', String(16)),
-    mapped_column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
-    mapped_column('session_id', ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
+    Column('user_id', ForeignKey('tapir_users.user_id'), index=True),
+    Column('secret', String(32), nullable=False, server_default=FetchedValue()),
+    Column('used_when', Integer),
+    Column('used_from', String(16)),
+    Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
+    Column('session_id', ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
 )
 
 
@@ -1742,10 +1743,10 @@ class TapirRecoveryTokensUsed(Base):
 
 t_tapir_save_post_variables = Table(
     'tapir_save_post_variables', metadata,
-    mapped_column('presession_id', ForeignKey('tapir_presessions.presession_id'), nullable=False, index=True, server_default=FetchedValue()),
-    mapped_column('name', String(255)),
-    mapped_column('value', String, nullable=False),
-    mapped_column('seq', Integer, nullable=False, server_default=FetchedValue())
+    Column('presession_id', ForeignKey('tapir_presessions.presession_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('name', String(255)),
+    Column('value', String, nullable=False),
+    Column('seq', Integer, nullable=False, server_default=FetchedValue())
 )
 
 
