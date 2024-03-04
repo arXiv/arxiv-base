@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from flask import current_app
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, String
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
 
@@ -16,13 +16,20 @@ from ..config import (
     ECHO_SQL,
     LATEXML_DB_URI
 )
+from .types import str255
 
 metadata = MetaData()
 
 class Base(DeclarativeBase):
+    type_annotation_map = {
+        str255: String(255),
+    }
     metadata=metadata
 
 class LaTeXMLBase(DeclarativeBase):
+    type_annotation_map = {
+        str255: String(255),
+    }
     metadata=metadata
 
 logger = logging.getLogger(__name__)
