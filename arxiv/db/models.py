@@ -21,12 +21,14 @@ from sqlalchemy import (
     Index, 
     Integer, 
     JSON, 
-    Numeric, 
+    Numeric,
+    PrimaryKeyConstraint, 
     SmallInteger, 
     String, 
     Text, 
     Table,
-    Enum
+    Enum,
+    text
 )
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
@@ -1262,17 +1264,24 @@ class Tracking(Base):
 
 
 
-t_arXiv_updates = Table(
-    'arXiv_updates', metadata,
-    Column('document_id', Integer, index=True),
-    Column('version', Integer, nullable=False, server_default=FetchedValue()),
-    Column('date', Date, index=True),
-    Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
-    Column('archive', String(20), index=True),
-    Column('category', String(20), index=True),
-    Index('updates_document_id', 'document_id', 'date', 'action', 'category')
-)
+class Updates(Base):
+    __tablename__ = "arXiv_updates"
+    __table_args__ = (PrimaryKeyConstraint('document_id', 'date', 'action', 'category'),)
 
+    document_id = Column(
+        ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+        index=True,
+        server_default=text("'0'"),
+    )
+    version=Column(Integer, nullable=False, server_default=text("'1'"))
+    date=Column( Date, index=True)
+    action=Column( Enum('new', 'replace', 'absonly', 'cross', 'repcro'))
+    archive=Column(String(20), index=True)
+    category=Column( String(20), index=True)
+
+    def __repr__(self) -> str:
+        return f"ArXivUpdate(document_id={self.document_id}, version={self.version}, action={self.action}, date={self.date}, category={self.category}, archive={self.archive})"
 
 
 t_arXiv_updates_tmp = Table(
