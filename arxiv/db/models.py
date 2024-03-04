@@ -101,7 +101,7 @@ class AdminLog(Base):
     host: Mapped[Optional[str]] = mapped_column(String(64))
     program: Mapped[Optional[str]] = mapped_column(String(20))
     command: Mapped[Optional[str]] = mapped_column(String(20), index=True)
-    logtext: Mapped[str]  = mapped_column(Text)
+    logtext: Mapped[Optional[str]]  = mapped_column(Text)
     document_id: Mapped[Optional[int]] = mapped_column(Integer)
     submission_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     notify: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -121,20 +121,20 @@ class AdminMetadata(Base):
     updated: Mapped[Optional[datetime]]
     submitter_name: Mapped[Optional[str]] = mapped_column(String(64))
     submitter_email: Mapped[Optional[str]] = mapped_column(String(64))
-    history: Mapped[str]  = mapped_column(Text)
+    history: Mapped[Optional[str]]  = mapped_column(Text)
     source_size: Mapped[Optional[int]] = mapped_column(Integer)
     source_type: Mapped[Optional[str]] = mapped_column(String(12))
-    title: Mapped[str]  = mapped_column(Text)
-    authors: Mapped[str]  = mapped_column(Text)
+    title: Mapped[Optional[str]]  = mapped_column(Text)
+    authors: Mapped[Optional[str]]  = mapped_column(Text)
     category_string: Mapped[Optional[str255]]
-    comments: Mapped[str]  = mapped_column(Text)
+    comments: Mapped[Optional[str]]  = mapped_column(Text)
     proxy: Mapped[Optional[str255]]
-    report_num: Mapped[str]  = mapped_column(Text)
+    report_num: Mapped[Optional[str]]  = mapped_column(Text)
     msc_class: Mapped[Optional[str255]]
     acm_class: Mapped[Optional[str255]]
-    journal_ref: Mapped[str]  = mapped_column(Text)
+    journal_ref: Mapped[Optional[str]]  = mapped_column(Text)
     doi: Mapped[Optional[str255]]
-    abstract: Mapped[str]  = mapped_column(Text)
+    abstract: Mapped[Optional[str]]  = mapped_column(Text)
     license: Mapped[Optional[str255]]
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     modtime: Mapped[Optional[int]] = mapped_column(Integer)
@@ -240,8 +240,8 @@ class BibFeed(Base):
     concatenate_dupes: Mapped[Optional[int]] = mapped_column(Integer)
     max_updates: Mapped[Optional[int]] = mapped_column(Integer)
     email_errors: Mapped[Optional[str255]]
-    prune_ids: Mapped[str]  = mapped_column(Text)
-    prune_regex: Mapped[str]  = mapped_column(Text)
+    prune_ids: Mapped[Optional[str]]  = mapped_column(Text)
+    prune_regex: Mapped[Optional[str]]  = mapped_column(Text)
     enabled: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
 
 
@@ -253,8 +253,8 @@ class BibUpdate(Base):
     document_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     bib_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     updated: Mapped[datetime]  = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
-    journal_ref: Mapped[str]  = mapped_column(Text)
-    doi: Mapped[str]  = mapped_column(Text)
+    journal_ref: Mapped[Optional[str]]  = mapped_column(Text)
+    doi: Mapped[Optional[str]]  = mapped_column(Text)
 
 
 
@@ -427,7 +427,7 @@ class Document(Base):
     document_id: Mapped[intpk]
     paper_id: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, server_default=FetchedValue())
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
-    authors: Mapped[str]  = mapped_column(Text)
+    authors: Mapped[Optional[str]]  = mapped_column(Text)
     submitter_email: Mapped[str] = mapped_column(String(64), nullable=False, index=True, server_default=FetchedValue())
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_users.user_id'), index=True)
     dated: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
@@ -538,7 +538,7 @@ class EndorsementsAudit(Endorsement):
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     flag_knows_personally: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     flag_seen_paper: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    comment: Mapped[str]  = mapped_column(Text)
+    comment: Mapped[Optional[str]]  = mapped_column(Text)
 
 
 
@@ -637,17 +637,17 @@ class Metadata(Base):
     source_size: Mapped[Optional[int]] = mapped_column(Integer)
     source_format: Mapped[Optional[str]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
-    title: Mapped[str]  = mapped_column(Text)
-    authors: Mapped[str]  = mapped_column(Text)
+    title: Mapped[Optional[str]]  = mapped_column(Text)
+    authors: Mapped[Optional[str]]  = mapped_column(Text)
     abs_categories: Mapped[Optional[str255]]
-    comments: Mapped[str]  = mapped_column(Text)
+    comments: Mapped[Optional[str]]  = mapped_column(Text)
     proxy: Mapped[Optional[str255]]
-    report_num: Mapped[str]  = mapped_column(Text)
+    report_num: Mapped[Optional[str]]  = mapped_column(Text)
     msc_class: Mapped[Optional[str255]]
     acm_class: Mapped[Optional[str255]]
-    journal_ref: Mapped[str]  = mapped_column(Text)
+    journal_ref: Mapped[Optional[str]]  = mapped_column(Text)
     doi: Mapped[Optional[str255]]
-    abstract: Mapped[str]  = mapped_column(Text)
+    abstract: Mapped[Optional[str]]  = mapped_column(Text)
     license: Mapped[Optional[str]] = mapped_column(ForeignKey('arXiv_licenses.name'), index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     modtime: Mapped[Optional[int]] = mapped_column(Integer)
@@ -936,7 +936,7 @@ class SubmissionAgreement(Base):
     agreement_id: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
     effective_date: Mapped[Optional[datetime]]  = mapped_column(DateTime, server_default=FetchedValue())
     commit_ref: Mapped[str] = mapped_column(String(255), nullable=False)
-    content: Mapped[str]  = mapped_column(Text)
+    content: Mapped[Optional[str]]  = mapped_column(Text)
 
 
 
@@ -1099,16 +1099,16 @@ class Submission(Base):
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
     has_pilot_data: Mapped[Optional[int]] = mapped_column(Integer)
     is_withdrawn: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    title: Mapped[str]  = mapped_column(Text)
-    authors: Mapped[str]  = mapped_column(Text)
-    comments: Mapped[str]  = mapped_column(Text)
+    title: Mapped[Optional[str]]  = mapped_column(Text)
+    authors: Mapped[Optional[str]]  = mapped_column(Text)
+    comments: Mapped[Optional[str]]  = mapped_column(Text)
     proxy: Mapped[Optional[str255]]
-    report_num: Mapped[str]  = mapped_column(Text)
+    report_num: Mapped[Optional[str]]  = mapped_column(Text)
     msc_class: Mapped[Optional[str255]]
     acm_class: Mapped[Optional[str255]]
-    journal_ref: Mapped[str]  = mapped_column(Text)
+    journal_ref: Mapped[Optional[str]]  = mapped_column(Text)
     doi: Mapped[Optional[str255]]
-    abstract: Mapped[str]  = mapped_column(Text)
+    abstract: Mapped[Optional[str]]  = mapped_column(Text)
     license: Mapped[Optional[str]] = mapped_column(ForeignKey('arXiv_licenses.name', onupdate='CASCADE'), index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     type: Mapped[Optional[str]] = mapped_column(String(8), index=True)
@@ -1147,27 +1147,27 @@ class SubmissionAbsClassifierDatum(Submission):
     __tablename__ = 'arXiv_submission_abs_classifier_data'
 
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
-    json: Mapped[str]  = mapped_column(Text)
+    json: Mapped[Optional[str]]  = mapped_column(Text)
     last_update: Mapped[datetime]  = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
     status: Mapped[Optional[Literal['processing', 'success', 'failed', 'no connection']]] = mapped_column(Enum('processing', 'success', 'failed', 'no connection'))
-    message: Mapped[str]  = mapped_column(Text)
+    message: Mapped[Optional[str]]  = mapped_column(Text)
     is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-    suggested_primary: Mapped[str]  = mapped_column(Text)
-    suggested_reason: Mapped[str]  = mapped_column(Text)
-    autoproposal_primary: Mapped[str]  = mapped_column(Text)
-    autoproposal_reason: Mapped[str]  = mapped_column(Text)
-    classifier_service_version: Mapped[str]  = mapped_column(Text)
-    classifier_model_version: Mapped[str]  = mapped_column(Text)
+    suggested_primary: Mapped[Optional[str]]  = mapped_column(Text)
+    suggested_reason: Mapped[Optional[str]]  = mapped_column(Text)
+    autoproposal_primary: Mapped[Optional[str]]  = mapped_column(Text)
+    autoproposal_reason: Mapped[Optional[str]]  = mapped_column(Text)
+    classifier_service_version: Mapped[Optional[str]]  = mapped_column(Text)
+    classifier_model_version: Mapped[Optional[str]]  = mapped_column(Text)
 
 
 class SubmissionClassifierDatum(Submission):
     __tablename__ = 'arXiv_submission_classifier_data'
 
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
-    json: Mapped[str]  = mapped_column(Text)
+    json: Mapped[Optional[str]]  = mapped_column(Text)
     last_update: Mapped[datetime]  = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
     status: Mapped[Optional[Literal['processing', 'success', 'failed', 'no connection']]] = mapped_column(Enum('processing', 'success', 'failed', 'no connection'))
-    message: Mapped[str]  = mapped_column(Text)
+    message: Mapped[Optional[str]]  = mapped_column(Text)
     is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
 
 
@@ -1272,7 +1272,7 @@ class Tracking(Base):
     tracking_id: Mapped[intpk]
     sword_id: Mapped[int] = mapped_column(Integer, nullable=False, unique=True, server_default=FetchedValue())
     paper_id: Mapped[str] = mapped_column(String(32), nullable=False)
-    submission_errors: Mapped[str]  = mapped_column(Text)
+    submission_errors: Mapped[Optional[str]]  = mapped_column(Text)
     timestamp: Mapped[datetime]  = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
 
@@ -1395,7 +1395,7 @@ class Session(Base):
     __tablename__ = 'sessions'
 
     id: Mapped[str] = mapped_column(String(72), primary_key=True)
-    session_data: Mapped[str]  = mapped_column(Text)
+    session_data: Mapped[Optional[str]]  = mapped_column(Text)
     expires: Mapped[Optional[int]] = mapped_column(Integer)
 
 
@@ -1515,7 +1515,7 @@ class TapirEmailMailing(Base):
     sent_date: Mapped[Optional[int]] = mapped_column(Integer)
     complete_date: Mapped[Optional[int]] = mapped_column(Integer)
     mailing_name: Mapped[Optional[str255]]
-    comment: Mapped[str]  = mapped_column(Text)
+    comment: Mapped[Optional[str]]  = mapped_column(Text)
 
     tapir_user = relationship('TapirUser', primaryjoin='TapirEmailMailing.created_by == TapirUser.user_id', backref='tapiruser_tapir_email_mailings')
     tapir_user1 = relationship('TapirUser', primaryjoin='TapirEmailMailing.sent_by == TapirUser.user_id', backref='tapiruser_tapir_email_mailings_0')
