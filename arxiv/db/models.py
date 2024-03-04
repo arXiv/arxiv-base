@@ -53,9 +53,9 @@ class MemberInstitution(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     label: Mapped[Optional[str255]]
     id: Mapped[intpk]
-    alt_text:  Mapped[str255]
-    link_icon:  Mapped[str255]
-    note:  Mapped[str255]
+    alt_text: Mapped[Optional[str255]]
+    link_icon: Mapped[Optional[str255]]
+    note: Mapped[Optional[str255]]
 
 
 
