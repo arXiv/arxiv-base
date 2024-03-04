@@ -1339,7 +1339,7 @@ class VersionsChecksum(Version):
 
 t_arXiv_white_email = Table(
     'arXiv_white_email', metadata,
-    mapped_column('pattern', String(64), unique=True)
+    Column('pattern', String(64), unique=True)
 )
 
 
