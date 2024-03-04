@@ -17,9 +17,9 @@ from ..config import (
     LATEXML_DB_URI
 )
 
-Base = declarative_base()
-LaTeXMLBase = declarative_base()
 metadata = MetaData()
+Base = declarative_base(metadata=metadata)
+LaTeXMLBase = declarative_base(metadata=metadata)
 
 logger = logging.getLogger(__name__)
 
