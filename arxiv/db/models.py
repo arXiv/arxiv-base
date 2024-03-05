@@ -897,8 +897,14 @@ t_arXiv_stats_hourly = Table(
     Column('connections', Integer, nullable=False)
 )
 
-class HourlyStats(Base):
+class StatsHourly(Base):
     __table__ = t_arXiv_stats_hourly
+    __mapper_args__ = {
+        "primary_key": [t_arXiv_stats_hourly.c.ymd, 
+                        t_arXiv_stats_hourly.c.hour,
+                        t_arXiv_stats_hourly.c.node_num,
+                        t_arXiv_stats_hourly.c.access_type]
+    }
 
 
 class StatsMonthlyDownload(Base):
