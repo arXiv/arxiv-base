@@ -19,7 +19,7 @@ from ..config import (
 
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
-LaTeXMLBase = declarative_base()
+LaTeXMLBase = declarative_base(metadata=metadata)
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ latexml_engine = create_engine(LATEXML_DB_URI,
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 SessionLocal.configure(binds={
     Base: engine,
-    LaTeXMLBase: latexml_engine
+    LaTeXMLBase: latexml_engine,
 })
 
 def _app_ctx_id () -> int:

@@ -897,7 +897,8 @@ t_arXiv_stats_hourly = Table(
     Column('connections', Integer, nullable=False)
 )
 
-
+class HourlyStats(Base):
+    __table__ = t_arXiv_stats_hourly
 
 
 class StatsMonthlyDownload(Base):
