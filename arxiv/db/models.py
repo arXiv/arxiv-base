@@ -38,7 +38,7 @@ from ..config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
 from . import Base, LaTeXMLBase, metadata
 
 tb_secret = TRACKBACK_SECRET
-tz = ARXIV_BUSINESS_TZ
+tz = gettz(ARXIV_BUSINESS_TZ)
 
 class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'
