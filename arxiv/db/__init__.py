@@ -39,7 +39,7 @@ def _app_ctx_id () -> int:
 session = scoped_session(SessionLocal, scopefunc=_app_ctx_id)
 
 @contextmanager
-def get_db () -> Generator[Session, None, None]:
+def get_db ():
     db = SessionLocal()
     try:
         yield db
@@ -47,7 +47,7 @@ def get_db () -> Generator[Session, None, None]:
         db.close()
 
 @contextmanager
-def transaction () -> Generator[Session, None, None]:
+def transaction ():
     in_flask = True if current_app else False
     db = session if in_flask else SessionLocal() 
     try:
