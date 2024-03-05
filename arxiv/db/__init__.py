@@ -8,8 +8,7 @@ from contextlib import contextmanager
 from flask import current_app
 
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy.orm.decl_api import DeclarativeMeta
+from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
 
 from ..config import (
@@ -20,14 +19,11 @@ from ..config import (
 
 metadata = MetaData()
 
-class Base (metaclass=DeclarativeMeta):
-    metadata=metadata
-    __abstract__=True
+class DecBase(DeclarativeBase):
+    ...
 
-class LaTeXMLBase (metaclass=DeclarativeMeta):
-    metadata=metadata
-    __abstract__=True
-
+Base = DecBase(metadata=metadata)
+LaTeXMLBase = DecBase(metadata=metadata)
 
 logger = logging.getLogger(__name__)
 
