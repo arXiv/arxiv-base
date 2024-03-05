@@ -19,7 +19,7 @@ from ..config import (
 
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
-LaTeXMLBase = declarative_base(metadata=metadata)
+LaTeXMLBase = declarative_base()
 
 logger = logging.getLogger(__name__)
 
