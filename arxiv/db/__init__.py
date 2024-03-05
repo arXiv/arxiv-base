@@ -19,11 +19,11 @@ from ..config import (
 
 metadata = MetaData()
 
-class DecBase(DeclarativeBase):
-    ...
+class Base(DeclarativeBase):
+    metadata=metadata
 
-Base = DecBase(metadata=metadata)
-LaTeXMLBase = DecBase(metadata=metadata)
+class LaTeXMLBase(DeclarativeBase):
+    metadata=metadata
 
 logger = logging.getLogger(__name__)
 
