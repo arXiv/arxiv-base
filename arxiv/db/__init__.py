@@ -8,8 +8,7 @@ from contextlib import contextmanager
 from flask import current_app
 
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker, Session, scoped_session
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import sessionmaker, Session, scoped_session, DeclarativeBase
 
 from ..config import (
     CLASSIC_DB_URI,
@@ -18,8 +17,12 @@ from ..config import (
 )
 
 metadata = MetaData()
-Base = declarative_base(metadata=metadata)
-LaTeXMLBase = declarative_base(metadata=metadata)
+
+class typedDeclarativeBase(DeclarativeBase):
+    metadata = metadata
+
+Base = typedDeclarativeBase()
+LaTeXMLBase = typedDeclarativeBase()
 
 logger = logging.getLogger(__name__)
 

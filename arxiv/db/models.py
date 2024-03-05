@@ -35,7 +35,7 @@ from sqlalchemy.orm import relationship
 
 from ..config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
 
-from . import Base, LaTeXMLBase, metadata
+from . import Base, LaTeXMLBase, md
 
 tb_secret = TRACKBACK_SECRET
 tz = gettz(ARXIV_BUSINESS_TZ)
@@ -139,7 +139,7 @@ class AdminMetadata(Base):
 
 
 t_arXiv_admin_state = Table(
-    'arXiv_admin_state', metadata,
+    'arXiv_admin_state', md,
     Column('document_id', Integer, unique=True),
     Column('timestamp', DateTime, nullable=False, server_default=FetchedValue()),
     Column('abs_timestamp', Integer),
@@ -216,7 +216,7 @@ class AwsFile(Base):
 
 
 t_arXiv_bad_pw = Table(
-    'arXiv_bad_pw', metadata,
+    'arXiv_bad_pw', md,
     Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
 )
 
@@ -253,14 +253,14 @@ class BibUpdate(Base):
 
 
 t_arXiv_black_email = Table(
-    'arXiv_black_email', metadata,
+    'arXiv_black_email', md,
     Column('pattern', String(64))
 )
 
 
 
 t_arXiv_block_email = Table(
-    'arXiv_block_email', metadata,
+    'arXiv_block_email', md,
     Column('pattern', String(64))
 )
 
@@ -275,7 +275,7 @@ class BogusCountry(Base):
 
 
 t_arXiv_bogus_subject_class = Table(
-    'arXiv_bogus_subject_class', metadata,
+    'arXiv_bogus_subject_class', md,
     Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('category_name', String(255), nullable=False, server_default=FetchedValue())
 )
@@ -448,7 +448,7 @@ class PaperPw(Document):
 
 
 t_arXiv_duplicates = Table(
-    'arXiv_duplicates', metadata,
+    'arXiv_duplicates', md,
     Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('email', String(255)),
     Column('username', String(255))
@@ -561,7 +561,7 @@ class Group(Base):
 
 
 t_arXiv_in_category = Table(
-    'arXiv_in_category', metadata,
+    'arXiv_in_category', md,
     Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('archive', String(16), nullable=False, server_default=FetchedValue()),
     Column('subject_class', String(16), nullable=False, server_default=FetchedValue()),
@@ -685,7 +685,7 @@ class ModeratorApiKey(Base):
 
 
 t_arXiv_moderators = Table(
-    'arXiv_moderators', metadata,
+    'arXiv_moderators', md,
     Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('archive', ForeignKey('arXiv_archive_group.archive_id'), nullable=False, server_default=FetchedValue()),
     Column('subject_class', String(16), nullable=False, server_default=FetchedValue()),
@@ -780,7 +780,7 @@ class OwnershipRequestsAudit(OwnershipRequest):
 
 
 t_arXiv_ownership_requests_papers = Table(
-    'arXiv_ownership_requests_papers', metadata,
+    'arXiv_ownership_requests_papers', md,
     Column('request_id', Integer, nullable=False, server_default=FetchedValue()),
     Column('document_id', Integer, nullable=False, index=True, server_default=FetchedValue()),
     Index('request_id', 'request_id', 'document_id')
@@ -789,7 +789,7 @@ t_arXiv_ownership_requests_papers = Table(
 
 
 t_arXiv_paper_owners = Table(
-    'arXiv_paper_owners', metadata,
+    'arXiv_paper_owners', md,
     Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue()),
     Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('date', Integer, nullable=False, server_default=FetchedValue()),
@@ -837,7 +837,7 @@ class PublishLog(Base):
 
 
 t_arXiv_refresh_list = Table(
-    'arXiv_refresh_list', metadata,
+    'arXiv_refresh_list', md,
     Column('filename', String(255)),
     Column('mtime', Integer, index=True)
 )
@@ -889,7 +889,7 @@ class State(Base):
 
 
 t_arXiv_stats_hourly = Table(
-    'arXiv_stats_hourly', metadata,
+    'arXiv_stats_hourly', md,
     Column('ymd', Date, nullable=False, index=True),
     Column('hour', Integer, nullable=False, index=True),
     Column('node_num', Integer, nullable=False, index=True),
@@ -1292,7 +1292,7 @@ class Updates(Base):
 
 
 t_arXiv_updates_tmp = Table(
-    'arXiv_updates_tmp', metadata,
+    'arXiv_updates_tmp', md,
     Column('document_id', Integer),
     Column('date', Date),
     Column('action', Enum('new', 'replace', 'absonly', 'cross', 'repcro')),
@@ -1332,14 +1332,14 @@ class VersionsChecksum(Version):
 
 
 t_arXiv_white_email = Table(
-    'arXiv_white_email', metadata,
+    'arXiv_white_email', md,
     Column('pattern', String(64), unique=True)
 )
 
 
 
 t_arXiv_xml_notifications = Table(
-    'arXiv_xml_notifications', metadata,
+    'arXiv_xml_notifications', md,
     Column('control_id', Integer, index=True),
     Column('type', Enum('submission', 'cross', 'jref')),
     Column('queued_date', Integer, nullable=False, server_default=FetchedValue()),
@@ -1358,7 +1358,7 @@ class DbixClassSchemaVersion(Base):
 
 
 t_demographics_backup = Table(
-    'demographics_backup', metadata,
+    'demographics_backup', md,
     Column('user_id', Integer, nullable=False, server_default=FetchedValue()),
     Column('country', String(2), nullable=False, server_default=FetchedValue()),
     Column('affiliation', String(255), nullable=False, server_default=FetchedValue()),
@@ -1463,7 +1463,7 @@ class TapirEmailChangeToken(Base):
 
 
 t_tapir_email_change_tokens_used = Table(
-    'tapir_email_change_tokens_used', metadata,
+    'tapir_email_change_tokens_used', md,
     Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('secret', String(32), nullable=False, server_default=FetchedValue()),
     Column('used_when', Integer, nullable=False, server_default=FetchedValue()),
@@ -1557,7 +1557,7 @@ class TapirEmailToken(Base):
 
 
 t_tapir_email_tokens_used = Table(
-    'tapir_email_tokens_used', metadata,
+    'tapir_email_tokens_used', md,
     Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('secret', String(32), nullable=False, server_default=FetchedValue()),
     Column('used_when', Integer, nullable=False, server_default=FetchedValue()),
@@ -1569,7 +1569,7 @@ t_tapir_email_tokens_used = Table(
 
 
 t_tapir_error_log = Table(
-    'tapir_error_log', metadata,
+    'tapir_error_log', md,
     Column('error_date', Integer, nullable=False, index=True, server_default=FetchedValue()),
     Column('user_id', Integer, index=True),
     Column('session_id', Integer, index=True),
@@ -1622,7 +1622,7 @@ class TapirNicknamesAudit(Base):
 
 
 t_tapir_no_cookies = Table(
-    'tapir_no_cookies', metadata,
+    'tapir_no_cookies', md,
     Column('log_date', Integer, nullable=False, server_default=FetchedValue()),
     Column('ip_addr', String(16), nullable=False, server_default=FetchedValue()),
     Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
@@ -1634,7 +1634,7 @@ t_tapir_no_cookies = Table(
 
 
 t_tapir_periodic_tasks_log = Table(
-    'tapir_periodic_tasks_log', metadata,
+    'tapir_periodic_tasks_log', md,
     Column('t', Integer, nullable=False, index=True, server_default=FetchedValue()),
     Column('entry', Text)
 )
@@ -1658,7 +1658,7 @@ class TapirPermanentToken(Base):
 
 
 t_tapir_permanent_tokens_used = Table(
-    'tapir_permanent_tokens_used', metadata,
+    'tapir_permanent_tokens_used', md,
     Column('user_id', ForeignKey('tapir_users.user_id'), index=True),
     Column('secret', String(32), nullable=False, server_default=FetchedValue()),
     Column('used_when', Integer),
@@ -1736,7 +1736,7 @@ class TapirRecoveryTokensUsed(Base):
 
 
 t_tapir_save_post_variables = Table(
-    'tapir_save_post_variables', metadata,
+    'tapir_save_post_variables', md,
     Column('presession_id', ForeignKey('tapir_presessions.presession_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('name', String(255)),
     Column('value', String, nullable=False),
