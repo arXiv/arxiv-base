@@ -40,7 +40,9 @@ from sqlalchemy.orm import (
 )
 
 from ..config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
-from . import Base, LaTeXMLBase, metadata
+from . import Base, LaTeXMLBase, metadata, \
+    SessionLocal, engine, latexml_engine
+
 from .types import intpk, str255
 
 tb_secret = TRACKBACK_SECRET
@@ -902,6 +904,7 @@ t_arXiv_stats_hourly = Table(
     Column('access_type', String(1), nullable=False, index=True),
     Column('connections', Integer, nullable=False)
 )
+t_arXiv_stats_hourly.
 
 class StatsHourly(Base):
     __table__ = t_arXiv_stats_hourly
@@ -1972,3 +1975,32 @@ class DBLaTeXMLFeedback (LaTeXMLBase):
     description: Mapped[Optional[str]]
     selected_html: Mapped[Optional[str]]
     initiation_mode: Mapped[Optional[str]]
+
+SessionLocal.configure(binds={
+    Base: engine,
+    LaTeXMLBase: latexml_engine,
+    t_arXiv_stats_hourly: engine,
+    t_arXiv_admin_state: engine,
+    t_arXiv_bad_pw: engine,
+    t_arXiv_black_email: engine,
+    t_arXiv_block_email: engine,
+    t_arXiv_bogus_subject_class: engine,
+    t_arXiv_duplicates: engine,
+    t_arXiv_in_category: engine,
+    t_arXiv_moderators: engine,
+    t_arXiv_ownership_requests_papers: engine,
+    t_arXiv_refresh_list: engine,
+    t_arXiv_paper_owners: engine,
+    t_arXiv_updates_tmp: engine,
+    t_arXiv_white_email: engine,
+    t_arXiv_xml_notifications: engine,
+    t_demographics_backup: engine,
+    t_tapir_email_change_tokens_used: engine,
+    t_tapir_email_tokens_used: engine,
+    t_tapir_error_log: engine,
+    t_tapir_no_cookies: engine,
+    t_tapir_periodic_tasks_log: engine,
+    t_tapir_periodic_tasks_log: engine,
+    t_tapir_permanent_tokens_used: engine,
+    t_tapir_save_post_variables: engine
+})

@@ -39,10 +39,6 @@ engine = create_engine(CLASSIC_DB_URI,
 latexml_engine = create_engine(LATEXML_DB_URI,
                                echo=ECHO_SQL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
-SessionLocal.configure(binds={
-    Base: engine,
-    LaTeXMLBase: latexml_engine,
-})
 
 def _app_ctx_id () -> int:
     return id(current_app._get_current_object())
