@@ -904,7 +904,6 @@ t_arXiv_stats_hourly = Table(
     Column('access_type', String(1), nullable=False, index=True),
     Column('connections', Integer, nullable=False)
 )
-t_arXiv_stats_hourly.
 
 class StatsHourly(Base):
     __table__ = t_arXiv_stats_hourly
