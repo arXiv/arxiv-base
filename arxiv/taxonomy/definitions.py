@@ -4,13 +4,13 @@ from typing import Dict, TypedDict, NotRequired
 
 from datetime import date
 
-class Group (TypedDict):
+class tGroup (TypedDict):
     name: str
     start_year: int
     default_archive: NotRequired[str]
     is_test: NotRequired[bool]
 
-GROUPS: Dict[str, Group] = {
+GROUPS: Dict[str, tGroup] = {
     'grp_physics': {
         'name': 'Physics',
         'start_year': 1991,
@@ -55,13 +55,13 @@ GROUPS: Dict[str, Group] = {
 }
 DEFAULT_GROUP = 'physics'
 
-class Archive(TypedDict):
+class tArchive(TypedDict):
     name: str
     in_group: str
     start_date: date
     end_date: NotRequired[date]
 
-ARCHIVES: Dict[str, Archive]= {
+ARCHIVES: Dict[str, tArchive]= {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_group': 'grp_physics',
