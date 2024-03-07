@@ -5,7 +5,7 @@ description = "Common code for arXiv NG"
 authors = ["arxiv.org"]
 packages = [
    { include = "arxiv" },
-   { include = "py.typed" }
+   { include = "arxiv/py.typed" }
    ]
 include = [
    "arxiv/base/static/*",
