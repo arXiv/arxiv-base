@@ -318,14 +318,14 @@ LEGACY_ARCHIVE_AS_SECONDARY = {
     'test': date(2010, 1, 1)
 }
 
-class Category(TypedDict):
+class tCategory(TypedDict):
     name: str
     in_archive: str
     is_active: bool
     is_general: bool
     description: NotRequired[str]
 
-CATEGORIES: Dict[str, Category] = {
+CATEGORIES: Dict[str, tCategory] = {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_archive': 'acc-phys',
