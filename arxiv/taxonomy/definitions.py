@@ -1,10 +1,16 @@
 """Category and archive definitions."""
 import sys
-from typing import Dict, TypedDict, Required, NotRequired
+from typing import Dict, TypedDict, NotRequired
 
 from datetime import date
 
-GROUPS = {
+class Group (TypedDict):
+    name: str
+    start_year: int
+    default_archive: NotRequired[str]
+    is_test: NotRequired[bool]
+
+GROUPS: Dict[str, Group] = {
     'grp_physics': {
         'name': 'Physics',
         'start_year': 1991,
@@ -49,14 +55,14 @@ GROUPS = {
 }
 DEFAULT_GROUP = 'physics'
 
-class ARCHIVE(TypedDict):
+class Archive(TypedDict):
     name: str
     in_group: str
     start_date: date
     end_date: NotRequired[date]
 
 
-ARCHIVES: Dict[str, ARCHIVE]= {
+ARCHIVES: Dict[str, Archive]= {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_group': 'grp_physics',
