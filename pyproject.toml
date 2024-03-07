@@ -4,12 +4,13 @@ version = "1.0.1"
 description = "Common code for arXiv NG"
 authors = ["arxiv.org"]
 packages = [
-   { include = "arxiv" }
+   { include = "arxiv" },
+   { include = "py.typed" }
    ]
 include = [
    "arxiv/base/static/*",
    "arxiv/base/templates/*",
-   "arxiv/mail/templates/*"
+   "arxiv/mail/templates/*",
 ]
    
 [tool.poetry.dependencies]
