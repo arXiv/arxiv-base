@@ -61,7 +61,6 @@ class Archive(TypedDict):
     start_date: date
     end_date: NotRequired[date]
 
-
 ARCHIVES: Dict[str, Archive]= {
     'acc-phys': {
         'name': 'Accelerator Physics',
@@ -284,7 +283,7 @@ ARCHIVES_ACTIVE = {key: value for key,
                    if 'end_date' not in ARCHIVES[key]}
 
 # defunct archives subsumed by categories
-ARCHIVES_SUBSUMED = {
+ARCHIVES_SUBSUMED: Dict[str, str] = {
     'cmp-lg': 'cs.CL',
     'adap-org': 'nlin.AO',
     'comp-gas': 'nlin.CG',
@@ -307,7 +306,7 @@ ARCHIVES_SUBSUMED = {
 
 # Legacy bare-archive names used as primary and secondary
 # categories for old submissions. yyyy-mm is last month allowed.
-LEGACY_ARCHIVE_AS_PRIMARY = {
+LEGACY_ARCHIVE_AS_PRIMARY: Dict[str, date] = {
     'astro-ph': date(2008, 12, 1),
     'cond-mat': date(2004, 1, 1),
     'test': date(2010, 1, 1)
@@ -319,7 +318,14 @@ LEGACY_ARCHIVE_AS_SECONDARY = {
     'test': date(2010, 1, 1)
 }
 
-CATEGORIES = {
+class Category(TypedDict):
+    name: str
+    in_archive: str
+    is_active: bool
+    is_general: bool
+    description: NotRequired[str]
+
+CATEGORIES: Dict[str, Category] = {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_archive': 'acc-phys',
