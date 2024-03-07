@@ -1141,7 +1141,7 @@ class PilotDataset(Submission):
     feed_url: Mapped[Optional[str]] = mapped_column(String(256))
     manifestation: Mapped[Optional[str]] = mapped_column(String(256))
     published: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-    created: Mapped[datetime]  = mapped_column(DateTime, nullable=False)
+    created: Mapped[datetime]  = mapped_column(DateTime, nullable=False, use_existing_column=True)
     last_checked: Mapped[datetime]  = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
 
@@ -1151,9 +1151,9 @@ class SubmissionAbsClassifierDatum(Submission):
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]]  = mapped_column(Text)
     last_update: Mapped[datetime]  = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
-    status: Mapped[Optional[Literal['processing', 'success', 'failed', 'no connection']]] = mapped_column(Enum('processing', 'success', 'failed', 'no connection'))
+    status: Mapped[Optional[Literal['processing', 'success', 'failed', 'no connection']]] = mapped_column(Enum('processing', 'success', 'failed', 'no connection'), use_existing_column=True)
     message: Mapped[Optional[str]]  = mapped_column(Text)
-    is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    is_oversize: Mapped[Optional[int]] = mapped_column(Integer, use_existing_column=True)
     suggested_primary: Mapped[Optional[str]]  = mapped_column(Text)
     suggested_reason: Mapped[Optional[str]]  = mapped_column(Text)
     autoproposal_primary: Mapped[Optional[str]]  = mapped_column(Text)
@@ -1168,9 +1168,9 @@ class SubmissionClassifierDatum(Submission):
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]]  = mapped_column(Text)
     last_update: Mapped[datetime]  = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
-    status: Mapped[Optional[Literal['processing', 'success', 'failed', 'no connection']]] = mapped_column(Enum('processing', 'success', 'failed', 'no connection'))
+    status: Mapped[Optional[Literal['processing', 'success', 'failed', 'no connection']]] = mapped_column(Enum('processing', 'success', 'failed', 'no connection'), use_existing_column=True)
     message: Mapped[Optional[str]]  = mapped_column(Text)
-    is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    is_oversize: Mapped[Optional[int]] = mapped_column(Integer, use_existing_column=True)
 
 
 
