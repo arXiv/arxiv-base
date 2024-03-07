@@ -1,4 +1,6 @@
 """Category and archive definitions."""
+import sys
+from typing import Dict, TypedDict, Required, NotRequired
 
 from datetime import date
 
@@ -47,7 +49,14 @@ GROUPS = {
 }
 DEFAULT_GROUP = 'physics'
 
-ARCHIVES = {
+class ARCHIVE(TypedDict):
+    name: str
+    in_group: str
+    start_date: date
+    end_date: NotRequired[date]
+
+
+ARCHIVES: Dict[str, ARCHIVE]= {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_group': 'grp_physics',
