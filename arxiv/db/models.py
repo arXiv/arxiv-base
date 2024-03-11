@@ -637,7 +637,7 @@ class Metadata(Base):
     submitter_name: Mapped[str] = mapped_column(String(64), nullable=False)
     submitter_email: Mapped[str] = mapped_column(String(64), nullable=False)
     source_size: Mapped[Optional[int]] = mapped_column(Integer)
-    source_format: Mapped[Optional[str]] = mapped_column(String(12))
+    source_format: Mapped[Optional[Literal['tex', 'ps', 'html', 'pdf', 'withdrawn', 'pdftex', 'docx']]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
     title: Mapped[Optional[str]]  = mapped_column(Text)
     authors: Mapped[Optional[str]]  = mapped_column(Text)
