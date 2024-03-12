@@ -11,11 +11,7 @@ from sqlalchemy import create_engine, MetaData, String
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
 
-from ..config import (
-    CLASSIC_DB_URI,
-    ECHO_SQL,
-    LATEXML_DB_URI
-)
+from ..config import Settings
 from .types import str255
 
 metadata = MetaData()
@@ -34,10 +30,10 @@ class LaTeXMLBase(DeclarativeBase):
 
 logger = logging.getLogger(__name__)
 
-engine = create_engine(CLASSIC_DB_URI,
-                       echo=ECHO_SQL)
-latexml_engine = create_engine(LATEXML_DB_URI,
-                               echo=ECHO_SQL)
+engine = create_engine(Settings.CLASSIC_DB_URI,
+                       echo=Settings.ECHO_SQL)
+latexml_engine = create_engine(Settings.LATEXML_DB_URI,
+                               echo=Settings.ECHO_SQL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 
 def _app_ctx_id () -> int:
