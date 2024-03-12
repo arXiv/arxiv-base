@@ -2,9 +2,9 @@
 import importlib.metadata
 from typing import Optional, List, Tuple
 import os
-import secrets
+from secrets import token_hex
 from urllib.parse import urlparse
-from pydantic import BaseSettings
+from pydantic import BaseSettings, SecretStr
 
 DEFAULT_DB = "sqlite:///tests/data/browse.db"
 DEFAULT_LATEXML_DB = "sqlite:///tests/data/latexml.db"
@@ -12,8 +12,19 @@ DEFAULT_LATEXML_DB = "sqlite:///tests/data/latexml.db"
 class Settings(BaseSettings):
 
     SERVER_NAME: Optional[str] = None
+    """
+    the name and port number of the server. Required for subdomain support (e.g.:
+    'myapp.dev:5000') Note that localhost does not support subdomains so setting
+    this to "localhost" does not help. Setting a SERVER_NAME also by default
+    enables URL generation without a request context but with an application
+    context.
 
-    SECRET_KEY: str = secrets.token_hex(16)
+    If this is set and the Host header of a request does not match the SERVER_NAME,
+    then Flask will respond with a 404. Test with
+    curl http://127.0.0.1:5000/ -sv -H "Host: subdomain.arxiv.org"
+    """
+
+    SECRET_KEY: str = "qwert2345"
 
     ARXIV_ACCESSIBILITY_URL: str = "mailto:web-accessibility@cornell.edu"
 
@@ -120,7 +131,11 @@ class Settings(BaseSettings):
             if i is not None:
                 URLS[i] = (endpoint, o.path, o.netloc)
 
+
     ARXIV_BUSINESS_TZ: str = "US/Eastern"
+    """
+    Timezone of the arxiv business offices.
+    """
 
     BASE_VERSION: str = importlib.metadata.version('arxiv-base')
     """The version of the arxiv-base package."""
@@ -146,7 +161,7 @@ class Settings(BaseSettings):
     ANALYTICS_SITE_ID: str = "1"
     """Analytics tracker site ID."""
 
-    TRACKBACK_SECRET: str = "baz"
+    TRACKBACK_SECRET: SecretStr = SecretStr(token_hex(10))
 
     CLASSIC_DB_URI: str = DEFAULT_DB
     LATEXML_DB_URI: str = DEFAULT_LATEXML_DB
