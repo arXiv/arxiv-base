@@ -126,7 +126,7 @@ class Base(object):
         filters.register_filters(app)
         context_processors.register_context_processors(app)
 
-        @app.teardown_request
+        @app.teardown_appcontext
         def remove_scoped_session (response_or_exc):
             session.remove()
             return response_or_exc

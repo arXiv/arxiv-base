@@ -5,7 +5,8 @@ from typing import Generator
 import logging
 from contextlib import contextmanager
 
-from flask import current_app
+from flask.globals import app_ctx
+from flask import has_app_context
 
 from sqlalchemy import create_engine, MetaData, String
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
@@ -37,7 +38,7 @@ latexml_engine = create_engine(settings.LATEXML_DB_URI,
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 
 def _app_ctx_id () -> int:
-    return id(current_app._get_current_object())
+    return id(app_ctx._get_current_object())
 
 session = scoped_session(SessionLocal, scopefunc=_app_ctx_id)
 
@@ -51,7 +52,7 @@ def get_db ():
 
 @contextmanager
 def transaction ():
-    in_flask = True if current_app else False
+    in_flask = True if has_app_context() else False
     db = session if in_flask else SessionLocal() 
     try:
         yield db
