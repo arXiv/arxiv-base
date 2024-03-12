@@ -1,345 +1,440 @@
-"""
-File accessor classes that abstracts the storage and path for each file type.
-"""
-# The number of classes here are a bit too many. Having a class for each file type is not a good
-# design. There is a room for redesign.
+"""FileObj for representing a file."""
 
-import os.path
-import os
-import shutil
-import typing
-from abc import abstractmethod
+import gzip
+import tarfile
+import io
+from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import BinaryIO, TextIO, Any
-import urllib.parse
-# from typing_extensions import TypedDict
+from types import TracebackType
+import typing
+from typing import BinaryIO, Optional
 
-from ..identifier import Identifier
-
-from google.cloud import storage as cloud_storage
-from google.cloud.storage.fileio import BlobReader
-from .path_mapper import arxiv_id_to_local_orig, local_path_to_blob_key, \
-    arxiv_id_to_local_pdf_path, arxiv_id_to_local_paper
-import logging
-
-logger = logging.getLogger(__name__)
-
-def make_subpath(path_str: str) -> str:
-    """Make a subpath from a path string. If the path string starts with /, remove it."""
-    return path_str[1:] if path_str.startswith("/") else path_str
-
-
-# noinspection Pylint
-class ArxivIdentified:
-    """Thing identified by arXiv ID"""
-    identifier: Identifier
-
-    def __init__(self, identifier: Identifier, **_kwargs: typing.Any):
-        self.identifier = identifier
+class BinaryMinimalFile(typing.Protocol):
+    def read(self, size: Optional[int] = -1) -> bytes:
         pass
 
-
-class AccessorFlavor(ArxivIdentified):
-    """Accessor flavor is a mix-in for access."""
-    root_dir: str | None
-
-    def __init__(self, identifier: Identifier, **kwargs: typing.Any):
-        self.root_dir = kwargs.pop("root_dir", None)
-        super().__init__(identifier, **kwargs)
+    def readline(self, size: Optional[int] = -1) -> bytes:
         pass
 
-    @property
-    def local_path(self) -> str:
-        """ Tarball filename from arXiv ID"""
-        return ""
-
-    @property
-    def blob_name(self) -> str | None:
-        """Turn webnode path to GCP blob name"""
-        return local_path_to_blob_key(self.local_path)
-
-    pass
-
-
-class BaseAccessor(AccessorFlavor):
-    """Abstract class for accessing files from GCP and local file system"""
-
-    @abstractmethod
-    def exists(self) -> bool:
-        """True if the file exists in the storage"""
-        raise NotImplementedError("Not implemented")
-
-    @abstractmethod
-    def download_to_filename(self, filename: str = "unnamed.bin") -> None:
-        """Download the file to the local file system"""
-        raise NotImplementedError("Not implemented")
-
-    @abstractmethod
-    def upload_from_filename(self, filename: str = "unnamed.bin") -> None:
-        """Upload the file to the storage"""
-        raise NotImplementedError("Not implemented")
-
-    @abstractmethod
-    def download_as_bytes(self, **kwargs: typing.Any) -> bytes:
-        """Download the file as bytes"""
-        raise NotImplementedError("Not implemented")
-
-    @property
-    @abstractmethod
-    def canonical_name(self) -> str:
-        """Canonical name - URI"""
-        raise NotImplementedError("Not implemented")
-
-    @property
-    def content_type(self) -> str | None:
-        """MIME type of the file, mostly for uploading to GCP"""
-        return None
-
-    @abstractmethod
-    def open(self, **kwargs: typing.Any) -> BlobReader | BinaryIO:
-        """Open the srorage (file or GCP blob) and return the file-ish object"""
-        raise NotImplementedError("Not implemented")
-
-    @property
-    def bytesize(self) -> typing.Optional[int]:
-        """Object byte size, if applicable"""
-        return None
-
-    @property
-    @abstractmethod
-    def basename(self) -> str:
-        """Base name of the file"""
-        raise NotImplementedError("Not implemented")
-    
-    @abstractmethod
-    def modtime(self) -> float:
-        """Last modified as float POSIX timestamp"""
-        raise NotImplementedError("Not implemented")
-
-    pass
-
-
-# noinspection Pylint
-class GCPStorage:
-    """GCP storage client and bucket"""
-    client: cloud_storage.Client
-    bucket_name: str
-    bucket: cloud_storage.Bucket
-
-    def __init__(self, client: cloud_storage.Client, bucket_name: str):
-        self.client = client
-        self.bucket_name = bucket_name
-        self.bucket = self.client.bucket(self.bucket_name)
-
-
-class GCPBlobAccessor(BaseAccessor):
-    """GCP Blob accessor for a given arXiv ID. This is an abstract class.
-    You need to implement to_blob_name property in the subclass.
-    """
-    gcp_storage: GCPStorage
-    blob: cloud_storage.Blob
-
-    def __init__(self, identifier: Identifier, **kwargs: typing.Any):
-        self.gcp_storage = kwargs.pop("storage")
-        super().__init__(identifier, **kwargs)
-        if self.blob_name is None:
-            raise ValueError("blob_name is None")
-        self.blob = self.bucket.blob(self.blob_name)
-
-    def download_to_filename(self, filename: str = "unnamed.bin") -> None:
-        self.blob.download_to_filename(filename)
-
-    def upload_from_filename(self, filename: str = "unnamed.bin") -> None:
-        logger.debug(f"upload_from_filename: {filename} to {self.blob_name}")
-        self.blob.upload_from_filename(filename, content_type=self.content_type)
-
-    def download_as_bytes(self, **kwargs: typing.Any) -> bytes:
-        return self.blob.download_as_bytes(**kwargs)  # type: ignore
-
-    @property
-    def bucket(self) -> cloud_storage.Bucket:
-        """GCP bucket"""
-        return self.gcp_storage.bucket
-
-    def exists(self) -> bool:
-        return self.blob.exists(client=self.gcp_storage.client)  # type: ignore
-
-    @property
-    def basename(self) -> str:
-        if self.blob_name is None:
-            raise ValueError("blob_name is None")
-        return os.path.basename(urllib.parse.urlparse(self.blob_name).path)
-
-    @property
-    def canonical_name(self) -> str:
-        return f'gs://{self.gcp_storage.bucket_name}/{self.blob_name}'
-
-    def open(self, **kwargs: Any) -> BlobReader | BinaryIO | TextIO:
-        return self.blob.open(**kwargs)
-
-    @property
-    def bytesize(self) -> typing.Optional[int]:
-        if self.blob.exists(client=self.gcp_storage.client):
-            self.blob.reload()
-            return self.blob.size  # type: ignore
-        return None
-    
-    def modtime(self) -> float:
-        return self.blob.updated.timestamp()
-
-    pass
-
-
-class LocalFileAccessor(BaseAccessor):
-    """Local file accessor for a given arXiv ID. This is an abstract class."""
-
-    def __init__(self, identifier: Identifier, **kwargs: Any):
-        super().__init__(identifier, **kwargs)
+    def seek(self, pos: int, whence:int=io.SEEK_SET) -> int:
+        pass
+    def close(self)->None:
         pass
 
-    def download_to_filename(self, filename: str = "unnamed.bin") -> None:
-        local_path = self.local_path
-        os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        shutil.copyfile(self.local_path, filename)
-
-    def upload_from_filename(self, filename: str = "unnamed.bin") -> None:
-        local_path = self.local_path
-        os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        shutil.copyfile(filename, local_path)
-
-    def download_as_bytes(self, **kwargs: Any) -> bytes:
-        with open(self.local_path, 'rb') as fd:
-            return bytes(fd.read())
-
-    def exists(self) -> bool:
-        return Path(self.local_path).exists()
-
-    @property
-    def basename(self) -> str:
-        return os.path.basename(self.local_path)
-
-    @property
-    def canonical_name(self) -> str:
-        return f'file://{self.local_path}'
-
-    def open(self, **kwargs: typing.Any) -> BlobReader | BinaryIO | TextIO:
-        mode: str = kwargs.pop("mode", "rb")
-        return open(self.local_path, mode=mode, **kwargs)
-
-    @property
-    def bytesize(self) -> typing.Optional[int]:
-        po = Path(self.local_path)
-        if po.exists():
-            return po.stat().st_size
-        return None
-
-    @property
-    def blob_name(self) -> str | None:
-        return None
-    
-    def modtime(self) -> float:
-        return os.stat(self.local_path).st_mtime
-
-
-    pass
-
-
-def merge_path(root_dir: str | None, local_path: str) -> str:
-    """Merge root_dir and local_path"""
-    if root_dir:
-        return os.path.join(root_dir, make_subpath(local_path))
-    return local_path
-
-
-class VersionedFlavor(AccessorFlavor):
-    """Versioned flavor needs to look at two places to decide the path. If it is latest,
-    it is in arxiv_id_to_local_paper() (aka under /ftp), and else  arxiv_id_to_local_orig()
-    (aka under /data/orig).
-    """
-
-    def __init__(self, arxiv_id: Identifier, **kwargs: typing.Any):
-        latest = kwargs.pop("latest", None)
-        if latest is None:
-            raise ValueError("latest is not set. It must be True or False.")
-        self.path_mapper = arxiv_id_to_local_paper if latest else arxiv_id_to_local_orig
-        super().__init__(arxiv_id, **kwargs)
+    def __enter__(self) -> 'BinaryMinimalFile':
         pass
 
+    def __exit__(self,
+                 exc_type: Optional[typing.Type[BaseException]],
+                 exc_val: Optional[BaseException],
+                 exc_tb: Optional[TracebackType]) -> None:
+        pass
 
-class TarballFlavor(VersionedFlavor):
-    """Tarball flavor"""
+    def __iter__(self) -> typing.Iterator[bytes]:
+        pass
 
-    @property
-    def local_path(self) -> str:
-        """ Tarball filename from arXiv ID"""
-        return merge_path(self.root_dir, self.path_mapper(self.identifier, extent=".tar.gz"))
+class FileObj(ABC):
+    """FileObj is a subset of the methods on GS `Blob`.
 
-    pass
+    The intent here is to facilitate testing by having a thin wrapper around
+    Path to allow local files for testing.
 
+    If a new method from `Blob` is needed for use in these packages,
+    add the `abstractmethod` to `FileObj` then implement a local
+    version in `LocalFileObj`. The method added to `FileObj` should
+    have the exact type signature as the method in `Blob`.
 
-class AbsFlavor(VersionedFlavor):
-    """GCP abstract text blob accessor for a given arXiv ID."""
-
-    @property
-    def local_path(self) -> str:
-        return merge_path(self.root_dir, self.path_mapper(self.identifier, extent=".abs"))
-
-    pass
-
-
-class PDFFlavor(AccessorFlavor):
-    """GCP PDF blob accessor for a given arXiv ID."""
-
-    @property
-    def local_path(self) -> str:
-        return merge_path(self.root_dir, arxiv_id_to_local_pdf_path(self.identifier))
-
-    pass
-
-
-class OutcomeFlavor(AccessorFlavor):
-    """GCP pdfgen outcome blob accessor for a given arXiv ID.
-    Outcome blob is a tarball containing the output files from running pdflatex except actual PDF.
     """
 
     @property
-    def local_path(self) -> str:
-        # If outcome is at webnode, this is where it would be - next to the PDF.
-        return merge_path(self.root_dir,
-                          arxiv_id_to_local_pdf_path(self.identifier, extent=".outcome.tar.gz"))
+    @abstractmethod
+    def name(self) -> str:
+        """Name, either path or key"""
+        pass
 
-    pass
+    @abstractmethod
+    def exists(self) -> bool:
+        """Does the storage obj exist?
 
+        This is not a property due to it not being a propery on GS `Blob`."""
+        pass
 
-class LocalTarballAccessor(LocalFileAccessor, TarballFlavor):
-    """Local tarball accessor for a given arXiv ID."""
+    @abstractmethod
+    def open(self, mode:str) -> BinaryMinimalFile:
+        """Opens the object similar to the normal Python `open()`"""
+        pass
 
+    @property
+    @abstractmethod
+    def etag(self) -> str:
+        """Gets the etag for the storage object"""
+        pass
 
-class LocalPDFAccessor(LocalFileAccessor, PDFFlavor):
-    """Local PDF accessor for a given arXiv ID."""
+    @property
+    @abstractmethod
+    def size(self) -> int:
+        """Size in bytes"""
+        pass
 
-
-class LocalAbsAccessor(LocalFileAccessor, AbsFlavor):
-    """Local abstract text accessor for a given arXiv ID."""
-
-
-class LocalOutcomeAccessor(LocalFileAccessor, OutcomeFlavor):
-    """Local outcome accessor for a given arXiv ID."""
-
-
-class GCPTarballAccessor(GCPBlobAccessor, TarballFlavor):
-    """GCP tarball accessor for a given arXiv ID."""
-
-
-class GCPPDFAccessor(GCPBlobAccessor, PDFFlavor):
-    """GCP PDF accessor for a given arXiv ID."""
-
-
-class GCPAbsAccessor(GCPBlobAccessor, AbsFlavor):
-    """GCP abstract text accessor for a given arXiv ID."""
-    pass
+    @property
+    @abstractmethod
+    def updated(self) -> datetime:
+        """Datetime object of last modified"""
 
 
-class GCPOutcomeAccessor(GCPBlobAccessor, OutcomeFlavor):
-    """GCP outcome accessor for a given arXiv ID."""
-    pass    
+class FileDoesNotExist(FileObj):
+    """Represents a file that does not exist"""
+
+    def __init__(self, item: str):
+        self.item = item
+
+    @property
+    def name(self) -> str:
+        return self.item
+
+    def exists(self) -> bool:
+        return False
+
+    def open(self, mode:str) -> BinaryMinimalFile:
+        raise Exception("File does not exist")
+
+    @property
+    def etag(self) -> str:
+        raise Exception("File does not exist")
+
+    @property
+    def size(self) -> int:
+        raise Exception("File does not exist")
+
+    @property
+    def updated(self) -> datetime:
+        raise Exception("File does not exist")
+
+    def __repr__(self) -> str:
+        return f"FileDoesNotExist({self.item})"
+
+
+class LocalFileObj(FileObj):
+    """File object backed by local files.
+
+    The goal here is to have LocalFileObj mimic `Blob` in the
+    methods and properties that are used.
+    """
+
+    def __init__(self, item: Path):
+        self.item = item
+
+    @property
+    def name(self) -> str:
+        return self.item.name
+
+    def exists(self) -> bool:
+        return self.item.exists()
+
+    def open(self, *args, **kwargs) -> BinaryIO:  # type: ignore
+        return self.item.open(*args, **kwargs)  # type: ignore
+
+    @property
+    def etag(self) -> str:
+        return "FAKE_ETAG"
+
+    @property
+    def size(self) -> int:
+        return self.item.stat().st_size
+
+    @property
+    def updated(self) -> datetime:
+        return datetime.fromtimestamp(self.item.stat().st_mtime,
+                                      tz=timezone.utc)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self) -> str:
+        return f"<LocalFileObj Path={self.item}>"
+
+
+class MockStringFileObj(FileObj):
+    """File object backed by a utf-8 `str`."""
+
+    def __init__(self, name: str, data: str):
+        self._name = name
+        self._data = bytes(data, 'utf-8')
+        self._size = len(self._data)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def exists(self) -> bool:
+        return True
+
+    def open(self, mode:str) -> BinaryMinimalFile:
+        return io.BytesIO(self._data)
+
+    @property
+    def etag(self) -> str:
+        return "FAKE_ETAG"
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @property
+    def updated(self) -> datetime:
+        return datetime.fromtimestamp(0, tz=timezone.utc)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self) -> str:
+        return f"<MockFileObj name={self.name}>"
+
+
+class UngzippedFileObj(FileObj):
+    """File object backed by different file object and un-gzipped."""
+
+    def __init__(self, gzipped_file: FileObj):
+        self._fileobj = gzipped_file
+        self._size = -1
+
+    @property
+    def name(self) -> str:
+        if self._fileobj.name.endswith(".gz"):
+            return self._fileobj.name[:-3]
+        elif self._fileobj.name.endswith(".gzip"):
+            return self._fileobj.name[:-5]
+        else:
+            return self._fileobj.name
+
+    def exists(self) -> bool:
+        return self._fileobj.exists()
+
+    def open(self, mode:str) -> BinaryMinimalFile:
+        return gzip.GzipFile(filename="",
+                             mode=mode,
+                             fileobj=self._fileobj.open(mode))
+
+    @property
+    def etag(self) -> str:
+        return self._fileobj.etag
+
+    @property
+    def size(self) -> int:
+        if self._size >= 0:
+            return self._size
+        else:
+            # Seems gzip files will have the size as the last 4 bytes of the
+            # file.  That won't record file sizes larger than 4Gb and there may
+            # be other quirks.  So for now we get it by reading and unzipping
+            # the whole file.
+            with self._fileobj.open("rb") as unzip_f:
+                size = unzip_f.seek(0, io.SEEK_END)
+                self._size = size
+            return self._size
+
+    @property
+    def updated(self) -> datetime:
+        return self._fileobj.updated
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self) -> str:
+        return f"<GunzipFileObj fileobj={self._fileobj}>"
+
+
+class FileNotFound(Exception):
+    """Raised when a `path` cannot be found in a tar."""
+
+
+class FileFromTar(FileObj):
+    """Single file from a tar `FileObj`."""
+
+    def __init__(self, tar_file: FileObj, path: str):
+        self._fileobj = tar_file
+        self._path = path
+        self._size = -1
+        self._path_exists: Optional[bool] = None
+        self._tarinfo: Optional[tarfile.TarInfo] = None
+
+    @property
+    def name(self) -> str:
+        return self._path
+
+    def exists(self) -> bool:
+        """Returns `True` if `tar_file` exists and a member exists at `path` in
+        the tar.
+
+        This extracts and saves the tarinfo. That records the offset into
+        the tar file. So it should not be too inefficient.
+        """
+        if self._path_exists is not None:
+            return self._path_exists
+
+        if not self._fileobj.exists():
+            self._path_exists = False
+            return False
+
+        with self._fileobj.open("rb") as fh:
+            with tarfile.open(fileobj=fh, mode="r") as tar:  # type: ignore
+                try:
+                    self._tarinfo = tar.getmember(self._path)
+                    self._path_exists = True
+                    self._size = self._tarinfo.size
+                    return True
+                except KeyError:
+                    self._path_exists = False
+                    return False
+
+    def open(self, mode:str) -> BinaryMinimalFile:
+        # Why does this not use `with`? Because after the return it would be out of the with scope
+        # and the file will be closed and unusable.
+        fh = self._fileobj.open(mode)
+        tfh = tarfile.open(fileobj=fh, mode="r")  # type: ignore
+        try:
+            if self._tarinfo is None:
+                member = tfh.getmember(self._path)
+            else:
+                member = self._tarinfo
+        except KeyError:
+            raise FileNotFound(f"could not find {self._path} in tar")
+        ef = tfh.extractfile(member)
+        if ef:
+            return typing.cast(BinaryMinimalFile, ef)
+        else:
+            raise FileNotFound(f"could not extract {self._path} in tar")
+
+    @property
+    def etag(self) -> str:
+        raise Exception("Not implemented due to it being inefficent")
+
+    @property
+    def size(self) -> int:
+        """This is only set after `open()` or `exists()` were called."""
+        return self._size
+
+    @property
+    def updated(self) -> datetime:
+        return self._fileobj.updated
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self) -> str:
+        return f"<FileFromTar fileobj={self._fileobj} path={self._path}>"
+
+
+
+DEFAULT_IO_SIZE = 8 * 1024 * 1024
+
+
+class BinaryMinimalFileTransformed(BinaryMinimalFile):
+    """A file like object that includes a transform."""
+
+    def __init__(self, inner_io: BinaryMinimalFile, transform: typing.Callable[[bytes], bytes]):
+        self.transform = transform
+        self.io = inner_io
+        self.buffer = b""
+        self.at_start = True
+        super().__init__()
+
+    def readline(self, size: Optional[int] = -1) -> bytes:
+        if size is None or size <= 0:
+            size = DEFAULT_IO_SIZE
+        if not self.buffer:
+            data = self.read(size)
+            self.buffer = data + self.buffer
+
+        lines = self.buffer.split(b"\n")
+        line = lines[0]
+        self.buffer = b"\n".join(lines[1:])
+        return line
+
+    def read(self, size: Optional[int] = -1) -> bytes:
+        if size is None or size <= 0:
+            size = DEFAULT_IO_SIZE
+
+        self.at_start = False
+        while True:
+            data = self.io.readline(size)
+            self.buffer = self.buffer + self.transform(data)
+            if not data or len(self.buffer) >= size:
+                break
+
+        if len(self.buffer) <= size:
+            to_return = self.buffer
+            self.buffer = b""
+            return to_return
+        else:
+            to_return = self.buffer[:size]
+            self.buffer = self.buffer[size:]
+            return to_return
+
+    def seek(self, pos: int, whence: int = io.SEEK_SET) -> int:
+        if not self.at_start:
+            raise RuntimeError("Cannot seek after reading")
+        if whence != io.SEEK_SET:
+            raise ValueError("whence is not supported")
+        data = self.read(pos)
+        return len(data)
+
+    def close(self) -> None:
+        self.io.close()
+        self.buffer = b""
+        self.at_start = True
+
+    def __enter__(self) -> 'BinaryMinimalFile':
+        return self
+
+    def __exit__(self,
+                 exc_type: Optional[typing.Type[BaseException]],
+                 exc_val: Optional[BaseException],
+                 exc_tb: Optional[TracebackType]) -> None:
+        self.close()
+
+    def __iter__(self) -> typing.Iterator[bytes]:
+        for line in self.io:
+            yield self.transform(line)
+
+
+
+
+class FileTransform(FileObj):
+    """A `FileObj` that applies a transform to the original data."""
+
+    def __init__(self, file: FileObj, transform: typing.Callable[[bytes], bytes]):
+        self.fileobj = file
+        self.transform = transform
+
+    @property
+    def name(self) -> str:
+        return self.fileobj.name
+
+    def exists(self) -> bool:
+        return self.fileobj.exists()
+
+    def open(self, mode:str) -> BinaryMinimalFile:
+        return BinaryMinimalFileTransformed(self.fileobj.open('rb'), self.transform)
+
+    @property
+    def etag(self) -> str:
+            return self.fileobj.etag
+    @property
+    def size(self) -> int:
+        """This is only set after `open()` or `exists()` were called."""
+        # TODO Size is going to be a lie.
+        return self.fileobj.size
+
+    @property
+    def updated(self) -> datetime:
+        return self.fileobj.updated
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self) -> str:
+        return f"<FileProcessed fileobj={self.fileobj} transform={self.transform}>"
+
+
