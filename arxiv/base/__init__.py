@@ -26,6 +26,7 @@ Intended for use in an application factory. For example:
 
 """
 import types
+import logging
 from typing import Optional, Any, Dict
 from flask import Blueprint, Flask, Blueprint
 from werkzeug.exceptions import NotFound
@@ -33,7 +34,7 @@ from werkzeug.exceptions import NotFound
 from . import exceptions, urls, alerts, context_processors, filters
 from . import config as base_config
 from .converter import ArXivConverter
-from ..db import session
+from ..db import session, _app_ctx_id
 
 
 class Base(object):
@@ -125,7 +126,8 @@ class Base(object):
         filters.register_filters(app)
         context_processors.register_context_processors(app)
 
-        @app.teardown_appcontext
+        @app.teardown_request
         def remove_scoped_session (response_or_exc):
+            logging.warn(f'Removed session for {_app_ctx_id()}')
             session.remove()
             return response_or_exc
