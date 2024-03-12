@@ -151,3 +151,5 @@ class Settings(BaseSettings):
     CLASSIC_DB_URI: str = DEFAULT_DB
     LATEXML_DB_URI: str = DEFAULT_LATEXML_DB
     ECHO_SQL: bool = False
+
+settings = Settings()

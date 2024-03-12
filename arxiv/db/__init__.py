@@ -11,10 +11,8 @@ from sqlalchemy import create_engine, MetaData, String
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
 
-from ..config import Settings
+from ..config import settings
 from .types import str255
-
-settings = Settings()
 
 metadata = MetaData()
 

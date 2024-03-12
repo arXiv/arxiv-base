@@ -39,14 +39,14 @@ from sqlalchemy.orm import (
     relationship
 )
 
-from ..config import TRACKBACK_SECRET, ARXIV_BUSINESS_TZ
+from ..config import settings
 from . import Base, LaTeXMLBase, metadata, \
     SessionLocal, engine, latexml_engine
 
 from .types import intpk, str255
 
-tb_secret = TRACKBACK_SECRET
-tz = gettz(ARXIV_BUSINESS_TZ)
+tb_secret = settings.TRACKBACK_SECRET
+tz = gettz(settings.ARXIV_BUSINESS_TZ)
 
 class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'
