@@ -128,6 +128,5 @@ class Base(object):
 
         @app.teardown_request
         def remove_scoped_session (response_or_exc):
-            logging.warn(f'Removed session for {_app_ctx_id()}')
             session.remove()
             return response_or_exc
