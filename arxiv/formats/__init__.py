@@ -8,7 +8,7 @@ from operator import itemgetter
 from tarfile import CompressionError, ReadError
 from typing import Dict
 
-from ..files import BaseAccessor
+from ..files import FileObj
 
 logger = logging.getLogger(__name__)
 
@@ -138,20 +138,21 @@ def has_ancillary_files(source_flag: str) -> bool:
     return re.search('A', source_flag, re.IGNORECASE) is not None
 
 
-def list_ancillary_files(tarball: BaseAccessor) -> List[Dict]:
+def list_ancillary_files(tarball: Optional[FileObj]) -> List[Dict]:
     """Return a list of ancillary files in a tarball (.tar.gz file)."""
+    if not tarball or not tarball.name.endswith('.tar.gz') or not tarball.exists():
+        return []
+
     anc_files = []
     try:
         with tarball.open(mode='rb') as fh:
-            with tarfile.open(fileobj=fh, mode='r') as tf:
-                for member in \
-                        (m for m in tf if re.search(r'^anc\/', m.name) and m.isfile()):
-                    name = re.sub(r'^anc\/', '', member.name)
-                    size_bytes = member.size
-                    anc_files.append({'name': name, 'size_bytes': size_bytes})
+            tf = tarfile.open(fileobj=fh, mode='r')  # type: ignore
+            for member in \
+                    (m for m in tf if re.search(r'^anc\/', m.name) and m.isfile()):
+                name = re.sub(r'^anc\/', '', member.name)
+                size_bytes = member.size
+                anc_files.append({'name': name, 'size_bytes': size_bytes})
     except (ReadError, CompressionError) as ex:
-        logger.error("Error while trying to read anc files from %s: %s", tarball, ex)
-        return []
-    if len(anc_files) > 1:
-        anc_files = sorted(anc_files, key=itemgetter('name'))
-    return anc_files
+        raise Exception(f"Problem while working with tar {tarball}") from ex
+
+    return sorted(anc_files, key=itemgetter('name'))

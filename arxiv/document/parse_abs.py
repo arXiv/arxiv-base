@@ -11,8 +11,6 @@ from dateutil import parser
 from flask import current_app
 
 from ..taxonomy import definitions
-from ..files import BaseAccessor
-
 from .metadata import Archive, AuthorList, Category, \
     DocMetadata, Group, Submitter
 from .version import VersionEntry, SourceFlag
@@ -88,28 +86,6 @@ def parse_abs_file(filename: str) -> DocMetadata:
         raise AbsNotFoundException
     except UnicodeDecodeError as e:
         raise AbsParsingException(f'Failed to decode .abs file "{filename.canonical_name}": {e}')
-
-def parse_abs_file_accessor(absfile: BaseAccessor) -> DocMetadata:
-    """Parse an arXiv .abs file.
-
-    The modified time on the abs file will be used as the modified time for the
-    abstract. It will be pulled from `flask.config` if in a app_context. It
-    can be specified with tz arg.
-    """
-    try:
-        with absfile.open(mode='r', encoding='latin-1') as absf:
-            raw = absf.read()
-            if current_app:
-                modified = datetime.fromtimestamp(absfile.modtime(), tz=_get_tz())
-            else:
-                modified = datetime.fromtimestamp(absfile.modtime())
-            modified = modified.astimezone(ZoneInfo("UTC"))
-            return parse_abs(raw, modified)
-
-    except FileNotFoundError:
-        raise AbsNotFoundException
-    except UnicodeDecodeError as e:
-        raise AbsParsingException(f'Failed to decode .abs file "{absfile.canonical_name}": {e}')
     
 
 
