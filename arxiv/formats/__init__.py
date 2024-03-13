@@ -127,36 +127,6 @@ def get_all_formats(src_fmt: str) -> List[str]:
 
         return formats
 
-def has_ancillary_files(source_flag: str) -> bool:
-    """Check source type for indication of ancillary files."""
-    if not source_flag:
-        return False
-    return re.search('A', source_flag, re.IGNORECASE) is not None
-
-
-def list_ancillary_files(tarball_path: APath) -> List[Dict]:
-    """Return a list of ancillary files in a tarball (.tar.gz file)."""
-    if not tarball_path or not tarball_path.suffixes == ['.tar', '.gz'] \
-       or not tarball_path.is_file():
-        return []
-
-    anc_files = []
-    try:
-        with tarball_path.open( mode='rb') as fh:
-            with tarfile.open(fileobj=fh, mode='r') as tf:
-                for member in \
-                        (m for m in tf if re.search(r'^anc\/', m.name) and m.isfile()):
-                    name = re.sub(r'^anc\/', '', member.name)
-                    size_bytes = member.size
-                    anc_files.append({'name': name, 'size_bytes': size_bytes})
-    except (ReadError, CompressionError) as ex:
-        logger.error("Error while trying to read anc files from %s: %s", tarball_path, ex)
-        return []
-    if len(anc_files) > 1:
-        anc_files = sorted(anc_files, key=itemgetter('name'))
-    return anc_files
-
-
 
 def has_ancillary_files(source_flag: str) -> bool:
     """Check source type for indication of ancillary files."""
