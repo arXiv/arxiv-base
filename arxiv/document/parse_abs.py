@@ -2,7 +2,7 @@
 
 import os
 import re
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, List, Tuple, Optional, Sequence
 from datetime import datetime
 
 from zoneinfo import ZoneInfo
@@ -59,18 +59,18 @@ identifier itself.
 The latest versions of these papers should always have the "Categories:" line.
 """
 
+
 _fs_tz: Optional[ZoneInfo] = None
 """FS timezone if in a flask app."""
 
+
 def parse_abs_file(filename: str) -> DocMetadata:
-    """Parse an arXiv .abs file in the file system.
+    """Parse an arXiv .abs file.
 
     The modified time on the abs file will be used as the modified time for the
     abstract. It will be pulled from `flask.config` if in a app_context. It
     can be specified with tz arg.
-    
     """
-
     absfile = to_anypath(filename)
     try:
         with absfile.open(mode='r', encoding='latin-1') as absf:
@@ -85,11 +85,11 @@ def parse_abs_file(filename: str) -> DocMetadata:
     except FileNotFoundError:
         raise AbsNotFoundException
     except UnicodeDecodeError as e:
-        raise AbsParsingException(f'Failed to decode .abs file "{filename.canonical_name}": {e}')
-    
+        raise AbsParsingException(f'Failed to decode .abs file "{filename}": {e}')
 
 
-def parse_abs(raw: str, modified: datetime) -> DocMetadata:
+
+def parse_abs(raw: str, modified:datetime) -> DocMetadata:
     """Parse an abs with fields and an abstract."""
 
     # There are two main components to an .abs file that contain data,
@@ -215,8 +215,9 @@ def parse_abs_top(raw: str, modified:datetime, abstract:str) -> DocMetadata:
         # private=private  # TODO, not implemented
     )
 
+
 def _parse_version_entries(arxiv_id: str, version_entry_list: List) \
-        -> Tuple[int, List[VersionEntry], str]:
+        -> Tuple[int, Sequence[VersionEntry], str]:
     """Parse the version entries from the arXiv .abs file."""
     version_count = 0
     version_entries = list()
@@ -236,12 +237,14 @@ def _parse_version_entries(arxiv_id: str, version_entry_list: List) \
         source_type = SourceFlag(code=date_match.group('source_type'))
         kb = int(date_match.group('size_kilobytes'))
         ve = VersionEntry(
+            #id = Identifier(f"{arxiv_id}v{version_count}"),
             raw=date_match.group(0),
             source_flag=source_type,
             size_kilobytes=kb,
             submitted_date=submitted_date,
             version=version_count,
-            is_withdrawn=kb == 0 or source_type.ignore
+            is_withdrawn=kb == 0 or source_type.ignore,
+            is_current = version_count == len(version_entry_list)
         )
         version_entries.append(ve)
 
@@ -295,6 +298,7 @@ def alt_component_split(components: List[str]) -> List[str]:
     alt_comp.append(abstract)
     alt_comp.append('')
     return alt_comp
+
 
 def _get_tz() -> ZoneInfo:
     """Gets the timezone from the flask current_app."""

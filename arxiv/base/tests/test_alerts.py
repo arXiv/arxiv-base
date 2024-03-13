@@ -1,7 +1,7 @@
 """Tests for :mod:`arxiv.base.alerts`."""
 
 from unittest import TestCase, mock
-from flask import Markup
+from markupsafe import Markup
 
 from arxiv.base import alerts
 
