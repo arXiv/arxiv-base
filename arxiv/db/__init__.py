@@ -13,20 +13,13 @@ from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
 
 from ..config import settings
-from .types import str255
 
 metadata = MetaData()
 
 class Base(DeclarativeBase):
-    type_annotation_map = {
-        str255: String(255),
-    }
     metadata=metadata
 
 class LaTeXMLBase(DeclarativeBase):
-    type_annotation_map = {
-        str255: String(255),
-    }
     metadata=metadata
 
 logger = logging.getLogger(__name__)
