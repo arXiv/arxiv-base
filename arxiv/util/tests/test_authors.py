@@ -1,7 +1,7 @@
 """Tests for author and affiliation parsing."""
 from unittest import TestCase
 
-from arxiv.authors import parse_author_affil, split_authors
+from ...authors import parse_author_affil, split_authors
 
 
 class TestAuthorAffiliationParsing(TestCase):

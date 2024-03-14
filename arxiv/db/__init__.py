@@ -1,5 +1,30 @@
 """
 This is the primary SQLAlchemy implementation of the main arXiv database 
+
+To use this in a simple non-flask non-fastapi script do:
+
+from arxiv.db import get_db
+
+with get_db() as session:
+    session.execute(
+        select(...)
+    )
+
+To use this in flask just do:
+
+from arxiv.db import session
+
+session.execute(
+    select(...)
+)
+
+To use this with fastapi do:
+
+with get_db() as session:
+    session.execute(
+        select(...)
+    )
+
 """
 from typing import Generator
 import logging

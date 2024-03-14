@@ -126,6 +126,10 @@ class Base(object):
         filters.register_filters(app)
         context_processors.register_context_processors(app)
 
+
+        # This piece of code is crucial to making sure sqlalchemy sessions work in flask
+        # It is the same as the flask_sqlalchemy implementation 
+        # See: https://github.com/pallets-eco/flask-sqlalchemy/blob/42a36a3cb604fd39d81d00b54ab3988bbd0ad184/src/flask_sqlalchemy/session.py#L109
         @app.teardown_appcontext
         def remove_scoped_session (response_or_exc):
             session.remove()

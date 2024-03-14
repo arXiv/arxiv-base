@@ -8,7 +8,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from dateutil import parser
 
-from flask import current_app
+from ..config import settings
 
 from ..taxonomy import definitions
 from .metadata import Archive, AuthorList, Category, \
@@ -75,10 +75,7 @@ def parse_abs_file(filename: str) -> DocMetadata:
     try:
         with absfile.open(mode='r', encoding='latin-1') as absf:
             raw = absf.read()
-            if current_app:
-                modified = datetime.fromtimestamp(absfile.stat().st_mtime, tz=_get_tz())
-            else:
-                modified = datetime.fromtimestamp(absfile.stat().st_mtime)
+            modified = datetime.fromtimestamp(absfile.stat().st_mtime, tz=_get_tz())
             modified = modified.astimezone(ZoneInfo("UTC"))
             return parse_abs(raw, modified)
 
@@ -301,9 +298,9 @@ def alt_component_split(components: List[str]) -> List[str]:
 
 
 def _get_tz() -> ZoneInfo:
-    """Gets the timezone from the flask current_app."""
+    """Gets the timezone from the environment"""
     global _fs_tz
     if _fs_tz is None:
-        _fs_tz = ZoneInfo(current_app.config["FS_TZ"])
+        _fs_tz = ZoneInfo(settings.FS_TZ)
 
     return _fs_tz

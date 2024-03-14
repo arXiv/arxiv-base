@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     curl http://127.0.0.1:5000/ -sv -H "Host: subdomain.arxiv.org"
     """
 
-    SECRET_KEY: str = "qwert2345"
+    SECRET_KEY: SecretStr = SecretStr("qwert2345")
 
     ARXIV_ACCESSIBILITY_URL: str = "mailto:web-accessibility@cornell.edu"
 
@@ -136,6 +136,8 @@ class Settings(BaseSettings):
     """
     Timezone of the arxiv business offices.
     """
+
+    FS_TZ: str = "US/Eastern"
 
     BASE_VERSION: str = importlib.metadata.version('arxiv-base')
     """The version of the arxiv-base package."""
