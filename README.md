@@ -147,7 +147,7 @@ registering your blueprints. For example:
 ## App tests
 
 Some tests to check app configuration and pattern compliance are provided in
-``arxiv.base.app_tests``. See that module for usage.
+``arxiv.base.tests``. See that module for usage. You can run them with the command ``pytest``
 
 ## Editing and compiling sass
 
