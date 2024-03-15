@@ -4,19 +4,18 @@ import os
 import re
 from typing import Any, Dict, List, Tuple, Optional, Sequence
 from datetime import datetime
+from pathlib import Path
 
 from zoneinfo import ZoneInfo
 from dateutil import parser
 
 from ..config import settings
-
 from ..taxonomy import definitions
 from .metadata import Archive, AuthorList, Category, \
     DocMetadata, Group, Submitter
 from .version import VersionEntry, SourceFlag
 from ..license import License
 from ..identifier import Identifier
-from ..files.anypath import to_anypath
 from .exceptions import \
     AbsException, AbsParsingException, AbsNotFoundException
 
@@ -65,13 +64,14 @@ _fs_tz: Optional[ZoneInfo] = None
 
 
 def parse_abs_file(filename: str) -> DocMetadata:
-    """Parse an arXiv .abs file.
+    """Parse an arXiv .abs file from the local FS.
 
     The modified time on the abs file will be used as the modified time for the
     abstract. It will be pulled from `flask.config` if in a app_context. It
     can be specified with tz arg.
     """
-    absfile = to_anypath(filename)
+
+    absfile = Path(filename)
     try:
         with absfile.open(mode='r', encoding='latin-1') as absf:
             raw = absf.read()

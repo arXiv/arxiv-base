@@ -10,7 +10,6 @@ from typing import Dict
 
 from ..document.version import SourceFlag
 from ..files import FileObj
-from ..files.anypath import APath
 
 logger = logging.getLogger(__name__)
 
