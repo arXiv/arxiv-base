@@ -33,7 +33,6 @@ sqlalchemy = "~=2.0.27"
 google-auth = "^2.23.4"
 google-cloud-monitoring = "^2.16.0"
 fire = "^0.5.0"
-cloudpathlib = {extras = ["gs"], version = "*"}
 
 [tool.poetry.dev-dependencies]
 pydocstyle = "*"
@@ -44,7 +43,6 @@ hypothesis = "*"
 sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
-mypy-extensions = "*"
 click = "*"
 
 [build-system]
