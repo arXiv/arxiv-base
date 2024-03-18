@@ -51,7 +51,7 @@ from urllib.parse import quote, urlparse
 from flask import url_for, g
 import bleach
 
-from arxiv.taxonomy import CATEGORIES
+from arxiv.taxonomy.definitions import CATEGORIES
 from arxiv import identifier
 from . import clickthrough
 

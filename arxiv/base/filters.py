@@ -12,8 +12,7 @@ from markupsafe import Markup, escape
 
 from arxiv.base.urls import urlizer, canonical_url, clickthrough_url
 from arxiv.util.tex2utf import tex2utf
-from arxiv.taxonomy import get_category_display, get_archive_display, \
-    get_group_display
+from arxiv.taxonomy.category import Archive, Category, Group
 
 ET = timezone('US/Eastern')
 
@@ -102,9 +101,9 @@ def register_filters(app: Flask) -> None:
     app.template_filter('tex2utf_no_symbols')(partial(f_tex2utf, greek=False))
     app.template_filter('canonical_url')(canonical_url)
     app.template_filter('clickthrough_url')(clickthrough_url)
-    app.template_filter('get_category_display')(get_category_display)
-    app.template_filter('get_archive_display')(get_archive_display)
-    app.template_filter('get_group_display')(get_group_display)
+    app.template_filter('get_category_display')(Category.display)
+    app.template_filter('get_archive_display')(Archive.display)
+    app.template_filter('get_group_display')(Group.display)
     app.template_filter('embed_content')(embed_content)
     app.template_filter('tidy_filesize')(tidy_filesize)
     app.template_filter('as_eastern')(as_eastern)
