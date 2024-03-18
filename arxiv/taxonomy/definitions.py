@@ -1947,7 +1947,7 @@ CATEGORY_ALIASES = {
 }
 """
 Equivalences: category alias: canonical category
-
+The name on the right is considered the canonical one
 This model is based on the notion that only two categories may be
 equivalent--not more. There would have to be some significant changes
 to the (classic) code to support three-way equivalences, this code could upgrade to a list of alternate names.
