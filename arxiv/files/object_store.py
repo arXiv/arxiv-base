@@ -67,14 +67,14 @@ class LocalObjectStore(ObjectStore):
     def list(self, key: str) -> Iterator[FileObj]:
         """Gets a listing similar to what would be returned by `Client.list_blobs()`
 
-        `key` should end with a /
-
-        `prefix` should be just a path to a file name. Example:
-        'ps_cache/arxiv/pdf/1212/1212.12345' or
-        'ftp/cs/papers/0012/0012007'.
+        if `key` ends with / it does a dir listing, other wise it does a
+        `prefix` + `key` * listing.
         """
-        parent, file = Path(self.prefix+key).parent, Path(self.prefix+key).name
-        return (LocalFileObj(item) for item in Path(parent).glob(f"{file}*"))
+         if key.endswith("/"):
+             return (LocalFileObj(item) for item in Path(self.prefix+key).glob("*"))
+         else:
+             parent, file = Path(self.prefix + key).parent, Path(self.prefix + key).name
+             return (LocalFileObj(item) for item in Path(parent).glob(f"{file}*"))
 
     def status(self) -> Tuple[Literal["GOOD", "BAD"], str]:
         if Path(self.prefix).exists():
