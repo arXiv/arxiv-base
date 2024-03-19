@@ -7,8 +7,7 @@ class BaseTaxonomy(BaseModel):
     id: str
     full_name: str
     is_active: bool
-    alt_name: Optional[str] #if part of an alias or subsumed archive pair displays the other name the category may be known as
-    _alt_canonical: Optional[str] #private, use canonical method
+    alt_name: Optional[str] #any other name the category may be known as (like if part of an alias or subsumed archive pair)
     
     @property
     def canonical(self) -> str:
@@ -17,7 +16,15 @@ class BaseTaxonomy(BaseModel):
         In the case of subsumed archives, returns the subsuming category.
         In the case of alias pairs returns the canonical category.
         """
-        return self._alt_canonical if self._alt_canonical else self.id
+        from .definitions import ARCHIVES_SUBSUMED, CATEGORY_ALIASES
+        
+        if self.alt_name:
+            if self.id in CATEGORY_ALIASES.keys():
+                return CATEGORY_ALIASES[self.id]
+            elif self.id in ARCHIVES_SUBSUMED.keys():
+                return ARCHIVES_SUBSUMED[self.id]
+
+        return self.id
     
     def display(self, canonical: bool = True) -> str:
         """
