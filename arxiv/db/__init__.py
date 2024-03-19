@@ -25,6 +25,13 @@ with get_db() as session:
         select(...)
     )
 
+    
+for writing within a transaction in any type of app do:
+
+from arxiv.db import transaction
+
+with transaction() as session:
+    session.add(...)
 """
 from typing import Generator
 import logging
