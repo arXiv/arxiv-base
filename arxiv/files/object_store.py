@@ -70,11 +70,11 @@ class LocalObjectStore(ObjectStore):
         if `key` ends with / it does a dir listing, other wise it does a
         `prefix` + `key` * listing.
         """
-         if key.endswith("/"):
-             return (LocalFileObj(item) for item in Path(self.prefix+key).glob("*"))
-         else:
-             parent, file = Path(self.prefix + key).parent, Path(self.prefix + key).name
-             return (LocalFileObj(item) for item in Path(parent).glob(f"{file}*"))
+        if key.endswith("/"):
+            return (LocalFileObj(item) for item in Path(self.prefix+key).glob("*"))
+        else:
+            parent, file = Path(self.prefix + key).parent, Path(self.prefix + key).name
+            return (LocalFileObj(item) for item in Path(parent).glob(f"{file}*"))
 
     def status(self) -> Tuple[Literal["GOOD", "BAD"], str]:
         if Path(self.prefix).exists():
