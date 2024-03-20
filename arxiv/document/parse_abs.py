@@ -9,10 +9,9 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 from dateutil import parser
 
+from ..taxonomy.definitions import ARCHIVES, CATEGORIES
+from .metadata import AuthorList, DocMetadata, Submitter
 from ..config import settings
-from ..taxonomy import definitions
-from .metadata import Archive, AuthorList, Category, \
-    DocMetadata, Group, Submitter
 from .version import VersionEntry, SourceFlag
 from ..license import License
 from ..identifier import Identifier
@@ -157,17 +156,15 @@ def parse_abs_top(raw: str, modified:datetime, abstract:str) -> DocMetadata:
 
     if 'categories' in fields and fields['categories']:
         category_list = fields['categories'].split()
-        if category_list[0] in definitions.CATEGORIES:
-            primary_category = Category(category_list[0])
-            primary_archive = \
-                Archive(
-                    definitions.CATEGORIES[primary_category.id]['in_archive'])
+        if category_list[0] in CATEGORIES:
+            primary_category = CATEGORIES[category_list[0]]
+            primary_archive = primary_category.get_archive()
         elif arxiv_identifier.is_old_id:
-            primary_archive = Archive(arxiv_identifier.archive)
+            primary_archive = ARCHIVES[arxiv_identifier.archive]
         else:
             raise AbsException(f"Invalid caregory {category_list[0]}")
     elif arxiv_identifier.is_old_id:
-        primary_archive = Archive(arxiv_identifier.archive)
+        primary_archive = ARCHIVES[arxiv_identifier.archive]
     else:
         raise AbsException('Cannot infer archive from identifier.')
 
@@ -188,10 +185,9 @@ def parse_abs_top(raw: str, modified:datetime, abstract:str) -> DocMetadata:
         categories=fields['categories'] if 'categories' in fields else None,
         primary_category=primary_category,
         primary_archive=primary_archive,
-        primary_group=Group(
-            definitions.ARCHIVES[primary_archive.id]['in_group']),
+        primary_group=primary_archive.get_group(),
         secondary_categories=[
-            Category(x) for x in category_list[1:]
+            CATEGORIES[x] for x in category_list[1:]
             if (category_list and len(category_list) > 1)
         ],
         journal_ref=None if 'journal_ref' not in fields
