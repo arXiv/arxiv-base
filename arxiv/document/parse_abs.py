@@ -4,18 +4,17 @@ import os
 import re
 from typing import Any, Dict, List, Tuple, Optional, Sequence
 from datetime import datetime
+from pathlib import Path
 
 from zoneinfo import ZoneInfo
 from dateutil import parser
 
-from flask import current_app
-
 from ..taxonomy.definitions import ARCHIVES, CATEGORIES
-from .metadata import  AuthorList, DocMetadata, Submitter
+from .metadata import AuthorList, DocMetadata, Submitter
+from ..config import settings
 from .version import VersionEntry, SourceFlag
 from ..license import License
 from ..identifier import Identifier
-from ..files.anypath import to_anypath
 from .exceptions import \
     AbsException, AbsParsingException, AbsNotFoundException
 
@@ -64,20 +63,18 @@ _fs_tz: Optional[ZoneInfo] = None
 
 
 def parse_abs_file(filename: str) -> DocMetadata:
-    """Parse an arXiv .abs file.
+    """Parse an arXiv .abs file from the local FS.
 
     The modified time on the abs file will be used as the modified time for the
     abstract. It will be pulled from `flask.config` if in a app_context. It
     can be specified with tz arg.
     """
-    absfile = to_anypath(filename)
+
+    absfile = Path(filename)
     try:
         with absfile.open(mode='r', encoding='latin-1') as absf:
             raw = absf.read()
-            if current_app:
-                modified = datetime.fromtimestamp(absfile.stat().st_mtime, tz=_get_tz())
-            else:
-                modified = datetime.fromtimestamp(absfile.stat().st_mtime)
+            modified = datetime.fromtimestamp(absfile.stat().st_mtime, tz=_get_tz())
             modified = modified.astimezone(ZoneInfo("UTC"))
             return parse_abs(raw, modified)
 
@@ -297,9 +294,9 @@ def alt_component_split(components: List[str]) -> List[str]:
 
 
 def _get_tz() -> ZoneInfo:
-    """Gets the timezone from the flask current_app."""
+    """Gets the timezone from the environment"""
     global _fs_tz
     if _fs_tz is None:
-        _fs_tz = ZoneInfo(current_app.config["FS_TZ"])
+        _fs_tz = ZoneInfo(settings.FS_TZ)
 
     return _fs_tz

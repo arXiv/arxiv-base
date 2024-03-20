@@ -16,7 +16,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.11"
 pydantic = "==1.10.*"
-flask = "3.0.2"
+flask = "3.0.*"
 pytz = "*"
 boto3 = "==1.*"
 wtforms = "*"
@@ -28,12 +28,11 @@ markupsafe = "*"
 google-cloud-storage = "^2.5.0"
 google-cloud-logging = "^3.8.0"
 google-cloud-pubsub = "^2.18.4"
-PyMySQL = { version = "~=1.1", optional= true}
 sqlalchemy = "~=2.0.27"
 google-auth = "^2.23.4"
 google-cloud-monitoring = "^2.16.0"
 fire = "^0.5.0"
-cloudpathlib = {extras = ["gs"], version = "*"}
+validators = "*"
 
 [tool.poetry.dev-dependencies]
 pydocstyle = "*"
@@ -44,12 +43,8 @@ hypothesis = "*"
 sphinx = "*"
 sphinxcontrib-websupport = "*"
 sphinx-autodoc-typehints = "*"
-mypy-extensions = "*"
 click = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.extras]
-mysql = ["PyMySQL", "SqlAlchemy"]

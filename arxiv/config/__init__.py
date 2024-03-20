@@ -137,6 +137,8 @@ class Settings(BaseSettings):
     Timezone of the arxiv business offices.
     """
 
+    FS_TZ: str = "US/Eastern"
+
     BASE_VERSION: str = importlib.metadata.version('arxiv-base')
     """The version of the arxiv-base package."""
 

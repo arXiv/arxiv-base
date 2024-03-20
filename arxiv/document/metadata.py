@@ -13,7 +13,7 @@ from .version import VersionEntry
 from ..base.urls import canonical_url
 
 
-@dataclass(frozen=True)
+@dataclass
 class Submitter:
     """Represents the person who submitted an arXiv article."""
 
@@ -26,7 +26,7 @@ class Submitter:
     __slots__ = ['name', 'email']
 
 
-@dataclass(frozen=True)
+@dataclass
 class AuthorList:
     """Represents author names."""
 
@@ -40,7 +40,7 @@ class AuthorList:
         return self.raw
 
 
-@dataclass(frozen=True)
+@dataclass
 class DocMetadata:
     """Class for representing the core arXiv document metadata."""
 
