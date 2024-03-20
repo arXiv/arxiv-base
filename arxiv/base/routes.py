@@ -63,6 +63,7 @@ def test_macros() -> Response:
                     " A subsequent replacement was made before versioning was"
                     " introduced.",
         'primary_category': CATEGORIES['cond-mat.supr-con'],
+        "secondary_categories": [CATEGORIES['math.MP'], CATEGORIES['hep-lat']],
         'submitted_date': datetime.now(),
         'submission_history': [
             {'version': 1, 'submitted_date': datetime.now()},
