@@ -20,11 +20,14 @@ jobs:
           # Check if poetry lock file is current with pyproject.toml
           poetry check --lock
           poetry install --with=dev
-      - name: Run Tests
-        run: poetry run pytest --cov=arxiv fourohfour --cov-fail-under=36 arxiv fourohfour
+      - name: Run arxiv-base tests with coverage
+        run: poetry run pytest --cov=arxiv.base fourohfour --cov-fail-under=68 arxiv/base fourohfour
       # - name: Check Types
       # TODO The types are in bad shape and need to be fixed
       #   run: poetry run mypy --exclude "test*" -p arxiv
+      - name: Run other tests
+        # These tests are split out because their coverage is low
+        run: poetry run pytest --cov=arxiv --cov-fail-under=27 arxiv
       - name: Check Doc Style
         run: poetry run pydocstyle --convention=numpy --add-ignore=D401 arxiv
       - name: Run App Tests
