@@ -48,13 +48,13 @@ class DocMetadata:
     """The raw abs string without submitter email address."""
 
     arxiv_id: str
-    """arXiv paper identifier string without version affix, e.g. 1810.12345."""
+    """ArXiv paper identifier string without version affix, e.g. 1810.12345."""
 
     arxiv_id_v: str
-    """arXiv paper identifier string with version affix, e.g. 1810.12345v2."""
+    """ArXiv paper identifier string with version affix, e.g. 1810.12345v2."""
 
     arxiv_identifier: Identifier
-    """arXiv Identifier for this paper."""
+    """ArXiv Identifier for this paper."""
 
     title: str
     abstract: str
@@ -96,7 +96,7 @@ class DocMetadata:
 
     msc_class: Optional[str] = None
     """American Mathematical Society Mathematics Subject (MSC)
-       classification(s)."""
+    classification(s)."""
 
     proxy: Optional[str] = None
     """Proxy submitter."""
@@ -117,17 +117,13 @@ class DocMetadata:
     """Version history, consisting of at least one version history entry."""
 
     is_definitive: bool = field(default=False)
-    """
-       Indicates whether this is the definitive DocMetadata for this article;
-       i.e. it includes metadata from the latest version of the article that is
-       needed for the abs page display.
-    """
+    """Indicates whether this is the definitive DocMetadata for this article;
+    i.e. it includes metadata from the latest version of the article that is
+    needed for the abs page display."""
 
     is_latest: bool = field(default=False)
-    """
-        Indicates whether this DocMetadata is from the latest
-        version of this article.
-    """
+    """Indicates whether this DocMetadata is from the latest version of this
+    article."""
 
 
 
@@ -196,7 +192,8 @@ class DocMetadata:
     def get_version(self, version:Optional[int] = None) -> Optional[VersionEntry]:
         """Gets `VersionEntry` for `version`.
 
-        Returns None if version does not exist."""
+        Returns None if version does not exist.
+        """
         if version is None:
             if self.arxiv_identifier.has_version:
                 version = self.arxiv_identifier.version
@@ -275,7 +272,8 @@ class DocMetadata:
     def raw(self) -> str:
         """Produces a txt output of the object.
 
-        Based on arXiv::Schema:Role:WrtieAbs"""
+        Based on arXiv::Schema:Role:WrtieAbs
+        """
         rv = "------------------------------------------------------------------------------\n"
         rv += "\\\n"
         rv += f"arXiv:{self.arxiv_id}\n"

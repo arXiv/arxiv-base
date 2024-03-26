@@ -19,13 +19,11 @@ def inject_a11y_url() -> dict:
     return dict(A11Y_URL=config.A11Y_URL)
 
 def register_context_processors(app: Flask) -> None:
-    """
-    Register base context processors on a Flask app.
+    """Register base context processors on a Flask app.
 
     Parameters
     ----------
     app : :class:`Flask`
-
     """
     app.context_processor(inject_get_alerts)
     app.context_processor(inject_get_hidden_alerts)

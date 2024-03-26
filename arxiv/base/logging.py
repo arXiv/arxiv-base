@@ -1,5 +1,4 @@
-"""
-Provides a logger factory with reasonable defaults.
+"""Provides a logger factory with reasonable defaults.
 
 We need to be able to analyze application logs in a consistent way across all
 arXiv services. This module provides a :func:`.getLogger`, which works just
@@ -20,8 +19,7 @@ from arxiv.base.globals import get_application_config
 
 
 def getLogger(name: str, stream: IO = sys.stderr) -> logging.Logger:
-    """
-    Wrapper for :func:`logging.getLogger` that applies configuration.
+    """Wrapper for :func:`logging.getLogger` that applies configuration.
 
     Parameters
     ----------

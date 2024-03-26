@@ -1,4 +1,4 @@
-"""function to open eihter local files or storage bucket files"""
+"""Function to open eihter local files or storage bucket files."""
 from pathlib import Path
 from typing import Union, List
 from contextvars import ContextVar
@@ -9,7 +9,7 @@ from cloudpathlib.gs import GSClient
 from google.cloud.storage import Client as StorageClient
 
 APath = Union[Path, CloudPath]
-"""Type to use with anypath.to_anypath"""
+"""Type to use with anypath.to_anypath."""
 
 
 def to_anypath(item: Union[str, Path]) -> APath:
@@ -69,8 +69,8 @@ _global_gs_client: StorageClient = None
 def _gs_client() -> StorageClient:
     """Gets a Google storage client.
 
-    These appear to be thread safe so we can share this. The start up of the
-    a GS Client takes a bit of time (~ 1.5 sec?).
+    These appear to be thread safe so we can share this. The start up of
+    the a GS Client takes a bit of time (~ 1.5 sec?).
     """
     global _global_gs_client
     if not _global_gs_client:

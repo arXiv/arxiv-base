@@ -1,5 +1,4 @@
-"""
-These tests check for possible problems with apps that use this package.
+"""These tests check for possible problems with apps that use this package.
 
 Usage
 -----
@@ -26,8 +25,6 @@ And run with:
 .. code-block:: bash
 
    pipenv run python my_app_tests.py
-
-
 """
 
 from flask import Flask, current_app

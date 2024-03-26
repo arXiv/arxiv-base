@@ -6,7 +6,8 @@ from datetime import datetime
 SOURCE_FORMAT = Literal["tex", "ps", "html", "pdf", "withdrawn", "pdftex", "docx"]
 """All values used in DB for the source_format column.
 
-Excluding NULL."""
+Excluding NULL.
+"""
 
 
 @dataclass
@@ -20,86 +21,75 @@ class SourceFlag:
 
     @property
     def ignore(self) -> bool:
-        """Withdarawn. All files auto ignore. No paper available."""
+        """Withdarawn.
+
+        All files auto ignore. No paper available.
+        """
         return self.code is not None and 'I' in self.code
 
     @property
     def source_encrypted(self)->bool:
-        """
-        Source is encrypted and should not be made available.
-        """
+        """Source is encrypted and should not be made available."""
         return self.code is not None and 'S' in self.code
 
     @property
     def ps_only(self)->bool:
-        """
-        Multi-file PS submission. It is not necessary to indicate P with single file PS
-        since in this case the source file has .ps.gz extension.
+        """Multi-file PS submission.
+
+        It is not necessary to indicate P with single file PS since in
+        this case the source file has .ps.gz extension.
         """
         return self.code is not None and 'P' in self.code
 
     @property
     def pdflatex(self)->bool:
-        """
-        A TeX submission that must be processed with PDFlatex
-        """
+        """A TeX submission that must be processed with PDFlatex."""
         return self.code is not None and 'D' in self.code
 
     @property
     def html(self)->bool:
-        """
-        Multi-file HTML submission.
-        """
+        """Multi-file HTML submission."""
         return self.code is not None and 'H' in self.code
 
     @property
     def includes_ancillary_files(self)->bool:
-        """
-        Submission includes ancillary files in the /anc directory
-        """
+        """Submission includes ancillary files in the /anc directory."""
         return self.code is not None and 'A' in self.code
 
     @property
     def dc_pilot_data(self)->bool:
-        """
-        Submission has associated data in the DC pilot system
-        """
+        """Submission has associated data in the DC pilot system."""
         return self.code is not None and 'B' in self.code
 
     @property
     def docx(self)->bool:
-        """
-        Submission in Microsoft DOCX (Office Open XML) format
-        """
+        """Submission in Microsoft DOCX (Office Open XML) format."""
         return self.code is not None and 'X' in self.code
 
     @property
     def odf(self)->bool:
-        """
-        Submission in Open Document Format
-        """
+        """Submission in Open Document Format."""
         return self.code is not None and 'O' in self.code
 
     @property
     def pdf_only(self)->bool:
-        """
-        PDF only submission with .tar.gz package. (likely because of anc files)
+        """PDF only submission with .tar.gz package.
+
+        (likely because of anc files)
         """
         return self.code is not None and 'F' in self.code
 
     @property
     def cannot_pdf(self) -> bool:
-        """
-        Is this version unable to produce a PDF?
+        """Is this version unable to produce a PDF?
+
         Does not take into account withdarawn.
         """
         return self.code is not None and self.html or self.odf or self.docx
 
     @property
     def is_single_file(self) -> bool:
-        """
-        Is the source for this version a single file?
-        """
+        """Is the source for this version a single file?"""
         return self.code is not None and '1' in self.code
 
 

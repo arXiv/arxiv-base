@@ -41,22 +41,23 @@ RE_ARXIV_ID_FROM_PREHISTORY = re.compile(
 NAMED_FIELDS = ['Title', 'Authors', 'Categories', 'Comments', 'Proxy',
                 'Report-no', 'ACM-class', 'MSC-class', 'Journal-ref',
                 'DOI', 'License']
-"""
-Fields that may be parsed from the key-value pairs in second
-major component of .abs string. Field names are not normalized.
+"""Fields that may be parsed from the key-value pairs in second major component
+of .abs string.
+
+Field names are not normalized.
 """
 
 REQUIRED_FIELDS = ['title', 'authors', 'abstract']
-"""
-Required parsed fields with normalized field names.
+"""Required parsed fields with normalized field names.
 
-Note the absence of 'categories' as a required field. A subset of version-
-affixed .abs files with the old identifiers predate the introduction of
-categories and therefore do not have a "Categories:" line; only the (higher-
-level) archive and group can be be inferred, and this must be done via the
-identifier itself.
+Note the absence of 'categories' as a required field. A subset of
+version- affixed .abs files with the old identifiers predate the
+introduction of categories and therefore do not have a "Categories:"
+line; only the (higher- level) archive and group can be be inferred, and
+this must be done via the identifier itself.
 
-The latest versions of these papers should always have the "Categories:" line.
+The latest versions of these papers should always have the "Categories:"
+line.
 """
 
 
@@ -274,11 +275,13 @@ def _parse_metadata_fields(key_value_block: str) -> Dict[str, str]:
 
 def alt_component_split(components: List[str]) -> List[str]:
     r"""Alternative split to accomidate extra \\ in the abstract.
-        ex of abstract portion:
-        u_t = \Delta u
-        \\
-        v_t = \Delta v
-        ARXIVNG-3128"""
+
+    ex of abstract portion:
+    u_t = \Delta u
+    \\
+    v_t = \Delta v
+    ARXIVNG-3128
+    """
     if len(components) <= 4:
         raise AbsParsingException(
             'Unexpected number of components parsed from .abs.')
@@ -298,7 +301,7 @@ def alt_component_split(components: List[str]) -> List[str]:
 
 
 def _get_tz() -> ZoneInfo:
-    """Gets the timezone from the environment"""
+    """Gets the timezone from the environment."""
     global _fs_tz
     if _fs_tz is None:
         _fs_tz = ZoneInfo(settings.FS_TZ)

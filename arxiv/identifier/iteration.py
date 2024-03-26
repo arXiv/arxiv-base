@@ -1,3 +1,5 @@
+"""Iterator for arxiv IDs."""
+
 from typing import Optional, List
 
 from sqlalchemy import or_
@@ -10,6 +12,7 @@ from ..document.version import SOURCE_FORMAT
 
 
 class arXivIDIterator:
+    """Iterator for arxiv ids."""
 
     def __init__ (self,
                   start_yymm: str,
@@ -35,9 +38,11 @@ class arXivIDIterator:
         self.index = 0
 
     def __iter__ (self) -> 'arXivIDIterator':
+        """Iterator for arXiv ids."""
         return self
     
     def __next__ (self) -> Identifier:
+        """Gets next."""
         if self.index >= self.len_ids:
             raise StopIteration
         paper_id, version = self.ids[self.index].tuple()
