@@ -49,6 +49,12 @@ class BaseTaxonomy(BaseModel):
                 item=GROUPS[name]
                 return f'{item.full_name} ({item.id})'
 
+    def __eq__(self, other):
+        return self.id == other.id and self.__class__ == other.__class__
+
+    def __hash__(self):
+        return hash((self.__class__, self.id))
+
 class Group(BaseTaxonomy):
     """Represents an arXiv group--the highest (most general) taxonomy level."""
     start_year: int
