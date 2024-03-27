@@ -1,5 +1,4 @@
-"""
-Contants for HTTP status codes. Merely to increase code readability.
+"""Contants for HTTP status codes. Merely to increase code readability.
 
 This was originally implemented using ``int`` values. We then switched to using
 the IntEnums in :mod:`http`, which uses names without ``HTTP_[0-9]{3}_``

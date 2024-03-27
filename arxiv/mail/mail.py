@@ -21,8 +21,7 @@ def send(recipient: str,
          headers: Optional[Dict[str, str]] = None,
          cc_recipients: Optional[List[str]] = None,
          bcc_recipients: Optional[List[str]] = None) -> None:
-    """
-    Send an e-mail.
+    """Send an e-mail.
 
     If both ``text_body`` and ``html_body`` are provided, the e-mail will be
     sent as ``multipart/alternative``.
@@ -46,7 +45,6 @@ def send(recipient: str,
         E-mail addresses that should be CC recipients.
     bcc_recipients : list
         E-mail addresses that should be BCC recipients.
-
     """
     _send(_write(recipient, subject, text_body, html_body=html_body,
                  sender=sender, headers=headers, cc_recipients=cc_recipients,

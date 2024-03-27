@@ -11,13 +11,12 @@ from arxiv import taxonomy
 __all__ = ('parse_arxiv_id', 'Identifier', )
 
 _archive = '|'.join([re.escape(key) for key in taxonomy.ARCHIVES.keys()])
-"""string for use in Regex for all arXiv archives"""
+"""String for use in Regex for all arXiv archives."""
 
 _category = '|'.join([re.escape(key) for key in taxonomy.CATEGORIES.keys()])
 
 _prefix = r'(?P<arxiv_prefix>ar[xX]iv:)'
-"""
-Attempt to catch the arxiv prefix in front of arxiv ids.
+"""Attempt to catch the arxiv prefix in front of arxiv ids.
 
 E.g. so that it can be included in the <a> tag anchor (ARXIVNG-1284).
 """
@@ -52,8 +51,7 @@ STANDARD = re.compile(
 
 
 def parse_arxiv_id(value: str) -> str:
-    """
-    Parse arxiv id from string.
+    """Parse arxiv id from string.
 
     Raises `ValidationError` if no arXiv ID.
     """
@@ -126,7 +124,10 @@ class Identifier:
         self.is_old_id: Optional[bool] = None
         self.extra: Optional[str] = None
         self.arxiv_prefix: bool = False
-        """Set to `True` if id like arxiv:astro-ph/011202. This was an acceptable old id format."""
+        """Set to `True` if id like arxiv:astro-ph/011202.
+
+        This was an acceptable old id format.
+        """
 
         if self.ids in taxonomy.definitions.ARCHIVES:
             raise IdentifierIsArchiveException(
@@ -199,8 +200,7 @@ class Identifier:
                 )
 
     def _parse_old_id(self, match_obj: Match[str]) -> None:
-        """
-        Populate instance attributes parsed from old arXiv identifier.
+        """Populate instance attributes parsed from old arXiv identifier.
 
         The old identifiers were minted from 1991 until March 2007.
 
@@ -212,7 +212,6 @@ class Identifier:
         Returns
         -------
         None
-
         """
         self.is_old_id = True
         self.archive = match_obj.group('archive')
@@ -228,8 +227,7 @@ class Identifier:
             self.extra = match_obj.group('extra')
 
     def _parse_new_id(self, match_obj: Match[str]) -> None:
-        """
-        Populate instance attributes from a new arXiv identifier.
+        """Populate instance attributes from a new arXiv identifier.
 
         New identifiers started 2007-04 with 4-digit suffix;
         starting 2015 they have a 5-digit suffix.
@@ -246,7 +244,6 @@ class Identifier:
         Returns
         -------
         None
-
         """
         self.is_old_id = False
         self.archive = 'arxiv'
@@ -286,8 +283,12 @@ class Identifier:
 
     @staticmethod
     def is_mostly_safe(idin: Optional[str]) -> bool:
-        """Checks that the input could reasonably be parsed as an ID,
-        fails if strange unicode, starts with strange characters, very long etc."""
+        """Checks that the input could reasonably be parsed as an ID.
+
+        Fails if strange unicode, starts with strange characters, very long
+        etc.
+
+        """
         if not idin:
             return False
         if len(idin) > 200:

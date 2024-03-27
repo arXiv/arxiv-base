@@ -60,9 +60,9 @@ def config_file_example():
 def last_hour(dry_run: bool, config_file: str, verbose: bool):
     """Adds request count for last clock hour.
 
-    Ex time is 2023-11-27T19:05:00Z,
-    the start of the interval is 2023-11-27T18:00:00.000000000Z
-    and the end time will be 2023-11-27T18:59:59.999999999Z
+    Ex time is 2023-11-27T19:05:00Z, the start of the interval is
+    2023-11-27T18:00:00.000000000Z and the end time will be
+    2023-11-27T18:59:59.999999999Z
     """
     config = configparser.ConfigParser()
     config.read(config_file)

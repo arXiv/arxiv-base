@@ -13,8 +13,6 @@ def fake_reasons():
 
 class TestReasons(TestCase):
     """Tests for :func:`reasons`."""
-
-
     ids_with_v =[ 'cond-mat/0405693v1', 'cond-mat/0405693v2',
                   'quant-ph/9803059v1', 'hep-ph/9606335v1', 'math-ph/0303060v1',
                   'hep-lat/9810030v1', '0804.0582v1', 'hep-ph/9702274v1',
@@ -2416,7 +2414,6 @@ test_reasons_data = {
 """Reasons some papers cannot build a PDF.
 
 The keys are in the formats yymm.12345 or yymm.1234 or cat/yymm123 or
-any of those with a version number or any of those with a version
-number and a format.
-
+any of those with a version number or any of those with a version number
+and a format.
 """

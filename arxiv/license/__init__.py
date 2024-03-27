@@ -16,7 +16,6 @@ LICENSES = {
         'order': 1,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
-
     'http://creativecommons.org/licenses/by-sa/4.0/': {
         'order': 2,
         'label': 'CC BY-SA: Creative Commons Attribution-ShareAlike',
@@ -28,7 +27,6 @@ LICENSES = {
                 'identical terms.',
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-sa-4.0.png'},
-
     'http://creativecommons.org/licenses/by-nc-sa/4.0/': {
         'order': 3,
         'label': 'CC BY-NC-SA: Creative Commons '
@@ -41,7 +39,6 @@ LICENSES = {
                 'identical terms.',
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
-
     'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
         'order': 4,
         'label': 'CC BY-NC-ND: Creative Commons '
@@ -52,7 +49,6 @@ LICENSES = {
                 'is given to the creator.',
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-nd-4.0.png'},
-
     'http://arxiv.org/licenses/nonexclusive-distrib/1.0/': {
         'label': 'arXiv.org perpetual, non-exclusive license to '
                  'distribute this article',
@@ -62,7 +58,6 @@ LICENSES = {
         'order': 5,
         'is_current': True,
     },
-
     'http://creativecommons.org/publicdomain/zero/1.0/': {
         'label': 'CC Zero: No Rights Reserved',
         'note': 'CC Zero is a public dedication tool, which allows creators '
@@ -74,8 +69,6 @@ LICENSES = {
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/zero-1.0.png'
     },
-
-
     'http://arxiv.org/licenses/assumed-1991-2003/': {
         'label': 'Assumed arXiv.org perpetual, non-exclusive license to '
                  'distribute this article for submissions made before '
@@ -83,14 +76,12 @@ LICENSES = {
         'order': 9,
         'is_current': False,
     },
-
     'http://creativecommons.org/licenses/by/3.0/': {
         'label': 'Creative Commons Attribution license',
         'order': 10,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-3.0.png'
     },
-
     'http://creativecommons.org/licenses/by-nc-sa/3.0/': {
         'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
                  'license',
@@ -177,8 +168,7 @@ class License:
     """URI of a license if one is in the article record."""
 
     effective_uri: str = field(init=False)
-    """
-    License that is in effect.
+    """License that is in effect.
 
     When the submitter uploaded this paper to arXiv, they agreed to
     arXiv using the paper under the terms of this license. This takes

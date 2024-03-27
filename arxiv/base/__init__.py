@@ -1,5 +1,4 @@
-"""
-arXiv base Flask components.
+"""ArXiv base Flask components.
 
 Provides :class:`.Base`, which attaches base templates, static assets, global
 context processors, and exception handlers to a :class:`flask.Flask` app
@@ -22,8 +21,6 @@ Intended for use in an application factory. For example:
       Base(app)   # Registers the base/UI blueprint.
       app.register_blueprint(routes.blueprint)    # Your blueprint.
    return app
-
-
 """
 import types
 import logging
