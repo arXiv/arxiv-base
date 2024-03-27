@@ -9,9 +9,8 @@ ET = timezone('US/Eastern')
 
 
 class TestISO8601JSONEncoder(TestCase):
-    """
-    Tests :func:`.serialize.dumps` and :class:`.serialize.ISO8601JSONEncoder`.
-    """
+    """Tests :func:`.serialize.dumps` and
+    :class:`.serialize.ISO8601JSONEncoder`."""
 
     def test_encode_with_date(self):
         """Encode JSON with a :class:`.date` object."""
@@ -78,9 +77,8 @@ class TestISO8601JSONEncoder(TestCase):
 
 
 class TestISO8601JSONDecoder(TestCase):
-    """
-    Tests :func:`.serialize.loads` and :class:`.serialize.ISO8601JSONDecoder`.
-    """
+    """Tests :func:`.serialize.loads` and
+    :class:`.serialize.ISO8601JSONDecoder`."""
 
     def test_decode_with_date(self):
         """Decode JSON with a date value."""

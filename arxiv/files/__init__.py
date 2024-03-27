@@ -11,27 +11,37 @@ import typing
 from typing import BinaryIO, Optional, Union
 
 class BinaryMinimalFile(typing.Protocol):
+    """A minimal file `Protocol` for a python binary file."""
+    
     def read(self, size: Optional[int] = -1) -> bytes:
+        """Read the bytes of the file."""
         pass
 
     def readline(self, size: Optional[int] = -1) -> bytes:
+        """Read a line of the file."""
         pass
 
     def seek(self, pos: int, whence:int=io.SEEK_SET) -> int:
+        """Seek into a file."""
         pass
+    
     def close(self)->None:
+        """Close the file."""
         pass
 
     def __enter__(self) -> 'BinaryMinimalFile':
+        """Context fn."""
         pass
 
     def __exit__(self,
                  exc_type: Optional[typing.Type[BaseException]],
                  exc_val: Optional[BaseException],
                  exc_tb: Optional[TracebackType]) -> None:
+        """Exist the context."""
         pass
 
     def __iter__(self) -> typing.Iterator[bytes]:
+        """Iterator of bytes for the file."""
         pass
 
 class FileObj(ABC):
@@ -44,48 +54,49 @@ class FileObj(ABC):
     add the `abstractmethod` to `FileObj` then implement a local
     version in `LocalFileObj`. The method added to `FileObj` should
     have the exact type signature as the method in `Blob`.
-
     """
 
     @property
     @abstractmethod
     def name(self) -> str:
-        """Name, either path or key"""
+        """Name, either path or key."""
         pass
 
     @abstractmethod
     def exists(self) -> bool:
-        """Does the storage obj exist?
+        """`True` if the storage obj exists.
 
-        This is not a property due to it not being a propery on GS `Blob`."""
+        This is not a property due to it not being a propery on GS `Blob`.
+        """
         pass
 
     @abstractmethod
     def open(self, mode:str) -> BinaryMinimalFile:
-        """Opens the object similar to the normal Python `open()`"""
+        """Opens the object similar to the normal Python `open()`."""
         pass
 
     @property
     @abstractmethod
     def etag(self) -> str:
-        """Gets the etag for the storage object"""
+        """Gets the etag for the storage object."""
         pass
 
     @property
     @abstractmethod
     def size(self) -> int:
-        """Size in bytes"""
+        """Size in bytes."""
         pass
 
     @property
     @abstractmethod
     def updated(self) -> datetime:
-        """Datetime object of last modified"""
+        """Datetime object of last modified."""
 
 
 class FileDoesNotExist(FileObj):
-    """Represents a file that does not exist"""
-
+    """Represents a file that does not exist."""
+    # noqa
+    
     def __init__(self, item: str):
         self.item = item
 
@@ -267,8 +278,8 @@ class FileFromTar(FileObj):
         """Returns `True` if `tar_file` exists and a member exists at `path` in
         the tar.
 
-        This extracts and saves the tarinfo. That records the offset into
-        the tar file. So it should not be too inefficient.
+        This extracts and saves the tarinfo. That records the offset
+        into the tar file. So it should not be too inefficient.
         """
         if self._path_exists is not None:
             return self._path_exists

@@ -6,7 +6,6 @@ To use this:
    poetry install
    export GOOGLE_APPLICATION_CREDENTIALS=~/somefile.json # needs read object permission on fastly log bucket
    poetry python arxiv/ops/fastly_gs_logs_to_cit.py --help
-
 """
 import heapq
 import logging
@@ -45,10 +44,11 @@ _et_year = UTC_PREVIOUS_HOUR.astimezone(ET_TZ).year
 DEFAULT_ARCHIVE_DIR_BASE = f"/data/logs_archive/site/fastly"
 
 TIME_PATTERN = r"\[([^\]]+)\]"
-"""Pattern to capture time from a log line
-    Ex.
-    180.66.144.48 180.66.144.48 - | [29/Dec/2023:01:57:01 +0000] [Mozilla/etc...
-    """
+"""Pattern to capture time from a log line.
+
+Ex.
+180.66.144.48 180.66.144.48 - | [29/Dec/2023:01:57:01 +0000] [Mozilla/etc...
+"""
 
 TIME_STRP = "%d/%b/%Y:%H:%M:%S %z"
 
@@ -85,7 +85,6 @@ def k_way_merge(
     ----------
     files: Paths to read from
     output: Path to write output to
-
     """
     files = [open(filename) for filename in in_files]
     line_heap = []
@@ -193,13 +192,16 @@ def get_hour(date_of_logs: datetime|str = "previous_hour",
              with_db_stats: bool = False):
     """Gets the fastly logs for an hour.
 
-    Downloads the fastly logs from GCP, combines them and puts in logs_archive.
+    Downloads the fastly logs from GCP, combines them and puts in
+    logs_archive.
 
     By default, gets the previous hour.
 
-    File names and timestamps in logs will be UTC time since fastly uses UTC times.
+    File names and timestamps in logs will be UTC time since fastly uses
+    UTC times.
 
-    Will overwrite already existing out file and will overwrite any already downloaded log files.
+    Will overwrite already existing out file and will overwrite any
+    already downloaded log files.
     """
     if date_of_logs == "previous_hour":
         date_of_logs = UTC_PREVIOUS_HOUR
@@ -282,7 +284,8 @@ def get_day(date_eastern: datetime|str,
             combine_day: bool = False):
     """Gets all logs for a day.
 
-    `date_eastern` is in the ET."""
+    `date_eastern` is in the ET.
+    """
     logger.setLevel(logging.DEBUG)
 
     if type(date_eastern) == str:

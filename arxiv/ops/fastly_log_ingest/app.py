@@ -27,7 +27,6 @@ INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 12.0))  # seconds between info l
 
 LOGGER_NAME = os.environ.get("LOGGER_NAME", "fastly_log_ingest")
 # name of logger in GCP, don't prefix with project-id or anything
-
 """Number of log records in a batch. Limit seems to be 16kb but not sure."""
 MAX_PER_BATCH = int(os.environ.get("MAX_PER_BATCH", 10))
 
@@ -162,7 +161,6 @@ if __name__ == "__main__":
         threads.append(Thread(target=_logging_thread))
     [t.start() for t in threads]
     logger.info(f"Started {len(threads)} log writer threads.")
-
     """>>>>>>>> Setup of streaming pull from Pub/Sub <<<<<<<<"""
 
     subscriber = pubsub_v1.SubscriberClient()

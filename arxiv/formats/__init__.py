@@ -25,10 +25,12 @@ VALID_SOURCE_EXTENSIONS = [
     ('.dvi.gz', None),
     ('.html.gz', ['html'])
 ]
-"""List of tuples containing the valid source file name extensions and
-their corresponding dissemintation formats.  There are minor
-performance implications in the ordering when doing filesystem
-lookups, so the ordering here should be preserved."""
+"""List of tuples containing the valid source file name extensions and their
+corresponding dissemintation formats.
+
+There are minor performance implications in the ordering when doing
+filesystem lookups, so the ordering here should be preserved.
+"""
 
 
 def formats_from_source_file_name(source_file_path: str) -> List[str]:
@@ -104,9 +106,9 @@ def formats_from_source_flag(source_flag: Union[str, SourceFlag]) -> List[str]:
     return formats
 
 def get_all_formats(src_fmt: str) -> List[str]:
-        """Returns the list of all formats that the given src can
-        be disseminated in. Takes sources format and knows what
-        transformations can be applied.
+        """Returns the list of all formats that the given src can be
+        disseminated in. Takes sources format and knows what transformations
+        can be applied.
 
         Does not include sub-formats (like types of ps).
         """

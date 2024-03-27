@@ -1,5 +1,4 @@
-"""
-Provides routes for verifying base templates and exception handling.
+"""Provides routes for verifying base templates and exception handling.
 
 The blueprint instantiated here is **not** for use in a production application;
 it is not attached by :class:`arxiv.base.Base`.

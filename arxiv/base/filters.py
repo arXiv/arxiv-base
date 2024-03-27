@@ -18,13 +18,12 @@ ET = timezone('US/Eastern')
 
 
 JinjaFilterInput = Union[Markup, str]
-"""
-   Jinja filters will receive their text input as either
-   a Markup object or a str. It is critical for proper escaping to
-   to ensure that str is correctly HTML escaped.
+"""Jinja filters will receive their text input as either a Markup object or a
+str. It is critical for proper escaping to to ensure that str is correctly HTML
+escaped.
 
-   Markup is decoded from str so this type is redundant but
-   the hope is to make it clear what is going on to arXiv developers.
+Markup is decoded from str so this type is redundant but the hope is to
+make it clear what is going on to arXiv developers.
 """
 
 
@@ -58,8 +57,7 @@ def embed_content(path: str) -> Markup:
 
 
 def tidy_filesize(size: Union[int, float]) -> str:
-    """
-    Convert upload size to human readable form.
+    """Convert upload size to human readable form.
 
     Decision to use powers of 10 rather than powers of 2 to stay compatible
     with Jinja filesizeformat filter with binary=false setting that we are
@@ -67,7 +65,6 @@ def tidy_filesize(size: Union[int, float]) -> str:
 
     Parameter: size in bytes
     Returns: formatted string of size in units up through GB
-
     """
     units = ["B", "KB", "MB", "GB"]
     if size == 0:
@@ -87,13 +84,11 @@ def as_eastern(utc_datetime: datetime) -> datetime:
 
 
 def register_filters(app: Flask) -> None:
-    """
-    Register base template filters on a Flask app.
+    """Register base template filters on a Flask app.
 
     Parameters
     ----------
     app : :class:`Flask`
-
     """
     app.template_filter('abstract_lf_to_br')(abstract_lf_to_br)
     app.template_filter('urlize')(urlizer())

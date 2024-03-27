@@ -1,7 +1,7 @@
 # Dockerfile for fastly log ingest
 #
 # Runs arxiv.ops.fastly_log_ingest.app
-# see arxiv/ops/fastly_log_ingest/__init__.py
+# see arxiv/ops/fastly_log_ingest
 #
 # Needs to be run with a SA that can read from the pub/sub subscription
 # and write to the project logs.

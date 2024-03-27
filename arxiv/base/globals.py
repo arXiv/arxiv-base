@@ -1,5 +1,4 @@
-"""
-Helpers for working with Flask globals.
+"""Helpers for working with Flask globals.
 
 Flask makes heavy use of proxy objects. Depending on the context in which code
 is being executed, many of the Flask globals will refer to different things
@@ -18,8 +17,7 @@ import werkzeug
 
 
 def get_application_config(app: Optional[Flask] = None) ->Mapping:
-    """
-    Get a configuration from the current app, or fall back to os.env.
+    """Get a configuration from the current app, or fall back to os.env.
 
     Parameters
     ----------
@@ -41,8 +39,7 @@ def get_application_config(app: Optional[Flask] = None) ->Mapping:
 
 
 def get_application_global() -> Optional[werkzeug.local.LocalProxy]:
-    """
-    Get the current application global proxy object.
+    """Get the current application global proxy object.
 
     Returns
     -------

@@ -1,5 +1,4 @@
-"""
-Provides base HTTP exceptions and exception handling.
+"""Provides base HTTP exceptions and exception handling.
 
 arXiv-base exceptions inherit from `Werkzeug HTTPExceptions
 <http://werkzeug.pocoo.org/docs/0.14/exceptions/>`_. In most cases it will
@@ -42,14 +41,12 @@ def handler(exception_type: Type[HTTPException]) -> Callable:
 
 
 def get_handlers() -> List[Tuple[Type[HTTPException], Callable]]:
-    """
-    Get a list of registered exception handlers.
+    """Get a list of registered exception handlers.
 
     Returns
     -------
     list
         List of (:class:`.HTTPException`, callable) tuples.
-
     """
     return _handlers
 

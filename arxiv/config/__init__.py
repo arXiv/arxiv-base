@@ -12,16 +12,16 @@ DEFAULT_LATEXML_DB = "sqlite:///tests/data/latexml.db"
 class Settings(BaseSettings):
 
     SERVER_NAME: Optional[str] = None
-    """
-    the name and port number of the server. Required for subdomain support (e.g.:
-    'myapp.dev:5000') Note that localhost does not support subdomains so setting
-    this to "localhost" does not help. Setting a SERVER_NAME also by default
-    enables URL generation without a request context but with an application
-    context.
+    """The name and port number of the server. Required for subdomain support
+    (e.g.: 'myapp.dev:5000') Note that localhost does not support subdomains so
+    setting this to "localhost" does not help. Setting a SERVER_NAME also by
+    default enables URL generation without a request context but with an
+    application context.
 
-    If this is set and the Host header of a request does not match the SERVER_NAME,
-    then Flask will respond with a 404. Test with
-    curl http://127.0.0.1:5000/ -sv -H "Host: subdomain.arxiv.org"
+    If this is set and the Host header of a request does not match the
+    SERVER_NAME, then Flask will respond with a 404. Test with curl
+    http://127.0.0.1:5000/
+    -sv -H "Host: subdomain.arxiv.org"
     """
 
     SECRET_KEY: str = "qwert2345"
@@ -108,8 +108,7 @@ class Settings(BaseSettings):
         ("university", "/", "cornell.edu"),
         ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
     ]
-    """
-    URLs for external services, for use with :func:`flask.url_for`.
+    """URLs for external services, for use with :func:`flask.url_for`.
 
     For details, see :mod:`arxiv.base.urls`.
     """
@@ -133,9 +132,7 @@ class Settings(BaseSettings):
 
 
     ARXIV_BUSINESS_TZ: str = "US/Eastern"
-    """
-    Timezone of the arxiv business offices.
-    """
+    """Timezone of the arxiv business offices."""
 
     FS_TZ: str = "US/Eastern"
 
@@ -143,8 +140,11 @@ class Settings(BaseSettings):
     """The version of the arxiv-base package."""
 
     APP_VERSION: str = BASE_VERSION
-    """The version of the base test app. This is used to build the paths
-    to static assets, see :mod:`arxiv.base`."""
+    """The version of the base test app.
+
+    This is used to build the paths
+    to static assets, see :mod:`arxiv.base`.
+    """
 
     # In some cases, we want an app to handle all of its static files, e.g. when
     # deploying in a development environment. Setting the configuration param
@@ -157,7 +157,10 @@ class Settings(BaseSettings):
     ANALYTICS_ENABLED: bool = False
     """Enable/disable Matomo web analytics."""
     ANALYTICS_BASE_URL: str = "https://webstats.arxiv.org/"
-    """Base URL for analytics tracker. Should include trailing slash."""
+    """Base URL for analytics tracker.
+
+    Should include trailing slash.
+    """
     ANALYTICS_COOKIE_DOMAIN: str = "*.arxiv.org"
     """Analytics tracker cookie domain."""
     ANALYTICS_SITE_ID: str = "1"

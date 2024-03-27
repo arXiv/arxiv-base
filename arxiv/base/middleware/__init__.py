@@ -1,5 +1,4 @@
-r"""
-WSGI middleware integration for Flask apps.
+r"""WSGI middleware integration for Flask apps.
 
 A WSGI middleware sits "between" the WSGI server (e.g. uWSGI) and the Flask
 application. This allows us to execute code on each request, either before or
@@ -66,9 +65,6 @@ called first upon each request.
    from arxiv.base.middleware import wrap
    app = Flask('some_app')
    wrap(app, [FirstMiddleware, SecondMiddleware, ThirdMiddleware])
-
-
-
 """
 
 from typing import Type, Callable, List, Union
@@ -82,8 +78,7 @@ logger = logging.getLogger(__name__)
 
 
 def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
-    """
-    Wrap a :class:`.Flask` app in WSGI middlewares.
+    """Wrap a :class:`.Flask` app in WSGI middlewares.
 
     Adds/updates ``app.middlewares: Dict[str, IWSGIApp]`` so that middleware
     instances can be accessed later on. Keys are the ``__name__``s of the
@@ -102,7 +97,6 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
     -------
     :class:`.Flask`
         The original Flask ``app``, with middlewares applied.
-
     """
     if not hasattr(app, 'wsgi_app'):
         raise TypeError('Not a valid Flask app or middleware')

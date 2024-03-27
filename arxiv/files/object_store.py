@@ -11,11 +11,11 @@ from google.cloud.storage.bucket import Bucket
 from . import FileObj
 
 class ObjectStore(ABC):
-    """ABC for an object store"""
+    """ABC for an object store."""
 
     @abstractmethod
     def to_obj(self, key: str) -> FileObj:
-        """Gets a `FileObj` given a key"""
+        """Gets a `FileObj` given a key."""
         pass
 
     @abstractmethod
@@ -30,12 +30,11 @@ class ObjectStore(ABC):
     def status(self) -> Tuple[Literal["GOOD", "BAD"], str]:
         """Indicates the health of the service.
 
-        Returns a tuple of either ("GOOD",'') or ("BAD","Some human readable
-        message")
+        Returns a tuple of either ("GOOD",'') or ("BAD","Some human
+        readable message")
 
-        The human readable message might be displayed publicly so do
-        not put sensitive information in it.
-
+        The human readable message might be displayed publicly so do not
+        put sensitive information in it.
         """
         pass
 
@@ -46,7 +45,7 @@ class ObjectStore(ABC):
 from . import FileDoesNotExist, FileObj, LocalFileObj
 
 class LocalObjectStore(ObjectStore):
-    """ObjectStore that uses local FS and Path"""
+    """ObjectStore that uses local FS and Path."""
     def __init__(self, prefix:str):
         if not prefix:
             raise ValueError("Must have a prefix")
@@ -56,7 +55,7 @@ class LocalObjectStore(ObjectStore):
         self.prefix = prefix
 
     def to_obj(self,  key:str) -> FileObj:
-        """Gets a `LocalFileObj` from local file system"""
+        """Gets a `LocalFileObj` from local file system."""
         item = Path(self.prefix + key)
         if not item or not item.exists():
             return FileDoesNotExist(self.prefix + key)
@@ -65,16 +64,17 @@ class LocalObjectStore(ObjectStore):
 
 
     def list(self, key: str) -> Iterator[FileObj]:
-        """Gets a listing similar to what would be returned by `Client.list_blobs()`
+        """Gets a listing similar to what would be returned by
+        `Client.list_blobs()`
 
-        `key` should end with a /
-
-        `prefix` should be just a path to a file name. Example:
-        'ps_cache/arxiv/pdf/1212/1212.12345' or
-        'ftp/cs/papers/0012/0012007'.
+        if `key` ends with / it does a dir listing, other wise it does a
+        `prefix` + `key` * listing.
         """
-        parent, file = Path(self.prefix+key).parent, Path(self.prefix+key).name
-        return (LocalFileObj(item) for item in Path(parent).glob(f"{file}*"))
+        if key.endswith("/"):
+            return (LocalFileObj(item) for item in Path(self.prefix+key).glob("*"))
+        else:
+            parent, file = Path(self.prefix + key).parent, Path(self.prefix + key).name
+            return (LocalFileObj(item) for item in Path(parent).glob(f"{file}*"))
 
     def status(self) -> Tuple[Literal["GOOD", "BAD"], str]:
         if Path(self.prefix).exists():
@@ -104,7 +104,8 @@ class GsObjectStore(ObjectStore):
     def to_obj(self, key: str) -> FileObj:
         """Gets the `Blob` fom google-cloud-storage.
 
-        Returns `FileDoesNotExist` if there is no object at the key."""
+        Returns `FileDoesNotExist` if there is no object at the key.
+        """
         blob = self.bucket.get_blob(key)
         if not blob:
             return FileDoesNotExist("gs://" + self.bucket.name + '/' + key)

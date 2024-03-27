@@ -1,5 +1,4 @@
-"""
-Provides middleware to support classic CUL/Apache log format.
+"""Provides middleware to support classic CUL/Apache log format.
 
 For accurate request metrics, apply this middleware before any others.
 
@@ -9,7 +8,6 @@ middleware installed:
 .. code-block::
 
    %(addr) %(addr) - %(user_id)|%(session_id) [%(rtime)] [%(uagent)] "%(method) %(uri) %(proto)" %(status) %(size) %(micros) %(ttfb) %(requestid)
-
 """
 
 from typing import Type, Callable, List, Iterable, Tuple
@@ -30,8 +28,7 @@ try:
 
         def before(self, environ: dict, start_response: Callable) \
                 -> Tuple[dict, Callable]:
-            """
-            Inject request time in CUL classic format, and start TTFB clock.
+            """Inject request time in CUL classic format, and start TTFB clock.
 
             Parameters
             ----------
@@ -60,8 +57,7 @@ try:
             return environ, start_response
 
         def after(self, response: Iterable) -> Iterable:
-            """
-            Set TTFB log variable.
+            """Set TTFB log variable.
 
             Parameters
             ----------

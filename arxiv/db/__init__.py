@@ -1,5 +1,4 @@
-"""
-This is the primary SQLAlchemy implementation of the main arXiv database 
+"""This is the primary SQLAlchemy implementation of the main arXiv database.
 
 To use this in a simple non-flask non-fastapi script do:
 

@@ -2,9 +2,9 @@
 
 DO NOT USE THIS PACKAGE.
 
-This package is flawed and not currently used in production. It
-assumes the client will respond on the same IP address that it used to
-request the form.
+This package is flawed and not currently used in production. It assumes
+the client will respond on the same IP address that it used to request
+the form.
 
 Look at the wtforms CSRF docs and use the examples there.
 """

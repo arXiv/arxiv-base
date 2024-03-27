@@ -1,8 +1,6 @@
-"""Format for use with an ItemSource"""
-"""
-tar.gz, gzipped postscript, gzipped html, a single PDF
-        file, a gzip that is not tarred, a single dox file, a single odt file.
-"""
+"""Format for use with an ItemSource."""
+"""tar.gz, gzipped postscript, gzipped html, a single PDF file, a gzip that is
+not tarred, a single dox file, a single odt file."""
 
 from typing import Optional
 

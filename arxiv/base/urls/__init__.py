@@ -1,5 +1,4 @@
-"""
-Helpers for working with URLs in arXiv Flask applications.
+"""Helpers for working with URLs in arXiv Flask applications.
 
 This module provides :func:`external_url_handler`, which is attached to Flask
 application instances by :class:`arxiv.base.Base`. This leverage's Flask's
@@ -55,7 +54,6 @@ handling, which registers a single :class:`.MapAdapter` on a Flask app. This
 adapter is in turn used by :func:`external_url_handler` on demand.
 
 See ARXIVNG-2085.
-
 """
 
 import sys
@@ -95,8 +93,7 @@ def build_adapter(app: Flask) -> MapAdapter:
 
 
 def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
-    """
-    Attempt to handle failed URL building with :func:`external_url_for`.
+    """Attempt to handle failed URL building with :func:`external_url_for`.
 
     This gets attached to a Flask application via the
     :func:`flask.Flask.url_build_error_handlers` hook.
@@ -117,11 +114,11 @@ def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
 
 
 def canonical_url(id: str, version: int = 0) -> str:
-    """
-    Generate the canonical URL for an arXiv identifier.
+    """Generate the canonical URL for an arXiv identifier.
 
-    This can be done from just the ID because the category is only needed if it
-    is in the ID. id can be just the id or idv or cat/id or cat/idv.
+    This can be done from just the ID because the category is only
+    needed if it is in the ID. id can be just the id or idv or cat/id or
+    cat/idv.
     """
     # TODO: This should be better.
     # There should probably be something like INTERNAL_URL_SCHEMA
