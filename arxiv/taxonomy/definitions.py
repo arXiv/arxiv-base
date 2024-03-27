@@ -275,6 +275,7 @@ ARCHIVES: Dict[str, Archive]= {
             id="math-ph",
             full_name="Mathematical Physics",
             is_active=True,
+            alt_name="math.MP",
             in_group="grp_physics",
             start_date=date(1996, 9, 1),
             ),
