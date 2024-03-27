@@ -1,5 +1,5 @@
 """Provides a convenience class for working with arXiv categories."""
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import date
 from pydantic import BaseModel
 
@@ -10,7 +10,7 @@ class BaseTaxonomy(BaseModel):
     alt_name: Optional[str] #any other name the category may be known as (like if part of an alias or subsumed archive pair)
     
     @property
-    def canonical(self) -> str:
+    def canonical_id(self) -> str:
         """
         Get the canonicalized category, if there is one.
         In the case of subsumed archives, returns the subsuming category.
@@ -36,7 +36,7 @@ class BaseTaxonomy(BaseModel):
         if not canonical:
             return f'{self.full_name} ({self.id})'
         else:
-            name=self.canonical 
+            name=self.canonical_id 
             if name==self.id:
                 return f'{self.full_name} ({self.id})'
             elif name in CATEGORIES.keys():
@@ -89,6 +89,15 @@ class Archive(BaseTaxonomy):
         else:
             return [category for category in CATEGORIES.values() if category.in_archive == self.id and category.is_active]
 
+    def get_canonical(self) -> Union['Category', 'Archive']:
+        """returns the canonical version of an archive. The main purpose is transforming subsumed archives into their subsumign categories.
+        For most archives this returns the archive itself. In the case of archives that are also categories, it return the Archive version of the archive"""
+        from .definitions import CATEGORIES
+        if self.canonical_id!= self.id and self.canonical_id in CATEGORIES:
+            return CATEGORIES[self.canonical_id]
+        else:
+            return self
+
 class Category(BaseTaxonomy):
     """Represents an arXiv category."""
 
@@ -100,3 +109,8 @@ class Category(BaseTaxonomy):
         """Returns parent archive."""
         from .definitions import ARCHIVES
         return ARCHIVES[self.in_archive]
+    
+    def get_canonical(self) -> 'Category':
+        """returns the canonical version of the category object"""
+        from .definitions import CATEGORIES
+        return CATEGORIES[self.canonical_id]

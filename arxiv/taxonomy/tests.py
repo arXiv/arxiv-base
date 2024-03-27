@@ -1,6 +1,8 @@
 """Tests for arXiv taxonomy module."""
 from unittest import TestCase
 from datetime import date
+from typing import Union
+
 from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
     LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY, CATEGORY_ALIASES, CATEGORIES_ACTIVE
@@ -24,8 +26,8 @@ class TestTaxonomy(TestCase):
                     f'default_archive {value.default_archive} is not a valid archive for group {value}'
                 )
             self.assertIsInstance(value.full_name, str)
-            self.assertIsInstance(value.canonical, str)
-            self.assertIn(value.canonical,GROUPS.keys(), "all groups currently cannonical for themselves")
+            self.assertIsInstance(value.canonical_id, str)
+            self.assertIn(value.canonical_id,GROUPS.keys(), "all groups currently cannonical for themselves")
             self.assertIsInstance(value.display(), str)
 
             archives=value.get_archives(True)
@@ -50,8 +52,8 @@ class TestTaxonomy(TestCase):
                     'end_date greater than start_date'
                 )
             self.assertIsInstance(value.display(), str)
-            self.assertIsInstance(value.canonical, str)
-            self.assertIn(value.canonical, [value.id]+list(CATEGORIES.keys()), "cannonical name either the archive or a category")
+            self.assertIsInstance(value.canonical_id, str)
+            self.assertIsInstance(value.get_canonical(), Union[Archive, Category], "cannonical name either the archive or a category")
 
             cats=value.get_categories(True)
             self.assertTrue(all(isinstance(item, Category) for item in cats), "categories fetched are Category")
@@ -64,7 +66,7 @@ class TestTaxonomy(TestCase):
             self.assertIsInstance(value.get_group(), Group, "fetches group object")
             self.assertEqual(value.in_group, value.get_group().id, "in_group and get_group point to same group")
             if value.alt_name:
-                self.assertIn(key, ARCHIVES_SUBSUMED.keys(), "alternate names are recorded")
+                self.assertIn(key, list(ARCHIVES_SUBSUMED.keys())+list(CATEGORY_ALIASES.keys())+list(CATEGORY_ALIASES.values()), "alternate names are recorded")
 
     def test_active_archives(self):
         """Tests for active (non-defunct) archives."""
@@ -82,9 +84,10 @@ class TestTaxonomy(TestCase):
                 CATEGORIES.keys(),
                 '{} is a valid category'.format(value)
             )
-            subsuming_cat=CATEGORIES[value]
+            subsuming_cat=subsumed.get_canonical()
+            self.assertIsInstance(subsuming_cat, Category, "canonical version of subsumed archive is category")
             self.assertFalse(subsuming_cat.get_archive().end_date, '{} is not in a defunct archive'.format(value))
-            self.assertEqual(subsumed.canonical, value, f"canonical of archive {subsumed.canonical} is subsuming category {value}")
+            self.assertEqual(subsumed.canonical_id, value, f"canonical of archive {subsumed.canonical_id} is subsuming category {value}")
             self.assertEqual(subsumed.alt_name, value, "subsumed archive knows its pair")
             self.assertEqual(subsuming_cat.alt_name, key, "subsuming category knows its old archive")
             self.assertEqual(subsuming_cat.display(True), subsuming_cat.display(False), "display string always the same for canonical name")
@@ -112,8 +115,9 @@ class TestTaxonomy(TestCase):
             parent=value.get_archive()
             self.assertIsInstance(parent, Archive, "fetches Archive object")
             self.assertEqual(value.in_archive, parent.id, "in_archive and get_archive point to same archive")
-            self.assertIsInstance(value.canonical, str, "cannonical id is string")
-            self.assertIn(value.canonical, CATEGORIES.keys(), "cannonical name is a category")
+            self.assertIsInstance(value.canonical_id, str, "cannonical id is string")
+            self.assertIsInstance(value.get_canonical(), Category, "cannonical version is category")
+            self.assertEqual(value.canonical_id,value.get_canonical().id)
             self.assertIsInstance(value.display(), str, "display test is string")
 
             if value.alt_name:
@@ -139,9 +143,10 @@ class TestTaxonomy(TestCase):
                           'Category description for an alias should indicate '
                           'that it is an alias for some other category')
             
-            self.assertEqual(canon.id, canon.canonical, "canonical category is canonical")
-            self.assertNotEqual(not_canon.id, not_canon.canonical, "non-canonical category is not canonical")
-            self.assertEqual(canon.id, not_canon.canonical, "alias knows its canonical category")
+            self.assertEqual(canon.id, canon.canonical_id, "canonical category is canonical")
+            self.assertNotEqual(not_canon.id, not_canon.canonical_id, "non-canonical category is not canonical")
+            self.assertEqual(canon.id, not_canon.canonical_id, "alias knows its canonical category")
+            self.assertEqual(canon, not_canon.get_canonical(), "alias knows its canonical category")
             self.assertEqual(not_canon.alt_name, canon.id, "alias knows its pair")
             self.assertEqual(canon.alt_name, not_canon.id, "alias knows its pair")
             self.assertEqual(canon.display(True), canon.display(False), "display string always the same for canonical name")

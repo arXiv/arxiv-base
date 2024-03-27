@@ -242,8 +242,8 @@ class DocMetadata:
   
         result=set()
         for cat in self.secondary_categories:
-            result.add(CATEGORIES[cat.canonical])
-        result.discard(CATEGORIES[self.primary_category.canonical])
+            result.add(cat.get_canonical())
+        result.discard(self.primary_category.get_canonical())
 
         return result
 
