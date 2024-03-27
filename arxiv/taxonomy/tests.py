@@ -27,9 +27,13 @@ class TestTaxonomy(TestCase):
             self.assertIsInstance(value.canonical, str)
             self.assertIn(value.canonical,GROUPS.keys(), "all groups currently cannonical for themselves")
             self.assertIsInstance(value.display(), str)
-            archives=value.get_archives()
+
+            archives=value.get_archives(True)
             self.assertGreater(len(archives),0,"group contains archives")
-            self.assertTrue(all(isinstance(item, Archive) for item in archives), "archives fetched are Archive")        
+            self.assertTrue(all(isinstance(item, Archive) for item in archives), "archives fetched are Archive")
+            active_archives=value.get_archives()
+            self.assertGreaterEqual(len(archives),len(active_archives),"all archives equal or outnumber active archvies")
+            self.assertTrue(all(item.is_active for item in active_archives), "only fetched active archives")        
 
     def test_archives(self):
         """Tests for the middle level of the category taxonomy (archives)."""
@@ -49,7 +53,12 @@ class TestTaxonomy(TestCase):
             self.assertIsInstance(value.canonical, str)
             self.assertIn(value.canonical, [value.id]+list(CATEGORIES.keys()), "cannonical name either the archive or a category")
 
-            self.assertTrue(all(isinstance(item, Category) for item in value.get_categories()), "categories fetched are Category")
+            cats=value.get_categories(True)
+            self.assertTrue(all(isinstance(item, Category) for item in cats), "categories fetched are Category")
+            active_cats=value.get_categories()
+            self.assertGreaterEqual(len(cats),len(active_cats),"all categories equal or outnumber active categories")
+            self.assertTrue(all(item.is_active for item in active_cats), "only fetched active categories")
+
             self.assertIsInstance(value.in_group, str, 'in_group is a str')
             self.assertIn(value.in_group, GROUPS.keys(), f'{value.in_group} is a valid group')
             self.assertIsInstance(value.get_group(), Group, "fetches group object")

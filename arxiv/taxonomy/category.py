@@ -61,10 +61,13 @@ class Group(BaseTaxonomy):
     default_archive: Optional[str]
     is_test: Optional[bool]
 
-    def get_archives(self) -> List['Archive'] :
-        """creates a list of all archives withing the group"""
+    def get_archives(self, include_inactive: bool = False) -> List['Archive'] :
+        """creates a list of all archives withing the group. By default only includes active archives"""
         from .definitions import ARCHIVES
-        return [archive for archive in ARCHIVES.values() if archive.in_group == self.id]
+        if include_inactive:
+            return [archive for archive in ARCHIVES.values() if archive.in_group == self.id]
+        else:
+            return [archive for archive in ARCHIVES.values() if archive.in_group == self.id and archive.is_active]
 
 class Archive(BaseTaxonomy):
     """Represents an arXiv archive--the middle level of the taxonomy."""
@@ -78,10 +81,13 @@ class Archive(BaseTaxonomy):
         from .definitions import GROUPS
         return GROUPS[self.in_group]
     
-    def get_categories(self) -> List['Category'] :
-        """creates a list of all categories withing the group"""
-        from .definitions import CATEGORIES,ARCHIVES, GROUPS
-        return [category for category in CATEGORIES.values() if category.in_archive == self.id]
+    def get_categories(self, include_inactive: bool =False) -> List['Category'] :
+        """creates a list of all categories withing the group. By default only includes active categories"""
+        from .definitions import CATEGORIES
+        if include_inactive:
+            return [category for category in CATEGORIES.values() if category.in_archive == self.id]
+        else:
+            return [category for category in CATEGORIES.values() if category.in_archive == self.id and category.is_active]
 
 class Category(BaseTaxonomy):
     """Represents an arXiv category."""
