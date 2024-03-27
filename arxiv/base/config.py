@@ -92,8 +92,7 @@ URLS = [
     ("university", "/", "cornell.edu"),
     ("wiki", "/display/arxivpub/arXiv+Public+Wiki", "confluence.cornell.edu"),
 ]
-"""
-URLs for external services, for use with :func:`flask.url_for`.
+"""URLs for external services, for use with :func:`flask.url_for`.
 
 For details, see :mod:`arxiv.base.urls`.
 """
@@ -121,8 +120,11 @@ BASE_VERSION = os.environ.get("BASE_VERSION", importlib.metadata.version('arxiv-
 """The version of the arxiv-base package."""
 
 APP_VERSION = os.environ.get("APP_VERSION", BASE_VERSION)
-"""The version of the base test app. This is used to build the paths
-to static assets, see :mod:`arxiv.base`."""
+"""The version of the base test app.
+
+This is used to build the paths
+to static assets, see :mod:`arxiv.base`.
+"""
 
 """
 Flask-S3 plugin settings.
@@ -151,8 +153,20 @@ RELATIVE_STATIC_PREFIX = os.environ.get("RELATIVE_STATIC_PREFIX", "")
 ANALYTICS_ENABLED = bool(int(os.environ.get("ANALYTICS_ENABLED", "0")))
 """Enable/disable Matomo web analytics."""
 ANALYTICS_BASE_URL = os.environ.get("ANALYTICS_BASE_URL", "https://webstats.arxiv.org/")
-"""Base URL for analytics tracker. Should include trailing slash."""
+"""Base URL for analytics tracker.
+
+Should include trailing slash.
+"""
 ANALYTICS_COOKIE_DOMAIN = os.environ.get("ANALYTICS_COOKIE_DOMAIN", "*.arxiv.org")
 """Analytics tracker cookie domain."""
 ANALYTICS_SITE_ID = os.environ.get("ANALYTICS_SITE_ID", "1")
 """Analytics tracker site ID."""
+
+TRACKBACK_SECRET = os.environ.get("TRACKBACK_SECRET", "baz")
+
+DEFAULT_DB = "sqlite:///../tests/data/browse.db"
+DEFAULT_LATEXML_DB = "sqlite:///..test/data/latexml.db"
+
+CLASSIC_DB_URI = os.environ.get("CLASSIC_DB_URI", DEFAULT_DB)
+LATEXML_DB_URI = os.environ.get("LATEXML_DB_URI", DEFAULT_LATEXML_DB)
+ECHO_SQL = os.environ.get("ECHO_SQL", True)

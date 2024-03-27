@@ -1,8 +1,16 @@
 """Category and archive definitions."""
+import sys
+from typing import Dict, TypedDict, NotRequired
 
 from datetime import date
 
-GROUPS = {
+class tGroup (TypedDict):
+    name: str
+    start_year: int
+    default_archive: NotRequired[str]
+    is_test: NotRequired[bool]
+
+GROUPS: Dict[str, tGroup] = {
     'grp_physics': {
         'name': 'Physics',
         'start_year': 1991,
@@ -47,7 +55,13 @@ GROUPS = {
 }
 DEFAULT_GROUP = 'physics'
 
-ARCHIVES = {
+class tArchive(TypedDict):
+    name: str
+    in_group: str
+    start_date: date
+    end_date: NotRequired[date]
+
+ARCHIVES: Dict[str, tArchive]= {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_group': 'grp_physics',
@@ -269,7 +283,7 @@ ARCHIVES_ACTIVE = {key: value for key,
                    if 'end_date' not in ARCHIVES[key]}
 
 # defunct archives subsumed by categories
-ARCHIVES_SUBSUMED = {
+ARCHIVES_SUBSUMED: Dict[str, str] = {
     'cmp-lg': 'cs.CL',
     'adap-org': 'nlin.AO',
     'comp-gas': 'nlin.CG',
@@ -292,7 +306,7 @@ ARCHIVES_SUBSUMED = {
 
 # Legacy bare-archive names used as primary and secondary
 # categories for old submissions. yyyy-mm is last month allowed.
-LEGACY_ARCHIVE_AS_PRIMARY = {
+LEGACY_ARCHIVE_AS_PRIMARY: Dict[str, date] = {
     'astro-ph': date(2008, 12, 1),
     'cond-mat': date(2004, 1, 1),
     'test': date(2010, 1, 1)
@@ -304,7 +318,14 @@ LEGACY_ARCHIVE_AS_SECONDARY = {
     'test': date(2010, 1, 1)
 }
 
-CATEGORIES = {
+class tCategory(TypedDict):
+    name: str
+    in_archive: str
+    is_active: bool
+    is_general: bool
+    description: NotRequired[str]
+
+CATEGORIES: Dict[str, tCategory] = {
     'acc-phys': {
         'name': 'Accelerator Physics',
         'in_archive': 'acc-phys',

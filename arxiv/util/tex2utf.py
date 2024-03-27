@@ -57,13 +57,11 @@ accents = {
     'vr': 0x0159, 'vs': 0x0161, 'vt': 0x0165, 'vu': 0x01d4,
     'vz': 0x017e
 }
-r"""
-Hash to lookup tex markup and convert to Unicode.
+r"""Hash to lookup tex markup and convert to Unicode.
 
 macron: a line above character (overbar \={} in TeX)
 caron: v-shape above character (\v{ } in TeX)
 See: http://www.unicode.org/charts/
-
 """
 
 textlet = {
@@ -130,9 +128,9 @@ def _textgreek_sub(match: Match) -> str:
 def texch2UTF(acc: str) -> str:
     """Convert single character TeX accents to UTF-8.
 
-    Strip non-whitepsace characters from any sequence not recognized (hence
-    could return an empty string if there are no word characters in the input
-    string).
+    Strip non-whitepsace characters from any sequence not recognized
+    (hence could return an empty string if there are no word characters
+    in the input string).
 
     chr(num) will automatically create a UTF8 string for big num
     """
@@ -146,13 +144,10 @@ def tex2utf(tex: str, greek: bool = True) -> str:
     r"""Convert some TeX accents and greek symbols to UTF-8 characters.
 
     :param tex: Text to filter.
-
-    :param greek: If False, do not convert greek letters or
-    ligatures.  Greek symbols can cause problems. Ex. \phi is not
-    suppose to look like φ. φ looks like \varphi.  See ARXIVNG-1612
-
+    :param greek: If False, do not convert greek letters or ligatures.
+        Greek symbols can cause problems. Ex. \phi is not suppose to
+        look like φ. φ looks like \varphi. See ARXIVNG-1612
     :returns: string, possibly with some TeX replaced with UTF8
-
     """
     # Do dotless i,j -> plain i,j where they are part of an accented i or j
     utf = re.sub(r"/(\\['`\^\"\~\=\.uvH])\{\\([ij])\}", r"\g<1>\{\g<2>\}", tex)

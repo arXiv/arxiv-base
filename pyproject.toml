@@ -4,19 +4,19 @@ version = "1.0.1"
 description = "Common code for arXiv NG"
 authors = ["arxiv.org"]
 packages = [
-   { include = "arxiv" }
+   { include = "arxiv" },
+   { include = "arxiv/py.typed" }
    ]
 include = [
    "arxiv/base/static/*",
    "arxiv/base/templates/*",
-   "arxiv/mail/templates/*"
+   "arxiv/mail/templates/*",
 ]
    
 [tool.poetry.dependencies]
-python = "^3.10"
-
-flask = "~2.2.5"
-Werkzeug = "~2.3.8"
+python = "^3.11"
+pydantic = "==1.10.*"
+flask = "3.0.*"
 pytz = "*"
 boto3 = "==1.*"
 wtforms = "*"
@@ -29,10 +29,11 @@ google-cloud-storage = "^2.5.0"
 google-cloud-logging = "^3.8.0"
 google-cloud-pubsub = "^2.18.4"
 PyMySQL = { version = "~=1.1", optional= true}
-SqlAlchemy = { version = "~=1.4", optional= true}
+sqlalchemy = "~=2.0.27"
 google-auth = "^2.23.4"
 google-cloud-monitoring = "^2.16.0"
 fire = "^0.5.0"
+cloudpathlib = {extras = ["gs"], version = "*"}
 
 [tool.poetry.dev-dependencies]
 pydocstyle = "*"

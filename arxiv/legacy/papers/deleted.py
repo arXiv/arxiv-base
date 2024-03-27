@@ -41,7 +41,6 @@ def get_deleted_data(location: Optional[str] = None)->dict:
     If `deleted()` is to be used in an app it makes sense to call
     `get_deleted_data()` when starting that app to ensure the app has
     access and it is configured correctly.
-
     """
     global _deleted_data
     if _deleted_data is not None:
@@ -79,7 +78,8 @@ def get_deleted_data(location: Optional[str] = None)->dict:
 def is_deleted(id: str) -> Optional[str]:
     """Checks if an id is for a deleted paper.
 
-    Expects a ID without a version such as quant-ph/0411165 or 0901.4014 or 1203.23434.
+    Expects a ID without a version such as quant-ph/0411165 or 0901.4014
+    or 1203.23434.
     """
     if not id:
         return None

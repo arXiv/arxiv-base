@@ -47,7 +47,6 @@ def get_reasons_data(location:Optional[str]=None)->dict:
     If `reasons()` is to be used in an app it makes sense to call
     `get_reasons_data()` when starting that app to ensure the app has
     access and it is configured correctly.
-
     """
     global _reasons_data
     if _reasons_data is not None:
@@ -86,9 +85,8 @@ def get_reasons_data(location:Optional[str]=None)->dict:
 
 
 def reasons(id: str, format: FORMATS)-> Optional[str] :
-    """
-    Find any reasons for inability to process this paper.
-    
+    """Find any reasons for inability to process this paper.
+
     Find all the recorded reasons for inability to process this paper (if any),
     that are either general ($id recorded in reasons file with no extension) or
     specific to $format ($id.format recorded in reasons file). If $id includes a

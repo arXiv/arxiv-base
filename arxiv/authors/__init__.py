@@ -3,10 +3,9 @@ import re
 from itertools import dropwhile
 from typing import Dict, Iterator, List, Tuple
 
-from .tex2utf import tex2utf
+from ..util.tex2utf import tex2utf
 
 PREFIX_MATCH = 'van|der|de|la|von|del|della|da|mac|ter|dem|di|vaziri'
-
 """
 Takes data from an Author: line in the current arXiv abstract
 file and returns a structured set of data:
@@ -34,8 +33,7 @@ Code originally written by Christina Scovel, Simeon Warner Dec99/Jan00
 
 
 def parse_author_affil(authors: str) -> List[List[str]]:
-    """
-    Parse author line and returns an list of author and affiliation data.
+    """Parse author line and returns an list of author and affiliation data.
 
     The list for each author will have at least three elements for
     keyname, firstname(s) and suffix. The keyname will always have content
@@ -65,14 +63,13 @@ def parse_author_affil(authors: str) -> List[List[str]]:
 
 
 def _parse_author_affil_split(author_line: str) -> Dict:
-    """
-    Split author line into author and affiliation data.
+    """Split author line into author and affiliation data.
 
-    Take author line, tidy spacing and punctuation, and then split up into
-    individual author an affiliation data. Has special cases to avoid splitting
-    an initial collaboration name and records in $back_propagate_affiliation_to
-    the fact that affiliations should not be back propagated to collaboration
-    names.
+    Take author line, tidy spacing and punctuation, and then split up
+    into individual author an affiliation data. Has special cases to
+    avoid splitting an initial collaboration name and records in
+    $back_propagate_affiliation_to the fact that affiliations should not
+    be back propagated to collaboration names.
 
     Does not handle multiple collaboration names.
     """
@@ -149,8 +146,7 @@ def _parse_author_affil_split(author_line: str) -> Dict:
 
 
 def parse_author_affil_utf(authors: str) -> List:
-    """
-    Call parse_author_affil() and do TeX to UTF conversion.
+    """Call parse_author_affil() and do TeX to UTF conversion.
 
     Output structure is the same but should be in UTF and not TeX.
     """
@@ -229,11 +225,10 @@ def _add_affiliation(author_line: str,
                      enumaffils: Dict,
                      author_entry: List[str],
                      name: str) -> List:
-    """
-    Add author affiliation to author_entry if one is found in author_line.
+    """Add author affiliation to author_entry if one is found in author_line.
 
-    This should deal with these cases
-    Smith B(labX) Smith B(1) Smith B(1, 2) Smith B(1 & 2) Smith B(1 and 2)
+    This should deal with these cases Smith B(labX) Smith B(1) Smith
+    B(1, 2) Smith B(1 & 2) Smith B(1 and 2)
     """
     en = re.escape(name)
     namerex = r'{}\s*\(([^\(\)]+)'.format(en.replace(' ', 's*'))
@@ -286,15 +281,14 @@ def _parse_author_affil_back_propagate(author_list: List[List[str]],
 
 
 def split_authors(authors: str) -> List:
-    """
-    Split author string into authors entity lists.
+    """Split author string into authors entity lists.
 
-    Take an author line as a string and return a reference to a list of the
-    different name and affiliation blocks. While this does normalize spacing
-    and 'and', it is a key feature that the set of strings returned can be
-    concatenated to reproduce the original authors line. This code thus
-    provides a very graceful degredation for badly formatted authors lines, as
-    the text at least shows up.
+    Take an author line as a string and return a reference to a list of
+    the different name and affiliation blocks. While this does normalize
+    spacing and 'and', it is a key feature that the set of strings
+    returned can be concatenated to reproduce the original authors line.
+    This code thus provides a very graceful degredation for badly
+    formatted authors lines, as the text at least shows up.
     """
     # split authors field into blocks with boundaries of ( and )
     if not authors:

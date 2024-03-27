@@ -1,1 +1,1 @@
-"""arXiv base utilities."""
+"""ArXiv base utilities."""
