@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Iterator, List, Optional, Set, Literal, Sequence
 
-from ..taxonomy import definitions
+from ..taxonomy.definitions import CATEGORIES
 from ..taxonomy.category import Category, Group, Archive
 from ..identifier import Identifier
 from ..license import License
@@ -157,14 +157,14 @@ class DocMetadata:
         if self.primary_category:
             options = {
                 self.primary_category.id: True,
-                definitions.CATEGORIES[self.primary_category.id]['in_archive']: True
+                self.primary_category.in_archive: True
             }
         else:
             options = {}
 
         for category in self.secondary_categories:
             options[category.id] = True
-            in_archive = definitions.CATEGORIES[category.id]['in_archive']
+            in_archive = category.in_archive
             options[in_archive] = True
         return sorted(options.keys())
 
@@ -231,31 +231,27 @@ class DocMetadata:
             return None
         else:
             return versions[0].submitted_date
-
+    
     def get_secondaries(self) -> Set[Category]:
         """Unalias and deduplicate secondary categories."""
         if not self.secondary_categories or not self.primary_category:
             return set()
+  
+        result=set()
+        for cat in self.secondary_categories:
+            result.add(cat.get_canonical())
+        result.discard(self.primary_category.get_canonical())
 
-        def unalias(secs: Iterator[Category])->Iterator[Category]:
-            return map(lambda c: Category(c.unalias()), secs)
-        prim = self.primary_category.unalias()
-
-        def de_prim(secs: Iterator[Category])->Iterator[Category]:
-            return filter(lambda c: c.id != prim.id, secs)
-
-        de_primaried = set(de_prim(unalias(iter(self.secondary_categories))))
-        if not de_primaried:
-            return set()
-        return de_primaried
+        return result
 
     def display_secondaries(self) -> List[str]:
         """Unalias, dedup and sort secondaries for display."""
-        de_primaried = self.get_secondaries()
-
-        def to_display(secs: List[Category]) -> List[str]:
-            return list(map(lambda c: str(c.display), secs))
-        return to_display(sorted(de_primaried))
+        
+        de_primaried=sorted(self.get_secondaries(), key=lambda cat: cat.id)
+        result=[]
+        for cat in de_primaried:
+            result.append(cat.display())
+        return result
 
     def canonical_url(self, no_version: bool = False) -> str:
         """Return canonical URL for this ID and version."""
@@ -294,7 +290,7 @@ class DocMetadata:
             rv += f"Comments: {self.comments}\n"
         # skipping proxy to avoid harvesting of email addresses
         if self.report_num:
-            rv += "Report-no: {self.report_num}\n"
+            rv += f"Report-no: {self.report_num}\n"
         if self.msc_class:
             rv += f"MSC-class: {self.msc_class}\n"
         if self.acm_class:

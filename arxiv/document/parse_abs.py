@@ -4,19 +4,17 @@ import os
 import re
 from typing import Any, Dict, List, Tuple, Optional, Sequence
 from datetime import datetime
+from pathlib import Path
 
 from zoneinfo import ZoneInfo
 from dateutil import parser
 
+from ..taxonomy.definitions import ARCHIVES, CATEGORIES
+from .metadata import AuthorList, DocMetadata, Submitter
 from ..config import settings
-
-from ..taxonomy import definitions
-from .metadata import Archive, AuthorList, Category, \
-    DocMetadata, Group, Submitter
 from .version import VersionEntry, SourceFlag
 from ..license import License
 from ..identifier import Identifier
-from ..files.anypath import to_anypath
 from .exceptions import \
     AbsException, AbsParsingException, AbsNotFoundException
 
@@ -66,13 +64,14 @@ _fs_tz: Optional[ZoneInfo] = None
 
 
 def parse_abs_file(filename: str) -> DocMetadata:
-    """Parse an arXiv .abs file.
+    """Parse an arXiv .abs file from the local FS.
 
     The modified time on the abs file will be used as the modified time for the
     abstract. It will be pulled from `flask.config` if in a app_context. It
     can be specified with tz arg.
     """
-    absfile = to_anypath(filename)
+
+    absfile = Path(filename)
     try:
         with absfile.open(mode='r', encoding='latin-1') as absf:
             raw = absf.read()
@@ -158,17 +157,15 @@ def parse_abs_top(raw: str, modified:datetime, abstract:str) -> DocMetadata:
 
     if 'categories' in fields and fields['categories']:
         category_list = fields['categories'].split()
-        if category_list[0] in definitions.CATEGORIES:
-            primary_category = Category(category_list[0])
-            primary_archive = \
-                Archive(
-                    definitions.CATEGORIES[primary_category.id]['in_archive'])
+        if category_list[0] in CATEGORIES:
+            primary_category = CATEGORIES[category_list[0]]
+            primary_archive = primary_category.get_archive()
         elif arxiv_identifier.is_old_id:
-            primary_archive = Archive(arxiv_identifier.archive)
+            primary_archive = ARCHIVES[arxiv_identifier.archive]
         else:
             raise AbsException(f"Invalid caregory {category_list[0]}")
     elif arxiv_identifier.is_old_id:
-        primary_archive = Archive(arxiv_identifier.archive)
+        primary_archive = ARCHIVES[arxiv_identifier.archive]
     else:
         raise AbsException('Cannot infer archive from identifier.')
 
@@ -189,10 +186,9 @@ def parse_abs_top(raw: str, modified:datetime, abstract:str) -> DocMetadata:
         categories=fields['categories'] if 'categories' in fields else None,
         primary_category=primary_category,
         primary_archive=primary_archive,
-        primary_group=Group(
-            definitions.ARCHIVES[primary_archive.id]['in_group']),
+        primary_group=primary_archive.get_group(),
         secondary_categories=[
-            Category(x) for x in category_list[1:]
+            CATEGORIES[x] for x in category_list[1:]
             if (category_list and len(category_list) > 1)
         ],
         journal_ref=None if 'journal_ref' not in fields

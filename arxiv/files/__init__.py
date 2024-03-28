@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from types import TracebackType
 import typing
-from typing import BinaryIO, Optional
+from typing import BinaryIO, Optional, Union
 
 class BinaryMinimalFile(typing.Protocol):
     """A minimal file `Protocol` for a python binary file."""
@@ -447,5 +447,3 @@ class FileTransform(FileObj):
 
     def __str__(self) -> str:
         return f"<FileProcessed fileobj={self.fileobj} transform={self.transform}>"
-
-

@@ -6,14 +6,14 @@ from re import RegexFlag
 from typing import Match, Optional, Union, Tuple, Callable, List
 import re
 
-from arxiv import taxonomy
+from arxiv.taxonomy.definitions import ARCHIVES, CATEGORIES
 
 __all__ = ('parse_arxiv_id', 'Identifier', )
 
-_archive = '|'.join([re.escape(key) for key in taxonomy.ARCHIVES.keys()])
-"""String for use in Regex for all arXiv archives."""
+_archive = '|'.join([re.escape(key) for key in ARCHIVES.keys()])
+"""string for use in Regex for all arXiv archives"""
 
-_category = '|'.join([re.escape(key) for key in taxonomy.CATEGORIES.keys()])
+_category = '|'.join([re.escape(key) for key in CATEGORIES.keys()])
 
 _prefix = r'(?P<arxiv_prefix>ar[xX]iv:)'
 """Attempt to catch the arxiv prefix in front of arxiv ids.
@@ -129,9 +129,9 @@ class Identifier:
         This was an acceptable old id format.
         """
 
-        if self.ids in taxonomy.definitions.ARCHIVES:
+        if self.ids in ARCHIVES:
             raise IdentifierIsArchiveException(
-                taxonomy.definitions.ARCHIVES[self.ids]['name'])
+                ARCHIVES[self.ids].full_name)
 
         if self.ids.startswith("arxiv:"):
             self.arxiv_prefix = True

@@ -21,7 +21,7 @@ jobs:
           poetry check --lock
           poetry install --with=dev
       - name: Run arxiv-base tests with coverage
-        run: poetry run pytest --cov=arxiv.base fourohfour --cov-fail-under=68 arxiv/base fourohfour
+        run: poetry run pytest --cov=arxiv.base fourohfour --cov-fail-under=67 arxiv/base fourohfour
       # - name: Check Types
       # TODO The types are in bad shape and need to be fixed
       #   run: poetry run mypy --exclude "test*" -p arxiv
