@@ -1,5 +1,4 @@
-r"""
-Patterns and functions to detect arXiv ids and URLs in text.
+r"""Patterns and functions to detect arXiv ids and URLs in text.
 
 Functions to detect arXiv ids, URLs and DOI in text.
 Functions to transform them to <a> tags.
@@ -51,7 +50,7 @@ from urllib.parse import quote, urlparse
 from flask import url_for, g
 import bleach
 
-from arxiv.taxonomy import CATEGORIES
+from arxiv.taxonomy.definitions import CATEGORIES
 from arxiv import identifier
 from . import clickthrough
 
@@ -69,11 +68,10 @@ def _without_group_names(pattern: Pattern) -> str:
 DOI = re.compile(  # '10.1145/0001234.1234567'
     r"(?P<doi>10.\d{4,9}/[-._;()/:A-Z0-9]+)", re.I
 )
-"""
-Pattern for matching DOIs.
+"""Pattern for matching DOIs.
 
-We should probably match DOIs first because they are the source of a
-lot of false positives for arxiv id matches.
+We should probably match DOIs first because they are the source of a lot
+of false positives for arxiv id matches.
 
 Only using the most general expression from
 https://www.crossref.org/blog/dois-and-matching-regular-expressions/
@@ -81,11 +79,10 @@ https://www.crossref.org/blog/dois-and-matching-regular-expressions/
 
 
 BROAD_DOI = re.compile(r"(?P<doi>\d{2,3}.\d{4,5}\/\S+)", re.I)
-"""
-Very broad pattern for matching DOIs in the abs DOI field.
+"""Very broad pattern for matching DOIs in the abs DOI field.
 
-Ex. 10.1175/1520-0469(1996)053<0946:ASTFHH>2.0.CO;2
-Ex. 21.11130/00-1735-0000-0005-146A-E
+Ex. 10.1175/1520-0469(1996)053<0946:ASTFHH>2.0.CO;2 Ex.
+21.11130/00-1735-0000-0005-146A-E
 """
 
 ARXIV_PATTERNS = [
@@ -99,10 +96,10 @@ ARXIV_ID = re.compile(
 )
 
 OKCHARS = r"([a-z0-9,_.\-+~:]|%[a-f0-9]*)"
-"""Characters that are acceptable during PATH, QUERY and ANCHOR parts"""
+"""Characters that are acceptable during PATH, QUERY and ANCHOR parts."""
 
 PATH = rf"(?P<PATH>(/{OKCHARS}*)+)?"
-"""Regex for path part of URLs for use in urlize"""
+"""Regex for path part of URLs for use in urlize."""
 
 FTP = re.compile(rf"(?P<url>(?:ftp://)({OKCHARS}|(@))*{PATH})", re.I)
 """Regex to match FTP URLs in text."""
@@ -196,8 +193,7 @@ def _add_scheme_info(attrs: Attrs, new: bool = False) -> Attrs:
 
 
 def _handle_arxiv_url(attrs: Attrs, new: bool = False) -> Attrs:
-    """
-    Screen for reference to an arXiv e-print, and generate URL.
+    """Screen for reference to an arXiv e-print, and generate URL.
 
     If the :ref:`.ARXIV_ID` pattern is used, it will generate a link with the
     identifier as a the target. We need to intercept these links, and generate
@@ -221,8 +217,7 @@ def _handle_arxiv_url(attrs: Attrs, new: bool = False) -> Attrs:
 
 
 def _handle_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
-    """
-    Screen for reference to a DOI, and generate a URL.
+    """Screen for reference to a DOI, and generate a URL.
 
     If the :ref:`.DOI` pattern is used, it will generate a link with the
     doi as a the target. We need to intercept these links, and generate
@@ -247,8 +242,7 @@ def _handle_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
 
 
 def _handle_broad_doi_url(attrs: Attrs, new: bool = False) -> Attrs:
-    """
-    Handle doi from DOI field.
+    """Handle doi from DOI field.
 
     It is always just a DOI so turn it into a DOI link.
     """
@@ -277,8 +271,7 @@ DONT_URLIZE_CATS = re.compile(
 
 
 def _dont_urlize_arxiv_categories(attrs: Attrs, new: bool = False) -> Attrs:
-    """
-    Prevent urlizing archive categories that look like hostnames.
+    """Prevent urlizing archive categories that look like hostnames.
 
     Ex. don't urlize math.CO but do urlize supermath.co
     """
@@ -294,8 +287,9 @@ ORDER = ["arxiv_id", "doi", "url", "doi_field"]
 DEFAULT_KINDS = ["arxiv_id", "doi", "url"]
 """Default list of identifier types to match and convert to to URLs.
 
-This does not include 'doi_field because that is a specialized kind
-for just the abs DOI field."""
+This does not include 'doi_field because that is a specialized kind for
+just the abs DOI field.
+"""
 
 callbacks = {
     "doi": [_handle_doi_url, _add_scheme_info, _add_rel_external],
@@ -374,8 +368,7 @@ def _get_linker(kinds: List[str]) -> Callable_Linker:
 
 
 def urlize(text: str, kinds: List[str] = DEFAULT_KINDS) -> str:
-    """
-    Convert URLs and certain identifiers to HTML links.
+    """Convert URLs and certain identifiers to HTML links.
 
     Parameters
     ----------
@@ -388,7 +381,6 @@ def urlize(text: str, kinds: List[str] = DEFAULT_KINDS) -> str:
     -------
     str
         The passed text, with identifiers and/or URLs converted to HTML links.
-
     """
     return _get_linker(kinds)(text)
 
@@ -411,6 +403,5 @@ def urlizer(kinds: List[str] = DEFAULT_KINDS) -> Callable_Linker:
     callable
         A function with signature ``(str) -> str`` that converts identifiers
         to HTML links.
-
     """
     return _get_linker(kinds)

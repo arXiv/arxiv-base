@@ -5,16 +5,14 @@ from typing_extensions import Protocol
 
 
 WSGIRequest = Tuple[dict, Callable]
-"""
-The WSGI request.
+"""The WSGI request.
 
 Comprised of an environ mapping and a callable for starting the response. See
 also `https://www.python.org/dev/peps/pep-0333/#the-start-response-callable`_.
 """
 
 WSGIResponse = Iterable
-"""
-The iterable that generates a WSGI response.
+"""The iterable that generates a WSGI response.
 
 See also
 `https://www.python.org/dev/peps/pep-0333/#the-application-framework-side`_.
@@ -49,15 +47,13 @@ class IWSGIMiddlewareFactory(Protocol):
 
 
 class BaseMiddleware:
-    r"""
-    Base class for WSGI middlewares.
+    r"""Base class for WSGI middlewares.
 
     Child classes should override :func:`.before` and/or :func:`.after`\.
     """
 
     def __init__(self, wsgi_app: IWSGIApp, config: Mapping = {}) -> None:
-        """
-        Set the app factory that this middleware wraps.
+        """Set the app factory that this middleware wraps.
 
         Parameters
         ----------
@@ -66,14 +62,12 @@ class BaseMiddleware:
             middleware, or the original :class:`.Flask` app itself.
         config : dict
             Application configuration.
-
         """
         self.app = wsgi_app
         self.config = config
 
     def before(self, environ: dict, start_response: Callable) -> WSGIRequest:
-        """
-        Pre-process a WSGI request. To be overridden by a child class.
+        """Pre-process a WSGI request. To be overridden by a child class.
 
         Parameters
         ----------
@@ -88,13 +82,11 @@ class BaseMiddleware:
             WSGI request environ.
         callable
             Callable used to begin the HTTP response.
-
         """
         return environ, start_response
 
     def after(self, response: WSGIResponse) -> WSGIResponse:
-        """
-        Post-process a WSGI response. To be overridden by a child class.
+        """Post-process a WSGI response. To be overridden by a child class.
 
         Parameters
         ----------
@@ -105,13 +97,11 @@ class BaseMiddleware:
         -------
         iterable
             The WSGI response.
-
         """
         return response
 
     def __call__(self, environ: dict, start: Callable) -> WSGIResponse:
-        r"""
-        Handle a WSGI request.
+        r"""Handle a WSGI request.
 
         Parameters
         ----------
@@ -126,7 +116,6 @@ class BaseMiddleware:
         iterable
             Iterable that generates the HTTP response. See
             :const:`.WSGIResponse`\.
-
         """
         environ, start_response = self.before(environ, start)
         response: WSGIResponse = self.app(environ, start)
@@ -135,8 +124,7 @@ class BaseMiddleware:
 
     @property
     def wsgi_app(self) -> IWSGIApp:
-        """
-        Refer to the current instance of this class.
+        """Refer to the current instance of this class.
 
         This is here for consistency with the :class:`.Flask` interface.
         """

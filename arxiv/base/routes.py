@@ -1,5 +1,4 @@
-"""
-Provides routes for verifying base templates and exception handling.
+"""Provides routes for verifying base templates and exception handling.
 
 The blueprint instantiated here is **not** for use in a production application;
 it is not attached by :class:`arxiv.base.Base`.
@@ -14,6 +13,7 @@ from http import HTTPStatus as status
 from arxiv.base.exceptions import NotFound, Forbidden, Unauthorized, \
     MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError, \
     default_exceptions, HTTPException
+from arxiv.taxonomy.definitions import CATEGORIES
 
 from . import alerts
 
@@ -61,7 +61,8 @@ def test_macros() -> Response:
         'comments': "This version (physics/9707012v2) was not stored by arXiv."
                     " A subsequent replacement was made before versioning was"
                     " introduced.",
-        'primary_category': 'cond-mat.supr-con',
+        'primary_category': CATEGORIES['cond-mat.supr-con'],
+        "secondary_categories": [CATEGORIES['math.MP'], CATEGORIES['hep-lat']],
         'submitted_date': datetime.now(),
         'submission_history': [
             {'version': 1, 'submitted_date': datetime.now()},

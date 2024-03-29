@@ -12,7 +12,15 @@ class TestGetLogger(TestCase):
         """There is no application nor request context."""
         stream = StringIO()
 
-        logger = logging.getLogger('foologger', stream)
+        logger = logging.getLogger('foologger')
+        handler = logging.StreamHandler(stream)
+        handler.setFormatter(
+            logging.Formatter(
+                '%(levelname)s: "%(message)s"'
+            )
+        )
+        handler.terminator = ''
+        logger.addHandler(handler)
         self.assertIsInstance(logger, pyLogging.Logger,
                               "Should return a logging.Logger instance")
 

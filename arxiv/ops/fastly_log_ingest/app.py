@@ -27,7 +27,6 @@ INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 12.0))  # seconds between info l
 
 LOGGER_NAME = os.environ.get("LOGGER_NAME", "fastly_log_ingest")
 # name of logger in GCP, don't prefix with project-id or anything
-
 """Number of log records in a batch. Limit seems to be 16kb but not sure."""
 MAX_PER_BATCH = int(os.environ.get("MAX_PER_BATCH", 10))
 
@@ -61,7 +60,10 @@ class WorkItem:
     def __init__(self, message: Message, arrival_time: float):
         self.message = message
         self.arrival_time = arrival_time
-        self.data: dict = json.loads(message.data.decode('utf-8').strip())
+        try:
+            self.data: dict = json.loads(message.data.decode('utf-8').strip())
+        except Exception as e:
+            logger.warning(f'Failed to log the following message: {message.data.decode("utf-8", errors='replace')} with {str(e)}')
 
     def to_payload(self) -> dict:
         """Convert the message into a `payload` for the log entry."""
@@ -159,7 +161,6 @@ if __name__ == "__main__":
         threads.append(Thread(target=_logging_thread))
     [t.start() for t in threads]
     logger.info(f"Started {len(threads)} log writer threads.")
-
     """>>>>>>>> Setup of streaming pull from Pub/Sub <<<<<<<<"""
 
     subscriber = pubsub_v1.SubscriberClient()

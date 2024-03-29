@@ -1,5 +1,4 @@
-"""
-arXiv base Flask components.
+"""ArXiv base Flask components.
 
 Provides :class:`.Base`, which attaches base templates, static assets, global
 context processors, and exception handlers to a :class:`flask.Flask` app
@@ -22,10 +21,9 @@ Intended for use in an application factory. For example:
       Base(app)   # Registers the base/UI blueprint.
       app.register_blueprint(routes.blueprint)    # Your blueprint.
    return app
-
-
 """
 import types
+import logging
 from typing import Optional, Any, Dict
 from flask import Blueprint, Flask, Blueprint
 from werkzeug.exceptions import NotFound
@@ -33,6 +31,7 @@ from werkzeug.exceptions import NotFound
 from . import exceptions, urls, alerts, context_processors, filters
 from . import config as base_config
 from .converter import ArXivConverter
+from ..db import session, _app_ctx_id
 
 
 class Base(object):
@@ -123,3 +122,12 @@ class Base(object):
 
         filters.register_filters(app)
         context_processors.register_context_processors(app)
+
+
+        # This piece of code is crucial to making sure sqlalchemy sessions work in flask
+        # It is the same as the flask_sqlalchemy implementation 
+        # See: https://github.com/pallets-eco/flask-sqlalchemy/blob/42a36a3cb604fd39d81d00b54ab3988bbd0ad184/src/flask_sqlalchemy/session.py#L109
+        @app.teardown_appcontext
+        def remove_scoped_session (response_or_exc):
+            session.remove()
+            return response_or_exc

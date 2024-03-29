@@ -113,10 +113,10 @@
   {%- else -%}
     {%- set vpart = '' -%}
   {% endif %}
-  {%- if primary_category in arxiv_id -%}
+  {%- if primary_category.id in arxiv_id -%}
     <a href="{{ arxiv_id|canonical_url(version) }}">arXiv:{{ arxiv_id }}{{vpart}}</a>
     {%- else -%}
-    <a href="{{ arxiv_id|canonical_url(version) }}">arXiv:{{ arxiv_id }}{{vpart}}</a> [{{ primary_category }}]
+    <a href="{{ arxiv_id|canonical_url(version) }}">arXiv:{{ arxiv_id }}{{vpart}}</a> [{{ primary_category.id }}]
   {%- endif -%}
 {%- endmacro -%}
 
@@ -177,8 +177,8 @@
         <tr>
           <td class="tablecell label">Subjects:</td>
           <td class="tablecell subjects">
-            <span class="primary-subject">{{ primary_category|get_category_display }}</span>
-            {%- for category in secondary_categories|sort(attribute='id') -%}; {{ category|get_category_display }}{%- endfor -%}
+            <span class="primary-subject">{{ primary_category.display() }}</span>
+            {%- for category in secondary_categories|sort(attribute='id') -%}; {{ category.display() }}{%- endfor -%}
           </td>
         </tr>
         {%- if msc_class %}
@@ -261,7 +261,7 @@ Date: {{ (submitted_date|as_eastern).strftime("%a, %-d %b %Y %H:%M:%S ET") }}   
 
 Title: {{ title }}
 Authors: {{ authors }}
-Categories: {{ primary_category }}{%- for category in secondary_categories|sort(attribute='id') -%} {{ category }}{%- endfor %}
+Categories: {{ primary_category.id }}{%- for category in secondary_categories|sort(attribute='id') -%} {{ category }}{%- endfor %}
 {% if comments -%}{{ ("Comments: " + comments)|wordwrap(77, wrapstring="\n  ") }}{%- endif %}
 {% if msc_class -%}MSC classes: {{ msc_class }}{%- endif %}
 {% if acm_class -%}ACM classes: {{ acm_class }}{%- endif %}

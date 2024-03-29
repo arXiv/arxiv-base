@@ -6,18 +6,17 @@ from re import RegexFlag
 from typing import Match, Optional, Union, Tuple, Callable, List
 import re
 
-from arxiv import taxonomy
+from arxiv.taxonomy.definitions import ARCHIVES, CATEGORIES
 
-__all__ = ('parse_arxiv_id', )
+__all__ = ('parse_arxiv_id', 'Identifier', )
 
-_archive = '|'.join([re.escape(key) for key in taxonomy.ARCHIVES.keys()])
+_archive = '|'.join([re.escape(key) for key in ARCHIVES.keys()])
 """string for use in Regex for all arXiv archives"""
 
-_category = '|'.join([re.escape(key) for key in taxonomy.CATEGORIES.keys()])
+_category = '|'.join([re.escape(key) for key in CATEGORIES.keys()])
 
 _prefix = r'(?P<arxiv_prefix>ar[xX]iv:)'
-"""
-Attempt to catch the arxiv prefix in front of arxiv ids.
+"""Attempt to catch the arxiv prefix in front of arxiv ids.
 
 E.g. so that it can be included in the <a> tag anchor (ARXIVNG-1284).
 """
@@ -52,8 +51,7 @@ STANDARD = re.compile(
 
 
 def parse_arxiv_id(value: str) -> str:
-    """
-    Parse arxiv id from string.
+    """Parse arxiv id from string.
 
     Raises `ValidationError` if no arXiv ID.
     """
@@ -84,13 +82,13 @@ class IdentifierIsArchiveException(IdentifierException):
 RE_ARXIV_OLD_ID = re.compile(
     r'^(?P<archive>[a-z]{1,}(\-[a-z]{2,})?)(\.([a-zA-Z\-]{2,}))?\/'
     r'(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))(?P<num>\d\d\d)'
-    r'(v(?P<version>[1-9]\d*))?([#\/].*)?$')
+    r'(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$')
 
 # arXiv ID format used from 2007-04 to present
 # For use with the Identifier class
 RE_ARXIV_NEW_ID = re.compile(
     r'^(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))\.(?P<num>\d{4,5})'
-    r'(v(?P<version>[1-9]\d*))?([#\/].*)?$'
+    r'(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$'
 )
 
 Sub_type = List[Tuple[str, Union[str, Callable[[Match[str]], str]],
@@ -124,10 +122,20 @@ class Identifier:
         self.year: Optional[int] = None
         self.month: Optional[int] = None
         self.is_old_id: Optional[bool] = None
+        self.extra: Optional[str] = None
+        self.arxiv_prefix: bool = False
+        """Set to `True` if id like arxiv:astro-ph/011202.
 
-        if self.ids in taxonomy.definitions.ARCHIVES:
+        This was an acceptable old id format.
+        """
+
+        if self.ids in ARCHIVES:
             raise IdentifierIsArchiveException(
-                taxonomy.definitions.ARCHIVES[self.ids]['name'])
+                ARCHIVES[self.ids].full_name)
+
+        if self.ids.startswith("arxiv:"):
+            self.arxiv_prefix = True
+            arxiv_id = arxiv_id.removeprefix("arxiv:")
 
         for subtup in SUBSTITUTIONS:
             arxiv_id = re.sub(subtup[0],
@@ -163,7 +171,7 @@ class Identifier:
                or (self.num > 9999 and self.year < 2015) \
                or (self.num > 999 and self.is_old_id):
                 raise IdentifierException(
-                    'invalid arXiv identifier {}'.format(self.ids)
+                    f'invalid arXiv identifier {self.ids}'
                 )
         self.has_version: bool = False
         self.idv: str = self.id
@@ -171,8 +179,8 @@ class Identifier:
             self.version = int(id_match.group('version'))
             self.idv = f'{self.id}v{self.version}'
             self.has_version = True
-        self.squashed = self.id.replace('/', '')
-        self.squashedv = self.idv.replace('/', '')
+        self.squashed: str = self.id.replace('/', '')
+        self.squashedv: str = self.idv.replace('/', '')
         self.yymm: str = id_match.group('yymm')
         self.month = int(id_match.group('mm'))
         if self.month > 12 or self.month < 1:
@@ -192,8 +200,7 @@ class Identifier:
                 )
 
     def _parse_old_id(self, match_obj: Match[str]) -> None:
-        """
-        Populate instance attributes parsed from old arXiv identifier.
+        """Populate instance attributes parsed from old arXiv identifier.
 
         The old identifiers were minted from 1991 until March 2007.
 
@@ -205,7 +212,6 @@ class Identifier:
         Returns
         -------
         None
-
         """
         self.is_old_id = True
         self.archive = match_obj.group('archive')
@@ -214,14 +220,14 @@ class Identifier:
 
         if match_obj.group('version'):
             self.version = int(match_obj.group('version'))
-        self.filename = '{}{:03d}'.format(
-            match_obj.group('yymm'),
-            int(match_obj.group('num')))
+        self.filename = f'{match_obj.group("yymm")}{int(match_obj.group("num")):03d}'
         self.id = f'{self.archive}/{self.filename}'
 
+        if match_obj.group('extra'):
+            self.extra = match_obj.group('extra')
+
     def _parse_new_id(self, match_obj: Match[str]) -> None:
-        """
-        Populate instance attributes from a new arXiv identifier.
+        """Populate instance attributes from a new arXiv identifier.
 
         New identifiers started 2007-04 with 4-digit suffix;
         starting 2015 they have a 5-digit suffix.
@@ -238,21 +244,19 @@ class Identifier:
         Returns
         -------
         None
-
         """
         self.is_old_id = False
         self.archive = 'arxiv'
         # NB: this works only until 2099
         self.year = int(match_obj.group('yy')) + 2000
         if self.year >= 2015:
-            self.id = '{:04d}.{:05d}'.format(
-                int(match_obj.group('yymm')),
-                int(match_obj.group('num')))
+            self.id = f'{int(match_obj.group("yymm")):04d}.{int(match_obj.group("num")):05d}'
         else:
-            self.id = '{:04d}.{:04d}'.format(
-                int(match_obj.group('yymm')),
-                int(match_obj.group('num')))
+            self.id = f'{int(match_obj.group("yymm")):04d}.{int(match_obj.group("num")):04d}'
         self.filename = self.id
+
+        if match_obj.group('extra'):
+            self.extra = match_obj.group('extra')
 
     def __str__(self) -> str:
         """Return the string representation of the instance in json."""
@@ -275,3 +279,18 @@ class Identifier:
             return self.__dict__ == other.__dict__
         except AttributeError:
             return False
+
+
+    @staticmethod
+    def is_mostly_safe(idin: Optional[str]) -> bool:
+        """Checks that the input could reasonably be parsed as an ID.
+
+        Fails if strange unicode, starts with strange characters, very long
+        etc.
+
+        """
+        if not idin:
+            return False
+        if len(idin) > 200:
+            return False
+        return bool(re.match(re.compile(r"^[./0-9a-zA-Z:-]{8}"), idin))

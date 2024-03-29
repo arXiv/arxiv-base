@@ -6,7 +6,6 @@ To use this:
    poetry install
    export GOOGLE_APPLICATION_CREDENTIALS=~/somefile.json # needs read object permission on fastly log bucket
    poetry python arxiv/ops/fastly_gs_logs_to_cit.py --help
-
 """
 import heapq
 import logging
@@ -15,10 +14,13 @@ import re
 import tempfile
 from datetime import date, timedelta
 from datetime import datetime
+import dateutil.parser
 from pathlib import Path
 from typing import Optional, List
+import shutil
 
 import google.auth
+import pytz
 from google.cloud import storage
 
 import fire
@@ -29,21 +31,24 @@ logger.setLevel(logging.INFO)
 
 TMP_DIR="/tmp"  # needs reasonable temp FS, 600MB of work space
 
-DEFAULT_BUCKET="arxiv-logs-archive"
-DEFAULT_KEY="site/fastly/" + datetime.utcnow().strftime("%Y/fastly_access_log.%Y-%m-%dT%H")
+DEFAULT_BUCKET = "arxiv-logs-archive"
+DEFAULT_KEY = "site/fastly/" + datetime.utcnow().strftime("%Y/fastly_access_log.%Y-%m-%dT%H")
 
-_previous_hour = datetime.utcnow().replace(minute=00) - timedelta(hours=1)
-UTC_NOW = _previous_hour.strftime("%Y-%m-%dT%H")
-UTC_DATE = _previous_hour.date()
-UTC_HOUR = _previous_hour.hour
+# Since fastly logs are UTC we need UTC times to handle fastly filenames
+UTC_PREVIOUS_HOUR = (datetime.now().replace(minute=00, microsecond=0, second=0) - timedelta(hours=1)).astimezone(pytz.timezone("UTC"))
 
-DEFAULT_OUT_DIR=f"/data/logs_archive/site/fastly/{_previous_hour.year}/"
+ET_TZ = tzinfo=pytz.timezone("US/Eastern")
 
-TIME_PATTERN=r"\[([^\]]+)\]"
-"""Pattern to caputre time from a log line
-    Ex.
-    180.66.144.48 180.66.144.48 - | [29/Dec/2023:01:57:01 +0000] [Mozilla/etc...
-    """
+# Since arXiv logs are stored with ET, need the ET year
+_et_year = UTC_PREVIOUS_HOUR.astimezone(ET_TZ).year
+DEFAULT_ARCHIVE_DIR_BASE = f"/data/logs_archive/site/fastly"
+
+TIME_PATTERN = r"\[([^\]]+)\]"
+"""Pattern to capture time from a log line.
+
+Ex.
+180.66.144.48 180.66.144.48 - | [29/Dec/2023:01:57:01 +0000] [Mozilla/etc...
+"""
 
 TIME_STRP = "%d/%b/%Y:%H:%M:%S %z"
 
@@ -80,9 +85,7 @@ def k_way_merge(
     ----------
     files: Paths to read from
     output: Path to write output to
-
     """
-    #files = [gzip.open(filename) for filename in in_files]
     files = [open(filename) for filename in in_files]
     line_heap = []
     heapq.heapify(line_heap)
@@ -113,13 +116,11 @@ def k_way_merge(
             [f.close() for f in files]
 
 
-def download_files(verbose: bool = False,
-             bucket: str = DEFAULT_BUCKET,
-             date: date = UTC_DATE,
-             hour: int = UTC_HOUR,
-             key_pattern: Optional[str] = None,
-             max: int = 0,
-             out_dir: Path = Path(TMP_DIR)) -> List[Path]:
+def download_files(bucket: str = DEFAULT_BUCKET,
+                   date: datetime = UTC_PREVIOUS_HOUR,
+                   key_pattern: Optional[str] = None,
+                   max: int = 0,
+                   out_dir: Path = Path(TMP_DIR)) -> List[Path]:
     """Gets fastly log files for the last hour, combines them into a single file and saves that.
 
     Parameters
@@ -134,7 +135,7 @@ def download_files(verbose: bool = False,
     Path
     """
     if key_pattern is None:
-        key_pattern = f"site/fastly/{date.year}/fastly_access_log.{date.strftime('%Y-%m-%d')}T{hour}"
+        key_pattern = f"site/fastly/{date.year}/fastly_access_log.{date.strftime('%Y-%m-%d')}T{date.hour:02d}"
 
     logger.debug(f"Getting logs for gs://{bucket}/{key_pattern}")
     logger.debug(f"Writing to {out_dir}")
@@ -156,8 +157,7 @@ def download_files(verbose: bool = False,
         blob.download_to_filename(dl_name)
         logger.debug(f"Downloaded {dl_name}")
         if dl_name.suffix == ".gz":
-            logger.debug(f"Will ungzip to {unzip_name}")
-            os.system(f"gunzip --stdout \"{dl_name}\" | sort -o \"{unzip_name}\"")
+            os.system(f"gunzip --stdout \"{dl_name}\" > \"{unzip_name}\"")
             dl_name.unlink()
             files.append(unzip_name)
         else:
@@ -186,38 +186,153 @@ def sort_files_by_time(files: list[Path]) -> list[Path]:
     return out_files
 
 
-def get_fastly_logs(date_of_logs: date = _previous_hour.date(),
-                    hour: int = _previous_hour.hour,
-                    out_file: Path = None,
-                    tmp_dir: Path = Path(TMP_DIR)):
+def get_hour(date_of_logs: datetime|str = "previous_hour",
+             out_file: Path = None,
+             tmp_dir: Path = Path(TMP_DIR),
+             with_db_stats: bool = False):
     """Gets the fastly logs for an hour.
 
-    Downloads the fastly logs from GCP, combines them and puts in logs_archive.
+    Downloads the fastly logs from GCP, combines them and puts in
+    logs_archive.
 
     By default, gets the previous hour.
 
-    File names and timestamps in logs will be UTC time since fastly uses UTC times.
+    File names and timestamps in logs will be UTC time since fastly uses
+    UTC times.
 
-    Will overwrite already existing out file and will overwrite any already downloaded log files.
+    Will overwrite already existing out file and will overwrite any
+    already downloaded log files.
     """
+    if date_of_logs == "previous_hour":
+        date_of_logs = UTC_PREVIOUS_HOUR
+    elif type(date_of_logs) == str:
+        date_of_logs = dateutil.parser.parse(date_of_logs)
+
+    if not( date_of_logs.tzinfo is not None and date_of_logs.tzinfo.utcoffset(date_of_logs) != 0):
+        raise ValueError(f"date_of_logs must have a timezone and it must be UTC, it was {date_of_logs}")
+
+    # Since arXiv logs are stored with ET, we also need ET
+    et_time = date_of_logs.astimezone(pytz.timezone("US/Eastern"))
+
+    out_dir = Path(tmp_dir)
+    out_dir.mkdir(exist_ok=True)
+
     if out_file is None:
-        out_dir = Path(tmp_dir)
-        out_dir.mkdir(exist_ok=True)
-        out_file = out_dir / f"fastly_access_logs.{date_of_logs.strftime('%Y-%m-%d')}T{hour}.log"
+        archive_dir = Path(DEFAULT_ARCHIVE_DIR_BASE) / str(et_time.year)
+        archive_dir.mkdir(exist_ok=True)
+        # outfile is with ET since that is similar to the other arxiv logs
+        out_file = archive_dir / f"fastly_access_logs.{et_time.astimezone().isoformat()}.log"
 
-    files = download_files(date=date_of_logs, hour=hour)
+    logger.debug(f"Getting fastly logs for {et_time}ET (UTC {date_of_logs})")
+    files = download_files(date=date_of_logs)
+    logger.debug(f"Merging {len(files)} files.")
     k_way_merge(files, out_file=out_file)
+    logger.debug(f"Wrote to {out_file}")
     [file.unlink() for file in files]
+    logger.debug(f"Cleaned up {len(files)}")
+    if with_db_stats:
+        expect_utc = "-u"
+        local_date = f"-d {et_time.isoformat()}"
+        web_node = "-n 0"
+        cmd = f"""~/bin/cron/load_hourly_stats.pl -l {expect_utc} {web_node} {local_date} -f {out_file}"""
+        logger.debug("Doing load_hourly_stats: " + cmd)
+        os.system(cmd)
 
-def _test():
+    logger.debug(f"Done getting hour {et_time}")
+
+
+def fn_combine_day(date_eastern: datetime|str=None):
+    """Combine the files for a day into a single file.
+
+    Defaults to yesterday US/Eastern if no date_eastern.
+    """
+    if date_eastern is None:
+        date_eastern = datetime.now().astimezone(ET_TZ).replace(hour=12, minute=0, second=0, microsecond=0) - timedelta(days=1)
+    elif type(date_eastern) == str:
+        date_eastern = dateutil.parser.parse(date_eastern)
+
+    la_dir = Path(DEFAULT_ARCHIVE_DIR_BASE) / str(date_eastern.year)
+    logger.debug(f"Going to combine for {date_eastern} in dir {la_dir}")
+
+    files = la_dir.glob(f"fastly_access_logs.{date_eastern.strftime('%Y-%m-%d')}T*.log")
+    if not files:
+        raise RuntimeError(f"No log files found in {la_dir} for date_eastern.strftime('%Y-%m-%d')")
+
+    outfile = la_dir / f"fastly_access_log.{date_eastern.strftime('%Y-%m-%d')}.log"
+    if outfile.exists():
+        raise RuntimeError(f"Was going to write log to {outfile} but it already exists. Aborting")
+
+    outfile_gz = la_dir / f"fastly_access_log.{date_eastern.strftime('%Y-%m-%d')}.log.gz"
+    if outfile_gz.exists():
+        raise RuntimeError(f"Was going to write log to {outfile_gz} but it already exists. Aborting")
+
+    with open(outfile , "wb") as outfh:
+        for infile in files:
+            logger.debug(f"Concat {infile}")
+            with open(infile, "rb") as infh:
+                shutil.copyfileobj(infh, outfh)
+            infile.unlink()
+
+    os.system(f"gzip --force {outfile}")
+    logger.debug(f"Gzipped to {outfile}.gz")
+
+
+
+def get_day(date_eastern: datetime|str,
+            tmp_dir: Path = Path(TMP_DIR),
+            with_db_stats: bool = False,
+            combine_day: bool = False):
+    """Gets all logs for a day.
+
+    `date_eastern` is in the ET.
+    """
     logger.setLevel(logging.DEBUG)
-    d = date(2023,12,30)
-    h = 2
-    files = download_files(verbose=True, hour=h, date=d, max=4)
-    #files = sort_files_by_time(files)
-    k_way_merge(files,
-                files[0].with_name(f"fastly_access_MERGED.{d.strftime('%Y-%m-%d')}T{h}.log"))
+
+    if type(date_eastern) == str:
+        date_eastern = dateutil.parser.parse(date_eastern)
+    elif not( date_eastern.tzinfo is not None):
+        raise ValueError(f"date_eastern must have a timezone and it should be ET, it was {date_eastern}")
+
+    for hour in range(0,24):
+        utc_h = date_eastern.replace(hour=hour).astimezone(pytz.timezone("UTC"))
+        get_hour(date_of_logs=utc_h, tmp_dir=tmp_dir, with_db_stats=with_db_stats)
+
+    if combine_day:
+        fn_combine_day(date_eastern)
+
+
+
+def date_range(start: date|str, end: date|str,
+               tmp_dir: Path = Path(TMP_DIR),
+               with_db_stats: bool = False,
+               combine_day: bool = False):
+    """Do `get_day` for all days in a date range, inclusive."""
+    if type(start) == str:
+        start = dateutil.parser.parse(start).replace(hour=12, minute=0, second=0, microsecond=0)
+        #start = ET_TZ.localize(start)
+        start = start.astimezone(ET_TZ)
+    if type(end) == str:
+        end = dateutil.parser.parse(end).replace(hour=12, minute=0, second=0, microsecond=0)
+        #end = ET_TZ.localize(end)
+        end = end.astimezone(ET_TZ)
+
+    if start > end:
+        raise ValueError(f"start ({start}) must be earlier than end ({end})")
+
+
+    oneday = timedelta(days=1)
+    workingday = start
+    while(workingday <= end):
+        get_day(workingday, tmp_dir, with_db_stats, combine_day)
+        workingday = workingday + oneday
+
 
 
 if __name__ == "__main__":
-    fire.Fire(get_fastly_logs)
+    fire.Fire({
+        'get_day': get_day,
+        'get_hour': get_hour,
+        'combine_day': fn_combine_day,
+        'date_range': date_range,
+        }
+    )

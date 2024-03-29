@@ -1,5 +1,4 @@
-"""
-Support for typed flash alerts.
+"""Support for typed flash alerts.
 
 Flask provides a `simple cookie-based flashing mechanism
 <http://flask.pocoo.org/docs/1.0/patterns/flashing/>`. This module extends
@@ -39,12 +38,12 @@ For example:
 
 
 :func:`flash_hidden` can be used to send hidden data across requests.
-
 """
 
 from arxiv.base import logging
 from typing import Optional, List, Tuple, Union
-from flask import flash, Markup, get_flashed_messages
+from flask import flash, get_flashed_messages
+from markupsafe import Markup
 
 INFO = 'info'
 WARNING = 'warning'
@@ -68,8 +67,7 @@ def _flash_with(severity: str, message: Union[str, dict],
 
 def flash_info(message: str, title: Optional[str] = None,
                dismissable: bool = True, safe: bool = False) -> None:
-    """
-    Flash an informative message to the user.
+    """Flash an informative message to the user.
 
     Parameters
     ----------
@@ -85,15 +83,13 @@ def flash_info(message: str, title: Optional[str] = None,
         in the HTML page. NB: only use this if you know for sure that the
         message content is safe for display (i.e. you're not using raw content
         from a request).
-
     """
     _flash_with(INFO, message, title, dismissable, safe)
 
 
 def flash_warning(message: str, title: Optional[str] = None,
                   dismissable: bool = True, safe: bool = False) -> None:
-    """
-    Flash a warning message to the user.
+    """Flash a warning message to the user.
 
     Warnings are like info alerts, but with a higher level of concern. For
     example, this might be used to notify a user that an unintended consequence
@@ -113,15 +109,13 @@ def flash_warning(message: str, title: Optional[str] = None,
         in the HTML page. NB: only use this if you know for sure that the
         message content is safe for display (i.e. you're not using raw content
         from a request).
-
     """
     _flash_with(WARNING, message, title, dismissable, safe)
 
 
 def flash_failure(message: str, title: Optional[str] = None,
                   dismissable: bool = True, safe: bool = False) -> None:
-    """
-    Flash a failure message to the user.
+    """Flash a failure message to the user.
 
     Failures are an unavoidable part of life. We should be honest about our
     mistakes, and find constructive ways to move forward with our lives. That
@@ -142,15 +136,13 @@ def flash_failure(message: str, title: Optional[str] = None,
         in the HTML page. NB: only use this if you know for sure that the
         message content is safe for display (i.e. you're not using raw content
         from a request).
-
     """
     _flash_with(FAILURE, message, title, dismissable, safe)
 
 
 def flash_success(message: str, title: Optional[str] = None,
                   dismissable: bool = True, safe: bool = False) -> None:
-    """
-    Flash a success message to the user.
+    """Flash a success message to the user.
 
     It's nice to know when you've done something right for a change.
 
@@ -168,15 +160,13 @@ def flash_success(message: str, title: Optional[str] = None,
         in the HTML page. NB: only use this if you know for sure that the
         message content is safe for display (i.e. you're not using raw content
         from a request).
-
     """
     _flash_with(SUCCESS, message, title, dismissable, safe)
 
 
 def flash_hidden(message: dict, key: str,
                  dismissable: bool = True, safe: bool = False) -> None:
-    """
-    Propagate hidden data using the flash mechanism.
+    """Propagate hidden data using the flash mechanism.
 
     Hidden messages are not shown to the user.
 
@@ -194,14 +184,12 @@ def flash_hidden(message: dict, key: str,
         in the HTML page. NB: only use this if you know for sure that the
         message content is safe for display (i.e. you're not using raw content
         from a request).
-
     """
     _flash_with(HIDDEN, message, key, dismissable, safe)
 
 
 def get_alerts(severity: Optional[str] = None) -> List[Tuple[str, dict]]:
-    """
-    Get displayable alerts.
+    """Get displayable alerts.
 
     Parameters
     ----------
@@ -214,7 +202,6 @@ def get_alerts(severity: Optional[str] = None) -> List[Tuple[str, dict]]:
     list
         Items are (str, dict) tuples, where the first element is the severity
         and the second element is the alert itself.
-
     """
     alerts: List[Tuple[str, dict]]
     if severity is not None:
@@ -226,8 +213,7 @@ def get_alerts(severity: Optional[str] = None) -> List[Tuple[str, dict]]:
 
 
 def get_hidden_alerts(key: str) -> Optional[dict]:
-    """
-    Get all hidden alerts.
+    """Get all hidden alerts.
 
     Parameters
     ----------
@@ -237,7 +223,6 @@ def get_hidden_alerts(key: str) -> Optional[dict]:
     Returns
     -------
     dict or None
-
     """
     logger.debug('all current alerts: %s', get_flashed_messages())
     logger.debug('get hidden alert "%s"', key)
