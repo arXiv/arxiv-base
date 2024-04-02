@@ -113,4 +113,7 @@ class Category(BaseTaxonomy):
     def get_canonical(self) -> 'Category':
         """returns the canonical version of the category object"""
         from .definitions import CATEGORIES
-        return CATEGORIES[self.canonical_id]
+        if self.canonical_id!= self.id:
+            return CATEGORIES[self.canonical_id]
+        else:
+            return self
