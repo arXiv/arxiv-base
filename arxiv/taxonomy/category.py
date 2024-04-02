@@ -33,7 +33,9 @@ class BaseTaxonomy(BaseModel):
         Example: Earth and Planetary Astrophysics (astro-ph.EP)
         """
         from .definitions import CATEGORIES,ARCHIVES, GROUPS
-        if not canonical:
+        if self.id.startswith("bad-arch") or self.id=="grp_bad":
+            return self.full_name
+        elif not canonical:
             return f'{self.full_name} ({self.id})'
         else:
             name=self.canonical_id 
