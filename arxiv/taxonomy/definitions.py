@@ -81,7 +81,14 @@ GROUPS: Dict[str, Group] = {
             full_name="Economics",
             is_active=True,
             start_year=2017,
-            )
+            ),
+    "grp_bad":Group(
+            id="grp_bad",
+            full_name="Invalid Group",
+            is_active=False,
+            start_year=2024,
+            is_test=True
+            ),
 }
 
 #ARCHIVE DATA
@@ -395,6 +402,13 @@ ARCHIVES: Dict[str, Archive]= {
             is_active=True,
             in_group="grp_test",
             start_date=date(1995, 2, 1),
+            ),
+    "bad-arch":Archive(
+            id="bad-arch",
+            full_name="Invalid Archive",
+            is_active=False,
+            in_group="grp_bad",
+            start_date=date(2024, 4, 1),
             )
 }
 
@@ -1926,6 +1940,13 @@ CATEGORIES: Dict[str, Category] = {
             full_name="Test Superconductivity",
             is_active=False,
             in_archive="test",
+            is_general=False,
+            ),
+    "bad-arch.bad-cat":Category(
+            id="bad-arch.bad-cat",
+            full_name="Invalid Category",
+            is_active=False,
+            in_archive="bad-arch",
             is_general=False,
             )
 }
