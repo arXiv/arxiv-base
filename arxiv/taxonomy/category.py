@@ -119,3 +119,22 @@ class Category(BaseTaxonomy):
             return CATEGORIES[self.canonical_id]
         else:
             return self
+        
+
+def create_bad_arch(name: str) -> Archive:
+    return Archive(
+        id="bad-arch",
+        full_name=f"Invalid Archive: {name}",
+        is_active=False,
+        in_group="grp_bad",
+        start_date=date(2024, 1, 1)
+    )
+
+def create_bad_category(name:str) -> Category:
+    return Category(
+        id="bad-arch.bad-cat",
+        full_name=f"Invalid Category: {name}",
+        is_active=False,
+        in_archive="bad-arch",
+        is_general=False
+    ) 
