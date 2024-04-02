@@ -6,7 +6,7 @@ from typing import Union
 from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
     LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY, CATEGORY_ALIASES, CATEGORIES_ACTIVE
-from arxiv.taxonomy.category import Category, Archive, Group
+from arxiv.taxonomy.category import Category, Archive, Group, create_bad_arch, create_bad_category
 
 
 class TestTaxonomy(TestCase):
@@ -152,3 +152,20 @@ class TestTaxonomy(TestCase):
             self.assertEqual(canon.display(True), canon.display(False), "display string always the same for canonical name")
             self.assertNotEqual(not_canon.display(True), not_canon.display(False), "display has different text for canonincal and non canonical options")
 
+    def test_bad_objects(self):
+        """the goal is to reasonably handle bad category types sometimes found in very old data"""
+        cat= create_bad_category("physics")
+        arch=create_bad_arch("hamsters")
+
+        self.assertIsInstance(cat, Category) 
+        self.assertIsInstance(arch, Archive)
+
+        self.assertEqual(cat.display(), "Invalid Category: physics", "display string should not include id")
+        self.assertEqual(cat.display(True), "Invalid Category: physics", "display string should not include id")
+        self.assertEqual(arch.display(), "Invalid Archive: hamsters", "display string should not include id")
+        self.assertEqual(arch.display(True), "Invalid Archive: hamsters", "display string should not include id")
+        
+        self.assertEqual(cat.full_name, "Invalid Category: physics", "full name should have data on original bad item")
+        self.assertEqual(cat.full_name, cat.get_canonical().full_name, "name data should be retained after canonical calls")
+        self.assertEqual(arch.full_name, "Invalid Archive: hamsters", "full name should have data on original bad item")
+        self.assertEqual(arch.full_name, arch.get_canonical().full_name, "name data should be retained after canonical calls")
