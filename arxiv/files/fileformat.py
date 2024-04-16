@@ -16,28 +16,28 @@ class FileFormat():
 
 
 
-targz = FileFormat("targz", "x-gzip", "application/x-eprint-tar")
-tex = FileFormat("tex", "x-gzip",  "application/x-eprint-tar")
-psgz = FileFormat("psgz", "x-gzip", "application/postscript")
-dvigz = FileFormat("psgz", "x-gzip", "application/x-dvi")
-htmlgz = FileFormat("htmlgz", "x-gzip", "text/html")
+targz = FileFormat("targz", "gzip", "application/gzip")
+tex = FileFormat("tex", "gzip",  "application/x-latex")
+psgz = FileFormat("psgz", "gzip", "application/gzip")
+dvigz = FileFormat("dvigz", "gzip", "application/gzip")
+htmlgz = FileFormat("htmlgz", "gzip", "application/gzip")
 pdf = FileFormat("pdf", None, "application/pdf")
-pdftex = FileFormat("pdftex", "x-gzip", "application/x-eprint-tar")
+pdftex = FileFormat("pdftex", "gzip", "application/x-latex")
 ps = FileFormat("ps", None, "application/postscript")
-gz = FileFormat("gz", "x-gzip", "application/x-eprint")
-docx = FileFormat("docx", "TODO", "TODO")
-odf = FileFormat("odf", "TODO", "TODO")
-html = FileFormat("html","text/html", "text/html")
+gz = FileFormat("gz", "gzip", "application/gzip")
+docx = FileFormat("docx", "gzip", "application/gzip") #these files get downloaded in a tarball with a pdf version of them
+html = FileFormat("html","utf-8", "text/html")
 
 formats = {
     "targz": targz,
     "tex": tex,
     "psgz": psgz,
+    "dvigz": dvigz,
     "htmlgz": htmlgz,
     "pdf": pdf,
     "pdftex": pdftex,
+    "ps": ps,
     "gz": gz,
     "docx": docx,
-    "odf": odf,
     "html": html
     }
