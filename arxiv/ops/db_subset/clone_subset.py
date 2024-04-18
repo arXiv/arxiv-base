@@ -128,6 +128,27 @@ def parse_graph_edge (table: Subquery, edge: Dict[str, str], table_map: Dict[str
             .join(table, onclause=(getattr(table.c, edge['from_column']) == getattr(to_table, edge['to_column']))))
 
 
+def topological_sort(graph):
+    visited = set()
+    stack = []
+
+    def dfs(node):
+        visited.add(node)
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                dfs(neighbor)
+
+        # process_node(node)
+
+        stack.append(node)
+
+    for node in graph:
+        if node not in visited:
+            dfs(node)
+
+    return stack[::-1]
+
+
 def get_subset(article_count: int, unpublished_submission_count: int):
     with get_db() as session:
         articles = get_published_articles(article_count).subquery()
