@@ -10,7 +10,7 @@ from pathlib import Path
 
 from gcp_service_auth import GcpIdentityToken
 
-dev_target = "https://gcp-genpdf-6lhtms3oua-uc.a.run.app"
+TEST_URL = os.environ.get('TEST_URL')
 
 @pytest.fixture(scope="module")
 #@pytest.mark.with_op
@@ -29,7 +29,7 @@ def gcp_browse_cred() -> Generator[str, str, str]:
 def test_get_token(gcp_browse_cred: str) -> None:
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = gcp_browse_cred
     logger = logging.getLogger("test")
-    idt = GcpIdentityToken(dev_target, logger=logger,
+    idt = GcpIdentityToken(TEST_URL, logger=logger,
                            expiration=datetime.timedelta(seconds=1))
     token0 = idt.token
     time.sleep(2)
