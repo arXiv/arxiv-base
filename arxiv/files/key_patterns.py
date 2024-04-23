@@ -145,7 +145,7 @@ def latexml_html_path(arxiv_id: Identifier, version: int=0) -> str:
         version = arxiv_id.version
     path=f"{arxiv_id.filename}v{version}"
     if arxiv_id.extra:
-                path+=arxiv_id.extra
+        path+=arxiv_id.extra
     else:
         path+='/'+path+".html"
     return path
