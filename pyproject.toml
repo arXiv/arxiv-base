@@ -6,7 +6,7 @@ authors = ["arxiv.org"]
 packages = [
    { include = "arxiv" },
    { include = "arxiv/py.typed" },
-   { include = "gcp/service-auth" }
+   { include = "gcp/service_auth" }
    ]
 include = [
    "arxiv/base/static/*",
