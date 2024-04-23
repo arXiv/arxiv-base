@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "arxiv-base"
 version = "1.0.1"
-description = "Common code for arXiv NG"
+description = "Common code for arXiv Cloud"
 authors = ["arxiv.org"]
 packages = [
    { include = "arxiv" },
-   { include = "arxiv/py.typed" }
+   { include = "arxiv/py.typed" },
+   { include = "gcp/service-auth" }
    ]
 include = [
    "arxiv/base/static/*",
