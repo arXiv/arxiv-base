@@ -1,4 +1,5 @@
 from typing import Sequence, List, Type, Dict, Optional
+from dataclasses import dataclass, asdict
 import json
 import os
 import importlib
@@ -98,25 +99,33 @@ def get_unpublished_submissions (unpublished_submission_count: int, session: Ses
         .limit(unpublished_submission_count)
     ).scalars().all()
 
+@dataclass(frozen=True)
+class Edge:
+    from_column: str
+    to_table: str
+    to_column: str
+    
 def generate_relationship_graph(models: List[Type]):
     adjacency_list = {}
 
     for model in models:
         table_name = model.__tablename__
-        adjacency_list[table_name] = []
+        if table_name not in adjacency_list:
+            adjacency_list[table_name] = set()
 
         for column in model.__table__.columns:
             for fk in column.foreign_keys:
-                referenced_table, referenced_column = fk.target_fullname.split('.')
+                origin_table, origin_column = fk.target_fullname.split('.')
 
-                edge_description = {
-                    "from_column": column.name,
-                    "to_table": referenced_table,
-                    "to_column": referenced_column
-                }
+                edge = Edge(origin_column, table_name, column.name)
 
-                if edge_description not in adjacency_list[table_name]:
-                    adjacency_list[table_name].append(edge_description)
+                if origin_table not in adjacency_list:
+                    adjacency_list[origin_table] = set([edge])
+                elif edge not in adjacency_list[origin_table]:
+                    adjacency_list[origin_table].add(edge)
+
+    for table, edges in adjacency_list.items():
+        adjacency_list[table] = list(map(asdict, edges))
 
     graph_json = json.dumps(adjacency_list)
     return graph_json
