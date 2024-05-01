@@ -32,7 +32,7 @@ from arxiv.db import transaction
 with transaction() as session:
     session.add(...)
 """
-from typing import Generator
+from typing import Optional
 import logging
 from contextlib import contextmanager
 
@@ -77,9 +77,13 @@ def get_db ():
         db.close()
 
 @contextmanager
-def transaction ():
+def transaction (transaction_isolation_level: Optional[str] = None):
     in_flask = True if has_app_context() else False
-    db = session if in_flask else SessionLocal() 
+    db = session if in_flask else SessionLocal()
+    if transaction_isolation_level:
+        db.connection(execution_options={
+            'isolation_level': transaction_isolation_level
+        })
     try:
         yield db
 
