@@ -41,7 +41,7 @@ from flask import has_app_context
 
 from sqlalchemy import create_engine, MetaData, String
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
-
+from sqlalchemy.engine.interfaces import IsolationLevel
 
 from ..config import settings
 
@@ -77,7 +77,7 @@ def get_db ():
         db.close()
 
 @contextmanager
-def transaction (transaction_isolation_level: Optional[str] = None):
+def transaction (transaction_isolation_level: Optional[IsolationLevel] = None):
     in_flask = True if has_app_context() else False
     db = session if in_flask else SessionLocal()
     if transaction_isolation_level:
