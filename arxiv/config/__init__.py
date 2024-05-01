@@ -2,6 +2,7 @@
 import importlib.metadata
 from typing import Optional, List, Tuple
 import os
+from sqlalchemy.engine.interfaces import IsolationLevel
 from secrets import token_hex
 from urllib.parse import urlparse
 from pydantic import BaseSettings, SecretStr
@@ -171,5 +172,7 @@ class Settings(BaseSettings):
     CLASSIC_DB_URI: str = DEFAULT_DB
     LATEXML_DB_URI: str = DEFAULT_LATEXML_DB
     ECHO_SQL: bool = False
+    CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL: IsolationLevel = 'REPEATABLE READ'
+    LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: IsolationLevel = 'READ COMMITTED'
 
 settings = Settings()

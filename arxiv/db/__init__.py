@@ -56,9 +56,11 @@ class LaTeXMLBase(DeclarativeBase):
 logger = logging.getLogger(__name__)
 
 engine = create_engine(settings.CLASSIC_DB_URI,
-                       echo=settings.ECHO_SQL)
+                       echo=settings.ECHO_SQL,
+                       isolation_level=settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL)
 latexml_engine = create_engine(settings.LATEXML_DB_URI,
-                               echo=settings.ECHO_SQL)
+                               echo=settings.ECHO_SQL,
+                               isolation_level=settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 
 def _app_ctx_id () -> int:
