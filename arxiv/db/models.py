@@ -1397,7 +1397,7 @@ class Session(Base):
 
 
 
-class TapirAddres(Base):
+class TapirAddress(Base):
     __tablename__ = 'tapir_address'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())

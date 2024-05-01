@@ -1,4 +1,4 @@
-from typing import Sequence, List, Type, Dict, Optional
+from typing import Sequence, List, Type, Dict, Optional, Literal
 from dataclasses import dataclass, asdict
 import json
 import os
@@ -16,7 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.sql import _typing
 from sqlalchemy.orm import sessionmaker, Session
 
-from ...db import Base, LaTeXMLBase, get_db
+from ...db import Base, LaTeXMLBase, SessionLocal
 from ...db.models import (
     Document,
     Submission,
@@ -50,9 +50,9 @@ from ...db.models import (
 engine = create_engine(os.environ.get('NEW_DB_URI', 'sqlite:///:memory:'))
 latexml_engine = create_engine(os.environ.get('NEW_LATEXML_DB_URI', 'sqlite:///:memory:'))
 
-SessionLocal = sessionmaker(autcommit=False, autoflush=True)
+NewSessionLocal = sessionmaker(autcommit=False, autoflush=True)
 
-SessionLocal.configure(binds={
+NewSessionLocal.configure(binds={
     Base: engine,
     LaTeXMLBase: latexml_engine,
     t_arXiv_stats_hourly: engine,
@@ -137,11 +137,11 @@ def parse_graph_edge (table: Subquery, edge: Dict[str, str], table_map: Dict[str
             .join(table, onclause=(getattr(table.c, edge['from_column']) == getattr(to_table, edge['to_column']))))
 
 
-def topological_sort(graph):
+def topological_sort(graph: Dict[str, List[str]]):
     visited = set()
     stack = []
 
-    def dfs(node):
+    def dfs(node: str):
         visited.add(node)
         for neighbor in graph[node]:
             if neighbor not in visited:
@@ -191,3 +191,70 @@ def get_subset(article_count: int, unpublished_submission_count: int):
         # processed = [Metadata, Document, Submission]
         # table_queue = get_tables()
         # while len(processed) < len(table_queue):
+
+SpecialCase = Literal['all', 'none']
+
+def _copy_all_rows (table: Type, classic_session: Session, new_session: Session):
+    table.create(new_session)
+    rows = classic_session.execute(select(table)).scalars().all()
+    new_session.add_all(rows)
+    new_session.commit()
+
+def _generate_table_build_query (table: Type, edges: List[Edge], classic_session: Session, new_session: Session):
+    table.create(new_session)
+    
+
+def _invert_db_graph_edges (db_graph: Dict[str, List[Edge]]) -> Dict[str, List[Edge]]:
+    inverted_db_graph = {}
+    for node in db_graph:
+        for next in db_graph[node]:
+            if next.to_table in inverted_db_graph:
+                reversed_edge = Edge(
+                    from_column=next.to_column,
+                    to_table=node,
+                    to_column=next.from_column
+                )
+                inverted_db_graph[next.to_table].append(reversed_edge)
+            else:
+                inverted_db_graph[next.to_table] = [reversed_edge]
+    return inverted_db_graph
+
+def make_subset (db_graph: Dict[str, List[Edge]], 
+                 special_cases: Dict[str, SpecialCase], 
+                 **kwargs):
+    """
+    algorithm:
+
+    1. make topological sort of nodes
+    2. work through nodes, looking up what action to take for each
+    in special cases config, otherwise defaulting to join on 
+    FK's (a.k.a parse_graph_edge)
+    """
+
+    ### Set up ###
+    table_lookup = { i.__tablename__: i for i in get_tables() }
+    inverted_db_graph = _invert_db_graph_edges(db_graph)
+    classic_session = SessionLocal()
+    new_session = NewSessionLocal()
+    
+    ### Do algorithm ###
+    processing_order = topological_sort({ k: list(map(lambda x: x.to_table, v)) for k,v in db_graph.items() })
+
+    for table_name in processing_order:
+        table = table_lookup[table_name]
+        if table_name in special_cases:
+            special_case = special_cases[table_name]
+            if special_case == 'all':
+                _copy_all_rows(table, classic_session, new_session)
+            else: # special case is 'none'
+                table.create(new_session)
+                new_session.commit()
+        else:
+            ...
+        
+
+    ### Clean up ###
+    classic_session.close()
+    new_session.close()
+
+
