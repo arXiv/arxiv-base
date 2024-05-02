@@ -32,7 +32,7 @@ from arxiv.db import transaction
 with transaction() as session:
     session.add(...)
 """
-from typing import Generator
+from typing import Optional
 import logging
 from contextlib import contextmanager
 
@@ -41,7 +41,7 @@ from flask import has_app_context
 
 from sqlalchemy import create_engine, MetaData, String
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
-
+from sqlalchemy.engine.interfaces import IsolationLevel
 
 from ..config import settings
 
@@ -56,9 +56,11 @@ class LaTeXMLBase(DeclarativeBase):
 logger = logging.getLogger(__name__)
 
 engine = create_engine(settings.CLASSIC_DB_URI,
-                       echo=settings.ECHO_SQL)
+                       echo=settings.ECHO_SQL,
+                       isolation_level=settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL)
 latexml_engine = create_engine(settings.LATEXML_DB_URI,
-                               echo=settings.ECHO_SQL)
+                               echo=settings.ECHO_SQL,
+                               isolation_level=settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 
 def _app_ctx_id () -> int:
@@ -75,9 +77,13 @@ def get_db ():
         db.close()
 
 @contextmanager
-def transaction ():
+def transaction (transaction_isolation_level: Optional[IsolationLevel] = None):
     in_flask = True if has_app_context() else False
-    db = session if in_flask else SessionLocal() 
+    db = session if in_flask else SessionLocal()
+    if transaction_isolation_level:
+        db.connection(execution_options={
+            'isolation_level': transaction_isolation_level
+        })
     try:
         yield db
 
