@@ -1,4 +1,6 @@
-"""This is the primary SQLAlchemy implementation of the main arXiv database.
+"""
+This is the primary SQLAlchemy implementation of the main arXiv database.
+Here are some usage examples:
 
 To use this in a simple non-flask non-fastapi script do:
 
@@ -31,7 +33,19 @@ from arxiv.db import transaction
 
 with transaction() as session:
     session.add(...)
+
+
+if you want to specify the transaction isolation level
+of the transaction, you also have to specify the engine.
+For example:
+
+from arxiv.db import transaction, engine
+
+with transaction('READ UNCOMMITTED', engine) as session:
+    session.execute(...)
+
 """
+
 from typing import Optional
 import logging
 from contextlib import contextmanager
