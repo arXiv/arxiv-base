@@ -107,6 +107,11 @@
             "from_column": "document_id",
             "to_table": "arXiv_bib_updates",
             "to_column": "document_id"
+        },
+        {
+            "from_column": "paper_id",
+            "to_table": "arXiv_titles",
+            "to_column": "paper_id"
         }
     ],
     "arXiv_archives": [

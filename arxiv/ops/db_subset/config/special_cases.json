@@ -40,5 +40,6 @@
     "arXiv_groups": "all",
     "arXiv_archives": "all",
     "arXiv_categories": "all",
-    "arXiv_questionable_categories": "all"
+    "arXiv_questionable_categories": "all",
+    "tapir_users": "seed"
 }
