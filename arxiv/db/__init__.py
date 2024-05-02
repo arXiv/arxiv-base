@@ -39,7 +39,7 @@ from contextlib import contextmanager
 from flask.globals import app_ctx
 from flask import has_app_context
 
-from sqlalchemy import create_engine, MetaData, String
+from sqlalchemy import create_engine, MetaData, Engine
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 from sqlalchemy.engine.interfaces import IsolationLevel
 
@@ -77,13 +77,17 @@ def get_db ():
         db.close()
 
 @contextmanager
-def transaction (transaction_isolation_level: Optional[IsolationLevel] = None):
+def transaction (transaction_isolation_level: Optional[IsolationLevel] = None,
+                 bind_engine: Optional[Engine] = None):
     in_flask = True if has_app_context() else False
     db = session if in_flask else SessionLocal()
     if transaction_isolation_level:
-        db.connection(execution_options={
-            'isolation_level': transaction_isolation_level
-        })
+        db.connection(
+            bind_arguments={'bind': bind_engine},
+            execution_options={
+                'isolation_level': transaction_isolation_level
+            }
+        )
     try:
         yield db
 
