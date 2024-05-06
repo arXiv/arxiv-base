@@ -77,13 +77,9 @@ def get_db ():
         db.close()
 
 @contextmanager
-def transaction (transaction_isolation_level: Optional[IsolationLevel] = None):
+def transaction ():
     in_flask = True if has_app_context() else False
     db = session if in_flask else SessionLocal()
-    if transaction_isolation_level:
-        db.connection(execution_options={
-            'isolation_level': transaction_isolation_level
-        })
     try:
         yield db
 
