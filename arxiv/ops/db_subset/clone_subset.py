@@ -12,13 +12,16 @@ from sqlalchemy import (
     Select,
     and_,
     Subquery,
-    MetaData
+    insert
 )
-from sqlalchemy.sql import _typing, text
+from sqlalchemy.sql import _typing
 from sqlalchemy.orm import sessionmaker, Session
 
 from ...db import Base, LaTeXMLBase, SessionLocal
+from ...db import engine as classic_engine
 from ...db.models import (
+    TapirUsersPassword,
+    OrcidIds,
     Document,
     Submission,
     DBLaTeXMLDocuments,
@@ -51,10 +54,10 @@ from ...db.models import (
     t_tapir_save_post_variables
 )
 
-engine = create_engine(os.environ.get('NEW_DB_URI', 'sqlite:///temp.db'))
+new_engine = create_engine(os.environ.get('NEW_DB_URI', 'sqlite:///temp.db'))
 
 NewSessionLocal = sessionmaker(autocommit=False, autoflush=True)
-NewSessionLocal.configure(bind=engine)
+NewSessionLocal.configure(bind=new_engine)
 
 def get_tables () -> List[Type]:
     module = importlib.import_module('arxiv.db.models')
@@ -175,16 +178,29 @@ def _copy_all_rows (table: Type, classic_session: Session, new_session: Session)
     new_session.add_all(rows)
     new_session.commit()
 
-
 def _process_node (table: Any, edges: List[Edge], table_map: Dict[str, Any], query_map: Dict[str, Subquery], special_cases: Dict[str, str]) -> Subquery:
-    stmt = select(table)
-    for edge in edges:
-        if special_cases.get(edge.to_table) == 'all':
+    if table == OrcidIds:
+        breakpoint()
+    stmt = select(*[getattr(table.__table__.c, col.key) for col in table.__table__.columns])
+    uniq_parents = set(map(lambda x: x.to_table, edges))
+    parent_edges = { x: list(filter(lambda y: y.to_table == x, edges)) for x in uniq_parents }
+    for parent, edge_list in parent_edges.items():
+        if special_cases.get(parent) == 'all':
             continue
-        subq = query_map[edge.to_table]
-        stmt = stmt.join(subq, onclause=(getattr(table, edge.from_column) == getattr(subq.c, edge.to_column)))
+        if len(edge_list) > 1:
+            subq = query_map[parent]
+            on = getattr(table, edge_list[0].from_column) == getattr(subq.c, edge_list[0].to_column)
+            for edge in edge_list[1:]:
+                on = on & (getattr(table, edge.from_column) == getattr(subq.c, edge.to_column))
+            stmt = stmt.join(subq, onclause=on)
+        else:
+            edge = edge_list[0]
+            subq = query_map[edge.to_table]
+            stmt = stmt.join(subq, onclause=(getattr(table, edge.from_column) == getattr(subq.c, edge.to_column)))
+    """
+    SELECT * FROM arXiv_orcid_ids JOIN (SELECT * FROM tapir_users WHERE ...) as anon_1 ON anon_1.user_id == arXiv_orcid_ids.user_id;
+    """
     return stmt.subquery()
-
 
 def _generate_seed_table (classic_session: Session) -> Subquery:
     SIZE = 10
@@ -193,10 +209,18 @@ def _generate_seed_table (classic_session: Session) -> Subquery:
 
 
 def _write_subquery (table: Any, subq: Subquery, classic_session: Session, new_session: Session):
+    if table == OrcidIds:
+        breakpoint()
+        print (select(subq).compile(new_engine, compile_kwargs={"literal_binds": True}))
+        print (f'TAPIR USERS COUNT: {len(new_session.execute(select(TapirUser)).all())}')
     stmt = select(subq)
-    rows = map(lambda x: table(**dict(zip(table.__table__.columns.keys(), x._t))), classic_session.execute(stmt).all())
-    new_session.add_all(rows)
-    new_session.commit()
+    rows = map(lambda x: table(**dict(zip(table.__table__.columns.keys(), x._t))), classic_session.execute(stmt, bind_arguments={'bind': classic_engine}).all())
+    for i, row in enumerate(rows):
+        print (f'{row}: {row.__dict__}')
+        values = row.__dict__
+        del values['_sa_instance_state']
+        new_session.execute(insert(row.__table__).values(**values))
+        new_session.commit()
     
 
 def _invert_db_graph_edges (db_graph: Dict[str, List[Edge]]) -> Dict[str, List[Edge]]:
@@ -231,10 +255,10 @@ def make_subset (db_graph: Dict[str, List[Edge]],
     classic_session = SessionLocal()
     new_session = NewSessionLocal()
 
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
-    LaTeXMLBase.metadata.drop_all(engine)
-    LaTeXMLBase.metadata.create_all(engine)
+    Base.metadata.drop_all(new_engine)
+    Base.metadata.create_all(new_engine)
+    LaTeXMLBase.metadata.drop_all(new_engine)
+    LaTeXMLBase.metadata.create_all(new_engine)
     
     ### Do algorithm ###
     table_lookup = { i.__tablename__: i for i in get_tables() }
@@ -252,6 +276,8 @@ def make_subset (db_graph: Dict[str, List[Edge]],
                 continue
             elif special_case == 'seed':
                 table_queries[table_name] = _generate_seed_table (classic_session)
+                breakpoint()
+                print (select(table_queries[table_name]).compile(new_engine, compile_kwargs={"literal_binds": True}))
             else: # special case is 'none'
                 # table.__table__.create(new_session)
                 # new_session.commit()
@@ -267,21 +293,25 @@ def make_subset (db_graph: Dict[str, List[Edge]],
         print (f"WRITING TABLE {table}")
         subq = table_queries.get(table)
         if subq is not None:
-            try:
-                _write_subquery(table_lookup[table], subq, classic_session, new_session)
-            except Exception as e:
-                print (e)
+            # print (select(subq).compile(engine, compile_kwargs={"literal_binds": True}))
+            _write_subquery(table_lookup[table], subq, classic_session, new_session)
         else:
             print ("NO SUBQUERY AVAILABLE")
 
+    print (processing_order)
+
     ### Clean up ###
     classic_session.close()
+    new_session.commit()
+
+    print ('PRINTING TAPIR_USERS')
+    for i in new_session.execute(select(TapirUser)).scalars().all():
+        print (i)
+
     new_session.close()
 
-    print (table_queries)
-
 def do_temp ():
-    graph = json.loads(open('arxiv/ops/db_subset/config/graph.json').read())
+    graph = json.loads(open('arxiv/ops/db_subset/config/graph_no_latexml.json').read())
     db_graph = { k: list(map(lambda x: Edge(**x), v)) for k,v in graph.items() }
     special_cases = json.loads(open('arxiv/ops/db_subset/config/special_cases.json').read())
     make_subset(db_graph, special_cases)

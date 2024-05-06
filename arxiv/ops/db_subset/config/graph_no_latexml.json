@@ -25,6 +25,11 @@
         },
         {
             "from_column": "document_id",
+            "to_table": "arXiv_trackback_pings",
+            "to_column": "document_id"
+        },
+        {
+            "from_column": "document_id",
             "to_table": "arXiv_versions",
             "to_column": "document_id"
         },
@@ -97,6 +102,26 @@
             "from_column": "document_id",
             "to_table": "arXiv_updates",
             "to_column": "document_id"
+        },
+        {
+            "from_column": "paper_id",
+            "to_table": "arXiv_tracking",
+            "to_column": "paper_id"
+        },
+        {
+            "from_column": "document_id",
+            "to_table": "arXiv_next_mail",
+            "to_column": "document_id"
+        },
+        {
+            "from_column": "document_id",
+            "to_table": "arXiv_bib_updates",
+            "to_column": "document_id"
+        },
+        {
+            "from_column": "paper_id",
+            "to_table": "arXiv_titles",
+            "to_column": "paper_id"
         }
     ],
     "arXiv_archives": [
@@ -327,6 +352,11 @@
             "from_column": "user_id",
             "to_table": "arXiv_submission_hold_reason",
             "to_column": "user_id"
+        },
+        {
+            "from_column": "user_id",
+            "to_table": "arXiv_bogus_countries",
+            "to_column": "user_id"
         }
     ],
     "arXiv_aws_config": [],
@@ -421,9 +451,6 @@
         }
     ],
     "arXiv_dblp_document_authors": [],
-    "arXiv_latexml_doc": [],
-    "feedback": [],
-    "arXiv_latexml_sub": [],
     "arXiv_datacite_dois": [],
     "arXiv_metadata": [
         {
@@ -565,6 +592,11 @@
             "from_column": "submission_id",
             "to_table": "arXiv_submission_abs_classifier_data",
             "to_column": "submission_id"
+        },
+        {
+            "from_column": "submission_id",
+            "to_table": "arXiv_submission_near_duplicates",
+            "to_column": "matching_id"
         }
     ],
     "arXiv_pilot_files": [],
@@ -640,6 +672,31 @@
             "from_column": "session_id",
             "to_table": "tapir_sessions_audit",
             "to_column": "session_id"
+        },
+        {
+            "from_column": "session_id",
+            "to_table": "tapir_email_change_tokens",
+            "to_column": "session_id"
+        },
+        {
+            "from_column": "session_id",
+            "to_table": "arXiv_endorsement_requests_audit",
+            "to_column": "session_id"
+        },
+        {
+            "from_column": "session_id",
+            "to_table": "arXiv_ownership_requests_audit",
+            "to_column": "session_id"
+        },
+        {
+            "from_column": "session_id",
+            "to_table": "arXiv_endorsements_audit",
+            "to_column": "session_id"
+        },
+        {
+            "from_column": "session_id",
+            "to_table": "arXiv_show_email_requests",
+            "to_column": "session_id"
         }
     ],
     "tapir_demographics": [],
@@ -661,7 +718,13 @@
     "tapir_email_mailings": [],
     "tapir_email_tokens": [],
     "tapir_integer_variables": [],
-    "tapir_nicknames": [],
+    "tapir_nicknames": [
+        {
+            "from_column": "nick_id",
+            "to_table": "tapir_nicknames_audit",
+            "to_column": "nick_id"
+        }
+    ],
     "tapir_nicknames_audit": [],
     "tapir_permanent_tokens": [],
     "tapir_phone": [],
