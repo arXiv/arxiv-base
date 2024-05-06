@@ -64,10 +64,12 @@ def get_tables () -> List[Type]:
     classes = [cls for _, cls in inspect.getmembers(module, inspect.isclass) if cls.__module__ == 'arxiv.db.models']
     return classes
 
+
 def get_published_articles (article_count: int) -> Select[Document]:
     return select(Document) \
         .order_by(func.random()) \
         .limit(article_count) \
+        
 
 def get_unpublished_submissions (unpublished_submission_count: int, session: Session) -> Sequence[Submission]:
     return session.execute(
@@ -77,11 +79,13 @@ def get_unpublished_submissions (unpublished_submission_count: int, session: Ses
         .limit(unpublished_submission_count)
     ).scalars().all()
 
+
 @dataclass(frozen=True)
 class Edge:
     from_column: str
     to_table: str
     to_column: str
+
     
 def generate_relationship_graph(models: List[Type]):
     adjacency_list = {}
@@ -109,12 +113,6 @@ def generate_relationship_graph(models: List[Type]):
     return graph_json
 
 
-def parse_graph_edge (table: Subquery, edge: Dict[str, str], table_map: Dict[str, _typing._TypedColumnClauseArgument]) -> Optional[Select]:
-    to_table = table_map[edge['to_table']]
-    return (select(to_table)
-            .join(table, onclause=(getattr(table.c, edge.from_column) == getattr(to_table, edge.to_column))))
-
-
 def topological_sort(graph: Dict[str, List[str]]):
     visited = set()
     stack = []
@@ -136,40 +134,6 @@ def topological_sort(graph: Dict[str, List[str]]):
     return stack[::-1]
 
 
-# def get_subset(article_count: int, unpublished_submission_count: int):
-#     with get_db() as session:
-#         articles = get_published_articles(article_count).subquery()
-#         published = session.execute(
-#             select(Metadata, Submission, articles)
-#             .filter(and_(
-#                 Metadata.paper_id == articles.c.paper_id,
-#                 Submission.document_id == Metadata.document_id)
-#             )
-#         ).all()
-
-#         doc_set = set()
-#         doc_cols = ['document_id', 'paper_id', 'title', 'authors',
-#                     'submitter_email', 'submitter_id', 'dated', 
-#                     'primary_subject_class', 'created', 'submitter']
-#         metadata = []
-#         documents = []
-#         submissions = get_unpublished_submissions(unpublished_submission_count, session)
-#         for row in published:
-#             metadata.append(row._t[0])
-#             submissions.append(row._t[1])
-#             paper_id = row._t[0].paper_id
-#             if paper_id not in doc_set:
-#                 documents.append(Document(**dict(zip(doc_cols, row._t[2:]))))
-#                 doc_set.add(paper_id)
-
-#         table_map = { t.__tablename__: t for t in get_tables() }
-#         graph = json.loads(generate_relationship_graph(get_tables()))
-#         test = session.execute(parse_graph_edge(articles, graph['arXiv_documents'][0], table_map)).all()
-#         print (test)
-#         # processed = [Metadata, Document, Submission]
-#         # table_queue = get_tables()
-#         # while len(processed) < len(table_queue):
-
 SpecialCase = Literal['all', 'none']
 
 def _copy_all_rows (table: Type, classic_session: Session, new_session: Session):
@@ -179,8 +143,6 @@ def _copy_all_rows (table: Type, classic_session: Session, new_session: Session)
     new_session.commit()
 
 def _process_node (table: Any, edges: List[Edge], table_map: Dict[str, Any], query_map: Dict[str, Subquery], special_cases: Dict[str, str]) -> Subquery:
-    if table == OrcidIds:
-        breakpoint()
     stmt = select(*[getattr(table.__table__.c, col.key) for col in table.__table__.columns])
     uniq_parents = set(map(lambda x: x.to_table, edges))
     parent_edges = { x: list(filter(lambda y: y.to_table == x, edges)) for x in uniq_parents }
@@ -197,9 +159,6 @@ def _process_node (table: Any, edges: List[Edge], table_map: Dict[str, Any], que
             edge = edge_list[0]
             subq = query_map[edge.to_table]
             stmt = stmt.join(subq, onclause=(getattr(table, edge.from_column) == getattr(subq.c, edge.to_column)))
-    """
-    SELECT * FROM arXiv_orcid_ids JOIN (SELECT * FROM tapir_users WHERE ...) as anon_1 ON anon_1.user_id == arXiv_orcid_ids.user_id;
-    """
     return stmt.subquery()
 
 def _generate_seed_table (classic_session: Session) -> Subquery:
@@ -209,14 +168,9 @@ def _generate_seed_table (classic_session: Session) -> Subquery:
 
 
 def _write_subquery (table: Any, subq: Subquery, classic_session: Session, new_session: Session):
-    if table == OrcidIds:
-        breakpoint()
-        print (select(subq).compile(new_engine, compile_kwargs={"literal_binds": True}))
-        print (f'TAPIR USERS COUNT: {len(new_session.execute(select(TapirUser)).all())}')
     stmt = select(subq)
     rows = map(lambda x: table(**dict(zip(table.__table__.columns.keys(), x._t))), classic_session.execute(stmt, bind_arguments={'bind': classic_engine}).all())
-    for i, row in enumerate(rows):
-        print (f'{row}: {row.__dict__}')
+    for row in rows:
         values = row.__dict__
         del values['_sa_instance_state']
         new_session.execute(insert(row.__table__).values(**values))
@@ -276,7 +230,6 @@ def make_subset (db_graph: Dict[str, List[Edge]],
                 continue
             elif special_case == 'seed':
                 table_queries[table_name] = _generate_seed_table (classic_session)
-                breakpoint()
                 print (select(table_queries[table_name]).compile(new_engine, compile_kwargs={"literal_binds": True}))
             else: # special case is 'none'
                 # table.__table__.create(new_session)
