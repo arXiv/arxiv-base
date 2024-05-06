@@ -201,7 +201,7 @@ def make_subset (db_graph: Dict[str, List[Edge]],
     1. make topological sort of nodes
     2. work through nodes, looking up what action to take for each
     in special cases config, otherwise defaulting to join on 
-    FK's (a.k.a parse_graph_edge)
+    FK's
     """
 
     ### Set up ###
@@ -230,7 +230,6 @@ def make_subset (db_graph: Dict[str, List[Edge]],
                 continue
             elif special_case == 'seed':
                 table_queries[table_name] = _generate_seed_table (classic_session)
-                print (select(table_queries[table_name]).compile(new_engine, compile_kwargs={"literal_binds": True}))
             else: # special case is 'none'
                 # table.__table__.create(new_session)
                 # new_session.commit()
@@ -246,21 +245,15 @@ def make_subset (db_graph: Dict[str, List[Edge]],
         print (f"WRITING TABLE {table}")
         subq = table_queries.get(table)
         if subq is not None:
-            # print (select(subq).compile(engine, compile_kwargs={"literal_binds": True}))
             _write_subquery(table_lookup[table], subq, classic_session, new_session)
         else:
             print ("NO SUBQUERY AVAILABLE")
 
-    print (processing_order)
 
     ### Clean up ###
     classic_session.close()
+
     new_session.commit()
-
-    print ('PRINTING TAPIR_USERS')
-    for i in new_session.execute(select(TapirUser)).scalars().all():
-        print (i)
-
     new_session.close()
 
 def do_temp ():
