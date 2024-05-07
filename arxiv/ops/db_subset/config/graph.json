@@ -25,7 +25,17 @@
         },
         {
             "from_column": "document_id",
+            "to_table": "arXiv_trackback_pings",
+            "to_column": "document_id"
+        },
+        {
+            "from_column": "document_id",
             "to_table": "arXiv_versions",
+            "to_column": "document_id"
+        },
+        {
+            "from_column": "document_id",
+            "to_table": "arXiv_admin_log",
             "to_column": "document_id"
         },
         {
@@ -441,25 +451,12 @@
         }
     ],
     "arXiv_dblp_document_authors": [],
-    "arXiv_latexml_doc": [],
-    "feedback": [],
-    "arXiv_latexml_sub": [],
     "arXiv_datacite_dois": [],
     "arXiv_metadata": [
         {
             "from_column": "metadata_id",
             "to_table": "arXiv_datacite_dois",
             "to_column": "metadata_id"
-        },
-        {
-            "from_column": "paper_id",
-            "to_table": "arXiv_latexml_doc",
-            "to_column": "paper_id"
-        },
-        {
-            "from_column": "version",
-            "to_table": "arXiv_latexml_doc",
-            "to_column": "document_version"
         }
     ],
     "dbix_class_schema_versions": [],
@@ -598,11 +595,6 @@
         },
         {
             "from_column": "submission_id",
-            "to_table": "arXiv_latexml_sub",
-            "to_column": "submission_id"
-        },
-        {
-            "from_column": "submission_id",
             "to_table": "arXiv_submission_near_duplicates",
             "to_column": "matching_id"
         }
@@ -618,13 +610,7 @@
     "arXiv_state": [],
     "arXiv_stats_monthly_downloads": [],
     "arXiv_stats_monthly_submissions": [],
-    "arXiv_tracking": [
-        {
-            "from_column": "sword_id",
-            "to_table": "arXiv_submissions",
-            "to_column": "sword_id"
-        }
-    ],
+    "arXiv_tracking": [],
     "arXiv_submission_agreements": [
         {
             "from_column": "agreement_id",
