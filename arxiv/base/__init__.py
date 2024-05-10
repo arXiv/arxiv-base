@@ -128,6 +128,5 @@ class Base(object):
         # It is the same as the flask_sqlalchemy implementation 
         # See: https://github.com/pallets-eco/flask-sqlalchemy/blob/42a36a3cb604fd39d81d00b54ab3988bbd0ad184/src/flask_sqlalchemy/session.py#L109
         @app.teardown_appcontext
-        def remove_scoped_session (response_or_exc):
+        def remove_scoped_session (response_or_exc: BaseException | None) -> None:
             session.remove()
-            return response_or_exc

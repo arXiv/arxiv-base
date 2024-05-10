@@ -144,7 +144,7 @@ class VersionEntry:
         elif self.source_flag.html or self.source_format == "html":
             formats.extend(['html'])
         elif self.source_flag.docx or self.source_format == "docx":
-            formats.extend(['pdf'])
+            formats.extend(['pdf', 'docx'])
         else:
             formats.extend(['pdf', 'ps', 'src'])
 

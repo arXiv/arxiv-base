@@ -2,6 +2,7 @@
 import importlib.metadata
 from typing import Optional, List, Tuple
 import os
+from sqlalchemy.engine.interfaces import IsolationLevel
 from secrets import token_hex
 from urllib.parse import urlparse
 from pydantic import BaseSettings, SecretStr
@@ -171,5 +172,11 @@ class Settings(BaseSettings):
     CLASSIC_DB_URI: str = DEFAULT_DB
     LATEXML_DB_URI: str = DEFAULT_LATEXML_DB
     ECHO_SQL: bool = False
+    CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
+    LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
 
+    REQUEST_CONCURRENCY: int = 32
+    """ How many requests do we handle at once -> How many db connections should we be able to open at once """
+    POOL_PRE_PING: bool = True
+    """ Liveness check of sqlalchemy connections before checking out of pool """
 settings = Settings()
