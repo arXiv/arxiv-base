@@ -175,4 +175,7 @@ class Settings(BaseSettings):
     CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
     LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
 
+    # How many requests do we handle at once -> How many db connections should we be able to open at once
+    REQUEST_CONCURRENCY: int = 32
+
 settings = Settings()
