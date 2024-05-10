@@ -75,7 +75,7 @@ def parse_abs_file(file: FileObj) -> DocMetadata:
         raise AbsNotFoundException
     try:
         with file.open(mode='r', encoding='latin-1') as absf:
-            return parse_abs(absf.read(), file.updated())
+            return parse_abs(absf.read(), file.updated)
 
     except FileNotFoundError:
         raise AbsNotFoundException
