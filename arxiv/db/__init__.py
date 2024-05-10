@@ -59,12 +59,14 @@ engine = create_engine(settings.CLASSIC_DB_URI,
                        echo=settings.ECHO_SQL,
                        isolation_level=settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
                        pool_recycle=600,
-                       max_overflow=(settings.REQUEST_CONCURRENCY - 5)) # max overflow is how many + base pool size, which is 5 by default
+                       max_overflow=(settings.REQUEST_CONCURRENCY - 5), # max overflow is how many + base pool size, which is 5 by default
+                       pool_pre_ping=settings.POOL_PRE_PING) 
 latexml_engine = create_engine(settings.LATEXML_DB_URI,
                                echo=settings.ECHO_SQL,
                                isolation_level=settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL,
                                pool_recycle=600,
-                               max_overflow=(settings.REQUEST_CONCURRENCY - 5))
+                               max_overflow=(settings.REQUEST_CONCURRENCY - 5),
+                               pool_pre_ping=settings.POOL_PRE_PING) 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 
 def _app_ctx_id () -> int:
