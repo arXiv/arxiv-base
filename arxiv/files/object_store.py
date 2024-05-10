@@ -7,8 +7,13 @@ from typing import Iterable, \
 
 from google.cloud.storage.blob import Blob
 from google.cloud.storage.bucket import Bucket
+from google.cloud.storage.retry import DEFAULT_RETRY
 
 from . import FileObj
+
+GCS_RETRY = DEFAULT_RETRY \
+    .with_deadline(12) \
+    .with_delay(0.25, 2.5)
 
 class ObjectStore(ABC):
     """ABC for an object store."""
@@ -106,7 +111,10 @@ class GsObjectStore(ObjectStore):
 
         Returns `FileDoesNotExist` if there is no object at the key.
         """
-        blob = self.bucket.get_blob(key)
+        try:
+            blob = self.bucket.get_blob(key, retry=GCS_RETRY)
+        except:
+            blob = None
         if not blob:
             return FileDoesNotExist("gs://" + self.bucket.name + '/' + key)
         else:
