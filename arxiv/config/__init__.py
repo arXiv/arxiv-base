@@ -175,7 +175,8 @@ class Settings(BaseSettings):
     CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
     LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
 
-    # How many requests do we handle at once -> How many db connections should we be able to open at once
     REQUEST_CONCURRENCY: int = 32
-
+    """ How many requests do we handle at once -> How many db connections should we be able to open at once """
+    POOL_PRE_PING: bool = True
+    """ Liveness check of sqlalchemy connections before checking out of pool """
 settings = Settings()
