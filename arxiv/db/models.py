@@ -1397,7 +1397,7 @@ class Session(Base):
 
 
 
-class TapirAddres(Base):
+class TapirAddress(Base):
     __tablename__ = 'tapir_address'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1411,8 +1411,8 @@ class TapirAddres(Base):
     country: Mapped[str] = mapped_column(ForeignKey('tapir_countries.digraph'), nullable=False, index=True, server_default=FetchedValue())
     share_addr: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    tapir_country = relationship('TapirCountry', primaryjoin='TapirAddres.country == TapirCountry.digraph', backref='tapir_address')
-    user = relationship('TapirUser', primaryjoin='TapirAddres.user_id == TapirUser.user_id', backref='tapir_address')
+    tapir_country = relationship('TapirCountry', primaryjoin='TapirAddress.country == TapirCountry.digraph', backref='tapir_address')
+    user = relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', backref='tapir_address')
 
 
 
