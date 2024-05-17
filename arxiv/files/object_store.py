@@ -127,7 +127,10 @@ class GsObjectStore(ObjectStore):
         'ps_cache/arxiv/pdf/1212/1212.12345' or
         'ftp/cs/papers/0012/0012007'.
         """
-        return self.bucket.client.list_blobs(self.bucket, prefix=prefix)  # type: ignore
+        try:
+            return self.bucket.client.list_blobs(self.bucket, prefix=prefix)  # type: ignore
+        except:
+            return iter([])
 
     def status(self) -> Tuple[Literal["GOOD", "BAD"], str]:
         """Gets if bucket can be read."""
