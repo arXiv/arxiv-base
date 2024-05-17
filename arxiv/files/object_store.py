@@ -129,8 +129,8 @@ class GsObjectStore(ObjectStore):
         """
         try:
             return self.bucket.client.list_blobs(self.bucket, prefix=prefix)  # type: ignore
-        except:
-            return iter([])
+        except Exception as e:
+            raise RuntimeError (f'.list failed on gs://{self.bucket.name}/{prefix}') from e
 
     def status(self) -> Tuple[Literal["GOOD", "BAD"], str]:
         """Gets if bucket can be read."""
