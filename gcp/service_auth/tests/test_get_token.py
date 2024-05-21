@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 import time
-from typing import Generator
+from typing import Generator, Tuple
 
 import pytest
 import logging
@@ -21,10 +21,16 @@ except ModuleNotFoundError:
 
 @pytest.fixture(scope="module")
 #@pytest.mark.with_op
-def gcp_browse_cred() -> (Generator[str, str, str], str):
+def gcp_browse_cred() -> Generator[Tuple[str, str], None, None]:
+    """The fixture sets up
+    1. the path to the credentials file
+    2. the URL to the service.
+    """
     logging.basicConfig(level=logging.DEBUG)
     cred_file = os.path.join(Path(__file__).parent, "browse-local.json")
     cred_file = cred_file
+    # the magic numbers are assigned by the 1password.
+    # You'd find the value by running `op item list`, etc.
     if not os.path.exists(cred_file):
         subprocess.run(["op", "document", "get", "4feibaz4tzn6iwk5c7ggvb7xwi", "-o", cred_file])
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = cred_file
@@ -32,15 +38,16 @@ def gcp_browse_cred() -> (Generator[str, str, str], str):
     test_meta = json.loads(op.stdout)
     test_url = ""
     for field in test_meta['fields']:
+        # the magic number is assigned by 1p. This is a URL to test against
         if field["id"] == "heltf7phky3h6rnlvd7zi3542u":
             test_url = field["value"]
             break
-    yield (cred_file, test_url)
+    yield cred_file, test_url
     os.remove(cred_file)
-    return ""
+    return
 
 @pytest.mark.with_op
-def test_get_token(gcp_browse_cred: (str, str)) -> None:
+def test_get_token(gcp_browse_cred: Tuple[str, str]) -> None:
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = gcp_browse_cred[0]
     logger = logging.getLogger("test")
     idt = GcpIdentityToken(gcp_browse_cred[0][1], logger=logger,
