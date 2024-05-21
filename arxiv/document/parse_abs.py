@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 from dateutil import parser
 
 from ..taxonomy.definitions import ARCHIVES, CATEGORIES
+from ..files import FileObj, FileDoesNotExist
 from .metadata import AuthorList, DocMetadata, Submitter
 from ..config import settings
 from .version import VersionEntry, SourceFlag
@@ -63,26 +64,23 @@ _fs_tz: Optional[ZoneInfo] = None
 """FS timezone if in a flask app."""
 
 
-def parse_abs_file(filename: str) -> DocMetadata:
+def parse_abs_file(file: FileObj) -> DocMetadata:
     """Parse an arXiv .abs file from the local FS.
 
     The modified time on the abs file will be used as the modified time for the
     abstract. It will be pulled from `flask.config` if in a app_context. It
     can be specified with tz arg.
     """
-
-    absfile = Path(filename)
+    if isinstance(file, FileDoesNotExist):
+        raise AbsNotFoundException
     try:
-        with absfile.open(mode='r', encoding='latin-1') as absf:
-            raw = absf.read()
-            modified = datetime.fromtimestamp(absfile.stat().st_mtime, tz=_get_tz())
-            modified = modified.astimezone(ZoneInfo("UTC"))
-            return parse_abs(raw, modified)
+        with file.open(mode='r', encoding='latin-1') as absf:
+            return parse_abs(absf.read(), file.updated)
 
     except FileNotFoundError:
         raise AbsNotFoundException
     except UnicodeDecodeError as e:
-        raise AbsParsingException(f'Failed to decode .abs file "{filename}": {e}')
+        raise AbsParsingException(f'Failed to decode .abs file "{file}": {e}')
 
 
 
