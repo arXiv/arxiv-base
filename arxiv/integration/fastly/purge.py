@@ -45,8 +45,8 @@ def _purge_multiple_keys(keys: List[str], service_id:str, api_instance: PurgeApi
         calls itself recursively to stay within fastly maximum key amount
     """
     if len(keys)> MAX_PURGE_KEYS:
-        _purge_multiple_keys(keys[0:MAX_PURGE_KEYS])
-        _purge_multiple_keys(keys[MAX_PURGE_KEYS:])
+        _purge_multiple_keys(keys[0:MAX_PURGE_KEYS], service_id, api_instance)
+        _purge_multiple_keys(keys[MAX_PURGE_KEYS:], service_id, api_instance)
 
     options = {
         'service_id': service_id,
