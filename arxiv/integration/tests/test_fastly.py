@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from fastly.api.purge_api import PurgeApi
 
 from arxiv.integration.fastly.purge import purge_fastly_keys
+from arxiv.integration.fastly.headers import add_surrogate_key
 
 class TestPurgeFastlyKeys(unittest.TestCase):
     @patch('arxiv.integration.fastly.purge.PurgeApi')
@@ -65,3 +66,33 @@ class TestPurgeFastlyKeys(unittest.TestCase):
 
         mock_api_instance.bulk_purge_tag.assert_has_calls(calls, any_order=True)
 
+
+def test_empty_keys():
+        headers = {}
+        keys = []
+        expected = {"Surrogate-Key": ""}
+        assert add_surrogate_key(headers, keys)== expected
+        
+def test_add_keys():
+    headers = {"Surrogate-Key": "key1"}
+    keys = ["key2", "key3"]
+    expected = {"Surrogate-Key": "key1 key2 key3"}
+    assert expected == add_surrogate_key(headers, keys)
+    
+def test_duplicate_keys():
+    headers = {"Surrogate-Key": "key1 key2"}
+    keys = ["key2", "key3", "key3"]
+    expected = {"Surrogate-Key": "key1 key2 key3"}
+    assert expected== add_surrogate_key(headers, keys)
+
+def test_keys_with_spaces():
+    headers = {"Surrogate-Key": " key1 "}
+    keys = [" key2 "]
+    expected = {"Surrogate-Key": "key1 key2"}
+    assert expected== add_surrogate_key(headers, keys)
+
+def test_other_headers():
+    headers = {"A Header": "nifty info"}
+    keys = [" key2 "]
+    expected = {"A Header": "nifty info", "Surrogate-Key": "key2"}
+    assert expected== add_surrogate_key(headers, keys)
