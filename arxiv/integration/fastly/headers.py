@@ -1,6 +1,7 @@
 from typing import Dict, List
+from werkzeug.datastructures import Headers
 
-def add_surrogate_key(headers: Dict[str,str], keys:List[str])-> Dict[str, str]:
+def add_surrogate_key(headers: Dict[str,str], keys:List[str])-> Headers:
     """adds surrogate key(s) to a response header, 
     will update the header dictionary with new keys while retaining the rest of the header information"""
     old_keys=f' {headers.get("Surrogate-Key","").strip()} '
