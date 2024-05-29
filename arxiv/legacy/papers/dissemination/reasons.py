@@ -11,6 +11,8 @@ import json
 
 from google.cloud import storage
 
+from arxiv.files import FileObj
+
 FORMATS = Literal['ps', 'pdf', 'html', 'dvi', 'postscript']
 
 DEFAULT_REASONS_GS_URL = "gs://arxiv-production-data/reasons.json"
@@ -19,33 +21,22 @@ _verregex = re.compile(r'v\d+$')
 
 _reasons_data = None
 
-def ensure_reasons_data(location:Optional[str]=None) -> None:
-    """Checks that reasons data loads from Google storage and is not empty.
 
-    Raises an Exception if there are problems.
-    """
-    rd = get_reasons_data(location)
-    if not rd:
-        raise Exception("Reasons data was empty")
-
-
-def get_reasons_data(location:Optional[str]=None)->dict:
-    """Get the reasons data.
+def get_reasons_data(file: FileObj) -> dict:
+    """Get the reasons' data.
 
     `get_reasons_data()` will attempt to get the data from GS only
     once. If it fails it will cache a "LOAD FAILED" result that will
     cause it to fail when called further in the execution. This is to
     avoid repeted API calls to the GS bucket.
 
-    `location` should be a GS bucket in the form
-    gs://bucketname/some/key/reasons.json. If location is not
-    provided the env var REASONS_GS_URL will be used and if that
-    doesn't exist a default value for the URL will be used.
+    `location` should be `FileObj` like
+    gs://arxiv-production-data/reasons.json.
 
-    This will load from GS once and save in a package level variable.
+    This will load once and save in a package level variable.
 
     If `reasons()` is to be used in an app it makes sense to call
-    `get_reasons_data()` when starting that app to ensure the app has
+    `get_reasons_data(file)` when starting that app to ensure the app has
     access and it is configured correctly.
     """
     global _reasons_data
@@ -54,29 +45,8 @@ def get_reasons_data(location:Optional[str]=None)->dict:
     if _reasons_data == "LOAD FAILED":
         raise Exception("Previous load of reasons data failed, not trying again "
                         "until _reasons_data is cleared by setting it to None")
-
-    if location is None:
-        location = os.environ.get("REASONS_GS_URL", DEFAULT_REASONS_GS_URL)
-
-    if location is None:
-        raise ValueError("Must pass location or set env var REASONS_GS_URL")
-
-    blob = None
     try:
-        bucket_name = location.strip('gs://').split('/')[0]
-        key = '/'.join(location.strip('gs://').split('/')[1:])
-        bucket = storage.Client().bucket(bucket_name)
-        blob = bucket.get_blob(key)
-    except Exception as ex:
-        _reasons_data = "LOAD FAILED"
-        raise ex
-
-    if not blob:
-        _reasons_data = "LOAD FAILED"
-        raise Exception(f"Could not get resons file from {location}")
-
-    try:
-        with blob.open('r') as fp:
+        with file.open('r') as fp:
             _reasons_data = json.load(fp)
             return _reasons_data
     except Exception as ex:
@@ -84,7 +54,7 @@ def get_reasons_data(location:Optional[str]=None)->dict:
         raise ex
 
 
-def reasons(id: str, format: FORMATS)-> Optional[str] :
+def reasons(reasons_data: dict, id: str, format: FORMATS) -> Optional[str] :
     """Find any reasons for inability to process this paper.
 
     Find all the recorded reasons for inability to process this paper (if any),
@@ -100,8 +70,9 @@ def reasons(id: str, format: FORMATS)-> Optional[str] :
 
     Returns a list of strings which report reasons for different versions
     or formats fail. List is empty if no reasons are recorded.
+
+    See test_reasons.py for an example of the JSON needed for `reasons_data`.
     """
-    reasons_data = get_reasons_data()
 
     if not id:
         return None
