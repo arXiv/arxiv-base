@@ -2,13 +2,10 @@
 import re
 from unittest import TestCase
 
-import arxiv.legacy.papers.dissemination.reasons as reasons_pkg
-
-reasons = reasons_pkg.reasons
+from arxiv.legacy.papers.dissemination.reasons import reasons
 
 def fake_reasons():
-    reasons_pkg._reasons_data = test_reasons_data # pylint: disable=W0212
-
+    return test_reasons_data
 
 
 class TestReasons(TestCase):
@@ -28,15 +25,14 @@ class TestReasons(TestCase):
                   '1808.02949v1', '1612.00844v1']
 
     def test_papers_flaged_versions_in_reasons(self):
-        fake_reasons()
         vrx = re.compile(r'v\d+$')
         for id in self.ids_with_v:
-            assert reasons(id, 'pdf')
-            assert reasons(id, 'ps')
+            assert reasons(fake_reasons(), id, 'pdf')
+            assert reasons(fake_reasons(), id, 'ps')
             nov = re.sub(vrx,'',id)
             assert nov != id
-            assert not reasons(nov, 'pdf')
-            assert not reasons(nov, 'ps')
+            assert not reasons(fake_reasons(), nov, 'pdf')
+            assert not reasons(fake_reasons(), nov, 'ps')
 
 
     ids_with_pdf_reasons = [ 'alg-geom/9411012.pdf',
@@ -66,13 +62,12 @@ class TestReasons(TestCase):
 
 
     def test_papers_flaged_pdf_in_reasons(self):
-        fake_reasons()
         dotpdfrx = re.compile('.pdf$')
         for id in self.ids_with_pdf_reasons:
-            assert reasons(id, 'pdf')
+            assert reasons(fake_reasons(), id, 'pdf')
             nodotpdf = re.sub(dotpdfrx, '', id)
-            assert not reasons(nodotpdf, 'ps')
-            assert not reasons(nodotpdf, 'postscript')
+            assert not reasons(fake_reasons(), nodotpdf, 'ps')
+            assert not reasons(fake_reasons(), nodotpdf, 'postscript')
 
 
 
@@ -813,15 +808,14 @@ class TestReasons(TestCase):
                         '1310.4962']
 
     def test_papers_flaged_in_reason(self):
-        fake_reasons()
         for id in self.ids_with_reasons:
-            assert reasons(id, 'pdf')
-            assert reasons(id + "v1", 'pdf')
-            assert reasons(id + "v2", 'pdf')
-            assert reasons(id + "v12", 'pdf')
-            assert reasons(id + "v123", 'pdf')
-            assert reasons(id, 'ps')
-            assert reasons(id, 'postscript')
+            assert reasons(fake_reasons(), id, 'pdf')
+            assert reasons(fake_reasons(), id + "v1", 'pdf')
+            assert reasons(fake_reasons(), id + "v2", 'pdf')
+            assert reasons(fake_reasons(), id + "v12", 'pdf')
+            assert reasons(fake_reasons(), id + "v123", 'pdf')
+            assert reasons(fake_reasons(), id, 'ps')
+            assert reasons(fake_reasons(), id, 'postscript')
 
     no_reasons_data=[ 'astro-ph/9811330', 'astro-ph/9811330v1',
                  'astro-ph/9811330v12', 'astro-ph/9811330v1.pdf',
@@ -831,9 +825,8 @@ class TestReasons(TestCase):
                 ]
 
     def no_reasons(self):
-        fake_reasons()
         for id in self.no_reasons_data:
-            assert not reasons(id, 'pdf')
+            assert not reasons(fake_reasons(), id, 'pdf')
 
 
 # Take from /users/e-prints/httpd/htdocs/Database/reasons on 2023-01-25.
