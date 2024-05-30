@@ -1418,6 +1418,9 @@ class TapirAddress(Base):
 
 class TapirAdminAudit(Base):
     __tablename__ = 'tapir_admin_audit'
+    __table_args__ = (
+        Index('ix_tapir_admin_audit_data', 'data', mysql_length=32)
+    )
 
     log_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     session_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_sessions.session_id'), index=True)
@@ -1427,13 +1430,15 @@ class TapirAdminAudit(Base):
     affected_user: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     action: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
-    data: Mapped[str] = mapped_column(Text, nullable=False, index=True)
+    data: Mapped[str] = mapped_column(Text, nullable=False)
     comment: Mapped[str] = mapped_column(Text, nullable=False)
     entry_id: Mapped[intpk]
 
     tapir_user = relationship('TapirUser', primaryjoin='TapirAdminAudit.admin_user == TapirUser.user_id', backref='tapiruser_tapir_admin_audits')
     tapir_user1 = relationship('TapirUser', primaryjoin='TapirAdminAudit.affected_user == TapirUser.user_id', backref='tapiruser_tapir_admin_audits_0')
     session = relationship('TapirSession', primaryjoin='TapirAdminAudit.session_id == TapirSession.session_id', backref='tapir_admin_audits')
+
+    
 
 
 
