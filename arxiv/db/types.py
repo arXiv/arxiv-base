@@ -5,7 +5,9 @@ shorthand like intpk to make annotating the column type in .models
 easier
 """
 
-from typing import Annotated
+from typing import Annotated, Optional
 from sqlalchemy.orm import mapped_column
+from sqlalchemy import String
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
+long_str = Annotated[Optional[str], mapped_column(String(255), nullable=True)]

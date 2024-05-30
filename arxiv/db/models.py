@@ -43,7 +43,7 @@ from ..config import settings
 from . import Base, LaTeXMLBase, metadata, \
     SessionLocal, engine, latexml_engine
 
-from .types import intpk
+from .types import intpk, long_str
 
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
@@ -51,25 +51,25 @@ tz = gettz(settings.ARXIV_BUSINESS_TZ)
 class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'
 
-    resolver_URL: Mapped[Optional[str]]
+    resolver_URL: Mapped[long_str]
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    label: Mapped[Optional[str]]
+    label: Mapped[long_str]
     id: Mapped[intpk]
-    alt_text: Mapped[Optional[str]]
-    link_icon: Mapped[Optional[str]]
-    note: Mapped[Optional[str]]
+    alt_text: Mapped[long_str]
+    link_icon: Mapped[long_str]
+    note: Mapped[long_str]
 
 
 
 class MemberInstitutionContact(Base):
     __tablename__ = 'Subscription_UniversalInstitutionContact'
 
-    email: Mapped[Optional[str]]
+    email: Mapped[long_str]
     sid: Mapped[int] = mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)
     active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-    contact_name: Mapped[Optional[str]]
+    contact_name: Mapped[long_str]
     id: Mapped[intpk]
-    phone: Mapped[Optional[str]]
+    phone: Mapped[long_str]
     note: Mapped[Optional[str]] = mapped_column(String(2048))
 
     Subscription_UniversalInstitution = relationship('MemberInstitution', primaryjoin='MemberInstitutionContact.sid == MemberInstitution.id')
@@ -128,16 +128,16 @@ class AdminMetadata(Base):
     source_type: Mapped[Optional[str]] = mapped_column(String(12))
     title: Mapped[Optional[str]] = mapped_column(Text)
     authors: Mapped[Optional[str]] = mapped_column(Text)
-    category_string: Mapped[Optional[str]]
+    category_string: Mapped[long_str]
     comments: Mapped[Optional[str]] = mapped_column(Text)
-    proxy: Mapped[Optional[str]]
+    proxy: Mapped[long_str]
     report_num: Mapped[Optional[str]] = mapped_column(Text)
-    msc_class: Mapped[Optional[str]]
-    acm_class: Mapped[Optional[str]]
+    msc_class: Mapped[long_str]
+    acm_class: Mapped[long_str]
     journal_ref: Mapped[Optional[str]] = mapped_column(Text)
-    doi: Mapped[Optional[str]]
+    doi: Mapped[long_str]
     abstract: Mapped[Optional[str]] = mapped_column(Text)
-    license: Mapped[Optional[str]]
+    license: Mapped[long_str]
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     modtime: Mapped[Optional[int]] = mapped_column(Integer)
     is_current: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -171,7 +171,7 @@ class ArchiveDef(Base):
     __tablename__ = 'arXiv_archive_def'
 
     archive: Mapped[str] = mapped_column(String(16), primary_key=True, server_default=FetchedValue())
-    name: Mapped[Optional[str]]
+    name: Mapped[long_str]
 
 
 
@@ -235,13 +235,13 @@ class BibFeed(Base):
     bib_id: Mapped[intpk]
     name: Mapped[str] = mapped_column(String(64), nullable=False, server_default=FetchedValue())
     priority: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    uri: Mapped[Optional[str]]
-    identifier: Mapped[Optional[str]]
-    version: Mapped[Optional[str]]
+    uri: Mapped[long_str]
+    identifier: Mapped[long_str]
+    version: Mapped[long_str]
     strip_journal_ref: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     concatenate_dupes: Mapped[Optional[int]] = mapped_column(Integer)
     max_updates: Mapped[Optional[int]] = mapped_column(Integer)
-    email_errors: Mapped[Optional[str]]
+    email_errors: Mapped[long_str]
     prune_ids: Mapped[Optional[str]] = mapped_column(Text)
     prune_regex: Mapped[Optional[str]] = mapped_column(Text)
     enabled: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -296,7 +296,7 @@ class Category(Base):
     subject_class: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
     definitive: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     active: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    category_name: Mapped[Optional[str]]
+    category_name: Mapped[long_str]
     endorse_all: Mapped[Literal['y', 'n', 'd']] = mapped_column(Enum('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
     endorse_email: Mapped[Literal['y', 'n', 'd']] = mapped_column(Enum('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
     papers_to_endorse: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
@@ -321,7 +321,7 @@ class CategoryDef(Base):
     __tablename__ = 'arXiv_category_def'
 
     category: Mapped[str] = mapped_column(String(32), primary_key=True)
-    name: Mapped[Optional[str]]
+    name: Mapped[long_str]
     active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
 
 
@@ -500,8 +500,8 @@ class EndorsementRequestsAudit(EndorsementRequest):
     request_id: Mapped[int] = mapped_column(ForeignKey('arXiv_endorsement_requests.request_id'), primary_key=True, server_default=FetchedValue())
     session_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     remote_addr: Mapped[Optional[str]] = mapped_column(String(16))
-    remote_host: Mapped[Optional[str]]
-    tracking_cookie: Mapped[Optional[str]]
+    remote_host: Mapped[long_str]
+    tracking_cookie: Mapped[long_str]
 
 
 
@@ -555,7 +555,7 @@ class GroupDef(Base):
     __tablename__ = 'arXiv_group_def'
 
     archive_group: Mapped[str] = mapped_column(String(16), primary_key=True, server_default=FetchedValue())
-    name: Mapped[Optional[str]]
+    name: Mapped[long_str]
 
 
 
@@ -606,7 +606,7 @@ class License(Base):
     __tablename__ = 'arXiv_licenses'
 
     name: Mapped[str] = mapped_column(String(255), primary_key=True)
-    label: Mapped[Optional[str]]
+    label: Mapped[long_str]
     active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     note: Mapped[Optional[str]] = mapped_column(String(400))
     sequence: Mapped[Optional[int]] = mapped_column(Integer)
@@ -641,14 +641,14 @@ class Metadata(Base):
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
     title: Mapped[Optional[str]] = mapped_column(Text)
     authors: Mapped[Optional[str]] = mapped_column(Text)
-    abs_categories: Mapped[Optional[str]]
+    abs_categories: Mapped[long_str]
     comments: Mapped[Optional[str]] = mapped_column(Text)
-    proxy: Mapped[Optional[str]]
+    proxy: Mapped[long_str]
     report_num: Mapped[Optional[str]] = mapped_column(Text)
-    msc_class: Mapped[Optional[str]]
-    acm_class: Mapped[Optional[str]]
+    msc_class: Mapped[long_str]
+    acm_class: Mapped[long_str]
     journal_ref: Mapped[Optional[str]] = mapped_column(Text)
-    doi: Mapped[Optional[str]]
+    doi: Mapped[long_str]
     abstract: Mapped[Optional[str]] = mapped_column(Text)
     license: Mapped[Optional[str]] = mapped_column(ForeignKey('arXiv_licenses.name'), index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -748,7 +748,7 @@ class NextMail(Base):
     paper_id: Mapped[Optional[str]] = mapped_column(String(20))
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     type: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    extra: Mapped[Optional[str]]
+    extra: Mapped[long_str]
     mail_id: Mapped[Optional[str]] = mapped_column(String(6))
     is_written: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
@@ -1095,12 +1095,12 @@ class Submission(Base):
     title: Mapped[Optional[str]] = mapped_column(Text)
     authors: Mapped[Optional[str]] = mapped_column(Text)
     comments: Mapped[Optional[str]] = mapped_column(Text)
-    proxy: Mapped[Optional[str]]
+    proxy: Mapped[long_str]
     report_num: Mapped[Optional[str]] = mapped_column(Text)
-    msc_class: Mapped[Optional[str]]
-    acm_class: Mapped[Optional[str]]
+    msc_class: Mapped[long_str]
+    acm_class: Mapped[long_str]
     journal_ref: Mapped[Optional[str]] = mapped_column(Text)
-    doi: Mapped[Optional[str]]
+    doi: Mapped[long_str]
     abstract: Mapped[Optional[str]] = mapped_column(Text)
     license: Mapped[Optional[str]] = mapped_column(ForeignKey('arXiv_licenses.name', onupdate='CASCADE'), index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1173,8 +1173,8 @@ class SubmitterFlag(Base):
     __tablename__ = 'arXiv_submitter_flags'
 
     flag_id: Mapped[intpk]
-    comment: Mapped[Optional[str]]
-    pattern: Mapped[Optional[str]]
+    comment: Mapped[long_str]
+    pattern: Mapped[long_str]
 
 
 
@@ -1449,8 +1449,8 @@ class TapirEmailChangeToken(Base):
     __tablename__ = 'tapir_email_change_tokens'
 
     user_id = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())
-    old_email: Mapped[Optional[str]]
-    new_email: Mapped[Optional[str]]
+    old_email: Mapped[long_str]
+    new_email: Mapped[long_str]
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
     tapir_dest: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     issued_when: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1494,7 +1494,7 @@ class TapirEmailLog(Base):
     reference_type: Mapped[Optional[str]] = mapped_column(String(1))
     reference_id: Mapped[Optional[int]] = mapped_column(Integer)
     sent_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    email: Mapped[Optional[str]]
+    email: Mapped[long_str]
     flag_bounced: Mapped[Optional[int]] = mapped_column(Integer)
     mailing_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     template_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1511,7 +1511,7 @@ class TapirEmailMailing(Base):
     created_date: Mapped[Optional[int]] = mapped_column(Integer)
     sent_date: Mapped[Optional[int]] = mapped_column(Integer)
     complete_date: Mapped[Optional[int]] = mapped_column(Integer)
-    mailing_name: Mapped[Optional[str]]
+    mailing_name: Mapped[long_str]
     comment: Mapped[Optional[str]] = mapped_column(Text)
 
     tapir_user = relationship('TapirUser', primaryjoin='TapirEmailMailing.created_by == TapirUser.user_id', backref='tapiruser_tapir_email_mailings')
@@ -1937,7 +1937,7 @@ class DBLaTeXMLDocuments(LaTeXMLBase):
     #   - 2 = failure
     conversion_status: Mapped[int] = mapped_column(Integer, nullable=False)
     latexml_version: Mapped[str] = mapped_column(String(40), nullable=False)
-    tex_checksum: Mapped[Optional[str]]
+    tex_checksum: Mapped[long_str]
     conversion_start_time: Mapped[Optional[int]] = mapped_column(Integer)
     conversion_end_time: Mapped[Optional[int]] = mapped_column(Integer)
     publish_dt: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
@@ -1952,7 +1952,7 @@ class DBLaTeXMLSubmissions (LaTeXMLBase):
     #   - 2 = failure
     conversion_status: Mapped[int] = mapped_column(Integer, nullable=False)
     latexml_version: Mapped[str] = mapped_column(String(40), nullable=False)
-    tex_checksum: Mapped[Optional[str]]
+    tex_checksum: Mapped[long_str]
     conversion_start_time: Mapped[Optional[int]]
     conversion_end_time: Mapped[Optional[int]]
 
@@ -1960,15 +1960,15 @@ class DBLaTeXMLFeedback (LaTeXMLBase):
     __tablename__ = 'feedback'
     
     id: Mapped[str] = mapped_column(String(40), primary_key=True)
-    canonical_url: Mapped[Optional[str]]
-    conversion_url: Mapped[Optional[str]]
+    canonical_url: Mapped[long_str]
+    conversion_url: Mapped[long_str]
     report_time: Mapped[Optional[int]] = mapped_column(BigInteger)
-    browser_info: Mapped[Optional[str]]
-    location_low: Mapped[Optional[str]]
-    location_high: Mapped[Optional[str]]
-    description: Mapped[Optional[str]]
-    selected_html: Mapped[Optional[str]]
-    initiation_mode: Mapped[Optional[str]]
+    browser_info: Mapped[long_str]
+    location_low: Mapped[long_str]
+    location_high: Mapped[long_str]
+    description: Mapped[long_str]
+    selected_html: Mapped[long_str]
+    initiation_mode: Mapped[long_str]
 
 SessionLocal.configure(binds={
     Base: engine,
