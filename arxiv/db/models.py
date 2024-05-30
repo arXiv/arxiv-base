@@ -1419,7 +1419,7 @@ class TapirAddress(Base):
 class TapirAdminAudit(Base):
     __tablename__ = 'tapir_admin_audit'
     __table_args__ = (
-        Index('ix_tapir_admin_audit_data', 'data', mysql_length=32)
+        Index('ix_tapir_admin_audit_data', 'data', mysql_length=32),
     )
 
     log_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
