@@ -1742,7 +1742,7 @@ t_tapir_save_post_variables = Table(
     'tapir_save_post_variables', metadata,
     Column('presession_id', ForeignKey('tapir_presessions.presession_id'), nullable=False, index=True, server_default=FetchedValue()),
     Column('name', String(255)),
-    Column('value', String, nullable=False),
+    Column('value', String(255), nullable=False),
     Column('seq', Integer, nullable=False, server_default=FetchedValue())
 )
 
