@@ -245,7 +245,14 @@ def _make_subset (db_graph: Dict[str, List[Edge]],
     new_session.commit()
     new_session.close()
 
-def clone_db_subset (n_users: int, config_directory: str):
+def clone_db_subset (n_users: int, config_directory: Optional[str] = None):
+    config_directory = config_directory or \
+        os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                'config'
+            )
+        )
     graph = json.loads(open(os.path.join(config_directory, 'graph.json')).read())
     special_cases = json.loads(open(os.path.join(config_directory, 'special_cases.json')).read())
     graph_with_edges = { k: list(map(lambda x: Edge(**x), v)) for k,v in graph.items() }
