@@ -100,12 +100,13 @@ def transaction ():
 
 @listens_for(engine, "before_cursor_execute")
 def _record_query_start (conn, cursor, statement, parameters, context, executemany):
-    conn.info["query_start"] = datetime.now()
+    conn.info['query_start'] = datetime.now()
 
 @listens_for(engine, "after_cursor_execute")
 def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
     if conn.info.get('query_start'):
-        secs = (datetime.now() - conn.info['query_start']).seconds
-        logger.error(f"TESTING TESTING with {secs} seconds")
-        if secs > 10:
-            logger.warning(f"This query:\n{str(statement)}\ntook {secs} seconds")
+        a = datetime.now() 
+        delta = (a - conn.info['query_start'])
+        logger.error(f"TESTING TESTING: now = {a}, query_start = {conn.info['query_start']}, delta: {delta.seconds} seconds / {delta.microseconds} microsecs")
+        if delta.seconds > 0.01:
+            logger.warning(f"This query:\n{str(statement)}\ntook {delta.seconds} seconds")
