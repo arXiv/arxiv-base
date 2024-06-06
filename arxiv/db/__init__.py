@@ -32,16 +32,16 @@ from arxiv.db import transaction
 with transaction() as session:
     session.add(...)
 """
-from typing import Optional
 import logging
+from datetime import datetime
 from contextlib import contextmanager
 
 from flask.globals import app_ctx
 from flask import has_app_context
 
-from sqlalchemy import create_engine, MetaData, String
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.event import listens_for
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
-from sqlalchemy.engine.interfaces import IsolationLevel
 
 from ..config import settings
 
@@ -97,3 +97,15 @@ def transaction ():
     finally:
         if not in_flask:
             db.close()
+
+@listens_for(engine, "before_cursor_execute")
+def _record_query_start (conn, cursor, statement, parameters, context, executemany):
+    conn.info["query_start"] = datetime.now()
+
+@listens_for(engine, "after_cursor_execute")
+def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
+    if conn.info.get('query_start'):
+        secs = (datetime.now() - conn.info['query_start']).seconds
+        logger.error(f"TESTING TESTING with {secs} seconds")
+        if secs > 10:
+            logger.warning(f"This query:\n{str(statement)}\ntook {secs} seconds")
