@@ -33,7 +33,7 @@ with transaction() as session:
     session.add(...)
 """
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 from flask.globals import app_ctx
@@ -105,8 +105,6 @@ def _record_query_start (conn, cursor, statement, parameters, context, executema
 @listens_for(engine, "after_cursor_execute")
 def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
     if conn.info.get('query_start'):
-        a = datetime.now() 
-        delta = (a - conn.info['query_start'])
-        logger.error(f"TESTING TESTING: now = {a}, query_start = {conn.info['query_start']}, delta: {delta.seconds} seconds / {delta.microseconds} microsecs")
-        if delta.seconds > 0.01:
-            logger.warning(f"This query:\n{str(statement)}\ntook {delta.seconds} seconds")
+        delta: timedelta = (datetime.now() - conn.info['query_start'])
+        if delta.seconds > 8:
+            logger.warning(f"This query:\n{str(statement)}\ntook {delta.seconds+(delta.microseconds/1000000)} seconds")
