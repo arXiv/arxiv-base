@@ -33,6 +33,7 @@ with transaction() as session:
     session.add(...)
 """
 import logging
+import json
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
@@ -109,7 +110,8 @@ def _calculate_query_run_time (conn, cursor, statement, parameters, context, exe
         if delta.microseconds > 250000:
             log = dict(
                 severity="WARNING",
-                message=f"Long query took {delta.seconds+(delta.microseconds/1000000)} seconds",
+                message=f"Long query took",
+                length=delta.seconds+(delta.microseconds/1000000),
                 query=str(statement)
             )
-            print (log)
+            print (json.dumps(log))
