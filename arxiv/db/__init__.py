@@ -107,11 +107,20 @@ def _record_query_start (conn, cursor, statement, parameters, context, executema
 def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
     if conn.info.get('query_start'):
         delta: timedelta = (datetime.now() - conn.info['query_start'])
-        if delta.microseconds > 250000:
+        query_time = delta.seconds+(delta.microseconds/1000000)
+        if query_time > 0.2 and query_time < 8:
+            log = dict(
+                severity="INFO",
+                message=f"Slightly long query",
+                query_seconds=query_time,
+                query=str(statement)
+            )
+            print (json.dumps(log))
+        elif query_time >= 8:
             log = dict(
                 severity="WARNING",
-                message=f"Long query took",
-                length=delta.seconds+(delta.microseconds/1000000),
+                message=f"Very long query",
+                query_seconds=query_time,
                 query=str(statement)
             )
             print (json.dumps(log))
