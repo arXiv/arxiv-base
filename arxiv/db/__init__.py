@@ -106,5 +106,10 @@ def _record_query_start (conn, cursor, statement, parameters, context, executema
 def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
     if conn.info.get('query_start'):
         delta: timedelta = (datetime.now() - conn.info['query_start'])
-        if delta.seconds > 8:
-            logger.warning(f"This query:\n{str(statement)}\ntook {delta.seconds+(delta.microseconds/1000000)} seconds")
+        if delta.microseconds > 250000:
+            log = dict(
+                severity="WARNING",
+                message=f"Long query took {delta.seconds+(delta.microseconds/1000000)} seconds",
+                query=str(statement)
+            )
+            print (log)
