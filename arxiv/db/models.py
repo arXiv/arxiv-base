@@ -30,7 +30,8 @@ from sqlalchemy import (
     Text, 
     Table,
     Enum,
-    text
+    text, 
+    Engine
 )
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import (
@@ -1998,3 +1999,33 @@ SessionLocal.configure(binds={
     t_tapir_permanent_tokens_used: engine,
     t_tapir_save_post_variables: engine
 })
+
+def reconfigure_db (engine: Engine, latexml_engine: Optional[Engine]):
+    SessionLocal.configure(binds={
+        Base: engine,
+        LaTeXMLBase: (latexml_engine if latexml_engine else engine),
+        t_arXiv_stats_hourly: engine,
+        t_arXiv_admin_state: engine,
+        t_arXiv_bad_pw: engine,
+        t_arXiv_black_email: engine,
+        t_arXiv_block_email: engine,
+        t_arXiv_bogus_subject_class: engine,
+        t_arXiv_duplicates: engine,
+        t_arXiv_in_category: engine,
+        t_arXiv_moderators: engine,
+        t_arXiv_ownership_requests_papers: engine,
+        t_arXiv_refresh_list: engine,
+        t_arXiv_paper_owners: engine,
+        t_arXiv_updates_tmp: engine,
+        t_arXiv_white_email: engine,
+        t_arXiv_xml_notifications: engine,
+        t_demographics_backup: engine,
+        t_tapir_email_change_tokens_used: engine,
+        t_tapir_email_tokens_used: engine,
+        t_tapir_error_log: engine,
+        t_tapir_no_cookies: engine,
+        t_tapir_periodic_tasks_log: engine,
+        t_tapir_periodic_tasks_log: engine,
+        t_tapir_permanent_tokens_used: engine,
+        t_tapir_save_post_variables: engine
+    })
