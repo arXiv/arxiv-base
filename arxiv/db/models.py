@@ -2000,7 +2000,7 @@ SessionLocal.configure(binds={
     t_tapir_save_post_variables: engine
 })
 
-def reconfigure_db (engine: Engine, latexml_engine: Optional[Engine]):
+def reconfigure_db (engine: Engine, latexml_engine: Optional[Engine] = None):
     SessionLocal.configure(binds={
         Base: engine,
         LaTeXMLBase: (latexml_engine if latexml_engine else engine),
