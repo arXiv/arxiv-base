@@ -1742,6 +1742,15 @@ class TapirPhone(Base):
 class TapirPolicyClass(Base):
     __tablename__ = 'tapir_policy_classes'
 
+    ADMIN = 1
+    PUBLIC_USER = 2
+    LEGACY_USER = 3
+    POLICY_CLASSES = [
+        {"name": "Administrator", "class_id": ADMIN, "description": ""},
+        {"name": "Public user", "class_id": PUBLIC_USER, "description": ""},
+        {"name": "Legacy user", "class_id": LEGACY_USER, "description": ""}
+    ]
+
     class_id: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, server_default=FetchedValue())
     description: Mapped[str] = mapped_column(Text, nullable=False)
