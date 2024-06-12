@@ -1921,7 +1921,7 @@ class Demographic(Base):
     flag_group_stat: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     flag_group_eess: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     flag_group_econ: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
-    veto_status: Mapped[Literal['ok', 'no-endorse', 'no-upload', 'no-replace']] = mapped_column(Enum('ok', 'no-endorse', 'no-upload', 'no-replace'), nullable=False, server_default=FetchedValue())
+    veto_status: Mapped[Literal['ok', 'no-endorse', 'no-upload', 'no-replace']] = mapped_column(Enum('ok', 'no-endorse', 'no-upload', 'no-replace'), nullable=False, server_default=text("'ok"))
 
     user = relationship('TapirUser')
     arXiv_category = relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='arXiv_demographics')
