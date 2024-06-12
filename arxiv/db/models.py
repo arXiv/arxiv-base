@@ -1883,7 +1883,7 @@ class TapirUser(Base):
     tapir_policy_class = relationship('TapirPolicyClass', primaryjoin='TapirUser.policy_class == TapirPolicyClass.class_id', backref='tapir_users')
 
 
-class AuthorIds(TapirUser):
+class AuthorIds(Base):
     __tablename__ = 'arXiv_author_ids'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True)
@@ -1891,7 +1891,7 @@ class AuthorIds(TapirUser):
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
 
-class Demographic(TapirUser):
+class Demographic(Base):
     __tablename__ = 'arXiv_demographics'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -1923,6 +1923,7 @@ class Demographic(TapirUser):
     flag_group_econ: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     veto_status: Mapped[Literal['ok', 'no-endorse', 'no-upload', 'no-replace']] = mapped_column(Enum('ok', 'no-endorse', 'no-upload', 'no-replace'), nullable=False, server_default=FetchedValue())
 
+    user = relationship('TapirUser')
     arXiv_category = relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='arXiv_demographics')
 
 
@@ -1983,12 +1984,15 @@ class TapirUsersHot(TapirUser):
     number_sessions: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
 
 
-class TapirUsersPassword(TapirUser):
+class TapirUsersPassword(Base):
     __tablename__ = 'tapir_users_password'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())
     password_storage: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     password_enc: Mapped[str] = mapped_column(String(50), nullable=False, server_default=FetchedValue())
+
+    user = relationship('TapirUser')
+
 
 class DBLaTeXMLDocuments(LaTeXMLBase):
     __tablename__ = 'arXiv_latexml_doc'
