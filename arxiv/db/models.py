@@ -51,18 +51,20 @@ tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
 
 def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
+    max_overflow = (base_settings.REQUEST_CONCURRENCY - 5) if 'sqlite' not in base_settings.CLASSIC_DB_URI \
+        else None # max overflow is how many + base pool size, which is 5 by default
     engine = create_engine(base_settings.CLASSIC_DB_URI,
                        echo=base_settings.ECHO_SQL,
                        isolation_level=base_settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
                        pool_recycle=600,
-                       max_overflow=(base_settings.REQUEST_CONCURRENCY - 5), # max overflow is how many + base pool size, which is 5 by default
+                       max_overflow=max_overflow,
                        pool_pre_ping=base_settings.POOL_PRE_PING)
     if base_settings.LATEXML_DB_URI:
         latexml_engine = create_engine(base_settings.LATEXML_DB_URI,
                                 echo=base_settings.ECHO_SQL,
                                 isolation_level=base_settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL,
                                 pool_recycle=600,
-                                max_overflow=(base_settings.REQUEST_CONCURRENCY - 5),
+                                max_overflow=max_overflow,
                                 pool_pre_ping=base_settings.POOL_PRE_PING)
     else:
         latexml_engine = None
