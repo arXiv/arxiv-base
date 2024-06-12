@@ -1658,11 +1658,11 @@ class TapirNickname(Base):
     nick_id: Mapped[intpk]
     nickname: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, server_default=FetchedValue())
-    user_seq: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    flag_valid: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    role: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    policy: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    flag_primary: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    user_seq: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_valid: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
+    role: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
+    policy: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
+    flag_primary: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
 
     user = relationship('TapirUser', primaryjoin='TapirNickname.user_id == TapirUser.user_id', backref='tapir_nicknames')
 
