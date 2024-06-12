@@ -1746,9 +1746,9 @@ class TapirPolicyClass(Base):
     PUBLIC_USER = 2
     LEGACY_USER = 3
     POLICY_CLASSES = [
-        {"name": "Administrator", "class_id": ADMIN, "description": ""},
-        {"name": "Public user", "class_id": PUBLIC_USER, "description": ""},
-        {"name": "Legacy user", "class_id": LEGACY_USER, "description": ""}
+        {"name": "Administrator", "class_id": ADMIN, "description": "", "password_storage": 2, "recovery_policy": 3, "permanent_login": 1},
+        {"name": "Public user", "class_id": PUBLIC_USER, "description": "", "password_storage": 2, "recovery_policy": 3, "permanent_login": 1},
+        {"name": "Legacy user", "class_id": LEGACY_USER, "description": "", "password_storage": 2, "recovery_policy": 3, "permanent_login": 1},
     ]
 
     class_id: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
