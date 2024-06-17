@@ -855,14 +855,14 @@ t_arXiv_paper_owners = Table(
     'arXiv_paper_owners', metadata,
     Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue()),
     Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    Column('date', Integer, nullable=False, server_default=FetchedValue()),
-    Column('added_by', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Column('date', Integer, nullable=False, server_default=text("'0'")),
+    Column('added_by', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=text("'0'")),
     Column('remote_addr', String(16), nullable=False, server_default=FetchedValue()),
     Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
     Column('tracking_cookie', String(32), nullable=False, server_default=FetchedValue()),
-    Column('valid', Integer, nullable=False, server_default=FetchedValue()),
-    Column('flag_author', Integer, nullable=False, server_default=FetchedValue()),
-    Column('flag_auto', Integer, nullable=False, server_default=FetchedValue()),
+    Column('valid', Integer, nullable=False, server_default=text("'0'")),
+    Column('flag_author', Integer, nullable=False, server_default=text("'0'")),
+    Column('flag_auto', Integer, nullable=False, server_default=text("'1'")),
     Index('owners_document_id', 'document_id', 'user_id')
 )
 
