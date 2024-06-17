@@ -94,6 +94,7 @@ def transaction ():
     except Exception as e:
         logger.warn(f'Commit failed, rolling back', exc_info=1)
         db.rollback()
+        raise
     finally:
         if not in_flask:
             db.close()
