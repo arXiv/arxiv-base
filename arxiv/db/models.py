@@ -487,7 +487,7 @@ class Document(Base):
     authors: Mapped[Optional[str]] = mapped_column(Text)
     submitter_email: Mapped[str] = mapped_column(String(64), nullable=False, index=True, server_default=FetchedValue())
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_users.user_id'), index=True)
-    dated: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    dated: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     primary_subject_class: Mapped[Optional[str]] = mapped_column(String(16))
     created: Mapped[Optional[datetime]]
 
