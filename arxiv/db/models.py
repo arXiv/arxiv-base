@@ -1831,6 +1831,8 @@ class TapirSessionsAudit(TapirSession):
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
 
+    session = relationship('TapirSession')
+
 
 
 class TapirStringVariable(Base):
