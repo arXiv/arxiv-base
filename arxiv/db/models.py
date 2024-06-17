@@ -349,12 +349,12 @@ class Category(Base):
 
     archive: Mapped[str] = mapped_column(ForeignKey('arXiv_archives.archive_id'), primary_key=True, nullable=False, server_default=FetchedValue())
     subject_class: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
-    definitive: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    active: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    definitive: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    active: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     category_name: Mapped[Optional[str]]
-    endorse_all: Mapped[Literal['y', 'n', 'd']] = mapped_column(Enum('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
-    endorse_email: Mapped[Literal['y', 'n', 'd']] = mapped_column(Enum('y', 'n', 'd'), nullable=False, server_default=FetchedValue())
-    papers_to_endorse: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
+    endorse_all: Mapped[Literal['y', 'n', 'd']] = mapped_column(Enum('y', 'n', 'd'), nullable=False, server_default=text("'d'"))
+    endorse_email: Mapped[Literal['y', 'n', 'd']] = mapped_column(Enum('y', 'n', 'd'), nullable=False, server_default=text("'d'"))
+    papers_to_endorse: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
     endorsement_domain: Mapped[Optional[str]] = mapped_column(ForeignKey('arXiv_endorsement_domains.endorsement_domain'), index=True)
 
     arXiv_archive = relationship('Archive', primaryjoin='Category.archive == Archive.archive_id', backref='arXiv_categories')
