@@ -1826,7 +1826,7 @@ class TapirSession(Base):
 class TapirSessionsAudit(TapirSession):
     __tablename__ = 'tapir_sessions_audit'
 
-    session_id: Mapped[int] = mapped_column(ForeignKey('tapir_sessions.session_id'), primary_key=True, server_default=text("'0'"), autoincrement=False)
+    session_id: Mapped[int] = mapped_column(ForeignKey('tapir_sessions.session_id'), primary_key=True, server_default=text("'0'"), autoincrement="false")
     ip_addr: Mapped[str] = mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
