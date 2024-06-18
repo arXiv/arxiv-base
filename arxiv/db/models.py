@@ -1814,11 +1814,11 @@ t_tapir_save_post_variables = Table(
 class TapirSession(Base):
     __tablename__ = 'tapir_sessions'
 
-    session_id: Mapped[intpk]
-    user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
-    last_reissue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    start_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    end_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    session_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=text("'0'"))
+    last_reissue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    start_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
+    end_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
 
     user = relationship('TapirUser', primaryjoin='TapirSession.user_id == TapirUser.user_id', backref='tapir_sessions')
 
