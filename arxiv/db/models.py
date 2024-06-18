@@ -1823,7 +1823,7 @@ class TapirSession(Base):
     user = relationship('TapirUser', primaryjoin='TapirSession.user_id == TapirUser.user_id', backref='tapir_sessions')
 
 
-class TapirSessionsAudit(TapirSession):
+class TapirSessionsAudit(Base):
     __tablename__ = 'tapir_sessions_audit'
 
     session_id: Mapped[int] = mapped_column(ForeignKey('tapir_sessions.session_id'), primary_key=True, server_default=text("'0'"), autoincrement="false")
