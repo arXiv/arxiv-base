@@ -11,7 +11,7 @@ relevant policies can be found on the `arXiv help pages
 <https://arxiv.org/help/endorsement>`_.
 """
 
-from typing import List, Dict, Optional, Callable, Set, Iterable, Union
+from typing import List, Dict, Optional, Set, Union
 from collections import Counter
 from datetime import datetime
 from functools import lru_cache as memoize
@@ -21,9 +21,9 @@ from sqlalchemy.sql.expression import literal
 
 from . import util
 from .. import domain
-from arxiv.taxonomy import definitions
-from arxiv.db import session
-from arxiv.db.models import TapirUser, Endorsement, t_arXiv_paper_owners, Document, \
+from ...taxonomy import definitions
+from ...db import session
+from ...db.models import Endorsement, t_arXiv_paper_owners, Document, \
     t_arXiv_in_category, Category, EndorsementDomain, t_arXiv_white_email, \
     t_arXiv_black_email
 
@@ -76,18 +76,6 @@ def _category(archive: str, subject_class: str) -> domain.Category:
 @memoize()
 def _get_archive(category: domain.Category) -> str:
     return category.in_archive
-    archive: str
-    if category.id.endswith(".*"):
-        archive = category.id.split(".", 1)[0]
-    else:
-        try:
-            archive = definitions.CATEGORIES_ACTIVE[category].in_archive
-        except KeyError:
-            if "." in category:
-                archive = category.split(".", 1)[0]
-            else:
-                archive = ""
-    return archive
 
 
 def _all_archives(endorsements: Endorsements) -> bool:

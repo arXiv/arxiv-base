@@ -1,23 +1,17 @@
 """Provide methods for working with user accounts."""
 
-from typing import Optional, Generator, Tuple, Any
-import hashlib
-from base64 import b64encode, b64decode
-from contextlib import contextmanager
-from datetime import datetime
-import secrets
+from typing import Optional, Tuple, Any
 import logging
 
-from sqlalchemy.exc import SQLAlchemyError, OperationalError
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import OperationalError
 
 from .. import domain
 from . import util, exceptions
 from .passwords import hash_password
 from .exceptions import Unavailable
-from arxiv.db import session
-from arxiv.db.models import TapirUser, TapirUsersPassword, TapirPermanentToken, \
-    TapirNickname, Demographic, TapirPolicyClass
+from ...db import session
+from ...db.models import TapirUser, TapirUsersPassword, \
+    TapirNickname, Demographic
 
 
 logger = logging.getLogger(__name__)

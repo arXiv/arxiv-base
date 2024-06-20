@@ -1,7 +1,6 @@
 """Provides tools for working with authenticated user/client sessions."""
 
 from typing import Optional, Union, Any, List
-import warnings
 import os
 
 from werkzeug.datastructures.structures import MultiDict
@@ -9,12 +8,11 @@ from werkzeug.datastructures.structures import MultiDict
 from flask import Flask, request, Response
 from retry import retry
 
+from ..legacy import util
 from ..legacy.cookies import parse_cookie
 from .. import domain, legacy
 
 import logging
-
-from . import decorators
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +141,7 @@ class Auth(object):
             raise req_auth
 
         if not req_auth:
-            if legacy.is_configured():
+            if util.is_configured():
                 req_auth = self.first_valid(self.legacy_cookies())
             else:
                 logger.warning('No legacy DB, will not check tapir auth.')

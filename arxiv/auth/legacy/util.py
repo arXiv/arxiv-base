@@ -1,21 +1,18 @@
 """Helpers and Flask application integration."""
 
-from typing import Generator, List, Any
+from typing import List, Any
 from datetime import datetime
 from pytz import timezone, UTC
-from contextlib import contextmanager
 import logging
 
-from flask import Flask
 from sqlalchemy import text, Engine
-from sqlalchemy.orm.session import Session
 
-from arxiv.base.globals import get_application_config
+from ...base.globals import get_application_config
 
 from ..auth import scopes
 from .. import domain
-from arxiv.db import session, Base, transaction
-from arxiv.db.models import TapirUser, TapirPolicyClass
+from ...db import session, Base, transaction
+from ...db.models import TapirUser, TapirPolicyClass
 
 EASTERN = timezone('US/Eastern')
 logger = logging.getLogger(__name__)

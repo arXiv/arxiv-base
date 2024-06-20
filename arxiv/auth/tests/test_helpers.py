@@ -13,6 +13,7 @@ from arxiv.base import Base
 from arxiv.base.middleware import wrap
 
 from .. import auth, helpers, legacy
+from ..auth import decorators
 from ..auth.middleware import AuthMiddleware
 from ..auth.scopes import VIEW_SUBMISSION, CREATE_SUBMISSION, EDIT_SUBMISSION
 
@@ -48,7 +49,7 @@ class TestGenerateToken(TestCase):
         wrap(app, [AuthMiddleware])
 
         @app.route('/')
-        @auth.decorators.scoped(EDIT_SUBMISSION)
+        @decorators.scoped(EDIT_SUBMISSION)
         def protected():
             return "this is protected"
 

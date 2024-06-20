@@ -1,22 +1,16 @@
 """Provide an API for user authentication using the legacy database."""
 
-from typing import Optional, Generator, Tuple
-import hashlib
-from base64 import b64encode, b64decode
-from contextlib import contextmanager
-from datetime import datetime
+from typing import Optional, Tuple
 import logging
 
-from sqlalchemy.exc import SQLAlchemyError, OperationalError
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import  OperationalError
 
 from . import util
 from .. import domain
-from ..auth import scopes
 
 from . passwords import check_password, is_ascii
-from arxiv.db import session
-from arxiv.db.models import TapirUser, TapirUsersPassword, TapirPermanentToken, \
+from ...db import session
+from ...db.models import TapirUser, TapirUsersPassword, TapirPermanentToken, \
     TapirNickname, Demographic
 from .exceptions import NoSuchUser, AuthenticationFailed, \
     PasswordAuthenticationFailed, Unavailable

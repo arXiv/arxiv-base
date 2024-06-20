@@ -1,30 +1,22 @@
 """Provides API for legacy user sessions."""
-
-import ipaddress
-import json
 from datetime import datetime, timedelta
 from pytz import timezone, UTC
-import hashlib
-from base64 import b64encode, b64decode
+
 import logging
 
-from typing import Optional, Generator, Tuple, List
+from typing import Optional, Tuple
 
-from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
 
 from .. import domain
-from arxiv.db import session
+from ...db import session
 from . import cookies, util
 
-from arxiv.db.models import TapirSession, TapirSessionsAudit, TapirUser, \
+from ...db.models import TapirSession, TapirSessionsAudit, TapirUser, \
     TapirNickname, Demographic
 from .exceptions import UnknownSession, SessionCreationFailed, \
-    SessionDeletionFailed, SessionExpired, InvalidCookie, Unavailable
+    SessionExpired, InvalidCookie, Unavailable
 
 logger = logging.getLogger(__name__)
 EASTERN = timezone('US/Eastern')

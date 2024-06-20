@@ -3,7 +3,6 @@
 import secrets
 from base64 import b64encode, b64decode
 import hashlib
-import logging
 
 from .exceptions import PasswordAuthenticationFailed
 
