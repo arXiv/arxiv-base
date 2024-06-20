@@ -36,11 +36,13 @@ validators = "*"
 sphinx = { version = "*", optional = true }
 sphinxcontrib-websupport = { version = "*", optional = true }
 sphinx-autodoc-typehints = { version = "*", optional = true }
+mimesis = "*"
 
 [tool.poetry.dev-dependencies]
 pydocstyle = "*"
 mypy = "*"
 pytest = "*"
+pytest-mock = "^3.8.2"
 pytest-cov = "*"
 hypothesis = "*"
 

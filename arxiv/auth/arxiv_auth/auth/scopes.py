@@ -1,0 +1,241 @@
+"""
+Authorization scopes for arXiv users and clients.
+
+The concept of authorization scope comes from OAuth 2.0 (`RFC 6749 §3.3
+<https://tools.ietf.org/html/rfc6749#section-3.3>`_). For a nice primer, see
+`this blog post <https://brandur.org/oauth-scope>`_. The basic idea is that
+the authorization associated with an access token can be limited, e.g. to
+limit what actions an API client can take on behalf of a user.
+
+In this package, the scope concept is applied to both API client and end-user
+sessions. When the session is created, we consult the relevant bits of data in
+our system (e.g. what roles the user has, what privileges are associated with
+those roles) to determine what the user is authorized to do. Those privileges
+are attached to the user's session as authorization scopes.
+
+This module simply defines a set of constants (str) that can be used to refer
+to specific authorization scopes. Rather than refer to scopes by writing new
+str objects, these constants should be imported and used. This improves the
+semantics of code, and reduces the risk of programming errors. For an example,
+see :mod:`arxiv.users.auth.decorators`.
+
+"""
+from typing import Optional, Dict
+from ..domain import Scope
+
+def _scope_str(domain:str, action:str, resource:str = None):
+    return str(Scope(domain=domain, action=action, resource=resource))
+
+
+class domains:
+        """Known authorization domains."""
+
+        PUBLIC = 'public'
+        """The public arXiv site, including APIs."""
+        PROFILE = 'profile'
+        """arXiv user profile."""
+        SUBMISSION = 'submission'
+        """Submission interfaces and actions."""
+        UPLOAD = 'upload'
+        """File uploads, including those for submissions."""
+        COMPILE = 'compile'
+        """PDF compilation."""
+        FULLTEXT = 'fulltext'
+        """Fulltext extraction."""
+        PREVIEW = 'preview'
+        """Submission previews."""
+
+class actions:
+        """Known authorization actions."""
+
+        UPDATE = 'update'
+        CREATE = 'create'
+        DELETE = 'delete'
+        RELEASE = 'release'
+        READ = 'read'
+        PROXY = 'proxy'
+
+READ_PUBLIC = _scope_str(domains.PUBLIC, actions.READ)
+"""
+Authorizes access to public endpoints.
+
+This is implicitly granted to all anonymous users. For endpoints requiring
+authentication (e.g. APIs) this scope can be used to denote baseline read
+access for clients.
+"""
+
+EDIT_PROFILE = _scope_str(domains.PROFILE, actions.UPDATE)
+"""
+Authorizes editing user profile.
+
+This includes things like affiliation, full name, etc..
+"""
+
+VIEW_PROFILE = _scope_str(domains.PROFILE, actions.READ)
+"""
+Authorizes viewing the content of a user profile.
+
+This includes things like affiliation, full name, and e-mail address.
+"""
+
+CREATE_SUBMISSION = _scope_str(domains.SUBMISSION, actions.CREATE)
+"""Authorizes creating a new submission."""
+
+EDIT_SUBMISSION = _scope_str(domains.SUBMISSION, actions.UPDATE)
+"""Authorizes updating a submission that has not yet been announced."""
+
+VIEW_SUBMISSION = _scope_str(domains.SUBMISSION, actions.READ)
+"""Authorizes viewing a submission."""
+
+DELETE_SUBMISSION = _scope_str(domains.SUBMISSION, actions.DELETE)
+"""Authorizes deleting a submission."""
+
+PROXY_SUBMISSION = _scope_str(domains.SUBMISSION, actions.PROXY)
+"""
+Authorizes creating a submission on behalf of another user.
+
+This authorization is specifically for human users submitting on behalf of
+other human users. For client authorization to submit on behalf of a user,
+<code>submission:create</code> should be used instead.
+"""
+
+READ_UPLOAD = _scope_str(domains.UPLOAD, actions.READ)
+"""Authorizes viewing the content of an upload workspace."""
+
+WRITE_UPLOAD = _scope_str(domains.UPLOAD, actions.UPDATE)
+"""Authorizes uploading files to to a workspace."""
+
+RELEASE_UPLOAD = _scope_str(domains.UPLOAD, actions.RELEASE)
+"""Authorizes releasing an upload workspace."""
+
+DELETE_UPLOAD_WORKSPACE = _scope_str(domains.UPLOAD, 'delete_workspace')
+"""Can delete an entire workspace in the file management service."""
+
+DELETE_UPLOAD_FILE = _scope_str(domains.UPLOAD, actions.DELETE)
+"""Can delete files from a file management upload workspace."""
+
+READ_UPLOAD_LOGS = _scope_str(domains.UPLOAD, 'read_logs')
+"""Can read logs for a file management upload workspace."""
+
+READ_UPLOAD_SERVICE_LOGS = _scope_str(domains.UPLOAD, 'read_service_logs')
+"""Can read service logs in the file management service."""
+
+CREATE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'create_checkpoint')
+"""Create an upload workspace checkpoint."""
+
+DELETE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'delete_checkpoint')
+"""Delete an upload workspace checkpoint."""
+
+READ_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'read_checkpoints')
+"""Read from an upload workspace checkpoint."""
+
+RESTORE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'restore_checkpoint')
+"""Restore an upload workspace to a checkpoint."""
+
+READ_COMPILE = _scope_str(domains.COMPILE, actions.READ)
+"""Can read documents generated by the compilation service."""
+
+CREATE_COMPILE = _scope_str(domains.COMPILE, actions.CREATE)
+"""Can create new documents via the compilation service."""
+
+READ_FULLTEXT = _scope_str(domains.FULLTEXT, actions.READ)
+"""Can access plain text extracted from compiled documents."""
+
+CREATE_FULLTEXT = _scope_str(domains.FULLTEXT, actions.CREATE)
+"""Can trigger new plain text extractions from compiled documents."""
+
+READ_PREVIEW = _scope_str(domains.PREVIEW, actions.READ)
+"""Can view a submission preview."""
+
+CREATE_PREVIEW = _scope_str(domains.PREVIEW, actions.CREATE)
+"""Can create a new submission preview."""
+
+GENERAL_USER = [
+    READ_PUBLIC,    # Access to public APIs.
+
+    # Profile management.
+    EDIT_PROFILE,
+    VIEW_PROFILE,
+
+    # Ability to use the submission system.
+    CREATE_SUBMISSION,
+    EDIT_SUBMISSION,
+    VIEW_SUBMISSION,
+    DELETE_SUBMISSION,
+
+    # Allows usage of the compilation service during submission.
+    READ_COMPILE,
+    CREATE_COMPILE,
+
+    # Allows usage of the file management service during submission.
+    READ_UPLOAD,
+    WRITE_UPLOAD,
+    DELETE_UPLOAD_FILE,
+
+    # Ability to create and view submission previews.
+    READ_PREVIEW,
+    CREATE_PREVIEW,
+]
+"""
+The default scopes afforded to an authenticated user.
+
+This static list will be deprecated by role-based access control (RBAC) at a
+later milestone of arXiv.
+"""
+
+_ADMIN_USER = GENERAL_USER + [
+    CREATE_UPLOAD_CHECKPOINT,
+    DELETE_UPLOAD_CHECKPOINT,
+    READ_UPLOAD_CHECKPOINT,
+    RESTORE_UPLOAD_CHECKPOINT,
+    READ_FULLTEXT,
+    CREATE_FULLTEXT,
+    DELETE_UPLOAD_WORKSPACE,
+    READ_UPLOAD_LOGS,
+    READ_UPLOAD_SERVICE_LOGS
+]
+ADMIN_USER = [str(Scope.from_str(scope).as_global()) for scope in _ADMIN_USER]
+"""
+Scopes afforded to an administrator.
+
+This static list will be deprecated by role-based access control (RBAC) at a
+later milestone of arXiv.
+"""
+
+_HUMAN_LABELS: Dict[Scope, str] = {
+    EDIT_PROFILE: "Grants authorization to change the contents of your user"
+                  " profile. This includes your affiliation, preferred name,"
+                  " default submission category, etc.",
+    VIEW_PROFILE: "Grants authorization to view the contents of your user"
+                  " profile. This includes your affiliation, preferred name,"
+                  " default submission category, etc.",
+    CREATE_SUBMISSION: "Grants authorization to submit papers on your behalf.",
+    EDIT_SUBMISSION: "Grants authorization to make changes to your submissions"
+                     " that have not yet been announced. For example, to"
+                     " update the DOI or journal reference field on your"
+                     " behalf. Note that this affects only the metadata of"
+                     " your submission, and not the content.",
+    VIEW_SUBMISSION: "Grants authorization to view your submissions, including"
+                     " those that have not yet been announced. Note that this"
+                     " only applies to the submission metadata, and not to the"
+                     " uploaded submission content.",
+    READ_UPLOAD: "Grants authorization to view the contents of your uploads.",
+    WRITE_UPLOAD: "Grants authorization to add and delete files on your"
+                  " behalf.",
+    READ_UPLOAD_LOGS: "Grants authorization to read logs of upload activity"
+                      " related to your submissions.",
+    READ_COMPILE: "Grants authorization to read a compilation task, product,"
+                  " and any log output, related to your submissions.",
+    CREATE_COMPILE: "Grants authorization to compile your submission source"
+                    " files, e.g. to produce a PDF.",
+    READ_PREVIEW: "Grants authorization to retrieve the preview (e.g. PDF) of"
+                  " your submission.",
+    CREATE_PREVIEW: "Grants authorization to update the preview (e.g. PDF) of"
+                    " your submission.",
+}
+
+
+def get_human_label(scope: str) -> Optional[str]:
+    """Get a human-readable label for a scope, for display to end users."""
+    label: Optional[str] = _HUMAN_LABELS.get(scope, None)
+    return label

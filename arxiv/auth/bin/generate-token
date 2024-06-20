@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+"""
+Helper script for generating an auth JWT.
+
+Be sure that you are using the same secret when running this script as when you
+run the app. Set ``JWT_SECRET=somesecret`` in your environment to ensure that
+the same secret is always used.
+
+
+.. code-block:: bash
+
+   $ JWT_SECRET=foosecret generate-token
+   Numeric user ID: 4
+   Email address: joe@bloggs.com
+   Username: jbloggs1
+   First name [Jane]: Joe
+   Last name [Doe]: Bloggs
+   Name suffix [IV]:
+   Affiliation [Cornell University]:
+   Numeric rank [3]:
+   Alpha-2 country code [us]:
+   Default category [astro-ph.GA]:
+   Submission groups (comma delim) [grp_physics]:
+   Endorsement categories (comma delim) [astro-ph.CO,astro-ph.GA]:
+   Authorization scope (comma delim) [upload:read,upload:write,upload:admin]:
+
+   eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoiZTljMGQwMDUtMTk1My00YWRiLWE0YzEtYzdmNWY1OGM5YTk4Iiwic3RhcnRfdGltZSI6IjIwMTgtMDgtMDlUMTQ6NDg6MDguNzY2NjUzLTA0OjAwIiwidXNlciI6eyJ1c2VybmFtZSI6ImVyaWNrIiwiZW1haWwiOiJlcmlja0Bmb28uY29tIiwidXNlcl9pZCI6IjQiLCJuYW1lIjp7ImZvcmVuYW1lIjoiSmFuZSIsInN1cm5hbWUiOiJEb2UiLCJzdWZmaXgiOiJJViJ9LCJwcm9maWxlIjp7ImFmZmlsaWF0aW9uIjoiQ29ybmVsbCBVbml2ZXJzaXR5IiwiY291bnRyeSI6InVzIiwicmFuayI6Mywic3VibWlzc2lvbl9ncm91cHMiOlsiZ3JwX3BoeXNpY3MiXSwiZGVmYXVsdF9jYXRlZ29yeSI6eyJhcmNoaXZlIjoiYXN0cm8tcGgiLCJzdWJqZWN0IjoiR0EifSwiaG9tZXBhZ2VfdXJsIjoiIiwicmVtZW1iZXJfbWUiOnRydWV9fSwiY2xpZW50IjpudWxsLCJlbmRfdGltZSI6IjIwMTgtMDgtMTBUMDA6NDg6MDguNzY2NjUzLTA0OjAwIiwiYXV0aG9yaXphdGlvbnMiOnsiY2xhc3NpYyI6MCwiZW5kb3JzZW1lbnRzIjpbW1siYXN0cm8tcGgiLCJDTyJdLG51bGxdLFtbImFzdHJvLXBoIiwiR0EiXSxudWxsXV0sInNjb3BlcyI6W1sidXBsb2FkOnJlYWQiLCJ1cGxvYWQ6d3JpdGUiLCJ1cGxvYWQ6YWRtaW4iXV19LCJpcF9hZGRyZXNzIjpudWxsLCJyZW1vdGVfaG9zdCI6bnVsbCwibm9uY2UiOm51bGx9.aOgRj73TT-zsRvF7gnPPjplJzcnXkKzYzEvMB61jEsY
+
+
+Start the dev server with:
+
+.. code-block:: bash
+
+   $ JWT_SECRET=foosecret FLASK_APP=app.py FLASK_DEBUG=1 flask run
+
+
+Use the (rather long) token in your requests to authorized endpoints. Set the
+header ``Authorization: [token]``.  There are apps that will do this for you.
+For Chrome, try `Requestly <https://chrome.google.com/webstore/detail/requestly-redirect-url-mo/mdnleldcmiljblolnjhpnblkcekpdkpa?hl=en>`_
+or `ModHeader <https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj?hl=en>`_.
+
+"""
+
+import os
+import uuid
+import random
+from typing import Optional
+from datetime import timedelta, datetime
+
+import click
+from pytz import timezone, UTC
+from mimesis import Person, locales, Address
+
+from arxiv.users import auth, domain
+
+DEFAULT_SCOPES = " ".join(([
+    "public:read",
+]))
+
+__locale__ = locales.LIST_OF_LOCALES[
+    random.randint(0, len(locales.LIST_OF_LOCALES) - 1)
+]
+__person__ = Person(__locale__)
+__address__ = Address(__locale__)
+__secret__: Optional[str] = os.environ.get('JWT_SECRET', None)
+
+
+@click.command()
+@click.option('--user_id', prompt='Numeric user ID', default=1)
+@click.option('--email', prompt='Email address', default=__person__.email)
+@click.option('--username', prompt='Username', default=__person__.username)
+@click.option('--first_name', prompt='First name', default=__person__.name)
+@click.option('--last_name', prompt='Last name', default=__person__.surname)
+@click.option('--suffix_name', prompt='Name suffix', default='')
+@click.option('--affiliation', prompt='Affiliation',
+              default=__person__.university)
+@click.option('--rank', prompt='Numeric rank', default=3)
+@click.option('--country', prompt='Alpha-2 country code',
+              default=__address__.country_code)
+@click.option('--default_category', prompt='Default category',
+              default='astro-ph.GA')
+@click.option('--submission_groups', prompt='Submission groups (comma delim)',
+              default='grp_physics')
+@click.option('--endorsements', prompt='Endorsement categories (comma delim)',
+              default='')
+@click.option('--scope', prompt='Authorization scope (space delim)',
+              default=DEFAULT_SCOPES)
+def generate_token(user_id: str,
+                   email: str,
+                   username: str,
+                   first_name: str,
+                   last_name: str,
+                   suffix_name: str,
+                   affiliation: str,
+                   rank: int,
+                   country: str,
+                   default_category: str,
+                   submission_groups: str,
+                   endorsements: str,
+                   scope: str) -> None:
+    """Generate an auth token for dev/testing purposes."""
+    # Specify the validity period for the session.
+    start = datetime.now(tz=timezone('US/Eastern'))
+    end = start + timedelta(seconds=36000)   # Make this as long as you want.
+
+    if endorsements:
+        these_endorsements = [domain.Category(category)
+                              for category in endorsements.split(',')]
+    else:
+        these_endorsements = []
+
+    session = domain.Session(
+        session_id=str(uuid.uuid4()),
+        start_time=start, end_time=end,
+        user=domain.User(
+            user_id=user_id,
+            email=email,
+            username=username,
+            name=domain.UserFullName(first_name, last_name, suffix_name),
+            profile=domain.UserProfile(
+                affiliation=affiliation,
+                rank=int(rank),
+                country=country,
+                default_category=domain.Category(default_category),
+                submission_groups=submission_groups.split(',')
+            )
+        ),
+        authorizations=domain.Authorizations(
+            scopes=[domain.Scope(*s.split(':')) for s in scope.split()],
+            endorsements=these_endorsements
+        )
+    )
+    token = auth.tokens.encode(session, __secret__)
+    click.echo('===================== AUTH TOKEN BELOW =====================')
+    click.echo(token)
+    click.echo('===================== AUTH TOKEN ABOVE =====================')
+
+
+if __name__ == '__main__':
+    __secret__ = os.environ.get('JWT_SECRET', None)
+    if __secret__ is None:
+        print('JWT_SECRET must be set in your environment')
+        exit(1)
+    generate_token()
