@@ -9,8 +9,8 @@ from ..config import Settings
 from ..base.middleware import wrap
 from ..db.models import configure_db
 
-from ..auth.arxiv_auth.auth import Auth
-from ..auth.arxiv_auth.auth.middleware import AuthMiddleware
+from ..auth.auth import Auth
+from ..auth.auth.middleware import AuthMiddleware
 
 
 @pytest.fixture()

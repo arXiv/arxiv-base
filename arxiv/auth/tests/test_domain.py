@@ -4,8 +4,8 @@ from unittest import TestCase
 from datetime import datetime
 from arxiv.taxonomy import definitions
 from pytz import timezone
-from arxiv.auth.arxiv_auth.auth import scopes
-from arxiv.auth.arxiv_auth import domain
+from ..auth import scopes
+from ..auth import domain
 
 EASTERN = timezone('US/Eastern')
 
