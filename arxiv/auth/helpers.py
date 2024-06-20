@@ -18,7 +18,6 @@ def generate_token(user_id: str, email: str, username: str,
                    country: str = 'us',
                    default_category: domain.Category = CATEGORIES['astro-ph.GA'],
                    submission_groups: str = 'grp_physics',
-                   endorsements: List[domain.Category] = [],
                    scope: List[domain.Scope] = [],
                    verified: bool = False) -> str:
     """Generate an auth token for dev/testing purposes."""
@@ -26,7 +25,7 @@ def generate_token(user_id: str, email: str, username: str,
     start = datetime.now(tz=timezone('US/Eastern'))
     end = start + timedelta(seconds=36000)   # Make this as long as you want.
 
-    # Create a user with endorsements in astro-ph.CO and .GA.
+    # Create a user
     session = domain.Session(
         session_id=str(uuid.uuid4()),
         start_time=start, end_time=end,
@@ -44,8 +43,7 @@ def generate_token(user_id: str, email: str, username: str,
             ),
             verified=verified
         ),
-        authorizations=domain.Authorizations(scopes=scope,
-                                             endorsements=endorsements)
+        authorizations=domain.Authorizations(scopes=scope)
     )
     token = auth.tokens.encode(session, get_application_config()['JWT_SECRET'])
     return token

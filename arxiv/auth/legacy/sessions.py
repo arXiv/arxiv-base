@@ -21,11 +21,10 @@ from .. import domain
 from arxiv.db import session
 from . import cookies, util
 
-from arxiv.db.models import TapirSession, TapirSessionsAudit, TapirUser, Endorsement, \
+from arxiv.db.models import TapirSession, TapirSessionsAudit, TapirUser, \
     TapirNickname, Demographic
 from .exceptions import UnknownSession, SessionCreationFailed, \
     SessionDeletionFailed, SessionExpired, InvalidCookie, Unavailable
-from .endorsements import get_endorsements
 
 logger = logging.getLogger(__name__)
 EASTERN = timezone('US/Eastern')
@@ -110,10 +109,8 @@ def load(cookie: str) -> domain.Session:
         verified=bool(db_user.flag_email_verified)
     )
 
-    # We should get one row per endorsement.
     authorizations = domain.Authorizations(
         classic=util.compute_capabilities(db_user),
-        endorsements=get_endorsements(user),
         scopes=util.get_scopes(db_user)
     )
     user_session = domain.Session(session_id=str(db_session.session_id),

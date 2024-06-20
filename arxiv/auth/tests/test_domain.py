@@ -30,15 +30,11 @@ class TestSession(TestCase):
             ),
             authorizations=domain.Authorizations(
                 scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION],
-                endorsements=[definitions.CATEGORIES['astro-ph.CO']]
             )
         )
         session_data = session.dict()
         self.assertEqual(session_data['authorizations']['scopes'],
                          ['submission:read','submission:create'])
-
-        self.assertEqual(session_data['authorizations']['endorsements'][0]['id'],
-                         'astro-ph.CO')
 
         self.assertEqual(session_data['user']['profile']['affiliation'], 'FSU')
         self.assertEqual(session_data['user']['profile']['country'], 'us')

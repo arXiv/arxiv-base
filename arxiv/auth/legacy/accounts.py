@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from sqlalchemy.orm.exc import NoResultFound
 
 from .. import domain
-from . import util, endorsements, exceptions
+from . import util, exceptions
 from .passwords import hash_password
 from .exceptions import Unavailable
 from arxiv.db import session
@@ -117,7 +117,6 @@ def register(user: domain.User, password: str, ip: str,
     auths = domain.Authorizations(
         classic=util.compute_capabilities(db_user),
         scopes=util.get_scopes(db_user),
-        endorsements=endorsements.get_endorsements(user)
     )
     return user, auths
 
@@ -200,7 +199,6 @@ def update(user: domain.User) -> Tuple[domain.User, domain.Authorizations]:
     auths = domain.Authorizations(
         classic=util.compute_capabilities(db_user),
         scopes=util.get_scopes(db_user),
-        endorsements=endorsements.get_endorsements(user)
     )
     return user, auths
 

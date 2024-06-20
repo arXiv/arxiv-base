@@ -189,55 +189,12 @@ class Authorizations(BaseModel):
     classic: int = 0
     """Capability code associated with a user's session."""
 
-    endorsements: List[Category] = []
-    """Categories to which the user is permitted to submit."""
-
-    @validator('endorsements')
-    @classmethod
-    def check_endorsements(cls, data: Any) -> List[Category]:
-        """Checks if `data` contains endorsements."""
-        if isinstance(data, str) or not issubclass(type(data), Iterable):
-            raise ValidationError("endorsements must be a list", cls)
-        return [ _check_category(obj) for obj in data ]
-
-
     scopes: List[str] = []
     """Authorized :class:`.scope`s. See also :mod:`arxiv.users.auth.scopes`."""
 
-    def endorsed_for(self, category: Category) -> bool:
-        """
-        Check whether category is included in this endorsement authorization.
-
-        If a user/client is authorized for all categories in a particular
-        archive, the category names in :attr:`Authorization.endorsements` will
-        be compressed to a wilcard ``archive.*`` representation. If the
-        user/client is authorized for all categories in the system, this will
-        be compressed to "*.*".
-
-        Parameters
-        ----------
-        category : :class:`.Category`
-
-        Returns
-        -------
-        bool
-
-        """
-        archive = category.split(".", 1)[0] if "." in category else category
-        endorsement_ids = [ cat if isinstance(cat, str) else cat.id for cat in self.endorsements]
-        return (category.id in endorsement_ids
-                or f"{archive}.*" in endorsement_ids
-                or "*.*" in endorsement_ids)
 
     @classmethod
     def before_init(cls, data: dict) -> None:
-        """Make sure that endorsements are :class:`.Category` instances."""
-        # Iterative coercion is hard. It's a lot easier to handle this here
-        # than to implement a general-purpose coercsion.
-        # if self.endorsements and type(self.endorsements[0]) is not Category:
-        data['endorsements'] = [
-            Category(obj) for obj in data.get('endorsements', [])
-        ]
         if 'scopes' in data:
             if type(data['scopes']) is str:
                 data['scopes'] = [

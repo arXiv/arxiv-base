@@ -10,7 +10,7 @@ import logging
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from sqlalchemy.orm.exc import NoResultFound
 
-from . import util, endorsements
+from . import util
 from .. import domain
 from ..auth import scopes
 
@@ -90,7 +90,6 @@ def authenticate(username_or_email: Optional[str] = None,
     auths = domain.Authorizations(
         classic=util.compute_capabilities(db_user),
         scopes=util.get_scopes(db_user),
-        endorsements=endorsements.get_endorsements(user)
     )
     return user, auths
 

@@ -30,10 +30,7 @@ class TestEncodeDecode(TestCase):
                     submission_groups=['grp_physics']
                 )
             ),
-            authorizations=domain.Authorizations(
-                scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION],
-                endorsements=[CATEGORIES['astro-ph.CO']]
-            )
+            authorizations=domain.Authorizations(scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION])
         )
         secret = 'foosecret'
         token = tokens.encode(session, secret)
@@ -59,10 +56,7 @@ class TestEncodeDecode(TestCase):
                     submission_groups=['grp_physics']
                 )
             ),
-            authorizations=domain.Authorizations(
-                scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION],
-                endorsements=[CATEGORIES['astro-ph.CO']]
-            )
+            authorizations=domain.Authorizations(scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION])
         )
         secret = 'foosecret'
         token = tokens.encode(session, secret)
