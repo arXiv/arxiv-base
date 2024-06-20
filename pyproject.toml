@@ -37,6 +37,7 @@ sphinx = { version = "*", optional = true }
 sphinxcontrib-websupport = { version = "*", optional = true }
 sphinx-autodoc-typehints = { version = "*", optional = true }
 mimesis = "*"
+retry = "^0.9.2"
 
 [tool.poetry.dev-dependencies]
 pydocstyle = "*"
