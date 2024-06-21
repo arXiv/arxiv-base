@@ -19,6 +19,19 @@ class TestPurgeFastlyKeys(unittest.TestCase):
 
         mock_api_instance.purge_tag.assert_called_once_with(
             service_id="hCz5jlkWV241zvUN0aWxg2",
+            surrogate_key='test'
+        )
+
+    @patch('arxiv.integration.fastly.purge.PurgeApi')
+    @patch('arxiv.integration.fastly.purge.fastly.ApiClient')
+    def test_purge_single_key(self, MockApiClient, MockPurgeApi: PurgeApi):
+        mock_api_instance:PurgeApi = MockPurgeApi.return_value
+        mock_api_instance.purge_tag = MagicMock()
+
+        purge_fastly_keys('test', "export.arxiv.org", True)
+
+        mock_api_instance.purge_tag.assert_called_once_with(
+            service_id="hCz5jlkWV241zvUN0aWxg2",
             surrogate_key='test',
             fastly_soft_purge=1
         )
@@ -35,8 +48,7 @@ class TestPurgeFastlyKeys(unittest.TestCase):
 
         mock_api_instance.bulk_purge_tag.assert_called_once_with(
             service_id="umpGzwE2hXfa2aRXsOQXZ4",
-            purge_response= {'surrogate_keys':keys},
-            fastly_soft_purge=1
+            purge_response= {'surrogate_keys':keys}
         )
 
 
@@ -52,18 +64,15 @@ class TestPurgeFastlyKeys(unittest.TestCase):
         calls = [
             unittest.mock.call(
                 service_id="umpGzwE2hXfa2aRXsOQXZ4",
-                purge_response= {'surrogate_keys':['1','2','3']},
-                fastly_soft_purge=1
+                purge_response= {'surrogate_keys':['1','2','3']}
             ),
                         unittest.mock.call(
                 service_id="umpGzwE2hXfa2aRXsOQXZ4",
-                purge_response= {'surrogate_keys':['4','5','6']},
-                fastly_soft_purge=1
+                purge_response= {'surrogate_keys':['4','5','6']}
             ),
                         unittest.mock.call(
                 service_id="umpGzwE2hXfa2aRXsOQXZ4",
-                purge_response= {'surrogate_keys':['7']},
-                fastly_soft_purge=1
+                purge_response= {'surrogate_keys':['7']}
             ),
         ]
 

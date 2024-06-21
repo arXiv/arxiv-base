@@ -111,9 +111,10 @@ def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> 
 
     return keys
 
-def purge_fastly_keys(key:Union[str, List[str]], service_name: Optional[str]="arxiv.org"):
+def purge_fastly_keys(key:Union[str, List[str]], service_name: Optional[str]="arxiv.org", soft_purge: Optional[bool]=False):
     """purges requested fastly surrogate keys for the service.
     If no service is specified default is the arxiv.org service
+    defaults to hard purge
     """
     configuration = fastly.Configuration()
     configuration.api_token = settings.FASTLY_PURGE_TOKEN
@@ -122,36 +123,38 @@ def purge_fastly_keys(key:Union[str, List[str]], service_name: Optional[str]="ar
         api_instance = PurgeApi(api_client)
         try:
             if isinstance(key, str):
-                api_response=_purge_single_key(key, SERVICE_IDS[service_name], api_instance)
+                api_response=_purge_single_key(key, SERVICE_IDS[service_name], api_instance, soft_purge)
                 logger.info(f"Fastly Purge service: {service_name}, key: {key}, status: {api_response.get('status')}, id: {api_response.get('id')}")
             else:
-                _purge_multiple_keys(key, SERVICE_IDS[service_name], api_instance)
+                _purge_multiple_keys(key, SERVICE_IDS[service_name], api_instance, soft_purge)
                 logger.info(f"Fastly bulk purge complete service: {service_name}, keys: {key}")
         except fastly.ApiException as e:
             logger.error(f"Exception purging fastly key(s): {e} service: {service_name}, key: {key}")
 
-def _purge_single_key(key:str, service_id: str, api_instance: PurgeApi)->Any:
+def _purge_single_key(key:str, service_id: str, api_instance: PurgeApi, soft_purge: bool=False)->Any:
     """purge all pages with a specific key from fastly, fastly will not indicate if the key does not exist"""
     options = {
         'service_id': service_id,
-        'surrogate_key': key,
-        'fastly_soft_purge':1
+        'surrogate_key': key
     }
+    if soft_purge:
+        options['fastly_soft_purge']=1
     return api_instance.purge_tag(**options)
 
-def _purge_multiple_keys(keys: List[str], service_id:str, api_instance: PurgeApi):
+def _purge_multiple_keys(keys: List[str], service_id:str, api_instance: PurgeApi, soft_purge:bool):
     """purge all pages with any of the requested keys from fastly
         calls itself recursively to stay within fastly maximum key amount
     """
     if len(keys)> MAX_PURGE_KEYS:
-        _purge_multiple_keys(keys[0:MAX_PURGE_KEYS], service_id, api_instance)
-        _purge_multiple_keys(keys[MAX_PURGE_KEYS:], service_id, api_instance)
+        _purge_multiple_keys(keys[0:MAX_PURGE_KEYS], service_id, api_instance, soft_purge)
+        _purge_multiple_keys(keys[MAX_PURGE_KEYS:], service_id, api_instance,soft_purge)
 
     options = {
         'service_id': service_id,
-        'purge_response': {'surrogate_keys':keys,},
-        'fastly_soft_purge':1
+        'purge_response': {'surrogate_keys':keys,}
     }
+    if soft_purge:
+        options['fastly_soft_purge']=1
     api_response=api_instance.bulk_purge_tag(**options)
     logger.debug(f"Bulk purge keys response: {api_response}")
     return
