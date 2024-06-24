@@ -32,16 +32,17 @@ from arxiv.db import transaction
 with transaction() as session:
     session.add(...)
 """
-from typing import Optional
 import logging
+import json
+from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 from flask.globals import app_ctx
 from flask import has_app_context
 
-from sqlalchemy import create_engine, MetaData, String
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.event import listens_for
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
-from sqlalchemy.engine.interfaces import IsolationLevel
 
 from ..config import settings
 
@@ -98,3 +99,31 @@ def transaction ():
     finally:
         if not in_flask:
             db.close()
+
+
+def config_query_timing( slightly_long_sec: float, long_sec: float):
+    @listens_for(engine, "before_cursor_execute")
+    def _record_query_start (conn, cursor, statement, parameters, context, executemany):
+        conn.info['query_start'] = datetime.now()
+
+    @listens_for(engine, "after_cursor_execute")
+    def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
+        if conn.info.get('query_start'):
+            delta: timedelta = (datetime.now() - conn.info['query_start'])
+            query_time = delta.seconds+(delta.microseconds/1000000)
+            if query_time > slightly_long_sec and query_time < long_sec:
+                log = dict(
+                    severity="INFO",
+                    message=f"Slightly long query",
+                    query_seconds=query_time,
+                    query=str(statement)
+                )
+                print (json.dumps(log))
+            elif query_time >= long_sec:
+                log = dict(
+                    severity="WARNING",
+                    message=f"Very long query",
+                    query_seconds=query_time,
+                    query=str(statement)
+                )
+                print (json.dumps(log))
