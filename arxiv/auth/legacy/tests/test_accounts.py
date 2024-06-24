@@ -14,6 +14,7 @@ from arxiv.taxonomy import definitions
 from arxiv.db import transaction
 from arxiv.db import models
 
+from .util import temporary_db
 from .. import util, authenticate, exceptions
 from .. import accounts
 from ... import domain
@@ -54,65 +55,62 @@ class SetUpUserMixin(TestCase):
 
         self.engine, _ = models.configure_db(settings)            # Insert tapir policy classes
 
-        with self.app.app_context():
-            util.create_all(self.engine)
-            with transaction() as session:
-                self.user_class = session.scalar(
-                    select(models.TapirPolicyClass).where(models.TapirPolicyClass.class_id==2))
-                self.email = 'first@last.iv'
-                self.db_user = models.TapirUser(
-                    user_id=self.user_id,
-                    first_name='first',
-                    last_name='last',
-                    suffix_name='iv',
-                    email=self.email,
-                    policy_class=self.user_class.class_id,
-                    flag_edit_users=1,
-                    flag_email_verified=1,
-                    flag_edit_system=0,
-                    flag_approved=1,
-                    flag_deleted=0,
-                    flag_banned=0,
-                    tracking_cookie='foocookie',
-                )
-                self.username = 'foouser'
-                self.db_nick = models.TapirNickname(
-                    nickname=self.username,
-                    user_id=self.user_id,
-                    user_seq=1,
-                    flag_valid=1,
-                    role=0,
-                    policy=0,
-                    flag_primary=1
-                )
-                self.salt = b'foo'
-                self.password = b'thepassword'
-                hashed = hashlib.sha1(self.salt + b'-' + self.password).digest()
-                self.db_password = models.TapirUsersPassword(
-                    user_id=self.user_id,
-                    password_storage=2,
-                    password_enc=hashed
-                )
-                n = util.epoch(datetime.now(tz=UTC))
-                self.secret = 'foosecret'
-                self.db_token = models.TapirPermanentToken(
-                    user_id=self.user_id,
-                    secret=self.secret,
-                    valid=1,
-                    issued_when=n,
-                    issued_to='127.0.0.1',
-                    remote_host='foohost.foo.com',
-                    session_id=0
-                )
-                session.add(self.user_class)
-                session.add(self.db_user)
-                session.add(self.db_password)
-                session.add(self.db_nick)
-                session.add(self.db_token)
-                session.commit()
+        with temporary_db(self.db_uri, drop=False) as session:
+            self.user_class = session.scalar(
+                select(models.TapirPolicyClass).where(models.TapirPolicyClass.class_id==2))
+            self.email = 'first@last.iv'
+            self.db_user = models.TapirUser(
+                user_id=self.user_id,
+                first_name='first',
+                last_name='last',
+                suffix_name='iv',
+                email=self.email,
+                policy_class=self.user_class.class_id,
+                flag_edit_users=1,
+                flag_email_verified=1,
+                flag_edit_system=0,
+                flag_approved=1,
+                flag_deleted=0,
+                flag_banned=0,
+                tracking_cookie='foocookie',
+            )
+            self.username = 'foouser'
+            self.db_nick = models.TapirNickname(
+                nickname=self.username,
+                user_id=self.user_id,
+                user_seq=1,
+                flag_valid=1,
+                role=0,
+                policy=0,
+                flag_primary=1
+            )
+            self.salt = b'foo'
+            self.password = b'thepassword'
+            hashed = hashlib.sha1(self.salt + b'-' + self.password).digest()
+            self.db_password = models.TapirUsersPassword(
+                user_id=self.user_id,
+                password_storage=2,
+                password_enc=hashed
+            )
+            n = util.epoch(datetime.now(tz=UTC))
+            self.secret = 'foosecret'
+            self.db_token = models.TapirPermanentToken(
+                user_id=self.user_id,
+                secret=self.secret,
+                valid=1,
+                issued_when=n,
+                issued_to='127.0.0.1',
+                remote_host='foohost.foo.com',
+                session_id=0
+            )
+            session.add(self.user_class)
+            session.add(self.db_user)
+            session.add(self.db_password)
+            session.add(self.db_nick)
+            session.add(self.db_token)
+            session.commit()
 
     def tearDown(self):
-        util.drop_all(self.engine)
         shutil.rmtree(self.db_path)
 
 
