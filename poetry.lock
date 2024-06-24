@@ -1926,4 +1926,4 @@ sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "a63b0835155070192a06743b408256f308fa4faac47dc6d1e652bc4a031b1f0a"
+content-hash = "c355759252de731ba6f40ffceb152166a7873941532338ee6ba6aa4eb66594cc"
