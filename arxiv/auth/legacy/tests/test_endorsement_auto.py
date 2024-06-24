@@ -9,6 +9,7 @@ from flask import Flask
 from sqlalchemy import insert
 from mimesis import Person, Internet, Datetime
 
+from arxiv.db import transaction
 from arxiv.db import models
 from arxiv.config import Settings
 from arxiv.taxonomy import definitions
@@ -42,7 +43,7 @@ class TestAutoEndorsement(TestCase):
 
         with self.app.app_context():
             util.create_all(engine)
-            with util.transaction() as session:
+            with transaction() as session:
                 person = Person('en')
                 net = Internet()
                 ip_addr = net.ip_v4()
@@ -93,7 +94,7 @@ class TestAutoEndorsement(TestCase):
     def test_invalidated_autoendorsements(self):
         """The user has two autoendorsements that have been invalidated."""
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 issued_when = util.epoch(
                     Datetime('en').datetime().replace(tzinfo=EASTERN)
                 )
@@ -140,7 +141,7 @@ class TestAutoEndorsement(TestCase):
     def test_category_policies(self):
         """Load category endorsement policies from the database."""
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 session.add(models.Category(
                     archive='astro-ph',
                     subject_class='CO',
@@ -167,7 +168,7 @@ class TestAutoEndorsement(TestCase):
     def test_domain_papers(self):
         """Get the number of papers published in each domain."""
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 # User owns three papers.
                 session.execute(
                     insert(models.t_arXiv_paper_owners)
@@ -296,7 +297,7 @@ class TestAutoEndorsement(TestCase):
         ok_patterns = ['%w3.org', '%aaas.org', '%agu.org', '%ams.org']
         bad_patterns = ['%.com', '%.net', '%.biz.%']
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 for pattern in ok_patterns:
                     session.execute(insert(
                         models.t_arXiv_white_email)

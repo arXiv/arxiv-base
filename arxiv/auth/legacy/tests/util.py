@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from flask import Flask
 
 from arxiv.config import Settings
+from arxiv.db import transaction
 from arxiv.db.models import configure_db
 from .. import util
 
@@ -25,7 +26,7 @@ def temporary_db(db_uri: str, create: bool = True, drop: bool = True):
         if create:
             util.create_all(engine)
         try:
-            with util.transaction() as session:
+            with transaction() as session:
                 yield session
         finally:
             if drop:

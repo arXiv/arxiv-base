@@ -11,7 +11,7 @@ from ...base.globals import get_application_config
 
 from ..auth import scopes
 from .. import domain
-from ...db import session, Base, transaction
+from ...db import session, Base, SessionLocal
 from ...db.models import TapirUser, TapirPolicyClass
 
 EASTERN = timezone('US/Eastern')
@@ -38,7 +38,7 @@ def from_epoch(t: int) -> datetime:
 def create_all(engine: Engine) -> None:
     """Create all tables in the database."""
     Base.metadata.create_all(engine)
-    with transaction() as session:
+    with SessionLocal() as session:
         data = session.query(TapirPolicyClass).all()
         if data:
             return

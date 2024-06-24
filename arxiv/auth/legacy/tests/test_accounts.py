@@ -11,6 +11,7 @@ from flask import Flask
 
 from arxiv.config import Settings
 from arxiv.taxonomy import definitions
+from arxiv.db import transaction
 from arxiv.db import models
 
 from .. import util, authenticate, exceptions
@@ -55,7 +56,7 @@ class SetUpUserMixin(TestCase):
 
         with self.app.app_context():
             util.create_all(self.engine)
-            with util.transaction() as session:
+            with transaction() as session:
                 self.user_class = session.scalar(
                     select(models.TapirPolicyClass).where(models.TapirPolicyClass.class_id==2))
                 self.email = 'first@last.iv'
@@ -126,7 +127,7 @@ class TestUsernameExists(SetUpUserMixin):
     def test_with_existant_user(self):
         """There is a user with the passed username."""
         # with temporary_db(self.db_uri, create=False, drop=False):
-        #     with util.transaction() as session:
+        #     with transaction() as session:
         #         print (f'NICKS: {session.query(models.TapirNickname).all()}')
         # self.setUp()
         with self.app.app_context():
@@ -175,7 +176,7 @@ class TestRegister(SetUpUserMixin, TestCase):
         ip = '1.2.3.4'
 
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 u, _ = accounts.register(user, 'apassword1', ip=ip, remote_host=ip)
                 db_user, db_nick, db_profile = get_user(session, u.user_id)
 
@@ -190,7 +191,7 @@ class TestRegister(SetUpUserMixin, TestCase):
         ip = '1.2.3.4'
 
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 u, _ = accounts.register(user, 'apassword1', ip=ip, remote_host=ip)
                 db_user, db_nick, db_profile = get_user(session, u.user_id)
 
@@ -214,7 +215,7 @@ class TestRegister(SetUpUserMixin, TestCase):
         ip = '1.2.3.4'
 
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 u, _ = accounts.register(user, 'apassword1', ip=ip, remote_host=ip)
                 db_user, db_nick, db_profile = get_user(session, u.user_id)
 
@@ -234,7 +235,7 @@ class TestRegister(SetUpUserMixin, TestCase):
         ip = '1.2.3.4'
 
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 u, _ = accounts.register(user, 'apassword1', ip=ip, remote_host=ip)
                 db_user, db_nick, db_profile = get_user(session, u.user_id)
                 auth_user, auths = authenticate.authenticate(
@@ -322,7 +323,7 @@ class TestUpdate(SetUpUserMixin, TestCase):
                                         remote_host=ip)
 
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 updated_name = domain.UserFullName(forename='Foo',
                                                 surname=name.surname,
                                                 suffix=name.suffix)
@@ -371,7 +372,7 @@ class TestUpdate(SetUpUserMixin, TestCase):
                                    profile=updated_profile)
 
         with self.app.app_context():
-            with util.transaction() as session:
+            with transaction() as session:
                 u, _ = accounts.update(updated_user)
                 db_user, db_nick, db_profile = get_user(session, u.user_id)
 

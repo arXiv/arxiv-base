@@ -14,6 +14,7 @@ from pytz import timezone, UTC
 from mimesis import Person, Internet, Datetime, locales
 
 from sqlalchemy import select, func
+from arxiv.db import transaction
 from arxiv.db import models
 from arxiv.config import Settings
 from arxiv.taxonomy import definitions
@@ -58,7 +59,7 @@ class TestBootstrap(TestCase):
 
         with cls.app.app_context():
             util.create_all(engine)
-            with util.transaction() as session:
+            with transaction() as session:
                 edc = session.execute(select(models.Endorsement)).all()
                 for row in edc:
                     print(row)
@@ -78,7 +79,7 @@ class TestBootstrap(TestCase):
                 else:
                     archive, subject_class = category, ''
 
-                with util.transaction() as session:
+                with transaction() as session:
                     #print(f"arch: {archive} sc: {subject_class}")
                     session.add(models.Category(
                         archive=archive,
@@ -95,7 +96,7 @@ class TestBootstrap(TestCase):
             _users = []
             _domain_users = []
             for i in range(COUNT):
-                with util.transaction() as session:
+                with transaction() as session:
                     locale = _get_locale()
                     person = Person(locale)
                     net = Internet()

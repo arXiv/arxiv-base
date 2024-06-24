@@ -1,13 +1,10 @@
 """Tests for legacy_users service."""
 import time
-from typing import Optional
 from unittest import mock, TestCase
 from datetime import datetime
 from pytz import timezone, UTC
 
-from flask import Flask
-
-from arxiv.db import models, session
+from arxiv.db import models, transaction
 from .. import exceptions, sessions, util, cookies
 
 from .util import temporary_db
@@ -83,7 +80,7 @@ class TestInvalidateSession(TestCase):
 
         with temporary_db('sqlite:///:memory:') as db_session:
             cookie = cookies.pack(session_id, user_id, ip, start, capabilities)
-            with util.transaction() as db_session:
+            with transaction() as db_session:
                 tapir_session = models.TapirSession(
                     session_id=session_id,
                     user_id=12345,

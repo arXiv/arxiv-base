@@ -92,7 +92,7 @@ def transaction ():
         if db.new or db.dirty or db.deleted:
             db.commit()
     except Exception as e:
-        logger.warn(f'Commit failed, rolling back', exc_info=1)
+        logger.warning(f'Commit failed, rolling back', exc_info=1)
         db.rollback()
         raise
     finally:
