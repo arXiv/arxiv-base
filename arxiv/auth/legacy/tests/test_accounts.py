@@ -55,7 +55,7 @@ class SetUpUserMixin(TestCase):
 
         self.engine, _ = models.configure_db(settings)            # Insert tapir policy classes
 
-        with temporary_db(self.db_uri, drop=False) as session:
+        with temporary_db("sqlite:///:memory:", drop=False) as session:
             self.user_class = session.scalar(
                 select(models.TapirPolicyClass).where(models.TapirPolicyClass.class_id==2))
             self.email = 'first@last.iv'
@@ -111,7 +111,8 @@ class SetUpUserMixin(TestCase):
             session.commit()
 
     def tearDown(self):
-        shutil.rmtree(self.db_path)
+        """Drop tables from the in-memory db file."""
+        util.drop_all(self.engine)
 
 
 class TestUsernameExists(SetUpUserMixin):

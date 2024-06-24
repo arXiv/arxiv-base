@@ -7,9 +7,12 @@ import tempfile
 import shutil
 import hashlib
 
+from flask import Flask
+
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 
+from arxiv.config import Settings
 from arxiv.db import models
 
 from .. import authenticate, exceptions, util
@@ -26,9 +29,16 @@ class TestAuthenticateWithPermanentToken(TestCase):
 
     def setUp(self):
         """Instantiate a user and its credentials in the DB."""
-        self.path = tempfile.mkdtemp()
-        self.db = f'sqlite:///{self.path}/test.db'
+        self.db = f'sqlite:///:memory:'
         self.user_id = '1'
+
+        self.app = Flask('test')
+        settings = Settings(
+                        CLASSIC_DB_URI=self.db,
+                        LATEXML_DB_URI=None)
+
+        self.engine, _ = models.configure_db(settings)
+
         with temporary_db(self.db, drop=False) as session:
             self.user_class = session.scalar(
                 select(models.TapirPolicyClass).where(models.TapirPolicyClass.class_id==2))
@@ -85,26 +95,27 @@ class TestAuthenticateWithPermanentToken(TestCase):
             session.commit()
 
     def tearDown(self):
-        """Remove the temporary db file."""
-        shutil.rmtree(self.path)
+        """Drop tables from the in-memory db file."""
+        util.drop_all(self.engine)
 
     def test_token_is_malformed(self):
         """Token is present, but it has the wrong format."""
         bad_token = 'footokenhasnohyphen'
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
             with self.assertRaises(exceptions.AuthenticationFailed):
                 authenticate.authenticate(token=bad_token)
 
     def test_token_is_incorrect(self):
         """Token is present, but there is no such token in the database."""
         bad_token = '1234-nosuchtoken'
-        with temporary_db(self.db, create=False):
+        # with temporary_db(self.db, create=False):
+        with self.app.app_context():
             with self.assertRaises(exceptions.AuthenticationFailed):
                 authenticate.authenticate(token=bad_token)
 
     def test_token_is_invalid(self):
         """The token is present, but it is not valid."""
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
             authenticate._invalidate_token(self.user_id, self.secret)
 
             with self.assertRaises(exceptions.AuthenticationFailed):
@@ -113,7 +124,7 @@ class TestAuthenticateWithPermanentToken(TestCase):
 
     def test_token_is_valid(self):
         """The token is valid!."""
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
             token = f'{self.user_id}-{self.secret}'
             user, auths = authenticate.authenticate(token=token)
             self.assertIsInstance(user, authenticate.domain.User,
@@ -135,8 +146,14 @@ class TestAuthenticateWithPassword(TestCase):
 
     def setUp(self):
         """Instantiate a user."""
-        self.path = tempfile.mkdtemp()
-        self.db = f'sqlite:///{self.path}/test.db'
+        self.db = f'sqlite:///:memory:'
+
+        self.app = Flask('test')
+        settings = Settings(
+                        CLASSIC_DB_URI=self.db,
+                        LATEXML_DB_URI=None)
+
+        self.engine, _ = models.configure_db(settings)
         self.user_id = '5'
         with temporary_db(self.db, drop=False) as session:
             # We have a good old-fashioned user.
@@ -185,15 +202,15 @@ class TestAuthenticateWithPassword(TestCase):
             session.commit()
 
     def tearDown(self):
-        """Remove the temporary db file."""
-        shutil.rmtree(self.path)
+        """Drop tables from the in-memory db file."""
+        util.drop_all(self.engine)
 
     def test_no_username(self):
         """Username is not entered."""
         username = ''
         password = 'foopass'
         with self.assertRaises(exceptions.AuthenticationFailed):
-            with temporary_db(self.db, create=False):
+            with self.app.app_context():
                 authenticate.authenticate(username, password)
 
     def test_no_password(self):
@@ -201,18 +218,18 @@ class TestAuthenticateWithPassword(TestCase):
         username = 'foouser'
         password = ''
         with self.assertRaises(exceptions.AuthenticationFailed):
-            with temporary_db(self.db):
+            with self.app.app_context():
                 authenticate.authenticate(username, password)
 
     def test_password_is_incorrect(self):
         """Password is incorrect."""
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
             with self.assertRaises(exceptions.AuthenticationFailed):
                 authenticate.authenticate('foouser', 'notthepassword')
 
     def test_password_is_correct(self):
         """Password is correct."""
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
 
             user, auths = authenticate.authenticate('foouser', 'thepassword')
             self.assertIsInstance(user, authenticate.domain.User,
@@ -230,7 +247,7 @@ class TestAuthenticateWithPassword(TestCase):
 
     def test_login_with_email_and_correct_password(self):
         """User attempts to log in with e-mail address."""
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
             user, auths = authenticate.authenticate('first@last.iv',
                                                     'thepassword')
             self.assertIsInstance(user, authenticate.domain.User,
@@ -248,14 +265,14 @@ class TestAuthenticateWithPassword(TestCase):
 
     def test_no_such_user(self):
         """Username does not exist."""
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
             with self.assertRaises(exceptions.AuthenticationFailed):
                 authenticate.authenticate('nobody', 'thepassword')
 
 
     def test_bad_data(self):
         """Test with bad data."""
-        with temporary_db(self.db, create=False):
+        with self.app.app_context():
             with self.assertRaises(exceptions.AuthenticationFailed):
                 authenticate.authenticate('abc', '')
             with self.assertRaises(exceptions.AuthenticationFailed):
