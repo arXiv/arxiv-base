@@ -840,7 +840,7 @@ class OwnershipRequestsAudit(Base):
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    ownership_request = relationship('OwnershipRequest', primaryjoin='OwnershipRequestAudit.request_id == OwnershipRequestsAudit.request_id', backref='arXiv_ownership_requests_audit')
+    ownership_request = relationship('OwnershipRequest', primaryjoin='OwnershipRequestsAudit.request_id == OwnershipRequest.request_id', backref='arXiv_ownership_requests_audit')
 
 
 t_arXiv_ownership_requests_papers = Table(
