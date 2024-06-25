@@ -1128,7 +1128,7 @@ class Submission(Base):
     doc_paper_id: Mapped[Optional[str]] = mapped_column(String(20), index=True)
     sword_id: Mapped[Optional[int]] = mapped_column(ForeignKey('arXiv_tracking.sword_id'), index=True)
     userinfo: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-    is_author: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    is_author: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     agree_policy: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     viewed: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     stage: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -1137,7 +1137,7 @@ class Submission(Base):
     submitter_email: Mapped[Optional[str]] = mapped_column(String(64))
     created: Mapped[Optional[datetime]]
     updated: Mapped[Optional[datetime]]
-    status: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    status: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     sticky_status: Mapped[Optional[int]] = mapped_column(Integer)
     must_process: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     submit_time: Mapped[Optional[datetime]]
@@ -1146,7 +1146,7 @@ class Submission(Base):
     source_format: Mapped[Optional[str]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
     has_pilot_data: Mapped[Optional[int]] = mapped_column(Integer)
-    is_withdrawn: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    is_withdrawn: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     title: Mapped[Optional[str]] = mapped_column(Text)
     authors: Mapped[Optional[str]] = mapped_column(Text)
     comments: Mapped[Optional[str]] = mapped_column(Text)
@@ -1158,7 +1158,7 @@ class Submission(Base):
     doi: Mapped[Optional[str]]
     abstract: Mapped[Optional[str]] = mapped_column(Text)
     license: Mapped[Optional[str]] = mapped_column(ForeignKey('arXiv_licenses.name', onupdate='CASCADE'), index=True)
-    version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     type: Mapped[Optional[str]] = mapped_column(String(8), index=True)
     is_ok: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     admin_ok: Mapped[Optional[int]] = mapped_column(Integer)
@@ -1169,7 +1169,7 @@ class Submission(Base):
     package: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     rt_ticket_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     auto_hold: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-    is_locked: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    is_locked: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     agreement_id = mapped_column(ForeignKey('arXiv_submission_agreements.agreement_id'), index=True)
 
     agreement = relationship('SubmissionAgreement', primaryjoin='Submission.agreement_id == SubmissionAgreement.agreement_id', backref='arXiv_submissions')
