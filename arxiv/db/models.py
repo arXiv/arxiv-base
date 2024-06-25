@@ -830,7 +830,7 @@ class OwnershipRequest(Base):
     user = relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', backref='arXiv_ownership_requests')
 
 
-class OwnershipRequestsAudit(OwnershipRequest):
+class OwnershipRequestsAudit(Base):
     __tablename__ = 'arXiv_ownership_requests_audit'
 
     request_id: Mapped[int] = mapped_column(ForeignKey('arXiv_ownership_requests.request_id'), primary_key=True, server_default=FetchedValue())
@@ -840,6 +840,7 @@ class OwnershipRequestsAudit(OwnershipRequest):
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
+    ownership_request = relationship('OwnershipRequest', primaryjoin='OwnershipRequestAudit.request_id == OwnershipRequestsAudit.request_id', backref='arXiv_ownership_requests_audit')
 
 
 t_arXiv_ownership_requests_papers = Table(
