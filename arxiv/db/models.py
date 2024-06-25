@@ -152,7 +152,7 @@ class AdminLog(Base):
 
     id: Mapped[intpk]
     logtime: Mapped[Optional[str]] = mapped_column(String(24))
-    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))
     paper_id: Mapped[Optional[str]] = mapped_column(String(20), index=True)
     username: Mapped[Optional[str]] = mapped_column(String(20), index=True)
     host: Mapped[Optional[str]] = mapped_column(String(64))
