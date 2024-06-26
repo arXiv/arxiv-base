@@ -819,9 +819,9 @@ class OrcidConfig(Base):
 
 t_arXiv_ownership_requests_papers = Table(
     'arXiv_ownership_requests_papers', metadata,
-    Column('request_id', Integer, nullable=False, server_default=FetchedValue()),
-    Column('document_id', Integer, nullable=False, index=True, server_default=FetchedValue()),
-    Index('request_id', 'request_id', 'document_id')
+    Column('request_id', ForeignKey('arXiv_ownership_requests.request_id'), nullable=False, server_default=FetchedValue()),
+    Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue()),
+    Index('request_id', 'request_id', 'document_id', unique=True)
 )
 
 class OwnershipRequest(Base):
@@ -835,7 +835,7 @@ class OwnershipRequest(Base):
     request_audit = relationship('OwnershipRequestsAudit')
     endorsement_request = relationship('EndorsementRequest', primaryjoin='OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id', backref='arXiv_ownership_requests')
     user = relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', back_populates='arXiv_ownership_requests')
-    documents = relationship("Documents", secondary=t_arXiv_ownership_requests_papers)
+    documents = relationship("Document", secondary=t_arXiv_ownership_requests_papers)
 
 class OwnershipRequestsAudit(Base):
     __tablename__ = 'arXiv_ownership_requests_audit'
