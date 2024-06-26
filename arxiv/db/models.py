@@ -547,6 +547,7 @@ class EndorsementRequest(Base):
 
     arXiv_categories = relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', back_populates='arXiv_endorsement_requests')
     endorsee = relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', back_populates='arXiv_endorsement_requests', uselist=False)
+    audit = relationship('EndorsementRequestsAudit', uselist=False)
 
 
 class EndorsementRequestsAudit(EndorsementRequest):
