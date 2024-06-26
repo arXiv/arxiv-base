@@ -8,6 +8,7 @@ from werkzeug.datastructures.structures import MultiDict
 from flask import Flask, request, Response
 from retry import retry
 
+from ...db import transaction
 from ..legacy import util
 from ..legacy.cookies import parse_cookie
 from .. import domain, legacy
@@ -81,7 +82,7 @@ class Auth(object):
         if cookie_value is None:
             return None
         try:
-            with legacy.transaction():
+            with transaction():
                 return legacy.sessions.load(cookie_value)
         except legacy.exceptions.UnknownSession as e:
             logger.debug('No legacy session available: %s', e)
