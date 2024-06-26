@@ -170,22 +170,20 @@ class TestAutoEndorsement(TestCase):
         with self.app.app_context():
             with transaction() as session:
                 # User owns three papers.
-                session.execute(
-                    insert(models.t_arXiv_paper_owners)
-                    .values(
-                        document_id=1,
-                        user_id=self.user.user_id,
-                        flag_author=0,  # <- User is _not_ an author.
-                        valid=1,
-                        **self.default_tracking_data
-                    )
-                )
-                session.add(models.Document(
+                document1 = models.Document(
                     document_id=1,
                     title='Foo Title',
                     submitter_email='foo@bar.baz',
                     paper_id='2101.00123',
                     dated=util.epoch(datetime.now(tz=UTC))
+                )
+                session.add(document1)
+                session.add(models.PaperOwner(
+                    document=document1,
+                    user_id=self.user.user_id,
+                    flag_author=0,  # <- User is _not_ an author.
+                    valid=1,
+                    **self.default_tracking_data
                 ))
                 session.execute(
                     insert(models.t_arXiv_in_category)
@@ -204,22 +202,20 @@ class TestAutoEndorsement(TestCase):
                     endorsement_domain='firstdomain'
                 ))
                 # Here's another paper.
-                session.execute(
-                    insert(models.t_arXiv_paper_owners)
-                    .values(
-                        document_id=2,
-                        user_id=self.user.user_id,
-                        flag_author=1,  # <- User is an author.
-                        valid=1,
-                        **self.default_tracking_data
-                    )
-                )
-                session.add(models.Document(
+                document2 = models.Document(
                     document_id=2,
                     title='Foo Title',
                     submitter_email='foo@bar.baz',
                     paper_id='2101.00124',
                     dated=util.epoch(datetime.now(tz=UTC))
+                )
+                session.add(document2)
+                session.add (models.PaperOwner(
+                    document=document2,
+                    user_id=self.user.user_id,
+                    flag_author=1,  # <- User is an author.
+                    valid=1,
+                    **self.default_tracking_data
                 ))
                 session.execute(
                     insert(models.t_arXiv_in_category)
@@ -238,22 +234,20 @@ class TestAutoEndorsement(TestCase):
                     endorsement_domain='firstdomain'
                 ))
                 # Here's a paper for which the user is an author.
-                session.execute(
-                    insert(models.t_arXiv_paper_owners)
-                    .values(
-                        document_id=3,
-                        user_id=self.user.user_id,
-                        flag_author=1,
-                        valid=1,
-                        **self.default_tracking_data
-                    )
-                )
-                session.add(models.Document(
+                document3 = models.Document(
                     document_id=3,
                     title='Foo Title',
                     submitter_email='foo@bar.baz',
                     paper_id='2101.00125',
                     dated=util.epoch(datetime.now(tz=UTC))
+                )
+                session.add(document3)
+                session.add (models.PaperOwner(
+                    document=document3,
+                    user_id=self.user.user_id,
+                    flag_author=1,
+                    valid=1,
+                    **self.default_tracking_data
                 ))
                 # It has both a primary and a secondary classification.
                 session.execute(

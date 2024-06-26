@@ -87,7 +87,6 @@ def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
         t_arXiv_moderators: engine,
         t_arXiv_ownership_requests_papers: engine,
         t_arXiv_refresh_list: engine,
-        t_arXiv_paper_owners: engine,
         t_arXiv_updates_tmp: engine,
         t_arXiv_white_email: engine,
         t_arXiv_xml_notifications: engine,
@@ -359,7 +358,7 @@ class Category(Base):
 
     arXiv_archive = relationship('Archive', primaryjoin='Category.archive == Archive.archive_id', backref='arXiv_categories')
     arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', backref='arXiv_categories')
-
+    arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='arXiv_categories')
 
 class QuestionableCategory(Category):
     __tablename__ = 'arXiv_questionable_categories'
@@ -397,8 +396,8 @@ class ControlHold(Base):
     placed_by: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_users.user_id'), index=True)
     last_changed_by: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_users.user_id'), index=True)
 
-    tapir_user = relationship('TapirUser', primaryjoin='ControlHold.last_changed_by == TapirUser.user_id', backref='tapiruser_arXiv_control_holds')
-    tapir_user1 = relationship('TapirUser', primaryjoin='ControlHold.placed_by == TapirUser.user_id', backref='tapiruser_arXiv_control_holds_0')
+    tapir_users = relationship('TapirUser', foreign_keys=[last_changed_by], back_populates='arXiv_control_holds')
+    tapir_users_ = relationship('TapirUser', foreign_keys=[placed_by], back_populates='arXiv_control_holds_')
 
 
 
@@ -491,7 +490,8 @@ class Document(Base):
     primary_subject_class: Mapped[Optional[str]] = mapped_column(String(16))
     created: Mapped[Optional[datetime]]
 
-    submitter = relationship('TapirUser', primaryjoin='Document.submitter_id == TapirUser.user_id', backref='arXiv_documents')
+    owners = relationship('PaperOwner', back_populates='document')
+    submitter = relationship('TapirUser', primaryjoin='Document.submitter_id == TapirUser.user_id', back_populates='arXiv_documents')
 
 
 class DBLP(Document):
@@ -545,8 +545,8 @@ class EndorsementRequest(Base):
     issued_when: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     point_value: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_category = relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', backref='arXiv_endorsement_requests')
-    endorsee = relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', backref='arXiv_endorsement_requests')
+    arXiv_categories = relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', back_populates='arXiv_endorsement_requests')
+    endorsee = relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', back_populates='arXiv_endorsement_requests', uselist=False)
 
 
 class EndorsementRequestsAudit(EndorsementRequest):
@@ -713,7 +713,7 @@ class Metadata(Base):
 
     document = relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', backref='arXiv_metadata')
     arXiv_license = relationship('License', primaryjoin='Metadata.license == License.name', backref='arXiv_metadata')
-    submitter = relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', backref='arXiv_metadata')
+    submitter = relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', back_populates='arXiv_metadata')
 
 
 
@@ -827,7 +827,7 @@ class OwnershipRequest(Base):
     workflow_status: Mapped[Literal['pending', 'accepted', 'rejected']] = mapped_column(Enum('pending', 'accepted', 'rejected'), nullable=False, server_default=FetchedValue())
 
     endorsement_request = relationship('EndorsementRequest', primaryjoin='OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id', backref='arXiv_ownership_requests')
-    user = relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', backref='arXiv_ownership_requests')
+    user = relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', back_populates='arXiv_ownership_requests')
 
 
 class OwnershipRequestsAudit(Base):
@@ -851,21 +851,30 @@ t_arXiv_ownership_requests_papers = Table(
 )
 
 
+class PaperOwner(Base):
+    __tablename__ = 'arXiv_paper_owners'
+    __table_args__ = (
+        ForeignKeyConstraint(['added_by'], ['tapir_users.user_id'], name='0_595'),
+        ForeignKeyConstraint(['document_id'], ['arXiv_documents.document_id'], name='0_593'),
+        ForeignKeyConstraint(['user_id'], ['tapir_users.user_id'], name='0_594'),
+        Index('added_by', 'added_by'),
+        # Index('document_id', 'document_id', 'user_id', unique=True),
+        # Index('user_id', 'user_id'),
+    )
 
-t_arXiv_paper_owners = Table(
-    'arXiv_paper_owners', metadata,
-    Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue()),
-    Column('user_id', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue()),
-    Column('date', Integer, nullable=False, server_default=text("'0'")),
-    Column('added_by', ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=text("'0'")),
-    Column('remote_addr', String(16), nullable=False, server_default=FetchedValue()),
-    Column('remote_host', String(255), nullable=False, server_default=FetchedValue()),
-    Column('tracking_cookie', String(32), nullable=False, server_default=FetchedValue()),
-    Column('valid', Integer, nullable=False, server_default=text("'0'")),
-    Column('flag_author', Integer, nullable=False, server_default=text("'0'")),
-    Column('flag_auto', Integer, nullable=False, server_default=text("'1'")),
-    Index('owners_document_id', 'document_id', 'user_id')
-)
+    document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True)
+    date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    added_by: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("''"))
+    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=text("''"))
+    tracking_cookie: Mapped[str] = mapped_column(String(32), nullable=False, server_default=text("''"))
+    valid: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_author: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_auto: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
+
+    document = relationship('Document', back_populates='owners')
+    owner = relationship('TapirUser', foreign_keys="[PaperOwner.user_id]", back_populates='owned_papers')
 
 
 class PaperSession(Base):
@@ -939,7 +948,7 @@ class ShowEmailRequest(Base):
     request_id: Mapped[intpk]
 
     document = relationship('Document', primaryjoin='ShowEmailRequest.document_id == Document.document_id', backref='arXiv_show_email_requests')
-    user = relationship('TapirUser', primaryjoin='ShowEmailRequest.user_id == TapirUser.user_id', backref='arXiv_show_email_requests')
+    user = relationship('TapirUser', primaryjoin='ShowEmailRequest.user_id == TapirUser.user_id', back_populates='arXiv_show_email_requests')
 
 
 
@@ -1176,7 +1185,7 @@ class Submission(Base):
     agreement = relationship('SubmissionAgreement', primaryjoin='Submission.agreement_id == SubmissionAgreement.agreement_id', backref='arXiv_submissions')
     document = relationship('Document', primaryjoin='Submission.document_id == Document.document_id', backref='arXiv_submissions')
     arXiv_license = relationship('License', primaryjoin='Submission.license == License.name', backref='arXiv_submissions')
-    submitter = relationship('TapirUser', primaryjoin='Submission.submitter_id == TapirUser.user_id', backref='arXiv_submissions')
+    submitter = relationship('TapirUser', primaryjoin='Submission.submitter_id == TapirUser.user_id', back_populates='arXiv_submissions')
     sword = relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', backref='arXiv_submissions')
 
 
@@ -1464,7 +1473,7 @@ class TapirAddress(Base):
     share_addr: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     tapir_country = relationship('TapirCountry', primaryjoin='TapirAddress.country == TapirCountry.digraph', backref='tapir_address')
-    user = relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', backref='tapir_address')
+    user = relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', back_populates='tapir_address')
 
 
 
@@ -1483,8 +1492,8 @@ class TapirAdminAudit(Base):
     comment: Mapped[str] = mapped_column(Text, nullable=False)
     entry_id: Mapped[intpk]
 
-    tapir_user = relationship('TapirUser', primaryjoin='TapirAdminAudit.admin_user == TapirUser.user_id', backref='tapiruser_tapir_admin_audits')
-    tapir_user1 = relationship('TapirUser', primaryjoin='TapirAdminAudit.affected_user == TapirUser.user_id', backref='tapiruser_tapir_admin_audits_0')
+    tapir_users = relationship('TapirUser', foreign_keys=[admin_user], back_populates='tapir_admin_audit')
+    tapir_users_ = relationship('TapirUser', foreign_keys=[affected_user], back_populates='tapir_admin_audit_')
     session = relationship('TapirSession', primaryjoin='TapirAdminAudit.session_id == TapirSession.session_id', backref='tapir_admin_audits')
 
 
@@ -1514,7 +1523,7 @@ class TapirEmailChangeToken(Base):
     consumed_when: Mapped[Optional[int]] = mapped_column(Integer)
     consumed_from: Mapped[Optional[str]] = mapped_column(String(16))
 
-    user = relationship('TapirUser', primaryjoin='TapirEmailChangeToken.user_id == TapirUser.user_id', backref='tapir_email_change_tokens')
+    user = relationship('TapirUser', primaryjoin='TapirEmailChangeToken.user_id == TapirUser.user_id', back_populates='tapir_email_change_tokens')
 
 
 t_tapir_email_change_tokens_used = Table(
@@ -1566,8 +1575,8 @@ class TapirEmailMailing(Base):
     mailing_name: Mapped[Optional[str]]
     comment: Mapped[Optional[str]] = mapped_column(Text)
 
-    tapir_user = relationship('TapirUser', primaryjoin='TapirEmailMailing.created_by == TapirUser.user_id', backref='tapiruser_tapir_email_mailings')
-    tapir_user1 = relationship('TapirUser', primaryjoin='TapirEmailMailing.sent_by == TapirUser.user_id', backref='tapiruser_tapir_email_mailings_0')
+    tapir_users = relationship('TapirUser', foreign_keys=[created_by], back_populates='tapir_email_mailings')
+    tapir_users_ = relationship('TapirUser', foreign_keys=[sent_by], back_populates='tapir_email_mailings_')
     template = relationship('TapirEmailTemplate', primaryjoin='TapirEmailMailing.template_id == TapirEmailTemplate.template_id', backref='tapir_email_mailings')
 
 
@@ -1590,8 +1599,8 @@ class TapirEmailTemplate(Base):
     workflow_status: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     flag_system: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    tapir_user = relationship('TapirUser', primaryjoin='TapirEmailTemplate.created_by == TapirUser.user_id', backref='tapiruser_tapir_email_templates')
-    tapir_user1 = relationship('TapirUser', primaryjoin='TapirEmailTemplate.updated_by == TapirUser.user_id', backref='tapiruser_tapir_email_templates_0')
+    tapir_users = relationship('TapirUser', foreign_keys=[created_by], back_populates='tapir_email_templates')
+    tapir_users_ = relationship('TapirUser', foreign_keys=[updated_by], back_populates='tapir_email_templates_')
 
 
 
@@ -1607,7 +1616,7 @@ class TapirEmailToken(Base):
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     wants_perm_token: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    user = relationship('TapirUser', primaryjoin='TapirEmailToken.user_id == TapirUser.user_id', backref='tapir_email_tokens')
+    user = relationship('TapirUser', primaryjoin='TapirEmailToken.user_id == TapirUser.user_id', back_populates='tapir_email_tokens')
 
 
 
@@ -1661,7 +1670,7 @@ class TapirNickname(Base):
     policy: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     flag_primary: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
 
-    user = relationship('TapirUser', primaryjoin='TapirNickname.user_id == TapirUser.user_id', backref='tapir_nicknames')
+    user = relationship('TapirUser', primaryjoin='TapirNickname.user_id == TapirUser.user_id', back_populates='tapir_nicknames')
 
 
 
@@ -1708,7 +1717,7 @@ class TapirPermanentToken(Base):
     session_id: Mapped[int] = mapped_column(ForeignKey('tapir_sessions.session_id'), nullable=False, index=True, server_default=FetchedValue())
 
     session = relationship('TapirSession', primaryjoin='TapirPermanentToken.session_id == TapirSession.session_id', backref='tapir_permanent_tokens')
-    user = relationship('TapirUser', primaryjoin='TapirPermanentToken.user_id == TapirUser.user_id', backref='tapir_permanent_tokens')
+    user = relationship('TapirUser', primaryjoin='TapirPermanentToken.user_id == TapirUser.user_id', back_populates='tapir_permanent_tokens')
 
 
 
@@ -1755,7 +1764,7 @@ class TapirPolicyClass(Base):
     recovery_policy: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     permanent_login: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-
+    tapir_users = relationship('TapirUser', back_populates='tapir_policy_classes')
 
 class TapirPresession(Base):
     __tablename__ = 'tapir_presessions'
@@ -1780,7 +1789,7 @@ class TapirRecoveryToken(Base):
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
 
-    user = relationship('TapirUser', primaryjoin='TapirRecoveryToken.user_id == TapirUser.user_id', backref='tapir_recovery_tokens')
+    user = relationship('TapirUser', primaryjoin='TapirRecoveryToken.user_id == TapirUser.user_id', back_populates='tapir_recovery_tokens')
 
 
 
@@ -1817,7 +1826,7 @@ class TapirSession(Base):
     start_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     end_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
 
-    user = relationship('TapirUser', primaryjoin='TapirSession.user_id == TapirUser.user_id', backref='tapir_sessions')
+    user = relationship('TapirUser', primaryjoin='TapirSession.user_id == TapirUser.user_id', back_populates='tapir_sessions')
 
 
 class TapirSessionsAudit(Base):
@@ -1852,6 +1861,22 @@ class TapirString(Base):
 
 class TapirUser(Base):
     __tablename__ = 'tapir_users'
+    __table_args__ = (
+        ForeignKeyConstraint(['policy_class'], ['tapir_policy_classes.class_id'], name='0_510'),
+        Index('email', 'email', unique=True),
+        Index('first_name', 'first_name'),
+        Index('flag_approved', 'flag_approved'),
+        Index('flag_banned', 'flag_banned'),
+        Index('flag_can_lock', 'flag_can_lock'),
+        Index('flag_deleted', 'flag_deleted'),
+        Index('flag_edit_users', 'flag_edit_users'),
+        Index('flag_internal', 'flag_internal'),
+        Index('joined_date', 'joined_date'),
+        Index('joined_ip_num', 'joined_ip_num'),
+        Index('last_name', 'last_name'),
+        Index('policy_class', 'policy_class'),
+        Index('tracking_cookie', 'tracking_cookie')
+    )
 
     user_id: Mapped[intpk]
     first_name: Mapped[Optional[str]] = mapped_column(String(50), index=True)
@@ -1879,7 +1904,46 @@ class TapirUser(Base):
     flag_allow_tex_produced: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     flag_can_lock: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
 
-    tapir_policy_class = relationship('TapirPolicyClass', primaryjoin='TapirUser.policy_class == TapirPolicyClass.class_id', backref='tapir_users')
+    tapir_policy_classes = relationship('TapirPolicyClass', back_populates='tapir_users')
+    arXiv_control_holds = relationship('ControlHold', foreign_keys='[ControlHold.last_changed_by]', back_populates='tapir_users')
+    arXiv_control_holds_ = relationship('ControlHold', foreign_keys='[ControlHold.placed_by]', back_populates='tapir_users_')
+    arXiv_documents = relationship('Document', back_populates='submitter')
+    arXiv_moderator_api_key = relationship('ModeratorApiKey', back_populates='user')
+    tapir_address = relationship('TapirAddress', back_populates='user')
+    tapir_email_change_tokens = relationship('TapirEmailChangeToken', back_populates='user')
+    tapir_email_templates = relationship('TapirEmailTemplate', foreign_keys='[TapirEmailTemplate.created_by]', back_populates='tapir_users')
+    tapir_email_templates_ = relationship('TapirEmailTemplate', foreign_keys='[TapirEmailTemplate.updated_by]', back_populates='tapir_users_')
+    tapir_email_tokens = relationship('TapirEmailToken', back_populates='user')
+    tapir_nicknames = relationship('TapirNickname', back_populates='user', uselist=False)
+    tapir_phone = relationship('TapirPhone', back_populates='user')
+    tapir_recovery_tokens = relationship('TapirRecoveryToken', back_populates='user')
+    tapir_sessions = relationship('TapirSession', back_populates='user')
+    arXiv_cross_control = relationship('CrossControl', back_populates='user')
+    arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='endorsee')
+    arXiv_jref_control = relationship('JrefControl', back_populates='user')
+    arXiv_metadata = relationship('Metadata', back_populates='submitter')
+    arXiv_show_email_requests = relationship('ShowEmailRequest', back_populates='user')
+    arXiv_submission_control = relationship('SubmissionControl', back_populates='user')
+    arXiv_submissions = relationship('Submission', back_populates='submitter')
+    tapir_admin_audit = relationship('TapirAdminAudit', foreign_keys='[TapirAdminAudit.admin_user]', back_populates='tapir_users')
+    tapir_admin_audit_ = relationship('TapirAdminAudit', foreign_keys='[TapirAdminAudit.affected_user]', back_populates='tapir_users_')
+    tapir_email_mailings = relationship('TapirEmailMailing', foreign_keys='[TapirEmailMailing.created_by]', back_populates='tapir_users')
+    tapir_email_mailings_ = relationship('TapirEmailMailing', foreign_keys='[TapirEmailMailing.sent_by]', back_populates='tapir_users_')
+    tapir_permanent_tokens = relationship('TapirPermanentToken', back_populates='user')
+    tapir_recovery_tokens_used = relationship('TapirRecoveryTokensUsed', back_populates='user')
+
+    endorsee_of = relationship('Endorsement', foreign_keys='[Endorsement.endorsee_id]', back_populates='endorsee')
+    endorses = relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')
+
+    arXiv_ownership_requests = relationship('OwnershipRequest', back_populates='user')
+    arXiv_submission_category_proposal = relationship('SubmissionCategoryProposal', back_populates='user')
+    arXiv_submission_flag = relationship('SubmissionFlag', back_populates='user')
+    arXiv_submission_hold_reason = relationship('SubmissionHoldReason', back_populates='user')
+    arXiv_submission_view_flag = relationship('SubmissionViewFlag', back_populates='user')
+
+    owned_papers = relationship("PaperOwner",  foreign_keys="[PaperOwner.user_id]", back_populates="owner")
+
+    demographics = relationship('Demographic', foreign_keys="[Demographic.user_id]", uselist=False)
 
 
 class AuthorIds(Base):
@@ -1943,7 +2007,7 @@ class Demographic(Base):
                 if getattr(self, column) == 1]
 
 
-class OrcidIds(TapirUser):
+class OrcidIds(Base):
     __tablename__ = 'arXiv_orcid_ids'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True)
@@ -1952,7 +2016,7 @@ class OrcidIds(TapirUser):
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
 
-class QueueView(TapirUser):
+class QueueView(Base):
     __tablename__ = 'arXiv_queue_view'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id', ondelete='CASCADE'), primary_key=True, server_default=FetchedValue())
@@ -1961,14 +2025,14 @@ class QueueView(TapirUser):
     total_views: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
 
-class SuspiciousName(TapirUser):
+class SuspiciousName(Base):
     __tablename__ = 'arXiv_suspicious_names'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())
     full_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
 
 
-class SwordLicense(TapirUser):
+class SwordLicense(Base):
     __tablename__ = 'arXiv_sword_licenses'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True)
@@ -1976,7 +2040,7 @@ class SwordLicense(TapirUser):
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
 
-class TapirDemographic(TapirUser):
+class TapirDemographic(Base):
     __tablename__ = 'tapir_demographics'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())
@@ -1991,7 +2055,7 @@ class TapirDemographic(TapirUser):
     tapir_country = relationship('TapirCountry', primaryjoin='TapirDemographic.country == TapirCountry.digraph', backref='tapir_demographics')
 
 
-class TapirUsersHot(TapirUser):
+class TapirUsersHot(Base):
     __tablename__ = 'tapir_users_hot'
 
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())

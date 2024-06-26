@@ -23,7 +23,7 @@ from . import util
 from .. import domain
 from ...taxonomy import definitions
 from ...db import session
-from ...db.models import Endorsement, t_arXiv_paper_owners, Document, \
+from ...db.models import Endorsement, PaperOwner, Document, \
     t_arXiv_in_category, Category, EndorsementDomain, t_arXiv_white_email, \
     t_arXiv_black_email
 
@@ -341,12 +341,12 @@ def domain_papers(user: domain.User,
         in each respective domain (int).
 
     """
-    query = session.query(t_arXiv_paper_owners.c.document_id,
+    query = session.query(PaperOwner.document_id,
                              Document.document_id,
                              t_arXiv_in_category.c.document_id,
                              Category.endorsement_domain) \
-        .filter(t_arXiv_paper_owners.c.user_id == user.user_id) \
-        .filter(Document.document_id == t_arXiv_paper_owners.c.document_id) \
+        .filter(PaperOwner.user_id == user.user_id) \
+        .filter(Document.document_id == PaperOwner.document_id) \
         .filter(t_arXiv_in_category.c.document_id == Document.document_id) \
         .filter(Category.archive == t_arXiv_in_category.c.archive) \
         .filter(Category.subject_class == t_arXiv_in_category.c.subject_class)
