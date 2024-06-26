@@ -357,6 +357,7 @@ class Category(Base):
     endorsement_domain: Mapped[Optional[str]] = mapped_column(ForeignKey('arXiv_endorsement_domains.endorsement_domain'), index=True)
 
     arXiv_archive = relationship('Archive', primaryjoin='Category.archive == Archive.archive_id', backref='arXiv_categories')
+    arXiv_endorsements = relationship('Endorsement', back_populates='arXiv_categories')
     arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', backref='arXiv_categories')
     arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='arXiv_categories')
 
@@ -423,8 +424,8 @@ class CrossControl(Base):
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     arXiv_category = relationship('Category', primaryjoin='and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)', backref='arXiv_cross_controls')
-    document = relationship('Document', primaryjoin='CrossControl.document_id == Document.document_id', backref='arXiv_cross_controls')
-    user = relationship('TapirUser', primaryjoin='CrossControl.user_id == TapirUser.user_id', backref='arXiv_cross_controls')
+    document = relationship('Document', primaryjoin='CrossControl.document_id == Document.document_id', back_populates='arXiv_cross_controls')
+    user = relationship('TapirUser', primaryjoin='CrossControl.user_id == TapirUser.user_id', back_populates='arXiv_cross_controls')
 
 
 
@@ -492,7 +493,7 @@ class Document(Base):
 
     owners = relationship('PaperOwner', back_populates='document')
     submitter = relationship('TapirUser', primaryjoin='Document.submitter_id == TapirUser.user_id', back_populates='arXiv_documents')
-
+    arXiv_cross_controls = relationship('CrossControl', back_populates='document')
 
 class DBLP(Document):
     __tablename__ = 'arXiv_dblp'
@@ -580,9 +581,9 @@ class Endorsement(Base):
     issued_when: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     request_id: Mapped[Optional[int]] = mapped_column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
 
-    arXiv_category = relationship('Category', primaryjoin='and_(Endorsement.archive == Category.archive, Endorsement.subject_class == Category.subject_class)', backref='arXiv_endorsements')
-    endorsee = relationship('TapirUser', primaryjoin='Endorsement.endorsee_id == TapirUser.user_id', backref='tapiruser_arXiv_endorsements')
-    endorser = relationship('TapirUser', primaryjoin='Endorsement.endorser_id == TapirUser.user_id', backref='tapiruser_arXiv_endorsements_0')
+    arXiv_categories = relationship('Category', primaryjoin='and_(Endorsement.archive == Category.archive, Endorsement.subject_class == Category.subject_class)', back_populates='arXiv_endorsements')
+    endorsee = relationship('TapirUser', primaryjoin='Endorsement.endorsee_id == TapirUser.user_id', back_populates='endorsee_of')
+    endorser = relationship('TapirUser', primaryjoin='Endorsement.endorser_id == TapirUser.user_id', back_populates='endorses')
     request = relationship('EndorsementRequest', primaryjoin='Endorsement.request_id == EndorsementRequest.request_id', backref='arXiv_endorsements')
 
 
@@ -654,7 +655,7 @@ class JrefControl(Base):
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     document = relationship('Document', primaryjoin='JrefControl.document_id == Document.document_id', backref='arXiv_jref_controls')
-    user = relationship('TapirUser', primaryjoin='JrefControl.user_id == TapirUser.user_id', backref='arXiv_jref_controls')
+    user = relationship('TapirUser', primaryjoin='JrefControl.user_id == TapirUser.user_id', back_populates='arXiv_jref_controls')
 
 
 
@@ -744,7 +745,7 @@ class ModeratorApiKey(Base):
     issued_to: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
 
-    user = relationship('TapirUser', primaryjoin='ModeratorApiKey.user_id == TapirUser.user_id', backref='arXiv_moderator_api_keys')
+    user = relationship('TapirUser', primaryjoin='ModeratorApiKey.user_id == TapirUser.user_id', back_populates='arXiv_moderator_api_keys')
 
 
 
@@ -1908,7 +1909,7 @@ class TapirUser(Base):
     arXiv_control_holds = relationship('ControlHold', foreign_keys='[ControlHold.last_changed_by]', back_populates='tapir_users')
     arXiv_control_holds_ = relationship('ControlHold', foreign_keys='[ControlHold.placed_by]', back_populates='tapir_users_')
     arXiv_documents = relationship('Document', back_populates='submitter')
-    arXiv_moderator_api_key = relationship('ModeratorApiKey', back_populates='user')
+    arXiv_moderator_api_keys = relationship('ModeratorApiKey', back_populates='user')
     tapir_address = relationship('TapirAddress', back_populates='user')
     tapir_email_change_tokens = relationship('TapirEmailChangeToken', back_populates='user')
     tapir_email_templates = relationship('TapirEmailTemplate', foreign_keys='[TapirEmailTemplate.created_by]', back_populates='tapir_users')
@@ -1918,9 +1919,9 @@ class TapirUser(Base):
     tapir_phone = relationship('TapirPhone', back_populates='user')
     tapir_recovery_tokens = relationship('TapirRecoveryToken', back_populates='user')
     tapir_sessions = relationship('TapirSession', back_populates='user')
-    arXiv_cross_control = relationship('CrossControl', back_populates='user')
+    arXiv_cross_controls = relationship('CrossControl', back_populates='user')
     arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='endorsee')
-    arXiv_jref_control = relationship('JrefControl', back_populates='user')
+    arXiv_jref_controls = relationship('JrefControl', back_populates='user')
     arXiv_metadata = relationship('Metadata', back_populates='submitter')
     arXiv_show_email_requests = relationship('ShowEmailRequest', back_populates='user')
     arXiv_submission_control = relationship('SubmissionControl', back_populates='user')
