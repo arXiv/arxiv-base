@@ -1029,7 +1029,7 @@ class SubmissionCategoryProposal(Base):
     proposal_comment = relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.proposal_comment_id == AdminLog.id', backref='arxivadminlog_arXiv_submission_category_proposals')
     response_comment = relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.response_comment_id == AdminLog.id', backref='arxivadminlog_arXiv_submission_category_proposals_0')
     submission = relationship('Submission', primaryjoin='SubmissionCategoryProposal.submission_id == Submission.submission_id', backref='arXiv_submission_category_proposals')
-    user = relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', back_populates='arXiv_submission_category_proposals')
+    user = relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', back_populates='arXiv_submission_category_proposal')
 
 
 
@@ -1051,7 +1051,7 @@ class SubmissionControl(Base):
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     document = relationship('Document', primaryjoin='SubmissionControl.document_id == Document.document_id', backref='arXiv_submission_controls')
-    user = relationship('TapirUser', primaryjoin='SubmissionControl.user_id == TapirUser.user_id', back_populates='arXiv_submission_controls')
+    user = relationship('TapirUser', primaryjoin='SubmissionControl.user_id == TapirUser.user_id', back_populates='arXiv_submission_control')
 
 
 
@@ -1068,7 +1068,7 @@ class SubmissionFlag(Base):
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
     submission = relationship('Submission', primaryjoin='SubmissionFlag.submission_id == Submission.submission_id', backref='arXiv_submission_flags')
-    user = relationship('TapirUser', primaryjoin='SubmissionFlag.user_id == TapirUser.user_id', back_populates='arXiv_submission_flags')
+    user = relationship('TapirUser', primaryjoin='SubmissionFlag.user_id == TapirUser.user_id', back_populates='arXiv_submission_flag')
 
 
 
@@ -1084,7 +1084,7 @@ class SubmissionHoldReason(Base):
 
     comment = relationship('AdminLog', primaryjoin='SubmissionHoldReason.comment_id == AdminLog.id', backref='arXiv_submission_hold_reasons')
     submission = relationship('Submission', primaryjoin='SubmissionHoldReason.submission_id == Submission.submission_id', backref='arXiv_submission_hold_reasons')
-    user = relationship('TapirUser', primaryjoin='SubmissionHoldReason.user_id == TapirUser.user_id', back_populates='arXiv_submission_hold_reasons')
+    user = relationship('TapirUser', primaryjoin='SubmissionHoldReason.user_id == TapirUser.user_id', back_populates='arXiv_submission_hold_reason')
 
 
 
@@ -1127,7 +1127,7 @@ class SubmissionViewFlag(Base):
     updated: Mapped[Optional[datetime]]
 
     submission = relationship('Submission', primaryjoin='SubmissionViewFlag.submission_id == Submission.submission_id', backref='arXiv_submission_view_flags')
-    user = relationship('TapirUser', primaryjoin='SubmissionViewFlag.user_id == TapirUser.user_id', back_populates='arXiv_submission_view_flags')
+    user = relationship('TapirUser', primaryjoin='SubmissionViewFlag.user_id == TapirUser.user_id', back_populates='arXiv_submission_view_flag')
 
 
 
@@ -1742,7 +1742,7 @@ class TapirPhone(Base):
     phone_number: Mapped[Optional[str]] = mapped_column(String(32), index=True)
     share_phone: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    user = relationship('TapirUser', primaryjoin='TapirPhone.user_id == TapirUser.user_id', back_populates='tapir_phones')
+    user = relationship('TapirUser', primaryjoin='TapirPhone.user_id == TapirUser.user_id', back_populates='tapir_phone')
 
 
 
@@ -1805,7 +1805,7 @@ class TapirRecoveryTokensUsed(Base):
     session_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_sessions.session_id'), index=True)
 
     session = relationship('TapirSession', primaryjoin='TapirRecoveryTokensUsed.session_id == TapirSession.session_id', backref='tapir_recovery_tokens_useds')
-    user = relationship('TapirUser', primaryjoin='TapirRecoveryTokensUsed.user_id == TapirUser.user_id', back_populates='tapir_recovery_tokens_useds')
+    user = relationship('TapirUser', primaryjoin='TapirRecoveryTokensUsed.user_id == TapirUser.user_id', back_populates='tapir_recovery_tokens_used')
 
 
 
