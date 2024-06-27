@@ -834,7 +834,7 @@ class OwnershipRequest(Base):
     endorsement_request_id: Mapped[Optional[int]] = mapped_column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
     workflow_status: Mapped[Literal['pending', 'accepted', 'rejected']] = mapped_column(Enum('pending', 'accepted', 'rejected'), nullable=False, server_default=FetchedValue())
 
-    request_audit = relationship('OwnershipRequestsAudit')
+    request_audit = relationship('OwnershipRequestsAudit', back_populates='ownership_request', uselist=False)
     endorsement_request = relationship('EndorsementRequest', primaryjoin='OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id', backref='arXiv_ownership_requests')
     user = relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', back_populates='arXiv_ownership_requests')
     documents = relationship("Document", secondary=t_arXiv_ownership_requests_papers)
@@ -849,7 +849,7 @@ class OwnershipRequestsAudit(Base):
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    ownership_request = relationship('OwnershipRequest', primaryjoin='OwnershipRequestsAudit.request_id == OwnershipRequest.request_id', backref='arXiv_ownership_requests_audit')
+    ownership_request = relationship('OwnershipRequest', primaryjoin='OwnershipRequestsAudit.request_id == OwnershipRequest.request_id', back_populates='request_audit', uselist=False)
 
 
 class PaperOwner(Base):
@@ -1029,7 +1029,7 @@ class SubmissionCategoryProposal(Base):
     proposal_comment = relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.proposal_comment_id == AdminLog.id', backref='arxivadminlog_arXiv_submission_category_proposals')
     response_comment = relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.response_comment_id == AdminLog.id', backref='arxivadminlog_arXiv_submission_category_proposals_0')
     submission = relationship('Submission', primaryjoin='SubmissionCategoryProposal.submission_id == Submission.submission_id', backref='arXiv_submission_category_proposals')
-    user = relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', backref='arXiv_submission_category_proposals')
+    user = relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', back_populates='arXiv_submission_category_proposals')
 
 
 
@@ -1051,7 +1051,7 @@ class SubmissionControl(Base):
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     document = relationship('Document', primaryjoin='SubmissionControl.document_id == Document.document_id', backref='arXiv_submission_controls')
-    user = relationship('TapirUser', primaryjoin='SubmissionControl.user_id == TapirUser.user_id', backref='arXiv_submission_controls')
+    user = relationship('TapirUser', primaryjoin='SubmissionControl.user_id == TapirUser.user_id', back_populates='arXiv_submission_controls')
 
 
 
@@ -1068,7 +1068,7 @@ class SubmissionFlag(Base):
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
     submission = relationship('Submission', primaryjoin='SubmissionFlag.submission_id == Submission.submission_id', backref='arXiv_submission_flags')
-    user = relationship('TapirUser', primaryjoin='SubmissionFlag.user_id == TapirUser.user_id', backref='arXiv_submission_flags')
+    user = relationship('TapirUser', primaryjoin='SubmissionFlag.user_id == TapirUser.user_id', back_populates='arXiv_submission_flags')
 
 
 
@@ -1084,7 +1084,7 @@ class SubmissionHoldReason(Base):
 
     comment = relationship('AdminLog', primaryjoin='SubmissionHoldReason.comment_id == AdminLog.id', backref='arXiv_submission_hold_reasons')
     submission = relationship('Submission', primaryjoin='SubmissionHoldReason.submission_id == Submission.submission_id', backref='arXiv_submission_hold_reasons')
-    user = relationship('TapirUser', primaryjoin='SubmissionHoldReason.user_id == TapirUser.user_id', backref='arXiv_submission_hold_reasons')
+    user = relationship('TapirUser', primaryjoin='SubmissionHoldReason.user_id == TapirUser.user_id', back_populates='arXiv_submission_hold_reasons')
 
 
 
@@ -1127,7 +1127,7 @@ class SubmissionViewFlag(Base):
     updated: Mapped[Optional[datetime]]
 
     submission = relationship('Submission', primaryjoin='SubmissionViewFlag.submission_id == Submission.submission_id', backref='arXiv_submission_view_flags')
-    user = relationship('TapirUser', primaryjoin='SubmissionViewFlag.user_id == TapirUser.user_id', backref='arXiv_submission_view_flags')
+    user = relationship('TapirUser', primaryjoin='SubmissionViewFlag.user_id == TapirUser.user_id', back_populates='arXiv_submission_view_flags')
 
 
 
@@ -1742,7 +1742,7 @@ class TapirPhone(Base):
     phone_number: Mapped[Optional[str]] = mapped_column(String(32), index=True)
     share_phone: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    user = relationship('TapirUser', primaryjoin='TapirPhone.user_id == TapirUser.user_id', backref='tapir_phones')
+    user = relationship('TapirUser', primaryjoin='TapirPhone.user_id == TapirUser.user_id', back_populates='tapir_phones')
 
 
 
@@ -1805,7 +1805,7 @@ class TapirRecoveryTokensUsed(Base):
     session_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_sessions.session_id'), index=True)
 
     session = relationship('TapirSession', primaryjoin='TapirRecoveryTokensUsed.session_id == TapirSession.session_id', backref='tapir_recovery_tokens_useds')
-    user = relationship('TapirUser', primaryjoin='TapirRecoveryTokensUsed.user_id == TapirUser.user_id', backref='tapir_recovery_tokens_useds')
+    user = relationship('TapirUser', primaryjoin='TapirRecoveryTokensUsed.user_id == TapirUser.user_id', back_populates='tapir_recovery_tokens_useds')
 
 
 
@@ -1944,7 +1944,7 @@ class TapirUser(Base):
 
     owned_papers = relationship("PaperOwner",  foreign_keys="[PaperOwner.user_id]", back_populates="owner")
 
-    demographics = relationship('Demographic', foreign_keys="[Demographic.user_id]", uselist=False)
+    demographics = relationship('Demographic', foreign_keys="[Demographic.user_id]", uselist=False, back_populates='user')
 
 
 class AuthorIds(Base):
@@ -1987,7 +1987,7 @@ class Demographic(Base):
     flag_group_econ: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     veto_status: Mapped[Literal['ok', 'no-endorse', 'no-upload', 'no-replace']] = mapped_column(Enum('ok', 'no-endorse', 'no-upload', 'no-replace'), nullable=False, server_default=text("'ok'"))
 
-    user = relationship('TapirUser')
+    user = relationship('TapirUser', back_populates='demographics')
     arXiv_category = relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='arXiv_demographics')
 
     GROUP_FLAGS = [
