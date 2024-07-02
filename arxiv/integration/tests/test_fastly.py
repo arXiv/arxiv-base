@@ -144,14 +144,14 @@ def test_purge_category_change_alias_cats(mockToday,mockDBQuery):
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("solv-int cs.SY", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'))
-    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs", "list-2010-01-solv-int", "list-2010-solv-int" ]
+    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs" ]
     assert sorted(result)==sorted(expected)
 
     #find archives of unlisted noncanonical categories
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("nlin.SI eess.SY", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'))
-    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs", "list-2010-01-solv-int", "list-2010-solv-int" ]
+    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs" ]
     assert sorted(result)==sorted(expected)
 
 @patch('arxiv.integration.fastly.purge._get_category_and_date')

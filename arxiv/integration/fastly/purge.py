@@ -13,6 +13,7 @@ from arxiv.db import session
 from arxiv.db.models import Metadata, Updates
 from arxiv.identifier import Identifier
 from arxiv.taxonomy.definitions import CATEGORIES
+from arxiv.taxonomy.category import get_all_cats_from_string 
 
 
 logger = logging.getLogger(__name__)
@@ -79,22 +80,16 @@ def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> 
     if today - timedelta(days=7) <= recent_date:
         recent=True
     
-    new_categories = {CATEGORIES[cat].get_canonical() for cat in new_cats.split()} 
-    cat_ids={cat.id for cat in new_categories}
-    archive_ids_canon={cat.get_archive().id for cat in new_categories}
-    archive_ids_noncanon = {CATEGORIES[cat.alt_name].get_archive().id for cat in new_categories if cat.alt_name} #papers still show up on the archive-wide pages of noncanicalical alias categories
-    new_archive_ids= archive_ids_noncanon | archive_ids_canon
-    list_pages=cat_ids |new_archive_ids
+    archives, cats = get_all_cats_from_string(new_cats, True)
+    new_archive_ids={arch.id for arch in archives}
+    list_pages={cat.id for cat in cats} | new_archive_ids
 
     year_pages=[]
     if old_cats: #clear any pages this paper may have been removed from or added to
-        old_categories = {CATEGORIES[cat].get_canonical() for cat in old_cats.split()}
-        old_cat_ids_canon={cat.id for cat in old_categories}
-        old_archive_ids_canon={cat.get_archive().id for cat in old_categories}
-        old_archive_ids_noncanon = {CATEGORIES[cat.alt_name].get_archive().id for cat in old_categories if cat.alt_name}
-        old_archive_ids=old_archive_ids_canon |old_archive_ids_noncanon
-
-        list_pages= list_pages | old_cat_ids_canon | old_archive_ids
+        old_archives, old_categories = get_all_cats_from_string(old_cats, True)
+        old_cat_ids=  {cat.id for cat in old_categories}
+        old_archive_ids={arch.id for arch in old_archives}
+        list_pages= list_pages | old_cat_ids | old_archive_ids
         year_pages=  old_archive_ids.symmetric_difference(new_archive_ids)
 
     #collect all relevant keys
