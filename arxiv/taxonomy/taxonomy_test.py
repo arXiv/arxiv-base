@@ -6,7 +6,7 @@ from typing import Union
 from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, \
     ARCHIVES_ACTIVE, CATEGORIES, ARCHIVES_SUBSUMED, \
     LEGACY_ARCHIVE_AS_PRIMARY, LEGACY_ARCHIVE_AS_SECONDARY, CATEGORY_ALIASES, CATEGORIES_ACTIVE
-from arxiv.taxonomy.category import Category, Archive, Group, create_bad_arch, create_bad_category
+from arxiv.taxonomy.category import Category, Archive, Group, create_bad_arch, create_bad_category, get_all_cats_from_string
 
 
 class TestTaxonomy(TestCase):
@@ -169,3 +169,54 @@ class TestTaxonomy(TestCase):
         self.assertEqual(cat.full_name, cat.get_canonical().full_name, "name data should be retained after canonical calls")
         self.assertEqual(arch.full_name, "Invalid Archive: hamsters", "full name should have data on original bad item")
         self.assertEqual(arch.full_name, arch.get_canonical().full_name, "name data should be retained after canonical calls")
+
+    def test_all_cats_from_string(self):
+        #basic
+        expected=([ARCHIVES["hep-lat"]], [CATEGORIES["hep-lat"]])
+        self.assertEqual(get_all_cats_from_string("hep-lat"), expected, "returns both archive and category")
+        expected=([ARCHIVES["math"]], [CATEGORIES["math.SP"]])
+        self.assertEqual(get_all_cats_from_string("math.SP"), expected, "returns both archive and category")
+
+        #multiple per archive
+        archs, cats= get_all_cats_from_string("math.GN math.SP")
+        self.assertCountEqual(archs, [ARCHIVES["math"]], "only one copy of the archive")
+        expected_cats=[CATEGORIES["math.SP"], CATEGORIES["math.GN"]]
+        self.assertCountEqual(cats, expected_cats, "both categories present")
+
+        #different archives
+        archs, cats= get_all_cats_from_string("math.GN math.SP cs.OS")
+        self.assertCountEqual(archs, [ARCHIVES["math"], ARCHIVES["cs"]], "one copy of each archive")
+        expected_cats=[CATEGORIES["math.SP"], CATEGORIES["math.GN"], CATEGORIES["cs.OS"]]
+        self.assertCountEqual(cats, expected_cats, "all categories present")
+
+        #alliases all
+        archs, cats= get_all_cats_from_string("cs.SY")
+        self.assertEqual((archs,cats),get_all_cats_from_string("eess.SY"), "either verison of a category name should return the same thing")
+        self.assertEqual((archs,cats),get_all_cats_from_string("cs.SY eess.SY"), "one part of pair should have the same result as both")
+        self.assertCountEqual(archs, [ARCHIVES["cs"], ARCHIVES["eess"]], "part of two different archives")
+        expected_cats=[CATEGORIES["eess.SY"], CATEGORIES["cs.SY"]]
+        self.assertCountEqual(cats, expected_cats, "all versions present")
+
+        #alliases only cannonical
+        archs, cats= get_all_cats_from_string("cs.SY", True)
+        self.assertEqual((archs,cats),get_all_cats_from_string("eess.SY", True), "either verison of a category name should return the same thing")
+        self.assertEqual((archs,cats),get_all_cats_from_string("cs.SY eess.SY", True), "one part of pair should have the same result as both")
+        self.assertCountEqual(archs, [ARCHIVES["cs"], ARCHIVES["eess"]], "part of two different archives")
+        expected_cats=[CATEGORIES["eess.SY"]]
+        self.assertCountEqual(cats, expected_cats, "only canonical present")
+
+        #subsumed only canonical
+        archs, cats= get_all_cats_from_string("solv-int", True)
+        self.assertEqual((archs,cats),get_all_cats_from_string("nlin.SI", True), "either verison of a category name should return the same thing")
+        self.assertEqual((archs,cats),get_all_cats_from_string("solv-int nlin.SI", True), "one part of pair should have the same result as both")
+        self.assertCountEqual(archs, [ ARCHIVES["nlin"]], "don't include subsumed archive")
+        expected_cats=[CATEGORIES["nlin.SI"]]
+        self.assertCountEqual(cats, expected_cats, "only canonical category returned")
+
+        #subsumed all
+        archs, cats= get_all_cats_from_string("solv-int")
+        self.assertEqual((archs,cats),get_all_cats_from_string("nlin.SI"), "either verison of a category name should return the same thing")
+        self.assertEqual((archs,cats),get_all_cats_from_string("solv-int nlin.SI"), "one part of pair should have the same result as both")
+        self.assertCountEqual(archs, [ARCHIVES["solv-int"], ARCHIVES["nlin"]], "include subsumed archive")
+        expected_cats=[CATEGORIES["nlin.SI"], CATEGORIES["solv-int"]]
+        self.assertCountEqual(cats, expected_cats, "all versions present")
