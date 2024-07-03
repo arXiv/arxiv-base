@@ -171,6 +171,10 @@ class TestTaxonomy(TestCase):
         self.assertEqual(arch.full_name, arch.get_canonical().full_name, "name data should be retained after canonical calls")
 
     def test_all_cats_from_string(self):
+        #empty string
+        self.assertEqual(get_all_cats_from_string(""),([],[]), "empty string doesn't cause error")
+        self.assertEqual(get_all_cats_from_string("     "),([],[]), "white space doesn't cause error")
+
         #basic
         expected=([ARCHIVES["hep-lat"]], [CATEGORIES["hep-lat"]])
         self.assertEqual(get_all_cats_from_string("hep-lat"), expected, "returns both archive and category")
