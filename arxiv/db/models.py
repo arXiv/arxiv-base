@@ -548,6 +548,7 @@ class EndorsementRequest(Base):
 
     arXiv_categories = relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', back_populates='arXiv_endorsement_requests')
     endorsee = relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', back_populates='arXiv_endorsement_requests', uselist=False)
+    endorsement = relationship('Endorsement', back_populates='request', uselist=False)
     audit = relationship('EndorsementRequestsAudit', uselist=False)
 
 
@@ -584,7 +585,7 @@ class Endorsement(Base):
     arXiv_categories = relationship('Category', primaryjoin='and_(Endorsement.archive == Category.archive, Endorsement.subject_class == Category.subject_class)', back_populates='arXiv_endorsements')
     endorsee = relationship('TapirUser', primaryjoin='Endorsement.endorsee_id == TapirUser.user_id', back_populates='endorsee_of')
     endorser = relationship('TapirUser', primaryjoin='Endorsement.endorser_id == TapirUser.user_id', back_populates='endorses')
-    request = relationship('EndorsementRequest', primaryjoin='Endorsement.request_id == EndorsementRequest.request_id', backref='arXiv_endorsements')
+    request = relationship('EndorsementRequest', primaryjoin='Endorsement.request_id == EndorsementRequest.request_id', back_populates='endorsement')
 
 
 class EndorsementsAudit(Endorsement):
