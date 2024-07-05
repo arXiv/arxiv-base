@@ -77,6 +77,7 @@ class TestPurgeFastlyKeys(unittest.TestCase):
         ]
 
         mock_api_instance.bulk_purge_tag.assert_has_calls(calls, any_order=True)
+        self.assertEqual(mock_api_instance.bulk_purge_tag.call_count, len(calls))
 
 
 #tests for adding surrogate keys helper function
