@@ -122,7 +122,7 @@ def purge_fastly_keys(key:Union[str, List[str]], service_name: Optional[str]="ar
                 logger.info(f"Fastly Purge service: {service_name}, key: {key}, status: {api_response.get('status')}, id: {api_response.get('id')}")
             else:
                 _purge_multiple_keys(key, SERVICE_IDS[service_name], api_instance, soft_purge)
-                logger.info(f"Fastly bulk purge complete service: {service_name}, keys: {key}")
+                logger.info(f"Fastly bulk purge complete service: {service_name}, keys ({len(key)}): {key}")
         except fastly.ApiException as e:
             logger.error(f"Exception purging fastly key(s): {e} service: {service_name}, key: {key}")
 
