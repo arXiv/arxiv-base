@@ -143,13 +143,13 @@ def _purge_multiple_keys(keys: List[str], service_id:str, api_instance: PurgeApi
     if len(keys)> MAX_PURGE_KEYS:
         _purge_multiple_keys(keys[0:MAX_PURGE_KEYS], service_id, api_instance, soft_purge)
         _purge_multiple_keys(keys[MAX_PURGE_KEYS:], service_id, api_instance,soft_purge)
-
-    options = {
-        'service_id': service_id,
-        'purge_response': {'surrogate_keys':keys,}
-    }
-    if soft_purge:
-        options['fastly_soft_purge']=1
-    api_response=api_instance.bulk_purge_tag(**options)
-    logger.debug(f"Bulk purge keys response: {api_response}")
+    else:
+        options = {
+            'service_id': service_id,
+            'purge_response': {'surrogate_keys':keys,}
+        }
+        if soft_purge:
+            options['fastly_soft_purge']=1
+        api_response=api_instance.bulk_purge_tag(**options)
+        logger.debug(f"Bulk purge keys response: {api_response}")
     return
