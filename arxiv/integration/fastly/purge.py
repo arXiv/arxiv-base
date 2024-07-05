@@ -116,15 +116,18 @@ def purge_fastly_keys(key:Union[str, List[str]], service_name: Optional[str]="ar
 
     with fastly.ApiClient(configuration) as api_client:
         api_instance = PurgeApi(api_client)
-        try:
-            if isinstance(key, str):
+        if isinstance(key, str):
+            try:
                 api_response=_purge_single_key(key, SERVICE_IDS[service_name], api_instance, soft_purge)
                 logger.info(f"Fastly Purge service: {service_name}, key: {key}, status: {api_response.get('status')}, id: {api_response.get('id')}")
-            else:
+            except fastly.ApiException as e:
+                logger.error(f"Exception purging fastly key(s): {e} service: {service_name}, key: {key}")
+        else:
+            try:
                 _purge_multiple_keys(key, SERVICE_IDS[service_name], api_instance, soft_purge)
                 logger.info(f"Fastly bulk purge complete service: {service_name}, keys ({len(key)}): {key}")
-        except fastly.ApiException as e:
-            logger.error(f"Exception purging fastly key(s): {e} service: {service_name}, key: {key}")
+            except fastly.ApiException as e:
+                logger.error(f"Exception purging fastly key(s): {e} service: {service_name}, for {len(key)} keys")
 
 def _purge_single_key(key:str, service_id: str, api_instance: PurgeApi, soft_purge: bool=False)->Any:
     """purge all pages with a specific key from fastly, fastly will not indicate if the key does not exist"""
@@ -151,5 +154,5 @@ def _purge_multiple_keys(keys: List[str], service_id:str, api_instance: PurgeApi
         if soft_purge:
             options['fastly_soft_purge']=1
         api_response=api_instance.bulk_purge_tag(**options)
-        logger.debug(f"Bulk purge keys response: {api_response}")
+        #logger.debug(f"Bulk purge keys response: {api_response}")
     return
