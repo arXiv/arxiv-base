@@ -170,7 +170,7 @@ class Settings(BaseSettings):
     TRACKBACK_SECRET: SecretStr = SecretStr(token_hex(10))
 
     CLASSIC_DB_URI: str = DEFAULT_DB
-    LATEXML_DB_URI: str = DEFAULT_LATEXML_DB
+    LATEXML_DB_URI: Optional[str] = DEFAULT_LATEXML_DB
     ECHO_SQL: bool = False
     CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
     LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None

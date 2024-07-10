@@ -40,7 +40,7 @@ from contextlib import contextmanager
 from flask.globals import app_ctx
 from flask import has_app_context
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import Engine, MetaData
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
@@ -56,24 +56,16 @@ class LaTeXMLBase(DeclarativeBase):
 
 logger = logging.getLogger(__name__)
 
-engine = create_engine(settings.CLASSIC_DB_URI,
-                       echo=settings.ECHO_SQL,
-                       isolation_level=settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
-                       pool_recycle=600,
-                       max_overflow=(settings.REQUEST_CONCURRENCY - 5), # max overflow is how many + base pool size, which is 5 by default
-                       pool_pre_ping=settings.POOL_PRE_PING) 
-latexml_engine = create_engine(settings.LATEXML_DB_URI,
-                               echo=settings.ECHO_SQL,
-                               isolation_level=settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL,
-                               pool_recycle=600,
-                               max_overflow=(settings.REQUEST_CONCURRENCY - 5),
-                               pool_pre_ping=settings.POOL_PRE_PING) 
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 
 def _app_ctx_id () -> int:
     return id(app_ctx._get_current_object())
 
 session = scoped_session(SessionLocal, scopefunc=_app_ctx_id)
+
+def get_engine () -> Engine:
+    return SessionLocal().get_bind(Base)
 
 @contextmanager
 def get_db ():
@@ -93,19 +85,20 @@ def transaction ():
         if db.new or db.dirty or db.deleted:
             db.commit()
     except Exception as e:
-        logger.warn(f'Commit failed, rolling back', exc_info=1)
+        logger.warning(f'Commit failed, rolling back', exc_info=1)
         db.rollback()
+        raise
     finally:
         if not in_flask:
             db.close()
 
 
-def config_query_timing( slightly_long_sec: float, long_sec: float):
-    @listens_for(engine, "before_cursor_execute")
+def config_query_timing(slightly_long_sec: float, long_sec: float):
+    @listens_for(get_engine(), "before_cursor_execute")
     def _record_query_start (conn, cursor, statement, parameters, context, executemany):
         conn.info['query_start'] = datetime.now()
 
-    @listens_for(engine, "after_cursor_execute")
+    @listens_for(get_engine(), "after_cursor_execute")
     def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
         if conn.info.get('query_start'):
             delta: timedelta = (datetime.now() - conn.info['query_start'])
