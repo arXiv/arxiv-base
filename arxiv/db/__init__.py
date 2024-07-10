@@ -93,12 +93,12 @@ def transaction ():
             db.close()
 
 
-def config_query_timing(slightly_long_sec: float, long_sec: float):
-    @listens_for(get_engine(), "before_cursor_execute")
+def config_query_timing(engine: Engine, slightly_long_sec: float, long_sec: float):
+    @listens_for(engine, "before_cursor_execute")
     def _record_query_start (conn, cursor, statement, parameters, context, executemany):
         conn.info['query_start'] = datetime.now()
 
-    @listens_for(get_engine(), "after_cursor_execute")
+    @listens_for(engine, "after_cursor_execute")
     def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
         if conn.info.get('query_start'):
             delta: timedelta = (datetime.now() - conn.info['query_start'])
