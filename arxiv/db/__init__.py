@@ -34,6 +34,7 @@ with transaction() as session:
 """
 import logging
 import json
+import threading
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
@@ -59,10 +60,24 @@ logger = logging.getLogger(__name__)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False)
 
-def _app_ctx_id () -> int:
-    return id(app_ctx._get_current_object())
+def _scope_id () -> int:
+    """Gets an ID used as a key to the sessions from the scopped_session registry.
+    Sqlalchemy `Session` objects are NOT thread safe, but we are using `session` as if were thread safe.
+    This works by `scopped_session` returning a proxy/registry that uses a different session based on
+    what thread is running.
+    See https://docs.sqlalchemy.org/en/20/orm/contextual.html#thread-local-scope
+    """
+    if has_app_context():
+        # This piece of code is crucial to making sure sqlalchemy sessions work in flask
+        # It is the same as the flask_sqlalchemy implementation
+        # See: https://github.com/pallets-eco/flask-sqlalchemy/blob/42a36a3cb604fd39d81d00b54ab3988bbd0ad184/src/flask_sqlalchemy/session.py#L109
+        return id(app_ctx._get_current_object())
+    else:
+        return int(threading.current_thread().ident)
 
-session = scoped_session(SessionLocal, scopefunc=_app_ctx_id)
+
+session = scoped_session(SessionLocal, scopefunc=_scope_id)
+
 
 def get_engine () -> Engine:
     return SessionLocal().get_bind(Base)
