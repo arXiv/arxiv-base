@@ -32,7 +32,7 @@ SELECT
       STRING(json_payload.remote_addr) as remote_addr,
       REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z\.-]*/?[0-9.]+[0-9])") as paper_id,
       STRING(json_payload.geo_country) as geo_country,
-      REPLACE(left(STRING(json_payload.path), 5), "/", "") as download_type,
+      REGEXP_EXTRACT(STRING(json_payload.path), r"^/(html|pdf|src|e-print)/") as download_type,
       TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR), HOUR) as start_dttm
  FROM arxiv_logs._AllLogs
 WHERE log_id = "fastly_log_ingest"
