@@ -26,17 +26,17 @@
 
 bq --format=json query --nouse_legacy_sql --use_cache --max_rows 10 \
 '
-SELECT paper_id, geo_country, continent, start_dttm, COUNT(*)
+SELECT paper_id, geo_country, download_type, start_dttm, COUNT(*) as num_downloads, 
   FROM (
 SELECT
-      REGEXP_EXTRACT(STRING(json_payload.path), r"^/pdf/([a-zA-Z\.-]*/?[0-9.]+)") as paper_id,
       STRING(json_payload.remote_addr) as remote_addr,
+      REGEXP_EXTRACT(STRING(json_payload.path), r"^/[htmlpdf]+/([a-zA-Z\.-]*/?[0-9.]+)") as paper_id,
       STRING(json_payload.geo_country) as geo_country,
-      "continent" as continent,
+      REPLACE(left(STRING(json_payload.path), 5), "/", "" ) as download_type,
       TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR), HOUR) as start_dttm
  FROM arxiv_logs._AllLogs
 WHERE log_id = "fastly_log_ingest"
-  AND left(STRING(json_payload.path), 4) = "/pdf"
+  AND left(STRING(json_payload.path), 5) in ("/html", "/pdf/")
   AND INT64(json_payload.status) in ( 200,206 )
   and timestamp between TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR), HOUR) and
                         TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 HOUR), HOUR)
