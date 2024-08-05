@@ -38,6 +38,7 @@ SELECT
 WHERE log_id = "fastly_log_ingest"
   AND REGEXP_CONTAINS(STRING(json_payload.path), "^/(html|pdf|src|e-print)/")
   AND INT64(json_payload.status) in ( 200,206 )
+  AND LENGTH(REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z\.-]*/?[0-9.]+[0-9])")) > 0
   and timestamp between TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR), HOUR) and
                         TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 HOUR), HOUR)
 GROUP BY 1,2,3,4,5
