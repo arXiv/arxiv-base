@@ -58,7 +58,7 @@ class LaTeXMLBase(DeclarativeBase):
 logger = logging.getLogger(__name__)
 
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False)
+SessionLocal = sessionmaker(autoflush=False)
 
 def _scope_id () -> int:
     """Gets an ID used as a key to the sessions from the scopped_session registry.
