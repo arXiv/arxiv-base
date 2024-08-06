@@ -9,6 +9,9 @@ The idea is that, when a user is authenticated, the claims represent who that is
 
 import json
 from datetime import datetime, timezone
+from typing import Any
+
+import jwt
 
 
 def kc_cliams_to_arxiv_token_data(kc_claims: dict) -> dict:
@@ -53,8 +56,8 @@ def kc_cliams_to_arxiv_token_data(kc_claims: dict) -> dict:
     }
 
     data = {
-        "expires_at": datetime.utcfromtimestamp(kc_claims.get('exp', 0)),
-        "issued_at": datetime.utcfromtimestamp(kc_claims.get('iat', 0)),
+        "expires_at": datetime.utcfromtimestamp(kc_claims.get('exp', 0)).isoformat(),
+        "issued_at": datetime.utcfromtimestamp(kc_claims.get('iat', 0)).isoformat(),
         "client_id": kc_claims.get('azp'),
         "session_id": kc_claims.get('sid'),
         "user_id": kc_claims.get('sub'),
@@ -78,7 +81,8 @@ class ArxivUserClaims:
     _claims: dict
 
     tapir_session_id: str
-    issued_at: datetime
+    expires_at: str
+    issued_at: str
     client_id: str
     session_id: str
     user_id: str
@@ -108,7 +112,7 @@ class ArxivUserClaims:
 
     def _create_property(self, name: str) -> None:
         if not hasattr(self.__class__, name):
-            def getter(self):
+            def getter(self: "ArxivUserClaims") -> Any:
                 return self._claims.get(name)
             setattr(self.__class__, name, property(getter))
 
@@ -126,6 +130,8 @@ class ArxivUserClaims:
         claims = kc_cliams_to_arxiv_token_data(kc_cliams)
         claims['access_token'] = access_token
         claims['refresh_token'] = refresh_token
+        # Have both so that jwt is happier
+        claims.update(kc_cliams)
         return cls(claims)
 
 
@@ -148,5 +154,12 @@ class ArxivUserClaims:
         self._claims[tag] = value
         self._create_property(tag)
 
+    def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
+        return jwt.encode(self._claims, secret, algorithm=algorithm)
+
+    @classmethod
+    def decode_jwt_token(cls, token: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+        arxiv_token = jwt.decode(token, secret, algorithm=algorithm)
+        return cls.from_arxiv_token_string(arxiv_token)
 
     pass
