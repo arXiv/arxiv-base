@@ -1,7 +1,11 @@
 import os
 
 from flask import Flask, redirect, request, session, url_for, jsonify
-from ..oidc_idp import ArxivOidcIdpClient
+from ..oidc_idp import ArxivOidcIdpClient, ArxivUserClaims
+from ...auth.decorators import scoped
+from ...auth.middleware import AuthMiddleware
+from ....base.middleware import wrap
+from ...auth import Auth
 
 import requests
 
@@ -11,15 +15,32 @@ KEYCLOAK_SERVER_URL = os.environ.get('KEYCLOAK_SERVER_URL', 'localhost')
 #CLIENT_SECRET = 'your-client-secret'
 #REDIRECT_URI = 'http://localhost:5000/callback'
 
+
+def _is_admin (session: Dict, *args, **kwargs) -> bool:
+    try:
+        uid = session.user.user_id
+    except:
+        return False
+    return db_session.scalar(
+        select(TapirUser)
+        .filter(TapirUser.flag_edit_users == 1)
+        .filter(TapirUser.user_id == uid)) is not None
+
+admin_scoped = scoped(
+    required=None,
+    resource=None,
+    authorizer=_is_admin,
+    unauthorized=None
+)
+
 class ToyFlask(Flask):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: [], **kwargs: dict):
         super().__init__(*args, **kwargs)
         self.secret_key = 'secret'  # Replace with a secure secret key
         self.idp = ArxivOidcIdpClient("http://localhost:5000/callback",
                                       server_url=KEYCLOAK_SERVER_URL)
 
 app = ToyFlask(__name__)
-
 
 @app.route('/')
 def home():
@@ -35,32 +56,16 @@ def login():
 def callback():
     # Get the authorization code from the callback URL
     code = request.args.get('code')
+    user_claims = app.idp.from_code_to_user_claims(code)
 
-    # Exchange the authorization code for an access token
-    token_response = requests.post(
-        app.idp.token_url,
-        data={
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': app.idp.redirect_uri,
-            'client_id': app.idp.client_id,
-        }
-    )
-
-    if token_response.status_code != 200:
+    if user_claims is None:
         session.clear()
         return 'Something is wrong'
 
-    # Parse the token response
-    token_json = token_response.json()
-    access_token = token_json.get('access_token')
-    refresh_token = token_json.get('refresh_token')
 
-    # Store tokens in session (for demonstration purposes)
-    session['access_token'] = access_token
-    session['refresh_token'] = refresh_token
+    print(user_claims._claims)
+    session["access_token"] = user_claims.to_arxiv_token_string
 
-    print(app.idp.validate_token(access_token))
     return 'Login successful!'
 
 
@@ -72,12 +77,14 @@ def logout():
 
 
 @app.route('/protected')
+@admin_scoped
 def protected():
-    access_token = session.get('access_token')
-    if not access_token:
+    arxiv_access_token = session.get('access_token')
+    if not arxiv_access_token:
         return redirect(app.idp.login_url)
 
-    decoded_token = app.idp.validate_token(access_token)
+    claims = ArxivUserClaims.from_arxiv_token_string(arxiv_access_token)
+    decoded_token = app.idp.validate_access_token(claims.access_token)
     if not decoded_token:
         return jsonify({'error': 'Invalid token'}), 401
 
@@ -88,4 +95,7 @@ def create_app():
     return app
 
 if __name__ == '__main__':
+    os.environ.putenv('JWT_SECRET', 'secret')
+    Auth(app)
+    wrap(app, [AuthMiddleware])
     app.run(debug=True, host='0.0.0.0', port=5000)
