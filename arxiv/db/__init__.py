@@ -59,10 +59,15 @@ logger = logging.getLogger(__name__)
 
 
 SessionLocal = sessionmaker(autoflush=False)
+"""`sessionmaker` is the SQLAlchemy class that provides a `sqlalchemy.orm.Session` based on how it is configured. 
+
+It may be used as a `sqlalchemy.orm.Session`. 
+
+Calling `SessionLocal.configure()` will alter all future sessions accessed via `arxiv.db.SessionLocal` or `arxiv.db.session`"""
 
 def _scope_id () -> int:
     """Gets an ID used as a key to the sessions from the scopped_session registry.
-    Sqlalchemy `Session` objects are NOT thread safe, but we are using `session` as if were thread safe.
+    `sqlalchemy.orm.Session` objects are NOT thread safe, but we are using `arxiv.db.session` as if were thread safe.
     This works by `scopped_session` returning a proxy/registry that uses a different session based on
     what thread is running.
     See https://docs.sqlalchemy.org/en/20/orm/contextual.html#thread-local-scope
@@ -77,7 +82,7 @@ def _scope_id () -> int:
 
 
 session = scoped_session(SessionLocal, scopefunc=_scope_id)
-
+"""`session` is a per thread proxy to a session created by `arxiv.db.SessionLocal` (which is a `sessionmaker`)"""
 
 def get_engine () -> Engine:
     return SessionLocal().get_bind(Base)
