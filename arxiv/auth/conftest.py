@@ -1,3 +1,6 @@
+import shutil
+import tempfile
+
 import pytest
 import os
 
@@ -14,16 +17,15 @@ from ..auth.auth.middleware import AuthMiddleware
 
 @pytest.fixture()
 def app():
-
+    db_path = tempfile.mkdtemp()
     app = Flask('test_auth_app')
-    app.config['CLASSIC_DATABASE_URI'] = 'sqlite:///test.db'
+    app.config['CLASSIC_DATABASE_URI'] = f'sqlite:///{db_path}/test.db'
     app.config['CLASSIC_SESSION_HASH'] = f'fake set in {__file__}'
     app.config['SESSION_DURATION'] = f'fake set in {__file__}'
     app.config['CLASSIC_COOKIE_NAME'] = f'fake set in {__file__}'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
     app.config['AUTH_UPDATED_SESSION_REF'] = True
-    settings = Settings (
-        CLASSIC_DB_URI = 'sqlite:///test.db',
+    settings = Settings(
+        CLASSIC_DB_URI = app.config['CLASSIC_DATABASE_URI'],
         LATEXML_DB_URI = None
     )
     engine, _ = configure_db(settings)
@@ -33,9 +35,9 @@ def app():
 
     Auth(app)
     wrap(app, [AuthMiddleware])
+    yield app
 
-
-    return app
+    shutil.rmtree(db_path)
 
 
 @pytest.fixture()
