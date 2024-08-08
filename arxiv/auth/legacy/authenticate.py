@@ -13,7 +13,7 @@ from ...db import session
 from ...db.models import TapirUser, TapirUsersPassword, TapirPermanentToken, \
     TapirNickname, Demographic
 from .exceptions import NoSuchUser, AuthenticationFailed, \
-    PasswordAuthenticationFailed, Unavailable
+    PasswordAuthenticationFailed
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +62,7 @@ def authenticate(username_or_email: Optional[str] = None,
             logger.debug('Neither username/password nor token provided')
             raise AuthenticationFailed('Username+password or token required')
     except OperationalError as e:
-        # Note OperationalError can be a lot of different things and not just
-        # the DB being unavailable. So this message can be deceptive.
-        raise Unavailable('Database is temporarily unavailable') from e
+        raise e  # want to just pass all these on
     except Exception as ex:
         raise AuthenticationFailed() from ex
 

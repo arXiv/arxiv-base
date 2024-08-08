@@ -16,7 +16,7 @@ from . import cookies, util
 from ...db.models import TapirSession, TapirSessionsAudit, TapirUser, \
     TapirNickname, Demographic
 from .exceptions import UnknownSession, SessionCreationFailed, \
-    SessionExpired, InvalidCookie, Unavailable
+    SessionExpired, InvalidCookie
 
 logger = logging.getLogger(__name__)
 EASTERN = timezone('US/Eastern')
@@ -71,14 +71,11 @@ def load(cookie: str) -> domain.Session:
         raise SessionExpired(f'Session {session_id} has expired in cookie')
 
     data: Tuple[TapirUser, TapirSession, TapirNickname, Demographic]
-    try:
-        data = session.query(TapirUser, TapirSession, TapirNickname, Demographic) \
-            .join(TapirSession).join(TapirNickname).join(Demographic) \
-            .filter(TapirUser.user_id == user_id) \
-            .filter(TapirSession.session_id == session_id ) \
-            .first()
-    except OperationalError as e:
-        raise Unavailable('Database is temporarily unavailable') from e
+    data = session.query(TapirUser, TapirSession, TapirNickname, Demographic) \
+        .join(TapirSession).join(TapirNickname).join(Demographic) \
+        .filter(TapirUser.user_id == user_id) \
+        .filter(TapirSession.session_id == session_id ) \
+        .first()
 
     if not data:
         raise UnknownSession('No such user or session')

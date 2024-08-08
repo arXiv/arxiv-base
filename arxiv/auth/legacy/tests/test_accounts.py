@@ -39,10 +39,6 @@ class TestUsernameExists(SetUpUserMixin):
 
     def test_with_existant_user(self):
         """There is a user with the passed username."""
-        # with temporary_db(self.db_uri, create=False, drop=False):
-        #     with transaction() as session:
-        #         print (f'NICKS: {session.query(models.TapirNickname).all()}')
-        # self.setUp()
         with self.app.app_context():
             self.assertTrue(accounts.does_username_exist('foouser'))
 
@@ -57,7 +53,6 @@ class TestEmailExists(SetUpUserMixin):
 
     def test_with_existant_email(self):
         """There is a user with the passed email."""
-        self.setUp()
         with self.app.app_context():
             self.assertTrue(accounts.does_email_exist('first@last.iv'))
 

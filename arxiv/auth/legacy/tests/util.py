@@ -1,5 +1,6 @@
 """Testing helpers."""
 import hashlib
+import os
 import shutil
 import tempfile
 from contextlib import contextmanager
@@ -49,6 +50,9 @@ class SetUpUserMixin(TestCase):
         super()
         self.db_path = tempfile.mkdtemp()
         self.db_uri = f'sqlite:///{self.db_path}/test.db'
+        with open(self.db_path + '/test.txt', 'w') as f:
+            f.write("test: " + os.environ.get("PYTEST_CURRENT_TEST"))
+
         self.user_id = '15830'
         self.app = Flask('test')
         with self.app.app_context():

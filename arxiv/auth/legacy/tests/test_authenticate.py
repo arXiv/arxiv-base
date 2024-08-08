@@ -1,25 +1,9 @@
 """Tests for :mod:`accounts.services.user_data`."""
 
-from unittest import TestCase, mock
-from datetime import datetime
-from pytz import timezone, UTC
-import tempfile
-import shutil
-import hashlib
-
-from flask import Flask
-
-from sqlalchemy import select
-from sqlalchemy.exc import SQLAlchemyError, OperationalError
-
-from arxiv.config import Settings
-from arxiv.db import models
-
-from .. import authenticate, exceptions, util
+from pytz import timezone
 
 from .util import SetUpUserMixin
-
-from ..passwords import hash_password
+from .. import authenticate, exceptions
 
 EASTERN = timezone('US/Eastern')
 

@@ -8,7 +8,6 @@ from sqlalchemy.exc import OperationalError
 from .. import domain
 from . import util, exceptions
 from .passwords import hash_password
-from .exceptions import Unavailable
 from ...db import session
 from ...db.models import TapirUser, TapirUsersPassword, \
     TapirNickname, Demographic
@@ -30,12 +29,9 @@ def does_username_exist(username: str) -> bool:
     bool
 
     """
-    try:
-        data = session.query(TapirNickname) \
-            .filter(TapirNickname.nickname == username) \
-            .first()
-    except OperationalError as e:
-        raise Unavailable('Database is temporarily unavailable') from e
+    data = session.query(TapirNickname) \
+                  .filter(TapirNickname.nickname == username) \
+                  .first()
     if data:
         return True
     return False
@@ -54,11 +50,7 @@ def does_email_exist(email: str) -> bool:
     bool
 
     """
-    try:
-        data = session.query(TapirUser).filter(TapirUser.email == email).first()
-        print (session.query(TapirUser).all())
-    except OperationalError as e:
-        raise Unavailable('Database is temporarily unavailable') from e
+    data = session.query(TapirUser).filter(TapirUser.email == email).first()
     if data:
         return True
     return False
@@ -91,11 +83,8 @@ def register(user: domain.User, password: str, ip: str,
     try:
         db_user, db_nick, db_profile = _create(user, password, ip, remote_host)
         session.commit()
-    except OperationalError as e:
-        raise Unavailable('Database is temporarily unavailable') from e
     except Exception as e:
-        logger.debug(e)
-        raise exceptions.RegistrationFailed('Could not create user')# from e
+        raise exceptions.RegistrationFailed('Could not create user') from e
 
     user = domain.User(
         user_id=str(db_user.user_id),
@@ -117,10 +106,7 @@ def register(user: domain.User, password: str, ip: str,
 
 def get_user_by_id(user_id: str) -> domain.User:
     """Load user data from the database."""
-    try:
-        db_user, db_nick, db_profile = _get_user_data(user_id)
-    except OperationalError as e:
-        raise Unavailable('Database is temporarily unavailable') from e
+    db_user, db_nick, db_profile = _get_user_data(user_id)
     user = domain.User(
         user_id=str(db_user.user_id),
         username=db_nick.nickname,

@@ -39,7 +39,3 @@ class RegistrationFailed(RuntimeError):
 
 class UpdateUserFailed(RuntimeError):
     """Could not update a user."""
-
-
-class Unavailable(RuntimeError):
-    """The database is temporarily unavailable."""

@@ -1,6 +1,5 @@
 import pytest
 import os
-# os.environ['CLASSIC_DB_URI'] = 'sqlite:///:memory:'
 
 from flask import Flask
 
