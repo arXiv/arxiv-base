@@ -9,7 +9,7 @@ The idea is that, when a user is authenticated, the claims represent who that is
 
 import json
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 import jwt
 
@@ -55,23 +55,10 @@ def kc_cliams_to_arxiv_token_data(kc_claims: dict) -> dict:
         "Public user": "public",
     }
 
-    data = {
-        "expires_at": datetime.utcfromtimestamp(kc_claims.get('exp', 0)).isoformat(),
-        "issued_at": datetime.utcfromtimestamp(kc_claims.get('iat', 0)).isoformat(),
-        "client_id": kc_claims.get('azp'),
-        "session_id": kc_claims.get('sid'),
-        "user_id": kc_claims.get('sub'),
-        "issuer": kc_claims.get('iss'),
-        "email_verified": kc_claims.get('email_verified'),
-        "login_name": kc_claims.get('preferred_username'),
-        "email": kc_claims.get('email'),
-        "name": kc_claims.get('name'), # human full name
-    }
-
     for role in kc_claims.get('realm_access', {}).get('roles', []):
         if role in _role_to_authorization:
-            data[_role_to_authorization[role]] = True
-    return data
+            kc_claims[_role_to_authorization[role]] = True
+    return kc_claims
 
 
 class ArxivUserClaims:
@@ -81,11 +68,6 @@ class ArxivUserClaims:
     _claims: dict
 
     tapir_session_id: str
-    expires_at: str
-    issued_at: str
-    client_id: str
-    session_id: str
-    user_id: str
     email_verified: bool
     login_name: str
     email: str
@@ -99,6 +81,8 @@ class ArxivUserClaims:
     is_admin: bool
     legacy: bool
     public: bool
+
+    iss: str
 
     def __init__(self, claims: dict) -> None:
         """
@@ -116,9 +100,28 @@ class ArxivUserClaims:
                 return self._claims.get(name)
             setattr(self.__class__, name, property(getter))
 
+    @property
+    def expires_at(self) -> str:
+        return datetime.utcfromtimestamp(self._claims.get('exp', 0)).isoformat()
 
     @property
-    def to_arxiv_token_string(self) -> str:
+    def issued_at(self) -> str:
+        return datetime.utcfromtimestamp(self._claims.get('iat', 0)).isoformat()
+
+    @property
+    def client_id(self) -> Optional[str]:
+        return self._claims.get('azp')
+
+    @property
+    def session_id(self) -> Optional[str]:
+        return self._claims.get('sid')
+
+    @property
+    def user_id(self) -> Optional[str]:
+        return self._claims.get('sub')
+
+    @property
+    def to_arxiv_token_string(self) -> Optional[str]:
         return json.dumps(self._claims)
 
     @classmethod
@@ -126,14 +129,11 @@ class ArxivUserClaims:
         return cls(json.loads(token))
 
     @classmethod
-    def from_keycloak_claims(cls, kc_cliams: dict, access_token: str, refresh_token: str) -> 'ArxivUserClaims':
+    def from_keycloak_claims(cls, kc_cliams: dict, access_token: str, _refresh_token: str) -> 'ArxivUserClaims':
         claims = kc_cliams_to_arxiv_token_data(kc_cliams)
         claims['access_token'] = access_token
-        claims['refresh_token'] = refresh_token
-        # Have both so that jwt is happier
-        claims.update(kc_cliams)
+        # claims['refresh_token'] = refresh_token
         return cls(claims)
-
 
     def is_expired(self, when: datetime | None = None) -> bool:
         """
