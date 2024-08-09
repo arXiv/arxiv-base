@@ -2,20 +2,9 @@
 User claims.
 
 The idea is that, when a user is authenticated, the claims represent who that is.
-"""
-
-# This needs to be tied to the tapir user
-#
-
-import json
-from datetime import datetime, timezone
-from typing import Any, Optional
-
-import jwt
 
 
-def kc_cliams_to_arxiv_token_data(kc_claims: dict) -> dict:
-    """Turn keycloak access token into arXiv claims.
+Keycloak:
 
     unpacked access token looks like this
     {
@@ -42,23 +31,17 @@ def kc_cliams_to_arxiv_token_data(kc_claims: dict) -> dict:
         'family_name': 'User',
         'email': 'testuser@example.com'
     }
-    """
 
-    _role_to_authorization: dict = {
-        "AllowTexProduced": "tex_pro",
-        "Approved": "approved",
-        "Banned": "banned",
-        "CanLock": "can_lock",
-        "EditSystem": "is_god",
-        "EditUser": "is_admin",
-        "Legacy user": "legacy",
-        "Public user": "public",
-    }
+"""
 
-    for role in kc_claims.get('realm_access', {}).get('roles', []):
-        if role in _role_to_authorization:
-            kc_claims[_role_to_authorization[role]] = True
-    return kc_claims
+# This needs to be tied to the tapir user
+#
+
+import json
+from datetime import datetime, timezone
+from typing import Any, Optional, List
+
+import jwt
 
 
 class ArxivUserClaims:
@@ -72,17 +55,6 @@ class ArxivUserClaims:
     login_name: str
     email: str
     name: str
-
-    tex_pro: bool
-    approved: bool
-    banned: bool
-    can_lock: bool
-    is_god: bool
-    is_admin: bool
-    legacy: bool
-    public: bool
-
-    iss: str
 
     def __init__(self, claims: dict) -> None:
         """
@@ -120,9 +92,46 @@ class ArxivUserClaims:
     def user_id(self) -> Optional[str]:
         return self._claims.get('sub')
 
+    # jwt.encode/decode serialize/deserialize dict, not string so not really needed
     @property
     def to_arxiv_token_string(self) -> Optional[str]:
         return json.dumps(self._claims)
+
+    @property
+    def is_tex_pro(self) -> bool:
+        return "AllowTexProduced" in self._roles
+
+    @property
+    def is_approved(self) -> bool:
+        return "Approved" in self._roles
+
+    @property
+    def is_banned(self) -> bool:
+        return "Banned" in self._roles
+
+    @property
+    def can_lock(self) -> bool:
+        return "CanLock" in self._roles
+
+    @property
+    def is_owner(self) -> bool:
+        return "EditSystem" in self._roles
+
+    @property
+    def is_admin(self) -> bool:
+        return "EditUser" in self._roles
+
+    @property
+    def is_legacy_user(self) -> bool:
+        return "Legacy user" in self._roles
+
+    @property
+    def is_public_user(self) -> bool:
+        return "Public user" in self._roles
+
+    @property
+    def _roles(self) -> List[str]:
+        return self._claims.get('realm_access', {}).get('roles', [])
 
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
@@ -130,7 +139,7 @@ class ArxivUserClaims:
 
     @classmethod
     def from_keycloak_claims(cls, kc_cliams: dict, access_token: str, _refresh_token: str) -> 'ArxivUserClaims':
-        claims = kc_cliams_to_arxiv_token_data(kc_cliams)
+        claims = kc_cliams.copy()
         claims['access_token'] = access_token
         # claims['refresh_token'] = refresh_token
         return cls(claims)
@@ -159,7 +168,6 @@ class ArxivUserClaims:
 
     @classmethod
     def decode_jwt_token(cls, token: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
-        arxiv_token = jwt.decode(token, secret, algorithm=algorithm)
-        return cls.from_arxiv_token_string(arxiv_token)
+        return cls(jwt.decode(token, secret, algorithms=[algorithm]))
 
     pass
