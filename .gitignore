@@ -129,3 +129,6 @@ dist/
 .pytest_cache/
 
 fastly_hourly_stats.ini
+
+*.db-journal
+foo.json

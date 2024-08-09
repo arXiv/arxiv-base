@@ -68,6 +68,29 @@ def authenticate(username_or_email: Optional[str] = None,
     except Exception as ex:
         raise AuthenticationFailed() from ex
 
+    return instantiate_tapir_user(passdata)
+
+
+def instantiate_tapir_user(passdata: PassData) -> Tuple[domain.User, domain.Authorizations]:
+    """
+    Make Tapir user data from pass-data
+
+    Parameters
+    ----------
+    passdata : PassData
+
+    Returns
+    -------
+    :class:`domain.User`
+    :class:`domain.Authorizations`
+
+    Raises
+    ------
+    :class:`AuthenticationFailed`
+        Failed to authenticate user with provided credentials.
+    :class:`Unavailable`
+        Unable to connect to DB.
+    """
     db_user, _, db_nick, db_profile = passdata
     user = domain.User(
         user_id=str(db_user.user_id),
