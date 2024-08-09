@@ -115,11 +115,15 @@ class ArxivUserClaims:
 
     @property
     def is_owner(self) -> bool:
-        return "EditSystem" in self._roles
+        return "Owner" in self._roles
 
     @property
     def is_admin(self) -> bool:
-        return "EditUser" in self._roles
+        return "Administrator" in self._roles
+
+    @property
+    def is_mod(self) -> bool:
+        return "Moderator" in self._roles
 
     @property
     def is_legacy_user(self) -> bool:
