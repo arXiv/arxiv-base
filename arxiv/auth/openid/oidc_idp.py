@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from typing import List, Any
 import requests
+from requests.auth import HTTPBasicAuth
 import jwt
 from jwt.algorithms import RSAAlgorithm, RSAPublicKey
 
@@ -124,6 +125,18 @@ class ArxivOidcIdpClient:
         ----------
         code: When IdP calls back, it comes with the authentication code as a query parameter.
         """
+        auth = None
+        if self.client_secret:
+            try:
+                auth = HTTPBasicAuth(self.client_id, self.client_secret)
+                self._logger.debug(f'client auth success')
+            except requests.exceptions.RequestException:
+                self._logger.debug(f'client auth failed')
+                return None
+            except Exception as exc:
+                self._logger.warning(f'client auth failed', exc_info=True)
+                raise
+
         try:
             # Exchange the authorization code for an access token
             token_response = requests.post(
@@ -133,10 +146,12 @@ class ArxivOidcIdpClient:
                     'code': code,
                     'redirect_uri': self.redirect_uri,
                     'client_id': self.client_id,
-                }
+                },
+                auth=auth
             )
             if token_response.status_code != 200:
                 # need logging here
+                self._logger.warning(f'idp %s', token_response.status_code)
                 return None
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
@@ -178,8 +193,8 @@ class ArxivOidcIdpClient:
             return None
         # not reached
 
-    @classmethod
-    def to_arxiv_user_claims(cls, idp_claims: dict, access_token: str, refresh_token: str) -> ArxivUserClaims:
+
+    def to_arxiv_user_claims(self, idp_claims: dict, access_token: str, refresh_token: str) -> ArxivUserClaims:
         """
         Given the IdP's access token claims, make Arxiv user claims.
 
@@ -193,7 +208,9 @@ class ArxivOidcIdpClient:
         access_token: The original access token
         refresh_token: The original refresh token
         """
-        return ArxivUserClaims.from_keycloak_claims(idp_claims, access_token, refresh_token)
+        claims = ArxivUserClaims.from_keycloak_claims(idp_claims, access_token, refresh_token)
+        return claims
+
 
     def from_code_to_user_claims(self, code: str) -> ArxivUserClaims | None:
         """
