@@ -75,34 +75,39 @@ def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
                                     pool_pre_ping=base_settings.POOL_PRE_PING)
         else:
             latexml_engine = None
+
+    return configure_db_engine(engine, latexml_engine)
+
+
+def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]) -> Tuple[Engine, Optional[Engine]]:
     SessionLocal.configure(binds={
-        Base: engine,
-        LaTeXMLBase: (latexml_engine if latexml_engine else engine),
-        t_arXiv_stats_hourly: engine,
-        t_arXiv_admin_state: engine,
-        t_arXiv_bad_pw: engine,
-        t_arXiv_black_email: engine,
-        t_arXiv_block_email: engine,
-        t_arXiv_bogus_subject_class: engine,
-        t_arXiv_duplicates: engine,
-        t_arXiv_in_category: engine,
-        t_arXiv_moderators: engine,
-        t_arXiv_ownership_requests_papers: engine,
-        t_arXiv_refresh_list: engine,
-        t_arXiv_updates_tmp: engine,
-        t_arXiv_white_email: engine,
-        t_arXiv_xml_notifications: engine,
-        t_demographics_backup: engine,
-        t_tapir_email_change_tokens_used: engine,
-        t_tapir_email_tokens_used: engine,
-        t_tapir_error_log: engine,
-        t_tapir_no_cookies: engine,
-        t_tapir_periodic_tasks_log: engine,
-        t_tapir_periodic_tasks_log: engine,
-        t_tapir_permanent_tokens_used: engine,
-        t_tapir_save_post_variables: engine
+        Base: classic_engine,
+        LaTeXMLBase: (latexml_engine if latexml_engine else classic_engine),
+        t_arXiv_stats_hourly: classic_engine,
+        t_arXiv_admin_state: classic_engine,
+        t_arXiv_bad_pw: classic_engine,
+        t_arXiv_black_email: classic_engine,
+        t_arXiv_block_email: classic_engine,
+        t_arXiv_bogus_subject_class: classic_engine,
+        t_arXiv_duplicates: classic_engine,
+        t_arXiv_in_category: classic_engine,
+        t_arXiv_moderators: classic_engine,
+        t_arXiv_ownership_requests_papers: classic_engine,
+        t_arXiv_refresh_list: classic_engine,
+        t_arXiv_updates_tmp: classic_engine,
+        t_arXiv_white_email: classic_engine,
+        t_arXiv_xml_notifications: classic_engine,
+        t_demographics_backup: classic_engine,
+        t_tapir_email_change_tokens_used: classic_engine,
+        t_tapir_email_tokens_used: classic_engine,
+        t_tapir_error_log: classic_engine,
+        t_tapir_no_cookies: classic_engine,
+        t_tapir_periodic_tasks_log: classic_engine,
+        t_tapir_periodic_tasks_log: classic_engine,
+        t_tapir_permanent_tokens_used: classic_engine,
+        t_tapir_save_post_variables: classic_engine
     })
-    return engine, latexml_engine
+    return classic_engine, latexml_engine
 
 class MemberInstitution(Base):
     __tablename__ = 'Subscription_UniversalInstitution'

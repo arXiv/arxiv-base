@@ -47,7 +47,6 @@ class SetUpUserMixin(TestCase):
 
     def setUp(self):
         """Set up the database."""
-        super()
         self.db_path = tempfile.mkdtemp()
         self.db_uri = f'sqlite:///{self.db_path}/test.db'
         with open(self.db_path + '/test.txt', 'w') as f:
@@ -55,15 +54,18 @@ class SetUpUserMixin(TestCase):
 
         self.user_id = '15830'
         self.app = Flask('test')
-        with self.app.app_context():
-            self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
-            self.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
-            self.app.config['SESSION_DURATION'] = '36000'
-            settings = Settings(
-                            CLASSIC_DB_URI=self.db_uri,
-                            LATEXML_DB_URI=None)
 
-            self.engine, _ = models.configure_db(settings)            # Insert tapir policy classes
+        self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
+        self.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
+        self.app.config['SESSION_DURATION'] = '36000'
+        settings = Settings(
+            CLASSIC_DB_URI=self.db_uri,
+            LATEXML_DB_URI=None)
+
+        self.engine, _ = models.configure_db(settings)
+
+        with self.app.app_context():
+                # Insert tapir policy classes
 
             util.create_all(self.engine)
             self.user_class = session.scalar(
@@ -123,4 +125,3 @@ class SetUpUserMixin(TestCase):
         """Drop tables from the in-memory db file."""
         util.drop_all(self.engine)
         shutil.rmtree(self.db_path)
-

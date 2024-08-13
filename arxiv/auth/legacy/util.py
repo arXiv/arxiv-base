@@ -6,6 +6,7 @@ from pytz import timezone, UTC
 import logging
 
 from sqlalchemy import text, Engine
+from sqlalchemy.orm import Session
 
 from ...base.globals import get_application_config
 
@@ -38,7 +39,7 @@ def from_epoch(t: int) -> datetime:
 def create_all(engine: Engine) -> None:
     """Create all tables in the database."""
     Base.metadata.create_all(engine)
-    with SessionLocal() as session:
+    with Session(engine) as session:
         data = session.query(TapirPolicyClass).all()
         if data:
             return

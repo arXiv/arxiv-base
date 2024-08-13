@@ -34,6 +34,7 @@ with transaction() as session:
 """
 import logging
 import json
+import os
 import threading
 from datetime import datetime, timedelta
 from contextlib import contextmanager
@@ -64,6 +65,7 @@ SessionLocal = sessionmaker(autoflush=False)
 It may be used as a `sqlalchemy.orm.Session`. 
 
 Calling `SessionLocal.configure()` will alter all future sessions accessed via `arxiv.db.SessionLocal` or `arxiv.db.session`"""
+
 
 def _scope_id () -> int:
     """Gets an ID used as a key to the sessions from the scopped_session registry.

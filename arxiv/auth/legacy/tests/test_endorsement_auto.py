@@ -1,6 +1,8 @@
 """Tests for :mod:`arxiv.users.legacy.endorsements` using a live test DB."""
 
 import os
+import shutil
+import tempfile
 from unittest import TestCase, mock
 from datetime import datetime
 from pytz import timezone, UTC
@@ -24,14 +26,14 @@ class TestAutoEndorsement(TestCase):
 
     def setUp(self):
         """Generate some fake data."""
-
+        self.db_path = tempfile.mkdtemp()
         self.app = Flask('test')
+        self.app.config['CLASSIC_DATABASE_URI'] = f'sqlite:///{self.db_path}/test.db'
         self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
         self.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
         self.app.config['SESSION_DURATION'] = '36000'
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://' #in memory
         settings = Settings(
-                        CLASSIC_DB_URI='sqlite:///:memory:',
+                        CLASSIC_DB_URI=self.app.config['CLASSIC_DATABASE_URI'],
                         LATEXML_DB_URI=None)
 
         engine, _ = models.configure_db(settings)
@@ -90,6 +92,8 @@ class TestAutoEndorsement(TestCase):
                     )
                 )
 
+    def tearDown(self):
+        shutil.rmtree(self.db_path)
 
     def test_invalidated_autoendorsements(self):
         """The user has two autoendorsements that have been invalidated."""

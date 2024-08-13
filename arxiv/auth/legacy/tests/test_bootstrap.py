@@ -1,7 +1,9 @@
 """Test the legacy integration with synthetic data."""
 
 import os
+import shutil
 import sys
+import tempfile
 from typing import Tuple
 from unittest import TestCase
 from flask import Flask
@@ -45,19 +47,21 @@ class TestBootstrap(TestCase):
     """Tests against legacy user integrations with fake data."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """Generate some fake data."""
-        cls.app = Flask('test')
-        cls.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
-        cls.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
-        cls.app.config['SESSION_DURATION'] = '36000'
+        self.db_path = tempfile.mkdtemp()
+        self.app = Flask('test')
+        self.app.config['CLASSIC_DATABASE_URI'] = f'sqlite:///{self.db_path}/test.db'
+        self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
+        self.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
+        self.app.config['SESSION_DURATION'] = '36000'
         settings = Settings(
-                        CLASSIC_DB_URI='sqlite:///:memory:',
+                        CLASSIC_DB_URI=self.app.config['CLASSIC_DATABASE_URI'],
                         LATEXML_DB_URI=None)
 
         engine, _ = models.configure_db(settings)
 
-        with cls.app.app_context():
+        with self.app.app_context():
             util.create_all(engine)
             with transaction() as session:
                 edc = session.execute(select(models.Endorsement)).all()
@@ -91,7 +95,7 @@ class TestBootstrap(TestCase):
 
             COUNT = 100
 
-            cls.users = []
+            self.users = []
 
             _users = []
             _domain_users = []
@@ -219,12 +223,14 @@ class TestBootstrap(TestCase):
                     ))
                     session.commit()
                     # We'll use these data to run tests.
-                    cls.users.append((
+                    self.users.append((
                         email, username, password, name,
                         (archive, subject_class, net_points),
                         (approved, deleted, banned, username_is_valid),
                     ))
 
+    def tearDown(self):
+        shutil.rmtree(self.db_path)
 
     def test_authenticate_and_use_session(self):
         """Attempt to authenticate users and create/load auth sessions."""
