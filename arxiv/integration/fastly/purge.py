@@ -9,7 +9,7 @@ import fastly
 from fastly.api.purge_api import PurgeApi
 
 from arxiv.config import settings
-from arxiv.db import session
+from arxiv.db import Session
 from arxiv.db.models import Metadata, Updates
 from arxiv.identifier import Identifier
 from arxiv.taxonomy.definitions import CATEGORIES
@@ -40,7 +40,7 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, date]:
     meta=aliased(Metadata)
     up=aliased(Updates)
     sub= (
-        session.query(
+        Session.query(
             meta.abs_categories,
             meta.document_id
         )
@@ -50,7 +50,7 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, date]:
     )
 
     result=(
-        session.query(
+        Session.query(
             sub.c.abs_categories,
             func.max(up.date)
         )

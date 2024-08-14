@@ -43,7 +43,7 @@ from sqlalchemy.orm import (
 
 from ..config import Settings, settings
 from . import Base, LaTeXMLBase, metadata, \
-    SessionLocal
+    session_factory
 
 from .types import intpk
 
@@ -80,7 +80,7 @@ def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
 
 
 def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]) -> Tuple[Engine, Optional[Engine]]:
-    SessionLocal.configure(binds={
+    session_factory.configure(binds={
         Base: classic_engine,
         LaTeXMLBase: (latexml_engine if latexml_engine else classic_engine),
         t_arXiv_stats_hourly: classic_engine,

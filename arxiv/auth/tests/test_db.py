@@ -3,7 +3,7 @@ import traceback
 
 from sqlalchemy import select
 
-from arxiv.db import models, session
+from arxiv.db import models, Session
 
 
 def test_tables_exist(classic_db_engine):
@@ -15,7 +15,7 @@ def test_basic_load_db_and_app(app):
     @app.route("/get_policy_classes")
     def get_policy_classes():
         try:
-            res = session.query(models.TapirPolicyClass)
+            res = Session.query(models.TapirPolicyClass)
             return "\n".join([f"{row.class_id}: {row.name}" for row in res])
         except Exception as e:
             return f"{e}\n{traceback.format_exc()}"

@@ -12,7 +12,7 @@ from pytz import UTC
 from sqlalchemy import select
 
 from arxiv.config import Settings
-from arxiv.db import transaction, models, session
+from arxiv.db import transaction, models, Session
 from arxiv.db.models import configure_db
 from .. import util
 from ..passwords import hash_password
@@ -68,7 +68,7 @@ class SetUpUserMixin(TestCase):
                 # Insert tapir policy classes
 
             util.create_all(self.engine)
-            self.user_class = session.scalar(
+            self.user_class = Session.scalar(
                 select(models.TapirPolicyClass).where(models.TapirPolicyClass.class_id==2))
             self.email = 'first@last.iv'
             self.db_user = models.TapirUser(
@@ -114,12 +114,12 @@ class SetUpUserMixin(TestCase):
                 remote_host='foohost.foo.com',
                 session_id=0
             )
-            session.add(self.user_class)
-            session.add(self.db_user)
-            session.add(self.db_password)
-            session.add(self.db_nick)
-            session.add(self.db_token)
-            session.commit()
+            Session.add(self.user_class)
+            Session.add(self.db_user)
+            Session.add(self.db_password)
+            Session.add(self.db_nick)
+            Session.add(self.db_token)
+            Session.commit()
 
     def tearDown(self):
         """Drop tables from the in-memory db file."""

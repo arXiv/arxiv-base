@@ -8,7 +8,7 @@ from sqlalchemy.exc import OperationalError
 from .. import domain
 from . import util, exceptions
 from .passwords import hash_password
-from ...db import session
+from ...db import Session
 from ...db.models import TapirUser, TapirUsersPassword, \
     TapirNickname, Demographic
 
@@ -29,7 +29,7 @@ def does_username_exist(username: str) -> bool:
     bool
 
     """
-    data = session.query(TapirNickname) \
+    data = Session.query(TapirNickname) \
                   .filter(TapirNickname.nickname == username) \
                   .first()
     if data:
@@ -50,7 +50,7 @@ def does_email_exist(email: str) -> bool:
     bool
 
     """
-    data = session.query(TapirUser).filter(TapirUser.email == email).first()
+    data = Session.query(TapirUser).filter(TapirUser.email == email).first()
     if data:
         return True
     return False
@@ -82,7 +82,7 @@ def register(user: domain.User, password: str, ip: str,
     """
     try:
         db_user, db_nick, db_profile = _create(user, password, ip, remote_host)
-        session.commit()
+        Session.commit()
     except Exception as e:
         raise exceptions.RegistrationFailed('Could not create user') from e
 
@@ -157,13 +157,13 @@ def update(user: domain.User) -> Tuple[domain.User, domain.Authorizations]:
             for grp, field in Demographic.GROUP_FLAGS:
                 _update_field_if_changed(db_profile, field,
                                          _has_group(grp))
-            session.add(db_profile)
+            Session.add(db_profile)
         else:
             db_profile = _create_profile(user, db_user)
 
-    session.add(db_nick)
-    session.add(db_user)
-    session.commit()
+    Session.add(db_nick)
+    Session.add(db_user)
+    Session.commit()
 
     user = domain.User(
         user_id=str(db_user.user_id),
@@ -191,7 +191,7 @@ def _update_field_if_changed(obj: Any, field: Any, update_with: Any) -> None:
 def _get_user_data(user_id: str) -> Tuple[TapirUser, TapirNickname, Demographic]:
 
     try:
-        db_user, db_nick = session.query(TapirUser, TapirNickname) \
+        db_user, db_nick = Session.query(TapirUser, TapirNickname) \
             .filter(TapirUser.user_id == user_id) \
             .filter(TapirUser.flag_approved == 1) \
             .filter(TapirUser.flag_deleted == 0) \
@@ -203,7 +203,7 @@ def _get_user_data(user_id: str) -> Tuple[TapirUser, TapirNickname, Demographic]
     except TypeError:   # first() returns a single None if no match.
         raise exceptions.NoSuchUser('User does not exist')
     # Profile may not exist.
-    db_profile = session.query(Demographic) \
+    db_profile = Session.query(Demographic) \
         .filter(Demographic.user_id == user_id) \
         .first()
     if not db_user:
@@ -235,7 +235,7 @@ def _create_profile(user: domain.User, db_user: TapirUser) -> Demographic:
         flag_group_eess=_has_group('grp_eess'),
         flag_group_econ=_has_group('grp_econ'),
     )
-    session.add(db_profile)
+    Session.add(db_profile)
     return db_profile
 
 
@@ -263,7 +263,7 @@ def _create(user: domain.User, password: str, ip: str, remote_host: str) \
 
     # Main user entry.
     db_user = TapirUser(**data)
-    session.add(db_user)
+    Session.add(db_user)
     # Nickname is where we keep the username.
     db_nick = TapirNickname(
         user=db_user,
@@ -271,7 +271,7 @@ def _create(user: domain.User, password: str, ip: str, remote_host: str) \
         flag_valid=1,
         flag_primary=1
     )
-    session.add(db_nick)
+    Session.add(db_nick)
 
     db_profile: Optional[Demographic]
     if user.profile is not None:
@@ -284,7 +284,7 @@ def _create(user: domain.User, password: str, ip: str, remote_host: str) \
         password_storage=2,
         password_enc=hash_password(password)
     )
-    session.add(db_pass)
+    Session.add(db_pass)
     from sqlalchemy import select
-    print(session.execute(select(TapirUser.email)).all())
+    print(Session.execute(select(TapirUser.email)).all())
     return db_user, db_nick, db_profile

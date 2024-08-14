@@ -22,7 +22,7 @@ from sqlalchemy.sql.expression import literal
 from . import util
 from .. import domain
 from ...taxonomy import definitions
-from ...db import session
+from ...db import Session
 from ...db.models import Endorsement, PaperOwner, Document, \
     t_arXiv_in_category, Category, EndorsementDomain, t_arXiv_white_email, \
     t_arXiv_black_email
@@ -147,7 +147,7 @@ def explicit_endorsements(user: domain.User) -> Endorsements:
 
     """
     data: List[Endorsement] = (
-        session.query(
+        Session.query(
             Endorsement.archive,
             Endorsement.subject_class,
             Endorsement.point_value,
@@ -219,14 +219,14 @@ def is_academic(user: domain.User) -> bool:
 
     """
     in_whitelist = (
-        session.query(t_arXiv_white_email.c.pattern)
+        Session.query(t_arXiv_white_email.c.pattern)
         .filter(literal(user.email).like(t_arXiv_white_email.c.pattern))
         .first()
     )
     if in_whitelist:
         return True
     in_blacklist = (
-        session.query(t_arXiv_black_email.c.pattern)
+        Session.query(t_arXiv_black_email.c.pattern)
         .filter(literal(user.email).like(t_arXiv_black_email.c.pattern))
         .first()
     )
@@ -341,10 +341,10 @@ def domain_papers(user: domain.User,
         in each respective domain (int).
 
     """
-    query = session.query(PaperOwner.document_id,
-                             Document.document_id,
-                             t_arXiv_in_category.c.document_id,
-                             Category.endorsement_domain) \
+    query = Session.query(PaperOwner.document_id,
+                          Document.document_id,
+                          t_arXiv_in_category.c.document_id,
+                          Category.endorsement_domain) \
         .filter(PaperOwner.user_id == user.user_id) \
         .filter(Document.document_id == PaperOwner.document_id) \
         .filter(t_arXiv_in_category.c.document_id == Document.document_id) \
@@ -372,12 +372,12 @@ def category_policies() -> Dict[domain.Category, Dict]:
         policiy details.
 
     """
-    data = session.query(Category.archive,
-                            Category.subject_class,
-                            EndorsementDomain.endorse_all,
-                            EndorsementDomain.endorse_email,
-                            EndorsementDomain.papers_to_endorse,
-                            EndorsementDomain.endorsement_domain) \
+    data = Session.query(Category.archive,
+                         Category.subject_class,
+                         EndorsementDomain.endorse_all,
+                         EndorsementDomain.endorse_email,
+                         EndorsementDomain.papers_to_endorse,
+                         EndorsementDomain.endorsement_domain) \
         .filter(Category.definitive == 1) \
         .filter(Category.active == 1) \
         .filter(Category.endorsement_domain
@@ -411,8 +411,8 @@ def invalidated_autoendorsements(user: domain.User) -> Endorsements:
         auto-endorsements revoked.
 
     """
-    data: List[Endorsement] = session.query(Endorsement.archive,
-                                                 Endorsement.subject_class) \
+    data: List[Endorsement] = Session.query(Endorsement.archive,
+                                            Endorsement.subject_class) \
         .filter(Endorsement.endorsee_id == user.user_id) \
         .filter(Endorsement.flag_valid == 0) \
         .filter(Endorsement.type == 'auto') \

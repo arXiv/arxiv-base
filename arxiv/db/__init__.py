@@ -2,24 +2,24 @@
 
 To use this in a simple non-flask non-fastapi script do:
 
-from arxiv.db import get_db
+from arxiv.db import Session
 
-with get_db() as session:
+with Session() as session:
     session.execute(
         select(...)
     )
 
 To use this in flask just do:
 
-from arxiv.db import session
+from arxiv.db import Session
 
-session.execute(
+Session.execute(
     select(...)
 )
 
 To use this with fastapi do:
 
-with get_db() as session:
+with Session() as session:
     session.execute(
         select(...)
     )
@@ -31,10 +31,17 @@ from arxiv.db import transaction
 
 with transaction() as session:
     session.add(...)
+
+Or just do it in a normal transaction:
+
+with Session() as session:
+   session.add(...)
+   session.commit()
+
+
 """
 import logging
 import json
-import os
 import threading
 from datetime import datetime, timedelta
 from contextlib import contextmanager
@@ -59,7 +66,7 @@ class LaTeXMLBase(DeclarativeBase):
 logger = logging.getLogger(__name__)
 
 
-SessionLocal = sessionmaker(autoflush=False)
+session_factory = sessionmaker(autoflush=False)
 """`sessionmaker` is the SQLAlchemy class that provides a `sqlalchemy.orm.Session` based on how it is configured. 
 
 It may be used as a `sqlalchemy.orm.Session`. 
@@ -83,24 +90,25 @@ def _scope_id () -> int:
         return int(threading.current_thread().ident)
 
 
-session = scoped_session(SessionLocal, scopefunc=_scope_id)
-"""`session` is a per thread proxy to a session created by `arxiv.db.SessionLocal` (which is a `sessionmaker`)"""
+Session = scoped_session(session_factory, scopefunc=_scope_id)
+"""`Session` is a per thread proxy to a session created by `arxiv.db.SessionLocal` (which is a `sessionmaker`)
 
-def get_engine () -> Engine:
-    return SessionLocal().get_bind(Base)
+Calling `Session()` will return a `sqlalchemy.orm.Session`
 
-@contextmanager
-def get_db ():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+It should be used like:
+
+    from arxiv.db import Session
+    ...
+    with Session() as session:
+        session.add(...)
+        session.commit()
+"""
+
 
 @contextmanager
 def transaction ():
     in_flask = True if has_app_context() else False
-    db = session if in_flask else SessionLocal()
+    db = Session if in_flask else session_factory()
     try:
         yield db
 
