@@ -8,7 +8,7 @@ from flask import Flask
 
 from arxiv import status
 from arxiv.config import Settings
-from arxiv.db.models import configure_db
+from ...db import configure_db
 from arxiv.base import Base
 from arxiv.base.middleware import wrap
 

@@ -11,6 +11,7 @@ from flask import Flask
 from sqlalchemy import insert
 from mimesis import Person, Internet, Datetime
 
+import arxiv.db
 from arxiv.db import transaction
 from arxiv.db import models
 from arxiv.config import Settings
@@ -36,7 +37,9 @@ class TestAutoEndorsement(TestCase):
                         CLASSIC_DB_URI=self.app.config['CLASSIC_DATABASE_URI'],
                         LATEXML_DB_URI=None)
 
-        engine, _ = models.configure_db(settings)
+        arxiv.db.init(settings)
+        util.create_all(arxiv.db._classic_engine)
+
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
             'remote_host': 'foo-host.foo.com',
@@ -44,7 +47,6 @@ class TestAutoEndorsement(TestCase):
         }
 
         with self.app.app_context():
-            util.create_all(engine)
             with transaction() as session:
                 person = Person('en')
                 net = Internet()

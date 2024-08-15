@@ -45,17 +45,20 @@ import json
 import threading
 from datetime import datetime, timedelta
 from contextlib import contextmanager
+from typing import Tuple, Optional
 
 from flask.globals import app_ctx
-from flask import has_app_context
+from flask import has_app_context, Flask
 
-from sqlalchemy import Engine, MetaData
+from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
-from ..config import settings
+from ..config import settings, Settings
 
 metadata = MetaData()
+_latexml_engine: Engine = None
+_classic_engine: Engine = None
 
 class Base(DeclarativeBase):
     metadata=metadata
@@ -149,3 +152,52 @@ def config_query_timing(engine: Engine, slightly_long_sec: float, long_sec: floa
                     query=str(statement)
                 )
                 print (json.dumps(log))
+
+
+def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
+    if 'sqlite' in base_settings.CLASSIC_DB_URI:
+        engine = create_engine(base_settings.CLASSIC_DB_URI)
+        if base_settings.LATEXML_DB_URI:
+            latexml_engine = create_engine(base_settings.LATEXML_DB_URI)
+        else:
+            latexml_engine = None
+    else:
+        engine = create_engine(base_settings.CLASSIC_DB_URI,
+                        echo=base_settings.ECHO_SQL,
+                        isolation_level=base_settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
+                        pool_recycle=600,
+                        max_overflow=(base_settings.REQUEST_CONCURRENCY - 5), # max overflow is how many + base pool size, which is 5 by default
+                        pool_pre_ping=base_settings.POOL_PRE_PING)
+        if base_settings.LATEXML_DB_URI:
+            stmt_timeout: int = max(base_settings.LATEXML_DB_QUERY_TIMEOUT, 1)
+            latexml_engine = create_engine(base_settings.LATEXML_DB_URI,
+                                    connect_args={"options": f"-c statement_timeout={stmt_timeout}s"},
+                                    echo=base_settings.ECHO_SQL,
+                                    isolation_level=base_settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL,
+                                    pool_recycle=600,
+                                    max_overflow=(base_settings.REQUEST_CONCURRENCY - 5),
+                                    pool_pre_ping=base_settings.POOL_PRE_PING)
+        else:
+            latexml_engine = None
+
+    global _classic_engine
+    global _latexml_engine
+    _classic_engine = engine
+    _latexml_engine = latexml_engine
+    return engine, latexml_engine
+
+
+# Configure the engine at package load time from env vars.
+_classic_engine, _latexml_engine = configure_db(settings)
+
+
+def init(settings: Settings=settings) -> None:
+    """Reset up with new `settings` for the db engines AND models.
+
+    This uses the values from `settings`. """
+    # configure_db was called at package load, but need to call again to change
+    configure_db(settings)
+
+    # late import of arxiv.db.models to avoid loops
+    from arxiv.db.models import configure_db_engine
+    configure_db_engine(_classic_engine, _latexml_engine)

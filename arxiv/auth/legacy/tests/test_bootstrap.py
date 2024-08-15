@@ -16,6 +16,8 @@ from pytz import timezone, UTC
 from mimesis import Person, Internet, Datetime, locales
 
 from sqlalchemy import select, func
+
+import arxiv.db
 from arxiv.db import transaction
 from arxiv.db import models
 from arxiv.config import Settings
@@ -59,10 +61,11 @@ class TestBootstrap(TestCase):
                         CLASSIC_DB_URI=self.app.config['CLASSIC_DATABASE_URI'],
                         LATEXML_DB_URI=None)
 
-        engine, _ = models.configure_db(settings)
+        engine, _ = arxiv.db.configure_db(settings)
+        arxiv.db.models.configure_db_engine(engine,None)
+        util.create_all(engine)
 
         with self.app.app_context():
-            util.create_all(engine)
             with transaction() as session:
                 edc = session.execute(select(models.Endorsement)).all()
                 for row in edc:

@@ -12,7 +12,7 @@ from pytz import timezone, UTC
 from arxiv.base import Base
 from arxiv.base.middleware import wrap
 from arxiv.config import Settings
-from arxiv.db.models import configure_db
+from arxiv.db import configure_db
 from .. import Auth
 from ..middleware import AuthMiddleware
 from ... import auth, domain
