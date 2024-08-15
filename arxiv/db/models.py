@@ -2072,6 +2072,7 @@ def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]
     session_factory.configure(binds={
         Base: classic_engine,
         LaTeXMLBase: (latexml_engine if latexml_engine else classic_engine),
+        t_arXiv_stats_hourly: classic_engine,
         t_arXiv_admin_state: classic_engine,
         t_arXiv_bad_pw: classic_engine,
         t_arXiv_black_email: classic_engine,
