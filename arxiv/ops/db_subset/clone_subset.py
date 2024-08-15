@@ -19,7 +19,7 @@ from sqlalchemy.orm import (
     make_transient
 )
 
-from ...db import Base, LaTeXMLBase, SessionLocal
+from ...db import Base, LaTeXMLBase, session_factory
 from ...db import engine as classic_engine
 from ...db.models import (
     DBLaTeXMLDocuments,
@@ -196,7 +196,7 @@ def _make_subset (db_graph: Dict[str, List[Edge]],
     """
 
     ### Set up ###
-    classic_session = SessionLocal()
+    classic_session = session_factory()
     new_session = NewSessionLocal()
 
     Base.metadata.drop_all(new_engine)

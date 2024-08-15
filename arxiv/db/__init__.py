@@ -2,24 +2,24 @@
 
 To use this in a simple non-flask non-fastapi script do:
 
-from arxiv.db import get_db
+from arxiv.db import Session
 
-with get_db() as session:
+with Session() as session:
     session.execute(
         select(...)
     )
 
 To use this in flask just do:
 
-from arxiv.db import session
+from arxiv.db import Session
 
-session.execute(
+Session.execute(
     select(...)
 )
 
 To use this with fastapi do:
 
-with get_db() as session:
+with Session() as session:
     session.execute(
         select(...)
     )
@@ -31,23 +31,34 @@ from arxiv.db import transaction
 
 with transaction() as session:
     session.add(...)
+
+Or just do it in a normal transaction:
+
+with Session() as session:
+   session.add(...)
+   session.commit()
+
+
 """
 import logging
 import json
 import threading
 from datetime import datetime, timedelta
 from contextlib import contextmanager
+from typing import Tuple, Optional
 
 from flask.globals import app_ctx
-from flask import has_app_context
+from flask import has_app_context, Flask
 
-from sqlalchemy import Engine, MetaData
+from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 
-from ..config import settings
+from ..config import settings, Settings
 
 metadata = MetaData()
+_latexml_engine: Engine = None
+_classic_engine: Engine = None
 
 class Base(DeclarativeBase):
     metadata=metadata
@@ -58,12 +69,13 @@ class LaTeXMLBase(DeclarativeBase):
 logger = logging.getLogger(__name__)
 
 
-SessionLocal = sessionmaker(autoflush=False)
+session_factory = sessionmaker(autoflush=False)
 """`sessionmaker` is the SQLAlchemy class that provides a `sqlalchemy.orm.Session` based on how it is configured. 
 
 It may be used as a `sqlalchemy.orm.Session`. 
 
 Calling `SessionLocal.configure()` will alter all future sessions accessed via `arxiv.db.SessionLocal` or `arxiv.db.session`"""
+
 
 def _scope_id () -> int:
     """Gets an ID used as a key to the sessions from the scopped_session registry.
@@ -81,24 +93,25 @@ def _scope_id () -> int:
         return int(threading.current_thread().ident)
 
 
-session = scoped_session(SessionLocal, scopefunc=_scope_id)
-"""`session` is a per thread proxy to a session created by `arxiv.db.SessionLocal` (which is a `sessionmaker`)"""
+Session = scoped_session(session_factory, scopefunc=_scope_id)
+"""`Session` is a per thread proxy to a session created by `arxiv.db.SessionLocal` (which is a `sessionmaker`)
 
-def get_engine () -> Engine:
-    return SessionLocal().get_bind(Base)
+Calling `Session()` will return a `sqlalchemy.orm.Session`
 
-@contextmanager
-def get_db ():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+It should be used like:
+
+    from arxiv.db import Session
+    ...
+    with Session() as session:
+        session.add(...)
+        session.commit()
+"""
+
 
 @contextmanager
 def transaction ():
     in_flask = True if has_app_context() else False
-    db = session if in_flask else SessionLocal()
+    db = Session if in_flask else session_factory()
     try:
         yield db
 
@@ -139,3 +152,52 @@ def config_query_timing(engine: Engine, slightly_long_sec: float, long_sec: floa
                     query=str(statement)
                 )
                 print (json.dumps(log))
+
+
+def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
+    if 'sqlite' in base_settings.CLASSIC_DB_URI:
+        engine = create_engine(base_settings.CLASSIC_DB_URI)
+        if base_settings.LATEXML_DB_URI:
+            latexml_engine = create_engine(base_settings.LATEXML_DB_URI)
+        else:
+            latexml_engine = None
+    else:
+        engine = create_engine(base_settings.CLASSIC_DB_URI,
+                        echo=base_settings.ECHO_SQL,
+                        isolation_level=base_settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
+                        pool_recycle=600,
+                        max_overflow=(base_settings.REQUEST_CONCURRENCY - 5), # max overflow is how many + base pool size, which is 5 by default
+                        pool_pre_ping=base_settings.POOL_PRE_PING)
+        if base_settings.LATEXML_DB_URI:
+            stmt_timeout: int = max(base_settings.LATEXML_DB_QUERY_TIMEOUT, 1)
+            latexml_engine = create_engine(base_settings.LATEXML_DB_URI,
+                                    connect_args={"options": f"-c statement_timeout={stmt_timeout}s"},
+                                    echo=base_settings.ECHO_SQL,
+                                    isolation_level=base_settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL,
+                                    pool_recycle=600,
+                                    max_overflow=(base_settings.REQUEST_CONCURRENCY - 5),
+                                    pool_pre_ping=base_settings.POOL_PRE_PING)
+        else:
+            latexml_engine = None
+
+    global _classic_engine
+    global _latexml_engine
+    _classic_engine = engine
+    _latexml_engine = latexml_engine
+    return engine, latexml_engine
+
+
+# Configure the engine at package load time from env vars.
+_classic_engine, _latexml_engine = configure_db(settings)
+
+
+def init(settings: Settings=settings) -> None:
+    """Reset up with new `settings` for the db engines AND models.
+
+    This uses the values from `settings`. """
+    # configure_db was called at package load, but need to call again to change
+    configure_db(settings)
+
+    # late import of arxiv.db.models to avoid loops
+    from arxiv.db.models import configure_db_engine
+    configure_db_engine(_classic_engine, _latexml_engine)

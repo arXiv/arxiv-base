@@ -1,6 +1,8 @@
 """Tests for :mod:`arxiv.users.legacy.endorsements` using a live test DB."""
 
 import os
+import shutil
+import tempfile
 from unittest import TestCase, mock
 from datetime import datetime
 from pytz import timezone, UTC
@@ -9,6 +11,7 @@ from flask import Flask
 from mimesis import Person, Internet, Datetime
 from sqlalchemy import insert
 
+import arxiv.db
 from arxiv.taxonomy import definitions
 from arxiv.config import Settings
 from arxiv.db import models, transaction
@@ -24,13 +27,15 @@ class TestEndorsement(TestCase):
     def setUp(self):
         """Generate some fake data."""
         self.app = Flask('test')
-        self.app.config['CLASSIC_DATABASE_URI'] = 'sqlite:///test.db'
+        self.db_path = tempfile.mkdtemp()
+        self.app.config['CLASSIC_DATABASE_URI'] = f'sqlite:///{self.db_path}/test.db'
         self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
         settings = Settings(
-                        CLASSIC_DB_URI='sqlite:///test.db',
+                        CLASSIC_DB_URI=self.app.config['CLASSIC_DATABASE_URI'],
                         LATEXML_DB_URI=None)
 
-        engine, _ = models.configure_db(settings)
+        arxiv.db.init(settings)
+        util.create_all(arxiv.db._classic_engine)
 
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
@@ -39,7 +44,6 @@ class TestEndorsement(TestCase):
         }
 
         with self.app.app_context():
-            util.create_all(engine)
             with transaction() as session:
                 person = Person('en')
                 net = Internet()
@@ -123,6 +127,9 @@ class TestEndorsement(TestCase):
                 #         endorsement_domain='test_domain'
                 #     ))
 
+    def tearDown(self):
+        shutil.rmtree(self.db_path)
+
     def test_get_endorsements(self):
         """Test :func:`endoresement.get_endorsements`."""
         with self.app.app_context():
@@ -145,13 +152,6 @@ class TestEndorsement(TestCase):
             all_possible = set(definitions.CATEGORIES_ACTIVE.values())
             self.assertEqual(all_endorsements, all_possible)
 
-    def tearDown(self):
-        """Remove the test DB."""
-        try:
-            os.remove('./test.db')
-        except FileNotFoundError:
-            pass
-
 
 class TestAutoEndorsement(TestCase):
     """Tests for :func:`get_autoendorsements`."""
@@ -159,13 +159,15 @@ class TestAutoEndorsement(TestCase):
     def setUp(self):
         """Generate some fake data."""
         self.app = Flask('test')
-        self.app.config['CLASSIC_DATABASE_URI'] = 'sqlite:///test.db'
+        self.db_path = tempfile.mkdtemp()
+        self.app.config['CLASSIC_DATABASE_URI'] = f'sqlite:///{self.db_path}/test.db'
         self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
         settings = Settings(
-                        CLASSIC_DB_URI='sqlite:///test.db',
+                        CLASSIC_DB_URI=self.app.config['CLASSIC_DATABASE_URI'],
                         LATEXML_DB_URI=None)
 
-        engine, _ = models.configure_db(settings)
+        arxiv.db.init(settings)
+        util.create_all(arxiv.db._classic_engine)
 
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
@@ -174,7 +176,6 @@ class TestAutoEndorsement(TestCase):
         }
 
         with self.app.app_context():
-            util.create_all(engine)
             with transaction() as session:
                 person = Person('en')
                 net = Internet()
@@ -223,11 +224,7 @@ class TestAutoEndorsement(TestCase):
                 )
 
     def tearDown(self):
-        """Remove the test DB."""
-        try:
-            os.remove('./test.db')
-        except FileNotFoundError:
-            pass
+        shutil.rmtree(self.db_path)
 
     def test_invalidated_autoendorsements(self):
         """The user has two autoendorsements that have been invalidated."""

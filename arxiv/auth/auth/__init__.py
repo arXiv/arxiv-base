@@ -3,6 +3,7 @@
 from typing import Optional, Union, Any, List
 import os
 
+from sqlalchemy.exc import OperationalError
 from werkzeug.datastructures.structures import MultiDict
 
 from flask import Flask, request, Response
@@ -68,7 +69,7 @@ class Auth(object):
             else:
                 self.auth_session_name = "session"
 
-    @retry(legacy.exceptions.Unavailable, tries=3, delay=0.5, backoff=2)
+    @retry(OperationalError, tries=2, delay=0.5, backoff=2)
     def _get_legacy_session(self,
                             cookie_value: str) -> Optional[domain.Session]:
         """

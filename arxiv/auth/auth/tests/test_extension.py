@@ -1,17 +1,57 @@
 """Tests for :class:`arxiv.users.auth.Auth`."""
+import shutil
+import tempfile
 from logging import DEBUG
 import pytest
 
 from datetime import datetime
+
+from flask import Flask
 from pytz import timezone, UTC
+
+from arxiv.base import Base
+from arxiv.base.middleware import wrap
+from arxiv.config import Settings
+from arxiv.db import configure_db
+from .. import Auth
+from ..middleware import AuthMiddleware
 from ... import auth, domain
 
 EASTERN = timezone('US/Eastern')
 
+
+
+@pytest.fixture()
+def app_ext():
+    db_path = tempfile.mkdtemp()
+    app = Flask('test_auth_app')
+    app.config['CLASSIC_DATABASE_URI'] = f'sqlite:///{db_path}/test.db'
+    app.config['CLASSIC_SESSION_HASH'] = f'fake set in {__file__}'
+    app.config['SESSION_DURATION'] = f'fake set in {__file__}'
+    app.config['CLASSIC_COOKIE_NAME'] = f'fake set in {__file__}'
+    app.config['AUTH_UPDATED_SESSION_REF'] = True
+    settings = Settings(
+        CLASSIC_DB_URI = app.config['CLASSIC_DATABASE_URI'],
+        LATEXML_DB_URI = None
+    )
+    engine, _ = configure_db(settings)
+    app.config['DB_ENGINE'] = engine
+
+    Base(app)
+
+    Auth(app)
+    wrap(app, [AuthMiddleware])
+    yield app
+
+    shutil.rmtree(db_path)
+
+
 @pytest.fixture
-def app_with_cookie(app):
-    app.config['CLASSIC_COOKIE_NAME'] = 'foo_cookie'
-    return app
+def app_with_cookie(app_ext):
+    app_ext.config['CLASSIC_COOKIE_NAME'] = "foo_cookie"
+    app_ext.config['CLASSIC_SESSION_HASH'] = "1234"
+    app_ext.config['SESSION_DURATION'] = "3600"
+    return app_ext
 
 def test_no_session_legacy_available(mocker, app_with_cookie):
     """No session is present on the request, but database is present."""
@@ -23,7 +63,7 @@ def test_no_session_legacy_available(mocker, app_with_cookie):
         mock_request.environ = {'auth': None,
                                 'HTTP_COOKIE': 'foo_cookie=sessioncookie123'}
 
-        mock_legacy.is_configured.return_value = True
+        mock_legacy.util.is_configured.return_value = True
         mock_legacy.sessions.load.return_value = None
 
         inst.load_session()

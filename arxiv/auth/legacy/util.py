@@ -6,12 +6,13 @@ from pytz import timezone, UTC
 import logging
 
 from sqlalchemy import text, Engine
+from sqlalchemy.orm import Session as ORMSession
 
 from ...base.globals import get_application_config
 
 from ..auth import scopes
 from .. import domain
-from ...db import session, Base, SessionLocal
+from ...db import Session, Base, session_factory
 from ...db.models import TapirUser, TapirPolicyClass
 
 EASTERN = timezone('US/Eastern')
@@ -38,7 +39,7 @@ def from_epoch(t: int) -> datetime:
 def create_all(engine: Engine) -> None:
     """Create all tables in the database."""
     Base.metadata.create_all(engine)
-    with SessionLocal() as session:
+    with ORMSession(engine) as session:
         data = session.query(TapirPolicyClass).all()
         if data:
             return
@@ -96,7 +97,7 @@ def get_session_duration() -> int:
 def is_available(**kwargs: Any) -> bool:
     """Check our connection to the database."""
     try:
-        session.query("1").from_statement(text("SELECT 1")).all()
+        Session.query("1").from_statement(text("SELECT 1")).all()
     except Exception as e:
         logger.error('Encountered an error talking to database: %s', e)
         return False

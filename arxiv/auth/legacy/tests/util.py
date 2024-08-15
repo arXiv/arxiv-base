@@ -1,5 +1,6 @@
 """Testing helpers."""
 import hashlib
+import os
 import shutil
 import tempfile
 from contextlib import contextmanager
@@ -10,9 +11,9 @@ from flask import Flask
 from pytz import UTC
 from sqlalchemy import select
 
+import arxiv.db
 from arxiv.config import Settings
-from arxiv.db import transaction, models, session
-from arxiv.db.models import configure_db
+from arxiv.db import transaction, models, Session, configure_db
 from .. import util
 from ..passwords import hash_password
 
@@ -28,17 +29,17 @@ def temporary_db(db_uri: str, create: bool = True, drop: bool = True):
                         CLASSIC_DB_URI=db_uri,
                         LATEXML_DB_URI=None)
 
-    engine, _ = configure_db (settings)
+    arxiv.db.init(settings)
+    if create:
+        util.create_all(arxiv.db._classic_engine)
 
     with app.app_context():
-        if create:
-            util.create_all(engine)
         try:
             with transaction() as session:
                 yield session
         finally:
             if drop:
-                util.drop_all(engine)
+                util.drop_all(arxiv.db._classic_engine)
 
 
 class SetUpUserMixin(TestCase):
@@ -46,23 +47,28 @@ class SetUpUserMixin(TestCase):
 
     def setUp(self):
         """Set up the database."""
-        super()
         self.db_path = tempfile.mkdtemp()
         self.db_uri = f'sqlite:///{self.db_path}/test.db'
+        with open(self.db_path + '/test.txt', 'w') as f:
+            f.write("test: " + os.environ.get("PYTEST_CURRENT_TEST"))
+
         self.user_id = '15830'
         self.app = Flask('test')
-        with self.app.app_context():
-            self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
-            self.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
-            self.app.config['SESSION_DURATION'] = '36000'
-            settings = Settings(
-                            CLASSIC_DB_URI=self.db_uri,
-                            LATEXML_DB_URI=None)
 
-            self.engine, _ = models.configure_db(settings)            # Insert tapir policy classes
+        self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
+        self.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
+        self.app.config['SESSION_DURATION'] = '36000'
+        settings = Settings(
+            CLASSIC_DB_URI=self.db_uri,
+            LATEXML_DB_URI=None)
+
+        self.engine, _ = arxiv.db.configure_db(settings)
+
+        with self.app.app_context():
+                # Insert tapir policy classes
 
             util.create_all(self.engine)
-            self.user_class = session.scalar(
+            self.user_class = Session.scalar(
                 select(models.TapirPolicyClass).where(models.TapirPolicyClass.class_id==2))
             self.email = 'first@last.iv'
             self.db_user = models.TapirUser(
@@ -108,15 +114,14 @@ class SetUpUserMixin(TestCase):
                 remote_host='foohost.foo.com',
                 session_id=0
             )
-            session.add(self.user_class)
-            session.add(self.db_user)
-            session.add(self.db_password)
-            session.add(self.db_nick)
-            session.add(self.db_token)
-            session.commit()
+            Session.add(self.user_class)
+            Session.add(self.db_user)
+            Session.add(self.db_password)
+            Session.add(self.db_nick)
+            Session.add(self.db_token)
+            Session.commit()
 
     def tearDown(self):
         """Drop tables from the in-memory db file."""
         util.drop_all(self.engine)
         shutil.rmtree(self.db_path)
-
