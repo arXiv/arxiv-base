@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "gcp-service-auth"
+version = "0.1.0"
+description = "Inspecting TeX in arXiv submissions"
+authors = ["arxiv.org"]
+license = "BSD-3 License"
+readme = "README.md"
+packages = [
+    { include = "gcp_service_auth" }
+]
+include = ["README.md"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+google-auth = "^2.29.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+mypy = "*"
+mypy-extensions = "*"
+pydantic = "1.10.*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

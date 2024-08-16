@@ -139,13 +139,13 @@ class VersionEntry:
             formats.extend(['pdf', 'ps'])
         elif self.source_flag.pdflatex or self.source_format == "pdflatex":
             formats.extend(['pdf', 'src'])
-        elif self.source_flag.pdf_only or self.source_format == "pdfonly":
+        elif self.source_flag.pdf_only or self.source_format == "pdf":
             formats.extend(['pdf'])
         elif self.source_flag.html or self.source_format == "html":
             formats.extend(['html'])
         elif self.source_flag.docx or self.source_format == "docx":
-            formats.extend(['pdf'])
-        else:
+            formats.extend(['pdf', 'docx'])
+        else:  # default format is tex source
             formats.extend(['pdf', 'ps', 'src'])
 
         # other is added for display purposes maybe move to controller or template?

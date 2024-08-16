@@ -291,10 +291,10 @@ class DocMetadata:
         # skipping proxy to avoid harvesting of email addresses
         if self.report_num:
             rv += f"Report-no: {self.report_num}\n"
-        if self.msc_class:
-            rv += f"MSC-class: {self.msc_class}\n"
         if self.acm_class:
             rv += f"ACM-class: {self.acm_class}\n"
+        if self.msc_class:
+            rv += f"MSC-class: {self.msc_class}\n"
         if self.journal_ref:
             rv += f"Journal-ref: {self.journal_ref}\n"
         if self.doi:
