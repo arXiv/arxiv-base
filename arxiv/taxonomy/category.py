@@ -144,6 +144,7 @@ def get_all_cats_from_string(cat_string:str, only_cannonical:Optional[bool]=Fals
     This is needed because alternate names are not always recorded in the strings
     setting only_cannonical to true will not return non canonical categories, but will stil return the archives from non-cannonical alias pairs
     This is meant to be used on catgory strings from the database, not user input
+    raises KeyError if category string is invalid
     """
     from .definitions import CATEGORIES, CATEGORY_ALIASES
     cats = {CATEGORIES[cat].get_canonical() for cat in cat_string.split()} 

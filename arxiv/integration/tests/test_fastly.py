@@ -1,10 +1,11 @@
 import unittest
+import pytest
 from unittest.mock import patch, MagicMock
 from datetime import date
 from fastly.api.purge_api import PurgeApi
 
-from arxiv.identifier import Identifier
-from arxiv.integration.fastly.purge import purge_fastly_keys, _purge_category_change, purge_cache_for_paper
+from arxiv.identifier import Identifier, IdentifierException
+from arxiv.integration.fastly.purge import purge_fastly_keys, _purge_category_change, purge_cache_for_paper, _get_category_and_date
 from arxiv.integration.fastly.headers import add_surrogate_key
 
 #tests for the purge keys utility function
@@ -213,3 +214,14 @@ def test_purge_cache_for_paper(mockToday,mockPurge, mockDBQuery):
     purge_cache_for_paper('1001.5678',"cs.LG")
     actual_keys = mockPurge.call_args[0][0]
     assert sorted(actual_keys) == sorted (expected_keys)
+
+def test_get_category_and_date_nonexstant_ids():
+    #this id does exist
+    good_id=Identifier("0807.0001")
+    assert ("astro-ph", date(2008, 9, 24))==_get_category_and_date(good_id)
+
+    #there is no paper with this id
+    bad_id=Identifier("0807.9999")
+    with pytest.raises(IdentifierException):
+        _get_category_and_date(bad_id)
+   
