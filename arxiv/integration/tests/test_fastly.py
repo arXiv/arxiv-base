@@ -216,11 +216,8 @@ def test_purge_cache_for_paper(mockToday,mockPurge, mockDBQuery):
     assert sorted(actual_keys) == sorted (expected_keys)
 
 def test_get_category_and_date_nonexstant_ids():
-    #this id does exist
-    good_id=Identifier("0807.0001")
-    assert ("astro-ph", date(2008, 9, 24))==_get_category_and_date(good_id)
-
-    #there is no paper with this id
+    #there is no paper with this id 
+    #also base has no test db so any paper would return none, but this will work even if it gets data
     bad_id=Identifier("0807.9999")
     with pytest.raises(IdentifierException):
         _get_category_and_date(bad_id)
