@@ -11,7 +11,7 @@ from fastly.api.purge_api import PurgeApi
 from arxiv.config import settings
 from arxiv.db import Session
 from arxiv.db.models import Metadata, Updates
-from arxiv.identifier import Identifier
+from arxiv.identifier import Identifier, IdentifierException
 from arxiv.taxonomy.definitions import CATEGORIES
 from arxiv.taxonomy.category import get_all_cats_from_string 
 
@@ -25,6 +25,7 @@ def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None):
     """purges all keys needed for an unspecified change to a paper
     clears everything related to the paper, as well as any list and year pages it is on
     old_cats: include this string if the paper undergoes a category change to also purge pages the paper may have been removed from (or new year pages it is added to)
+    raises an IdentifierException if the paper_id is invalid, and KeyError if the category string contains invalid categories
     """
     arxiv_id = Identifier(paper_id)
     keys=_purge_category_change(arxiv_id, old_cats)
@@ -59,6 +60,9 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, date]:
         .filter(up.action != "absonly")
         .first()
     )
+    if not result:
+        raise IdentifierException(f'paper id does not exist: {arxiv_id.id}')
+
     new_cats: str=result[0]
     recent_date: date=result[1]
     return new_cats, recent_date
