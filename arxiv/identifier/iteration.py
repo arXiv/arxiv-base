@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from sqlalchemy import or_
 
-from ..db import get_db
+from ..db import Session
 from ..db.models import Metadata
 from . import Identifier
 from ..taxonomy.category import Category
@@ -21,7 +21,7 @@ class arXivIDIterator:
                   source_formats: Optional[List[SOURCE_FORMAT]] = None,
                   only_latest_version: bool = False):
         
-        with get_db() as session:
+        with Session() as session:
             self.query = session.query(Metadata.paper_id, Metadata.version) \
                 .filter(Metadata.paper_id >= start_yymm) \
                 .filter(Metadata.paper_id < f'{end_yymm}.999999')

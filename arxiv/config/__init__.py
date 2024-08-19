@@ -170,10 +170,21 @@ class Settings(BaseSettings):
     TRACKBACK_SECRET: SecretStr = SecretStr(token_hex(10))
 
     CLASSIC_DB_URI: str = DEFAULT_DB
-    LATEXML_DB_URI: str = DEFAULT_LATEXML_DB
+    LATEXML_DB_URI: Optional[str] = DEFAULT_LATEXML_DB
     ECHO_SQL: bool = False
     CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
     LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
+
+    LATEXML_DB_QUERY_TIMEOUT: int = 5
+    """Maximium seconds any query to the latxml DB can run.
+
+    The statement will raise an excepton if it runs for longer than this
+    time.
+
+    This is intened to prevent a backed up latexml db from blocking arxiv-browse
+    from serving pages. See ARXIVCE-2433.
+
+    """
 
     REQUEST_CONCURRENCY: int = 32
     """ How many requests do we handle at once -> How many db connections should we be able to open at once """

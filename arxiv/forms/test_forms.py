@@ -16,7 +16,7 @@ class TestCSRFForm(TestCase):
         """An invalid CSRF token is passed in the form data."""
         mock_request.remote_addr = "10.10.10.10"
         mock_request.auth = None
-        mock_request.session = mock.MagicMock(nonce="foononce123")
+        mock_request.Session = mock.MagicMock(nonce="foononce123")
         mock_get_config.return_value = {"CSRF_SECRET": "foosecret"}
 
         class ProtectedForm(csrf.CSRFForm):
@@ -37,7 +37,7 @@ class TestCSRFForm(TestCase):
         secret = "foosecret"
         mock_request.remote_addr = ip_address
         mock_request.auth = None
-        mock_request.session = mock.MagicMock(nonce=nonce)
+        mock_request.Session = mock.MagicMock(nonce=nonce)
         mock_get_config.return_value = {"CSRF_SECRET": secret}
 
         class ProtectedForm(csrf.CSRFForm):
@@ -68,7 +68,7 @@ class TestCSRFForm(TestCase):
 
         mock_request.remote_addr = ip_address
         mock_request.auth = None
-        mock_request.session = mock.MagicMock(nonce=nonce)
+        mock_request.Session = mock.MagicMock(nonce=nonce)
         mock_get_config.return_value = {"CSRF_SECRET": secret}
 
         class ProtectedForm(csrf.CSRFForm):
@@ -89,7 +89,7 @@ class TestCSRFFormWithNewSessionRef(TestCase):
     def test_invalid_token(self, mock_get_config, mock_request):
         """An invalid CSRF token is passed in the form data."""
         mock_request.remote_addr = "10.10.10.10"
-        mock_request.session = None
+        mock_request.Session = None
         mock_request.auth = mock.MagicMock(nonce="foononce123")
         mock_get_config.return_value = {"CSRF_SECRET": "foosecret"}
 
@@ -110,7 +110,7 @@ class TestCSRFFormWithNewSessionRef(TestCase):
         nonce = "foononce123"
         secret = "foosecret"
         mock_request.remote_addr = ip_address
-        mock_request.session = None
+        mock_request.Session = None
         mock_request.auth = mock.MagicMock(nonce=nonce)
         mock_get_config.return_value = {"CSRF_SECRET": secret}
 
@@ -141,7 +141,7 @@ class TestCSRFFormWithNewSessionRef(TestCase):
         csrf_token = csrf.SessionCSRF._join(digest, expires)
 
         mock_request.remote_addr = ip_address
-        mock_request.session = None
+        mock_request.Session = None
         mock_request.auth = mock.MagicMock(nonce=nonce)
         mock_get_config.return_value = {"CSRF_SECRET": secret}
 
