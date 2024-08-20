@@ -45,7 +45,7 @@
 
     if (label) {
       s = 'We gratefully acknowledge support from<br/>';
-      s += 'the Simons Foundation, <a href="https://info.arxiv.org/about/ourmembers.html">' + label + "</a>, and all contributors. <a href='https://info.arxiv.org/about/donate.html'>Donate</a>";
+      s += 'the Simons Foundation, <a href="https://info.arxiv.org/about/ourmembers.html">' + label + "</a>, and all contributors.";
       support_elem = document.getElementById('support-ack-url');
       if (support_elem) {
         support_elem.innerHTML = s;
