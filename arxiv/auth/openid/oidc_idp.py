@@ -92,7 +92,7 @@ class ArxivOidcIdpClient:
     def user_info_url(self) -> str:
         return self.oidc + '/userinfo'
 
-    def logout_url(self, user: ArxivUserClaims, url: str | None = url) -> str:
+    def logout_url(self, user: ArxivUserClaims, url: str | None = None) -> str:
         url = self.login_url if url is None else url
         return self.oidc + f'/logout?id_token_hint={user.id_token}' if url is None else f'&post_logout_redirect_uri={url}'
 
