@@ -1,0 +1,6 @@
+functions-framework
+arxiv-base @ git+https://github.com/arXiv/arxiv-base.git@6bbf57ed5e0c0c8ea6d07982fe4f607477ef0158#egg=arxiv_base
+google-cloud-logging
+google-cloud-bigquery
+sqlalchemy>=2.0.26
+mysqlclient >=2.1
