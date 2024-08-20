@@ -32,11 +32,13 @@ class ArxivOidcIdpClient:
 
     def __init__(self, redirect_uri: str,
                  server_url: str = "https://openid.arxiv.org",
-                 realm: str ="arxiv",
+                 realm: str = "arxiv",
                  client_id: str = "arxiv-user",
                  scope: List[str] | None = None,
                  client_secret: str | None = None,
-                 logger: logging.Logger | None = None):
+                 login_url: str | None = None,
+                 logger: logging.Logger | None = None,
+                 ):
         """
         Make Tapir user data from pass-data
 
@@ -50,6 +52,7 @@ class ArxivOidcIdpClient:
             match
         scope: List of OAuth2 scopes
         client_secret: Registered client secret
+        login_url: redircet URL when not logged in or logged out
         logger: Python logging logger instance
         """
         self.server_url = server_url
@@ -57,7 +60,9 @@ class ArxivOidcIdpClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
-        self.scope = scope if scope else ["openid", "basic", "profile", "email", "userid", "roles", "microprofile-jwt"]
+        self.scope = scope if scope else ["openid", "basic", "profile", "email", "userid", "roles",
+                                          "microprofile-jwt"]
+        self.login_url = login_url
         self._server_certs = {}
         self._logger = logger or logging.getLogger(__name__)
         pass
@@ -87,15 +92,14 @@ class ArxivOidcIdpClient:
     def user_info_url(self) -> str:
         return self.oidc + '/userinfo'
 
-    @property
-    def logout_url(self) -> str:
-        return self.oidc + '/logout'
+    def logout_url(self, user: ArxivUserClaims, url: str | None = url) -> str:
+        url = self.login_url if url is None else url
+        return self.oidc + f'/logout?id_token_hint={user.id_token}' if url is None else f'&post_logout_redirect_uri={url}'
 
     @property
     def login_url(self) -> str:
         scope = "&" + ",".join(self.scope) if self.scope else ""
         return f'{self.auth_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code{scope}'
-
 
     @property
     def server_certs(self) -> dict:
@@ -159,7 +163,6 @@ class ArxivOidcIdpClient:
         except requests.exceptions.RequestException:
             return None
 
-
     def validate_access_token(self, access_token: str) -> dict | None:
         """
         Given the IdP's access token, validate it and unpack the token payload. This should
@@ -177,8 +180,8 @@ class ArxivOidcIdpClient:
 
         try:
             unverified_header = jwt.get_unverified_header(access_token)
-            kid = unverified_header['kid'] # key id
-            algorithm = unverified_header['alg'] # key algo
+            kid = unverified_header['kid']  # key id
+            algorithm = unverified_header['alg']  # key algo
             public_key = self.get_public_key(kid)
             if public_key is None:
                 self._logger.info("Validating the token failed. kid=%s alg=%s", kid, algorithm)
@@ -193,8 +196,8 @@ class ArxivOidcIdpClient:
             return None
         # not reached
 
-
-    def to_arxiv_user_claims(self, idp_claims: dict, access_token: str, refresh_token: str) -> ArxivUserClaims:
+    def to_arxiv_user_claims(self, idp_claims: dict, access_token: str,
+                             refresh_token: str) -> ArxivUserClaims:
         """
         Given the IdP's access token claims, make Arxiv user claims.
 
@@ -210,7 +213,6 @@ class ArxivOidcIdpClient:
         """
         claims = ArxivUserClaims.from_keycloak_claims(idp_claims, access_token, refresh_token)
         return claims
-
 
     def from_code_to_user_claims(self, code: str) -> ArxivUserClaims | None:
         """
@@ -247,3 +249,34 @@ class ArxivOidcIdpClient:
         if not idp_claims:
             return None
         return self.to_arxiv_user_claims(idp_claims, access_token, idp_token.get('refresh_token'))
+
+    def logout_user(self, user: ArxivUserClaims) -> bool:
+        """With user's access token, logout user.
+
+        Parameters
+        ----------
+        user: ArxivUserClaims
+        """
+        try:
+            header = {
+                "Authorization": f"Bearer {user.access_token}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+        except KeyError:
+            return None
+
+        data = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+        }
+        url = self.logout_url(user)
+        try:
+            response = requests.post(url, headers=header, data=data, timeout=10)
+            if response.status_code == 200:
+                self._logger.warning(
+                    "Keycloak is misconfigured. Turn front channel logout off in the logout settings of the client.")
+            self._logger.info("Uesr %s logged out.", user.username)
+            return response.status_code == 204
+        except requests.exceptions.RequestException:
+            self._logger.error("Failed to connect to %s", url)
+            return False

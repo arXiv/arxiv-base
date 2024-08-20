@@ -2,8 +2,6 @@
 User claims.
 
 The idea is that, when a user is authenticated, the claims represent who that is.
-
-
 Keycloak:
 
     unpacked access token looks like this
@@ -31,6 +29,14 @@ Keycloak:
         'family_name': 'User',
         'email': 'testuser@example.com'
     }
+
+    Tapir cookie data
+    return self._pack_cookie({
+       'user_id': session.user.user_id,
+        'session_id': session.session_id,
+        'nonce': session.nonce,
+        'expires': session.end_time.isoformat()
+    })
 
 """
 
@@ -136,6 +142,14 @@ class ArxivUserClaims:
     @property
     def _roles(self) -> List[str]:
         return self._claims.get('realm_access', {}).get('roles', [])
+
+    @property
+    def id_token(self) -> str:
+        """
+        id_token is jti of keycloak. Not sure other IdP's use this but I think this is handy and
+        clarifies somwhat cryptic 3-letter tags of access token.
+        """
+        return self._claims.get('jti', '')
 
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
