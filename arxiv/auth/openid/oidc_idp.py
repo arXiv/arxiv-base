@@ -36,7 +36,7 @@ class ArxivOidcIdpClient:
                  client_id: str = "arxiv-user",
                  scope: List[str] | None = None,
                  client_secret: str | None = None,
-                 login_url: str | None = None,
+                 login_redirect_url: str | None = None,
                  logger: logging.Logger | None = None,
                  ):
         """
@@ -52,7 +52,7 @@ class ArxivOidcIdpClient:
             match
         scope: List of OAuth2 scopes
         client_secret: Registered client secret
-        login_url: redircet URL when not logged in or logged out
+        login_redirect_url: redircet URL when not logged in or logged out
         logger: Python logging logger instance
         """
         self.server_url = server_url
@@ -62,7 +62,7 @@ class ArxivOidcIdpClient:
         self.redirect_uri = redirect_uri
         self.scope = scope if scope else ["openid", "basic", "profile", "email", "userid", "roles",
                                           "microprofile-jwt"]
-        self.login_url = login_url
+        self._login_redirect_url = login_redirect_url
         self._server_certs = {}
         self._logger = logger or logging.getLogger(__name__)
         pass
@@ -92,8 +92,8 @@ class ArxivOidcIdpClient:
     def user_info_url(self) -> str:
         return self.oidc + '/userinfo'
 
-    def logout_url(self, user: ArxivUserClaims, url: str | None = None) -> str:
-        url = self.login_url if url is None else url
+    def logout_url(self, user: ArxivUserClaims, redirect_url: str | None = None) -> str:
+        url = self._login_redirect_url if redirect_url is None else redirect_url
         return self.oidc + f'/logout?id_token_hint={user.id_token}' if url is None else f'&post_logout_redirect_uri={url}'
 
     @property
