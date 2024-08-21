@@ -2,9 +2,7 @@
 OpenID connect IdP client
 """
 
-import json
-from datetime import datetime
-from typing import List, Any
+from typing import List
 import requests
 from requests.auth import HTTPBasicAuth
 import jwt
@@ -50,7 +48,8 @@ class ArxivOidcIdpClient:
         realm: OpenID's realm - for arXiv users, it should be "arxiv"
         client_id: Registered client ID. OAuth2 client/callback are registered on IdP and need to
             match
-        scope: List of OAuth2 scopes
+        scope: List of OAuth2 scopes - Apparently, keycloak (v20?) dropped the "openid" scope.
+               Trying to include "openid" results in no such scope error.
         client_secret: Registered client secret
         login_redirect_url: redircet URL when not logged in or logged out
         logger: Python logging logger instance
@@ -60,8 +59,7 @@ class ArxivOidcIdpClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
-        self.scope = scope if scope else ["openid", "basic", "profile", "email", "userid", "roles",
-                                          "microprofile-jwt"]
+        self.scope = scope if scope else []
         self._login_redirect_url = login_redirect_url
         self._server_certs = {}
         self._logger = logger or logging.getLogger(__name__)
@@ -98,12 +96,14 @@ class ArxivOidcIdpClient:
 
     @property
     def login_url(self) -> str:
-        scope = "&" + ",".join(self.scope) if self.scope else ""
-        return f'{self.auth_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code{scope}'
+        scope = "&scope=" + "%20".join(self.scope) if self.scope else ""
+        url = f'{self.auth_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code{scope}'
+        self._logger.debug(f'login_url: {url}')
+        return url
 
     @property
     def server_certs(self) -> dict:
-        """Get IdP server's SSL certificates"""
+        """Get IdP server's SSL certificates""""openid"
         # I'm having some 2nd thought about caching this. Fresh cert every time is probably needed
         # if not self._server_certs:
         # This adds one extra fetch but it avoids weird expired certs situation
@@ -196,8 +196,7 @@ class ArxivOidcIdpClient:
             return None
         # not reached
 
-    def to_arxiv_user_claims(self, idp_claims: dict, access_token: str,
-                             refresh_token: str) -> ArxivUserClaims:
+    def to_arxiv_user_claims(self, idp_token: dict = {}, kc_cliams: dict = {}) -> ArxivUserClaims:
         """
         Given the IdP's access token claims, make Arxiv user claims.
 
@@ -206,12 +205,15 @@ class ArxivOidcIdpClient:
 
         Parameters
         ----------
-        idp_claims: This is the contents of (unpacked) access token. IdP signs it with the private
+        idp_token: This is the IdP token which contains access, refresh, id tokens, etc.
+
+        kc_cliams: This is the contents of (unpacked) access token. IdP signs it with the private
             key, and the value is verified using the published public cert.
-        access_token: The original access token
-        refresh_token: The original refresh token
+
+        NOTE: So this means there are two copies of access token. Unfortunate, but unpacking
+              every time can be costly.
         """
-        claims = ArxivUserClaims.from_keycloak_claims(idp_claims, access_token, refresh_token)
+        claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams)
         return claims
 
     def from_code_to_user_claims(self, code: str) -> ArxivUserClaims | None:
@@ -248,7 +250,7 @@ class ArxivOidcIdpClient:
         idp_claims = self.validate_access_token(access_token)
         if not idp_claims:
             return None
-        return self.to_arxiv_user_claims(idp_claims, access_token, idp_token.get('refresh_token'))
+        return self.to_arxiv_user_claims(idp_token, idp_claims)
 
     def logout_user(self, user: ArxivUserClaims) -> bool:
         """With user's access token, logout user.
@@ -265,6 +267,10 @@ class ArxivOidcIdpClient:
         except KeyError:
             return None
 
+        """
+            "id_token_hint": user.id_token,
+        """
+
         data = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -275,8 +281,15 @@ class ArxivOidcIdpClient:
             if response.status_code == 200:
                 self._logger.warning(
                     "Keycloak is misconfigured. Turn front channel logout off in the logout settings of the client.")
-            self._logger.info("Uesr %s logged out.", user.username)
-            return response.status_code == 204
+            if response.status_code == 204:
+                self._logger.info("Uesr %s logged out.", user.user_id)
+                return True
+
+            if response.status_code == 400:
+                self._logger.info("Uesr %s logged out.", user.user_id)
+                return True
+            return False
+
         except requests.exceptions.RequestException:
             self._logger.error("Failed to connect to %s", url)
             return False

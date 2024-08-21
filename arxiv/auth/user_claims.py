@@ -50,6 +50,21 @@ from typing import Any, Optional, List
 import jwt
 
 
+def get_roles(realm_access: dict) -> (str, any):
+    return ('roles', realm_access['roles'])
+
+
+claims_map = {
+    'sub': 'sub',
+    'exp': 'exp',
+    'iat': 'iat',
+    'realm_access': get_roles,
+    'email_verified': 'email_p',
+    'email': 'email',
+    "access_token": "acc",
+    "id_token": "idt",
+}
+
 class ArxivUserClaims:
     """
     arXiv logged in user claims
@@ -85,10 +100,6 @@ class ArxivUserClaims:
     @property
     def issued_at(self) -> str:
         return datetime.utcfromtimestamp(self._claims.get('iat', 0)).isoformat()
-
-    @property
-    def client_id(self) -> Optional[str]:
-        return self._claims.get('azp')
 
     @property
     def session_id(self) -> Optional[str]:
@@ -141,32 +152,56 @@ class ArxivUserClaims:
 
     @property
     def _roles(self) -> List[str]:
-        return self._claims.get('realm_access', {}).get('roles', [])
+        return self._claims.get('roles', [])
 
     @property
     def id_token(self) -> str:
         """
-        id_token is jti of keycloak. Not sure other IdP's use this but I think this is handy and
-        clarifies somwhat cryptic 3-letter tags of access token.
+        Keycloak id_token
         """
-        return self._claims.get('jti', '')
+        return self._claims.get('idt', "")
+
+    @property
+    def access_token(self) -> str:
+        """
+        Keycloak access (bearer) token
+        """
+        return self._claims.get('acc', '')
+
 
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
         return cls(json.loads(token))
 
     @classmethod
-    def from_keycloak_claims(cls, kc_cliams: dict, access_token: str, _refresh_token: str) -> 'ArxivUserClaims':
-        claims = kc_cliams.copy()
-        claims['access_token'] = access_token
-        # claims['refresh_token'] = refresh_token
+    def from_keycloak_claims(cls, idp_token: dict = {}, kc_claims: dict = {}) -> 'ArxivUserClaims':
+        """Make the user cliams from the IdP token and user claims
+
+        The claims need to be compact as the cookie size is limited to 4096, tossing "uninteresting"
+        """
+        claims = {}
+        # Flatten the idp token and claims
+        mushed = idp_token.copy()
+        mushed.update(kc_claims)
+
+        for key, mapper in claims_map.items():
+            if key not in mushed:
+                # This may be worth logging.
+                continue
+            value = mushed.get(key)
+            if callable(mapper):
+                mapped_key, mapped_value = mapper(value)
+                if mapped_key and mapped_value:
+                    claims[mapped_key] = mapped_value
+            elif key in mushed:
+                claims[mapper] = value
         return cls(claims)
 
     def is_expired(self, when: datetime | None = None) -> bool:
         """
         Check if the claims is expired
         """
-        exp = self._claims.get("expires_at")
+        exp = self.expires_at
         if exp is None:
             return False
         exp_datetime = datetime.fromtimestamp(exp, timezone.utc)
@@ -182,7 +217,10 @@ class ArxivUserClaims:
         self._create_property(tag)
 
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
-        return jwt.encode(self._claims, secret, algorithm=algorithm)
+        token = jwt.encode(self._claims, secret, algorithm=algorithm)
+        if len(token) > 4096:
+            raise ValueError(f'JWT token is too long {len(token)} bytes')
+        return token
 
     @classmethod
     def decode_jwt_token(cls, token: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
