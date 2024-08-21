@@ -1,7 +1,7 @@
 """
 OpenID connect IdP client
 """
-
+import urllib.parse
 from typing import List
 import requests
 from requests.auth import HTTPBasicAuth
@@ -27,6 +27,8 @@ class ArxivOidcIdpClient:
     scope: List[str]  # it's okay to be empty. Keycloak should be configured to provide scopes.
     _server_certs: dict  # Cache for the IdP certs
     _logger: logging.Logger
+    _login_redirect_url: str
+    _logout_redirect_url: str
 
     def __init__(self, redirect_uri: str,
                  server_url: str = "https://openid.arxiv.org",
@@ -35,6 +37,7 @@ class ArxivOidcIdpClient:
                  scope: List[str] | None = None,
                  client_secret: str | None = None,
                  login_redirect_url: str | None = None,
+                 logout_redirect_url: str | None = None,
                  logger: logging.Logger | None = None,
                  ):
         """
@@ -51,7 +54,8 @@ class ArxivOidcIdpClient:
         scope: List of OAuth2 scopes - Apparently, keycloak (v20?) dropped the "openid" scope.
                Trying to include "openid" results in no such scope error.
         client_secret: Registered client secret
-        login_redirect_url: redircet URL when not logged in or logged out
+        login_redirect_url: redircet URL after log in
+        logout_redirect_url: redircet URL after log out
         logger: Python logging logger instance
         """
         self.server_url = server_url
@@ -60,7 +64,8 @@ class ArxivOidcIdpClient:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.scope = scope if scope else []
-        self._login_redirect_url = login_redirect_url
+        self._login_redirect_url = login_redirect_url if login_redirect_url else ""
+        self._logout_redirect_url = logout_redirect_url if logout_redirect_url else ""
         self._server_certs = {}
         self._logger = logger or logging.getLogger(__name__)
         pass
@@ -91,7 +96,7 @@ class ArxivOidcIdpClient:
         return self.oidc + '/userinfo'
 
     def logout_url(self, user: ArxivUserClaims, redirect_url: str | None = None) -> str:
-        url = self._login_redirect_url if redirect_url is None else redirect_url
+        url = urllib.parse.quote(self._logout_redirect_url if redirect_url is None else redirect_url)
         return self.oidc + f'/logout?id_token_hint={user.id_token}' if url is None else f'&post_logout_redirect_uri={url}'
 
     @property
@@ -267,27 +272,30 @@ class ArxivOidcIdpClient:
         except KeyError:
             return None
 
-        """
-            "id_token_hint": user.id_token,
-        """
-
         data = {
             "client_id": self.client_id,
-            "client_secret": self.client_secret,
+            "id_token_hint": user.id_token,
         }
+        if  self.client_secret:
+            data["client_secret"] = self.client_secret
+
         url = self.logout_url(user)
         try:
             response = requests.post(url, headers=header, data=data, timeout=10)
             if response.status_code == 200:
-                self._logger.warning(
-                    "Keycloak is misconfigured. Turn front channel logout off in the logout settings of the client.")
+                # If Keycloak is misconfigured, this does not log out.
+                # Turn front channel logout off in the logout settings of the client."
+                self._logger.info("Uesr %s logged out. - 200", user.user_id)
+                return True
+
             if response.status_code == 204:
                 self._logger.info("Uesr %s logged out.", user.user_id)
                 return True
 
             if response.status_code == 400:
-                self._logger.info("Uesr %s logged out.", user.user_id)
+                self._logger.info("Uesr %s did not log. But, it's likely not logged in", user.user_id)
                 return True
+
             return False
 
         except requests.exceptions.RequestException:
