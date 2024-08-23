@@ -45,13 +45,13 @@ Keycloak:
 
 import json
 from datetime import datetime, timezone
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Tuple
 
 import jwt
 
 
-def get_roles(realm_access: dict) -> (str, any):
-    return ('roles', realm_access['roles'])
+def get_roles(realm_access: dict) -> Tuple[str, Any]:
+    return 'roles', realm_access['roles']
 
 
 claims_map = {
@@ -94,12 +94,12 @@ class ArxivUserClaims:
             setattr(self.__class__, name, property(getter))
 
     @property
-    def expires_at(self) -> str:
-        return datetime.utcfromtimestamp(self._claims.get('exp', 0)).isoformat()
+    def expires_at(self) -> datetime:
+        return datetime.utcfromtimestamp(float(self._claims.get('exp', 0)))
 
     @property
-    def issued_at(self) -> str:
-        return datetime.utcfromtimestamp(self._claims.get('iat', 0)).isoformat()
+    def issued_at(self) -> datetime:
+        return datetime.utcfromtimestamp(float(self._claims.get('iat', 0)))
 
     @property
     def session_id(self) -> Optional[str]:
@@ -174,15 +174,18 @@ class ArxivUserClaims:
         return cls(json.loads(token))
 
     @classmethod
-    def from_keycloak_claims(cls, idp_token: dict = {}, kc_claims: dict = {}) -> 'ArxivUserClaims':
+    def from_keycloak_claims(cls,
+                             idp_token: Optional[dict] = None,
+                             kc_claims: Optional[dict] = None) -> 'ArxivUserClaims':
         """Make the user cliams from the IdP token and user claims
 
         The claims need to be compact as the cookie size is limited to 4096, tossing "uninteresting"
         """
         claims = {}
         # Flatten the idp token and claims
-        mushed = idp_token.copy()
-        mushed.update(kc_claims)
+        mushed = idp_token.copy() if idp_token else {}
+        if kc_claims:
+            mushed.update(kc_claims)
 
         for key, mapper in claims_map.items():
             if key not in mushed:
@@ -201,13 +204,9 @@ class ArxivUserClaims:
         """
         Check if the claims is expired
         """
-        exp = self.expires_at
-        if exp is None:
-            return False
-        exp_datetime = datetime.fromtimestamp(exp, timezone.utc)
         if when is None:
             when = datetime.now(timezone.utc)
-        return when > exp_datetime
+        return when > self.expires_at
 
     def update_claims(self, tag: str, value: str) -> None:
         """

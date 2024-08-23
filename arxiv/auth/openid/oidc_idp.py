@@ -2,16 +2,16 @@
 OpenID connect IdP client
 """
 import urllib.parse
-from typing import List
+from typing import List, Optional
 import requests
 from requests.auth import HTTPBasicAuth
 import jwt
 from jwt.algorithms import RSAAlgorithm, RSAPublicKey
 
-from arxiv.base import logging
+import logging
+from arxiv.base import logging as arxiv_logging
 
 from ..user_claims import ArxivUserClaims
-
 
 class ArxivOidcIdpClient:
     """arXiv OpenID Connect IdP client
@@ -67,7 +67,7 @@ class ArxivOidcIdpClient:
         self._login_redirect_url = login_redirect_url if login_redirect_url else ""
         self._logout_redirect_url = logout_redirect_url if logout_redirect_url else ""
         self._server_certs = {}
-        self._logger = logger or logging.getLogger(__name__)
+        self._logger = logger or arxiv_logging.getLogger(__name__)
         pass
 
     @property
@@ -127,7 +127,7 @@ class ArxivOidcIdpClient:
                     return pkey
         return None
 
-    def acquire_idp_token(self, code: str) -> dict | None:
+    def acquire_idp_token(self, code: str) -> Optional[dict]:
         """With the callback's code, go get the access token from IdP.
 
         Parameters
@@ -159,7 +159,6 @@ class ArxivOidcIdpClient:
                 auth=auth
             )
             if token_response.status_code != 200:
-                # need logging here
                 self._logger.warning(f'idp %s', token_response.status_code)
                 return None
             # returned data should be
@@ -201,7 +200,9 @@ class ArxivOidcIdpClient:
             return None
         # not reached
 
-    def to_arxiv_user_claims(self, idp_token: dict = {}, kc_cliams: dict = {}) -> ArxivUserClaims:
+    def to_arxiv_user_claims(self,
+                             idp_token: Optional[dict] = None,
+                             kc_cliams: Optional[dict] = None) -> ArxivUserClaims:
         """
         Given the IdP's access token claims, make Arxiv user claims.
 
@@ -218,6 +219,10 @@ class ArxivOidcIdpClient:
         NOTE: So this means there are two copies of access token. Unfortunate, but unpacking
               every time can be costly.
         """
+        if idp_token is None:
+            idp_token = {}
+        if kc_cliams is None:
+            kc_cliams = {}
         claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams)
         return claims
 
