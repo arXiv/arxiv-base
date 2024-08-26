@@ -125,6 +125,10 @@ class Base(object):
 
         @app.teardown_appcontext
         def remove_scoped_session (response_or_exc: BaseException | None) -> None:
-            if response_or_exc:
-                Session.rollback()
+            """Cleans up the DB session.
+
+            Will rollback any uncomitted transactions (via Session.remove()
+            which will call Sesion.close()). When Session is used again in this thread,
+            a new one will be created.
+            """
             Session.remove()
