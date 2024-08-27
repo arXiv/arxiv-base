@@ -25,6 +25,7 @@ class ArxivOidcIdpClient:
     realm: str
     redirect_uri: str  #
     scope: List[str]  # it's okay to be empty. Keycloak should be configured to provide scopes.
+    audience: str
     _server_certs: dict  # Cache for the IdP certs
     _logger: logging.Logger
     _login_redirect_url: str
@@ -34,6 +35,7 @@ class ArxivOidcIdpClient:
                  server_url: str = "https://openid.arxiv.org",
                  realm: str = "arxiv",
                  client_id: str = "arxiv-user",
+                 audience: str = "account",
                  scope: List[str] | None = None,
                  client_secret: str | None = None,
                  login_redirect_url: str | None = None,
@@ -61,6 +63,7 @@ class ArxivOidcIdpClient:
         self.server_url = server_url
         self.realm = realm
         self.client_id = client_id
+        self.audience = audience
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.scope = scope if scope else []
@@ -190,13 +193,18 @@ class ArxivOidcIdpClient:
             if public_key is None:
                 self._logger.info("Validating the token failed. kid=%s alg=%s", kid, algorithm)
                 return None
-            decoded_token: dict = jwt.decode(access_token, public_key, algorithms=[algorithm])
+            decoded_token: dict = jwt.decode(access_token, public_key, algorithms=[algorithm],
+                                             audience=self.audience)
             return dict(decoded_token)
+        except jwt.InvalidAudienceError:
+            self._logger.error("")
+            return None
+
         except jwt.ExpiredSignatureError:
-            self._logger.warning("IdP signature cert is expired.")
+            self._logger.error("IdP signature cert is expired.")
             return None
         except jwt.InvalidTokenError:
-            self._logger.warning("Token is invalid.")
+            self._logger.error("jwt.InvalidTokenError: Token is invalid.", exc_info=True)
             return None
         # not reached
 

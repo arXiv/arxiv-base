@@ -216,13 +216,23 @@ class ArxivUserClaims:
         self._create_property(tag)
 
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
-        token = jwt.encode(self._claims, secret, algorithm=algorithm)
+        claims = self._claims.copy()
+        del claims['idt']
+        del claims['acc']
+        payload = jwt.encode(claims, secret, algorithm=algorithm)
+        token = id_token = self.id_token + " " + self.access_token + " " + payload
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
         return token
 
     @classmethod
     def decode_jwt_token(cls, token: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+        chunks = token.split()
+        if len(chunks) != 3:
+            raise ValueError(f'Token is invalid')
+        claims = jwt.decode(chunks[2], secret, algorithms=[algorithm])
+        claims['acc'] = chunks[0]
+        claims['idt'] = chunks[1]
         return cls(jwt.decode(token, secret, algorithms=[algorithm]))
 
     pass
