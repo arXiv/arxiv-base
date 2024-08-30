@@ -220,7 +220,7 @@ class ArxivUserClaims:
         del claims['idt']
         del claims['acc']
         payload = jwt.encode(claims, secret, algorithm=algorithm)
-        token = id_token = self.id_token + " " + self.access_token + " " + payload
+        token = " ".join([self.id_token, self.access_token, payload])
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
         return token
@@ -231,8 +231,8 @@ class ArxivUserClaims:
         if len(chunks) != 3:
             raise ValueError(f'Token is invalid')
         claims = jwt.decode(chunks[2], secret, algorithms=[algorithm])
-        claims['acc'] = chunks[0]
-        claims['idt'] = chunks[1]
-        return cls(jwt.decode(token, secret, algorithms=[algorithm]))
+        claims['idt'] = chunks[0]
+        claims['acc'] = chunks[1]
+        return cls(claims)
 
     pass

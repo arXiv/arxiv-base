@@ -25,17 +25,16 @@ class ArxivOidcIdpClient:
     realm: str
     redirect_uri: str  #
     scope: List[str]  # it's okay to be empty. Keycloak should be configured to provide scopes.
-    audience: str
     _server_certs: dict  # Cache for the IdP certs
     _logger: logging.Logger
     _login_redirect_url: str
     _logout_redirect_url: str
+    jwt_verify_options: dict
 
     def __init__(self, redirect_uri: str,
                  server_url: str = "https://openid.arxiv.org",
                  realm: str = "arxiv",
                  client_id: str = "arxiv-user",
-                 audience: str = "account",
                  scope: List[str] | None = None,
                  client_secret: str | None = None,
                  login_redirect_url: str | None = None,
@@ -63,7 +62,6 @@ class ArxivOidcIdpClient:
         self.server_url = server_url
         self.realm = realm
         self.client_id = client_id
-        self.audience = audience
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.scope = scope if scope else []
@@ -71,6 +69,14 @@ class ArxivOidcIdpClient:
         self._logout_redirect_url = logout_redirect_url if logout_redirect_url else ""
         self._server_certs = {}
         self._logger = logger or arxiv_logging.getLogger(__name__)
+        self.jwt_verify_options = {
+            "verify_signature": True,
+            "verify_iat": True,
+            "verify_nbf": True,
+            "verify_exp": True,
+            "verify_iss": True,
+            "verify_aud": False,  # audience is "account" when it comes from olde tapir but not so for Keycloak.
+        }
         pass
 
     @property
@@ -99,8 +105,9 @@ class ArxivOidcIdpClient:
         return self.oidc + '/userinfo'
 
     def logout_url(self, user: ArxivUserClaims, redirect_url: str | None = None) -> str:
-        url = urllib.parse.quote(self._logout_redirect_url if redirect_url is None else redirect_url)
-        return self.oidc + f'/logout?id_token_hint={user.id_token}' if url is None else f'&post_logout_redirect_uri={url}'
+        url = self._logout_redirect_url if redirect_url is None else redirect_url
+        post_logout = f"&post_logout_redirect_uri={urllib.parse.quote(url)}" if url else ""
+        return self.oidc + f'/logout?id_token_hint={user.id_token}{post_logout}'
 
     @property
     def login_url(self) -> str:
@@ -193,8 +200,10 @@ class ArxivOidcIdpClient:
             if public_key is None:
                 self._logger.info("Validating the token failed. kid=%s alg=%s", kid, algorithm)
                 return None
-            decoded_token: dict = jwt.decode(access_token, public_key, algorithms=[algorithm],
-                                             audience=self.audience)
+            decoded_token: dict = jwt.decode(access_token, public_key,
+                                             options=self.jwt_verify_options,
+                                             algorithms=[algorithm],
+                                             )
             return dict(decoded_token)
         except jwt.InvalidAudienceError:
             self._logger.error("")
