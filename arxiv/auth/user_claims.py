@@ -63,6 +63,7 @@ claims_map = {
     'email': 'email',
     "access_token": "acc",
     "id_token": "idt",
+    "refresh_token": "refresh",
 }
 
 class ArxivUserClaims:
@@ -168,6 +169,12 @@ class ArxivUserClaims:
         """
         return self._claims.get('acc', '')
 
+    @property
+    def refresh_token(self) -> str:
+        """
+        Keycloak refresh token
+        """
+        return self._claims.get('refresh', '')
 
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
@@ -216,23 +223,44 @@ class ArxivUserClaims:
         self._create_property(tag)
 
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
+        """packing user claims"""
         claims = self._claims.copy()
         del claims['idt']
         del claims['acc']
+        if 'refresh' in claims:
+            del claims['refresh']
         payload = jwt.encode(claims, secret, algorithm=algorithm)
-        token = " ".join([self.id_token, self.access_token, payload])
+        tokens = [self.id_token, self.access_token, payload]
+        if self.refresh_token:
+            tokens.append(self.refresh_token)
+        token = " ".join(tokens)
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
         return token
 
     @classmethod
-    def decode_jwt_token(cls, token: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+    def unpack_token(cls, token: str) -> Tuple[dict, str]:
         chunks = token.split()
-        if len(chunks) != 3:
+        if len(chunks) < 3:
             raise ValueError(f'Token is invalid')
-        claims = jwt.decode(chunks[2], secret, algorithms=[algorithm])
-        claims['idt'] = chunks[0]
-        claims['acc'] = chunks[1]
+        tokens = {
+            'idt': chunks[0],
+            'acc':  chunks[1]
+        }
+        if len(chunks) > 3:
+            tokens['refsesh'] = chunks[3]
+        return tokens, chunks[2]
+
+    @classmethod
+    def decode_jwt_payload(cls, claims: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+        payload = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
+        claims.update(payload)
         return cls(claims)
+
+
+    def update_keycloak_access_token(self, updates: dict) -> None:
+        self._claims['acc'] = updates['acc']
+        return
+
 
     pass
