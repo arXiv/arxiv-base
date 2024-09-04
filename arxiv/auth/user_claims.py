@@ -230,17 +230,21 @@ class ArxivUserClaims:
         if 'refresh' in claims:
             del claims['refresh']
         payload = jwt.encode(claims, secret, algorithm=algorithm)
+        assert(',' not in self.id_token)
+        assert(',' not in self.access_token)
+        assert(',' not in payload)
         tokens = [self.id_token, self.access_token, payload]
         if self.refresh_token:
+            assert (',' not in self.refresh_token)
             tokens.append(self.refresh_token)
-        token = " ".join(tokens)
+        token = ",".join(tokens)
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
         return token
 
     @classmethod
     def unpack_token(cls, token: str) -> Tuple[dict, str]:
-        chunks = token.split()
+        chunks = token.split(',')
         if len(chunks) < 3:
             raise ValueError(f'Token is invalid')
         tokens = {
