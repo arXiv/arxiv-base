@@ -302,6 +302,7 @@ class ArxivOidcIdpClient:
             data["client_secret"] = self.client_secret
 
         url = self.logout_url(user)
+        self._logger.debug('Logout request %s', url, extra={'header': header, 'body': data})
         try:
             response = requests.post(url, headers=header, data=data, timeout=10)
             if response.status_code == 200:
@@ -320,18 +321,24 @@ class ArxivOidcIdpClient:
 
             return False
 
-        except requests.exceptions.RequestException:
-            self._logger.error("Failed to connect to %s", url)
+        except requests.exceptions.RequestException as exc:
+            self._logger.error("Failed to connect to %s - %s", url, str(exc), exc_info=True)
             return False
 
-    def refresh_access_token(self, tokens: dict) -> ArxivUserClaims:
+    def refresh_access_token(self, user: ArxivUserClaims) -> ArxivUserClaims:
         """With the refresh token, get a new access token
 
         Parameters
         ----------
-        tokens: dict
+        user: ArxivUserClaims
            that has all of id_token, access_token and refresh token
         """
+
+        if not user.refresh_token:
+            self._logger.warning("I suspect that you'd expect to see the refresh token",
+                                 extra=user._claims)
+            return user
+
         headers = {
             "Content-Type": "application/x-www-form-urlencoded"
         }
@@ -355,7 +362,7 @@ class ArxivOidcIdpClient:
                 data={
                     'grant_type': 'refresh_token',
                     'client_id': self.client_id,
-                    'refresh_token': refresh_token
+                    'refresh_token': user.refresh_token
                 },
                 auth=auth,
                 headers=headers,
@@ -370,11 +377,11 @@ class ArxivOidcIdpClient:
             if not idp_claims:
                 return None
             # somewhat fake but sufficient idp_token  - we only need id_token and refresh_token,
-            # and they are in tokens.
-            # Since this is the format Keycloak uses, other IdP may have othre format.
+            # and they are in the user cliams.
+            # Since this is the format Keycloak uses, other IdP may have other format.
             idp_token = {
-                "id_token": tokens.get('idt'),
-                "refresh_token": tokens.get('refresh'),
+                "id_token": user.id_token,
+                "refresh_token": user.refresh_token,
             }
             return self.to_arxiv_user_claims(idp_token, idp_claims)
         except requests.exceptions.RequestException:
