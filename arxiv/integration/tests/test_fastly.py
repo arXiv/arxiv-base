@@ -146,14 +146,14 @@ def test_purge_category_change_alias_cats(mockToday,mockDBQuery):
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("solv-int cs.SY", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'))
-    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs" ]
+    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs", "list-2010-01-grp_physics", "list-2010-grp_physics" ]
     assert sorted(result)==sorted(expected)
 
     #find archives of unlisted noncanonical categories
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("nlin.SI eess.SY", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'))
-    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs" ]
+    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs", "list-2010-01-grp_physics", "list-2010-grp_physics" ]
     assert sorted(result)==sorted(expected)
 
 @patch('arxiv.integration.fastly.purge._get_category_and_date')
@@ -170,7 +170,7 @@ def test_purge_category_change_remove_cats(mockToday,mockDBQuery):
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("cs.LG", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'),"cs.LG hep-lat")
-    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010"]
+    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010", "list-2010-01-grp_physics", "list-2010-grp_physics"]
     assert sorted(result)==sorted(expected)
 
     #remove archive of alias
@@ -194,7 +194,7 @@ def test_purge_category_change_add_cats(mockToday,mockDBQuery):
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("cs.LG hep-lat", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'),"cs.LG")
-    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010"]
+    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010", "list-2010-01-grp_physics", "list-2010-grp_physics"]
     assert sorted(result)==sorted(expected)
 
     #add archive of alias
