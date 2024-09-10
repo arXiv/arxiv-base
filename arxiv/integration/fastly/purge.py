@@ -12,7 +12,7 @@ from arxiv.config import settings
 from arxiv.db import Session
 from arxiv.db.models import Metadata, Updates
 from arxiv.identifier import Identifier, IdentifierException
-from arxiv.taxonomy.definitions import CATEGORIES
+from arxiv.taxonomy.definitions import GROUPS
 from arxiv.taxonomy.category import get_all_cats_from_string 
 
 
@@ -70,9 +70,10 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, date]:
 def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> List[str]:
     """determines all list and year pages required for a category change to a paper
         returns list of all keys to purge
-        does not includepaths for the paper itself
-        assumes categories will be provided as string like from abs_categories feild, but could be imporved if categories could be specified in a list
+        does not include paths for the paper itself
+        assumes categories will be provided as string like from abs_categories feild, but could be improved if categories could be specified in a list
     """
+    grp_physics=GROUPS['grp_physics']
     new_cats, recent_date= _get_category_and_date(arxiv_id)
 
     #get time period affected
@@ -84,16 +85,20 @@ def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> 
     if today - timedelta(days=7) <= recent_date:
         recent=True
     
-    archives, cats = get_all_cats_from_string(new_cats, True)
+    groups, archives, cats = get_all_cats_from_string(new_cats, True)
     new_archive_ids={arch.id for arch in archives}
     list_pages={cat.id for cat in cats} | new_archive_ids
+    if grp_physics in groups: #grp_physics is a group for catchup
+        list_pages.add(grp_physics.id)
 
     year_pages=[]
     if old_cats: #clear any pages this paper may have been removed from or added to
-        old_archives, old_categories = get_all_cats_from_string(old_cats, True)
+        old_groups, old_archives, old_categories = get_all_cats_from_string(old_cats, True)
         old_cat_ids=  {cat.id for cat in old_categories}
         old_archive_ids={arch.id for arch in old_archives}
         list_pages= list_pages | old_cat_ids | old_archive_ids
+        if grp_physics in old_groups: #grp_physics is a group for catchup
+            list_pages.add(grp_physics.id)
         year_pages=  old_archive_ids.symmetric_difference(new_archive_ids)
 
     #collect all relevant keys
