@@ -91,7 +91,7 @@ class TextTex2Utf(TestCase):
             0x03b1) + '{' + chr(0x03b2) + chr(0x03b3) + '}')
 
         # another test_string of greek with nested curlies
-        test_str = '\\alpha{\\beta{\\gamma\macro}'
+        test_str = '\\alpha{\\beta{\\gamma\\macro}'
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, 'α{β{γ\\macro}')
 
