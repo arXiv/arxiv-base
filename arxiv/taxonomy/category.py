@@ -139,22 +139,24 @@ def create_bad_category(name:str) -> Category:
         is_general=False
     ) 
 
-def get_all_cats_from_string(cat_string:str, only_cannonical:Optional[bool]=False)->Tuple[List[Archive],List[Category]]:
-    """returns all possble lists and archives the categories and article would appear in based on the category string.
+def get_all_cats_from_string(cat_string:str, only_cannonical:Optional[bool]=False)->Tuple[List[Group], List[Archive],List[Category]]:
+    """returns all possble groups, archives and category lists an article would appear in based on the category string.
     This is needed because alternate names are not always recorded in the strings
     setting only_cannonical to true will not return non canonical categories, but will stil return the archives from non-cannonical alias pairs
     This is meant to be used on catgory strings from the database, not user input
+    raises KeyError if category string is invalid
     """
     from .definitions import CATEGORIES, CATEGORY_ALIASES
     cats = {CATEGORIES[cat].get_canonical() for cat in cat_string.split()} 
     archives_canon={cat.get_archive() for cat in cats}
     archives_noncanon = {CATEGORIES[cat.alt_name].get_archive() for cat in cats if (cat.alt_name and cat.alt_name in CATEGORY_ALIASES)} #papers also belong in the archives of their non-cannon alias categories
     archives= archives_noncanon | archives_canon
-    
+      
     if not only_cannonical:
         noncannon_cats = {CATEGORIES[cat.alt_name] for cat in cats if cat.alt_name is not None and cat.alt_name in CATEGORIES}
         cats= cats | noncannon_cats
         noncannon_archives={cat.get_archive() for cat in noncannon_cats}
         archives= archives | noncannon_archives
 
-    return list(archives), list(cats)
+    groups={arch.get_group() for arch in archives}
+    return list(groups), list(archives), list(cats)

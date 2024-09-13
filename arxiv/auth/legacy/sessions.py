@@ -10,13 +10,13 @@ from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from sqlalchemy.orm.exc import NoResultFound
 
 from .. import domain
-from ...db import session
+from ...db import Session
 from . import cookies, util
 
 from ...db.models import TapirSession, TapirSessionsAudit, TapirUser, \
     TapirNickname, Demographic
 from .exceptions import UnknownSession, SessionCreationFailed, \
-    SessionExpired, InvalidCookie, Unavailable
+    SessionExpired, InvalidCookie
 
 logger = logging.getLogger(__name__)
 EASTERN = timezone('US/Eastern')
@@ -24,7 +24,7 @@ EASTERN = timezone('US/Eastern')
 
 def _load(session_id: str) -> TapirSession:
     """Get TapirSession from session id."""
-    db_session: TapirSession = session.query(TapirSession) \
+    db_session: TapirSession = Session.query(TapirSession) \
         .filter(TapirSession.session_id == session_id) \
         .first()
     if not db_session:
@@ -35,7 +35,7 @@ def _load(session_id: str) -> TapirSession:
 
 def _load_audit(session_id: str) -> TapirSessionsAudit:
     """Get TapirSessionsAudit from session id."""
-    db_sessions_audit: TapirSessionsAudit = session.query(TapirSessionsAudit) \
+    db_sessions_audit: TapirSessionsAudit = Session.query(TapirSessionsAudit) \
         .filter(TapirSessionsAudit.session_id == session_id) \
         .first()
     if not db_sessions_audit:
@@ -71,14 +71,11 @@ def load(cookie: str) -> domain.Session:
         raise SessionExpired(f'Session {session_id} has expired in cookie')
 
     data: Tuple[TapirUser, TapirSession, TapirNickname, Demographic]
-    try:
-        data = session.query(TapirUser, TapirSession, TapirNickname, Demographic) \
-            .join(TapirSession).join(TapirNickname).join(Demographic) \
-            .filter(TapirUser.user_id == user_id) \
-            .filter(TapirSession.session_id == session_id ) \
-            .first()
-    except OperationalError as e:
-        raise Unavailable('Database is temporarily unavailable') from e
+    data = Session.query(TapirUser, TapirSession, TapirNickname, Demographic) \
+        .join(TapirSession).join(TapirNickname).join(Demographic) \
+        .filter(TapirUser.user_id == user_id) \
+        .filter(TapirSession.session_id == session_id ) \
+        .first()
 
     if not data:
         raise UnknownSession('No such user or session')
@@ -152,8 +149,8 @@ def create(authorizations: domain.Authorizations,
             remote_host=remote_host,
             tracking_cookie=tracking_cookie
         )
-        session.add(tapir_sessions_audit)
-        session.commit()
+        Session.add(tapir_sessions_audit)
+        Session.commit()
     except Exception as e:
         raise SessionCreationFailed(f'Failed to create: {e}') from e
 
@@ -234,8 +231,8 @@ def invalidate_by_id(session_id: str) -> None:
     try:
         tapir_session = _load(session_id)
         tapir_session.end_time = end - 1
-        session.merge(tapir_session)
-        session.commit()
+        Session.merge(tapir_session)
+        Session.commit()
     except NoResultFound as e:
         raise UnknownSession(f'No such session {session_id}') from e
     except SQLAlchemyError as e:

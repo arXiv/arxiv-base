@@ -1,6 +1,8 @@
 """Tests for :mod:`arxiv.users.legacy.endorsements` using a live test DB."""
 
 import os
+import shutil
+import tempfile
 from unittest import TestCase, mock
 from datetime import datetime
 from pytz import timezone, UTC
@@ -9,6 +11,7 @@ from flask import Flask
 from sqlalchemy import insert
 from mimesis import Person, Internet, Datetime
 
+import arxiv.db
 from arxiv.db import transaction
 from arxiv.db import models
 from arxiv.config import Settings
@@ -24,17 +27,19 @@ class TestAutoEndorsement(TestCase):
 
     def setUp(self):
         """Generate some fake data."""
-
+        self.db_path = tempfile.mkdtemp()
         self.app = Flask('test')
+        self.app.config['CLASSIC_DATABASE_URI'] = f'sqlite:///{self.db_path}/test.db'
         self.app.config['CLASSIC_SESSION_HASH'] = 'foohash'
         self.app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
         self.app.config['SESSION_DURATION'] = '36000'
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://' #in memory
         settings = Settings(
-                        CLASSIC_DB_URI='sqlite:///:memory:',
+                        CLASSIC_DB_URI=self.app.config['CLASSIC_DATABASE_URI'],
                         LATEXML_DB_URI=None)
 
-        engine, _ = models.configure_db(settings)
+        arxiv.db.init(settings)
+        util.create_all(arxiv.db._classic_engine)
+
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
             'remote_host': 'foo-host.foo.com',
@@ -42,7 +47,6 @@ class TestAutoEndorsement(TestCase):
         }
 
         with self.app.app_context():
-            util.create_all(engine)
             with transaction() as session:
                 person = Person('en')
                 net = Internet()
@@ -90,6 +94,8 @@ class TestAutoEndorsement(TestCase):
                     )
                 )
 
+    def tearDown(self):
+        shutil.rmtree(self.db_path)
 
     def test_invalidated_autoendorsements(self):
         """The user has two autoendorsements that have been invalidated."""

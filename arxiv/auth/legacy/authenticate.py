@@ -9,11 +9,11 @@ from . import util
 from .. import domain
 
 from . passwords import check_password, is_ascii
-from ...db import session
+from ...db import Session
 from ...db.models import TapirUser, TapirUsersPassword, TapirPermanentToken, \
     TapirNickname, Demographic
 from .exceptions import NoSuchUser, AuthenticationFailed, \
-    PasswordAuthenticationFailed, Unavailable
+    PasswordAuthenticationFailed
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +62,7 @@ def authenticate(username_or_email: Optional[str] = None,
             logger.debug('Neither username/password nor token provided')
             raise AuthenticationFailed('Username+password or token required')
     except OperationalError as e:
-        # Note OperationalError can be a lot of different things and not just
-        # the DB being unavailable. So this message can be deceptive.
-        raise Unavailable('Database is temporarily unavailable') from e
+        raise e  # want to just pass all these on
     except Exception as ex:
         raise AuthenticationFailed() from ex
 
@@ -201,7 +199,7 @@ def _authenticate_password(username_or_email: str, password: str) -> PassData:
 
 
 def _get_user_by_user_id(user_id: int) -> PassData:
-    tapir_user: TapirUser = session.query(TapirUser) \
+    tapir_user: TapirUser = Session.query(TapirUser) \
         .filter(TapirUser.user_id == int(user_id)) \
         .filter(TapirUser.flag_approved == 1) \
         .filter(TapirUser.flag_deleted == 0) \
@@ -213,7 +211,7 @@ def _get_user_by_user_id(user_id: int) -> PassData:
 def _get_user_by_email(email: str) -> PassData:
     if not email or '@' not in email:
         raise ValueError("must be an email address")
-    tapir_user: TapirUser = session.query(TapirUser) \
+    tapir_user: TapirUser = Session.query(TapirUser) \
         .filter(TapirUser.email == email) \
         .filter(TapirUser.flag_approved == 1) \
         .filter(TapirUser.flag_deleted == 0) \
@@ -226,14 +224,14 @@ def _get_user_by_username(username: str) -> PassData:
     """Username is the tapir nickname."""
     if not username or '@' in username:
         raise ValueError("username must not contain a @")
-    tapir_nick = session.query(TapirNickname) \
+    tapir_nick = Session.query(TapirNickname) \
             .filter(TapirNickname.nickname == username) \
             .filter(TapirNickname.flag_valid == 1) \
             .first()
     if not tapir_nick:
         raise NoSuchUser('User lacks a nickname')
 
-    tapir_user = session.query(TapirUser) \
+    tapir_user = Session.query(TapirUser) \
                 .filter(TapirUser.user_id == tapir_nick.user_id) \
                 .filter(TapirUser.flag_approved == 1) \
                 .filter(TapirUser.flag_deleted == 0) \
@@ -268,20 +266,20 @@ def _get_passdata(tapir_user: TapirUser) -> PassData:
     if not tapir_user:
         raise NoSuchUser('User does not exist')
 
-    tapir_nick = session.query(TapirNickname) \
+    tapir_nick = Session.query(TapirNickname) \
             .filter(TapirNickname.user_id ==tapir_user.user_id) \
             .filter(TapirNickname.flag_valid == 1) \
             .first()
     if not tapir_nick:
         raise NoSuchUser('User lacks a nickname')
 
-    tapir_password: TapirUsersPassword = session.query(TapirUsersPassword) \
+    tapir_password: TapirUsersPassword = Session.query(TapirUsersPassword) \
         .filter(TapirUsersPassword.user_id == tapir_user.user_id) \
         .first()
     if not tapir_password:
         raise RuntimeError(f'Missing password')
 
-    tapir_profile: Demographic = session.query(Demographic) \
+    tapir_profile: Demographic = Session.query(Demographic) \
         .filter(Demographic.user_id == tapir_user.user_id) \
         .first()
     return tapir_user, tapir_password, tapir_nick, tapir_profile
@@ -304,8 +302,8 @@ def _invalidate_token(user_id: str, secret: str) -> None:
     """
     db_token = _get_token(user_id, secret)
     db_token.valid = 0
-    session.add(db_token)
-    session.commit()
+    Session.add(db_token)
+    Session.commit()
 
 
 def _get_token(user_id: str, secret: str) -> TapirPermanentToken:
@@ -340,7 +338,7 @@ def _get_token(user_id: str, secret: str) -> TapirPermanentToken:
     if len(secret) > 40:
         raise ValueError("secret too long")
 
-    db_token: TapirPermanentToken = session.query(TapirPermanentToken) \
+    db_token: TapirPermanentToken = Session.query(TapirPermanentToken) \
         .filter(TapirPermanentToken.user_id == user_id) \
         .filter(TapirPermanentToken.secret == secret) \
         .filter(TapirPermanentToken.valid == 1) \

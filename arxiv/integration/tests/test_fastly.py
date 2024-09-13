@@ -1,10 +1,11 @@
 import unittest
+import pytest
 from unittest.mock import patch, MagicMock
 from datetime import date
 from fastly.api.purge_api import PurgeApi
 
-from arxiv.identifier import Identifier
-from arxiv.integration.fastly.purge import purge_fastly_keys, _purge_category_change, purge_cache_for_paper
+from arxiv.identifier import Identifier, IdentifierException
+from arxiv.integration.fastly.purge import purge_fastly_keys, _purge_category_change, purge_cache_for_paper, _get_category_and_date
 from arxiv.integration.fastly.headers import add_surrogate_key
 
 #tests for the purge keys utility function
@@ -145,14 +146,14 @@ def test_purge_category_change_alias_cats(mockToday,mockDBQuery):
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("solv-int cs.SY", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'))
-    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs" ]
+    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs", "list-2010-01-grp_physics", "list-2010-grp_physics" ]
     assert sorted(result)==sorted(expected)
 
     #find archives of unlisted noncanonical categories
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("nlin.SI eess.SY", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'))
-    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs" ]
+    expected=["list-2010-01-nlin.SI", "list-2010-nlin.SI", "list-2010-01-nlin", "list-2010-nlin","list-2010-01-eess.SY", "list-2010-eess.SY", "list-2010-01-eess", "list-2010-eess", "list-2010-01-cs", "list-2010-cs", "list-2010-01-grp_physics", "list-2010-grp_physics" ]
     assert sorted(result)==sorted(expected)
 
 @patch('arxiv.integration.fastly.purge._get_category_and_date')
@@ -169,7 +170,7 @@ def test_purge_category_change_remove_cats(mockToday,mockDBQuery):
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("cs.LG", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'),"cs.LG hep-lat")
-    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010"]
+    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010", "list-2010-01-grp_physics", "list-2010-grp_physics"]
     assert sorted(result)==sorted(expected)
 
     #remove archive of alias
@@ -193,7 +194,7 @@ def test_purge_category_change_add_cats(mockToday,mockDBQuery):
     mockToday.today.return_value=date(2024,1,1)
     mockDBQuery.return_value=("cs.LG hep-lat", date(2010,1,1))
     result=_purge_category_change(Identifier('1001.5678'),"cs.LG")
-    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010"]
+    expected=["list-2010-01-cs.LG", "list-2010-cs.LG", "list-2010-01-cs", "list-2010-cs", "list-2010-01-hep-lat", "list-2010-hep-lat", "year-hep-lat-2010", "list-2010-01-grp_physics", "list-2010-grp_physics"]
     assert sorted(result)==sorted(expected)
 
     #add archive of alias
@@ -213,3 +214,11 @@ def test_purge_cache_for_paper(mockToday,mockPurge, mockDBQuery):
     purge_cache_for_paper('1001.5678',"cs.LG")
     actual_keys = mockPurge.call_args[0][0]
     assert sorted(actual_keys) == sorted (expected_keys)
+
+def test_get_category_and_date_nonexstant_ids():
+    #there is no paper with this id 
+    #also base has no test db so any paper would return none, but this will work even if it gets data
+    bad_id=Identifier("0807.9999")
+    with pytest.raises(IdentifierException):
+        _get_category_and_date(bad_id)
+   
