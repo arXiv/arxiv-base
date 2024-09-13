@@ -377,7 +377,7 @@ class ArxivOidcIdpClient:
             if not idp_claims:
                 return None
             # somewhat fake but sufficient idp_token  - we only need id_token and refresh_token,
-            # and they are in the user cliams.
+            # and they are in the user claims.
             # Since this is the format Keycloak uses, other IdP may have other format.
             idp_token = {
                 "id_token": user.id_token,

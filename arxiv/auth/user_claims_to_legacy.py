@@ -1,5 +1,5 @@
 from typing import Tuple, Optional
-from .legacy.authenticate import PassData, _get_user_by_email, instantiate_tapir_user
+from .legacy.authenticate import PassData, _get_user_by_email, instantiate_tapir_user, NoSuchUser, _get_user_by_user_id
 from .legacy.sessions import (
     create as create_legacy_session,
     generate_cookie as generate_legacy_cookie,
@@ -24,9 +24,15 @@ def create_tapir_session_from_user_claims(user_claims: ArxivUserClaims,
 
 
     with transaction() as session:
-        passdata  = _get_user_by_email(user_claims.email)
+        passdata = None
+        try:
+            passdata = _get_user_by_user_id(user_claims.user_id)
+        except NoSuchUser:
+            pass
+
         if passdata is None:
-            passdata = create_legacy_user(user_claims)
+            return None
+        passdata = create_legacy_user(user_claims)
         tapir_user, legacy_auth = instantiate_tapir_user(passdata)
         session: Session = create_legacy_session(legacy_auth, client_ip, client_host,
                                                  tracking_cookie=tracking_cookie,
