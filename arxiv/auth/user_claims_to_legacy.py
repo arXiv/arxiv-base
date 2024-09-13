@@ -20,25 +20,25 @@ def create_tapir_session_from_user_claims(user_claims: ArxivUserClaims,
                                           ) -> Optional[Tuple[str, Session]]:
     """
     Using the legacy tapir models, establish the session and return the legacy cookie.
+
+    You need to be in a transaction.
     """
+    passdata = None
+    try:
+        passdata = _get_user_by_user_id(user_claims.user_id)
+    except NoSuchUser:
+        pass
 
+    if passdata is None:
+        # passdata = create_legacy_user(user_claims)
+        return None
 
-    with transaction() as session:
-        passdata = None
-        try:
-            passdata = _get_user_by_user_id(user_claims.user_id)
-        except NoSuchUser:
-            pass
-
-        if passdata is None:
-            return None
-        passdata = create_legacy_user(user_claims)
-        tapir_user, legacy_auth = instantiate_tapir_user(passdata)
-        session: Session = create_legacy_session(legacy_auth, client_ip, client_host,
-                                                 tracking_cookie=tracking_cookie,
-                                                 user=tapir_user)
-        legacy_cookie = generate_legacy_cookie(session)
-        return legacy_cookie, session
+    tapir_user, legacy_auth = instantiate_tapir_user(passdata)
+    session: Session = create_legacy_session(legacy_auth, client_ip, client_host,
+                                             tracking_cookie=tracking_cookie,
+                                             user=tapir_user)
+    legacy_cookie = generate_legacy_cookie(session)
+    return legacy_cookie, session
 
 
 def create_legacy_user(user_claims: ArxivUserClaims) -> PassData:
