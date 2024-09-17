@@ -302,9 +302,10 @@ class ArxivOidcIdpClient:
             data["client_secret"] = self.client_secret
 
         url = self.logout_url(user)
-        self._logger.debug('Logout request %s', url, extra={'header': header, 'body': data})
+        log_extra = {'header': header, 'body': data}
+        self._logger.debug('Logout request %s', url, extra=log_extra)
         try:
-            response = requests.post(url, headers=header, data=data, timeout=10)
+            response = requests.post(url, headers=header, data=data, timeout=30)
             if response.status_code == 200:
                 # If Keycloak is misconfigured, this does not log out.
                 # Turn front channel logout off in the logout settings of the client."
@@ -322,8 +323,15 @@ class ArxivOidcIdpClient:
             return False
 
         except requests.exceptions.RequestException as exc:
-            self._logger.error("Failed to connect to %s - %s", url, str(exc), exc_info=True)
+            self._logger.error("Logout failed to connect to %s - %s", url, str(exc), exc_info=True,
+                               extra=log_extra)
             return False
+
+        except Exception as exc:
+            self._logger.error("Logout failed to connect to %s - %s", url, str(exc), exc_info=True,
+                               extra=log_extra)
+            return False
+
 
     def refresh_access_token(self, user: ArxivUserClaims) -> ArxivUserClaims:
         """With the refresh token, get a new access token
@@ -372,17 +380,15 @@ class ArxivOidcIdpClient:
                 return None
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
-            access_token = token_response.json()['access_token']
+            # This should be identical shape payload as to the login
+            refreshed = token_response.json()
+            # be defensive and don't assume to have access_token
+            access_token = refreshed.get('access_token')
+            if not access_token:
+                return None
             idp_claims = self.validate_access_token(access_token)
             if not idp_claims:
                 return None
-            # somewhat fake but sufficient idp_token  - we only need id_token and refresh_token,
-            # and they are in the user claims.
-            # Since this is the format Keycloak uses, other IdP may have other format.
-            idp_token = {
-                "id_token": user.id_token,
-                "refresh_token": user.refresh_token,
-            }
-            return self.to_arxiv_user_claims(idp_token, idp_claims)
+            return self.to_arxiv_user_claims(refreshed, idp_claims)
         except requests.exceptions.RequestException:
             return None

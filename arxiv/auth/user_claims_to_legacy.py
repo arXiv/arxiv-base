@@ -1,4 +1,5 @@
 from typing import Tuple, Optional
+from logging import getLogger
 from .legacy.authenticate import PassData, _get_user_by_email, instantiate_tapir_user, NoSuchUser, _get_user_by_user_id
 from .legacy.sessions import (
     create as create_legacy_session,
@@ -23,9 +24,17 @@ def create_tapir_session_from_user_claims(user_claims: ArxivUserClaims,
 
     You need to be in a transaction.
     """
+    logger = getLogger(__name__)
     passdata = None
     try:
-        passdata = _get_user_by_user_id(user_claims.user_id)
+        user_id = int(user_claims.user_id)
+    except ValueError:
+        user_id = user_claims.user_id
+        logger.warning("create_tapir_session_from_user_claims: User ID '%s' is not int", user_id)
+        pass
+
+    try:
+        passdata = _get_user_by_user_id(user_id)
     except NoSuchUser:
         pass
 
