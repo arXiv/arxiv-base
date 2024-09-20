@@ -47,9 +47,6 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 from typing import Tuple, Optional
 
-from flask.globals import app_ctx
-from flask import has_app_context, Flask
-
 from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
@@ -76,21 +73,33 @@ It may be used as a `sqlalchemy.orm.Session`.
 
 Calling `SessionLocal.configure()` will alter all future sessions accessed via `arxiv.db.SessionLocal` or `arxiv.db.session`"""
 
+try:
+    # allow arxiv.db to be used when flask is not installed
+    from flask import has_app_context, Flask
+    from flask.globals import app_ctx
+    def _scope_id() -> int:
+        """Gets an ID used as a key to the sessions from the scopped_session registry.
+        `sqlalchemy.orm.Session` objects are NOT thread safe, but we are using `arxiv.db.session` as if were thread safe.
+        This works by `scopped_session` returning a proxy/registry that uses a different session based on
+        what thread is running.
+        See https://docs.sqlalchemy.org/en/20/orm/contextual.html#thread-local-scope
+        """
+        if has_app_context():
+            # This piece of code is crucial to making sure sqlalchemy sessions work in flask
+            # It is the same as the flask_sqlalchemy implementation
+            # See: https://github.com/pallets-eco/flask-sqlalchemy/blob/42a36a3cb604fd39d81d00b54ab3988bbd0ad184/src/flask_sqlalchemy/session.py#L109
+            return id(app_ctx._get_current_object())
+        else:
+            return int(threading.current_thread().ident)
 
-def _scope_id () -> int:
-    """Gets an ID used as a key to the sessions from the scopped_session registry.
-    `sqlalchemy.orm.Session` objects are NOT thread safe, but we are using `arxiv.db.session` as if were thread safe.
-    This works by `scopped_session` returning a proxy/registry that uses a different session based on
-    what thread is running.
-    See https://docs.sqlalchemy.org/en/20/orm/contextual.html#thread-local-scope
-    """
-    if has_app_context():
-        # This piece of code is crucial to making sure sqlalchemy sessions work in flask
-        # It is the same as the flask_sqlalchemy implementation
-        # See: https://github.com/pallets-eco/flask-sqlalchemy/blob/42a36a3cb604fd39d81d00b54ab3988bbd0ad184/src/flask_sqlalchemy/session.py#L109
-        return id(app_ctx._get_current_object())
-    else:
+    def _in_flask() -> bool:
+        return has_app_context()
+except ImportError:
+    def _scope_id() -> int:
         return int(threading.current_thread().ident)
+
+    def _in_flask() -> bool:
+        False
 
 
 Session = scoped_session(session_factory, scopefunc=_scope_id)
@@ -110,7 +119,7 @@ It should be used like:
 
 @contextmanager
 def transaction ():
-    in_flask = True if has_app_context() else False
+    in_flask = _in_flask()
     db = Session if in_flask else session_factory()
     try:
         yield db
