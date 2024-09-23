@@ -6,13 +6,9 @@ from datetime import datetime
 
 from arxiv.taxonomy.category import Category
 from arxiv.taxonomy.definitions import CATEGORIES
-from arxiv.db import session
+from arxiv.db import Session
 from arxiv.db.models import Metadata, DocumentCategory
 from arxiv.identifier import Identifier
-
-import logging
-from google.cloud.logging import Client
-from google.cloud.logging.handlers import CloudLoggingHandler
 
 import functions_framework
 from cloudevents.http import CloudEvent
@@ -22,14 +18,15 @@ from sqlalchemy import create_engine, Column, String, Integer, DateTime, Enum, P
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, aliased
 
-#cloud function logging setup
-handler = CloudLoggingHandler(Client())
-functions_framework.setup_logging()
-logger = logging.getLogger(__name__)
+#logging setup
+if not(os.environ.get('LOG_LOCALLY')):
+    import google.cloud.logging
+    client = google.cloud.logging.Client()
+    client.setup_logging()
+import logging 
 log_level_str = os.getenv('LOG_LEVEL', 'INFO')
 log_level = getattr(logging, log_level_str.upper(), logging.INFO)
-logger.setLevel(log_level)
-logger.addHandler(handler)
+logging.basicConfig(level=log_level)
 
 # Initialize BigQuery client
 bq_client = bigquery.Client()
@@ -48,7 +45,7 @@ class PaperCategories:
 
     def add_primary(self,cat:str):
         if self.primary != None: #this function should only get called once per paper
-            logger.error(f"Multiple primary categories for {self.paper_id}: {self.primary} and {cat}")
+            logging.error(f"Multiple primary categories for {self.paper_id}: {self.primary} and {cat}")
             self.add_cross(cat) #add as a cross just to keep data
         else:
             catgory=CATEGORIES[cat]
@@ -130,23 +127,23 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     """
 
     data=json.loads(base64.b64decode(cloud_event.get_data()['message']['data']).decode())
-    logger.info(f"Received message: {data}")
+    logging.info(f"Received message: {data}")
 
     #get and check enviroment data
     enviro=os.environ.get('ENVIRONMENT')
     download_table=os.environ.get('DOWNLOAD_TABLE')
     write_table=os.environ.get('WRITE_TABLE')
     if any(v is None for v in (enviro, download_table, write_table)):
-        logger.critical(f"Missing enviroment variable(s): ENVIRONMENT:{enviro}, DOWNLOAD_TABLE: {download_table}, WRITE_TABLE: {write_table}")
+        logging.critical(f"Missing enviroment variable(s): ENVIRONMENT:{enviro}, DOWNLOAD_TABLE: {download_table}, WRITE_TABLE: {write_table}")
         return #dont bother retrying
     elif enviro == "PRODUCTION":
         if "development" in download_table or "development" in write_table: 
-            logger.warning(f"Referencing development project in production! Downloads {download_table} Write {write_table}")
+            logging.warning(f"Referencing development project in production! Downloads {download_table} Write {write_table}")
     elif enviro == "DEVELOPMENT":
         if "production" in download_table or "production" in write_table: 
-            logger.warning(f"Referencing production project in development! Downloads {download_table} Write {write_table}")
+            logging.warning(f"Referencing production project in development! Downloads {download_table} Write {write_table}")
     else:
-        logger.error(f"Unknown Enviroment: {enviro}")
+        logging.error(f"Unknown Enviroment: {enviro}")
         return #dont bother retrying
 
     #get the download data
@@ -181,19 +178,19 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
             )
             paper_ids.add(paper_id)
         except Exception as e:
-            logger.error(f"Problem with row: {tuple(row)}, skipping. Error:{e}")
+            logging.error(f"Problem with row: {tuple(row)}, skipping. Error:{e}")
             continue #dont count this download
 
-    logger.info(f"fetched {len(download_data)} rows, unique paper ids: {len(paper_ids)}")
+    logging.info(f"fetched {len(download_data)} rows, unique paper ids: {len(paper_ids)}")
 
     if len(paper_ids) ==0:
-        logger.critical("No data retrieved from BigQuery")
+        logging.critical("No data retrieved from BigQuery")
         return #this will prevent retries (is that good?)
     
     #find categories for all the papers
     paper_categories=get_paper_categories(paper_ids)
     if len(paper_categories) ==0:
-        logger.critical("No category data retrieved from database")
+        logging.critical("No category data retrieved from database")
         return #this will prevent retries (is that good?)
 
     #aggregate download data
@@ -208,7 +205,7 @@ def get_paper_categories(paper_ids: Set[str])-> Dict[str, PaperCategories]:
     meta=aliased(Metadata)
     dc=aliased(DocumentCategory)    
     paper_cats = (
-        session.query(meta.paper_id, dc.category, dc.is_primary)
+        Session.query(meta.paper_id, dc.category, dc.is_primary)
         .join(meta, dc.document_id == meta.document_id)
         .filter(meta.paper_id.in_(paper_ids)) 
         .filter(meta.is_current==1)
@@ -239,7 +236,7 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
         try:
             cats=paper_categories[entry.paper_id]
         except KeyError as e:
-            logger.error(f"No category data found for {entry.paper_id} Error: {e}")
+            logging.error(f"No category data found for {entry.paper_id} Error: {e}")
             continue #dont process this paper
         
         #record primary
@@ -345,5 +342,5 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
     session.bulk_update_mappings(HourlyDownloadData, update_data)
     session.commit()
     session.close()
-    logger.info(f"added {len(data_to_insert)} rows, updated {len(update_data)} rows")
+    logging.info(f"added {len(data_to_insert)} rows, updated {len(update_data)} rows")
     return
