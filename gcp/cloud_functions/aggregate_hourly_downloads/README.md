@@ -27,7 +27,7 @@ to run use this in the src folder
 ` functions-framework --target=aggregate_hourly_downloads --signature-type=cloudevent `
 
 message data options:
-currently the contents of the message don't matter any message triggers the run
+the function looks for a message like {"state": "SUCCEEDED"} to trigger
 
 to trigger run a curl command with a cloud event, heres an example you can use: 
 note that the data is base 64 encoded, and that return values from cloud functions seem to be useless
@@ -42,7 +42,7 @@ note that the data is base 64 encoded, and that return values from cloud functio
   -H "ce-source: //pubsub.googleapis.com/projects/MY-PROJECT/topics/MY-TOPIC" \
   -d '{
         "message": {
-          "data": "eyJwYXBlcl9pZCI6IjEwMDguMzIyMiIsICJvbGRfY2F0ZWdvcmllcyI6ImVlc3MuU1kgaGVwLWxhdCJ9",
+          "data": "eyJzdGF0ZSI6ICJTVUNDRUVERUQifQ==",
           "attributes": {
              "attr1":"attr1-value"
           }

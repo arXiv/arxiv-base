@@ -127,7 +127,10 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     """
 
     data=json.loads(base64.b64decode(cloud_event.get_data()['message']['data']).decode())
-    logging.info(f"Received message: {data}")
+    state= data.get("state","")
+    if state!="SUCCEEDED":
+        logging.debug(f"ignored message: {data}")
+        return
 
     #get and check enviroment data
     enviro=os.environ.get('ENVIRONMENT')
