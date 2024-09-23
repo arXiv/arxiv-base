@@ -233,7 +233,11 @@ class ArxivUserClaims:
         assert(',' not in self.id_token)
         assert(',' not in self.access_token)
         assert(',' not in payload)
-        tokens = ["4", self.expires_at.isoformat(), self.id_token, self.access_token, payload]
+        # access_token = self.access_token
+        # remove the access token from packing. Payload is from access token, and since I'm not using this,
+        # save the space.
+        access_token = "-"
+        tokens = ["4", self.expires_at.isoformat(), self.id_token, access_token, payload]
         if self.refresh_token:
             assert (',' not in self.refresh_token)
             tokens.append(self.refresh_token)
@@ -249,7 +253,7 @@ class ArxivUserClaims:
         # chunk 1 is expiration - This is NOT internally used. This is to show
         # to the UI when the cookie expires
         # chunk 2 is id token
-        # chunk 3 is access token
+        # chunk 3 is access token == '-' (removed)
         # chunk 4 is payload
         # chunk 5 is refresh token (may or may not exist)
         if len(chunks) < 5:

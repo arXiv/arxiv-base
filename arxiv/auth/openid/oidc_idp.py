@@ -196,11 +196,16 @@ class ArxivOidcIdpClient:
             unverified_header = jwt.get_unverified_header(access_token)
             kid = unverified_header['kid']  # key id
             algorithm = unverified_header['alg']  # key algo
-            public_key = self.get_public_key(kid)
-            if public_key is None:
-                self._logger.info("Validating the token failed. kid=%s alg=%s", kid, algorithm)
-                return None
-            decoded_token: dict = jwt.decode(access_token, public_key,
+            if algorithm[0:2] == "RS":
+                public_key = self.get_public_key(kid)
+                if public_key is None:
+                    self._logger.info("Validating the token failed. kid=%s alg=%s", kid, algorithm)
+                    return None
+            else:
+                public_key = None
+
+            decoded_token: dict = jwt.decode(access_token,
+                                             key=public_key,
                                              options=self.jwt_verify_options,
                                              algorithms=[algorithm],
                                              )
