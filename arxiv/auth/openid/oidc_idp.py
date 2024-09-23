@@ -333,19 +333,14 @@ class ArxivOidcIdpClient:
             return False
 
 
-    def refresh_access_token(self, user: ArxivUserClaims) -> ArxivUserClaims:
+    def refresh_access_token(self, refresh_token: str) -> ArxivUserClaims:
         """With the refresh token, get a new access token
 
         Parameters
         ----------
-        user: ArxivUserClaims
-           that has all of id_token, access_token and refresh token
+        refresh_token: str
+           refresh token which is given by OIDC
         """
-
-        if not user.refresh_token:
-            self._logger.warning("I suspect that you'd expect to see the refresh token",
-                                 extra=user._claims)
-            return user
 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded"
@@ -370,7 +365,7 @@ class ArxivOidcIdpClient:
                 data={
                     'grant_type': 'refresh_token',
                     'client_id': self.client_id,
-                    'refresh_token': user.refresh_token
+                    'refresh_token': refresh_token
                 },
                 auth=auth,
                 headers=headers,
