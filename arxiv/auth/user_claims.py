@@ -255,8 +255,9 @@ class ArxivUserClaims:
         if len(chunks) < 5:
             raise ValueError(f'Token is invalid')
         tokens = {
+            'expires_at': chunks[1],
             'idt': chunks[2],
-            'acc':  chunks[3]
+            'acc': chunks[3]
         }
         if len(chunks) > 5:
             tokens['refresh'] = chunks[5]
