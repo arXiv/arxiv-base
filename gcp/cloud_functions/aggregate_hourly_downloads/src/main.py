@@ -1,7 +1,7 @@
 import json
 import base64
 import os
-from typing import Set, Dict, List, Literal, Tuple
+from typing import Set, Dict, List, Literal, Tuple, Any
 from datetime import datetime
 
 from arxiv.taxonomy.category import Category
@@ -166,6 +166,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     #process and store returned data
     paper_ids=set() #only look things up for each paper once
     download_data: List[DownloadData]=[] #not a dictionary because no unique keys
+    problem_rows: List[Tuple[Any], Exception]=[]
     for row in download_result:
         try:
             d_type = "src" if row['download_type'] == "e-print" else row['download_type'] #combine e-print and src downloads
@@ -181,8 +182,11 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
             )
             paper_ids.add(paper_id)
         except Exception as e:
-            logging.error(f"Problem with row: {tuple(row)}, skipping. Error:{e}")
+            problem_rows.append((tuple(row), e))
             continue #dont count this download
+    if len(problem_rows)>0:
+        logging.warning(f"Problem processing {len(problem_rows)} rows")
+        logging.debug(f"Problem row errors: {problem_rows}")
 
     logging.info(f"fetched {len(download_data)} rows, unique paper ids: {len(paper_ids)}")
 
@@ -235,13 +239,14 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
         goes through each download entry, matches it with its caegories and adds the number of downloads to the count
     """
     all_data: Dict[DownloadKey, DownloadCounts]={}
+    missing_data: List[str]=[]
     for entry in download_data:
         try:
             cats=paper_categories[entry.paper_id]
         except KeyError as e:
-            logging.error(f"No category data found for {entry.paper_id} Error: {e}")
+            missing_data.append(entry.paper_id)
             continue #dont process this paper
-        
+
         #record primary
         key=DownloadKey(entry.time, entry.country, entry.download_type, cats.primary.in_archive, cats.primary.id)
         value=all_data.get(key, DownloadCounts())
@@ -254,6 +259,10 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
             value=all_data.get(key, DownloadCounts())
             value.cross+=entry.num
             all_data[key]=value
+
+    if len(missing_data)>0:
+        logging.warning(f"Could not find category data for {len(missing_data)} paper_ids (may be invalid)")
+        logging.debug(f"Paper_ids with no category data: {missing_data}")
 
     return all_data
 
