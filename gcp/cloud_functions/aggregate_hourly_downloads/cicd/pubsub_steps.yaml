@@ -1,0 +1,20 @@
+steps:
+  # Deploy to Cloud Run
+  - name: 'google/cloud-sdk'
+    id: Deploy
+    entrypoint: gcloud
+    args: ['functions', 'deploy', '${_FUNCTION_NAME}',
+           '--retry',
+           '--gen2',
+           '--source', '${_SRCDIR}',
+           '--runtime', 'python311',
+           '--region', '${_REGION}',
+           '--trigger-topic', '${_PUBSUB_NAME}',
+           '--entry-point', '${_ENTRY_POINT}',
+           '--service-account', '${_RUN_ACCOUNT}',
+           '--env-vars-file', '${_ROOTDIR}/cicd/env.${_FUNCTION_NAME}.${_PROJECT_ID}.yaml',
+           '--allow-unauthenticated'
+           ]
+# Without this, build does not proceed
+options:
+  logging: CLOUD_LOGGING_ONLY
