@@ -167,6 +167,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     paper_ids=set() #only look things up for each paper once
     download_data: List[DownloadData]=[] #not a dictionary because no unique keys
     problem_rows: List[Tuple[Any], Exception]=[]
+    problem_row_count=0
     for row in download_result:
         try:
             d_type = "src" if row['download_type'] == "e-print" else row['download_type'] #combine e-print and src downloads
@@ -182,11 +183,12 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
             )
             paper_ids.add(paper_id)
         except Exception as e:
-            problem_rows.append((tuple(row), e))
+            problem_row_count+=1
+            problem_rows.append((tuple(row), e)) if len(problem_rows) < 20 else None
             continue #dont count this download
-    if len(problem_rows)>0:
-        logging.warning(f"Problem processing {len(problem_rows)} rows")
-        logging.debug(f"Problem row errors: {problem_rows}")
+    if problem_row_count>0:
+        logging.warning(f"Problem processing {problem_row_count} rows")
+        logging.debug(f"Selection of problem row errors: {problem_rows}")
 
     logging.info(f"fetched {len(download_data)} rows, unique paper ids: {len(paper_ids)}")
 
@@ -240,11 +242,13 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
     """
     all_data: Dict[DownloadKey, DownloadCounts]={}
     missing_data: List[str]=[]
+    missing_data_count=0
     for entry in download_data:
         try:
             cats=paper_categories[entry.paper_id]
         except KeyError as e:
-            missing_data.append(entry.paper_id)
+            missing_data_count+=1
+            missing_data.append(entry.paper_id) if len(missing_data) < 20 else None #dont make the list too long
             continue #dont process this paper
 
         #record primary
@@ -260,9 +264,9 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
             value.cross+=entry.num
             all_data[key]=value
 
-    if len(missing_data)>0:
-        logging.warning(f"Could not find category data for {len(missing_data)} paper_ids (may be invalid)")
-        logging.debug(f"Paper_ids with no category data: {missing_data}")
+    if missing_data_count>0:
+        logging.warning(f"Could not find category data for {missing_data_count} paper_ids (may be invalid)")
+        logging.debug(f"Example paper_ids with no category data: {missing_data}")
 
     return all_data
 
