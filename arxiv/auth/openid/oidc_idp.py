@@ -1,6 +1,7 @@
 """
 OpenID connect IdP client
 """
+import json
 import urllib.parse
 from typing import List, Optional
 import requests
@@ -282,6 +283,14 @@ class ArxivOidcIdpClient:
         idp_claims = self.validate_access_token(access_token)
         if not idp_claims:
             return None
+
+        # pedantic curiosity
+        try:
+            refresh_cliams = self.validate_access_token(refresh_token)
+            self._logger.debug("refresh token contents: %s", json.dumps(refresh_cliams))
+        except:
+            pass
+
         return self.to_arxiv_user_claims(idp_token, idp_claims)
 
     def logout_user(self, user: ArxivUserClaims) -> bool:
