@@ -283,7 +283,7 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
     class HourlyDownloadData(Base):
         __tablename__ = 'hourly_download_data'     
         country = Column(String(255), primary_key=True)
-        download_type = Column(String(16), Enum('pdf', 'html', 'src'), primary_key=True)
+        download_type = Column(String(16), Enum('pdf', 'html', 'src', name='download_type_enum'), primary_key=True)
         archive = Column(String(16))
         category = Column(String(32), primary_key=True)
         primary_count = Column(Integer)
