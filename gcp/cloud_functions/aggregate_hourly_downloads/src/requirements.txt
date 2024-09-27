@@ -4,3 +4,4 @@ google-cloud-logging
 google-cloud-bigquery
 sqlalchemy>=2.0.26
 mysqlclient >=2.1
+psycopg2-binary>=2.9.9
