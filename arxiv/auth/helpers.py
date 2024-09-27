@@ -1,11 +1,13 @@
 """Helpers and utilities for :mod:`arxiv.users`."""
 
 import os
-from typing import List
+from typing import List, Optional
 from pytz import timezone, UTC
 import uuid
 from datetime import timedelta, datetime
 from . import auth, domain
+from .auth import tokens
+
 from arxiv.base.globals import get_application_config
 from arxiv.taxonomy.definitions import CATEGORIES
 
@@ -19,7 +21,8 @@ def generate_token(user_id: str, email: str, username: str,
                    default_category: domain.Category = CATEGORIES['astro-ph.GA'],
                    submission_groups: str = 'grp_physics',
                    scope: List[domain.Scope] = [],
-                   verified: bool = False) -> str:
+                   verified: bool = False,
+                   jwt_secret: Optional[str] = None) -> str:
     """Generate an auth token for dev/testing purposes."""
     # Specify the validity period for the session.
     start = datetime.now(tz=timezone('US/Eastern'))
@@ -45,5 +48,5 @@ def generate_token(user_id: str, email: str, username: str,
         ),
         authorizations=domain.Authorizations(scopes=scope)
     )
-    token = auth.tokens.encode(session, get_application_config()['JWT_SECRET'])
+    token = tokens.encode(session, jwt_secret or get_application_config()['JWT_SECRET'])
     return token
