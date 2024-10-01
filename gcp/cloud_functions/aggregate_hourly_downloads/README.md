@@ -9,9 +9,9 @@ to install
 and 
 ` pip install -r src/requirements-dev.txt `
 
-# enviroment variables
+# enviroment variables for running locally
 ```
-export ENVIRONMENT=DEVELOPMENT LOG_LEVEL=INFO DOWNLOAD_TABLE=arxiv-development.arxiv_stats.papers_downloaded_by_ip_recently WRITE_TABLE='sqlite:///../tests/output_test.db'
+export ENVIRONMENT=DEVELOPMENT LOG_LEVEL=INFO DOWNLOAD_TABLE=arxiv-development.arxiv_stats.papers_downloaded_by_ip_recently WRITE_TABLE='sqlite:///../tests/output_test.db' LOG_LOCALLY=1
 
 ```
 

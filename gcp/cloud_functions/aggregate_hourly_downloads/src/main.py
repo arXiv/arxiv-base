@@ -18,6 +18,8 @@ from sqlalchemy import create_engine, Column, String, Integer, DateTime, Enum, P
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, aliased
 
+MAX_QUERY_TO_WRITE=1000 #the latexmldb we write to has a stack size limit
+
 #logging setup
 if not(os.environ.get('LOG_LOCALLY')):
     import google.cloud.logging
@@ -304,28 +306,34 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
         (item.country, item.download_type, item.category, item.time)
         for item in aggregated_data.keys()
     ]
-    existing_records = session.query(HourlyDownloadData).filter(
-        tuple_(
-            HourlyDownloadData.country,
-            HourlyDownloadData.download_type,
-            HourlyDownloadData.category,
-            HourlyDownloadData.start_dttm
-        ).in_(keys_to_check)
-    ).all()
+    all_keys_to_update=[]
+    for i in range(0, len(keys_to_check), MAX_QUERY_TO_WRITE):
+        #query a section of data
+        existing_records = session.query(HourlyDownloadData).filter(
+            tuple_(
+                HourlyDownloadData.country,
+                HourlyDownloadData.download_type,
+                HourlyDownloadData.category,
+                HourlyDownloadData.start_dttm
+            ).in_(keys_to_check[i:i+MAX_QUERY_TO_WRITE])
+        ).all()
 
-    #update existing records
-    keys_to_update=[
-        DownloadKey(
-            time=record.start_dttm,
-            country=record.country,
-            download_type=record.download_type,
-            archive=record.archive,
-            category_id=record.category
-        )
-        for record in existing_records
-    ]
+        #record found records
+        keys_to_update=[
+            DownloadKey(
+                time=record.start_dttm,
+                country=record.country,
+                download_type=record.download_type,
+                archive=record.archive,
+                category_id=record.category
+            )
+            for record in existing_records
+        ]
+        all_keys_to_update += keys_to_update
+
+    #create data to be updated vs inserted
     update_data=[]
-    for key in keys_to_update:
+    for key in all_keys_to_update:
         counts=aggregated_data[key]
         entry={
             'country': key.country,
@@ -354,8 +362,11 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
     ]
 
     #add data
-    session.bulk_save_objects(data_to_insert)
-    session.bulk_update_mappings(HourlyDownloadData, update_data)
+    for i in range(0, len(data_to_insert), MAX_QUERY_TO_WRITE):
+        session.bulk_save_objects(data_to_insert[i:i+MAX_QUERY_TO_WRITE])
+    #update existing data
+    for i in range(0, len(update_data), MAX_QUERY_TO_WRITE):
+        session.bulk_update_mappings(HourlyDownloadData, update_data[i:i+MAX_QUERY_TO_WRITE])
     session.commit()
     session.close()
     logging.info(f"added {len(data_to_insert)} rows, updated {len(update_data)} rows")
