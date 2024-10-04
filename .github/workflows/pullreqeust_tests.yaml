@@ -33,7 +33,7 @@ jobs:
 
       - name: Run other tests
         # These tests are split out because their coverage is low
-        run: poetry run pytest --cov=arxiv --cov-fail-under=25 --headless arxiv
+        run: poetry run pytest --cov=arxiv --cov-fail-under=25 arxiv
       #- name: Check Doc Style
       #  run: poetry run pydocstyle --convention=numpy --add-ignore=D401 arxiv
 
