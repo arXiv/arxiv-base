@@ -55,9 +55,13 @@ def drop_all(engine: Engine) -> None:
 
 def compute_capabilities(tapir_user: TapirUser) -> int:
     """Calculate the privilege level code for a user."""
-    return int(sum([2 * tapir_user.flag_edit_users,
-                    4 * tapir_user.flag_email_verified,
-                    8 * tapir_user.flag_edit_system]))
+    return _compute_capabilities(tapir_user.flag_edit_users,
+                                 tapir_user.flag_email_verified,
+                                 tapir_user.flag_edit_system)
+
+def _compute_capabilities(is_admin: int | bool, email_verified: int | bool, is_god: int | bool) -> int:
+    """Calculate the privilege level code for a user."""
+    return int(sum([2 if is_admin else 0, 4 if email_verified else 0, 8 if is_god else 0]))
 
 
 def get_scopes(db_user: TapirUser) -> List[domain.Scope]:
