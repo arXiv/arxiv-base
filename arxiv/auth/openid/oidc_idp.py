@@ -54,7 +54,9 @@ class ArxivOidcIdpClient:
         client_id: Registered client ID. OAuth2 client/callback are registered on IdP and need to
             match
         scope: List of OAuth2 scopes - Apparently, keycloak (v20?) dropped the "openid" scope.
-               Trying to include "openid" results in no such scope error.
+               Trying to include "openid" results in no such scope error if you don't set up "openid" scope in the realm.
+               You need to have the "openid" scope for id_token, or else logout does not work.
+               IOW, you need to create "openid" scope for the realm if it does not exist.
         client_secret: Registered client secret
         login_redirect_url: redircet URL after log in
         logout_redirect_url: redircet URL after log out
@@ -65,7 +67,7 @@ class ArxivOidcIdpClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
-        self.scope = scope if scope else []
+        self.scope = scope if scope else ["openid"]
         self._login_redirect_url = login_redirect_url if login_redirect_url else ""
         self._logout_redirect_url = logout_redirect_url if logout_redirect_url else ""
         self._server_certs = {}
@@ -283,13 +285,6 @@ class ArxivOidcIdpClient:
         idp_claims = self.validate_access_token(access_token)
         if not idp_claims:
             return None
-
-        # pedantic curiosity
-        try:
-            refresh_cliams = self.validate_access_token(refresh_token)
-            self._logger.debug("refresh token contents: %s", json.dumps(refresh_cliams))
-        except:
-            pass
 
         return self.to_arxiv_user_claims(idp_token, idp_claims)
 

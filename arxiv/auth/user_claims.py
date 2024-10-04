@@ -1,7 +1,10 @@
 """
 User claims.
+When a user is authenticated, the claims represent who that is.
 
-The idea is that, when a user is authenticated, the claims represent who that is.
+In other words, the user claims is a Python object from the identity cookie.
+
+
 Keycloak:
 
     unpacked access token looks like this
@@ -111,6 +114,7 @@ class ArxivUserClaims:
         return self._claims.get('sub')
 
     # jwt.encode/decode serialize/deserialize dict, not string so not really needed
+    # you should not use this for real. okay for testing
     @property
     def to_arxiv_token_string(self) -> Optional[str]:
         return json.dumps(self._claims)
@@ -225,7 +229,9 @@ class ArxivUserClaims:
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
         """packing user claims"""
         claims = self._claims.copy()
-        del claims['idt']
+        # you probably forgot to add "openid" scope in Keycloak if id_token is not in it.
+        if 'idt' in claims:
+            del claims['idt']
         del claims['acc']
         if 'refresh' in claims:
             del claims['refresh']
@@ -248,6 +254,9 @@ class ArxivUserClaims:
 
     @classmethod
     def unpack_token(cls, token: str) -> Tuple[dict, str]:
+        """the cookie/token needs to be split between non-encrypted and encrypted claims.
+        Then, ues decode_jwt_payload.
+        """
         chunks = token.split(',')
         # Chunk 0 should be 4 - is a version number
         # chunk 1 is expiration - This is NOT internally used. This is to show
@@ -268,10 +277,13 @@ class ArxivUserClaims:
         return tokens, chunks[4]
 
     @classmethod
-    def decode_jwt_payload(cls, claims: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+    def decode_jwt_payload(cls, tokens: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+        """
+        Decodes the user claims.
+        """
         payload = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
-        claims.update(payload)
-        return cls(claims)
+        tokens.update(payload)
+        return cls(tokens)
 
 
     def update_keycloak_access_token(self, updates: dict) -> None:

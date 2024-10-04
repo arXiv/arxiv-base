@@ -2,12 +2,16 @@ import subprocess
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 import time
 
 @pytest.fixture(scope="module")
 def web_driver() -> webdriver.Chrome:
     # Set up the Selenium WebDriver
-    _web_driver = webdriver.Chrome()  # Ensure you have ChromeDriver installed and in PATH
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    _web_driver = webdriver.Chrome(options=options)
     _web_driver.implicitly_wait(10)  # Wait for elements to be ready
     yield _web_driver
     _web_driver.quit()  # Close the browser window after tests
@@ -22,7 +26,7 @@ def toy_flask():
     flask_app.wait()
 
 def test_login(web_driver, toy_flask):
-    web_driver.get("http://localhost:5000/login")  # URL of your Flask app's login route
+    web_driver.get("http://localhost:5101/login")  # URL of your Flask app's login route
 
     # Simulate user login on the IdP login page
     # Replace the following selectors with the actual ones from your IdP login form
@@ -39,6 +43,6 @@ def test_login(web_driver, toy_flask):
     time.sleep(5)
 
     # Check if the login was successful by verifying the presence of a specific element or text
-    web_driver.get("http://localhost:5000/protected")  # URL of your protected route
+    web_driver.get("http://localhost:5101/protected")  # URL of your protected route
     body_text = web_driver.find_element(By.TAG_NAME, "body").text
     assert "Token is valid" in body_text
