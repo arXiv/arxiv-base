@@ -2,16 +2,23 @@ import subprocess
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chromium.options import Options
 import time
 
 @pytest.fixture(scope="module")
 def web_driver() -> webdriver.Chrome:
     # Set up the Selenium WebDriver
+    # You'd need
+    # sudo apt-get update
+    # sudo apt-get install -y chromium-browser chromium-chromedriver
+
     options = Options()
+    options.binary_location = "/usr/bin/chromium-browser"
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
-    _web_driver = webdriver.Chrome(options=options)
+    service = Service(executable_path="/usr/bin/chromedriver")
+    _web_driver = webdriver.Chrome(service=service, options=options)
     _web_driver.implicitly_wait(10)  # Wait for elements to be ready
     yield _web_driver
     _web_driver.quit()  # Close the browser window after tests
