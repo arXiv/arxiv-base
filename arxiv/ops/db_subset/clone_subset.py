@@ -19,8 +19,7 @@ from sqlalchemy.orm import (
     make_transient
 )
 
-from ...db import Base, LaTeXMLBase, session_factory
-from ...db import engine as classic_engine
+from ...db import Base, LaTeXMLBase, session_factory, _classic_engine as classic_engine
 from ...db.models import (
     DBLaTeXMLDocuments,
     DBLaTeXMLSubmissions,
