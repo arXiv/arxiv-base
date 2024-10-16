@@ -25,10 +25,17 @@ jobs:
       # - name: Check Types
       # TODO The types are in bad shape and need to be fixed
       #   run: poetry run mypy --exclude "test*" -p arxiv
+
+      - name: Install Chrome Driver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+
       - name: Run other tests
         # These tests are split out because their coverage is low
         run: poetry run pytest --cov=arxiv --cov-fail-under=25 arxiv
       #- name: Check Doc Style
       #  run: poetry run pydocstyle --convention=numpy --add-ignore=D401 arxiv
+
       - name: Run App Tests
         run: poetry run python tests/run_app_tests.py

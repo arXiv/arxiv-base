@@ -129,4 +129,5 @@ dist/
 
 fastly_hourly_stats.ini
 
+foo.json
 test.db-journal
