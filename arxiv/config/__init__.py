@@ -173,7 +173,7 @@ class Settings(BaseSettings):
     LATEXML_DB_URI: Optional[str] = DEFAULT_LATEXML_DB
     ECHO_SQL: bool = False
     CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
-    LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = "READ UNCOMMITTED"
+    LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
 
     LATEXML_DB_QUERY_TIMEOUT: int = 5
     """Maximium seconds any query to the latxml DB can run.
