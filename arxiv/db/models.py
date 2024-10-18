@@ -30,7 +30,8 @@ from sqlalchemy import (
     Table,
     Enum,
     text,
-    Engine
+    Engine,
+    event as sqlalchemy_event,
 )
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import (
@@ -47,6 +48,23 @@ from .types import intpk
 
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
+
+
+@sqlalchemy_event.listens_for(Table, "before_create")
+def before_create_replace_string_columns(target, connection, **kw):
+    """
+    Make the default string type as VARCHAR(255) for mysql.
+
+    column type Mapped[Optional[str]] works for sqlite3 but not for MySQL or PostgreSQL.
+    """
+    if connection.engine.dialect.name != "sqlite3":
+        for column in target.columns:
+            if isinstance(column.type, String) and column.type.length is None:
+                column.type = String(255)
+            if isinstance(column.type, str):
+                column.type = String(255)
+    else:
+        pass
 
 
 class MemberInstitution(Base):
@@ -1812,7 +1830,9 @@ class TapirUser(Base):
     __tablename__ = 'tapir_users'
     __table_args__ = (
         ForeignKeyConstraint(['policy_class'], ['tapir_policy_classes.class_id'], name='0_510'),
-        Index('email', 'email', unique=True),
+        # When you define unique=True, it creates an index and no need to explicitly make one. And making one
+        # conflicts with the default-made index and schema creation fails.
+        # Index('email', 'email', unique=True),
         Index('first_name', 'first_name'),
         Index('flag_approved', 'flag_approved'),
         Index('flag_banned', 'flag_banned'),
