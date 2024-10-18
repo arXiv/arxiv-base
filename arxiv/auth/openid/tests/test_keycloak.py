@@ -2,26 +2,23 @@ import subprocess
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
 import time
 
 @pytest.fixture(scope="module")
 def web_driver() -> webdriver.Chrome:
-    # Set up the Selenium WebDriver
-    # You'd need
-    # sudo apt-get update
-    # sudo apt-get install -y chromium-browser chromium-chromedriver
-
     options = Options()
-    options.binary_location = "/usr/bin/chromium-browser"
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    service = Service(executable_path="/usr/bin/chromedriver")
-    _web_driver = webdriver.Chrome(service=service, options=options)
-    _web_driver.implicitly_wait(10)  # Wait for elements to be ready
+    options.headless = True
+    options.binary_location = "/usr/bin/firefox-esr"
+    options.add_argument('--headless')
+
+    service = Service(executable_path="/usr/local/bin/geckodriver")
+    _web_driver = webdriver.Firefox(service=service, options=options)
+    _web_driver.implicitly_wait(10)  # Wait for elements to be ready                                                                                                                                                             
     yield _web_driver
-    _web_driver.quit()  # Close the browser window after tests
+    _web_driver.quit()  # Close the browser window after tests                                                                                                                                                                   
+
 
 @pytest.fixture(scope="module")
 def toy_flask():
