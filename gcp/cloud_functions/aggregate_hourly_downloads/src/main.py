@@ -190,7 +190,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
             problem_rows.append((tuple(row), e)) if len(problem_rows) < 20 else None
             continue #dont count this download
         time_period=row['start_dttm'].replace(minute=0, second=0, microsecond=0)
-        if time_period not in time_period:
+        if time_period not in time_periods:
             time_periods.append(time_period)
 
     time_period_str=  ', '.join([date.strftime('%Y-%m-%d %H:%M:%S') for date in time_periods])
