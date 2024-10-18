@@ -170,6 +170,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     download_data: List[DownloadData]=[] #not a dictionary because no unique keys
     problem_rows: List[Tuple[Any], Exception]=[]
     problem_row_count=0
+    time_periods=[]
     for row in download_result:
         try:
             d_type = "src" if row['download_type'] == "e-print" else row['download_type'] #combine e-print and src downloads
@@ -188,11 +189,17 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
             problem_row_count+=1
             problem_rows.append((tuple(row), e)) if len(problem_rows) < 20 else None
             continue #dont count this download
-    if problem_row_count>0:
-        logging.warning(f"Problem processing {problem_row_count} rows")
-        logging.debug(f"Selection of problem row errors: {problem_rows}")
+        time_period=row['start_dttm'].replace(minute=0, second=0, microsecond=0)
+        if time_period not in time_period:
+            time_periods.append(time_period)
 
-    logging.info(f"fetched {len(download_data)} rows, unique paper ids: {len(paper_ids)}")
+    time_period_str=  ', '.join([date.strftime('%Y-%m-%d %H:%M:%S') for date in time_periods])
+    if problem_row_count>30:
+        logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows")
+        logging.debug(f"{time_period_str}: Selection of problem row errors: {problem_rows}")
+
+    fetched_count=len(download_data)
+    unique_id_count=len(paper_ids)
 
     if len(paper_ids) ==0:
         logging.critical("No data retrieved from BigQuery")
@@ -201,14 +208,15 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     #find categories for all the papers
     paper_categories=get_paper_categories(paper_ids)
     if len(paper_categories) ==0:
-        logging.critical("No category data retrieved from database")
+        logging.critical(f"{time_period_str}: No category data retrieved from database")
         return #this will prevent retries (is that good?)
 
     #aggregate download data
     aggregated_data=aggregate_data(download_data, paper_categories)
     
     #write all_data to tables  
-    insert_into_database(aggregated_data, write_table)
+    add_count, update_count=insert_into_database(aggregated_data, write_table)
+    logging.info(f"{time_period_str}: SUCCESS! fetched rows: {fetched_count}, unique_ids: {unique_id_count}, unprocessable rows: {problem_row_count}, rows added: {add_count}, rows updated: {update_count}")
 
 
 def get_paper_categories(paper_ids: Set[str])-> Dict[str, PaperCategories]:
@@ -272,13 +280,14 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
 
     return all_data
 
-def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_uri: str):
+def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_uri: str)->Tuple[int, int]:
     """adds the data from an hour of downloads into the database
         uses bulk insert and update statements to increase efficiency
         first compiles all the keys for the data we would like to add and checks for their presence in the database
         present items are added to run update for, and removed from the aggregated dictionary
         remaining items are inserted
         data with duplicate keys will be overwritten to allow for reruns with updates
+        returns the number of rows added and updated
     """
     #set up table
     Base = declarative_base()
@@ -369,5 +378,4 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
         session.bulk_update_mappings(HourlyDownloadData, update_data[i:i+MAX_QUERY_TO_WRITE])
     session.commit()
     session.close()
-    logging.info(f"added {len(data_to_insert)} rows, updated {len(update_data)} rows")
-    return
+    return (len(data_to_insert), len(update_data))
