@@ -28,6 +28,7 @@ if not(os.environ.get('LOG_LOCALLY')):
 import logging 
 log_level_str = os.getenv('LOG_LEVEL', 'INFO')
 log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+logging.info(log_level)
 logging.basicConfig(level=log_level)
 
 # Initialize BigQuery client
