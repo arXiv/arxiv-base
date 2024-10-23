@@ -26,11 +26,8 @@ if not(os.environ.get('LOG_LOCALLY')):
     client = google.cloud.logging.Client()
     client.setup_logging()
 import logging 
-print("logging stuff")
 log_level_str = os.getenv('LOG_LEVEL', 'INFO')
-print(log_level_str)
 log_level = getattr(logging, log_level_str.upper(), logging.INFO)
-print(log_level)
 logging.basicConfig(level=log_level)
 
 # Initialize BigQuery client
@@ -134,7 +131,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     data=json.loads(base64.b64decode(cloud_event.get_data()['message']['data']).decode())
     state= data.get("state","")
     if state!="SUCCEEDED":
-        logging.debug(f"ignored message: {data}")
+        logging.info(f"ignored message: {data}")
         return
 
     #get and check enviroment data
@@ -197,9 +194,8 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
             time_periods.append(time_period)
 
     time_period_str=  ', '.join([date.strftime('%Y-%m-%d %H:%M:%S') for date in time_periods])
-    if problem_row_count>30:
-        logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows")
-        logging.debug(f"{time_period_str}: Selection of problem row errors: {problem_rows}")
+    if problem_row_count>100:
+        logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows\n Selection of problem row errors: {problem_rows}")
 
     fetched_count=len(download_data)
     unique_id_count=len(paper_ids)
@@ -278,8 +274,7 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
             all_data[key]=value
 
     if missing_data_count>0:
-        logging.warning(f"Could not find category data for {missing_data_count} paper_ids (may be invalid)")
-        logging.debug(f"Example paper_ids with no category data: {missing_data}")
+        logging.warning(f"Could not find category data for {missing_data_count} paper_ids (may be invalid)\n Example paper_ids with no category data: {missing_data}")
 
     return all_data
 
