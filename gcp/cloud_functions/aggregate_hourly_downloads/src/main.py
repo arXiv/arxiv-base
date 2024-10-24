@@ -8,7 +8,7 @@ from arxiv.taxonomy.category import Category
 from arxiv.taxonomy.definitions import CATEGORIES
 from arxiv.db import Session
 from arxiv.db.models import Metadata, DocumentCategory
-from arxiv.identifier import Identifier
+from arxiv.identifier import Identifier, IdentifierException
 
 import functions_framework
 from cloudevents.http import CloudEvent
@@ -131,7 +131,6 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     data=json.loads(base64.b64decode(cloud_event.get_data()['message']['data']).decode())
     state= data.get("state","")
     if state!="SUCCEEDED":
-        logging.debug(f"ignored message: {data}")
         return
 
     #get and check enviroment data
@@ -170,6 +169,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     download_data: List[DownloadData]=[] #not a dictionary because no unique keys
     problem_rows: List[Tuple[Any], Exception]=[]
     problem_row_count=0
+    bad_id_count=0
     time_periods=[]
     for row in download_result:
         try:
@@ -185,6 +185,9 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
                 )
             )
             paper_ids.add(paper_id)
+        except IdentifierException as e:
+            bad_id_count+=1
+            continue #dont count this download
         except Exception as e:
             problem_row_count+=1
             problem_rows.append((tuple(row), e)) if len(problem_rows) < 20 else None
@@ -195,8 +198,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
 
     time_period_str=  ', '.join([date.strftime('%Y-%m-%d %H:%M:%S') for date in time_periods])
     if problem_row_count>30:
-        logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows")
-        logging.debug(f"{time_period_str}: Selection of problem row errors: {problem_rows}")
+        logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows \n Selection of problem row errors: {problem_rows}")
 
     fetched_count=len(download_data)
     unique_id_count=len(paper_ids)
@@ -216,7 +218,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     
     #write all_data to tables  
     add_count, update_count=insert_into_database(aggregated_data, write_table)
-    logging.info(f"{time_period_str}: SUCCESS! fetched rows: {fetched_count}, unique_ids: {unique_id_count}, unprocessable rows: {problem_row_count}, rows added: {add_count}, rows updated: {update_count}")
+    logging.info(f"{time_period_str}: SUCCESS! rows added: {add_count}, rows updated: {update_count} fetched rows: {fetched_count}, unique_ids: {unique_id_count}, invalid_ids: {bad_id_count}, other unprocessable rows: {problem_row_count}")
 
 
 def get_paper_categories(paper_ids: Set[str])-> Dict[str, PaperCategories]:
@@ -274,9 +276,9 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
             value.cross+=entry.num
             all_data[key]=value
 
-    if missing_data_count>0:
-        logging.warning(f"Could not find category data for {missing_data_count} paper_ids (may be invalid)")
-        logging.debug(f"Example paper_ids with no category data: {missing_data}")
+    if missing_data_count>10:
+        time=download_data[0].time
+        logging.warning(f"{time} Could not find category data for {missing_data_count} paper_ids (may be invalid) \n Example paper_ids with no category data: {missing_data}")
 
     return all_data
 
