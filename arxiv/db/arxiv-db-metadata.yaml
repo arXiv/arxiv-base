@@ -1,0 +1,401 @@
+Subscription_UniversalInstitution:
+  class_name: MemberInstitution
+Subscription_UniversalInstitutionContact:
+  class_name: MemberInstitutionContact
+Subscription_UniversalInstitutionIP:
+  class_name: MemberInstitutionIP
+arXiv_admin_log:
+  class_name: AdminLog
+arXiv_admin_metadata:
+  class_name: AdminMetadata
+  table_args:
+    - replace: ["Index('pidv', 'paper_id', 'version', unique=True)", "Index('arxiv_admin_pidv', 'paper_id', 'version', unique=True)"]
+arXiv_archive_category:
+  class_name: ArchiveCategory
+arXiv_archive_def:
+  class_name: ArchiveDef
+arXiv_archive_group:
+  class_name: ArchiveGroup
+arXiv_archives:
+  class_name: Archive
+arXiv_aws_config:
+  class_name: AwsConfig
+arXiv_aws_files:
+  class_name: AwsFile
+arXiv_bib_feeds:
+  class_name: BibFeed
+arXiv_bib_updates:
+  class_name: BibUpdate
+arXiv_bogus_countries:
+  class_name: BogusCountries
+arXiv_categories:
+  class_name: Category
+arXiv_questionable_categories:
+  class_name: QuestionableCategory
+arXiv_category_def:
+  class_name: CategoryDef
+arXiv_control_holds:
+  class_name: ControlHold
+arXiv_cross_control:
+  class_name: CrossControl
+  table_args:
+    - replace: ["Index('document_id', 'document_id', 'version'),", ""]
+    - replace: ["Index('user_id', 'user_id')", ""]
+    - replace: ["Index('ix_arXiv_cross_control_freeze_date', 'freeze_date'),", "" ]
+  columns:
+    freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+arXiv_datacite_dois:
+  class_name: DataciteDois
+  table_args:
+    - replace: ["Index('metadata_id', 'metadata_id')", ""]
+    
+arXiv_dblp_authors:
+  class_name: DBLPAuthor
+  table_args:
+    - replace: ["Index('author_id', 'author_id'),", ""]
+    - replace: ["Index('document_id', 'document_id')", ""]
+arXiv_dblp_document_authors:
+  class_name: DBLPDocumentAuthor
+  table_args:
+    - replace: ["Index('author_id', 'author_id'),", ""]
+    - replace: ["Index('document_id', 'document_id')", ""]
+arXiv_document_category:
+  class_name: DocumentCategory
+  table_args:
+    - replace: ["Index('category', 'category'),", ""]
+    - replace: ["Index('document_id', 'document_id')", ""]
+arXiv_documents:
+  class_name: Document
+arXiv_dblp:
+  class_name: DBLP
+arXiv_paper_pw:
+  class_name: PaperPw
+arXiv_endorsement_domains:
+  class_name: EndorsementDomain
+arXiv_endorsement_requests:
+  class_name: EndorsementRequest
+  table_args:
+    # Index('archive', 'archive', 'subject_class'),
+    - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
+    - replace: ["Index('secret', 'secret', unique=True)", ""]
+arXiv_endorsement_requests_audit:
+  class_name: EndorsementRequestsAudit
+arXiv_endorsements:
+  class_name: Endorsement
+  table_args:
+    - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
+    - replace: ["Index('endorsee_id', 'endorsee_id'),", ""]
+    - replace: ["Index('endorser_id', 'endorser_id'),", ""]
+    # - replace: ["Index('endorser_id_2', 'endorser_id', 'endorsee_id', 'archive', 'subject_class', unique=True),", ""]
+    - replace: ["Index('request_id', 'request_id')", ""]
+arXiv_endorsements_audit:
+  class_name: EndorsementsAudit
+arXiv_freeze_log:
+  class_name: FreezeLog
+arXiv_group_def:
+  class_name: GroupDef
+arXiv_groups:
+  class_name: Group
+arXiv_jref_control:
+  class_name: JrefControl
+  columns:
+    freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+    status: "mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
+  table_args:
+    - replace: ["Index('arXiv_jref_control_ibfk_1', 'document_id'),", ""]
+    - replace: ["Index('arXiv_jref_control_ibfk_2', 'user_id'),", ""]
+    - replace: ["Index('ix_arXiv_jref_control_freeze_date', 'freeze_date'),", ""]
+    - replace: ["Index('ix_arXiv_jref_control_status', 'status')", ""]
+arXiv_licenses:
+  class_name: License
+arXiv_log_positions:
+  class_name: LogPosition
+arXiv_metadata:
+  class_name: Metadata
+#    ForeignKeyConstraint(
+#        ["document_id"],
+#        ["arXiv_documents.document_id"],
+#        ondelete="CASCADE",
+#        onupdate="CASCADE",
+#        name="arXiv_metadata_fk_document_id",
+#    ),
+#    ForeignKeyConstraint(
+#        ["license"], ["arXiv_licenses.name"], name="arXiv_metadata_fk_license"
+#    ),
+#    ForeignKeyConstraint(
+#        ["submitter_id"],
+#        ["tapir_users.user_id"],
+#        name="arXiv_metadata_fk_submitter_id",
+#    ),
+#    Index("arXiv_metadata_idx_document_id", "document_id"),
+#    Index("arXiv_metadata_idx_license", "license"),
+#    Index("arXiv_metadata_idx_submitter_id", "submitter_id"),
+#    Index("pidv", "paper_id", "version", unique=True),
+  table_args:
+    - replace: ["Index('arXiv_metadata_idx_document_id', 'document_id'),", ""]
+    - replace: ["Index('arXiv_metadata_idx_license', 'license'),", ""]
+    - replace: ["Index('arXiv_metadata_idx_submitter_id', 'submitter_id'),", ""]
+
+arXiv_mirror_list:
+  class_name: MirrorList
+arXiv_moderator_api_key:
+  class_name: ModeratorApiKey
+arXiv_monitor_klog:
+  class_name: MonitorKlog
+arXiv_monitor_mailq:
+  class_name: MonitorMailq
+arXiv_monitor_mailsent:
+  class_name: MonitorMailsent
+arXiv_next_mail:
+  class_name: NextMail
+arXiv_orcid_config:
+  class_name: OrcidConfig
+arXiv_ownership_requests:
+  class_name: OwnershipRequest
+  table_args:
+    - replace: ["Index('endorsement_request_id', 'endorsement_request_id'),", ""]
+    - replace: ["Index('user_id', 'user_id')", ""]
+arXiv_ownership_requests_audit:
+  class_name: OwnershipRequestsAudit
+arXiv_paper_owners:
+  class_name: PaperOwner
+  table_args:
+    - replace: ["Index('user_id', 'user_id')", ""]
+arXiv_paper_sessions:
+  class_name: PaperSession
+arXiv_pilot_files:
+  class_name: PilotFile
+  table_args:
+    - replace: ["Index('arXiv_pilot_files_cdfk3', 'submission_id')", ""]
+arXiv_publish_log:
+  class_name: PublishLog
+arXiv_reject_session_usernames:
+  class_name: RejectSessionUsername
+arXiv_sciencewise_pings:
+  class_name: SciencewisePing
+arXiv_show_email_requests:
+  class_name: ShowEmailRequest
+  table_args:
+    - replace: ["Index('email_reqs_user_id', 'user_id', 'dated'),", ""]
+    - replace: ["Index('ix_arXiv_show_email_requests_dated', 'dated'),", ""]
+    - replace: ["Index('user_id', 'user_id', 'dated')", "Index('email_reqs_user_id', 'user_id', 'dated')"]
+  columns:
+    dated: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+arXiv_state:
+  class_name: State
+arXiv_stats_monthly_downloads:
+  class_name: StatsMonthlyDownload
+arXiv_stats_monthly_submissions:
+  class_name: StatsMonthlySubmission
+arXiv_submission_agreements:
+  class_name: SubmissionAgreement
+arXiv_submission_category:
+  class_name: SubmissionCategory
+  table_args:
+    - replace: ["Index('arXiv_submission_category_idx_category', 'category'),", ""]
+    - replace: ["Index('arXiv_submission_category_idx_submission_id', 'submission_id')", ""]
+  
+arXiv_submission_category_proposal:
+  class_name: SubmissionCategoryProposal
+  table_args:
+    - replace: ["Index('arXiv_submission_category_proposal_fk_prop_comment_id', 'proposal_comment_id'),", ""]
+    - replace: ["Index('arXiv_submission_category_proposal_fk_resp_comment_id', 'response_comment_id'),", ""]
+    - replace: ["Index('arXiv_submission_category_proposal_fk_user_id', 'user_id'),", ""]
+    - replace: ["Index('arXiv_submission_category_proposal_idx_category', 'category'),", ""]
+    - replace: ["Index('arXiv_submission_category_proposal_idx_is_primary', 'is_primary'),", ""]
+    - replace: ["Index('arXiv_submission_category_proposal_idx_key', 'proposal_id'),", ""]
+    - replace: ["Index('arXiv_submission_category_proposal_idx_submission_id', 'submission_id')", ""]
+
+arXiv_submission_control:
+  class_name: SubmissionControl
+  table_args:
+    - replace: ["ForeignKeyConstraint(['document_id'], ['arXiv_documents.document_id'], name='arXiv_submission_control_ibfk_1'),", ""]
+    - replace: ["ForeignKeyConstraint(['user_id'], ['tapir_users.user_id'], name='arXiv_submission_control_ibfk_2'),", ""]
+    - replace: ["Index('document_id', 'document_id', 'version', unique=True),", ""]
+    - replace: ["Index('freeze_date', 'freeze_date'),", ""]
+    - replace: ["Index('pending_paper_id', 'pending_paper_id'),", ""]
+    - replace: ["Index('request_date', 'request_date'),", ""]
+    - replace: ["Index('status', 'status'),", ""]
+    - replace: ["Index('user_id', 'user_id')", ""]
+  columns:
+    document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue())"
+    version: "mapped_column(Integer, nullable=False, server_default=FetchedValue())"
+    pending_paper_id: "mapped_column(String(20), nullable=False, index=True, server_default=FetchedValue())"
+    user_id: "mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())"
+    status: ":Mapped[Literal['new', 'frozen', 'published', 'rejected']] = mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
+    flag_must_notify: ":Mapped[Optional[Literal['0', '1']]] = mapped_column(Enum('0', '1'), server_default=FetchedValue())"
+    request_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+    freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+    publish_date: "mapped_column(Integer, nullable=False, server_default=FetchedValue())"
+
+arXiv_submission_flag:
+  class_name: SubmissionFlag
+  table_args:
+    - replace: ["Index('user_id', 'user_id')", ""]
+
+arXiv_submission_hold_reason:
+  class_name: SubmissionHoldReason
+  table_args:
+    - replace: ["Index('comment_id', 'comment_id'),", ""]
+    - replace: ["Index('submission_id', 'submission_id'),", ""]
+    - replace: ["Index('user_id', 'user_id')", ""]
+arXiv_submission_near_duplicates:
+  class_name: SubmissionNearDuplicate
+arXiv_submission_qa_reports:
+  class_name: SubmissionQaReport
+  table_args:
+    - replace: ["Index('submission_id', 'submission_id')", ""]
+
+arXiv_submission_view_flag:
+  class_name: SubmissionViewFlag
+  table_args:
+    - replace: ["Index('user_id', 'user_id')", ""]
+
+arXiv_submissions:
+  class_name: Submission
+arXiv_pilot_datasets:
+  class_name: PilotDataset
+arXiv_submission_abs_classifier_data:
+  class_name: SubmissionAbsClassifierDatum
+arXiv_submission_classifier_data:
+  class_name: SubmissionClassifierDatum
+arXiv_submitter_flags:
+  class_name: SubmitterFlag
+arXiv_suspect_emails:
+  class_name: SuspectEmail
+arXiv_titles:
+  class_name: Title
+arXiv_top_papers:
+  class_name: TopPaper
+  table_args:
+    - replace: ["Index('document_id', 'document_id')", ""]
+arXiv_trackback_pings:
+  class_name: TrackbackPing
+arXiv_trackback_sites:
+  class_name: TrackbackSite
+arXiv_tracking:
+  class_name: Tracking
+arXiv_updates:
+  class_name: Updates
+
+arXiv_versions:
+  class_name: Version
+  table_args: drop
+  columns:
+    document_id: mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True, nullable=False, server_default=FetchedValue())
+    version: mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
+    request_date: mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    freeze_date: mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    publish_date: mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    flag_current: mapped_column(Integer, nullable=False, server_default=FetchedValue())
+
+arXiv_versions_checksum:
+  class_name: VersionsChecksum
+dbix_class_schema_versions:
+  class_name: DbixClassSchemaVersion
+sessions:
+  class_name: Session
+tapir_address:
+  class_name: TapirAddress
+tapir_admin_audit:
+  class_name: TapirAdminAudit
+  columns:
+    data: mapped_column(String(255))
+tapir_countries:
+  class_name: TapirCountry
+tapir_email_change_tokens:
+  class_name: TapirEmailChangeToken
+tapir_email_headers:
+  class_name: TapirEmailHeader
+tapir_email_log:
+  class_name: TapirEmailLog
+tapir_email_mailings:
+  class_name: TapirEmailMailing
+  table_args:
+    - replace: ["Index('created_by', 'created_by'),", ""]
+    - replace: ["Index('updated_by', 'updated_by')", ""]
+tapir_email_templates:
+  class_name: TapirEmailTemplate
+tapir_email_tokens:
+  class_name: TapirEmailToken
+  table_args:
+    - replace: ["Index('secret', 'secret')", ""]
+tapir_integer_variables:
+  class_name: TapirIntegerVariable
+tapir_nicknames:
+  class_name: TapirNickname
+tapir_nicknames_audit:
+  class_name: TapirNicknamesAudit
+tapir_permanent_tokens:
+  class_name: TapirPermanentToken
+  table_args:
+    - replace: ["Index('session_id', 'session_id')", ""]
+tapir_phone:
+  class_name: TapirPhone
+tapir_policy_classes:
+  class_name: TapirPolicyClass
+tapir_presessions:
+  class_name: TapirPresession
+tapir_recovery_tokens:
+  class_name: TapirRecoveryToken
+  table_args:
+    - replace: ["Index('secret', 'secret')", ""]
+tapir_recovery_tokens_used:
+  class_name: TapirRecoveryTokensUsed
+  table_args:
+    - replace: ["Index('session_id', 'session_id')", ""]
+tapir_sessions:
+  class_name: TapirSession
+  table_args:
+    - replace: ["Index('user_id', 'user_id')", ""]
+tapir_sessions_audit:
+  class_name: TapirSessionsAudit
+  table_args:
+    - replace: ["Index('ip_addr', 'ip_addr'),", ""]
+    - replace: ["Index('tracking_cookie', 'tracking_cookie')", ""]
+  columns:
+    ip_addr: "mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())"
+    tracking_cookie: "mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())"
+tapir_string_variables:
+  class_name: TapirStringVariable
+tapir_strings:
+  class_name: TapirString
+tapir_users:
+  class_name: TapirUser
+arXiv_author_ids:
+  class_name: AuthorIds
+arXiv_demographics:
+  class_name: Demographic
+  table_args:
+    - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
+    - replace: ["Index('country', 'country'),", ""]
+    - replace: ["Index('type', 'type')", "Index('dem_archive', 'archive', 'subject_class')"]
+      
+  columns:
+    country: "mapped_column(String(2), nullable=False, index=True, server_default=FetchedValue())"
+    type: "mapped_column(SmallInteger, index=True)"
+    veto_status: |
+      :Mapped[Literal['ok', 'no-endorse', 'no-upload', 'no-replace']] = mapped_column(Enum('ok', 'no-endorse', 'no-upload', 'no-replace'), server_default=text("'ok'"))
+arXiv_orcid_ids:
+  class_name: OrcidIds
+arXiv_queue_view:
+  class_name: QueueView
+arXiv_suspicious_names:
+  class_name: SuspiciousName
+arXiv_sword_licenses:
+  class_name: SwordLicense
+tapir_demographics:
+  class_name: TapirDemographic
+  table_args:
+    - replace: ["Index('country', 'country'),", ""]
+    - replace: ["Index('postal_code', 'postal_code')", ""]
+tapir_users_hot:
+  class_name: TapirUsersHot
+tapir_users_password:
+  class_name: TapirUsersPassword
+arXiv_latexml_doc:
+  class_name: DBLaTeXMLDocuments
+arXiv_latexml_sub:
+  class_name: DBLaTeXMLSubmissions
+feedback:
+  class_name: DBLaTeXMLFeedback

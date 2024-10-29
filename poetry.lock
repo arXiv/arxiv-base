@@ -1065,6 +1065,29 @@ files = [
 ]
 
 [[package]]
+name = "inflect"
+version = "7.4.0"
+description = "Correctly generate plurals, singular nouns, ordinals, indefinite articles"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "inflect-7.4.0-py3-none-any.whl", hash = "sha256:85af0997ee2bda942b1c1eed8c8a827abda91aa3e22d1efaa0eea817f9350ce7"},
+    {file = "inflect-7.4.0.tar.gz", hash = "sha256:904baa17cc2cb74827a6c27b95692e95670dadc72b208b3e8c1c05aeed47026b"},
+]
+
+[package.dependencies]
+more-itertools = ">=8.5.0"
+typeguard = ">=4.0.1"
+
+[package.extras]
+check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1)"]
+cover = ["pytest-cov"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+enabler = ["pytest-enabler (>=2.2)"]
+test = ["pygments", "pytest (>=6,!=8.1.*)"]
+type = ["pytest-mypy"]
+
+[[package]]
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
@@ -1212,6 +1235,17 @@ files = [
 [package.extras]
 factory = ["factory-boy (>=3.3.0,<4.0.0)"]
 pytest = ["pytest (>=7.2,<8.0)"]
+
+[[package]]
+name = "more-itertools"
+version = "10.5.0"
+description = "More routines for operating on iterables, beyond itertools"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "more-itertools-10.5.0.tar.gz", hash = "sha256:5482bfef7849c25dc3c6dd53a6173ae4795da2a41a80faea6700d9f5846c5da6"},
+    {file = "more_itertools-10.5.0-py3-none-any.whl", hash = "sha256:037b0d3203ce90cca8ab1defbbdac29d5f993fc20131f3664dc8d6acfa872aef"},
+]
 
 [[package]]
 name = "mypy"
@@ -1942,6 +1976,32 @@ test = ["pytest"]
 whoosh = ["sqlalchemy", "whoosh"]
 
 [[package]]
+name = "sqlacodegen"
+version = "3.0.0rc5.post1"
+description = "Automatic model code generator for SQLAlchemy"
+optional = false
+python-versions = ">=3.8"
+files = []
+develop = false
+
+[package.dependencies]
+inflect = ">=4.0.0"
+SQLAlchemy = ">=2.0.23"
+
+[package.extras]
+citext = ["sqlalchemy-citext (>=1.7.0)"]
+geoalchemy2 = ["geoalchemy2 (>=0.11.1)"]
+pgvector = ["pgvector (>=0.2.4)"]
+sqlmodel = ["sqlmodel (>=0.0.12)"]
+test = ["coverage (>=7)", "mysql-connector-python", "psycopg2-binary", "pytest (>=7.4)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/agronholm/sqlacodegen.git"
+reference = "HEAD"
+resolved_reference = "eb7b95f47ea854291fd9db02c673f7de0f33f41f"
+
+[[package]]
 name = "sqlalchemy"
 version = "2.0.30"
 description = "Database Abstraction Library"
@@ -2075,6 +2135,24 @@ files = [
 [package.dependencies]
 trio = ">=0.11"
 wsproto = ">=0.14"
+
+[[package]]
+name = "typeguard"
+version = "4.2.0"
+description = "Run-time type checker for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "typeguard-4.2.0-py3-none-any.whl", hash = "sha256:24bb8f05ccaee423309daf980ba19e978b18766334ee01994503b853fc44efde"},
+    {file = "typeguard-4.2.0.tar.gz", hash = "sha256:2aeae510750fca88d0a2ceca3e86de7f71aa43b6c3e6c267737ce1f5effc4b34"},
+]
+
+[package.dependencies]
+typing-extensions = {version = ">=4.7.0", markers = "python_version < \"3.12\""}
+
+[package.extras]
+doc = ["Sphinx (>=7)", "packaging", "sphinx-autodoc-typehints (>=1.2.0)"]
+test = ["coverage[toml] (>=7)", "mypy (>=1.2.0)", "pytest (>=7)"]
 
 [[package]]
 name = "types-requests"
@@ -2213,4 +2291,4 @@ sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "30b8ca7ca3f104f9d931cddc2beaa09859838aa5fb31be004df531912e0a9cea"
+content-hash = "4c3b31b0ae121a5901272bbe5d032c0be8bf485ae5b423959b9b4c59cea3cd57"

@@ -53,6 +53,7 @@ pytest-mock = "^3.8.2"
 pytest-cov = "*"
 hypothesis = "*"
 fakeredis = "*"
+sqlacodegen = {git = "https://github.com/agronholm/sqlacodegen.git"}
 
 click = "*"
 
