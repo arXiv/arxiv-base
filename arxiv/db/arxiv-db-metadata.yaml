@@ -1,9 +1,22 @@
 Subscription_UniversalInstitution:
   class_name: MemberInstitution
+  relationships:
+    Subscription_UniversalInstitutionContact: ""
+    Subscription_UniversalInstitutionIP: ""
+
 Subscription_UniversalInstitutionContact:
   class_name: MemberInstitutionContact
+  table_args: drop
+  columns:
+    sid: "mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)"
+  relationships:
+    Subscription_UniversalInstitution: relationship('MemberInstitution', primaryjoin='MemberInstitutionContact.sid == MemberInstitution.id')
+
 Subscription_UniversalInstitutionIP:
   class_name: MemberInstitutionIP
+  relationships:
+    Subscription_UniversalInstitution: relationship('MemberInstitution', primaryjoin='MemberInstitutionIP.sid == MemberInstitution.id')
+
 arXiv_admin_log:
   class_name: AdminLog
 arXiv_admin_metadata:
@@ -30,6 +43,14 @@ arXiv_bogus_countries:
   class_name: BogusCountries
 arXiv_categories:
   class_name: Category
+  relationships:
+    # give arXiv_demographics to use diffent back-ref name: demographic_categories
+    # don't forget to have this name on Demographic
+    arXiv_demographics: ""
+  additional_relationships:
+    - "demographic_categories: Mapped['Demographic'] =  relationship('Demographic', back_populates='demographic_categories') # do not ues 'arXiv_archive ='"
+    - "arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
+      
 arXiv_questionable_categories:
   class_name: QuestionableCategory
 arXiv_category_def:
@@ -40,54 +61,64 @@ arXiv_cross_control:
   class_name: CrossControl
   table_args:
     - replace: ["Index('document_id', 'document_id', 'version'),", ""]
-    - replace: ["Index('user_id', 'user_id')", ""]
-    - replace: ["Index('ix_arXiv_cross_control_freeze_date', 'freeze_date'),", "" ]
   columns:
     freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+  additional_relationships:
+    - "arXiv_category = relationship('Category', primaryjoin='and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)', back_populates='arXiv_cross_control')"
 arXiv_datacite_dois:
   class_name: DataciteDois
-  table_args:
-    - replace: ["Index('metadata_id', 'metadata_id')", ""]
     
 arXiv_dblp_authors:
   class_name: DBLPAuthor
-  table_args:
-    - replace: ["Index('author_id', 'author_id'),", ""]
-    - replace: ["Index('document_id', 'document_id')", ""]
 arXiv_dblp_document_authors:
   class_name: DBLPDocumentAuthor
-  table_args:
-    - replace: ["Index('author_id', 'author_id'),", ""]
-    - replace: ["Index('document_id', 'document_id')", ""]
+  table_args: drop
+
 arXiv_document_category:
   class_name: DocumentCategory
-  table_args:
-    - replace: ["Index('category', 'category'),", ""]
-    - replace: ["Index('document_id', 'document_id')", ""]
+
 arXiv_documents:
   class_name: Document
+  relationships:
+    arXiv_dblp_document_authors: ""
+  additional_relationships:
+    # This is a bit of hack
+    - |
+      @property
+      def owners(self):
+          return self.arXiv_paper_owners
+
 arXiv_dblp:
   class_name: DBLP
+
 arXiv_paper_pw:
   class_name: PaperPw
+  table_args: drop
+  columns:
+    document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())"
+    password_storage: mapped_column(Integer)
+    password_enc: mapped_column(String(50))
+    
 arXiv_endorsement_domains:
   class_name: EndorsementDomain
+
 arXiv_endorsement_requests:
   class_name: EndorsementRequest
-  table_args:
-    # Index('archive', 'archive', 'subject_class'),
-    - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
-    - replace: ["Index('secret', 'secret', unique=True)", ""]
+  relationships:
+    arXiv_categories: "relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', back_populates='arXiv_endorsement_requests')"
+    endorsee: "relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', back_populates='arXiv_endorsement_requests', uselist=False)"
+  additional_relationships:
+    - "endorsement = relationship('Endorsement', back_populates='request', uselist=False)"
+    - "audit = relationship('EndorsementRequestsAudit', uselist=False)"
+
 arXiv_endorsement_requests_audit:
   class_name: EndorsementRequestsAudit
+
 arXiv_endorsements:
   class_name: Endorsement
   table_args:
     - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
-    - replace: ["Index('endorsee_id', 'endorsee_id'),", ""]
-    - replace: ["Index('endorser_id', 'endorser_id'),", ""]
     # - replace: ["Index('endorser_id_2', 'endorser_id', 'endorsee_id', 'archive', 'subject_class', unique=True),", ""]
-    - replace: ["Index('request_id', 'request_id')", ""]
 arXiv_endorsements_audit:
   class_name: EndorsementsAudit
 arXiv_freeze_log:
@@ -98,43 +129,23 @@ arXiv_groups:
   class_name: Group
 arXiv_jref_control:
   class_name: JrefControl
+  table_args:
+    - replace: ["Index('document_id', 'document_id', 'version'", "Index('jref_ctrl_document_id', 'document_id', 'version'"]
   columns:
     freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
     status: "mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
-  table_args:
-    - replace: ["Index('arXiv_jref_control_ibfk_1', 'document_id'),", ""]
-    - replace: ["Index('arXiv_jref_control_ibfk_2', 'user_id'),", ""]
-    - replace: ["Index('ix_arXiv_jref_control_freeze_date', 'freeze_date'),", ""]
-    - replace: ["Index('ix_arXiv_jref_control_status', 'status')", ""]
 arXiv_licenses:
   class_name: License
 arXiv_log_positions:
   class_name: LogPosition
+
 arXiv_metadata:
   class_name: Metadata
-#    ForeignKeyConstraint(
-#        ["document_id"],
-#        ["arXiv_documents.document_id"],
-#        ondelete="CASCADE",
-#        onupdate="CASCADE",
-#        name="arXiv_metadata_fk_document_id",
-#    ),
-#    ForeignKeyConstraint(
-#        ["license"], ["arXiv_licenses.name"], name="arXiv_metadata_fk_license"
-#    ),
-#    ForeignKeyConstraint(
-#        ["submitter_id"],
-#        ["tapir_users.user_id"],
-#        name="arXiv_metadata_fk_submitter_id",
-#    ),
-#    Index("arXiv_metadata_idx_document_id", "document_id"),
-#    Index("arXiv_metadata_idx_license", "license"),
-#    Index("arXiv_metadata_idx_submitter_id", "submitter_id"),
-#    Index("pidv", "paper_id", "version", unique=True),
-  table_args:
-    - replace: ["Index('arXiv_metadata_idx_document_id', 'document_id'),", ""]
-    - replace: ["Index('arXiv_metadata_idx_license', 'license'),", ""]
-    - replace: ["Index('arXiv_metadata_idx_submitter_id', 'submitter_id'),", ""]
+  relationships:
+    document: "relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', back_populates='arXiv_metadata')"
+    arXiv_license: "relationship('License', primaryjoin='Metadata.license == License.name', back_populates='arXiv_metadata_licenses')"
+    submitter: "relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', back_populates='arXiv_metadata')"
+    sword: Mapped["Tracking"] = relationship("Tracking", primaryjoin="Submission.sword_id == Tracking.sword_id", back_populates="arXiv_submissions_sowrd")
 
 arXiv_mirror_list:
   class_name: MirrorList
@@ -152,21 +163,52 @@ arXiv_orcid_config:
   class_name: OrcidConfig
 arXiv_ownership_requests:
   class_name: OwnershipRequest
-  table_args:
-    - replace: ["Index('endorsement_request_id', 'endorsement_request_id'),", ""]
-    - replace: ["Index('user_id', 'user_id')", ""]
+  table_args: drop
+  columns:
+    user_id: mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
+    endorsement_request_id: mapped_column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
+
+  relationships:
+    endorsement_request: "relationship('EndorsementRequest', primaryjoin='OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id', back_populates='arXiv_ownership_requests')"
+    user: "relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', back_populates='arXiv_ownership_requests')"
+  additional_relationships:
+    - "request_audit = relationship('OwnershipRequestsAudit', back_populates='ownership_request', uselist=False)"
+    - "documents = relationship('Document', secondary=t_arXiv_ownership_requests_papers)"
+
+# Have a mixed feelig about this. This is clearly hand-edited, and not really used
 arXiv_ownership_requests_audit:
   class_name: OwnershipRequestsAudit
+  table_args: drop
+  columns:
+    request_id: "mapped_column(ForeignKey('arXiv_ownership_requests.request_id'), primary_key=True, server_default=FetchedValue())"
+  additional_relationships:
+    - "ownership_request = relationship('OwnershipRequest', primaryjoin='OwnershipRequestsAudit.request_id == OwnershipRequest.request_id', back_populates='request_audit', uselist=False)"
+
+# Without this, arXiv_paper_owners would become simple Table, not Model
+#
+# The definition of PaperOwner is problematic. The main issue is that the table has no simple
+# primary key. If this had a surrogate key as primary with the constraints as secondary,
+# the table was a lot more usuable.
+# Because of this, referencing the paper owner record from elsewhere is inconvinent, and
+# sqlalchemy has trouble making the table to begin with.
 arXiv_paper_owners:
   class_name: PaperOwner
   table_args:
-    - replace: ["Index('user_id', 'user_id')", ""]
+    # This is given by the document_id column - squalch the index name that's not relevant
+    - replace: ["ForeignKeyConstraint(['document_id'], ['arXiv_documents.document_id'], name='0_593'),", ""]
+    # This is give by the user_id column
+    - replace: ["ForeignKeyConstraint(['user_id'], ['tapir_users.user_id'], name='0_594'),", ""]
+    # Define this as primary key - don't add primay = true in the column 
+    - replace: ["Index('document_id', 'document_id', 'user_id', unique=True)", "PrimaryKeyConstraint('document_id', 'user_id')"]
+  columns:
+    document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'))"
+    user_id: "mapped_column(ForeignKey('tapir_users.user_id'))"
+  additional_relationships:
+    - "owner = relationship('TapirUser', foreign_keys='[PaperOwner.user_id]', back_populates='owned_papers')"
 arXiv_paper_sessions:
   class_name: PaperSession
 arXiv_pilot_files:
   class_name: PilotFile
-  table_args:
-    - replace: ["Index('arXiv_pilot_files_cdfk3', 'submission_id')", ""]
 arXiv_publish_log:
   class_name: PublishLog
 arXiv_reject_session_usernames:
@@ -177,10 +219,8 @@ arXiv_show_email_requests:
   class_name: ShowEmailRequest
   table_args:
     - replace: ["Index('email_reqs_user_id', 'user_id', 'dated'),", ""]
-    - replace: ["Index('ix_arXiv_show_email_requests_dated', 'dated'),", ""]
+    # - replace: ["Index('ix_arXiv_show_email_requests_dated', 'dated'),", ""]
     - replace: ["Index('user_id', 'user_id', 'dated')", "Index('email_reqs_user_id', 'user_id', 'dated')"]
-  columns:
-    dated: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
 arXiv_state:
   class_name: State
 arXiv_stats_monthly_downloads:
@@ -191,68 +231,38 @@ arXiv_submission_agreements:
   class_name: SubmissionAgreement
 arXiv_submission_category:
   class_name: SubmissionCategory
-  table_args:
-    - replace: ["Index('arXiv_submission_category_idx_category', 'category'),", ""]
-    - replace: ["Index('arXiv_submission_category_idx_submission_id', 'submission_id')", ""]
   
 arXiv_submission_category_proposal:
   class_name: SubmissionCategoryProposal
-  table_args:
-    - replace: ["Index('arXiv_submission_category_proposal_fk_prop_comment_id', 'proposal_comment_id'),", ""]
-    - replace: ["Index('arXiv_submission_category_proposal_fk_resp_comment_id', 'response_comment_id'),", ""]
-    - replace: ["Index('arXiv_submission_category_proposal_fk_user_id', 'user_id'),", ""]
-    - replace: ["Index('arXiv_submission_category_proposal_idx_category', 'category'),", ""]
-    - replace: ["Index('arXiv_submission_category_proposal_idx_is_primary', 'is_primary'),", ""]
-    - replace: ["Index('arXiv_submission_category_proposal_idx_key', 'proposal_id'),", ""]
-    - replace: ["Index('arXiv_submission_category_proposal_idx_submission_id', 'submission_id')", ""]
 
 arXiv_submission_control:
-  class_name: SubmissionControl
   table_args:
-    - replace: ["ForeignKeyConstraint(['document_id'], ['arXiv_documents.document_id'], name='arXiv_submission_control_ibfk_1'),", ""]
-    - replace: ["ForeignKeyConstraint(['user_id'], ['tapir_users.user_id'], name='arXiv_submission_control_ibfk_2'),", ""]
-    - replace: ["Index('document_id', 'document_id', 'version', unique=True),", ""]
-    - replace: ["Index('freeze_date', 'freeze_date'),", ""]
-    - replace: ["Index('pending_paper_id', 'pending_paper_id'),", ""]
-    - replace: ["Index('request_date', 'request_date'),", ""]
-    - replace: ["Index('status', 'status'),", ""]
-    - replace: ["Index('user_id', 'user_id')", ""]
-  columns:
-    document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue())"
-    version: "mapped_column(Integer, nullable=False, server_default=FetchedValue())"
-    pending_paper_id: "mapped_column(String(20), nullable=False, index=True, server_default=FetchedValue())"
-    user_id: "mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())"
-    status: ":Mapped[Literal['new', 'frozen', 'published', 'rejected']] = mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
-    flag_must_notify: ":Mapped[Optional[Literal['0', '1']]] = mapped_column(Enum('0', '1'), server_default=FetchedValue())"
-    request_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
-    freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
-    publish_date: "mapped_column(Integer, nullable=False, server_default=FetchedValue())"
+    # the document_id conflicts
+    - replace: ["Index('document_id', 'document_id', 'version'", "Index('sub_ctrl_document_id', 'document_id', 'version'"]
+  class_name: SubmissionControl
 
 arXiv_submission_flag:
   class_name: SubmissionFlag
-  table_args:
-    - replace: ["Index('user_id', 'user_id')", ""]
-
 arXiv_submission_hold_reason:
   class_name: SubmissionHoldReason
-  table_args:
-    - replace: ["Index('comment_id', 'comment_id'),", ""]
-    - replace: ["Index('submission_id', 'submission_id'),", ""]
-    - replace: ["Index('user_id', 'user_id')", ""]
 arXiv_submission_near_duplicates:
   class_name: SubmissionNearDuplicate
 arXiv_submission_qa_reports:
   class_name: SubmissionQaReport
-  table_args:
-    - replace: ["Index('submission_id', 'submission_id')", ""]
-
 arXiv_submission_view_flag:
   class_name: SubmissionViewFlag
-  table_args:
-    - replace: ["Index('user_id', 'user_id')", ""]
-
 arXiv_submissions:
   class_name: Submission
+  relationships:
+    agreement: "relationship('SubmissionAgreement', primaryjoin='Submission.agreement_id == SubmissionAgreement.agreement_id', back_populates='arXiv_submissions')"
+    document: "relationship('Document', primaryjoin='Submission.document_id == Document.document_id', back_populates='arXiv_submissions')"
+    submitter: "relationship('TapirUser', primaryjoin='Submission.submitter_id == TapirUser.user_id', back_populates='arXiv_submissions')"
+    sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions')"
+    arXiv_check_results: "relationship('ArXivCheckResults', back_populates='submission')"
+    arXiv_submission_locks: "relationship('ArXivSubmissionLocks', back_populates='submission')"
+  additional_relationships:
+    - "arXiv_license = relationship('License', primaryjoin='Submission.license == License.name', back_populates='arXiv_submissions')"
+
 arXiv_pilot_datasets:
   class_name: PilotDataset
 arXiv_submission_abs_classifier_data:
@@ -265,44 +275,59 @@ arXiv_suspect_emails:
   class_name: SuspectEmail
 arXiv_titles:
   class_name: Title
+
 arXiv_top_papers:
   class_name: TopPaper
-  table_args:
-    - replace: ["Index('document_id', 'document_id')", ""]
+  relationships:
+    document: "relationship('Document', primaryjoin='TopPaper.document_id == Document.document_id', back_populates='arXiv_top_papers')"
+
 arXiv_trackback_pings:
   class_name: TrackbackPing
+  columns:
+    status: ":Mapped[Literal['pending', 'pending2', 'accepted', 'rejected', 'spam']] = mapped_column(Enum('pending', 'pending2', 'accepted', 'rejected', 'spam'), nullable=False, index=True, server_default=FetchedValue())"
+
 arXiv_trackback_sites:
   class_name: TrackbackSite
+  columns:
+    action: ":Mapped[Literal['neutral', 'accept', 'reject', 'spam']] = mapped_column(Enum('neutral', 'accept', 'reject', 'spam'), nullable=False, server_default=FetchedValue())"
+
 arXiv_tracking:
   class_name: Tracking
+
+# without this, arXiv_updates would become simple Table, not Model
 arXiv_updates:
   class_name: Updates
+  table_args: drop
+  columns:
+    action: ":Mapped[Optional[Literal['new', 'replace', 'absonly', 'cross', 'repcro']]] = mapped_column(Enum('new', 'replace', 'absonly', 'cross', 'repcro'))"
 
 arXiv_versions:
   class_name: Version
-  table_args: drop
-  columns:
-    document_id: mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True, nullable=False, server_default=FetchedValue())
-    version: mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
-    request_date: mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    freeze_date: mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    publish_date: mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    flag_current: mapped_column(Integer, nullable=False, server_default=FetchedValue())
-
 arXiv_versions_checksum:
   class_name: VersionsChecksum
 dbix_class_schema_versions:
   class_name: DbixClassSchemaVersion
 sessions:
   class_name: Session
+
 tapir_address:
   class_name: TapirAddress
+  table_args: drop
+  columns:
+    user_id: "mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())"
+    country: "mapped_column(ForeignKey('tapir_countries.digraph'), nullable=False, index=True, server_default=FetchedValue())"
+  relationships:
+    tapir_country: "relationship('TapirCountry', primaryjoin='TapirAddress.country == TapirCountry.digraph', back_populates='tapir_address')"
+    user: "relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', back_populates='tapir_address')"
+
 tapir_admin_audit:
   class_name: TapirAdminAudit
   columns:
     data: mapped_column(String(255))
 tapir_countries:
   class_name: TapirCountry
+  relationships:
+      user: "relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', back_populates='tapir_address')"
 tapir_email_change_tokens:
   class_name: TapirEmailChangeToken
 tapir_email_headers:
@@ -311,15 +336,10 @@ tapir_email_log:
   class_name: TapirEmailLog
 tapir_email_mailings:
   class_name: TapirEmailMailing
-  table_args:
-    - replace: ["Index('created_by', 'created_by'),", ""]
-    - replace: ["Index('updated_by', 'updated_by')", ""]
 tapir_email_templates:
   class_name: TapirEmailTemplate
 tapir_email_tokens:
   class_name: TapirEmailToken
-  table_args:
-    - replace: ["Index('secret', 'secret')", ""]
 tapir_integer_variables:
   class_name: TapirIntegerVariable
 tapir_nicknames:
@@ -328,8 +348,6 @@ tapir_nicknames_audit:
   class_name: TapirNicknamesAudit
 tapir_permanent_tokens:
   class_name: TapirPermanentToken
-  table_args:
-    - replace: ["Index('session_id', 'session_id')", ""]
 tapir_phone:
   class_name: TapirPhone
 tapir_policy_classes:
@@ -338,44 +356,37 @@ tapir_presessions:
   class_name: TapirPresession
 tapir_recovery_tokens:
   class_name: TapirRecoveryToken
-  table_args:
-    - replace: ["Index('secret', 'secret')", ""]
 tapir_recovery_tokens_used:
   class_name: TapirRecoveryTokensUsed
-  table_args:
-    - replace: ["Index('session_id', 'session_id')", ""]
 tapir_sessions:
   class_name: TapirSession
-  table_args:
-    - replace: ["Index('user_id', 'user_id')", ""]
+  additional_relationships:
+    - "user = relationship('TapirUser', primaryjoin='TapirSession.user_id == TapirUser.user_id', back_populates='tapir_sessions')"
 tapir_sessions_audit:
   class_name: TapirSessionsAudit
-  table_args:
-    - replace: ["Index('ip_addr', 'ip_addr'),", ""]
-    - replace: ["Index('tracking_cookie', 'tracking_cookie')", ""]
-  columns:
-    ip_addr: "mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())"
-    tracking_cookie: "mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())"
+  additional_relationships:
+    - "session = relationship('TapirSession')"
 tapir_string_variables:
   class_name: TapirStringVariable
 tapir_strings:
   class_name: TapirString
 tapir_users:
   class_name: TapirUser
+  additional_relationships:
+    - "endorsee_of = relationship('Endorsement', foreign_keys='[Endorsement.endorsee_id]', back_populates='endorsee')"
+    - "endorses = relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')"
+    - "owned_papers = relationship('PaperOwner',  foreign_keys='[PaperOwner.user_id]', back_populates='owner')"
+    - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
+
 arXiv_author_ids:
   class_name: AuthorIds
 arXiv_demographics:
   class_name: Demographic
-  table_args:
-    - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
-    - replace: ["Index('country', 'country'),", ""]
-    - replace: ["Index('type', 'type')", "Index('dem_archive', 'archive', 'subject_class')"]
-      
-  columns:
-    country: "mapped_column(String(2), nullable=False, index=True, server_default=FetchedValue())"
-    type: "mapped_column(SmallInteger, index=True)"
-    veto_status: |
-      :Mapped[Literal['ok', 'no-endorse', 'no-upload', 'no-replace']] = mapped_column(Enum('ok', 'no-endorse', 'no-upload', 'no-replace'), server_default=text("'ok'"))
+  relationships:
+    # I have to drop to avoid the confusion. Instead use "demographic_categories"
+    arXiv_categories: ""
+  additional_relationships:
+    - "demographic_categories: Mapped['Category'] = relationship('Category', back_populates='demographic_categories')"
 arXiv_orcid_ids:
   class_name: OrcidIds
 arXiv_queue_view:
@@ -386,13 +397,17 @@ arXiv_sword_licenses:
   class_name: SwordLicense
 tapir_demographics:
   class_name: TapirDemographic
-  table_args:
-    - replace: ["Index('country', 'country'),", ""]
-    - replace: ["Index('postal_code', 'postal_code')", ""]
+  additional_relationships:
+    - "tapir_countries: Mapped['TapirCountry'] = relationship('TapirCountry', back_populates='tapir_demographics')"
 tapir_users_hot:
   class_name: TapirUsersHot
 tapir_users_password:
   class_name: TapirUsersPassword
+  table_args: drop
+  columns:
+    user_id: "mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())"
+  additional_relationships:
+    - "user = relationship('TapirUser')"
 arXiv_latexml_doc:
   class_name: DBLaTeXMLDocuments
 arXiv_latexml_sub:

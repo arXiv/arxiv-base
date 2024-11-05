@@ -4,10 +4,16 @@ import sys
 import os
 import subprocess
 from typing import Tuple
+import logging
+
+from libcst.matchers import SimpleStatementLine
 from ruamel.yaml import YAML
 
 # import ast
 import libcst as cst
+
+logging.basicConfig(level=logging.INFO)
+
 
 tables_i_cannot_update = {
     'DBLPAuthor': True,
@@ -48,11 +54,11 @@ def patch_mysql_types(contents: str):
         (re.compile(r'Mapped\[decimal.Decimal\]'), r'Mapped[float]'),  #
         (re.compile(r'Mapped\[datetime.datetime\]'), r'Mapped[datetime]'),  #
         (re.compile(r'Optional\[datetime.datetime\]'), r'Optional[datetime]'),  #
-        (re.compile(r'INTEGER\(\d+\)'), r'Integer'),
-        (re.compile(r'TINYINT\(\d+\)'), r'Integer'),
-        (re.compile(r'MEDIUMINT\(\d+\)'), r'Integer'),
-        (re.compile(r'SMALLINT\(\d+\)'), r'Integer'),
-        (re.compile(r'MEDIUMTEXT'), r'Text'),
+        (re.compile(r'INTEGER(\(\d+\)){0,1}'), r'Integer'),
+        (re.compile(r'TINYINT(\(\d+\)){0,1}'), r'Integer'),
+        (re.compile(r'MEDIUMINT(\(\d+\)){0,1}'), r'Integer'),
+        (re.compile(r'SMALLINT(\(\d+\)){0,1}'), r'Integer'),
+        (re.compile(r'MEDIUMTEXT(\(\d+\)){0,1}'), r'Text'),
         (re.compile(r'text\("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"\)'), r'FetchdValue()'),
         (re.compile(r'datetime\.date'), r'dt.date'),
 
@@ -142,7 +148,8 @@ class SchemaTransformer(cst.CSTTransformer):
                     if target in existing_assignments:
                         existing_elem = existing_assignments[target]
                         # Use the original element if it's marked as int primary key or similar
-                        if self.is_intpk(existing_elem):
+                        # Also, it the line is commented, keep.
+                        if self.is_intpk(existing_elem) or self.has_comment(existing_elem):
                             updated_body.append(existing_elem)
                         else:
                             if isinstance(elem.body[0].value, cst.Call) and isinstance(existing_elem.body[0].value, cst.Call):
@@ -164,6 +171,28 @@ class SchemaTransformer(cst.CSTTransformer):
             for elem in original_node.body.body:
                 if not is_assign_expr(elem):
                     updated_body.append(elem)
+
+            if existing_assignments:
+                logging.info("#========================================================================")
+                logging.info(f"# {class_name}")
+                for remain_key, remain_value in existing_assignments.items():
+                    logging.info(f"    {remain_key}")
+                logging.info("#========================================================================")
+
+            a_key: str
+            for a_key, a_value in existing_assignments.items():
+                if not isinstance(a_value, cst.SimpleStatementLine):
+                    continue
+                # If the lhs is all upper, it is def. added by hand. So, leave it in the class
+                if a_key == a_key.upper():
+                    updated_body.append(a_value)
+                    continue
+
+                # If the line has any comment, hand-added, so leave it
+                for line in a_value.leading_lines:
+                    if line.comment:
+                        updated_body.append(a_value)
+                        continue
 
             # Rebuild the class body with updated assignments
             return updated_node.with_changes(body=updated_node.body.with_changes(body=updated_body))
@@ -189,6 +218,11 @@ class SchemaTransformer(cst.CSTTransformer):
                                         return True
         return False
 
+    def has_comment(self, elem):
+        if isinstance(elem, cst.SimpleStatementLine):
+            return elem.leading_lines and elem.leading_lines[-1].comment
+        return False
+
     def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.CSTNode:
         # Check if the value of the assignment is a Table call
         lhs_name = original_node.targets[0].target.value
@@ -200,6 +234,12 @@ class SchemaTransformer(cst.CSTTransformer):
         latest_table_def: cst.Assign = self.latest_tables.get(lhs_name)
         if not latest_table_def:
             return original_node
+
+        # If the original node is commented, consider it as hand-updated so leave as is
+        if isinstance(original_node, cst.SimpleStatementLine):
+            if original_node.leading_lines and original_node.leading_lines[-1].comment:
+                return original_node
+
         # updated_node = updated_node.with_changes(value=)
         rh_new = latest_table_def.value
         rh_old = updated_node.value
@@ -238,17 +278,25 @@ class SchemaTransformer(cst.CSTTransformer):
 def main() -> None:
     p_outfile = "arxiv/db/autogen_models.py"
 
-    #
     #with open(os.path.expanduser('~/.arxiv/arxiv-db-prod-readonly'), encoding='utf-8') as uri_fd:
+    #    p_url: str = uri_fd.read().strip()
+    #with open(os.path.expanduser('~/.arxiv/arxiv-db-dev-proxy'), encoding='utf-8') as uri_fd:
     #    p_url: str = uri_fd.read().strip()
     p_url = "mysql://testuser:testpassword@127.0.0.1/testdb"
     sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "sqlacodegen", "src"))
     subprocess.run(['development/sqlacodegen/venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile, '--model-metadata', "arxiv/db/arxiv-db-metadata.yaml"], check=True)
 
+    subprocess.run(['development/sqlacodegen/venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', "arxiv/db/raw-autogen_models.py"], check=True)
+
     with open(p_outfile, 'r') as src:
         source = src.read()
 
-    latest_tree = cst.parse_module(source)
+    try:
+        latest_tree = cst.parse_module(source)
+    except Exception as exc:
+        logging.error("%s: failed to parse", p_outfile, exc_info=exc)
+        exit(1)
+
     latest_def = {}
     latest_tables = {}
 
@@ -274,7 +322,7 @@ def main() -> None:
     contents = patch_mysql_types(contents)
     with open(updated_model, 'w', encoding='utf-8') as updated_fd:
         updated_fd.write(contents)
-    subprocess.run(['black', updated_model])
+    subprocess.run(['black', "-l", "200", updated_model])
 
 
 if __name__ == "__main__":

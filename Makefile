@@ -1,5 +1,7 @@
+PROD_DB_PROXY_PORT := 2021
 
-.PHONY: db-models
+
+.PHONY: db-models prod-proxy
 
 default: venv/bin/poetry
 
@@ -30,3 +32,6 @@ arxiv/db/autogen_models_patch.diff:
 	@PROD_ARXIV_DB_URI=`cat ~/.arxiv/arxiv-db-prod-readonly`; . venv/bin/activate && \
 	poetry run sqlacodegen "$$PROD_ARXIV_DB_URI" --outfile arxiv/db/.autogen_models.py
 	diff -c arxiv/db/.autogen_models.py arxiv/db/autogen_models.py > arxiv/db/autogen_models_patch.diff
+
+prod-proxy:
+	/usr/local/bin/cloud-sql-proxy --address 0.0.0.0 --port ${PROD_DB_PROXY_PORT} arxiv-production:us-central1:arxiv-production-rep9 > /dev/null 2>&1 &

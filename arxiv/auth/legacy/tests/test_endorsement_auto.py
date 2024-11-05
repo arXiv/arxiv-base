@@ -43,7 +43,10 @@ class TestAutoEndorsement(TestCase):
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
             'remote_host': 'foo-host.foo.com',
-            'tracking_cookie': '0'
+            'tracking_cookie': '0',
+            'date': '2024-01-01',
+            'flag_auto': 1,
+            'added_by': 1,
         }
 
         with self.app.app_context():

@@ -53,9 +53,11 @@ pytest-mock = "^3.8.2"
 pytest-cov = "*"
 hypothesis = "*"
 fakeredis = "*"
-sqlacodegen = {git = "https://github.com/agronholm/sqlacodegen.git"}
-
 click = "*"
+sqlmodel = "*"
+sqlalchemy-citext = "*"
+geoalchemy2 = "*"
+pgvector = "*"
 
 [tool.poetry.extras]
 sphinx = [ "sphinx", "sphinxcontrib-websupport", "sphinx-autodoc-typehints" ]
@@ -63,6 +65,15 @@ sphinx = [ "sphinx", "sphinxcontrib-websupport", "sphinx-autodoc-typehints" ]
 [tool.poetry.group.dev.dependencies]
 selenium = "^4.23.0"
 types-requests = "^2.32.0.20240712"
+autopep8 = "^2.3.1"
+inflect = "^7.4.0"
+sqlmodel = "^0.0.22"
+geoalchemy2 = "^0.15.2"
+pgvector = "^0.3.5"
+black = "^24.10.0"
+libcst = "^1.5.0"
+functions-framework = "^3.8.1"
+google-cloud-bigquery = "^3.26.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

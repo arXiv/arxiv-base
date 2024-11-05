@@ -133,3 +133,4 @@ foo.json
 test.db-journal
 
 arxiv/db/.autogen_models.py
+/arxiv/db/autogen_models.py
