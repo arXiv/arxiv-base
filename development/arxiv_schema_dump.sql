@@ -21,7 +21,7 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup 
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '2d19f914-b050-11e7-95e6-005056a34791:1-563686703,
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '2d19f914-b050-11e7-95e6-005056a34791:1-566477503,
 c713b996-7f87-11ef-8e22-42010a5ee117:1-12';
 
 --
@@ -112,7 +112,7 @@ CREATE TABLE `arXiv_admin_log` (
   KEY `arXiv_admin_log_idx_command` (`command`),
   KEY `arXiv_admin_log_idx_paper_id` (`paper_id`),
   KEY `arXiv_admin_log_idx_username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=37722030 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=37855801 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -347,7 +347,7 @@ CREATE TABLE `arXiv_bib_updates` (
   `journal_ref` text,
   `doi` text,
   PRIMARY KEY (`update_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=796639 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=796789 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -505,7 +505,7 @@ CREATE TABLE `arXiv_check_results` (
   CONSTRAINT `check_results_checks_fk` FOREIGN KEY (`check_id`) REFERENCES `arXiv_checks` (`check_id`),
   CONSTRAINT `check_results_sub_fk` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`),
   CONSTRAINT `check_results_user_fk` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=188641 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=198669 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -798,7 +798,7 @@ CREATE TABLE `arXiv_documents` (
   KEY `submitter_id` (`submitter_id`),
   KEY `submitter_email` (`submitter_email`),
   CONSTRAINT `0_580` FOREIGN KEY (`submitter_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2608822 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2614028 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -857,7 +857,7 @@ CREATE TABLE `arXiv_endorsement_requests` (
   KEY `archive` (`archive`,`subject_class`),
   CONSTRAINT `0_722` FOREIGN KEY (`endorsee_id`) REFERENCES `tapir_users` (`user_id`),
   CONSTRAINT `0_723` FOREIGN KEY (`archive`, `subject_class`) REFERENCES `arXiv_categories` (`archive`, `subject_class`)
-) ENGINE=InnoDB AUTO_INCREMENT=287964 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=289081 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -906,7 +906,7 @@ CREATE TABLE `arXiv_endorsements` (
   CONSTRAINT `0_728` FOREIGN KEY (`endorsee_id`) REFERENCES `tapir_users` (`user_id`),
   CONSTRAINT `0_729` FOREIGN KEY (`archive`, `subject_class`) REFERENCES `arXiv_categories` (`archive`, `subject_class`),
   CONSTRAINT `0_730` FOREIGN KEY (`request_id`) REFERENCES `arXiv_endorsement_requests` (`request_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1091105 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1093533 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1095,7 +1095,7 @@ CREATE TABLE `arXiv_metadata` (
   CONSTRAINT `arXiv_metadata_fk_document_id` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `arXiv_metadata_fk_license` FOREIGN KEY (`license`) REFERENCES `arXiv_licenses` (`name`),
   CONSTRAINT `arXiv_metadata_fk_submitter_id` FOREIGN KEY (`submitter_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4126037 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4134837 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1117,7 +1117,7 @@ CREATE TABLE `arXiv_mirror_list` (
   PRIMARY KEY (`mirror_list_id`),
   KEY `arXiv_mirror_list_idx_document_id` (`document_id`),
   CONSTRAINT `arXiv_mirror_list_fk_document_id` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=583872 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=584251 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1233,7 +1233,7 @@ CREATE TABLE `arXiv_next_mail` (
   PRIMARY KEY (`next_mail_id`),
   KEY `arXiv_next_mail_idx_document_id` (`document_id`),
   KEY `arXiv_next_mail_idx_document_id_version` (`document_id`,`version`)
-) ENGINE=InnoDB AUTO_INCREMENT=3671365 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3680904 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1286,7 +1286,7 @@ CREATE TABLE `arXiv_ownership_requests` (
   KEY `endorsement_request_id` (`endorsement_request_id`),
   CONSTRAINT `0_734` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`),
   CONSTRAINT `0_735` FOREIGN KEY (`endorsement_request_id`) REFERENCES `arXiv_endorsement_requests` (`request_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=61970 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=62120 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1533,7 +1533,7 @@ CREATE TABLE `arXiv_show_email_requests` (
   KEY `remote_addr` (`remote_addr`),
   CONSTRAINT `arXiv_show_email_requests_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`),
   CONSTRAINT `arXiv_show_email_requests_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1980104 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1982787 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1693,7 +1693,7 @@ CREATE TABLE `arXiv_submission_category_proposal` (
   CONSTRAINT `arXiv_submission_category_proposal_fk_resp_comment_id` FOREIGN KEY (`response_comment_id`) REFERENCES `arXiv_admin_log` (`id`),
   CONSTRAINT `arXiv_submission_category_proposal_fk_submission_id` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `arXiv_submission_category_proposal_fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=465344 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=467577 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1763,7 +1763,7 @@ CREATE TABLE `arXiv_submission_flag` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `arXiv_submission_flag_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `arXiv_submission_flag_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=655595 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=662304 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1787,7 +1787,7 @@ CREATE TABLE `arXiv_submission_hold_reason` (
   CONSTRAINT `arXiv_submission_hold_reason_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE,
   CONSTRAINT `arXiv_submission_hold_reason_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `arXiv_submission_hold_reason_ibfk_3` FOREIGN KEY (`comment_id`) REFERENCES `arXiv_admin_log` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=112275 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=114140 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1810,7 +1810,7 @@ CREATE TABLE `arXiv_submission_locks` (
   KEY `arxiv_submission_locks_user_index` (`user_id`),
   CONSTRAINT `arxiv_submission_locks_sub_fk` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`),
   CONSTRAINT `arxiv_submission_locks_user_fk` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54261 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=64547 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1952,7 +1952,7 @@ CREATE TABLE `arXiv_submissions` (
   CONSTRAINT `arXiv_submissions_fk_license` FOREIGN KEY (`license`) REFERENCES `arXiv_licenses` (`name`) ON UPDATE CASCADE,
   CONSTRAINT `arXiv_submissions_fk_submitter_id` FOREIGN KEY (`submitter_id`) REFERENCES `tapir_users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `arXiv_submissions_fk_sword_id` FOREIGN KEY (`sword_id`) REFERENCES `arXiv_tracking` (`sword_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5966693 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5982750 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2082,7 +2082,7 @@ CREATE TABLE `arXiv_trackback_pings` (
   KEY `arXiv_trackback_pings__url` (`url`),
   KEY `arXiv_trackback_pings__posted_date` (`posted_date`),
   KEY `arXiv_trackback_pings__status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=1868897 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1868954 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2116,7 +2116,7 @@ CREATE TABLE `arXiv_tracking` (
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`tracking_id`),
   UNIQUE KEY `sword_id` (`sword_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=73019 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=73104 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2396,7 +2396,7 @@ CREATE TABLE `tapir_admin_audit` (
   CONSTRAINT `0_553` FOREIGN KEY (`session_id`) REFERENCES `tapir_sessions` (`session_id`),
   CONSTRAINT `0_554` FOREIGN KEY (`admin_user`) REFERENCES `tapir_users` (`user_id`),
   CONSTRAINT `0_555` FOREIGN KEY (`affected_user`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=289744 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=290626 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2521,7 +2521,7 @@ CREATE TABLE `tapir_email_log` (
   `template_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`mail_id`),
   KEY `mailing_id` (`mailing_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1329214 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1330693 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2686,7 +2686,7 @@ CREATE TABLE `tapir_nicknames` (
   KEY `role` (`role`),
   KEY `policy` (`policy`),
   CONSTRAINT `0_570` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1029043 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1031816 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2834,7 +2834,7 @@ CREATE TABLE `tapir_presessions` (
   `tracking_cookie` varchar(255) NOT NULL DEFAULT '',
   `created_at` int(4) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`presession_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=422 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=442 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2915,7 +2915,7 @@ CREATE TABLE `tapir_sessions` (
   KEY `start_time` (`start_time`),
   KEY `end_time` (`end_time`),
   CONSTRAINT `0_525` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22707799 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22747905 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3015,7 +3015,7 @@ CREATE TABLE `tapir_users` (
   KEY `joined_ip_num` (`joined_ip_num`),
   KEY `flag_can_lock` (`flag_can_lock`),
   CONSTRAINT `0_510` FOREIGN KEY (`policy_class`) REFERENCES `tapir_policy_classes` (`class_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1082745 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1085901 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3064,4 +3064,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-30 14:30:10
+-- Dump completed on 2024-11-06 12:59:37

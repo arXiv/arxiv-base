@@ -306,9 +306,9 @@ class Category(Base):
     arXiv_archives: Mapped["Archive"] = relationship("Archive", back_populates="arXiv_categories")
     arXiv_endorsement_domains: Mapped["EndorsementDomain"] = relationship("EndorsementDomain", back_populates="arXiv_categories")
     arXiv_cross_control: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="arXiv_categories")
+    arXiv_demographics: Mapped[List["Demographic"]] = relationship("Demographic", back_populates="arXiv_categories")
     arXiv_endorsement_requests: Mapped[List["EndorsementRequest"]] = relationship("EndorsementRequest", back_populates="arXiv_categories")
     arXiv_endorsements: Mapped[List["Endorsement"]] = relationship("Endorsement", back_populates="arXiv_categories")
-    demographic_categories: Mapped["Demographic"] = relationship("Demographic", back_populates="demographic_categories")  # do not ues 'arXiv_archive ='
     arXiv_endorsement_domain = relationship("EndorsementDomain", primaryjoin="Category.endorsement_domain == EndorsementDomain.endorsement_domain", back_populates="arXiv_categories")
 
     # link to category
@@ -466,10 +466,7 @@ class Document(Base):
     arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="document")
     arXiv_top_papers: Mapped[List["TopPaper"]] = relationship("TopPaper", back_populates="document")
     arXiv_versions: Mapped[List["Version"]] = relationship("Version", back_populates="document")
-
-    @property
-    def owners(self):
-        return self.arXiv_paper_owners
+    owners = relationship("PaperOwner", back_populates="document")
 
 
 class DBLP(Document):
@@ -2004,7 +2001,9 @@ class Demographic(Base):
     subject_class: Mapped[Optional[str]] = mapped_column(String(16))
     flag_group_physics: Mapped[Optional[int]] = mapped_column(Integer, index=True)
 
-    demographic_categories: Mapped["Category"] = relationship("Category", back_populates="demographic_categories")
+    arXiv_categories: Mapped["Category"] = relationship(
+        "Category", primaryjoin="and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)", backref="category_demographics"
+    )
 
     @property
     def groups(self) -> List[str]:
@@ -2013,9 +2012,6 @@ class Demographic(Base):
 
     # the original user
     user = relationship("TapirUser", back_populates="demographics")
-
-    # associate the category
-    arXiv_category = relationship("Category", primaryjoin="and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)", backref="arXiv_demographics")
 
     GROUP_FLAGS = [
         ("grp_physics", "flag_group_physics"),

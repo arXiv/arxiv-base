@@ -173,11 +173,14 @@ class SchemaTransformer(cst.CSTTransformer):
                     updated_body.append(elem)
 
             if existing_assignments:
-                logging.info("#========================================================================")
-                logging.info(f"# {class_name}")
-                for remain_key, remain_value in existing_assignments.items():
-                    logging.info(f"    {remain_key}")
-                logging.info("#========================================================================")
+                # ignore all uppers
+                props = [prop for prop in existing_assignments.keys() if prop.upper() != prop]
+                if props:
+                    logging.info("#")
+                    logging.info(f"# {class_name}")
+                    for prop in props:
+                        logging.info(f"    {prop}")
+                    logging.info("#")
 
             a_key: str
             for a_key, a_value in existing_assignments.items():
@@ -275,6 +278,18 @@ class SchemaTransformer(cst.CSTTransformer):
         return updated_node
 
 
+def find_classes_and_tables(tree):
+    classes = {}
+    tables = {}
+
+    for node in tree.body:
+        if isinstance(node, cst.ClassDef):
+            classes[node.name.value] = node
+        if is_table_def(node):
+            tables[node.body[0].targets[0].target.value] = node.body[0]
+    return classes, tables
+
+
 def main() -> None:
     p_outfile = "arxiv/db/autogen_models.py"
 
@@ -297,20 +312,28 @@ def main() -> None:
         logging.error("%s: failed to parse", p_outfile, exc_info=exc)
         exit(1)
 
-    latest_def = {}
-    latest_tables = {}
-
-    for node in latest_tree.body:
-        if isinstance(node, cst.ClassDef):
-            latest_def[node.name.value] = node
-        if is_table_def(node):
-            latest_tables[node.body[0].targets[0].target.value] = node.body[0]
+    latest_classes, latest_tables = find_classes_and_tables(latest_tree)
 
     with open(os.path.expanduser('arxiv/db/orig_models.py'), encoding='utf-8') as model_fd:
         existing_models = model_fd.read()
     existing_tree = cst.parse_module(existing_models)
 
-    transformer = SchemaTransformer(latest_def, latest_tables)
+    existing_classes, existing_tables = find_classes_and_tables(existing_tree)
+
+    new_classes: [str] = list(set(latest_classes.keys()) - set(existing_classes.keys()))
+    new_classes.remove('Base') # base shows up here but Base is imported in existing models.py
+    if new_classes:
+        logging.warning("NEW CLASSES! Add this to the original")
+        for new_class in new_classes:
+            logging.warnind(f"class {new_class}")
+
+    new_tables = list(set(latest_tables.keys()) - set(existing_tables.keys()))
+    if new_tables:
+        logging.warning("NEW TABLES! Add this to the original")
+        for new_table in new_tables:
+            logging.warnind(f"class {new_table}")
+
+    transformer = SchemaTransformer(latest_classes, latest_tables)
     updated_tree = existing_tree.visit(transformer)
 
     updated_model = 'arxiv/db/models.py'

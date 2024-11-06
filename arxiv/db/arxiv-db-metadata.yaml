@@ -1,3 +1,16 @@
+#
+# sqlacodegen input
+#
+# Essentially, this is a catalog of changes made to the original sqlacodegen
+#
+# For example, the first class def - Subscription_UniversalInstitution -> MemberInstitution
+# This is obviously not auto-generated from the db schema, or heavily modified.
+#
+# To preserve the code change, this file exists. When the customized sqlacodegen runs, this is used to change
+# and override the behavior of codegen.
+#
+# Generally, sqlacodegen is driven from development/db_codegen.py
+#
 Subscription_UniversalInstitution:
   class_name: MemberInstitution
   relationships:
@@ -43,12 +56,7 @@ arXiv_bogus_countries:
   class_name: BogusCountries
 arXiv_categories:
   class_name: Category
-  relationships:
-    # give arXiv_demographics to use diffent back-ref name: demographic_categories
-    # don't forget to have this name on Demographic
-    arXiv_demographics: ""
   additional_relationships:
-    - "demographic_categories: Mapped['Demographic'] =  relationship('Demographic', back_populates='demographic_categories') # do not ues 'arXiv_archive ='"
     - "arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
       
 arXiv_questionable_categories:
@@ -82,11 +90,7 @@ arXiv_documents:
   relationships:
     arXiv_dblp_document_authors: ""
   additional_relationships:
-    # This is a bit of hack
-    - |
-      @property
-      def owners(self):
-          return self.arXiv_paper_owners
+    - "owners = relationship('PaperOwner', back_populates='document')"
 
 arXiv_dblp:
   class_name: DBLP
@@ -145,7 +149,7 @@ arXiv_metadata:
     document: "relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', back_populates='arXiv_metadata')"
     arXiv_license: "relationship('License', primaryjoin='Metadata.license == License.name', back_populates='arXiv_metadata_licenses')"
     submitter: "relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', back_populates='arXiv_metadata')"
-    sword: Mapped["Tracking"] = relationship("Tracking", primaryjoin="Submission.sword_id == Tracking.sword_id", back_populates="arXiv_submissions_sowrd")
+    sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions_sowrd')"
 
 arXiv_mirror_list:
   class_name: MirrorList
@@ -219,7 +223,6 @@ arXiv_show_email_requests:
   class_name: ShowEmailRequest
   table_args:
     - replace: ["Index('email_reqs_user_id', 'user_id', 'dated'),", ""]
-    # - replace: ["Index('ix_arXiv_show_email_requests_dated', 'dated'),", ""]
     - replace: ["Index('user_id', 'user_id', 'dated')", "Index('email_reqs_user_id', 'user_id', 'dated')"]
 arXiv_state:
   class_name: State
@@ -383,10 +386,7 @@ arXiv_author_ids:
 arXiv_demographics:
   class_name: Demographic
   relationships:
-    # I have to drop to avoid the confusion. Instead use "demographic_categories"
-    arXiv_categories: ""
-  additional_relationships:
-    - "demographic_categories: Mapped['Category'] = relationship('Category', back_populates='demographic_categories')"
+    arXiv_categories: "relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='category_demographics')"
 arXiv_orcid_ids:
   class_name: OrcidIds
 arXiv_queue_view:
