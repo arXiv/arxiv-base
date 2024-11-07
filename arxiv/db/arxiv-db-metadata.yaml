@@ -300,7 +300,8 @@ arXiv_tracking:
 # without this, arXiv_updates would become simple Table, not Model
 arXiv_updates:
   class_name: Updates
-  table_args: drop
+  table_args:
+    - replace: ["Index('document_id', 'document_id', 'date', 'action', 'category', unique=True)", "PrimaryKeyConstraint('document_id', 'date', 'action', 'category')"]
   columns:
     action: ":Mapped[Optional[Literal['new', 'replace', 'absonly', 'cross', 'repcro']]] = mapped_column(Enum('new', 'replace', 'absonly', 'cross', 'repcro'))"
 

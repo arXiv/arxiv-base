@@ -1305,11 +1305,13 @@ class Tracking(Base):
 
 class Updates(Base):
     __tablename__ = "arXiv_updates"
+    __table_args__ = (PrimaryKeyConstraint('document_id', 'date', 'action', 'category'),)
 
     # primary key is foregn key
     document_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"),
-        primary_key=True,
+        index=True,
+        server_defaults=text("'0'"),
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     date: Mapped[Optional[dt.date]] = mapped_column(Date, index=True)

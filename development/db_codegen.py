@@ -142,36 +142,56 @@ class SchemaTransformer(cst.CSTTransformer):
 
             updated_body = []
 
-            for elem in latest_node.body.body:
-                if is_assign_expr(elem):
-                    target = self.first_target(elem)
-                    if target in existing_assignments:
-                        existing_elem = existing_assignments[target]
-                        # Use the original element if it's marked as int primary key or similar
-                        # Also, it the line is commented, keep.
-                        if self.is_intpk(existing_elem) or self.has_comment(existing_elem):
-                            updated_body.append(existing_elem)
-                        else:
-                            if isinstance(elem.body[0].value, cst.Call) and isinstance(existing_elem.body[0].value, cst.Call):
-                                elem = elem.with_changes(
-                                    body=[
-                                        elem.body[0].with_changes(
-                                            value=copy_server_default(elem.body[0].value, existing_elem.body[0].value)
-                                        )
-                                    ])
-                                pass
-                            updated_body.append(elem)
-                        # Remove this from the existing assignments so it's not processed again
-                        del existing_assignments[target]
-                    else:
-                        updated_body.append(elem)
-                else:
-                    updated_body.append(elem)
+            # Remember the original slot order
+            original_slot_order = {
+                "__tablename__": 0,
+                "__table_args__": 1,
+            }
 
             for elem in original_node.body.body:
+                if is_assign_expr(elem):
+                    target = self.first_target(elem)
+                    if target not in original_slot_order:
+                        original_slot_order[target] = len(original_slot_order.keys())
+
+            for elem in latest_node.body.body:
                 if not is_assign_expr(elem):
+                    continue
+                target = self.first_target(elem)
+                if target in existing_assignments:
+                    existing_elem = existing_assignments[target]
+                    # Use the original element if it's marked as int primary key or similar
+                    # Also, it the line is commented, keep.
+                    if self.is_intpk(existing_elem) or self.has_comment(existing_elem):
+                        updated_body.append(existing_elem)
+                    else:
+                        if isinstance(elem.body[0].value, cst.Call) and isinstance(existing_elem.body[0].value, cst.Call):
+                            elem = elem.with_changes(
+                                body=[
+                                    elem.body[0].with_changes(
+                                        value=copy_server_default(elem.body[0].value, existing_elem.body[0].value)
+                                    )
+                                ])
+                            pass
+                        updated_body.append(elem)
+                    # Remove this from the existing assignments so it's not processed again
+                    del existing_assignments[target]
+                else:
+                    # the slot not appearing shows up after the existing ones
+                    if target not in original_slot_order:
+                        original_slot_order[target] = len(original_slot_order.keys())
                     updated_body.append(elem)
 
+            # Adjust the slot order based on the existing slot while appending the new ones at the botom
+            updated_body.sort(key=lambda slot: original_slot_order[self.first_target(slot)])
+
+            # Append the non-assigns
+            for elem in original_node.body.body:
+                if is_assign_expr(elem):
+                    continue
+                updated_body.append(elem)
+
+            # Warn the left over assigns
             if existing_assignments:
                 # ignore all uppers
                 props = [prop for prop in existing_assignments.keys() if prop.upper() != prop]
