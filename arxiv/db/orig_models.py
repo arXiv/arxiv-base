@@ -457,6 +457,7 @@ class Document(Base):
     # join it with user to get the user info
     submitter = relationship('TapirUser', primaryjoin='Document.submitter_id == TapirUser.user_id', back_populates='arXiv_documents')
     owners = relationship("PaperOwner", back_populates="document")
+    # link the cross control
     arXiv_cross_controls = relationship('CrossControl', back_populates='document')
 
 class DBLP(Document):
@@ -679,6 +680,7 @@ class Metadata(Base):
     is_withdrawn: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     document = relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', backref='arXiv_metadata')
+    # Link to the license
     arXiv_license = relationship('License', primaryjoin='Metadata.license == License.name', backref='arXiv_metadata')
     submitter = relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', back_populates='arXiv_metadata')
 

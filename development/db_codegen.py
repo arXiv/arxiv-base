@@ -23,6 +23,7 @@ tables_i_cannot_update = {
     "t_arXiv_ownership_requests_papers": True,
     "t_arXiv_updates_tmp": True,
     "t_arXiv_admin_state": True,
+    # "t_arXiv_in_category": True,
 }
 
 def first_target(body):
@@ -50,7 +51,6 @@ def patch_mysql_types(contents: str):
         (re.compile(r'= mapped_column\(TIMESTAMP'), r'= mapped_column(DateTime'),  # Replace MEDIUMTEXT with Text
         (re.compile(r'= mapped_column\(CHAR\s*\((\d+)\)'), r'= mapped_column(String(\1)'),  # Replace CHAR(size) with str
         (re.compile(r' CHAR\s*\((\d+)\),'), r' String(\1),'),  # Replace CHAR(size) with str
-        (re.compile(r' class_:'), r' _class:'),  #
         (re.compile(r'Mapped\[decimal.Decimal\]'), r'Mapped[float]'),  #
         (re.compile(r'Mapped\[datetime.datetime\]'), r'Mapped[datetime]'),  #
         (re.compile(r'Optional\[datetime.datetime\]'), r'Optional[datetime]'),  #
@@ -59,6 +59,7 @@ def patch_mysql_types(contents: str):
         (re.compile(r'MEDIUMINT(\(\d+\)){0,1}'), r'Integer'),
         (re.compile(r'SMALLINT(\(\d+\)){0,1}'), r'Integer'),
         (re.compile(r'MEDIUMTEXT(\(\d+\)){0,1}'), r'Text'),
+        (re.compile(r'Base\.metadata'), r'metadata'),
         (re.compile(r'text\("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"\)'), r'FetchdValue()'),
         (re.compile(r'datetime\.date'), r'dt.date'),
 
@@ -191,31 +192,31 @@ class SchemaTransformer(cst.CSTTransformer):
                     continue
                 updated_body.append(elem)
 
-            # Warn the left over assigns
-            if existing_assignments:
-                # ignore all uppers
-                props = [prop for prop in existing_assignments.keys() if prop.upper() != prop]
-                if props:
-                    logging.info("#")
-                    logging.info(f"# {class_name}")
-                    for prop in props:
-                        logging.info(f"    {prop}")
-                    logging.info("#")
-
             a_key: str
+            intended = {}
             for a_key, a_value in existing_assignments.items():
                 if not isinstance(a_value, cst.SimpleStatementLine):
                     continue
                 # If the lhs is all upper, it is def. added by hand. So, leave it in the class
                 if a_key == a_key.upper():
                     updated_body.append(a_value)
+                    intended[a_key] = a_value
                     continue
 
                 # If the line has any comment, hand-added, so leave it
                 for line in a_value.leading_lines:
                     if line.comment:
                         updated_body.append(a_value)
+                        intended[a_key] = a_value
                         continue
+
+            # Warn the left over assigns
+            if existing_assignments:
+                # ignore all uppers
+                props = [prop for prop in existing_assignments.keys() if prop not in intended]
+                if props:
+                    extras = [class_name] + [f"    {prop}" for prop in props]
+                    logging.warning(f"Class with extra existing assignmet(s):\n" +  "\n".join(extras))
 
             # Rebuild the class body with updated assignments
             return updated_node.with_changes(body=updated_node.body.with_changes(body=updated_body))
@@ -263,11 +264,37 @@ class SchemaTransformer(cst.CSTTransformer):
             if original_node.leading_lines and original_node.leading_lines[-1].comment:
                 return original_node
 
+        # Going to replace the table with the new one
+        updated_node = latest_table_def
+
         # updated_node = updated_node.with_changes(value=)
-        rh_new = latest_table_def.value
-        rh_old = updated_node.value
-        # Update the table def's RH with new's RH
+        rh_new = updated_node.value
+        rh_old = original_node.value
+
+        # Assignments do have ards
         if hasattr(rh_new, 'args') and hasattr(rh_old, 'args'):
+            #
+            # foreign_key_constaints = {}
+            # simple_indecies = {}
+            # for new_col in rh_new.args:
+            #     if isinstance(new_col.value, cst.Call):
+            #         if new_col.value.func.value == "ForeignKeyConstraint":
+            #             # see the args
+            #             # args[0] is the list of columns on this table, and args[1] is the far table
+            #             # if it's simple, remember
+            #             cols = new_col.value.args[0]
+            #             far = new_col.value.args[1]
+            #             if len(cols.value.elements) == 1 and len(far.value.elements) == 1:
+            #                 # this is a simple foreign key ref
+            #                 foreign_key_constaints[cols.value.elements[0]] = far.value.elements[0]
+            #
+            #         elif new_col.value.func.value == "Index":
+            #             index_name = new_col.value.args[0]
+            #             columns = new_col.value.args[1:]
+            #             if len(columns) == 1:
+            #                 simple_indecies[index_name.value.value] = columns[0].value.value
+
+            # Collect the old columns to look at
             columns = {}
             for old_col in rh_old.args:
                 # I only care the Column("foo")
@@ -277,12 +304,15 @@ class SchemaTransformer(cst.CSTTransformer):
                     columns[column_name] = old_col
 
             for i_col, new_column in enumerate(rh_new.args):
-                # I only care the Column("foo")
+                # I only care the Column("<a column>")
                 if isinstance(new_column.value, cst.Call) and new_column.value.func.value == "Column":
-                    # column def
+                    # new column def and matching one
                     column_name = new_column.value.args[0].value.value
                     old_column = columns.get(column_name)
+
+                    # If the old one exists...
                     if old_column:
+                        # Copy the server_default= value
                         patched_call = copy_server_default(new_column.value, old_column.value)
                         if not patched_call.deep_equals(new_column.value):
                             column = new_column.with_changes(value = patched_call)
@@ -321,7 +351,7 @@ def main() -> None:
     sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "sqlacodegen", "src"))
     subprocess.run(['development/sqlacodegen/venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile, '--model-metadata', "arxiv/db/arxiv-db-metadata.yaml"], check=True)
 
-    subprocess.run(['development/sqlacodegen/venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', "arxiv/db/raw-autogen_models.py"], check=True)
+    # subprocess.run(['development/sqlacodegen/venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', "arxiv/db/raw-autogen_models.py"], check=True)
 
     with open(p_outfile, 'r') as src:
         source = src.read()

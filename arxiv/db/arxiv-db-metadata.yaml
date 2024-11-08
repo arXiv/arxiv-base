@@ -11,6 +11,15 @@
 #
 # Generally, sqlacodegen is driven from development/db_codegen.py
 #
+
+# a hack
+# globally suggests the column name to python variable name
+# by default, sqlacodegen uses the suffix "_"
+#
+_names_map_:
+  class: _class
+
+#
 Subscription_UniversalInstitution:
   class_name: MemberInstitution
   relationships:
@@ -56,6 +65,8 @@ arXiv_bogus_countries:
   class_name: BogusCountries
 arXiv_categories:
   class_name: Category
+  relationships:
+    arXiv_demographics: "relationship('Demographic', back_populates='arXiv_category')"
   additional_relationships:
     - "arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
       
@@ -140,14 +151,16 @@ arXiv_jref_control:
     status: "mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
 arXiv_licenses:
   class_name: License
+  relationships:
+    arXiv_metadata: ""
 arXiv_log_positions:
   class_name: LogPosition
 
 arXiv_metadata:
   class_name: Metadata
   relationships:
+    arXiv_licenses: ""
     document: "relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', back_populates='arXiv_metadata')"
-    arXiv_license: "relationship('License', primaryjoin='Metadata.license == License.name', back_populates='arXiv_metadata_licenses')"
     submitter: "relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', back_populates='arXiv_metadata')"
     sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions_sowrd')"
 
@@ -303,6 +316,7 @@ arXiv_updates:
   table_args:
     - replace: ["Index('document_id', 'document_id', 'date', 'action', 'category', unique=True)", "PrimaryKeyConstraint('document_id', 'date', 'action', 'category')"]
   columns:
+    
     action: ":Mapped[Optional[Literal['new', 'replace', 'absonly', 'cross', 'repcro']]] = mapped_column(Enum('new', 'replace', 'absonly', 'cross', 'repcro'))"
 
 arXiv_versions:
@@ -321,17 +335,21 @@ tapir_address:
     user_id: "mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())"
     country: "mapped_column(ForeignKey('tapir_countries.digraph'), nullable=False, index=True, server_default=FetchedValue())"
   relationships:
-    tapir_country: "relationship('TapirCountry', primaryjoin='TapirAddress.country == TapirCountry.digraph', back_populates='tapir_address')"
+    tapir_countries:
+      tapir_country: "relationship('TapirCountry', primaryjoin='TapirAddress.country == TapirCountry.digraph', back_populates='tapir_address')"
     user: "relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', back_populates='tapir_address')"
 
 tapir_admin_audit:
   class_name: TapirAdminAudit
   columns:
     data: mapped_column(String(255))
+
 tapir_countries:
   class_name: TapirCountry
   relationships:
-      user: "relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', back_populates='tapir_address')"
+    tapir_address: "relationship('TapirAddress', back_populates='tapir_country')"
+    tapir_demographics: ""
+
 tapir_email_change_tokens:
   class_name: TapirEmailChangeToken
 tapir_email_headers:
@@ -381,13 +399,17 @@ tapir_users:
     - "endorses = relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')"
     - "owned_papers = relationship('PaperOwner',  foreign_keys='[PaperOwner.user_id]', back_populates='owner')"
     - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
+    - "arXiv_moderator_api_keys = relationship('ModeratorApiKey', back_populates='user')"
+    - "arXiv_cross_controls = relationship('CrossControl', back_populates='user')"
+    - "arXiv_jref_controls = relationship('JrefControl', back_populates='user')"
 
 arXiv_author_ids:
   class_name: AuthorIds
 arXiv_demographics:
   class_name: Demographic
   relationships:
-    arXiv_categories: "relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='category_demographics')"
+    arXiv_categories:
+      arXiv_category: "relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='category_demographics')"
 arXiv_orcid_ids:
   class_name: OrcidIds
 arXiv_queue_view:
@@ -398,8 +420,9 @@ arXiv_sword_licenses:
   class_name: SwordLicense
 tapir_demographics:
   class_name: TapirDemographic
-  additional_relationships:
-    - "tapir_countries: Mapped['TapirCountry'] = relationship('TapirCountry', back_populates='tapir_demographics')"
+  relationships:
+    tapir_countries:
+      tapir_country: relationship('TapirCountry', primaryjoin='TapirDemographic.country == TapirCountry.digraph', backref='tapir_demographics')
 tapir_users_hot:
   class_name: TapirUsersHot
 tapir_users_password:
@@ -415,3 +438,10 @@ arXiv_latexml_sub:
   class_name: DBLaTeXMLSubmissions
 feedback:
   class_name: DBLaTeXMLFeedback
+arXiv_in_category:
+  columns:
+    document_id: "Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue())"
+
+arXiv_moderators:
+  indecies:
+    - replace: ["Index('user_id'", "Index('mod_user_id'"]
