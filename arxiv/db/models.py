@@ -56,6 +56,8 @@ tz = gettz(settings.ARXIV_BUSINESS_TZ)
 
 
 class MemberInstitution(Base):
+    """Deprecated - superceded by membership_institutions"""
+
     __tablename__ = "Subscription_UniversalInstitution"
     resolver_URL: Mapped[Optional[str]] = mapped_column(String(255))
 
@@ -68,6 +70,8 @@ class MemberInstitution(Base):
 
 
 class MemberInstitutionContact(Base):
+    """Deprecated - superceded by membership_institution_users"""
+
     __tablename__ = "Subscription_UniversalInstitutionContact"
     email: Mapped[Optional[str]] = mapped_column(String(255))
 
@@ -871,6 +875,8 @@ class PaperSession(Base):
 
 
 class PilotFile(Base):
+    """arXiv_pilot is deprecated"""
+
     __tablename__ = "arXiv_pilot_files"
     __table_args__ = (ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], name="arXiv_pilot_files_cdfk3"),)
 
@@ -1208,6 +1214,8 @@ class Submission(Base):
 
 
 class PilotDataset(Submission):
+    """arXiv_pilot is deprecated"""
+
     __tablename__ = "arXiv_pilot_datasets"
     __table_args__ = (ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], name="arXiv_pilot_datasets_cdfk3"),)
 
@@ -1219,7 +1227,6 @@ class PilotDataset(Submission):
     # created: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     # ^This column is inherited
     last_checked: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
-    created: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
 class SubmissionAbsClassifierDatum(Base):

@@ -281,6 +281,10 @@ arXiv_submissions:
 
 arXiv_pilot_datasets:
   class_name: PilotDataset
+  columns:
+    # Kill off the slot
+    created: drop
+
 arXiv_submission_abs_classifier_data:
   class_name: SubmissionAbsClassifierDatum
 arXiv_submission_classifier_data:

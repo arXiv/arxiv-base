@@ -149,12 +149,21 @@ class SchemaTransformer(cst.CSTTransformer):
                 "__table_args__": 1,
             }
 
+            # Save the order of assign statement.
             for elem in original_node.body.body:
                 if is_assign_expr(elem):
                     target = self.first_target(elem)
                     if target not in original_slot_order:
                         original_slot_order[target] = len(original_slot_order.keys())
 
+            # If there is a non-assignment for first part, it's likely doc string so keep it
+            preamble = []
+            for elem in original_node.body.body:
+                if is_assign_expr(elem):
+                    break
+                preamble.append(elem)
+
+            # Accumulate the assignments aka columns and relationships
             for elem in latest_node.body.body:
                 if not is_assign_expr(elem):
                     continue
@@ -186,11 +195,14 @@ class SchemaTransformer(cst.CSTTransformer):
             # Adjust the slot order based on the existing slot while appending the new ones at the botom
             updated_body.sort(key=lambda slot: original_slot_order[self.first_target(slot)])
 
-            # Append the non-assigns
+            # Append the non-assigns. Non-assign before the assign is "preamble"
+            after_assign = False
             for elem in original_node.body.body:
                 if is_assign_expr(elem):
+                    after_assign = True
                     continue
-                updated_body.append(elem)
+                if after_assign:
+                    updated_body.append(elem)
 
             a_key: str
             intended = {}
@@ -219,7 +231,8 @@ class SchemaTransformer(cst.CSTTransformer):
                     logging.warning(f"Class with extra existing assignmet(s):\n" +  "\n".join(extras))
 
             # Rebuild the class body with updated assignments
-            return updated_node.with_changes(body=updated_node.body.with_changes(body=updated_body))
+            body = preamble + updated_body
+            return updated_node.with_changes(body=updated_node.body.with_changes(body=body))
         return updated_node
 
     def first_target(self, node):

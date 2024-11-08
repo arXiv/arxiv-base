@@ -61,6 +61,7 @@ tz = gettz(settings.ARXIV_BUSINESS_TZ)
 
 
 class MemberInstitution(Base):
+    """Deprecated - superceded by membership_institutions"""
     __tablename__ = 'Subscription_UniversalInstitution'
 
     resolver_URL: Mapped[Optional[str]] = mapped_column(String(255))
@@ -73,6 +74,7 @@ class MemberInstitution(Base):
 
 
 class MemberInstitutionContact(Base):
+    """Deprecated - superceded by membership_institution_users"""
     __tablename__ = 'Subscription_UniversalInstitutionContact'
 
     email: Mapped[Optional[str]] = mapped_column(String(255))
@@ -84,7 +86,6 @@ class MemberInstitutionContact(Base):
     note: Mapped[Optional[str]] = mapped_column(String(2048))
 
     Subscription_UniversalInstitution = relationship('MemberInstitution', primaryjoin='MemberInstitutionContact.sid == MemberInstitution.id')
-
 
 
 class MemberInstitutionIP(Base):
@@ -857,6 +858,7 @@ class PaperSession(Base):
 
 
 class PilotFile(Base):
+    """arXiv_pilot is deprecated"""
     __tablename__ = 'arXiv_pilot_files'
 
     file_id: Mapped[intpk]
@@ -1160,6 +1162,7 @@ class Submission(Base):
 
 
 class PilotDataset(Submission):
+    """arXiv_pilot is deprecated"""
     __tablename__ = 'arXiv_pilot_datasets'
 
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id'), primary_key=True)
