@@ -18,7 +18,7 @@
 # docker push $TAG
 #
 # Then create a small VM with a that docker image and the
-# service account fastly-logs-ingest, set it to run the docker image, set the image to run prilvinged,
+# service account fastly-logs-ingest, set it to run the docker image, set the image to run privileged,
 # set logging to on.
 # Chech the logs of the VM to see if there are the expected debugging messages.
 #
