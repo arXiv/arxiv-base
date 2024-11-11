@@ -298,8 +298,8 @@ class Category(Base):
     definitive: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     active: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     category_name: Mapped[Optional[str]] = mapped_column(String(255))
-    endorse_all: Mapped[str] = mapped_column(Enum("y", "n", "d"), nullable=False, server_default=text("'d'"))
-    endorse_email: Mapped[str] = mapped_column(Enum("y", "n", "d"), nullable=False, server_default=text("'d'"))
+    endorse_all: Mapped[Literal["y", "n", "d"]] = mapped_column(Enum("y", "n", "d"), nullable=False, server_default=text("'d'"))
+    endorse_email: Mapped[Literal["y", "n", "d"]] = mapped_column(Enum("y", "n", "d"), nullable=False, server_default=text("'d'"))
     papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     endorsement_domain: Mapped[Optional[str]] = mapped_column(ForeignKey("arXiv_endorsement_domains.endorsement_domain"), index=True)
     arXiv_endorsements: Mapped[List["Endorsement"]] = relationship("Endorsement", back_populates="arXiv_categories")
@@ -344,11 +344,13 @@ class ControlHold(Base):
 
     hold_id: Mapped[intpk]
     control_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    hold_type: Mapped[str] = mapped_column(Enum("submission", "cross", "jref"), nullable=False, index=True, server_default=FetchedValue())
-    hold_status: Mapped[str] = mapped_column(Enum("held", "extended", "accepted", "rejected"), nullable=False, index=True, server_default=FetchedValue())
+    hold_type: Mapped[Literal["submission", "cross", "jref"]] = mapped_column(Enum("submission", "cross", "jref"), nullable=False, index=True, server_default=FetchedValue())
+    hold_status: Mapped[Literal["held", "extended", "accepted", "rejected"]] = mapped_column(
+        Enum("held", "extended", "accepted", "rejected"), nullable=False, index=True, server_default=FetchedValue()
+    )
     hold_reason: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
     hold_data: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    origin: Mapped[str] = mapped_column(Enum("auto", "user", "admin", "moderator"), nullable=False, index=True, server_default=FetchedValue())
+    origin: Mapped[Literal["auto", "user", "admin", "moderator"]] = mapped_column(Enum("auto", "user", "admin", "moderator"), nullable=False, index=True, server_default=FetchedValue())
     placed_by: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
     last_changed_by: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
 
@@ -370,8 +372,8 @@ class CrossControl(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     desired_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
-    status: Mapped[str] = mapped_column(Enum("new", "frozen", "published", "rejected"), nullable=False, index=True, server_default=FetchedValue())
-    flag_must_notify: Mapped[Optional[str]] = mapped_column(Enum("0", "1"), server_default=FetchedValue())
+    status: Mapped[Literal["new", "frozen", "published", "rejected"]] = mapped_column(Enum("new", "frozen", "published", "rejected"), nullable=False, index=True, server_default=FetchedValue())
+    flag_must_notify: Mapped[Optional[Literal["0", "1"]]] = mapped_column(Enum("0", "1"), server_default=FetchedValue())
     archive: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     subject_class: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     request_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -390,7 +392,7 @@ class DataciteDois(Base):
     __table_args__ = (ForeignKeyConstraint(["metadata_id"], ["arXiv_metadata.metadata_id"], name="arXiv_datacite_dois_ibfk_1"), Index("account_paper_id", "account", "paper_id", unique=True))
 
     doi: Mapped[str] = mapped_column(String(255), primary_key=True)
-    account: Mapped[Optional[str]] = mapped_column(Enum("test", "prod"))
+    account: Mapped[Optional[Literal["test", "prod"]]] = mapped_column(Enum("test", "prod"))
     metadata_id: Mapped[int] = mapped_column(ForeignKey("arXiv_metadata.metadata_id"), nullable=False, index=True)
     paper_id: Mapped[str] = mapped_column(String(64), nullable=False)
     created: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
@@ -497,9 +499,9 @@ class EndorsementDomain(Base):
     __tablename__ = "arXiv_endorsement_domains"
 
     endorsement_domain: Mapped[str] = mapped_column(String(32), primary_key=True, server_default=FetchedValue())
-    endorse_all: Mapped[str] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
-    mods_endorse_all: Mapped[str] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
-    endorse_email: Mapped[str] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
+    endorse_all: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
+    mods_endorse_all: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
+    endorse_email: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
     papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     arXiv_categories: Mapped[List["Category"]] = relationship("Category", back_populates="arXiv_endorsement_domain")
@@ -558,7 +560,7 @@ class Endorsement(Base):
     archive: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     subject_class: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     flag_valid: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    type: Mapped[Optional[str]] = mapped_column(Enum("user", "admin", "auto"))
+    type: Mapped[Optional[Literal["user", "admin", "auto"]]] = mapped_column(Enum("user", "admin", "auto"))
     point_value: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     issued_when: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     request_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_endorsement_requests.request_id"), index=True)
@@ -631,8 +633,8 @@ class JrefControl(Base):
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
-    status: Mapped[str] = mapped_column(Enum("new", "frozen", "published", "rejected"), nullable=False, index=True, server_default=FetchedValue())
-    flag_must_notify: Mapped[Optional[str]] = mapped_column(Enum("0", "1"), server_default=FetchedValue())
+    status: Mapped[Literal["new", "frozen", "published", "rejected"]] = mapped_column(Enum("new", "frozen", "published", "rejected"), nullable=False, index=True, server_default=FetchedValue())
+    flag_must_notify: Mapped[Optional[Literal["0", "1"]]] = mapped_column(Enum("0", "1"), server_default=FetchedValue())
     jref: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     request_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     freeze_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
@@ -816,7 +818,7 @@ class OwnershipRequest(Base):
     request_id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
     endorsement_request_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_endorsement_requests.request_id"), index=True)
-    workflow_status: Mapped[str] = mapped_column(Enum("pending", "accepted", "rejected"), nullable=False, server_default=FetchedValue())
+    workflow_status: Mapped[Literal["pending", "accepted", "rejected"]] = mapped_column(Enum("pending", "accepted", "rejected"), nullable=False, server_default=FetchedValue())
     request_audit = relationship("OwnershipRequestsAudit", back_populates="ownership_request", uselist=False)
 
     endorsement_request: Mapped["EndorsementRequest"] = relationship(
@@ -1029,8 +1031,8 @@ class SubmissionControl(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     pending_paper_id: Mapped[str] = mapped_column(String(20), nullable=False, index=True, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
-    status: Mapped[str] = mapped_column(Enum("new", "frozen", "published", "rejected"), nullable=False, index=True, server_default=FetchedValue())
-    flag_must_notify: Mapped[Optional[str]] = mapped_column(Enum("0", "1"), server_default=FetchedValue())
+    status: Mapped[Literal["new", "frozen", "published", "rejected"]] = mapped_column(Enum("new", "frozen", "published", "rejected"), nullable=False, index=True, server_default=FetchedValue())
+    flag_must_notify: Mapped[Optional[Literal["0", "1"]]] = mapped_column(Enum("0", "1"), server_default=FetchedValue())
     request_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     freeze_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1232,7 +1234,7 @@ class SubmissionAbsClassifierDatum(Base):
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
     last_update: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
-    status: Mapped[Optional[str]] = mapped_column(Enum("processing", "success", "failed", "no connection"))
+    status: Mapped[Optional[Literal["processing", "success", "failed", "no connection"]]] = mapped_column(Enum("processing", "success", "failed", "no connection"))
     message: Mapped[Optional[str]] = mapped_column(Text)
     is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'0'"))
     suggested_primary: Mapped[Optional[str]] = mapped_column(Text)
@@ -1250,7 +1252,7 @@ class SubmissionClassifierDatum(Base):
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
     last_update: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
-    status: Mapped[Optional[str]] = mapped_column(Enum("processing", "success", "failed", "no connection"))
+    status: Mapped[Optional[Literal["processing", "success", "failed", "no connection"]]] = mapped_column(Enum("processing", "success", "failed", "no connection"))
     message: Mapped[Optional[str]] = mapped_column(Text)
     is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'0'"))
 
@@ -2003,7 +2005,7 @@ class Demographic(Base):
     flag_group_stat: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     flag_group_eess: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     flag_group_econ: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
-    veto_status: Mapped[str] = mapped_column(Enum("ok", "no-endorse", "no-upload", "no-replace"), nullable=False, server_default=text("'ok'"))
+    veto_status: Mapped[Literal["ok", "no-endorse", "no-upload", "no-replace"]] = mapped_column(Enum("ok", "no-endorse", "no-upload", "no-replace"), nullable=False, server_default=text("'ok'"))
 
     arXiv_category: Mapped["Category"] = relationship(
         "Category", primaryjoin="and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)", backref="category_demographics"
