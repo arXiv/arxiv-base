@@ -192,6 +192,8 @@ arXiv_log_positions:
 
 arXiv_metadata:
   class_name: Metadata
+  columns:
+    source_format: ": Mapped[Optional[SOURCE_FORMAT]] = mapped_column(String(12))"
   relationships:
     arXiv_licenses: ""
     document: "relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', back_populates='arXiv_metadata')"

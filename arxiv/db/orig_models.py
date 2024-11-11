@@ -55,6 +55,7 @@ from . import Base, LaTeXMLBase, metadata, \
     session_factory, _classic_engine, _latexml_engine
 
 from .types import intpk
+from ..document.version import SOURCE_FORMAT
 
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)

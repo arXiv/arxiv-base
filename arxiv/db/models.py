@@ -50,6 +50,7 @@ from ..config import settings
 from . import Base, LaTeXMLBase, metadata, session_factory, _classic_engine, _latexml_engine
 
 from .types import intpk
+from ..document.version import SOURCE_FORMAT
 
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
@@ -679,7 +680,7 @@ class Metadata(Base):
     submitter_name: Mapped[str] = mapped_column(String(64), nullable=False)
     submitter_email: Mapped[str] = mapped_column(String(64), nullable=False)
     source_size: Mapped[Optional[int]] = mapped_column(Integer)
-    source_format: Mapped[Optional[str]] = mapped_column(String(12))
+    source_format: Mapped[Optional[SOURCE_FORMAT]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
     title: Mapped[Optional[str]] = mapped_column(Text)
     authors: Mapped[Optional[str]] = mapped_column(Text)
