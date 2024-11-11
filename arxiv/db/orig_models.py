@@ -458,7 +458,6 @@ class Document(Base):
     # join it with user to get the user info
     submitter = relationship('TapirUser', primaryjoin='Document.submitter_id == TapirUser.user_id', back_populates='arXiv_documents')
     owners = relationship("PaperOwner", back_populates="document")
-    # link the cross control
     arXiv_cross_controls = relationship('CrossControl', back_populates='document')
 
 class DBLP(Document):
@@ -833,14 +832,14 @@ class PaperOwner(Base):
 
     document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True)
-    date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    added_by: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
-    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    tracking_cookie: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
-    valid: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
-    flag_author: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
-    flag_auto: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
+    date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    added_by: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("''"))
+    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=text("''"))
+    tracking_cookie: Mapped[str] = mapped_column(String(32), nullable=False, server_default=text("''"))
+    valid: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_author: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_auto: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
 
     document = relationship('Document', back_populates='owners')
     owner = relationship('TapirUser', foreign_keys="[PaperOwner.user_id]", back_populates='owned_papers')
@@ -1157,8 +1156,9 @@ class Submission(Base):
     arXiv_license = relationship('License', primaryjoin='Submission.license == License.name', backref='arXiv_submissions')
     submitter = relationship('TapirUser', primaryjoin='Submission.submitter_id == TapirUser.user_id', back_populates='arXiv_submissions')
     sword = relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', backref='arXiv_submissions')
-    arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="submission")
-    arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
+
+    # arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="submission")
+    # arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
 
 
 class PilotDataset(Submission):
@@ -1316,7 +1316,7 @@ class Updates(Base):
     document_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"),
         index=True,
-        server_defaults=text("'0'"),
+        server_default=text("'0'"),
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     date: Mapped[Optional[dt.date]] = mapped_column(Date, index=True)
@@ -2004,7 +2004,6 @@ class QueueView(Base):
     total_views: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
 
-  
 class SuspiciousName(Base):
     __tablename__ = 'arXiv_suspicious_names'
 

@@ -51,8 +51,13 @@ arXiv_archive_def:
   class_name: ArchiveDef
 arXiv_archive_group:
   class_name: ArchiveGroup
+
 arXiv_archives:
   class_name: Archive
+  relationships:
+    arXiv_categories: "relationship('Category', back_populates='arXiv_archive')"
+    arXiv_groups: ""
+
 arXiv_aws_config:
   class_name: AwsConfig
 arXiv_aws_files:
@@ -66,9 +71,13 @@ arXiv_bogus_countries:
 arXiv_categories:
   class_name: Category
   relationships:
-    arXiv_demographics: "relationship('Demographic', back_populates='arXiv_category')"
-  additional_relationships:
-    - "arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
+    arXiv_demographics: ""
+    arXiv_archives: ""
+    arXiv_cross_control:
+      arXiv_cross_controls: "relationship('CrossControl', back_populates='arXiv_category')"
+    arXiv_categories: ""
+    arXiv_endorsement_domains:
+      arXiv_endorsement_domain: "relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
       
 arXiv_questionable_categories:
   class_name: QuestionableCategory
@@ -76,14 +85,19 @@ arXiv_category_def:
   class_name: CategoryDef
 arXiv_control_holds:
   class_name: ControlHold
+
 arXiv_cross_control:
   class_name: CrossControl
   table_args:
     - replace: ["Index('document_id', 'document_id', 'version'),", ""]
   columns:
     freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
-  additional_relationships:
-    - "arXiv_category = relationship('Category', primaryjoin='and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)', back_populates='arXiv_cross_control')"
+  relationships:
+    arXiv_categories:
+      arXiv_category: "relationship('Category', primaryjoin='and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)', back_populates='arXiv_cross_controls')"
+    document: "relationship('Document', primaryjoin='CrossControl.document_id == Document.document_id', back_populates='arXiv_cross_controls')"
+    user: "relationship('TapirUser', primaryjoin='CrossControl.user_id == TapirUser.user_id', back_populates='arXiv_cross_controls')"
+
 arXiv_datacite_dois:
   class_name: DataciteDois
     
@@ -100,8 +114,12 @@ arXiv_documents:
   class_name: Document
   relationships:
     arXiv_dblp_document_authors: ""
-  additional_relationships:
-    - "owners = relationship('PaperOwner', back_populates='document')"
+    arXiv_paper_owners:
+      owners: "relationship('PaperOwner', back_populates='document')"
+    arXiv_cross_control:
+      arXiv_cross_controls: "relationship('CrossControl', back_populates='document')"
+    arXiv_jref_control:
+      arXiv_jref_controls: "relationship('JrefControl', back_populates='document')"
 
 arXiv_dblp:
   class_name: DBLP
@@ -116,14 +134,17 @@ arXiv_paper_pw:
     
 arXiv_endorsement_domains:
   class_name: EndorsementDomain
+  relationships:
+    arXiv_categories: "relationship('Category', back_populates='arXiv_endorsement_domain')"
 
 arXiv_endorsement_requests:
   class_name: EndorsementRequest
   relationships:
     arXiv_categories: "relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', back_populates='arXiv_endorsement_requests')"
     endorsee: "relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', back_populates='arXiv_endorsement_requests', uselist=False)"
+    arXiv_endorsements:
+      endorsement: ":Mapped['Endorsement'] = relationship('Endorsement', back_populates='request', uselist=False)"
   additional_relationships:
-    - "endorsement = relationship('Endorsement', back_populates='request', uselist=False)"
     - "audit = relationship('EndorsementRequestsAudit', uselist=False)"
 
 arXiv_endorsement_requests_audit:
@@ -134,6 +155,10 @@ arXiv_endorsements:
   table_args:
     - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
     # - replace: ["Index('endorser_id_2', 'endorser_id', 'endorsee_id', 'archive', 'subject_class', unique=True),", ""]
+  relationships:
+    endorsee: "relationship('TapirUser', primaryjoin='Endorsement.endorsee_id == TapirUser.user_id', back_populates='endorsee_of')"
+    endorser: "relationship('TapirUser', primaryjoin='Endorsement.endorser_id == TapirUser.user_id', back_populates='endorses')"
+    request: "relationship('EndorsementRequest', back_populates='endorsement')"
 arXiv_endorsements_audit:
   class_name: EndorsementsAudit
 arXiv_freeze_log:
@@ -142,6 +167,9 @@ arXiv_group_def:
   class_name: GroupDef
 arXiv_groups:
   class_name: Group
+  relationships:
+    arXiv_archives: "relationship('Archive', back_populates='arXiv_group')"
+
 arXiv_jref_control:
   class_name: JrefControl
   table_args:
@@ -149,10 +177,16 @@ arXiv_jref_control:
   columns:
     freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
     status: "mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
+  relationships:
+    document: "relationship('Document', back_populates='arXiv_jref_controls')"
+    user: "relationship('TapirUser', back_populates='arXiv_jref_controls')"
+
 arXiv_licenses:
   class_name: License
   relationships:
     arXiv_metadata: ""
+    arXiv_submissions: "relationship('Submission', back_populates='arXiv_license')"
+    
 arXiv_log_positions:
   class_name: LogPosition
 
@@ -168,6 +202,8 @@ arXiv_mirror_list:
   class_name: MirrorList
 arXiv_moderator_api_key:
   class_name: ModeratorApiKey
+  relationships:
+    user: "relationship('TapirUser', primaryjoin='ModeratorApiKey.user_id == TapirUser.user_id', back_populates='arXiv_moderator_api_keys')"
 arXiv_monitor_klog:
   class_name: MonitorKlog
 arXiv_monitor_mailq:
@@ -220,6 +256,11 @@ arXiv_paper_owners:
   columns:
     document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'))"
     user_id: "mapped_column(ForeignKey('tapir_users.user_id'))"
+  relationships:
+    document: "relationship('Document', back_populates='owners')"
+    tapir_users: ""
+    user: ""
+      
   additional_relationships:
     - "owner = relationship('TapirUser', foreign_keys='[PaperOwner.user_id]', back_populates='owned_papers')"
 arXiv_paper_sessions:
@@ -274,10 +315,8 @@ arXiv_submissions:
     document: "relationship('Document', primaryjoin='Submission.document_id == Document.document_id', back_populates='arXiv_submissions')"
     submitter: "relationship('TapirUser', primaryjoin='Submission.submitter_id == TapirUser.user_id', back_populates='arXiv_submissions')"
     sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions')"
-    arXiv_check_results: "relationship('ArXivCheckResults', back_populates='submission')"
-    arXiv_submission_locks: "relationship('ArXivSubmissionLocks', back_populates='submission')"
-  additional_relationships:
-    - "arXiv_license = relationship('License', primaryjoin='Submission.license == License.name', back_populates='arXiv_submissions')"
+    arXiv_licenses:
+      arXiv_license: "relationship('License', primaryjoin='Submission.license == License.name', back_populates='arXiv_submissions')"
 
 arXiv_pilot_datasets:
   class_name: PilotDataset
@@ -398,14 +437,23 @@ tapir_strings:
   class_name: TapirString
 tapir_users:
   class_name: TapirUser
+  relationships:
+    arXiv_endorsements:
+      endorsee_of: "relationship('Endorsement', foreign_keys='[Endorsement.endorsee_id]', back_populates='endorsee')"
+    arXiv_endorsements_:
+      endorses: "relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')"
+    arXiv_moderator_api_key:
+      arXiv_moderator_api_keys: "relationship('ModeratorApiKey', back_populates='user')"
+    arXiv_paper_owners:
+      owned_papers: "relationship('PaperOwner',  foreign_keys='[PaperOwner.user_id]', back_populates='owner')"
+    arXiv_paper_owners_: ""
+    arXiv_jref_control:
+      arXiv_jref_controls: "relationship('JrefControl', back_populates='user')"
+    arXiv_cross_control:
+      arXiv_cross_controls: "relationship('CrossControl', back_populates='user')"
+      
   additional_relationships:
-    - "endorsee_of = relationship('Endorsement', foreign_keys='[Endorsement.endorsee_id]', back_populates='endorsee')"
-    - "endorses = relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')"
-    - "owned_papers = relationship('PaperOwner',  foreign_keys='[PaperOwner.user_id]', back_populates='owner')"
     - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
-    - "arXiv_moderator_api_keys = relationship('ModeratorApiKey', back_populates='user')"
-    - "arXiv_cross_controls = relationship('CrossControl', back_populates='user')"
-    - "arXiv_jref_controls = relationship('JrefControl', back_populates='user')"
 
 arXiv_author_ids:
   class_name: AuthorIds

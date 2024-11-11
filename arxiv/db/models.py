@@ -201,8 +201,7 @@ class Archive(Base):
     end_date: Mapped[str] = mapped_column(String(4), nullable=False, server_default=FetchedValue())
     subdivided: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_groups: Mapped["Group"] = relationship("Group", back_populates="arXiv_archives")
-    arXiv_categories: Mapped[List["Category"]] = relationship("Category", back_populates="arXiv_archives")
+    arXiv_categories: Mapped[List["Category"]] = relationship("Category", back_populates="arXiv_archive")
 
     # additional relation
     arXiv_group = relationship("Group", primaryjoin="Archive.in_group == Group.group_id", back_populates="arXiv_archives")
@@ -303,13 +302,12 @@ class Category(Base):
     papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     endorsement_domain: Mapped[Optional[str]] = mapped_column(ForeignKey("arXiv_endorsement_domains.endorsement_domain"), index=True)
     arXiv_endorsements: Mapped[List["Endorsement"]] = relationship("Endorsement", back_populates="arXiv_categories")
-    arXiv_endorsement_domain = relationship("EndorsementDomain", primaryjoin="Category.endorsement_domain == EndorsementDomain.endorsement_domain", back_populates="arXiv_categories")
-    arXiv_endorsement_requests: Mapped[List["EndorsementRequest"]] = relationship("EndorsementRequest", back_populates="arXiv_categories")
 
-    arXiv_archives: Mapped["Archive"] = relationship("Archive", back_populates="arXiv_categories")
-    arXiv_endorsement_domains: Mapped["EndorsementDomain"] = relationship("EndorsementDomain", back_populates="arXiv_categories")
-    arXiv_cross_control: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="arXiv_categories")
-    arXiv_demographics: Mapped[List["Demographic"]] = relationship("Demographic", back_populates="arXiv_category")
+    arXiv_endorsement_domain: Mapped["EndorsementDomain"] = relationship(
+        "EndorsementDomain", primaryjoin="Category.endorsement_domain == EndorsementDomain.endorsement_domain", back_populates="arXiv_categories"
+    )
+    arXiv_endorsement_requests: Mapped[List["EndorsementRequest"]] = relationship("EndorsementRequest", back_populates="arXiv_categories")
+    arXiv_cross_controls: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="arXiv_category")
 
     # link to category
     arXiv_archive = relationship("Archive", primaryjoin="Category.archive == Archive.archive_id", back_populates="arXiv_categories")
@@ -378,11 +376,12 @@ class CrossControl(Base):
     request_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     freeze_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    arXiv_category = relationship("Category", primaryjoin="and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)", back_populates="arXiv_cross_control")
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_cross_control")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_cross_control")
 
-    arXiv_categories: Mapped["Category"] = relationship("Category", back_populates="arXiv_cross_control")
+    arXiv_category: Mapped["Category"] = relationship(
+        "Category", primaryjoin="and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)", back_populates="arXiv_cross_controls"
+    )
+    document: Mapped["Document"] = relationship("Document", primaryjoin="CrossControl.document_id == Document.document_id", back_populates="arXiv_cross_controls")
+    user: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="CrossControl.user_id == TapirUser.user_id", back_populates="arXiv_cross_controls")
 
 
 class DataciteDois(Base):
@@ -454,21 +453,18 @@ class Document(Base):
 
     # join it with user to get the user info
     submitter = relationship("TapirUser", primaryjoin="Document.submitter_id == TapirUser.user_id", back_populates="arXiv_documents")
-    owners = relationship("PaperOwner", back_populates="document")
+    owners: Mapped[List["PaperOwner"]] = relationship("PaperOwner", back_populates="document")
+    arXiv_cross_controls: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="document")
     arXiv_admin_metadata: Mapped[List["AdminMetadata"]] = relationship("AdminMetadata", back_populates="document")
-    arXiv_cross_control: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="document")
     arXiv_document_category: Mapped[List["DocumentCategory"]] = relationship("DocumentCategory", back_populates="document")
-    arXiv_jref_control: Mapped[List["JrefControl"]] = relationship("JrefControl", back_populates="document")
+    arXiv_jref_controls: Mapped[List["JrefControl"]] = relationship("JrefControl", back_populates="document")
     arXiv_metadata: Mapped[List["Metadata"]] = relationship("Metadata", back_populates="document")
     arXiv_mirror_list: Mapped[List["MirrorList"]] = relationship("MirrorList", back_populates="document")
-    arXiv_paper_owners: Mapped[List["PaperOwner"]] = relationship("PaperOwner", back_populates="document")
     arXiv_show_email_requests: Mapped[List["ShowEmailRequest"]] = relationship("ShowEmailRequest", back_populates="document")
     arXiv_submission_control: Mapped[List["SubmissionControl"]] = relationship("SubmissionControl", back_populates="document")
     arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="document")
     arXiv_top_papers: Mapped[List["TopPaper"]] = relationship("TopPaper", back_populates="document")
     arXiv_versions: Mapped[List["Version"]] = relationship("Version", back_populates="document")
-    # link the cross control
-    arXiv_cross_controls = relationship("CrossControl", back_populates="document")
 
 
 class DBLP(Document):
@@ -505,7 +501,7 @@ class EndorsementDomain(Base):
     endorse_email: Mapped[str] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
     papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_categories: Mapped[List["Category"]] = relationship("Category", back_populates="arXiv_endorsement_domains")
+    arXiv_categories: Mapped[List["Category"]] = relationship("Category", back_populates="arXiv_endorsement_domain")
 
 
 class EndorsementRequest(Base):
@@ -529,9 +525,8 @@ class EndorsementRequest(Base):
         "Category", primaryjoin="and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)", back_populates="arXiv_endorsement_requests"
     )
     endorsee: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="EndorsementRequest.endorsee_id == TapirUser.user_id", back_populates="arXiv_endorsement_requests", uselist=False)
-    endorsement = relationship("Endorsement", back_populates="request", uselist=False)
+    endorsement: Mapped["Endorsement"] = relationship("Endorsement", back_populates="request", uselist=False)
     audit = relationship("EndorsementRequestsAudit", uselist=False)
-    arXiv_endorsements: Mapped[List["Endorsement"]] = relationship("Endorsement", back_populates="request")
     arXiv_ownership_requests: Mapped[List["OwnershipRequest"]] = relationship("OwnershipRequest", back_populates="endorsement_request")
 
 
@@ -568,9 +563,9 @@ class Endorsement(Base):
     request_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_endorsement_requests.request_id"), index=True)
 
     arXiv_categories: Mapped["Category"] = relationship("Category", back_populates="arXiv_endorsements")
-    endorsee: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[endorsee_id], back_populates="arXiv_endorsements")
-    endorser: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[endorser_id], back_populates="arXiv_endorsements_")
-    request: Mapped["EndorsementRequest"] = relationship("EndorsementRequest", back_populates="arXiv_endorsements")
+    endorsee: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Endorsement.endorsee_id == TapirUser.user_id", back_populates="endorsee_of")
+    endorser: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Endorsement.endorser_id == TapirUser.user_id", back_populates="endorses")
+    request: Mapped["EndorsementRequest"] = relationship("EndorsementRequest", back_populates="endorsement")
 
 
 class EndorsementsAudit(Endorsement):
@@ -607,7 +602,7 @@ class Group(Base):
     group_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     start_year: Mapped[str] = mapped_column(String(4), nullable=False, server_default=FetchedValue())
 
-    arXiv_archives: Mapped[List["Archive"]] = relationship("Archive", back_populates="arXiv_groups")
+    arXiv_archives: Mapped[List["Archive"]] = relationship("Archive", back_populates="arXiv_group")
 
 
 t_arXiv_in_category = Table(
@@ -642,8 +637,8 @@ class JrefControl(Base):
     freeze_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_jref_control")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_jref_control")
+    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_jref_controls")
+    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_jref_controls")
 
 
 class License(Base):
@@ -655,7 +650,7 @@ class License(Base):
     note: Mapped[Optional[str]] = mapped_column(String(400))
     sequence: Mapped[Optional[int]] = mapped_column(Integer)
 
-    arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="arXiv_licenses")
+    arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="arXiv_license")
 
 
 class LogPosition(Base):
@@ -737,7 +732,7 @@ class ModeratorApiKey(Base):
     issued_to: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
 
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_moderator_api_key")
+    user: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="ModeratorApiKey.user_id == TapirUser.user_id", back_populates="arXiv_moderator_api_keys")
 
 
 t_arXiv_moderators = Table(
@@ -849,19 +844,17 @@ class PaperOwner(Base):
 
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"))
-    date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    added_by: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
-    remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
-    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    tracking_cookie: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
-    valid: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    flag_author: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    flag_auto: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_paper_owners")
-    owner = relationship("TapirUser", foreign_keys="[PaperOwner.user_id]", back_populates="owned_papers")
+    date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    added_by: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=text("'0'"))
+    remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("''"))
+    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=text("''"))
+    tracking_cookie: Mapped[str] = mapped_column(String(32), nullable=False, server_default=text("''"))
+    valid: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_author: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_auto: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
 
-    tapir_users: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[added_by], back_populates="arXiv_paper_owners")
-    user: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[user_id], back_populates="arXiv_paper_owners_")
+    document: Mapped["Document"] = relationship("Document", back_populates="owners")
+    owner = relationship("TapirUser", foreign_keys="[PaperOwner.user_id]", back_populates="owned_papers")
 
 
 class PaperSession(Base):
@@ -1190,11 +1183,9 @@ class Submission(Base):
 
     agreement: Mapped["SubmissionAgreement"] = relationship("SubmissionAgreement", primaryjoin="Submission.agreement_id == SubmissionAgreement.agreement_id", back_populates="arXiv_submissions")
     document: Mapped["Document"] = relationship("Document", primaryjoin="Submission.document_id == Document.document_id", back_populates="arXiv_submissions")
-    arXiv_license = relationship("License", primaryjoin="Submission.license == License.name", back_populates="arXiv_submissions")
+    arXiv_license: Mapped["License"] = relationship("License", primaryjoin="Submission.license == License.name", back_populates="arXiv_submissions")
     submitter: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Submission.submitter_id == TapirUser.user_id", back_populates="arXiv_submissions")
     sword: Mapped["Tracking"] = relationship("Tracking", primaryjoin="Submission.sword_id == Tracking.sword_id", back_populates="arXiv_submissions")
-    arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="submission")
-    arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
     data_version: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
     metadata_version: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
     data_needed: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
@@ -1202,15 +1193,19 @@ class Submission(Base):
     metadata_version_queued: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
     data_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     metadata_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    arXiv_licenses: Mapped["License"] = relationship("License", back_populates="arXiv_submissions")
+    arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="submission")
     arXiv_pilot_files: Mapped[List["PilotFile"]] = relationship("PilotFile", back_populates="submission")
     arXiv_submission_category: Mapped[List["SubmissionCategory"]] = relationship("SubmissionCategory", back_populates="submission")
     arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship("SubmissionCategoryProposal", back_populates="submission")
     arXiv_submission_flag: Mapped[List["SubmissionFlag"]] = relationship("SubmissionFlag", back_populates="submission")
     arXiv_submission_hold_reason: Mapped[List["SubmissionHoldReason"]] = relationship("SubmissionHoldReason", back_populates="submission")
+    arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
     arXiv_submission_near_duplicates: Mapped[List["SubmissionNearDuplicate"]] = relationship("SubmissionNearDuplicate", back_populates="submission")
     arXiv_submission_qa_reports: Mapped[List["SubmissionQaReport"]] = relationship("SubmissionQaReport", back_populates="submission")
     arXiv_submission_view_flag: Mapped[List["SubmissionViewFlag"]] = relationship("SubmissionViewFlag", back_populates="submission")
+
+    # arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="submission")
+    # arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
 
 
 class PilotDataset(Submission):
@@ -1379,7 +1374,7 @@ class Updates(Base):
     document_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"),
         index=True,
-        server_defaults=text("'0'"),
+        server_default=text("'0'"),
     )
 
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
@@ -1931,7 +1926,7 @@ class TapirUser(Base):
     arXiv_control_holds: Mapped[List["ControlHold"]] = relationship("ControlHold", foreign_keys="[ControlHold.last_changed_by]", back_populates="tapir_users")
     arXiv_control_holds_: Mapped[List["ControlHold"]] = relationship("ControlHold", foreign_keys="[ControlHold.placed_by]", back_populates="tapir_users_")
     arXiv_documents: Mapped[List["Document"]] = relationship("Document", back_populates="submitter")
-    arXiv_moderator_api_keys = relationship("ModeratorApiKey", back_populates="user")
+    arXiv_moderator_api_keys: Mapped[List["ModeratorApiKey"]] = relationship("ModeratorApiKey", back_populates="user")
     tapir_address: Mapped[List["TapirAddress"]] = relationship("TapirAddress", back_populates="user")
     tapir_email_change_tokens: Mapped[List["TapirEmailChangeToken"]] = relationship("TapirEmailChangeToken", back_populates="user")
     tapir_email_templates: Mapped[List["TapirEmailTemplate"]] = relationship("TapirEmailTemplate", foreign_keys="[TapirEmailTemplate.created_by]", back_populates="tapir_users")
@@ -1941,9 +1936,9 @@ class TapirUser(Base):
     tapir_phone: Mapped[List["TapirPhone"]] = relationship("TapirPhone", back_populates="user")
     tapir_recovery_tokens: Mapped[List["TapirRecoveryToken"]] = relationship("TapirRecoveryToken", back_populates="user")
     tapir_sessions: Mapped[List["TapirSession"]] = relationship("TapirSession", back_populates="user")
-    arXiv_cross_controls = relationship("CrossControl", back_populates="user")
+    arXiv_cross_controls: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="user")
     arXiv_endorsement_requests: Mapped[List["EndorsementRequest"]] = relationship("EndorsementRequest", back_populates="endorsee")
-    arXiv_jref_controls = relationship("JrefControl", back_populates="user")
+    arXiv_jref_controls: Mapped[List["JrefControl"]] = relationship("JrefControl", back_populates="user")
     arXiv_metadata: Mapped[List["Metadata"]] = relationship("Metadata", back_populates="submitter")
     arXiv_show_email_requests: Mapped[List["ShowEmailRequest"]] = relationship("ShowEmailRequest", back_populates="user")
     arXiv_submission_control: Mapped[List["SubmissionControl"]] = relationship("SubmissionControl", back_populates="user")
@@ -1954,8 +1949,8 @@ class TapirUser(Base):
     tapir_email_mailings_: Mapped[List["TapirEmailMailing"]] = relationship("TapirEmailMailing", foreign_keys="[TapirEmailMailing.sent_by]", back_populates="tapir_users_")
     tapir_permanent_tokens: Mapped[List["TapirPermanentToken"]] = relationship("TapirPermanentToken", back_populates="user")
     tapir_recovery_tokens_used: Mapped[List["TapirRecoveryTokensUsed"]] = relationship("TapirRecoveryTokensUsed", back_populates="user")
-    endorsee_of = relationship("Endorsement", foreign_keys="[Endorsement.endorsee_id]", back_populates="endorsee")
-    endorses = relationship("Endorsement", foreign_keys="[Endorsement.endorser_id]", back_populates="endorser")
+    endorsee_of: Mapped[List["Endorsement"]] = relationship("Endorsement", foreign_keys="[Endorsement.endorsee_id]", back_populates="endorsee")
+    endorses: Mapped[List["Endorsement"]] = relationship("Endorsement", foreign_keys="[Endorsement.endorser_id]", back_populates="endorser")
     arXiv_ownership_requests: Mapped[List["OwnershipRequest"]] = relationship("OwnershipRequest", back_populates="user")
     arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship("SubmissionCategoryProposal", back_populates="user")
     arXiv_submission_flag: Mapped[List["SubmissionFlag"]] = relationship("SubmissionFlag", back_populates="user")
@@ -1964,15 +1959,8 @@ class TapirUser(Base):
     arXiv_submission_view_flag: Mapped[List["SubmissionViewFlag"]] = relationship("SubmissionViewFlag", back_populates="user")
     arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="user")
     arXiv_check_responses: Mapped[List["ArXivCheckResponses"]] = relationship("ArXivCheckResponses", back_populates="user")
-    owned_papers = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="owner")
+    owned_papers: Mapped[List["PaperOwner"]] = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="owner")
     demographics = relationship("Demographic", foreign_keys="[Demographic.user_id]", uselist=False, back_populates="user")
-    arXiv_moderator_api_key: Mapped[List["ModeratorApiKey"]] = relationship("ModeratorApiKey", back_populates="user")
-    arXiv_cross_control: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="user")
-    arXiv_jref_control: Mapped[List["JrefControl"]] = relationship("JrefControl", back_populates="user")
-    arXiv_paper_owners: Mapped[List["PaperOwner"]] = relationship("PaperOwner", foreign_keys="[PaperOwner.added_by]", back_populates="tapir_users")
-    arXiv_paper_owners_: Mapped[List["PaperOwner"]] = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="user")
-    arXiv_endorsements: Mapped[List["Endorsement"]] = relationship("Endorsement", foreign_keys="[Endorsement.endorsee_id]", back_populates="endorsee")
-    arXiv_endorsements_: Mapped[List["Endorsement"]] = relationship("Endorsement", foreign_keys="[Endorsement.endorser_id]", back_populates="endorser")
 
 
 class AuthorIds(Base):
