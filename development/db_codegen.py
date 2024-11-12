@@ -1,16 +1,22 @@
+""" arxiv-base/development/db_codegen.py
+
+Generated arxiv-base/arxiv/db/models.py
+
+The script
+
+"""
+
 from __future__ import annotations
 import re
 import sys
 import os
-import subprocess
+import time
 from typing import Tuple
 import logging
-
-from libcst.matchers import SimpleStatementLine
-from ruamel.yaml import YAML
-
-# import ast
 import libcst as cst
+
+import socket
+import subprocess
 
 logging.basicConfig(level=logging.INFO)
 
@@ -26,7 +32,8 @@ tables_i_cannot_update = {
     # "t_arXiv_in_category": True,
 }
 
-def first_target(body):
+def first_target(body: cst.CSTNode):
+    """Get the first LHS name"""
     if hasattr(body, 'targets'):
         return body.targets[0].id
     if hasattr(body, 'target'):
@@ -34,10 +41,13 @@ def first_target(body):
     return None
 
 
-def is_intpk(elem):
+def is_intpk(elem: cst.CSTNode):
+    """Figure out this is intpk"""
     return hasattr(elem, 'annotation') and hasattr(elem.annotation, 'slice') and hasattr(elem.annotation.slice, 'id') and elem.annotation.slice.id == "intpk"
 
+
 def patch_mysql_types(contents: str):
+    """Mass regex replace the python code for mostly MySQL dependant types."""
     # Define a mapping of MySQL dialect types to generic SQLAlchemy types
     type_mapping = [
         (re.compile(r'= mapped_column\(BIGINT\s*\(\d+\)'), r'= mapped_column(BigInteger'),  # Replace BIGINT(size) with BIGINT
@@ -77,27 +87,38 @@ def patch_mysql_types(contents: str):
     return contents
 
 
-def is_assign_expr(elem):
+def is_assign_expr(elem: cst.CSTNode):
+    """Check the element type for assignment"""
     if isinstance(elem, cst.SimpleStatementLine):
         return isinstance(elem.body[0], (cst.Assign, cst.AnnAssign))
     return False
 
-def is_table_def(node):
+def is_table_def(node: cst.CSTNode):
+    """If this is a simple statement and RHS is table, this is a table definition."""
     return isinstance(node, cst.SimpleStatementLine) and is_table_assign(node.body[0])
 
-def is_table_assign(node):
+def is_table_assign(node: cst.CSTNode):
+    """Assignment that the RHS starts with Table() is a table assign."""
     return isinstance(node, cst.Assign) and isinstance(node.value, cst.Call) and node.value.func.value == "Table"
 
 
 def find_keyword_arg(elem: cst.Call, key_name: str) -> Tuple[int, cst.Arg] | None:
+    """
+    Find a keyword ard in the function call.
+    """
     assert(isinstance(elem, cst.Call))
     for idx, arg in enumerate(elem.args):
         if hasattr(arg, 'keyword') and arg.keyword and arg.keyword.value == key_name:
             return idx, arg
     return None
 
+
 def copy_server_default(to_elem: cst.Call, from_elem: cst.Call) -> cst.Call:
-    """Copy the keyword 'server_default' from/to"""
+    """Copy the keyword 'server_default' from/to
+    If the original's server_default is working, even if the schema says otherwise, keep it.
+
+    This might have a wrong impact in the instance but that's how it was working so preserve the behavior
+    """
     assert(isinstance(from_elem, cst.Call))
     assert(isinstance(to_elem, cst.Call))
 
@@ -122,20 +143,34 @@ def copy_server_default(to_elem: cst.Call, from_elem: cst.Call) -> cst.Call:
 
 
 class SchemaTransformer(cst.CSTTransformer):
+    """
+    Visits the CST's node and applies the transformation.
+
+    Since the nodes are immutable object, all of changes are to create new object and pass it back.
+    """
     def __init__(self, latest_def, latest_tables):
         self.latest_def = latest_def
         self.latest_tables = latest_tables
 
     def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.CSTNode:
-        #
+        """
+        Update the existing assignments with latest assignments.
+
+        The intention is to replace all of assignments with the latest.
+
+        """
         class_name = original_node.name.value
+
+        # Skip the things I don't want to touch
         if class_name in tables_i_cannot_update:
             return updated_node
 
         if class_name in self.latest_def:
+            # Only updates if there is a latest.
             latest_node = self.latest_def[class_name]
 
             # Collect the existing assignments from the original class body
+            # If the assignments is NOT found in the latest, it could be a problematic so remember this.
             existing_assignments = {
                 self.first_target(elem): elem for elem in original_node.body.body if
                 is_assign_expr(elem)
@@ -143,7 +178,8 @@ class SchemaTransformer(cst.CSTTransformer):
 
             updated_body = []
 
-            # Remember the original slot order
+            # Remember the original slot order. __tablename__ and __table_args__ are special. it is always the
+            # first and 2nd.
             original_slot_order = {
                 "__tablename__": 0,
                 "__table_args__": 1,
@@ -184,7 +220,7 @@ class SchemaTransformer(cst.CSTTransformer):
                                 ])
                             pass
                         updated_body.append(elem)
-                    # Remove this from the existing assignments so it's not processed again
+                    # Remove this from the existing assignments so it's visited.
                     del existing_assignments[target]
                 else:
                     # the slot not appearing shows up after the existing ones
@@ -192,7 +228,7 @@ class SchemaTransformer(cst.CSTTransformer):
                         original_slot_order[target] = len(original_slot_order.keys())
                     updated_body.append(elem)
 
-            # Adjust the slot order based on the existing slot while appending the new ones at the botom
+            # Adjust the slot order based on the existing slot while appending the new ones at the bottom
             updated_body.sort(key=lambda slot: original_slot_order[self.first_target(slot)])
 
             # Append the non-assigns. Non-assign before the assign is "preamble"
@@ -222,7 +258,7 @@ class SchemaTransformer(cst.CSTTransformer):
                         intended[a_key] = a_value
                         continue
 
-            # Warn the left over assigns
+            # Warn the left over assigns.
             if existing_assignments:
                 # ignore all uppers
                 props = [prop for prop in existing_assignments.keys() if prop not in intended]
@@ -235,7 +271,7 @@ class SchemaTransformer(cst.CSTTransformer):
             return updated_node.with_changes(body=updated_node.body.with_changes(body=body))
         return updated_node
 
-    def first_target(self, node):
+    def first_target(self, node: cst.CSTNode):
         if is_assign_expr(node):
             if hasattr(node.body[0], 'target'):
                 return node.body[0].target.value
@@ -243,7 +279,8 @@ class SchemaTransformer(cst.CSTTransformer):
                 return node.body[0].targets[0].target.value
         return None
 
-    def is_intpk(self, elem):
+    def is_intpk(self, elem: cst.CSTNode):
+        """Find the intpk and print it as so"""
         if isinstance(elem, cst.SimpleStatementLine):
             if hasattr(elem.body[0], 'annotation'):
                 for anno in elem.body[0].annotation.children:
@@ -255,19 +292,26 @@ class SchemaTransformer(cst.CSTTransformer):
                                         return True
         return False
 
-    def has_comment(self, elem):
+    def has_comment(self, elem: cst.CSTNode):
+        """commented?"""
         if isinstance(elem, cst.SimpleStatementLine):
             return elem.leading_lines and elem.leading_lines[-1].comment
         return False
 
     def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.CSTNode:
+        """
+        Handle the Table assignment
+        """
+
         # Check if the value of the assignment is a Table call
         lhs_name = original_node.targets[0].target.value
         if lhs_name in tables_i_cannot_update:
             return updated_node
 
         if not is_table_assign(original_node):
+            # If this is not FOO = Table(BAR), leave as is
             return original_node
+
         latest_table_def: cst.Assign = self.latest_tables.get(lhs_name)
         if not latest_table_def:
             return original_node
@@ -341,7 +385,7 @@ class SchemaTransformer(cst.CSTTransformer):
         return updated_node
 
 
-def find_classes_and_tables(tree):
+def find_classes_and_tables(tree: cst.CSTNode):
     classes = {}
     tables = {}
 
@@ -353,18 +397,79 @@ def find_classes_and_tables(tree):
     return classes, tables
 
 
+def is_port_open(host: str, port: int):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(1)
+        result = sock.connect_ex((host, port))
+        return result == 0
+
+def run_mysql_container(port: int):
+    """Start a mysql docker"""
+    mysql_image = "mysql:5.7"
+    try:
+        subprocess.run(["docker", "pull", mysql_image], check=True)
+
+        subprocess.run(
+            [
+                "docker", "run", "-d", "--name", "mysql-test",
+                "-e", "MYSQL_ROOT_PASSWORD=testpassword",
+                "-e", "MYSQL_USER=testuser",
+                "-e", "MYSQL_PASSWORD=testpassword",
+                "-e", "MYSQL_DATABASE=testdb",
+                "-p", f"{port}:3306",
+                mysql_image
+            ],
+            check=True
+        )
+        logging.info("MySQL Docker container started successfully.")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+
+
+def load_sql_file(sql_file):
+    """Load a sql file to mysql
+
+    If you see
+
+ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty.
+ERROR:root:Error loading SQL file: Command '['mysql', '--host=127.0.0.1', '-uroot', '-ptestpassword', 'testdb']' returned non-zero exit status 1.
+
+    it means that the sql is alreayd loaded so ignore the error.
+
+    """
+    with open(sql_file, encoding="utf-8") as sql:
+        try:
+            subprocess.run(["mysql", "--host=127.0.0.1", "-uroot", "-ptestpassword", "testdb"],
+                           stdin=sql, check=True)
+            logging.info(f"SQL file '{sql_file}' loaded successfully into 'testdb'.")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Error loading SQL file: {e}")
+        except Exception as e:
+            logging.error(f"Unexpected error: {e}")
+
+
 def main() -> None:
-    p_outfile = "arxiv/db/autogen_models.py"
+    mysql_port = 3306
+    arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    p_outfile = os.path.join(arxiv_base_dir, "arxiv/db/autogen_models.py")
+    db_metadata = os.path.join(arxiv_base_dir, "arxiv/db/arxiv-db-metadata.yaml")
+    codegen_dir = os.path.join(arxiv_base_dir, "development/sqlacodegen")
 
-    #with open(os.path.expanduser('~/.arxiv/arxiv-db-prod-readonly'), encoding='utf-8') as uri_fd:
-    #    p_url: str = uri_fd.read().strip()
-    #with open(os.path.expanduser('~/.arxiv/arxiv-db-dev-proxy'), encoding='utf-8') as uri_fd:
-    #    p_url: str = uri_fd.read().strip()
+    if not is_port_open("127.0.0.1", mysql_port):
+        run_mysql_container(mysql_port)
+        for _ in range(20):
+            if is_port_open("127.0.0.1", mysql_port):
+                break
+            time.sleep(1)
+
+    load_sql_file(os.path.join(arxiv_base_dir, "development/arxiv_db_schema.sql"))
+
     p_url = "mysql://testuser:testpassword@127.0.0.1/testdb"
-    sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "sqlacodegen", "src"))
-    subprocess.run(['development/sqlacodegen/venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile, '--model-metadata', "arxiv/db/arxiv-db-metadata.yaml"], check=True)
-
-    # subprocess.run(['development/sqlacodegen/venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', "arxiv/db/raw-autogen_models.py"], check=True)
+    sys.path.append(os.path.join(codegen_dir, "src"))
+    subprocess.run(['venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile,
+                    '--model-metadata', db_metadata], check=True, cwd=arxiv_base_dir)
 
     with open(p_outfile, 'r') as src:
         source = src.read()
