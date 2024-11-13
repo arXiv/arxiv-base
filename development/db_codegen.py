@@ -212,6 +212,15 @@ class SchemaTransformer(cst.CSTTransformer):
                         updated_body.append(existing_elem)
                     else:
                         if isinstance(elem.body[0].value, cst.Call) and isinstance(existing_elem.body[0].value, cst.Call):
+                            if existing_elem.body[0].value.func.value == "relationship":
+                                existing_primary_join = find_keyword_arg(existing_elem.body[0].value, "primaryjoin")
+                                if existing_primary_join:
+                                    latest_primary_join = find_keyword_arg(existing_elem.body[0].value, "primaryjoin")
+                                    latest_pj = str(latest_primary_join[1].value.value) if latest_primary_join else "none"
+                                    if str(existing_primary_join[1].value.value) != latest_pj:
+                                        logging.warning(
+                                            f"{class_name}.{elem.body[0].targep!r} primary join -> {existing_primary_join[1].value.value} != {latest_pj}")
+
                             elem = elem.with_changes(
                                 body=[
                                     elem.body[0].with_changes(
@@ -219,6 +228,7 @@ class SchemaTransformer(cst.CSTTransformer):
                                     )
                                 ])
                             pass
+
                         updated_body.append(elem)
                     # Remove this from the existing assignments so it's visited.
                     del existing_assignments[target]
@@ -382,6 +392,8 @@ class SchemaTransformer(cst.CSTTransformer):
                                     ]
                                 )
                             )
+
+
         return updated_node
 
 
