@@ -107,6 +107,8 @@ class CodeGenerator(metaclass=ABCMeta):
         if invalid_options:
             raise ValueError("Unrecognized options: " + ", ".join(invalid_options))
 
+        self.names_map: dict[str, str] = {}
+
     @abstractmethod
     def generate(self) -> str:
         """
@@ -136,6 +138,7 @@ class TablesGenerator(CodeGenerator):
         self.imports: dict[str, set[str]] = defaultdict(set)
         self.module_imports: set[str] = set()
         self.model_metadata = model_metadata
+        self.names_map = model_metadata.get('_names_map_', {})
 
 
     def get_class_name_override(self, table_name: str, suggested: str):
@@ -146,7 +149,7 @@ class TablesGenerator(CodeGenerator):
             return opt.get('class_name', suggested)
         return suggested
 
-    def get_override(self, table: Table, keyword: str, default: str | None) -> str | None:
+    def get_arg_override(self, table: Table, keyword: str, default: str | None) -> str | None:
         assert isinstance(table, Table)
         result = default
         override = self.model_metadata.get(table.name, None)
@@ -163,7 +166,6 @@ class TablesGenerator(CodeGenerator):
                         result = result.replace(values[0], values[1])
         return result
 
-
     def get_column_overrides(self, table: Table) -> dict:
         override = self.model_metadata.get(table.name, None)
         if isinstance(override, dict):
@@ -172,6 +174,27 @@ class TablesGenerator(CodeGenerator):
 
     def get_column_type_override(self, table: Table, col_name: str) -> dict | None:
         return self.get_column_overrides(table).get(col_name)
+
+
+    def get_relationship_overrides(self, table: Table) -> dict:
+        override = self.model_metadata.get(table.name, None)
+        if isinstance(override, dict):
+            return override.get("relationships", {})
+        return {}
+
+    def get_additional_relationships(self, table: Table) -> list[str]:
+        override = self.model_metadata.get(table.name, None)
+        if isinstance(override, dict):
+            add_ons = override.get("additional_relationships", [])
+            if add_ons and isinstance(add_ons, list):
+                return add_ons
+        return []
+
+
+    def is_table_class(self, table: Table) -> bool:
+        """Returns true if table has corresponding class name"""
+        opt = self.model_metadata.get(table.name, None)
+        return isinstance(opt, dict) and 'class_name' in opt
 
 
     def generate_base(self) -> None:
@@ -394,10 +417,29 @@ class TablesGenerator(CodeGenerator):
     def render_table(self, table: Table) -> str:
         args: list[str] = [f"{table.name!r}, {self.base.metadata_ref}"]
         kwargs: dict[str, object] = {}
+
+        used_args = set()
+        for constraint in table.constraints:
+            if isinstance(constraint, PrimaryKeyConstraint):
+                if len(constraint.columns) == 1:
+                    constraint.columns[0].primary_key = True
+                    used_args.add(constraint)
+
+            if isinstance(constraint, ForeignKeyConstraint):
+                if len(constraint.columns) == 1:
+                    # constraint.columns[0].type = constraint.elements[0]
+                    used_args.add(constraint)
+
+        used_indecies = set()
+        for index in table.indexes:
+            if len(index.columns) == 1:
+                index.columns[0].index = True
+                used_indecies.add(index)
+
         for column in table.columns:
             # Cast is required because of a bug in the SQLAlchemy stubs regarding
             # Table.columns
-            args.append(self.render_column(column, True, is_table=True))
+            args.append(self.render_column(column, True, is_table=True, table=table))
 
         for constraint in sorted(table.constraints, key=get_constraint_sort_key):
             if uses_default_name(constraint):
@@ -406,13 +448,14 @@ class TablesGenerator(CodeGenerator):
                 elif isinstance(constraint, (ForeignKeyConstraint, UniqueConstraint)):
                     if len(constraint.columns) == 1:
                         continue
-
-            args.append(self.render_constraint(constraint))
+            if constraint not in used_args:
+                args.append(self.render_constraint(constraint))
 
         for index in sorted(table.indexes, key=lambda i: i.name):
             # One-column indexes should be rendered as index=True on columns
             if len(index.columns) > 1 or not uses_default_name(index):
-                args.append(self.render_index(index))
+                if index not in used_indecies:
+                    args.append(self.render_index(index, table))
 
         if table.schema:
             kwargs["schema"] = repr(table.schema)
@@ -423,17 +466,18 @@ class TablesGenerator(CodeGenerator):
 
         return render_callable("Table", *args, kwargs=kwargs, indentation="    ")
 
-    def render_index(self, index: Index) -> str:
+    def render_index(self, index: Index, table: Table) -> str:
         extra_args = [repr(col.name) for col in index.columns]
         kwargs = {}
         if index.unique:
             kwargs["unique"] = True
 
-        return render_callable("Index", repr(index.name), *extra_args, kwargs=kwargs)
+        index_expr = render_callable("Index", repr(index.name), *extra_args, kwargs=kwargs)
+        return self.get_arg_override(table, "indecies", index_expr)
 
     # TODO find better solution for is_table
     def render_column(
-        self, column: Column[Any], show_name: bool, is_table: bool = False
+        self, column: Column[Any], show_name: bool, is_table: bool = False, table: Table | None = None,
     ) -> str:
         args = []
         kwargs: dict[str, Any] = {}
@@ -444,7 +488,7 @@ class TablesGenerator(CodeGenerator):
             for c in column.foreign_keys
             if c.constraint
             and len(c.constraint.columns) == 1
-            and uses_default_name(c.constraint)
+            # and uses_default_name(c.constraint)
         ]
         is_unique = any(
             isinstance(c, UniqueConstraint)
@@ -468,7 +512,7 @@ class TablesGenerator(CodeGenerator):
         has_index = any(
             set(i.columns) == {column} and uses_default_name(i)
             for i in column.table.indexes
-        )
+        ) or column.index
 
         if show_name:
             args.append(repr(column.name))
@@ -629,6 +673,8 @@ class TablesGenerator(CodeGenerator):
         name = name.strip()
         assert name, "Identifier cannot be empty"
         name = _re_invalid_identifier.sub("_", name)
+        name = self.names_map.get(name, name)
+
         if name[0].isdigit():
             name = "_" + name
         elif iskeyword(name) or name == "metadata":
@@ -815,7 +861,7 @@ class DeclarativeGenerator(TablesGenerator):
 
             # Only form model classes for tables that have a primary key and are not
             # association tables
-            if not table.primary_key:
+            if not table.primary_key and (not self.is_table_class(table)):
                 models_by_table_name[qualified_name] = Model(table)
             else:
                 model = ModelClass(table)
@@ -1132,13 +1178,13 @@ class DeclarativeGenerator(TablesGenerator):
 
     def render_class(self, model: ModelClass) -> str:
         sections: list[str] = []
+        indexed_columns = set()
 
         # Render class variables / special declarations
-        class_vars: str = self.render_class_variables(model)
-        if class_vars:
-            sections.append(class_vars)
+        class_vars: str = self.render_class_variables(model, indexed_columns=indexed_columns)
 
         # Render column attributes
+        # This populates "index"
         rendered_column_attributes: list[str] = []
         for nullable in (False, True):
             for column_attr in model.columns:
@@ -1146,6 +1192,14 @@ class DeclarativeGenerator(TablesGenerator):
                     rendered_column_attributes.append(
                         self.render_column_attribute(column_attr, model.table)
                     )
+
+        for column_attr in model.columns:
+            if column_attr.column.index:
+                indexed_columns.add(column_attr.column.name)
+
+        # Render class variables / special declarations
+        if class_vars:
+            sections.append(class_vars)
 
         if rendered_column_attributes:
             sections.append("\n".join(rendered_column_attributes))
@@ -1156,6 +1210,9 @@ class DeclarativeGenerator(TablesGenerator):
             for relationship in model.relationships
         ]
 
+        rendered_relationship_attributes.extend(self.get_additional_relationships(model.table))
+        rendered_relationship_attributes = [attr for attr in rendered_relationship_attributes if attr]
+
         if rendered_relationship_attributes:
             sections.append("\n".join(rendered_relationship_attributes))
 
@@ -1163,6 +1220,7 @@ class DeclarativeGenerator(TablesGenerator):
         rendered_sections = "\n\n".join(
             indent(section, self.indentation) for section in sections
         )
+
         return f"{declaration}\n{rendered_sections}"
 
     def render_class_declaration(self, model: ModelClass) -> str:
@@ -1171,22 +1229,23 @@ class DeclarativeGenerator(TablesGenerator):
         )
         return f"class {model.name}({parent_class_name}):"
 
-    def render_class_variables(self, model: ModelClass) -> str:
+    def render_class_variables(self, model: ModelClass, indexed_columns: set) -> str:
         variables = [f"__tablename__ = {model.table.name!r}"]
 
         # Render constraints and indexes as __table_args__
-        table_args = self.render_table_args(model.table)
-        table_args = self.get_override(model.table, "table_args", table_args)
+        table_args = self.render_table_args(model.table, indexed_columns)
+        table_args = self.get_arg_override(model.table, "table_args", table_args)
         if table_args:
             variables.append(f"__table_args__ = {table_args}")
 
         return "\n".join(variables)
 
-    def render_table_args(self, table: Table) -> str:
+    def render_table_args(self, table: Table, indexed_columns: set) -> str:
         args: list[str] = []
         kwargs: dict[str, str] = {}
 
         # Render constraints
+        foreign_keys = set()
         for constraint in sorted(table.constraints, key=get_constraint_sort_key):
             if uses_default_name(constraint):
                 if isinstance(constraint, PrimaryKeyConstraint):
@@ -1197,12 +1256,21 @@ class DeclarativeGenerator(TablesGenerator):
                 ):
                     continue
 
+            if isinstance(constraint, ForeignKeyConstraint):
+                foreign_keys.add(repr(constraint.column_keys))
             args.append(self.render_constraint(constraint))
 
         # Render indexes
+        simple_indecies = set()
         for index in sorted(table.indexes, key=lambda i: i.name):
+            if len(index.columns) == 1:
+                simple_indecies.add(index.columns[0].name)
+                index.columns[0].index = True
+                continue
+            if repr([col.name for col in index.columns]) in foreign_keys:
+                continue
             if len(index.columns) > 1 or not uses_default_name(index):
-                args.append(self.render_index(index))
+                args.append(self.render_index(index, table))
 
         if table.schema:
             kwargs["schema"] = table.schema
@@ -1229,10 +1297,12 @@ class DeclarativeGenerator(TablesGenerator):
     def render_column_attribute(self, column_attr: ColumnAttribute, table: Table) -> str:
         column = column_attr.column
         override = self.get_column_type_override(table, column.name)
+        if override == "drop":
+            return f"# {column_attr.name} is dropped."
         if override and override[0] == ":":
             return f"{column_attr.name}: {override[1:]}"
-
-        rendered_column = override if override else self.render_column(column, column_attr.name != column.name)
+        rendered_column = self.render_column(column, column_attr.name != column.name)
+        rendered_column = override if override else rendered_column
 
         try:
             python_type = column.type.python_type
@@ -1246,6 +1316,10 @@ class DeclarativeGenerator(TablesGenerator):
         except NotImplementedError:
             self.add_literal_import("typing", "Any")
             column_python_type = "Any"
+
+        # if the RHS is enum, propagate to LHS as literal
+        if isinstance(column_attr.column.type, Enum) and column_python_type == "str":
+            column_python_type = "Literal%s" % repr(column_attr.column.type.enums)
 
         if column.nullable:
             self.add_literal_import("typing", "Optional")
@@ -1344,6 +1418,20 @@ class DeclarativeGenerator(TablesGenerator):
             self.add_literal_import("typing", "Any")
             relationship_type = "Any"
 
+        relationship_override = self.get_relationship_overrides(table)
+        rendered_relationship = relationship_override.get(relationship.name, rendered_relationship)
+        if not rendered_relationship:
+            return ""
+        if isinstance(rendered_relationship, dict):
+            assert len(rendered_relationship) == 1
+            name, value = list(rendered_relationship.items())[0]
+            if value:
+                # When the RHS start with :, it has the type included
+                if value[0] == ":":
+                    return f"{name}: {value[1:]}"
+                else:
+                    return f"{name}: Mapped[{relationship_type}] = {value}"
+            return ""
         return (
             f"{relationship.name}: Mapped[{relationship_type}] "
             f"= {rendered_relationship}"
@@ -1521,9 +1609,10 @@ class SQLModelGenerator(DeclarativeGenerator):
             annotation = f"Optional[{annotation}]"
 
         rendered_field = render_callable("Relationship", *args, kwargs=kwargs)
-        relationship_override = self.get_override('relationship', table, {})
-        if relationship.name in relationship_override:
-            rendered_field = relationship_override[relationship.name]
+        relationship_override = self.get_relationship_overrides(table)
+        rendered_field = relationship_override.get(relationship.name, rendered_field)
+        if not rendered_field:
+            return ""
         return f"{relationship.name}: {annotation} = {rendered_field}"
 
     def render_relationship_args(self, arguments: str) -> list[str]:
