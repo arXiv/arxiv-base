@@ -1,5 +1,7 @@
 import json
 import ast
+from ruamel.yaml import YAML
+import sys
 
 def extract_class_table_mapping(filename: str):
     with open(filename, 'r') as src:
@@ -28,6 +30,11 @@ def extract_class_table_mapping(filename: str):
     return class_table_mapping
 
 if __name__ == '__main__':
+    output = sys.stdout
     filename = 'arxiv/db/models.py'  # Replace this with the path to your Python file
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
     class_table_mapping = extract_class_table_mapping(filename)
-    json.dump(class_table_mapping, open('arxiv/db/model-options.json', 'w'), indent=4)
+    yaml = YAML()
+    yaml.dump(class_table_mapping, output)
+

@@ -60,8 +60,11 @@ from .utils import (
     get_constraint_sort_key,
     qualified_table_name,
     render_callable,
-    uses_default_name,
+    #uses_default_name,
 )
+
+def uses_default_name(_constraint: Constraint | Index) -> bool:
+    return True
 
 if sys.version_info < (3, 10):
     pass
@@ -206,6 +209,15 @@ class TablesGenerator(CodeGenerator):
 
     def generate(self) -> str:
         self.generate_base()
+
+        if self.bind.dialect.name == "mysql":
+            from .mysql_util import get_mysql_table_charsets
+            chasets = get_mysql_table_charsets(self.bind, self.bind.engine.url.database)
+            for table_name, charset in chasets.items():
+                if table_name in self.model_metadata:
+                    self.model_metadata[table_name]["charset"] = charset
+                else:
+                    self.model_metadata[table_name] = {"charset": charset}
 
         sections: list[str] = []
 
@@ -1277,6 +1289,11 @@ class DeclarativeGenerator(TablesGenerator):
 
         if table.comment:
             kwargs["comment"] = table.comment
+
+        table_charset = self.model_metadata.get(table.name, {}).get("charset")
+        if table_charset:
+            kwargs["mysql_charset"] = table_charset
+
 
         if kwargs:
             formatted_kwargs = pformat(kwargs)

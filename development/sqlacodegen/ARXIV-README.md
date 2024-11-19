@@ -48,6 +48,41 @@ This is an example of metadata for a table.
         - "request_audit = relationship('OwnershipRequestsAudit', back_populates='ownership_request', uselist=False)"
         - "documents = relationship('Document', secondary=t_arXiv_ownership_requests_papers)"
 
+### Definition of metadata
+
+    TABLE_NAME:
+      class_name: <class_name>
+
+      table_args: <drop>
+        - replace: [<from_str>, <to_str>]
+
+      columns:
+        <column_name>: <rhs> | <typed_rhs>
+
+      relationships:
+        <relationship_name>: <rhs>
+          <replacement_relationship_name>: <rhs>
+
+      additional_relationships:
+        - <str>
+
+#### table_args
+
+When the `table_args` is given `drop` , it is dropped and does not appear in the output.
+When `replace` is used, python's string replace is applied to it. There is no semantic consideration. 
+
+#### columns
+
+You can override the RHS of column. For example:
+
+    status: "mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
+
+If the table schema has no concept of string literal enum but you want to define it, you may want to override 
+the generated definition. 
+
+There are two types of column's RHS. One with type and without type. When the first character of RHS is ":", it is
+a typed RHS. 
+
 
 ## Class name designation
 

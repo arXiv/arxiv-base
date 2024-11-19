@@ -86,6 +86,9 @@ def patch_mysql_types(contents: str):
     contents = "\n".join([mapper(line) for line in contents.splitlines()])
     return contents
 
+# ================================================================================================================
+#
+# Model code merging
 
 def is_assign_expr(elem: cst.CSTNode):
     """Check the element type for assignment"""
@@ -147,8 +150,13 @@ class SchemaTransformer(cst.CSTTransformer):
     Visits the CST's node and applies the transformation.
 
     Since the nodes are immutable object, all of changes are to create new object and pass it back.
+
+    In db/models.py, there are the class-based models and table objects. Merge of model is done with `leave_ClassDef`
+    and merge of table is done with `leave_Assign`.
+
     """
     def __init__(self, latest_def, latest_tables):
+        # Merging data
         self.latest_def = latest_def
         self.latest_tables = latest_tables
 
@@ -159,6 +167,7 @@ class SchemaTransformer(cst.CSTTransformer):
         The intention is to replace all of assignments with the latest.
 
         """
+
         class_name = original_node.name.value
 
         # Skip the things I don't want to touch
@@ -169,7 +178,8 @@ class SchemaTransformer(cst.CSTTransformer):
             # Only updates if there is a latest.
             latest_node = self.latest_def[class_name]
 
-            # Collect the existing assignments from the original class body
+            # Collect the existing assignments from the original class body. These are the column and relationship
+            # definitions.
             # If the assignments is NOT found in the latest, it could be a problematic so remember this.
             existing_assignments = {
                 self.first_target(elem): elem for elem in original_node.body.body if
@@ -180,6 +190,11 @@ class SchemaTransformer(cst.CSTTransformer):
 
             # Remember the original slot order. __tablename__ and __table_args__ are special. it is always the
             # first and 2nd.
+
+            # This is necessary to maintain the order of columns. Some of our tests do not use the column names
+            # in the sql statement so if you change the order, those test data fail to load.
+            # Also, if we ever stop using orig_models.py and use models.py as the old input (we may do so in future)
+            # maintaining the column order is good for easier code review.
             original_slot_order = {
                 "__tablename__": 0,
                 "__table_args__": 1,
@@ -282,6 +297,7 @@ class SchemaTransformer(cst.CSTTransformer):
         return updated_node
 
     def first_target(self, node: cst.CSTNode):
+        """Find the LHS name. If it is targets, use the first one"""
         if is_assign_expr(node):
             if hasattr(node.body[0], 'target'):
                 return node.body[0].target.value
@@ -290,7 +306,15 @@ class SchemaTransformer(cst.CSTTransformer):
         return None
 
     def is_intpk(self, elem: cst.CSTNode):
-        """Find the intpk and print it as so"""
+        """Find the intpk and print it as so.
+        In the orid_models.py, we use this syntax sugar so keep using it.
+
+        It this is a simple assign:
+          and it's annotated
+            and the annotation uses intpk,
+              -> True
+
+        """
         if isinstance(elem, cst.SimpleStatementLine):
             if hasattr(elem.body[0], 'annotation'):
                 for anno in elem.body[0].annotation.children:
@@ -303,9 +327,9 @@ class SchemaTransformer(cst.CSTTransformer):
         return False
 
     def has_comment(self, elem: cst.CSTNode):
-        """commented?"""
+        """commented? The commented line means that the statement's very last comment is not blank comment"""
         if isinstance(elem, cst.SimpleStatementLine):
-            return elem.leading_lines and elem.leading_lines[-1].comment
+            return elem.leading_lines and elem.leading_lines[-1].comment[1:].strip()
         return False
 
     def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.CSTNode:
@@ -340,6 +364,8 @@ class SchemaTransformer(cst.CSTTransformer):
 
         # Assignments do have ards
         if hasattr(rh_new, 'args') and hasattr(rh_old, 'args'):
+            #
+            # This seems not needed
             #
             # foreign_key_constaints = {}
             # simple_indecies = {}
@@ -408,12 +434,17 @@ def find_classes_and_tables(tree: cst.CSTNode):
             tables[node.body[0].targets[0].target.value] = node.body[0]
     return classes, tables
 
+# ================================================================================================================
+
+#
 
 def is_port_open(host: str, port: int):
+    """See the TCP port is open or not"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.settimeout(1)
         result = sock.connect_ex((host, port))
         return result == 0
+
 
 def run_mysql_container(port: int):
     """Start a mysql docker"""
@@ -448,7 +479,7 @@ def load_sql_file(sql_file):
 ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty.
 ERROR:root:Error loading SQL file: Command '['mysql', '--host=127.0.0.1', '-uroot', '-ptestpassword', 'testdb']' returned non-zero exit status 1.
 
-    it means that the sql is alreayd loaded so ignore the error.
+    it means that the sql is already loaded so ignore the error.
 
     """
     with open(sql_file, encoding="utf-8") as sql:
@@ -463,12 +494,17 @@ ERROR:root:Error loading SQL file: Command '['mysql', '--host=127.0.0.1', '-uroo
 
 
 def main() -> None:
+
+    # This is the default mysql port. If you are using a native MySQL, that's fine. If you don't want to install
+    # mysql, it uses the MySQL docker.
     mysql_port = 3306
+
     arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     p_outfile = os.path.join(arxiv_base_dir, "arxiv/db/autogen_models.py")
     db_metadata = os.path.join(arxiv_base_dir, "arxiv/db/arxiv-db-metadata.yaml")
     codegen_dir = os.path.join(arxiv_base_dir, "development/sqlacodegen")
 
+    # If there is no MySQL up and running, start a container
     if not is_port_open("127.0.0.1", mysql_port):
         run_mysql_container(mysql_port)
         for _ in range(20):
@@ -476,6 +512,7 @@ def main() -> None:
                 break
             time.sleep(1)
 
+    # Load the arxiv_db_schema.sql to the database.
     load_sql_file(os.path.join(arxiv_base_dir, "development/arxiv_db_schema.sql"))
 
     p_url = "mysql://testuser:testpassword@127.0.0.1/testdb"
@@ -483,48 +520,63 @@ def main() -> None:
     subprocess.run(['venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile,
                     '--model-metadata', db_metadata], check=True, cwd=arxiv_base_dir)
 
+    # autogen_models.py
     with open(p_outfile, 'r') as src:
         source = src.read()
 
+    # Parse the autogen
     try:
         latest_tree = cst.parse_module(source)
     except Exception as exc:
         logging.error("%s: failed to parse", p_outfile, exc_info=exc)
         exit(1)
 
+    # Traverse the autogen and build the dicts
     latest_classes, latest_tables = find_classes_and_tables(latest_tree)
 
-    with open(os.path.expanduser('arxiv/db/orig_models.py'), encoding='utf-8') as model_fd:
+    # Parse the exiting models
+    with open(os.path.join(arxiv_base_dir, 'arxiv/db/orig_models.py'), encoding='utf-8') as model_fd:
         existing_models = model_fd.read()
     existing_tree = cst.parse_module(existing_models)
 
+    # Also build the dicts for the existing models and tables
     existing_classes, existing_tables = find_classes_and_tables(existing_tree)
 
+    # Warn of tables not mentioned in the existing model. This means the new table added and the
+    # exiting model does not know about it.
     new_classes: [str] = list(set(latest_classes.keys()) - set(existing_classes.keys()))
     new_classes.remove('Base') # base shows up here but Base is imported in existing models.py
     if new_classes:
         logging.warning("NEW CLASSES! Add this to the original")
         for new_class in new_classes:
-            logging.warnind(f"class {new_class}")
+            logging.warning(f"class {new_class}")
 
     new_tables = list(set(latest_tables.keys()) - set(existing_tables.keys()))
     if new_tables:
         logging.warning("NEW TABLES! Add this to the original")
         for new_table in new_tables:
-            logging.warnind(f"class {new_table}")
+            logging.warning(f"class {new_table}")
 
+    # Merge the exiting and latest models
     transformer = SchemaTransformer(latest_classes, latest_tables)
     updated_tree = existing_tree.visit(transformer)
 
-    updated_model = 'arxiv/db/models.py'
-    with open(os.path.expanduser(updated_model), "w", encoding='utf-8') as updated_fd:
+    # Write out the models after the merge
+    updated_model = os.path.join(arxiv_base_dir, 'arxiv/db/models.py')
+    with open(updated_model, "w", encoding='utf-8') as updated_fd:
         updated_fd.write(updated_tree.code)
 
+    # Patch the models with regex
+    # 1. MySQL types are replaced with the generic types.
+    # 2. sqlacodegen and db/models.py import things differently (eg from datatime import datatime)
+    # These can be done with hacking sqlacodegen but decided on the quick-and-dirty.
     with open(updated_model, encoding='utf-8') as updated_fd:
         contents = updated_fd.read()
     contents = patch_mysql_types(contents)
     with open(updated_model, 'w', encoding='utf-8') as updated_fd:
         updated_fd.write(contents)
+
+    # Then, make the code look neat.
     subprocess.run(['black', "-l", "200", updated_model])
 
 

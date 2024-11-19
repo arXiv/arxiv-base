@@ -28,7 +28,6 @@ Subscription_UniversalInstitution:
 
 Subscription_UniversalInstitutionContact:
   class_name: MemberInstitutionContact
-  table_args: drop
   columns:
     sid: "mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)"
   relationships:
@@ -68,21 +67,26 @@ arXiv_bib_updates:
   class_name: BibUpdate
 arXiv_bogus_countries:
   class_name: BogusCountries
+
 arXiv_categories:
   class_name: Category
   relationships:
     arXiv_demographics: ""
     arXiv_archives: ""
-    arXiv_cross_control:
-      arXiv_cross_controls: "relationship('CrossControl', back_populates='arXiv_category')"
+    arXiv_cross_control: ""
     arXiv_categories: ""
     arXiv_endorsement_domains:
       arXiv_endorsement_domain: "relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
-      
+  additional_relationships:
+    - "arXiv_endorsements = relationship('Endorsement', back_populates='arXiv_categories')"
+    - "arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='arXiv_categories')"
+    # - "arXiv_cross_controls = relationship('CrossControl', back_populates='arXiv_category')"
+
 arXiv_questionable_categories:
   class_name: QuestionableCategory
 arXiv_category_def:
   class_name: CategoryDef
+
 arXiv_control_holds:
   class_name: ControlHold
 
@@ -100,12 +104,11 @@ arXiv_cross_control:
 
 arXiv_datacite_dois:
   class_name: DataciteDois
-    
+
 arXiv_dblp_authors:
   class_name: DBLPAuthor
 arXiv_dblp_document_authors:
   class_name: DBLPDocumentAuthor
-  table_args: drop
 
 arXiv_document_category:
   class_name: DocumentCategory
@@ -114,19 +117,19 @@ arXiv_documents:
   class_name: Document
   relationships:
     arXiv_dblp_document_authors: ""
-    arXiv_paper_owners:
-      owners: "relationship('PaperOwner', back_populates='document')"
-    arXiv_cross_control:
-      arXiv_cross_controls: "relationship('CrossControl', back_populates='document')"
+    arXiv_paper_owners: ""
+    arXiv_cross_control: ""
     arXiv_jref_control:
       arXiv_jref_controls: "relationship('JrefControl', back_populates='document')"
+  additional_relationships:
+    - "arXiv_cross_controls = relationship('CrossControl', back_populates='document')"
+    - "owners = relationship('PaperOwner', back_populates='document')"
 
 arXiv_dblp:
   class_name: DBLP
 
 arXiv_paper_pw:
   class_name: PaperPw
-  table_args: drop
   columns:
     document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())"
     password_storage: mapped_column(Integer)
@@ -201,6 +204,7 @@ arXiv_metadata:
     sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions_sowrd')"
 
 arXiv_mirror_list:
+
   class_name: MirrorList
 arXiv_moderator_api_key:
   class_name: ModeratorApiKey
@@ -455,6 +459,40 @@ tapir_users:
       arXiv_cross_controls: "relationship('CrossControl', back_populates='user')"
       
   additional_relationships:
+    - "tapir_address = relationship('TapirAddress', back_populates='user')"
+    - "tapir_email_change_tokens = relationship('TapirEmailChangeToken', back_populates='user')"
+    - "tapir_email_templates = relationship('TapirEmailTemplate', foreign_keys='[TapirEmailTemplate.created_by]', back_populates='tapir_users')"
+    - "tapir_email_templates_ = relationship('TapirEmailTemplate', foreign_keys='[TapirEmailTemplate.updated_by]', back_populates='tapir_users_')"
+    - "tapir_email_tokens = relationship('TapirEmailToken', back_populates='user')"
+    - "tapir_nicknames = relationship('TapirNickname', back_populates='user', uselist=False)"
+    - "tapir_phone = relationship('TapirPhone', back_populates='user')"
+    - "tapir_recovery_tokens = relationship('TapirRecoveryToken', back_populates='user')"
+    - "tapir_sessions = relationship('TapirSession', back_populates='user')"
+    - "arXiv_cross_controls = relationship('CrossControl', back_populates='user')"
+    - "arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='endorsee')"
+    - "arXiv_jref_controls = relationship('JrefControl', back_populates='user')"
+    - "arXiv_metadata = relationship('Metadata', back_populates='submitter')"
+    - "arXiv_show_email_requests = relationship('ShowEmailRequest', back_populates='user')"
+    - "arXiv_submission_control = relationship('SubmissionControl', back_populates='user')"
+    - "arXiv_submissions = relationship('Submission', back_populates='submitter')"
+    - "tapir_admin_audit = relationship('TapirAdminAudit', foreign_keys='[TapirAdminAudit.admin_user]', back_populates='tapir_users')"
+    - "tapir_admin_audit_ = relationship('TapirAdminAudit', foreign_keys='[TapirAdminAudit.affected_user]', back_populates='tapir_users_')"
+    - "tapir_email_mailings = relationship('TapirEmailMailing', foreign_keys='[TapirEmailMailing.created_by]', back_populates='tapir_users')"
+    - "tapir_email_mailings_ = relationship('TapirEmailMailing', foreign_keys='[TapirEmailMailing.sent_by]', back_populates='tapir_users_')"
+    - "tapir_permanent_tokens = relationship('TapirPermanentToken', back_populates='user')"
+    - "tapir_recovery_tokens_used = relationship('TapirRecoveryTokensUsed', back_populates='user')"
+    - "endorsee_of = relationship('Endorsement', foreign_keys='[Endorsement.endorsee_id]', back_populates='endorsee')"
+    - "endorses = relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')"
+    - "arXiv_ownership_requests = relationship('OwnershipRequest', back_populates='user')"
+    - "arXiv_submission_category_proposal = relationship('SubmissionCategoryProposal', back_populates='user')"
+    - "arXiv_submission_flag = relationship('SubmissionFlag', back_populates='user')"
+    - "arXiv_submission_hold_reason = relationship('SubmissionHoldReason', back_populates='user')"
+    - "arXiv_submission_locks: Mapped[List['ArXivSubmissionLocks']] = relationship('ArXivSubmissionLocks', back_populates='user')"
+    - "arXiv_submission_view_flag = relationship('SubmissionViewFlag', back_populates='user')"
+    - "arXiv_check_results: Mapped[List['CheckResults']] = relationship('CheckResults', back_populates='user')"
+    - "arXiv_check_responses: Mapped[List['CheckResponses']] = relationship('CheckResponses', back_populates='user')"
+
+    - "owned_papers = relationship('PaperOwner',  foreign_keys='[PaperOwner.user_id]', back_populates='owner')"
     - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
 
 arXiv_author_ids:
@@ -499,3 +537,46 @@ arXiv_in_category:
 arXiv_moderators:
   indecies:
     - replace: ["Index('user_id'", "Index('mod_user_id'"]
+
+# Student-lead membership dashboard
+membership_institutions:
+  class_name: MembershipInstitutions
+membership_users:
+  class_name: MembershipUsers
+
+# arXiv check from modapi
+
+arXiv_check_roles:
+  class_name: CheckRoles
+  relationships:
+    arXiv_checks: ""
+
+arXiv_check_result_views:
+  class_name: CheckResultViews
+  relationships:
+    arXiv_checks: ""
+
+arXiv_check_targets:
+  class_name: CheckTargets
+  relationships:
+    arXiv_checks: ""
+
+arXiv_checks:
+  class_name: Checks
+  relationships:
+    check_target:
+      target: "relationship('CheckTargets')"
+    check_role:
+      role: "relationship('CheckRoles')"
+    check_result_view:
+      view: "relationship('CheckResultViews')"
+
+arXiv_check_results:
+  class_name: CheckResults
+  table_args: drop
+
+arXiv_check_responses:
+  class_name: CheckResponses
+  table_args: drop
+  
+  

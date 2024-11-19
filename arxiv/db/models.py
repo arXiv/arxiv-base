@@ -27,6 +27,8 @@ from sqlalchemy import (
     Column,
     Date,
     DateTime,
+    Engine,
+    Enum,
     ForeignKey,
     ForeignKeyConstraint,
     Index,
@@ -36,12 +38,11 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     SmallInteger,
     String,
-    Text,
-    Table,
     TIMESTAMP,
-    Enum,
+    Table,
+    Text,
+    func,
     text,
-    Engine,
 )
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -60,6 +61,7 @@ class MemberInstitution(Base):
     """Deprecated - superceded by membership_institutions"""
 
     __tablename__ = "Subscription_UniversalInstitution"
+    __table_args__ = {"mysql_charset": "utf8mb3"}
     resolver_URL: Mapped[Optional[str]] = mapped_column(String(255))
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
@@ -74,10 +76,11 @@ class MemberInstitutionContact(Base):
     """Deprecated - superceded by membership_institution_users"""
 
     __tablename__ = "Subscription_UniversalInstitutionContact"
+    __table_args__ = {"mysql_charset": "utf8mb3"}
     email: Mapped[Optional[str]] = mapped_column(String(255))
 
     sid: Mapped[int] = mapped_column(ForeignKey("Subscription_UniversalInstitution.id", ondelete="CASCADE"), nullable=False, index=True)
-    active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    active: Mapped[Optional[int]] = mapped_column(Integer)
     contact_name: Mapped[Optional[str]] = mapped_column(String(255))
     id: Mapped[intpk]
     phone: Mapped[Optional[str]] = mapped_column(String(255))
@@ -101,6 +104,7 @@ class MemberInstitutionIP(Base):
 
 class AdminLog(Base):
     __tablename__ = "arXiv_admin_log"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     id: Mapped[intpk]
     logtime: Mapped[Optional[str]] = mapped_column(String(24))
@@ -113,26 +117,18 @@ class AdminLog(Base):
     logtext: Mapped[Optional[str]] = mapped_column(Text)
     document_id: Mapped[Optional[int]] = mapped_column(Integer)
     submission_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
-    notify: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-
-    arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship(
-        "SubmissionCategoryProposal", foreign_keys="[SubmissionCategoryProposal.proposal_comment_id]", back_populates="proposal_comment"
-    )
-    arXiv_submission_category_proposal_: Mapped[List["SubmissionCategoryProposal"]] = relationship(
-        "SubmissionCategoryProposal", foreign_keys="[SubmissionCategoryProposal.response_comment_id]", back_populates="response_comment"
-    )
-    arXiv_submission_hold_reason: Mapped[List["SubmissionHoldReason"]] = relationship("SubmissionHoldReason", back_populates="comment")
+    notify: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class AdminMetadata(Base):
     __tablename__ = "arXiv_admin_metadata"
-    __table_args__ = (ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], ondelete="CASCADE", name="meta_doc_fk"), Index("arxiv_admin_pidv", "paper_id", "version", unique=True))
+    __table_args__ = (Index("admin_metadata_pidv", "paper_id", "version"),)
 
     metadata_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    document_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE"), index=True)
+    document_id = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE"), index=True)
     paper_id: Mapped[Optional[str]] = mapped_column(String(64))
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    created: Mapped[Optional[datetime]]
+    updated: Mapped[Optional[datetime]]
     submitter_name: Mapped[Optional[str]] = mapped_column(String(64))
     submitter_email: Mapped[Optional[str]] = mapped_column(String(64))
     history: Mapped[Optional[str]] = mapped_column(Text)
@@ -154,7 +150,7 @@ class AdminMetadata(Base):
     modtime: Mapped[Optional[int]] = mapped_column(Integer)
     is_current: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_admin_metadata")
+    document = relationship("Document", primaryjoin="AdminMetadata.document_id == Document.document_id", backref="arXiv_admin_metadata")
 
 
 t_arXiv_admin_state = Table(
@@ -172,35 +168,38 @@ t_arXiv_admin_state = Table(
 
 class ArchiveCategory(Base):
     __tablename__ = "arXiv_archive_category"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
+    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False)
     category_id: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
 
 
 class ArchiveDef(Base):
     __tablename__ = "arXiv_archive_def"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    archive: Mapped[str] = mapped_column(String(16), primary_key=True, server_default=FetchedValue())
+    archive: Mapped[str] = mapped_column(String(16), primary_key=True)
     name: Mapped[Optional[str]] = mapped_column(String(255))
 
 
 class ArchiveGroup(Base):
     __tablename__ = "arXiv_archive_group"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
-    group_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
+    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False)
+    group_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False)
 
 
 class Archive(Base):
     __tablename__ = "arXiv_archives"
-    __table_args__ = (ForeignKeyConstraint(["in_group"], ["arXiv_groups.group_id"], name="0_576"),)
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, server_default=FetchedValue())
-    in_group: Mapped[str] = mapped_column(ForeignKey("arXiv_groups.group_id"), nullable=False, index=True, server_default=FetchedValue())
-    archive_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    start_date: Mapped[str] = mapped_column(String(4), nullable=False, server_default=FetchedValue())
-    end_date: Mapped[str] = mapped_column(String(4), nullable=False, server_default=FetchedValue())
-    subdivided: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True)
+    in_group: Mapped[str] = mapped_column(ForeignKey("arXiv_groups.group_id"), nullable=False, index=True)
+    archive_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    start_date: Mapped[str] = mapped_column(String(4), nullable=False)
+    end_date: Mapped[str] = mapped_column(String(4), nullable=False)
+    subdivided: Mapped[int] = mapped_column(Integer, nullable=False)
 
     arXiv_categories: Mapped[List["Category"]] = relationship("Category", back_populates="arXiv_archive")
 
@@ -210,6 +209,7 @@ class Archive(Base):
 
 class AwsConfig(Base):
     __tablename__ = "arXiv_aws_config"
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     domain: Mapped[str] = mapped_column(String(75), primary_key=True, nullable=False)
     keyname: Mapped[str] = mapped_column(String(60), primary_key=True, nullable=False)
@@ -218,9 +218,10 @@ class AwsConfig(Base):
 
 class AwsFile(Base):
     __tablename__ = "arXiv_aws_files"
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
-    type: Mapped[str] = mapped_column(String(10), nullable=False, index=True, server_default=FetchedValue())
-    filename: Mapped[str] = mapped_column(String(100), primary_key=True, server_default=FetchedValue())
+    type: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    filename: Mapped[str] = mapped_column(String(100), primary_key=True)
     md5sum: Mapped[Optional[str]] = mapped_column(String(50))
     content_md5sum: Mapped[Optional[str]] = mapped_column(String(50))
     size: Mapped[Optional[int]] = mapped_column(Integer)
@@ -232,34 +233,36 @@ class AwsFile(Base):
     num_items: Mapped[Optional[int]] = mapped_column(Integer)
 
 
-t_arXiv_bad_pw = Table("arXiv_bad_pw", metadata, Column("user_id", ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue()))
+t_arXiv_bad_pw = Table("arXiv_bad_pw", metadata, Column("user_id", ForeignKey("tapir_users.user_id"), nullable=False, index=True))
 
 
 class BibFeed(Base):
     __tablename__ = "arXiv_bib_feeds"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     bib_id: Mapped[intpk]
-    name: Mapped[str] = mapped_column(String(64), nullable=False, server_default=FetchedValue())
-    priority: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False)
     uri: Mapped[Optional[str]] = mapped_column(String(255))
     identifier: Mapped[Optional[str]] = mapped_column(String(255))
     version: Mapped[Optional[str]] = mapped_column(String(255))
-    strip_journal_ref: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    strip_journal_ref: Mapped[int] = mapped_column(Integer, nullable=False)
     concatenate_dupes: Mapped[Optional[int]] = mapped_column(Integer)
     max_updates: Mapped[Optional[int]] = mapped_column(Integer)
     email_errors: Mapped[Optional[str]] = mapped_column(String(255))
     prune_ids: Mapped[Optional[str]] = mapped_column(Text)
     prune_regex: Mapped[Optional[str]] = mapped_column(Text)
-    enabled: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    enabled: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class BibUpdate(Base):
     __tablename__ = "arXiv_bib_updates"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     update_id: Mapped[intpk]
-    document_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    bib_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
+    document_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    bib_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     journal_ref: Mapped[Optional[str]] = mapped_column(Text)
     doi: Mapped[Optional[str]] = mapped_column(Text)
 
@@ -272,9 +275,10 @@ t_arXiv_block_email = Table("arXiv_block_email", metadata, Column("pattern", Str
 
 class BogusCountries(Base):
     __tablename__ = "arXiv_bogus_countries"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    user_id: Mapped[int] = mapped_column(Integer, primary_key=True, server_default=FetchedValue())
-    country_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
+    user_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    country_name: Mapped[str] = mapped_column(String(255), nullable=False)
 
 
 t_arXiv_bogus_subject_class = Table(
@@ -287,14 +291,11 @@ t_arXiv_bogus_subject_class = Table(
 
 class Category(Base):
     __tablename__ = "arXiv_categories"
-    __table_args__ = (
-        ForeignKeyConstraint(["archive"], ["arXiv_archives.archive_id"], name="0_578"),
-        ForeignKeyConstraint(["endorsement_domain"], ["arXiv_endorsement_domains.endorsement_domain"], name="0_753"),
-    )
+    __table_args__ = {"mysql_charset": "latin1"}
 
     # link to arXiv_archive
     archive: Mapped[str] = mapped_column(ForeignKey("arXiv_archives.archive_id"), primary_key=True, nullable=False, server_default=FetchedValue())
-    subject_class: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
+    subject_class: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False)
     definitive: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     active: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     category_name: Mapped[Optional[str]] = mapped_column(String(255))
@@ -302,13 +303,12 @@ class Category(Base):
     endorse_email: Mapped[Literal["y", "n", "d"]] = mapped_column(Enum("y", "n", "d"), nullable=False, server_default=text("'d'"))
     papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     endorsement_domain: Mapped[Optional[str]] = mapped_column(ForeignKey("arXiv_endorsement_domains.endorsement_domain"), index=True)
-    arXiv_endorsements: Mapped[List["Endorsement"]] = relationship("Endorsement", back_populates="arXiv_categories")
+    arXiv_endorsements = relationship("Endorsement", back_populates="arXiv_categories")
 
     arXiv_endorsement_domain: Mapped["EndorsementDomain"] = relationship(
         "EndorsementDomain", primaryjoin="Category.endorsement_domain == EndorsementDomain.endorsement_domain", back_populates="arXiv_categories"
     )
-    arXiv_endorsement_requests: Mapped[List["EndorsementRequest"]] = relationship("EndorsementRequest", back_populates="arXiv_categories")
-    arXiv_cross_controls: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="arXiv_category")
+    arXiv_endorsement_requests = relationship("EndorsementRequest", back_populates="arXiv_categories")
 
     # link to category
     arXiv_archive = relationship("Archive", primaryjoin="Category.archive == Archive.archive_id", back_populates="arXiv_categories")
@@ -316,7 +316,7 @@ class Category(Base):
 
 class QuestionableCategory(Category):
     __tablename__ = "arXiv_questionable_categories"
-    __table_args__ = (ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"], name="0_756"),)
+    __table_args__ = (ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]),)
 
     archive: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
     subject_class: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -324,33 +324,24 @@ class QuestionableCategory(Category):
 
 class CategoryDef(Base):
     __tablename__ = "arXiv_category_def"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     category: Mapped[str] = mapped_column(String(32), primary_key=True)
     name: Mapped[Optional[str]] = mapped_column(String(255))
-    active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-
-    arXiv_document_category: Mapped[List["DocumentCategory"]] = relationship("DocumentCategory", back_populates="arXiv_category_def")
-    arXiv_submission_category: Mapped[List["SubmissionCategory"]] = relationship("SubmissionCategory", back_populates="arXiv_category_def")
-    arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship("SubmissionCategoryProposal", back_populates="arXiv_category_def")
+    active: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class ControlHold(Base):
     __tablename__ = "arXiv_control_holds"
-    __table_args__ = (
-        ForeignKeyConstraint(["last_changed_by"], ["tapir_users.user_id"], name="arXiv_control_holds_ibfk_2"),
-        ForeignKeyConstraint(["placed_by"], ["tapir_users.user_id"], name="arXiv_control_holds_ibfk_1"),
-        Index("control_id", "control_id", "hold_type", unique=True),
-    )
+    __table_args__ = (Index("control_id", "control_id", "hold_type", unique=True), {"mysql_charset": "latin1"})
 
     hold_id: Mapped[intpk]
-    control_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    hold_type: Mapped[Literal["submission", "cross", "jref"]] = mapped_column(Enum("submission", "cross", "jref"), nullable=False, index=True, server_default=FetchedValue())
-    hold_status: Mapped[Literal["held", "extended", "accepted", "rejected"]] = mapped_column(
-        Enum("held", "extended", "accepted", "rejected"), nullable=False, index=True, server_default=FetchedValue()
-    )
-    hold_reason: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
-    hold_data: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    origin: Mapped[Literal["auto", "user", "admin", "moderator"]] = mapped_column(Enum("auto", "user", "admin", "moderator"), nullable=False, index=True, server_default=FetchedValue())
+    control_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    hold_type: Mapped[Literal["submission", "cross", "jref"]] = mapped_column(Enum("submission", "cross", "jref"), nullable=False, index=True)
+    hold_status: Mapped[Literal["held", "extended", "accepted", "rejected"]] = mapped_column(Enum("held", "extended", "accepted", "rejected"), nullable=False, index=True)
+    hold_reason: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    hold_data: Mapped[str] = mapped_column(String(255), nullable=False)
+    origin: Mapped[Literal["auto", "user", "admin", "moderator"]] = mapped_column(Enum("auto", "user", "admin", "moderator"), nullable=False, index=True)
     placed_by: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
     last_changed_by: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
 
@@ -361,10 +352,9 @@ class ControlHold(Base):
 class CrossControl(Base):
     __tablename__ = "arXiv_cross_control"
     __table_args__ = (
-        ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"], name="arXiv_cross_control_ibfk_2"),
-        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_cross_control_ibfk_1"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_cross_control_ibfk_3"),
+        ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]),
         Index("document_id", "document_id", "version"),
+        Index("archive", "archive", "subject_class"),
     )
 
     control_id: Mapped[intpk]
@@ -380,16 +370,14 @@ class CrossControl(Base):
     freeze_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_category: Mapped["Category"] = relationship(
-        "Category", primaryjoin="and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)", back_populates="arXiv_cross_controls"
-    )
-    document: Mapped["Document"] = relationship("Document", primaryjoin="CrossControl.document_id == Document.document_id", back_populates="arXiv_cross_controls")
-    user: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="CrossControl.user_id == TapirUser.user_id", back_populates="arXiv_cross_controls")
+    arXiv_category = relationship("Category", primaryjoin="and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)", backref="arXiv_cross_controls")
+    document = relationship("Document", primaryjoin="CrossControl.document_id == Document.document_id", back_populates="arXiv_cross_controls")
+    user = relationship("TapirUser", primaryjoin="CrossControl.user_id == TapirUser.user_id", back_populates="arXiv_cross_controls")
 
 
 class DataciteDois(Base):
     __tablename__ = "arXiv_datacite_dois"
-    __table_args__ = (ForeignKeyConstraint(["metadata_id"], ["arXiv_metadata.metadata_id"], name="arXiv_datacite_dois_ibfk_1"), Index("account_paper_id", "account", "paper_id", unique=True))
+    __table_args__ = (Index("account_paper_id", "account", "paper_id"),)
 
     doi: Mapped[str] = mapped_column(String(255), primary_key=True)
     account: Mapped[Optional[Literal["test", "prod"]]] = mapped_column(Enum("test", "prod"))
@@ -398,7 +386,7 @@ class DataciteDois(Base):
     created: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
     updated: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
 
-    metadata_: Mapped["Metadata"] = relationship("Metadata", back_populates="arXiv_datacite_dois")
+    metadata_ = relationship("Metadata", primaryjoin="DataciteDois.metadata_id == Metadata.metadata_id", backref="arXiv_datacite_dois")
 
 
 class DBLPAuthor(Base):
@@ -416,6 +404,7 @@ class DBLPDocumentAuthor(Base):
 
     # join with author
     author_id: Mapped[int] = mapped_column(ForeignKey("arXiv_dblp_authors.author_id"), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
+
     position: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
     # join with dblp author
@@ -427,28 +416,24 @@ class DBLPDocumentAuthor(Base):
 
 class DocumentCategory(Base):
     __tablename__ = "arXiv_document_category"
-    __table_args__ = (
-        ForeignKeyConstraint(["category"], ["arXiv_category_def.category"], name="doc_cat_cat"),
-        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], ondelete="CASCADE", name="doc_cat_doc"),
-    )
 
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE"), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
-    category: Mapped[str] = mapped_column(ForeignKey("arXiv_category_def.category"), primary_key=True, nullable=False, index=True)
+    category = mapped_column(ForeignKey("arXiv_category_def.category"), primary_key=True, nullable=False, index=True)
     is_primary: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_category_def: Mapped["CategoryDef"] = relationship("CategoryDef", back_populates="arXiv_document_category")
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_document_category")
+    arXiv_category_def: Mapped[Optional[str]] = relationship("CategoryDef", primaryjoin="DocumentCategory.category == CategoryDef.category", backref="arXiv_document_categories")
+    document = relationship("Document", primaryjoin="DocumentCategory.document_id == Document.document_id", backref="arXiv_document_categories")
 
 
 class Document(Base):
     __tablename__ = "arXiv_documents"
-    __table_args__ = (ForeignKeyConstraint(["submitter_id"], ["tapir_users.user_id"], name="0_580"),)
+    __table_args__ = {"mysql_charset": "latin1"}
 
     document_id: Mapped[intpk]
-    paper_id: Mapped[str] = mapped_column(String(20), nullable=False, index=True, server_default=FetchedValue())
-    title: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
+    paper_id: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     authors: Mapped[Optional[str]] = mapped_column(Text)
-    submitter_email: Mapped[str] = mapped_column(String(64), nullable=False, index=True, server_default=FetchedValue())
+    submitter_email: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
     dated: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     primary_subject_class: Mapped[Optional[str]] = mapped_column(String(16))
@@ -456,23 +441,12 @@ class Document(Base):
 
     # join it with user to get the user info
     submitter = relationship("TapirUser", primaryjoin="Document.submitter_id == TapirUser.user_id", back_populates="arXiv_documents")
-    owners: Mapped[List["PaperOwner"]] = relationship("PaperOwner", back_populates="document")
-    arXiv_cross_controls: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="document")
-    arXiv_admin_metadata: Mapped[List["AdminMetadata"]] = relationship("AdminMetadata", back_populates="document")
-    arXiv_document_category: Mapped[List["DocumentCategory"]] = relationship("DocumentCategory", back_populates="document")
-    arXiv_jref_controls: Mapped[List["JrefControl"]] = relationship("JrefControl", back_populates="document")
-    arXiv_metadata: Mapped[List["Metadata"]] = relationship("Metadata", back_populates="document")
-    arXiv_mirror_list: Mapped[List["MirrorList"]] = relationship("MirrorList", back_populates="document")
-    arXiv_show_email_requests: Mapped[List["ShowEmailRequest"]] = relationship("ShowEmailRequest", back_populates="document")
-    arXiv_submission_control: Mapped[List["SubmissionControl"]] = relationship("SubmissionControl", back_populates="document")
-    arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="document")
-    arXiv_top_papers: Mapped[List["TopPaper"]] = relationship("TopPaper", back_populates="document")
-    arXiv_versions: Mapped[List["Version"]] = relationship("Version", back_populates="document")
+    owners = relationship("PaperOwner", back_populates="document")
+    arXiv_cross_controls = relationship("CrossControl", back_populates="document")
 
 
 class DBLP(Document):
     __tablename__ = "arXiv_dblp"
-    __table_args__ = (ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_DBLP_cdfk1"),)
 
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), primary_key=True, server_default=FetchedValue())
     url: Mapped[Optional[str]] = mapped_column(String(80))
@@ -487,22 +461,19 @@ class PaperPw(Document):
 
 
 t_arXiv_duplicates = Table(
-    "arXiv_duplicates",
-    metadata,
-    Column("user_id", ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue()),
-    Column("email", String(255)),
-    Column("username", String(255)),
+    "arXiv_duplicates", metadata, Column("user_id", ForeignKey("tapir_users.user_id"), nullable=False, index=True), Column("email", String(255)), Column("username", String(255))
 )
 
 
 class EndorsementDomain(Base):
     __tablename__ = "arXiv_endorsement_domains"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    endorsement_domain: Mapped[str] = mapped_column(String(32), primary_key=True, server_default=FetchedValue())
-    endorse_all: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
-    mods_endorse_all: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
-    endorse_email: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False, server_default=FetchedValue())
-    papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    endorsement_domain: Mapped[str] = mapped_column(String(32), primary_key=True)
+    endorse_all: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False)
+    mods_endorse_all: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False)
+    endorse_email: Mapped[Literal["y", "n"]] = mapped_column(Enum("y", "n"), nullable=False)
+    papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False)
 
     arXiv_categories: Mapped[List["Category"]] = relationship("Category", back_populates="arXiv_endorsement_domain")
 
@@ -510,32 +481,29 @@ class EndorsementDomain(Base):
 class EndorsementRequest(Base):
     __tablename__ = "arXiv_endorsement_requests"
     __table_args__ = (
-        ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"], name="0_723"),
-        ForeignKeyConstraint(["endorsee_id"], ["tapir_users.user_id"], name="0_722"),
-        Index("endorsee_id_2", "endorsee_id", "archive", "subject_class", unique=True),
+        ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]),
+        Index("endorsee_id_2", "endorsee_id", "archive", "subject_class"),
     )
 
     request_id: Mapped[intpk]
     endorsee_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
     archive: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     subject_class: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
-    secret: Mapped[str] = mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())
+    secret: Mapped[str] = mapped_column(String(16), nullable=False, unique=True, server_default=FetchedValue())
     flag_valid: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     issued_when: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     point_value: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    arXiv_categories: Mapped["Category"] = relationship(
+    arXiv_categories = relationship(
         "Category", primaryjoin="and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)", back_populates="arXiv_endorsement_requests"
     )
-    endorsee: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="EndorsementRequest.endorsee_id == TapirUser.user_id", back_populates="arXiv_endorsement_requests", uselist=False)
-    endorsement: Mapped["Endorsement"] = relationship("Endorsement", back_populates="request", uselist=False)
+    endorsee = relationship("TapirUser", primaryjoin="EndorsementRequest.endorsee_id == TapirUser.user_id", back_populates="arXiv_endorsement_requests", uselist=False)
+    endorsement = relationship("Endorsement", back_populates="request", uselist=False)
     audit = relationship("EndorsementRequestsAudit", uselist=False)
-    arXiv_ownership_requests: Mapped[List["OwnershipRequest"]] = relationship("OwnershipRequest", back_populates="endorsement_request")
 
 
 class EndorsementRequestsAudit(EndorsementRequest):
     __tablename__ = "arXiv_endorsement_requests_audit"
-    __table_args__ = (ForeignKeyConstraint(["request_id"], ["arXiv_endorsement_requests.request_id"], name="0_725"),)
 
     request_id: Mapped[int] = mapped_column(ForeignKey("arXiv_endorsement_requests.request_id"), primary_key=True, server_default=FetchedValue())
     session_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -547,11 +515,9 @@ class EndorsementRequestsAudit(EndorsementRequest):
 class Endorsement(Base):
     __tablename__ = "arXiv_endorsements"
     __table_args__ = (
-        ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"], name="0_729"),
-        ForeignKeyConstraint(["endorsee_id"], ["tapir_users.user_id"], name="0_728"),
-        ForeignKeyConstraint(["endorser_id"], ["tapir_users.user_id"], name="0_727"),
-        ForeignKeyConstraint(["request_id"], ["arXiv_endorsement_requests.request_id"], name="0_730"),
-        Index("endorser_id_2", "endorser_id", "endorsee_id", "archive", "subject_class", unique=True),
+        ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]),
+        Index("endorsement_archive", "archive", "subject_class"),
+        Index("endorser_id_2", "endorser_id", "endorsee_id", "archive", "subject_class"),
     )
 
     endorsement_id: Mapped[intpk]
@@ -565,15 +531,14 @@ class Endorsement(Base):
     issued_when: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     request_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_endorsement_requests.request_id"), index=True)
 
-    arXiv_categories: Mapped["Category"] = relationship("Category", back_populates="arXiv_endorsements")
-    endorsee: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Endorsement.endorsee_id == TapirUser.user_id", back_populates="endorsee_of")
-    endorser: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Endorsement.endorser_id == TapirUser.user_id", back_populates="endorses")
-    request: Mapped["EndorsementRequest"] = relationship("EndorsementRequest", back_populates="endorsement")
+    arXiv_categories = relationship("Category", primaryjoin="and_(Endorsement.archive == Category.archive, Endorsement.subject_class == Category.subject_class)", back_populates="arXiv_endorsements")
+    endorsee = relationship("TapirUser", primaryjoin="Endorsement.endorsee_id == TapirUser.user_id", back_populates="endorsee_of")
+    endorser = relationship("TapirUser", primaryjoin="Endorsement.endorser_id == TapirUser.user_id", back_populates="endorses")
+    request = relationship("EndorsementRequest", primaryjoin="Endorsement.request_id == EndorsementRequest.request_id", back_populates="endorsement")
 
 
 class EndorsementsAudit(Endorsement):
     __tablename__ = "arXiv_endorsements_audit"
-    __table_args__ = (ForeignKeyConstraint(["endorsement_id"], ["arXiv_endorsements.endorsement_id"], name="0_732"),)
 
     endorsement_id: Mapped[int] = mapped_column(ForeignKey("arXiv_endorsements.endorsement_id"), primary_key=True, server_default=FetchedValue())
     session_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -587,23 +552,26 @@ class EndorsementsAudit(Endorsement):
 
 class FreezeLog(Base):
     __tablename__ = "arXiv_freeze_log"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    date: Mapped[int] = mapped_column(Integer, primary_key=True, server_default=FetchedValue())
+    date: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class GroupDef(Base):
     __tablename__ = "arXiv_group_def"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    archive_group: Mapped[str] = mapped_column(String(16), primary_key=True, server_default=FetchedValue())
+    archive_group: Mapped[str] = mapped_column(String(16), primary_key=True)
     name: Mapped[Optional[str]] = mapped_column(String(255))
 
 
 class Group(Base):
     __tablename__ = "arXiv_groups"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    group_id: Mapped[str] = mapped_column(String(16), primary_key=True, server_default=FetchedValue())
-    group_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    start_year: Mapped[str] = mapped_column(String(4), nullable=False, server_default=FetchedValue())
+    group_id: Mapped[str] = mapped_column(String(16), primary_key=True)
+    group_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    start_year: Mapped[str] = mapped_column(String(4), nullable=False)
 
     arXiv_archives: Mapped[List["Archive"]] = relationship("Archive", back_populates="arXiv_group")
 
@@ -615,19 +583,15 @@ t_arXiv_in_category = Table(
     Column("archive", String(16), nullable=False, server_default=FetchedValue()),
     Column("subject_class", String(16), nullable=False, server_default=FetchedValue()),
     Column("is_primary", Integer, nullable=False, server_default=FetchedValue()),
-    ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"], name="0_583"),
+    ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]),
+    Index("in_cat_archive", "archive", "subject_class", "document_id"),
     Index("arXiv_in_category_mp", "archive", "subject_class"),
-    Index("archive", "archive", "subject_class", "document_id", unique=True),
 )
 
 
 class JrefControl(Base):
     __tablename__ = "arXiv_jref_control"
-    __table_args__ = (
-        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_jref_control_ibfk_1"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_jref_control_ibfk_2"),
-        Index("jref_ctrl_document_id", "document_id", "version", unique=True),
-    )
+    __table_args__ = (Index("jref_ctrl_document_id", "document_id", "version"),)
 
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, server_default=FetchedValue())
@@ -640,49 +604,44 @@ class JrefControl(Base):
     freeze_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_jref_controls")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_jref_controls")
+    document = relationship("Document", primaryjoin="JrefControl.document_id == Document.document_id", backref="arXiv_jref_controls")
+    user = relationship("TapirUser", primaryjoin="JrefControl.user_id == TapirUser.user_id", back_populates="arXiv_jref_controls")
 
 
 class License(Base):
     __tablename__ = "arXiv_licenses"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     name: Mapped[str] = mapped_column(String(255), primary_key=True)
     label: Mapped[Optional[str]] = mapped_column(String(255))
-    active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    active: Mapped[Optional[int]] = mapped_column(Integer)
     note: Mapped[Optional[str]] = mapped_column(String(400))
     sequence: Mapped[Optional[int]] = mapped_column(Integer)
-
-    arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="arXiv_license")
 
 
 class LogPosition(Base):
     __tablename__ = "arXiv_log_positions"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    id: Mapped[str] = mapped_column(String(255), primary_key=True, server_default=FetchedValue())
+    id: Mapped[str] = mapped_column(String(255), primary_key=True)
     position: Mapped[Optional[int]] = mapped_column(Integer)
     date: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class Metadata(Base):
     __tablename__ = "arXiv_metadata"
-    __table_args__ = (
-        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], ondelete="CASCADE", onupdate="CASCADE", name="arXiv_metadata_fk_document_id"),
-        ForeignKeyConstraint(["license"], ["arXiv_licenses.name"], name="arXiv_metadata_fk_license"),
-        ForeignKeyConstraint(["submitter_id"], ["tapir_users.user_id"], name="arXiv_metadata_fk_submitter_id"),
-        Index("pidv", "paper_id", "version", unique=True),
-    )
+    __table_args__ = (Index("pidv", "paper_id", "version"),)
 
     metadata_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False, index=True, server_default=FetchedValue())
     paper_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    created: Mapped[Optional[datetime]]
+    updated: Mapped[Optional[datetime]]
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
     submitter_name: Mapped[str] = mapped_column(String(64), nullable=False)
     submitter_email: Mapped[str] = mapped_column(String(64), nullable=False)
     source_size: Mapped[Optional[int]] = mapped_column(Integer)
-    source_format: Mapped[Optional[SOURCE_FORMAT]] = mapped_column(String(12))
+    source_format: Mapped[Optional[Literal["tex", "ps", "html", "pdf", "withdrawn", "pdftex", "docx"]]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
     title: Mapped[Optional[str]] = mapped_column(Text)
     authors: Mapped[Optional[str]] = mapped_column(Text)
@@ -701,39 +660,37 @@ class Metadata(Base):
     is_current: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     is_withdrawn: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", primaryjoin="Metadata.document_id == Document.document_id", back_populates="arXiv_metadata")
-    submitter: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Metadata.submitter_id == TapirUser.user_id", back_populates="arXiv_metadata")
-    arXiv_datacite_dois: Mapped[List["DataciteDois"]] = relationship("DataciteDois", back_populates="metadata_")
+    document = relationship("Document", primaryjoin="Metadata.document_id == Document.document_id", backref="arXiv_metadata")
     # Link to the license
     arXiv_license = relationship("License", primaryjoin="Metadata.license == License.name", backref="arXiv_metadata")
+    submitter = relationship("TapirUser", primaryjoin="Metadata.submitter_id == TapirUser.user_id", back_populates="arXiv_metadata")
 
 
 class MirrorList(Base):
     __tablename__ = "arXiv_mirror_list"
-    __table_args__ = (ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_mirror_list_fk_document_id"),)
 
     mirror_list_id: Mapped[intpk]
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    created: Mapped[Optional[datetime]]
+    updated: Mapped[Optional[datetime]]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, index=True, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     write_source: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     write_abs: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     is_written: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_mirror_list")
+    document = relationship("Document", primaryjoin="MirrorList.document_id == Document.document_id", backref="arXiv_mirror_lists")
 
 
 class ModeratorApiKey(Base):
     __tablename__ = "arXiv_moderator_api_key"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_moderator_api_key_ibfk_1"),)
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
-    secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
-    valid: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    issued_when: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    issued_to: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
-    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
+    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False)
+    secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+    valid: Mapped[int] = mapped_column(Integer, nullable=False)
+    issued_when: Mapped[int] = mapped_column(Integer, nullable=False)
+    issued_to: Mapped[str] = mapped_column(String(16), nullable=False)
+    remote_host: Mapped[str] = mapped_column(String(255), nullable=False)
 
     user: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="ModeratorApiKey.user_id == TapirUser.user_id", back_populates="arXiv_moderator_api_keys")
 
@@ -749,54 +706,58 @@ t_arXiv_moderators = Table(
     Column("no_web_email", Integer, index=True, server_default=FetchedValue()),
     Column("no_reply_to", Integer, index=True, server_default=FetchedValue()),
     Column("daily_update", Integer, server_default=FetchedValue()),
-    ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"], name="0_591"),
-    Index("mod_user_id", "archive", "subject_class", "user_id", unique=True),
+    ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]),
+    Index("mod_user_id", "archive", "subject_class", "user_id"),
 )
 
 
 class MonitorKlog(Base):
     __tablename__ = "arXiv_monitor_klog"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    t: Mapped[int] = mapped_column(Integer, primary_key=True, server_default=FetchedValue())
+    t: Mapped[int] = mapped_column(Integer, primary_key=True)
     sent: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class MonitorMailq(Base):
     __tablename__ = "arXiv_monitor_mailq"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    t: Mapped[int] = mapped_column(Integer, primary_key=True, server_default=FetchedValue())
-    main_q: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    local_q: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    local_host_map: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    local_timeout: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    local_refused: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    local_in_flight: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    t: Mapped[int] = mapped_column(Integer, primary_key=True)
+    main_q: Mapped[int] = mapped_column(Integer, nullable=False)
+    local_q: Mapped[int] = mapped_column(Integer, nullable=False)
+    local_host_map: Mapped[int] = mapped_column(Integer, nullable=False)
+    local_timeout: Mapped[int] = mapped_column(Integer, nullable=False)
+    local_refused: Mapped[int] = mapped_column(Integer, nullable=False)
+    local_in_flight: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class MonitorMailsent(Base):
     __tablename__ = "arXiv_monitor_mailsent"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    t: Mapped[int] = mapped_column(Integer, primary_key=True, server_default=FetchedValue())
+    t: Mapped[int] = mapped_column(Integer, primary_key=True)
     sent: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class NextMail(Base):
     __tablename__ = "arXiv_next_mail"
-    __table_args__ = (Index("arXiv_next_mail_idx_document_id_version", "document_id", "version"),)
+    __table_args__ = (Index("arXiv_next_mail_idx_document_id_version", "document_id", "version"), {"mysql_charset": "latin1"})
 
     next_mail_id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    document_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    document_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     paper_id: Mapped[Optional[str]] = mapped_column(String(20))
-    version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    type: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    type: Mapped[str] = mapped_column(String(255), nullable=False)
     extra: Mapped[Optional[str]] = mapped_column(String(255))
     mail_id: Mapped[Optional[str]] = mapped_column(String(6))
-    is_written: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    is_written: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class OrcidConfig(Base):
     __tablename__ = "arXiv_orcid_config"
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     domain: Mapped[str] = mapped_column(String(75), primary_key=True, nullable=False)
     keyname: Mapped[str] = mapped_column(String(60), primary_key=True, nullable=False)
@@ -819,12 +780,10 @@ class OwnershipRequest(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
     endorsement_request_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_endorsement_requests.request_id"), index=True)
     workflow_status: Mapped[Literal["pending", "accepted", "rejected"]] = mapped_column(Enum("pending", "accepted", "rejected"), nullable=False, server_default=FetchedValue())
-    request_audit = relationship("OwnershipRequestsAudit", back_populates="ownership_request", uselist=False)
 
-    endorsement_request: Mapped["EndorsementRequest"] = relationship(
-        "EndorsementRequest", primaryjoin="OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id", back_populates="arXiv_ownership_requests"
-    )
-    user: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="OwnershipRequest.user_id == TapirUser.user_id", back_populates="arXiv_ownership_requests")
+    request_audit = relationship("OwnershipRequestsAudit", back_populates="ownership_request", uselist=False)
+    endorsement_request = relationship("EndorsementRequest", primaryjoin="OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id", backref="arXiv_ownership_requests")
+    user = relationship("TapirUser", primaryjoin="OwnershipRequest.user_id == TapirUser.user_id", back_populates="arXiv_ownership_requests")
     documents = relationship("Document", secondary=t_arXiv_ownership_requests_papers)
 
 
@@ -843,38 +802,45 @@ class OwnershipRequestsAudit(Base):
 
 class PaperOwner(Base):
     __tablename__ = "arXiv_paper_owners"
-    __table_args__ = (ForeignKeyConstraint(["added_by"], ["tapir_users.user_id"], name="0_595"), PrimaryKeyConstraint("document_id", "user_id"))
+    __table_args__ = (
+        ForeignKeyConstraint(["added_by"], ["tapir_users.user_id"], name="0_595"),
+        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="0_593"),
+        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_594"),
+        Index("added_by", "added_by"),
+        # Index('document_id', 'document_id', 'user_id', unique=True),
+        # Index('user_id', 'user_id'),
+    )
 
-    document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"))
+    document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True)
     date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    added_by: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=text("'0'"))
+    added_by: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("''"))
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=text("''"))
     tracking_cookie: Mapped[str] = mapped_column(String(32), nullable=False, server_default=text("''"))
-    valid: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    flag_author: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    flag_auto: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
+    valid: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_author: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_auto: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
 
-    document: Mapped["Document"] = relationship("Document", back_populates="owners")
+    document = relationship("Document", back_populates="owners")
     owner = relationship("TapirUser", foreign_keys="[PaperOwner.user_id]", back_populates="owned_papers")
 
 
 class PaperSession(Base):
     __tablename__ = "arXiv_paper_sessions"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     paper_session_id: Mapped[intpk]
-    paper_id: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
-    start_time: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    end_time: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    ip_name: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
+    paper_id: Mapped[str] = mapped_column(String(16), nullable=False)
+    start_time: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_time: Mapped[int] = mapped_column(Integer, nullable=False)
+    ip_name: Mapped[str] = mapped_column(String(16), nullable=False)
 
 
 class PilotFile(Base):
     """arXiv_pilot is deprecated"""
 
     __tablename__ = "arXiv_pilot_files"
-    __table_args__ = (ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], name="arXiv_pilot_files_cdfk3"),)
 
     file_id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
@@ -883,13 +849,14 @@ class PilotFile(Base):
     description: Mapped[Optional[str]] = mapped_column(String(80))
     byRef: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
 
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_pilot_files")
+    submission = relationship("Submission", primaryjoin="PilotFile.submission_id == Submission.submission_id", backref="arXiv_pilot_files")
 
 
 class PublishLog(Base):
     __tablename__ = "arXiv_publish_log"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    date: Mapped[int] = mapped_column(Integer, primary_key=True, server_default=FetchedValue())
+    date: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 t_arXiv_refresh_list = Table("arXiv_refresh_list", metadata, Column("filename", String(255)), Column("mtime", Integer, index=True))
@@ -897,12 +864,14 @@ t_arXiv_refresh_list = Table("arXiv_refresh_list", metadata, Column("filename", 
 
 class RejectSessionUsername(Base):
     __tablename__ = "arXiv_reject_session_usernames"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    username: Mapped[str] = mapped_column(String(64), primary_key=True, server_default=FetchedValue())
+    username: Mapped[str] = mapped_column(String(64), primary_key=True)
 
 
 class SciencewisePing(Base):
     __tablename__ = "arXiv_sciencewise_pings"
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     paper_id_v: Mapped[str] = mapped_column(String(32), primary_key=True)
     updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -910,11 +879,7 @@ class SciencewisePing(Base):
 
 class ShowEmailRequest(Base):
     __tablename__ = "arXiv_show_email_requests"
-    __table_args__ = (
-        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_show_email_requests_ibfk_1"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_show_email_requests_ibfk_2"),
-        Index("email_reqs_user_id", "user_id", "dated"),
-    )
+    __table_args__ = (Index("email_reqs_user_id", "user_id", "dated"),)
 
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, index=True, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, server_default=FetchedValue())
@@ -926,12 +891,13 @@ class ShowEmailRequest(Base):
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     request_id: Mapped[intpk]
 
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_show_email_requests")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_show_email_requests")
+    document = relationship("Document", primaryjoin="ShowEmailRequest.document_id == Document.document_id", backref="arXiv_show_email_requests")
+    user = relationship("TapirUser", primaryjoin="ShowEmailRequest.user_id == TapirUser.user_id", back_populates="arXiv_show_email_requests")
 
 
 class State(Base):
     __tablename__ = "arXiv_state"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     id: Mapped[intpk]
     name: Mapped[Optional[str]] = mapped_column(String(24))
@@ -951,6 +917,7 @@ t_arXiv_stats_hourly = Table(
 
 class StatsMonthlyDownload(Base):
     __tablename__ = "arXiv_stats_monthly_downloads"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     ym: Mapped[dt.date] = mapped_column(Date, primary_key=True)
     downloads: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -958,48 +925,37 @@ class StatsMonthlyDownload(Base):
 
 class StatsMonthlySubmission(Base):
     __tablename__ = "arXiv_stats_monthly_submissions"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    ym: Mapped[dt.date] = mapped_column(Date, primary_key=True, server_default=FetchedValue())
+    ym: Mapped[dt.date] = mapped_column(Date, primary_key=True)
     num_submissions: Mapped[int] = mapped_column(Integer, nullable=False)
-    historical_delta: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    historical_delta: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class SubmissionAgreement(Base):
     __tablename__ = "arXiv_submission_agreements"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     agreement_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    effective_date: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
+    effective_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
     commit_ref: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[Optional[str]] = mapped_column(Text)
-
-    arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="agreement")
 
 
 class SubmissionCategory(Base):
     __tablename__ = "arXiv_submission_category"
-    __table_args__ = (
-        ForeignKeyConstraint(["category"], ["arXiv_category_def.category"], name="arXiv_submission_category_fk_category"),
-        ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", onupdate="CASCADE", name="arXiv_submission_category_fk_submission_id"),
-    )
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True, nullable=False, index=True)
     category: Mapped[str] = mapped_column(ForeignKey("arXiv_category_def.category"), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
     is_primary: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     is_published: Mapped[Optional[int]] = mapped_column(Integer, index=True, server_default=FetchedValue())
 
-    arXiv_category_def: Mapped["CategoryDef"] = relationship("CategoryDef", back_populates="arXiv_submission_category")
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_category")
+    arXiv_category_def = relationship("CategoryDef", primaryjoin="SubmissionCategory.category == CategoryDef.category", backref="arXiv_submission_categories")
+    submission = relationship("Submission", primaryjoin="SubmissionCategory.submission_id == Submission.submission_id", backref="arXiv_submission_categories")
 
 
 class SubmissionCategoryProposal(Base):
     __tablename__ = "arXiv_submission_category_proposal"
-    __table_args__ = (
-        ForeignKeyConstraint(["category"], ["arXiv_category_def.category"], name="arXiv_submission_category_proposal_fk_category"),
-        ForeignKeyConstraint(["proposal_comment_id"], ["arXiv_admin_log.id"], name="arXiv_submission_category_proposal_fk_prop_comment_id"),
-        ForeignKeyConstraint(["response_comment_id"], ["arXiv_admin_log.id"], name="arXiv_submission_category_proposal_fk_resp_comment_id"),
-        ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", onupdate="CASCADE", name="arXiv_submission_category_proposal_fk_submission_id"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_submission_category_proposal_fk_user_id"),
-    )
 
     proposal_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True, nullable=False, index=True)
@@ -1007,24 +963,20 @@ class SubmissionCategoryProposal(Base):
     is_primary: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True, server_default=FetchedValue())
     proposal_status: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    updated: Mapped[Optional[datetime]]
     proposal_comment_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_admin_log.id"), index=True)
     response_comment_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_admin_log.id"), index=True)
 
-    arXiv_category_def: Mapped["CategoryDef"] = relationship("CategoryDef", back_populates="arXiv_submission_category_proposal")
-    proposal_comment: Mapped["AdminLog"] = relationship("AdminLog", foreign_keys=[proposal_comment_id], back_populates="arXiv_submission_category_proposal")
-    response_comment: Mapped["AdminLog"] = relationship("AdminLog", foreign_keys=[response_comment_id], back_populates="arXiv_submission_category_proposal_")
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_category_proposal")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_category_proposal")
+    arXiv_category_def = relationship("CategoryDef", primaryjoin="SubmissionCategoryProposal.category == CategoryDef.category", backref="arXiv_submission_category_proposals")
+    proposal_comment = relationship("AdminLog", primaryjoin="SubmissionCategoryProposal.proposal_comment_id == AdminLog.id", backref="arxivadminlog_arXiv_submission_category_proposals")
+    response_comment = relationship("AdminLog", primaryjoin="SubmissionCategoryProposal.response_comment_id == AdminLog.id", backref="arxivadminlog_arXiv_submission_category_proposals_0")
+    submission = relationship("Submission", primaryjoin="SubmissionCategoryProposal.submission_id == Submission.submission_id", backref="arXiv_submission_category_proposals")
+    user = relationship("TapirUser", primaryjoin="SubmissionCategoryProposal.user_id == TapirUser.user_id", back_populates="arXiv_submission_category_proposal")
 
 
 class SubmissionControl(Base):
     __tablename__ = "arXiv_submission_control"
-    __table_args__ = (
-        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_submission_control_ibfk_1"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_submission_control_ibfk_2"),
-        Index("sub_ctrl_document_id", "document_id", "version", unique=True),
-    )
+    __table_args__ = (Index("sub_ctrl_document_id", "document_id", "version"),)
 
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, server_default=FetchedValue())
@@ -1037,17 +989,13 @@ class SubmissionControl(Base):
     freeze_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_submission_control")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_control")
+    document = relationship("Document", primaryjoin="SubmissionControl.document_id == Document.document_id", backref="arXiv_submission_controls")
+    user = relationship("TapirUser", primaryjoin="SubmissionControl.user_id == TapirUser.user_id", back_populates="arXiv_submission_control")
 
 
 class SubmissionFlag(Base):
     __tablename__ = "arXiv_submission_flag"
-    __table_args__ = (
-        ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", name="arXiv_submission_flag_ibfk_2"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], ondelete="CASCADE", name="arXiv_submission_flag_ibfk_1"),
-        Index("uniq_one_flag_per_mod", "submission_id", "user_id", unique=True),
-    )
+    __table_args__ = (Index("uniq_one_flag_per_mod", "submission_id", "user_id"),)
 
     flag_id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), nullable=False, index=True, server_default=FetchedValue())
@@ -1055,17 +1003,12 @@ class SubmissionFlag(Base):
     flag: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_flag")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_flag")
+    submission = relationship("Submission", primaryjoin="SubmissionFlag.submission_id == Submission.submission_id", backref="arXiv_submission_flags")
+    user = relationship("TapirUser", primaryjoin="SubmissionFlag.user_id == TapirUser.user_id", back_populates="arXiv_submission_flag")
 
 
 class SubmissionHoldReason(Base):
     __tablename__ = "arXiv_submission_hold_reason"
-    __table_args__ = (
-        ForeignKeyConstraint(["comment_id"], ["arXiv_admin_log.id"], name="arXiv_submission_hold_reason_ibfk_3"),
-        ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", name="arXiv_submission_hold_reason_ibfk_1"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], ondelete="CASCADE", name="arXiv_submission_hold_reason_ibfk_2"),
-    )
 
     reason_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), nullable=False, index=True)
@@ -1074,66 +1017,51 @@ class SubmissionHoldReason(Base):
     type: Mapped[Optional[str]] = mapped_column(String(30))
     comment_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_admin_log.id"), index=True)
 
-    comment: Mapped["AdminLog"] = relationship("AdminLog", back_populates="arXiv_submission_hold_reason")
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_hold_reason")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_hold_reason")
+    comment = relationship("AdminLog", primaryjoin="SubmissionHoldReason.comment_id == AdminLog.id", backref="arXiv_submission_hold_reasons")
+    submission = relationship("Submission", primaryjoin="SubmissionHoldReason.submission_id == Submission.submission_id", backref="arXiv_submission_hold_reasons")
+    user = relationship("TapirUser", primaryjoin="SubmissionHoldReason.user_id == TapirUser.user_id", back_populates="arXiv_submission_hold_reason")
 
 
 class SubmissionNearDuplicate(Base):
     __tablename__ = "arXiv_submission_near_duplicates"
-    __table_args__ = (
-        ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", name="arXiv_submission_near_duplicates_ibfk_1"),
-        Index("match", "submission_id", "matching_id", unique=True),
-    )
+    __table_args__ = (Index("match", "submission_id", "matching_id"),)
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, nullable=False, server_default=FetchedValue())
     matching_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
     similarity: Mapped[float] = mapped_column(Numeric(2, 1), nullable=False)
     last_update: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
 
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_near_duplicates")
+    submission = relationship("Submission", primaryjoin="SubmissionNearDuplicate.submission_id == Submission.submission_id", backref="arXiv_submission_near_duplicates")
 
 
 class SubmissionQaReport(Base):
     __tablename__ = "arXiv_submission_qa_reports"
-    __table_args__ = (ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], name="arXiv_submission_qa_reports_ibfk_1"),)
 
     id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     report_key_name: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     created: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
-    num_flags: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    report: Mapped[dict] = mapped_column(JSON, nullable=False)
+    num_flags: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
+    report: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     report_uri: Mapped[Optional[str]] = mapped_column(String(256))
 
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_qa_reports")
+    submission = relationship("Submission", primaryjoin="SubmissionQaReport.submission_id == Submission.submission_id", backref="arXiv_submission_qa_reports")
 
 
 class SubmissionViewFlag(Base):
     __tablename__ = "arXiv_submission_view_flag"
-    __table_args__ = (
-        ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", name="arXiv_submission_view_flag_ibfk_1"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], ondelete="CASCADE", name="arXiv_submission_view_flag_ibfk_2"),
-    )
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, nullable=False)
     flag: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), primary_key=True, nullable=False, index=True)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    updated: Mapped[Optional[datetime]]
 
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_view_flag")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_view_flag")
+    submission = relationship("Submission", primaryjoin="SubmissionViewFlag.submission_id == Submission.submission_id", backref="arXiv_submission_view_flags")
+    user = relationship("TapirUser", primaryjoin="SubmissionViewFlag.user_id == TapirUser.user_id", back_populates="arXiv_submission_view_flag")
 
 
 class Submission(Base):
     __tablename__ = "arXiv_submissions"
-    __table_args__ = (
-        ForeignKeyConstraint(["agreement_id"], ["arXiv_submission_agreements.agreement_id"], name="agreement_fk"),
-        ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], ondelete="CASCADE", onupdate="CASCADE", name="arXiv_submissions_fk_document_id"),
-        ForeignKeyConstraint(["license"], ["arXiv_licenses.name"], onupdate="CASCADE", name="arXiv_submissions_fk_license"),
-        ForeignKeyConstraint(["submitter_id"], ["tapir_users.user_id"], ondelete="CASCADE", onupdate="CASCADE", name="arXiv_submissions_fk_submitter_id"),
-        ForeignKeyConstraint(["sword_id"], ["arXiv_tracking.sword_id"], name="arXiv_submissions_fk_sword_id"),
-    )
 
     submission_id: Mapped[intpk]
     document_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"), index=True)
@@ -1147,13 +1075,13 @@ class Submission(Base):
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE", onupdate="CASCADE"), index=True)
     submitter_name: Mapped[Optional[str]] = mapped_column(String(64))
     submitter_email: Mapped[Optional[str]] = mapped_column(String(64))
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    created: Mapped[Optional[datetime]]
+    updated: Mapped[Optional[datetime]]
     status: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     sticky_status: Mapped[Optional[int]] = mapped_column(Integer)
     must_process: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
-    submit_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    release_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    submit_time: Mapped[Optional[datetime]]
+    release_time: Mapped[Optional[datetime]]
     source_size: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     source_format: Mapped[Optional[str]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
@@ -1162,7 +1090,7 @@ class Submission(Base):
     title: Mapped[Optional[str]] = mapped_column(Text)
     authors: Mapped[Optional[str]] = mapped_column(Text)
     comments: Mapped[Optional[str]] = mapped_column(Text)
-    proxy: Mapped[Optional[str]] = mapped_column(String(255))
+    proxy: Mapped[Optional[str]] = mapped_column(VARCHAR(255, charset="latin1"))
     report_num: Mapped[Optional[str]] = mapped_column(Text)
     msc_class: Mapped[Optional[str]] = mapped_column(String(255))
     acm_class: Mapped[Optional[str]] = mapped_column(String(255))
@@ -1182,43 +1110,27 @@ class Submission(Base):
     rt_ticket_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     auto_hold: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     is_locked: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
-    agreement_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_submission_agreements.agreement_id"), index=True)
+    agreement_id = mapped_column(ForeignKey("arXiv_submission_agreements.agreement_id"), index=True)
 
-    agreement: Mapped["SubmissionAgreement"] = relationship("SubmissionAgreement", primaryjoin="Submission.agreement_id == SubmissionAgreement.agreement_id", back_populates="arXiv_submissions")
-    document: Mapped["Document"] = relationship("Document", primaryjoin="Submission.document_id == Document.document_id", back_populates="arXiv_submissions")
-    arXiv_license: Mapped["License"] = relationship("License", primaryjoin="Submission.license == License.name", back_populates="arXiv_submissions")
-    submitter: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Submission.submitter_id == TapirUser.user_id", back_populates="arXiv_submissions")
-    sword: Mapped["Tracking"] = relationship("Tracking", primaryjoin="Submission.sword_id == Tracking.sword_id", back_populates="arXiv_submissions")
-    data_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    metadata_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    data_needed: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    data_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    metadata_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    data_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    metadata_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="submission")
-    arXiv_pilot_files: Mapped[List["PilotFile"]] = relationship("PilotFile", back_populates="submission")
-    arXiv_submission_category: Mapped[List["SubmissionCategory"]] = relationship("SubmissionCategory", back_populates="submission")
-    arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship("SubmissionCategoryProposal", back_populates="submission")
-    arXiv_submission_flag: Mapped[List["SubmissionFlag"]] = relationship("SubmissionFlag", back_populates="submission")
-    arXiv_submission_hold_reason: Mapped[List["SubmissionHoldReason"]] = relationship("SubmissionHoldReason", back_populates="submission")
+    agreement = relationship("SubmissionAgreement", primaryjoin="Submission.agreement_id == SubmissionAgreement.agreement_id", backref="arXiv_submissions")
+    document = relationship("Document", primaryjoin="Submission.document_id == Document.document_id", backref="arXiv_submissions")
+    arXiv_license = relationship("License", primaryjoin="Submission.license == License.name", backref="arXiv_submissions")
+    submitter = relationship("TapirUser", primaryjoin="Submission.submitter_id == TapirUser.user_id", back_populates="arXiv_submissions")
+    sword = relationship("Tracking", primaryjoin="Submission.sword_id == Tracking.sword_id", backref="arXiv_submissions")
+
+    # to arxiv check
+    arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="submission")
+    # to submission locks
     arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
-    arXiv_submission_near_duplicates: Mapped[List["SubmissionNearDuplicate"]] = relationship("SubmissionNearDuplicate", back_populates="submission")
-    arXiv_submission_qa_reports: Mapped[List["SubmissionQaReport"]] = relationship("SubmissionQaReport", back_populates="submission")
-    arXiv_submission_view_flag: Mapped[List["SubmissionViewFlag"]] = relationship("SubmissionViewFlag", back_populates="submission")
-
-    # arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="submission")
-    # arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
 
 
 class PilotDataset(Submission):
     """arXiv_pilot is deprecated"""
 
     __tablename__ = "arXiv_pilot_datasets"
-    __table_args__ = (ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], name="arXiv_pilot_datasets_cdfk3"),)
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), primary_key=True)
-    numfiles: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    numfiles: Mapped[Optional[int]] = mapped_column(SmallInteger, server_default=FetchedValue())
     feed_url: Mapped[Optional[str]] = mapped_column(String(256))
     manifestation: Mapped[Optional[str]] = mapped_column(String(256))
     published: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -1229,14 +1141,13 @@ class PilotDataset(Submission):
 
 class SubmissionAbsClassifierDatum(Base):
     __tablename__ = "arXiv_submission_abs_classifier_data"
-    __table_args__ = (ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", name="arXiv_submission_abs_classifier_data_ibfk_1"),)
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
     last_update: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
     status: Mapped[Optional[Literal["processing", "success", "failed", "no connection"]]] = mapped_column(Enum("processing", "success", "failed", "no connection"))
     message: Mapped[Optional[str]] = mapped_column(Text)
-    is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'0'"))
+    is_oversize: Mapped[Optional[int]] = mapped_column(Integer)
     suggested_primary: Mapped[Optional[str]] = mapped_column(Text)
     suggested_reason: Mapped[Optional[str]] = mapped_column(Text)
     autoproposal_primary: Mapped[Optional[str]] = mapped_column(Text)
@@ -1247,18 +1158,18 @@ class SubmissionAbsClassifierDatum(Base):
 
 class SubmissionClassifierDatum(Base):
     __tablename__ = "arXiv_submission_classifier_data"
-    __table_args__ = (ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], ondelete="CASCADE", name="arXiv_submission_classifier_data_ibfk_1"),)
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
     last_update: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
     status: Mapped[Optional[Literal["processing", "success", "failed", "no connection"]]] = mapped_column(Enum("processing", "success", "failed", "no connection"))
     message: Mapped[Optional[str]] = mapped_column(Text)
-    is_oversize: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'0'"))
+    is_oversize: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class SubmitterFlag(Base):
     __tablename__ = "arXiv_submitter_flags"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     flag_id: Mapped[intpk]
     comment: Mapped[Optional[str]] = mapped_column(String(255))
@@ -1267,16 +1178,18 @@ class SubmitterFlag(Base):
 
 class SuspectEmail(Base):
     __tablename__ = "arXiv_suspect_emails"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     id: Mapped[intpk]
     type: Mapped[str] = mapped_column(String(10), nullable=False)
     pattern: Mapped[str] = mapped_column(Text, nullable=False)
     comment: Mapped[str] = mapped_column(Text, nullable=False)
-    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
 class Title(Base):
     __tablename__ = "arXiv_titles"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     paper_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     title: Mapped[Optional[str]] = mapped_column(String(255), index=True)
@@ -1286,32 +1199,32 @@ class Title(Base):
 
 class TopPaper(Base):
     __tablename__ = "arXiv_top_papers"
-    __table_args__ = (ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_top_papers_ibfk_1"),)
 
-    from_week: Mapped[dt.date] = mapped_column(Date, primary_key=True, nullable=False, server_default=FetchedValue())
+    from_week: Mapped[date] = mapped_column(Date, primary_key=True, nullable=False, server_default=FetchedValue())
     _class: Mapped[str] = mapped_column("class", String(1), primary_key=True, nullable=False, server_default=FetchedValue())
-    rank: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
+    rank: Mapped[int] = mapped_column(SmallInteger, primary_key=True, nullable=False, server_default=FetchedValue())
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, index=True, server_default=FetchedValue())
     viewers: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", primaryjoin="TopPaper.document_id == Document.document_id", back_populates="arXiv_top_papers")
+    document = relationship("Document", primaryjoin="TopPaper.document_id == Document.document_id", backref="arXiv_top_papers")
 
 
 class TrackbackPing(Base):
     __tablename__ = "arXiv_trackback_pings"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     trackback_id: Mapped[intpk]
     document_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
-    title: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    excerpt: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    url: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
-    blog_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
-    posted_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    is_stale: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    approved_by_user: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    approved_time: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    excerpt: Mapped[str] = mapped_column(String(255), nullable=False)
+    url: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    blog_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    remote_host: Mapped[str] = mapped_column(String(255), nullable=False)
+    remote_addr: Mapped[str] = mapped_column(String(16), nullable=False)
+    posted_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    is_stale: Mapped[int] = mapped_column(Integer, nullable=False)
+    approved_by_user: Mapped[int] = mapped_column(Integer, nullable=False)
+    approved_time: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[Literal["pending", "pending2", "accepted", "rejected", "spam"]] = mapped_column(
         Enum("pending", "pending2", "accepted", "rejected", "spam"), nullable=False, index=True, server_default=FetchedValue()
     )
@@ -1351,22 +1264,22 @@ class TrackbackPing(Base):
 
 class TrackbackSite(Base):
     __tablename__ = "arXiv_trackback_sites"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    pattern: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
+    pattern: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     site_id: Mapped[intpk]
     action: Mapped[Literal["neutral", "accept", "reject", "spam"]] = mapped_column(Enum("neutral", "accept", "reject", "spam"), nullable=False, server_default=FetchedValue())
 
 
 class Tracking(Base):
     __tablename__ = "arXiv_tracking"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     tracking_id: Mapped[intpk]
-    sword_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
+    sword_id: Mapped[int] = mapped_column(Integer, nullable=False, unique=True, index=True)
     paper_id: Mapped[str] = mapped_column(String(32), nullable=False)
     submission_errors: Mapped[Optional[str]] = mapped_column(Text)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
-
-    arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="sword")
+    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
 class Updates(Base):
@@ -1379,12 +1292,11 @@ class Updates(Base):
         index=True,
         server_default=text("'0'"),
     )
-
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     date: Mapped[Optional[dt.date]] = mapped_column(Date, index=True)
     action: Mapped[Optional[Literal["new", "replace", "absonly", "cross", "repcro"]]] = mapped_column(Enum("new", "replace", "absonly", "cross", "repcro"))
     archive: Mapped[Optional[str]] = mapped_column(String(20), index=True)
-    category: Mapped[Optional[str]] = mapped_column(String(20), index=True)
+    category: Mapped[Optional[int]] = mapped_column(String(20), index=True)
 
     def __repr__(self) -> str:
         return f"Update(document_id={self.document_id}, version={self.version}, action={self.action}, date={self.date}, category={self.category}, archive={self.archive})"
@@ -1403,7 +1315,6 @@ t_arXiv_updates_tmp = Table(
 
 class Version(Base):
     __tablename__ = "arXiv_versions"
-    __table_args__ = (ForeignKeyConstraint(["document_id"], ["arXiv_documents.document_id"], name="arXiv_versions_ibfk_1"),)
 
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1412,24 +1323,24 @@ class Version(Base):
     publish_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     flag_current: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    document: Mapped["Document"] = relationship("Document", back_populates="arXiv_versions")
+    document = relationship("Document", primaryjoin="Version.document_id == Document.document_id", backref="arXiv_versions")
 
 
 class VersionsChecksum(Version):
     __tablename__ = "arXiv_versions_checksum"
-    __table_args__ = (ForeignKeyConstraint(["document_id", "version"], ["arXiv_versions.document_id", "arXiv_versions.version"], name="arXiv_versions_checksum_ibfk_1"),)
+    __table_args__ = (ForeignKeyConstraint(["document_id", "version"], ["arXiv_versions.document_id", "arXiv_versions.version"]),)
 
     document_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
     flag_abs_present: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     abs_size: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    abs_md5sum: Mapped[Optional[bytes]] = mapped_column(BINARY(16), index=True)
+    abs_md5sum: Mapped[Optional[str]] = mapped_column(BINARY(16), index=True)
     flag_src_present: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     src_size: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
-    src_md5sum: Mapped[Optional[bytes]] = mapped_column(BINARY(16), index=True)
+    src_md5sum: Mapped[Optional[str]] = mapped_column(BINARY(16), index=True)
 
 
-t_arXiv_white_email = Table("arXiv_white_email", metadata, Column("pattern", String(64), index=True))
+t_arXiv_white_email = Table("arXiv_white_email", metadata, Column("pattern", String(64), unique=True, index=True))
 
 
 t_arXiv_xml_notifications = Table(
@@ -1437,14 +1348,15 @@ t_arXiv_xml_notifications = Table(
     metadata,
     Column("control_id", Integer, index=True),
     Column("type", Enum("submission", "cross", "jref")),
-    Column("queued_date", Integer, nullable=False, server_default=FetchedValue()),
-    Column("sent_date", Integer, nullable=False, server_default=FetchedValue()),
+    Column("queued_date", Integer, nullable=False),
+    Column("sent_date", Integer, nullable=False),
     Column("status", Enum("unsent", "sent", "failed"), index=True),
 )
 
 
 class DbixClassSchemaVersion(Base):
     __tablename__ = "dbix_class_schema_versions"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     version: Mapped[str] = mapped_column(String(10), primary_key=True)
     installed: Mapped[str] = mapped_column(String(20), nullable=False)
@@ -1453,34 +1365,35 @@ class DbixClassSchemaVersion(Base):
 t_demographics_backup = Table(
     "demographics_backup",
     metadata,
-    Column("user_id", Integer, nullable=False, server_default=FetchedValue()),
-    Column("country", String(2), nullable=False, server_default=FetchedValue()),
-    Column("affiliation", String(255), nullable=False, server_default=FetchedValue()),
-    Column("url", String(255), nullable=False, server_default=FetchedValue()),
+    Column("user_id", Integer, nullable=False),
+    Column("country", String(2), nullable=False),
+    Column("affiliation", String(255), nullable=False),
+    Column("url", String(255), nullable=False),
     Column("type", Integer),
     Column("os", Integer),
     Column("archive", String(16)),
     Column("subject_class", String(16)),
-    Column("original_subject_classes", String(255), nullable=False, server_default=FetchedValue()),
+    Column("original_subject_classes", String(255), nullable=False),
     Column("flag_group_physics", Integer),
-    Column("flag_group_math", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_group_cs", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_group_nlin", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_proxy", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_journal", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_xml", Integer, nullable=False, server_default=FetchedValue()),
-    Column("dirty", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_group_test", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_suspect", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_group_q_bio", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_no_upload", Integer, nullable=False, server_default=FetchedValue()),
-    Column("flag_no_endorse", Integer, nullable=False, server_default=FetchedValue()),
-    Column("veto_status", Enum("ok", "no-endorse", "no-upload"), server_default=FetchedValue()),
+    Column("flag_group_math", Integer, nullable=False),
+    Column("flag_group_cs", Integer, nullable=False),
+    Column("flag_group_nlin", Integer, nullable=False),
+    Column("flag_proxy", Integer, nullable=False),
+    Column("flag_journal", Integer, nullable=False),
+    Column("flag_xml", Integer, nullable=False),
+    Column("dirty", Integer, nullable=False),
+    Column("flag_group_test", Integer, nullable=False),
+    Column("flag_suspect", Integer, nullable=False),
+    Column("flag_group_q_bio", Integer, nullable=False),
+    Column("flag_no_upload", Integer, nullable=False),
+    Column("flag_no_endorse", Integer, nullable=False),
+    Column("veto_status", Enum("ok", "no-endorse", "no-upload")),
 )
 
 
 class Session(Base):
     __tablename__ = "sessions"
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     id: Mapped[str] = mapped_column(String(72), primary_key=True)
     session_data: Mapped[Optional[str]] = mapped_column(Text)
@@ -1501,17 +1414,12 @@ class TapirAddress(Base):
     country: Mapped[str] = mapped_column(ForeignKey("tapir_countries.digraph"), nullable=False, index=True, server_default=FetchedValue())
     share_addr: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    tapir_country: Mapped["TapirCountry"] = relationship("TapirCountry", primaryjoin="TapirAddress.country == TapirCountry.digraph", back_populates="tapir_address")
-    user: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="TapirAddress.user_id == TapirUser.user_id", back_populates="tapir_address")
+    tapir_country = relationship("TapirCountry", primaryjoin="TapirAddress.country == TapirCountry.digraph", backref="tapir_address")
+    user = relationship("TapirUser", primaryjoin="TapirAddress.user_id == TapirUser.user_id", back_populates="tapir_address")
 
 
 class TapirAdminAudit(Base):
     __tablename__ = "tapir_admin_audit"
-    __table_args__ = (
-        ForeignKeyConstraint(["admin_user"], ["tapir_users.user_id"], name="0_554"),
-        ForeignKeyConstraint(["affected_user"], ["tapir_users.user_id"], name="0_555"),
-        ForeignKeyConstraint(["session_id"], ["tapir_sessions.session_id"], name="0_553"),
-    )
 
     log_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     session_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_sessions.session_id"), index=True)
@@ -1521,30 +1429,28 @@ class TapirAdminAudit(Base):
     affected_user: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     action: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
-    data: Mapped[str] = mapped_column(String(255))
+    data: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     comment: Mapped[str] = mapped_column(Text, nullable=False)
     entry_id: Mapped[intpk]
 
-    tapir_users: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[admin_user], back_populates="tapir_admin_audit")
-    tapir_users_: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[affected_user], back_populates="tapir_admin_audit_")
-    session: Mapped["TapirSession"] = relationship("TapirSession", back_populates="tapir_admin_audit")
+    tapir_users = relationship("TapirUser", foreign_keys=[admin_user], back_populates="tapir_admin_audit")
+    tapir_users_ = relationship("TapirUser", foreign_keys=[affected_user], back_populates="tapir_admin_audit_")
+    session = relationship("TapirSession", primaryjoin="TapirAdminAudit.session_id == TapirSession.session_id", backref="tapir_admin_audits")
 
 
 class TapirCountry(Base):
     __tablename__ = "tapir_countries"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    digraph: Mapped[str] = mapped_column(String(2), primary_key=True, server_default=FetchedValue())
-    country_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    rank: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-
-    tapir_address: Mapped[List["TapirAddress"]] = relationship("TapirAddress", back_populates="tapir_country")
+    digraph: Mapped[str] = mapped_column(String(2), primary_key=True)
+    country_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    rank: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class TapirEmailChangeToken(Base):
     __tablename__ = "tapir_email_change_tokens"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_535"),)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
+    user_id = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     old_email: Mapped[Optional[str]] = mapped_column(String(255))
     new_email: Mapped[Optional[str]] = mapped_column(String(255))
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
@@ -1558,7 +1464,7 @@ class TapirEmailChangeToken(Base):
     consumed_when: Mapped[Optional[int]] = mapped_column(Integer)
     consumed_from: Mapped[Optional[str]] = mapped_column(String(16))
 
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_email_change_tokens")
+    user = relationship("TapirUser", primaryjoin="TapirEmailChangeToken.user_id == TapirUser.user_id", back_populates="tapir_email_change_tokens")
 
 
 t_tapir_email_change_tokens_used = Table(
@@ -1575,35 +1481,30 @@ t_tapir_email_change_tokens_used = Table(
 
 class TapirEmailHeader(Base):
     __tablename__ = "tapir_email_headers"
-    __table_args__ = (ForeignKeyConstraint(["template_id"], ["tapir_email_templates.template_id"], name="0_563"),)
 
     template_id: Mapped[int] = mapped_column(ForeignKey("tapir_email_templates.template_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     header_name: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
     header_content: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
 
-    template: Mapped["TapirEmailTemplate"] = relationship("TapirEmailTemplate", back_populates="tapir_email_headers")
+    template = relationship("TapirEmailTemplate", primaryjoin="TapirEmailHeader.template_id == TapirEmailTemplate.template_id", backref="tapir_email_headers")
 
 
 class TapirEmailLog(Base):
     __tablename__ = "tapir_email_log"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     mail_id: Mapped[intpk]
     reference_type: Mapped[Optional[str]] = mapped_column(String(1))
     reference_id: Mapped[Optional[int]] = mapped_column(Integer)
-    sent_date: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    sent_date: Mapped[int] = mapped_column(Integer, nullable=False)
     email: Mapped[Optional[str]] = mapped_column(String(255))
     flag_bounced: Mapped[Optional[int]] = mapped_column(Integer)
     mailing_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
-    template_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    template_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class TapirEmailMailing(Base):
     __tablename__ = "tapir_email_mailings"
-    __table_args__ = (
-        ForeignKeyConstraint(["created_by"], ["tapir_users.user_id"], name="0_565"),
-        ForeignKeyConstraint(["sent_by"], ["tapir_users.user_id"], name="0_566"),
-        ForeignKeyConstraint(["template_id"], ["tapir_email_templates.template_id"], name="0_567"),
-    )
 
     mailing_id: Mapped[intpk]
     template_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_email_templates.template_id"), index=True)
@@ -1615,18 +1516,14 @@ class TapirEmailMailing(Base):
     mailing_name: Mapped[Optional[str]] = mapped_column(String(255))
     comment: Mapped[Optional[str]] = mapped_column(Text)
 
-    tapir_users: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[created_by], back_populates="tapir_email_mailings")
-    tapir_users_: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[sent_by], back_populates="tapir_email_mailings_")
-    template: Mapped["TapirEmailTemplate"] = relationship("TapirEmailTemplate", back_populates="tapir_email_mailings")
+    tapir_users = relationship("TapirUser", foreign_keys=[created_by], back_populates="tapir_email_mailings")
+    tapir_users_ = relationship("TapirUser", foreign_keys=[sent_by], back_populates="tapir_email_mailings_")
+    template = relationship("TapirEmailTemplate", primaryjoin="TapirEmailMailing.template_id == TapirEmailTemplate.template_id", backref="tapir_email_mailings")
 
 
 class TapirEmailTemplate(Base):
     __tablename__ = "tapir_email_templates"
-    __table_args__ = (
-        ForeignKeyConstraint(["created_by"], ["tapir_users.user_id"], name="0_560"),
-        ForeignKeyConstraint(["updated_by"], ["tapir_users.user_id"], name="0_561"),
-        Index("short_name", "short_name", "lang", unique=True),
-    )
+    __table_args__ = (Index("short_name", "short_name", "lang"),)
 
     template_id: Mapped[intpk]
     short_name: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
@@ -1640,15 +1537,12 @@ class TapirEmailTemplate(Base):
     workflow_status: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     flag_system: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    tapir_users: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[created_by], back_populates="tapir_email_templates")
-    tapir_users_: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[updated_by], back_populates="tapir_email_templates_")
-    tapir_email_headers: Mapped[List["TapirEmailHeader"]] = relationship("TapirEmailHeader", back_populates="template")
-    tapir_email_mailings: Mapped[List["TapirEmailMailing"]] = relationship("TapirEmailMailing", back_populates="template")
+    tapir_users = relationship("TapirUser", foreign_keys=[created_by], back_populates="tapir_email_templates")
+    tapir_users_ = relationship("TapirUser", foreign_keys=[updated_by], back_populates="tapir_email_templates_")
 
 
 class TapirEmailToken(Base):
     __tablename__ = "tapir_email_tokens"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_530"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
@@ -1659,7 +1553,7 @@ class TapirEmailToken(Base):
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     wants_perm_token: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_email_tokens")
+    user = relationship("TapirUser", primaryjoin="TapirEmailToken.user_id == TapirUser.user_id", back_populates="tapir_email_tokens")
 
 
 t_tapir_email_tokens_used = Table(
@@ -1677,31 +1571,32 @@ t_tapir_email_tokens_used = Table(
 t_tapir_error_log = Table(
     "tapir_error_log",
     metadata,
-    Column("error_date", Integer, nullable=False, index=True, server_default=FetchedValue()),
+    Column("error_date", Integer, nullable=False, index=True),
     Column("user_id", Integer, index=True),
     Column("session_id", Integer, index=True),
-    Column("ip_addr", String(16), nullable=False, index=True, server_default=FetchedValue()),
-    Column("remote_host", String(255), nullable=False, server_default=FetchedValue()),
-    Column("tracking_cookie", String(32), nullable=False, index=True, server_default=FetchedValue()),
-    Column("message", String(32), nullable=False, index=True, server_default=FetchedValue()),
-    Column("url", String(255), nullable=False, server_default=FetchedValue()),
-    Column("error_url", String(255), nullable=False, server_default=FetchedValue()),
+    Column("ip_addr", String(16), nullable=False, index=True),
+    Column("remote_host", String(255), nullable=False),
+    Column("tracking_cookie", String(32), nullable=False, index=True),
+    Column("message", String(32), nullable=False, index=True),
+    Column("url", String(255), nullable=False),
+    Column("error_url", String(255), nullable=False),
 )
 
 
 class TapirIntegerVariable(Base):
     __tablename__ = "tapir_integer_variables"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    variable_id: Mapped[str] = mapped_column(String(32), primary_key=True, server_default=FetchedValue())
-    value: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    variable_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class TapirNickname(Base):
     __tablename__ = "tapir_nicknames"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_570"), Index("user_id", "user_id", "user_seq", unique=True))
+    __table_args__ = (Index("user_id", "user_id", "user_seq"),)
 
     nick_id: Mapped[intpk]
-    nickname: Mapped[str] = mapped_column(String(20), nullable=False, index=True, server_default=FetchedValue())
+    nickname: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, server_default=FetchedValue())
     user_seq: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     flag_valid: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
@@ -1709,7 +1604,7 @@ class TapirNickname(Base):
     policy: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     flag_primary: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
 
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_nicknames")
+    user = relationship("TapirUser", primaryjoin="TapirNickname.user_id == TapirUser.user_id", back_populates="tapir_nicknames")
 
 
 class TapirNicknamesAudit(Base):
@@ -1725,21 +1620,20 @@ class TapirNicknamesAudit(Base):
 t_tapir_no_cookies = Table(
     "tapir_no_cookies",
     metadata,
-    Column("log_date", Integer, nullable=False, server_default=FetchedValue()),
-    Column("ip_addr", String(16), nullable=False, server_default=FetchedValue()),
-    Column("remote_host", String(255), nullable=False, server_default=FetchedValue()),
-    Column("tracking_cookie", String(255), nullable=False, server_default=FetchedValue()),
-    Column("session_data", String(255), nullable=False, server_default=FetchedValue()),
-    Column("user_agent", String(255), nullable=False, server_default=FetchedValue()),
+    Column("log_date", Integer, nullable=False),
+    Column("ip_addr", String(16), nullable=False),
+    Column("remote_host", String(255), nullable=False),
+    Column("tracking_cookie", String(255), nullable=False),
+    Column("session_data", String(255), nullable=False),
+    Column("user_agent", String(255), nullable=False),
 )
 
 
-t_tapir_periodic_tasks_log = Table("tapir_periodic_tasks_log", metadata, Column("t", Integer, nullable=False, index=True, server_default=FetchedValue()), Column("entry", Text))
+t_tapir_periodic_tasks_log = Table("tapir_periodic_tasks_log", metadata, Column("t", Integer, nullable=False, index=True), Column("entry", Text))
 
 
 class TapirPermanentToken(Base):
     __tablename__ = "tapir_permanent_tokens"
-    __table_args__ = (ForeignKeyConstraint(["session_id"], ["tapir_sessions.session_id"], name="0_541"), ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_540"))
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1749,8 +1643,8 @@ class TapirPermanentToken(Base):
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     session_id: Mapped[int] = mapped_column(ForeignKey("tapir_sessions.session_id"), nullable=False, index=True, server_default=FetchedValue())
 
-    session: Mapped["TapirSession"] = relationship("TapirSession", back_populates="tapir_permanent_tokens")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_permanent_tokens")
+    session = relationship("TapirSession", primaryjoin="TapirPermanentToken.session_id == TapirSession.session_id", backref="tapir_permanent_tokens")
+    user = relationship("TapirUser", primaryjoin="TapirPermanentToken.user_id == TapirUser.user_id", back_populates="tapir_permanent_tokens")
 
 
 t_tapir_permanent_tokens_used = Table(
@@ -1767,25 +1661,25 @@ t_tapir_permanent_tokens_used = Table(
 
 class TapirPhone(Base):
     __tablename__ = "tapir_phone"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_520"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     phone_type: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True, server_default=FetchedValue())
     phone_number: Mapped[Optional[str]] = mapped_column(String(32), index=True)
     share_phone: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_phone")
+    user = relationship("TapirUser", primaryjoin="TapirPhone.user_id == TapirUser.user_id", back_populates="tapir_phone")
 
 
 class TapirPolicyClass(Base):
     __tablename__ = "tapir_policy_classes"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     class_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(64), nullable=False, server_default=FetchedValue())
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    password_storage: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    recovery_policy: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    permanent_login: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    password_storage: Mapped[int] = mapped_column(Integer, nullable=False)
+    recovery_policy: Mapped[int] = mapped_column(Integer, nullable=False)
+    permanent_login: Mapped[int] = mapped_column(Integer, nullable=False)
 
     tapir_users: Mapped[List["TapirUser"]] = relationship("TapirUser", back_populates="tapir_policy_classes")
 
@@ -1801,17 +1695,17 @@ class TapirPolicyClass(Base):
 
 class TapirPresession(Base):
     __tablename__ = "tapir_presessions"
+    __table_args__ = {"mysql_charset": "latin1"}
 
     presession_id: Mapped[intpk]
-    ip_num: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
-    remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    created_at: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    ip_num: Mapped[str] = mapped_column(String(16), nullable=False)
+    remote_host: Mapped[str] = mapped_column(String(255), nullable=False)
+    tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class TapirRecoveryToken(Base):
     __tablename__ = "tapir_recovery_tokens"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_546"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, index=True, server_default=FetchedValue())
@@ -1822,12 +1716,11 @@ class TapirRecoveryToken(Base):
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
 
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_recovery_tokens")
+    user = relationship("TapirUser", primaryjoin="TapirRecoveryToken.user_id == TapirUser.user_id", back_populates="tapir_recovery_tokens")
 
 
 class TapirRecoveryTokensUsed(Base):
     __tablename__ = "tapir_recovery_tokens_used"
-    __table_args__ = (ForeignKeyConstraint(["session_id"], ["tapir_sessions.session_id"], name="0_549"), ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_548"))
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1836,42 +1729,36 @@ class TapirRecoveryTokensUsed(Base):
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     session_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_sessions.session_id"), index=True)
 
-    session: Mapped["TapirSession"] = relationship("TapirSession", back_populates="tapir_recovery_tokens_used")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_recovery_tokens_used")
+    session = relationship("TapirSession", primaryjoin="TapirRecoveryTokensUsed.session_id == TapirSession.session_id", backref="tapir_recovery_tokens_useds")
+    user = relationship("TapirUser", primaryjoin="TapirRecoveryTokensUsed.user_id == TapirUser.user_id", back_populates="tapir_recovery_tokens_used")
 
 
 t_tapir_save_post_variables = Table(
     "tapir_save_post_variables",
     metadata,
-    Column("presession_id", ForeignKey("tapir_presessions.presession_id"), nullable=False, index=True, server_default=FetchedValue()),
+    Column("presession_id", ForeignKey("tapir_presessions.presession_id"), nullable=False, index=True),
     Column("name", String(255)),
     Column("value", Text, nullable=False),
-    Column("seq", Integer, nullable=False, server_default=FetchedValue()),
+    Column("seq", Integer, nullable=False),
 )
 
 
 class TapirSession(Base):
     __tablename__ = "tapir_sessions"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_525"),)
 
-    session_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    session_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=text("'0'"))
     last_reissue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     start_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     end_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
 
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_sessions")
     user = relationship("TapirUser", primaryjoin="TapirSession.user_id == TapirUser.user_id", back_populates="tapir_sessions")
-    tapir_admin_audit: Mapped[List["TapirAdminAudit"]] = relationship("TapirAdminAudit", back_populates="session")
-    tapir_permanent_tokens: Mapped[List["TapirPermanentToken"]] = relationship("TapirPermanentToken", back_populates="session")
-    tapir_recovery_tokens_used: Mapped[List["TapirRecoveryTokensUsed"]] = relationship("TapirRecoveryTokensUsed", back_populates="session")
 
 
 class TapirSessionsAudit(Base):
     __tablename__ = "tapir_sessions_audit"
-    __table_args__ = (ForeignKeyConstraint(["session_id"], ["tapir_sessions.session_id"], name="0_527"),)
 
-    session_id: Mapped[int] = mapped_column(ForeignKey("tapir_sessions.session_id"), primary_key=True, server_default=text("'0'"))
+    session_id: Mapped[int] = mapped_column(ForeignKey("tapir_sessions.session_id"), primary_key=True, server_default=text("'0'"), autoincrement="false")
     ip_addr: Mapped[str] = mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
@@ -1881,23 +1768,25 @@ class TapirSessionsAudit(Base):
 
 class TapirStringVariable(Base):
     __tablename__ = "tapir_string_variables"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    variable_id: Mapped[str] = mapped_column(String(32), primary_key=True, server_default=FetchedValue())
+    variable_id: Mapped[str] = mapped_column(String(32), primary_key=True)
     value: Mapped[str] = mapped_column(Text, nullable=False)
 
 
 class TapirString(Base):
     __tablename__ = "tapir_strings"
+    __table_args__ = {"mysql_charset": "latin1"}
 
-    name: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
-    module: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
-    language: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
+    name: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+    module: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+    language: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
     string: Mapped[str] = mapped_column(Text, nullable=False)
 
 
 class TapirUser(Base):
     __tablename__ = "tapir_users"
-    __table_args__ = (ForeignKeyConstraint(["policy_class"], ["tapir_policy_classes.class_id"], name="0_510"),)
+    __table_args__ = {"mysql_charset": "latin1"}
 
     user_id: Mapped[intpk]
     first_name: Mapped[Optional[str]] = mapped_column(String(50), index=True)
@@ -1905,7 +1794,7 @@ class TapirUser(Base):
     suffix_name: Mapped[Optional[str]] = mapped_column(String(50))
     share_first_name: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     share_last_name: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=text("''"))
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True, server_default=text("''"))
     share_email: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'8'"))
     email_bouncing: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     policy_class: Mapped[int] = mapped_column(ForeignKey("tapir_policy_classes.class_id"), nullable=False, index=True, server_default=text("'0'"))
@@ -1930,45 +1819,44 @@ class TapirUser(Base):
     arXiv_control_holds_: Mapped[List["ControlHold"]] = relationship("ControlHold", foreign_keys="[ControlHold.placed_by]", back_populates="tapir_users_")
     arXiv_documents: Mapped[List["Document"]] = relationship("Document", back_populates="submitter")
     arXiv_moderator_api_keys: Mapped[List["ModeratorApiKey"]] = relationship("ModeratorApiKey", back_populates="user")
-    tapir_address: Mapped[List["TapirAddress"]] = relationship("TapirAddress", back_populates="user")
-    tapir_email_change_tokens: Mapped[List["TapirEmailChangeToken"]] = relationship("TapirEmailChangeToken", back_populates="user")
-    tapir_email_templates: Mapped[List["TapirEmailTemplate"]] = relationship("TapirEmailTemplate", foreign_keys="[TapirEmailTemplate.created_by]", back_populates="tapir_users")
-    tapir_email_templates_: Mapped[List["TapirEmailTemplate"]] = relationship("TapirEmailTemplate", foreign_keys="[TapirEmailTemplate.updated_by]", back_populates="tapir_users_")
-    tapir_email_tokens: Mapped[List["TapirEmailToken"]] = relationship("TapirEmailToken", back_populates="user")
-    tapir_nicknames: Mapped[List["TapirNickname"]] = relationship("TapirNickname", back_populates="user")
-    tapir_phone: Mapped[List["TapirPhone"]] = relationship("TapirPhone", back_populates="user")
-    tapir_recovery_tokens: Mapped[List["TapirRecoveryToken"]] = relationship("TapirRecoveryToken", back_populates="user")
-    tapir_sessions: Mapped[List["TapirSession"]] = relationship("TapirSession", back_populates="user")
-    arXiv_cross_controls: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="user")
-    arXiv_endorsement_requests: Mapped[List["EndorsementRequest"]] = relationship("EndorsementRequest", back_populates="endorsee")
-    arXiv_jref_controls: Mapped[List["JrefControl"]] = relationship("JrefControl", back_populates="user")
-    arXiv_metadata: Mapped[List["Metadata"]] = relationship("Metadata", back_populates="submitter")
-    arXiv_show_email_requests: Mapped[List["ShowEmailRequest"]] = relationship("ShowEmailRequest", back_populates="user")
-    arXiv_submission_control: Mapped[List["SubmissionControl"]] = relationship("SubmissionControl", back_populates="user")
-    arXiv_submissions: Mapped[List["Submission"]] = relationship("Submission", back_populates="submitter")
-    tapir_admin_audit: Mapped[List["TapirAdminAudit"]] = relationship("TapirAdminAudit", foreign_keys="[TapirAdminAudit.admin_user]", back_populates="tapir_users")
-    tapir_admin_audit_: Mapped[List["TapirAdminAudit"]] = relationship("TapirAdminAudit", foreign_keys="[TapirAdminAudit.affected_user]", back_populates="tapir_users_")
-    tapir_email_mailings: Mapped[List["TapirEmailMailing"]] = relationship("TapirEmailMailing", foreign_keys="[TapirEmailMailing.created_by]", back_populates="tapir_users")
-    tapir_email_mailings_: Mapped[List["TapirEmailMailing"]] = relationship("TapirEmailMailing", foreign_keys="[TapirEmailMailing.sent_by]", back_populates="tapir_users_")
-    tapir_permanent_tokens: Mapped[List["TapirPermanentToken"]] = relationship("TapirPermanentToken", back_populates="user")
-    tapir_recovery_tokens_used: Mapped[List["TapirRecoveryTokensUsed"]] = relationship("TapirRecoveryTokensUsed", back_populates="user")
-    endorsee_of: Mapped[List["Endorsement"]] = relationship("Endorsement", foreign_keys="[Endorsement.endorsee_id]", back_populates="endorsee")
-    endorses: Mapped[List["Endorsement"]] = relationship("Endorsement", foreign_keys="[Endorsement.endorser_id]", back_populates="endorser")
-    arXiv_ownership_requests: Mapped[List["OwnershipRequest"]] = relationship("OwnershipRequest", back_populates="user")
-    arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship("SubmissionCategoryProposal", back_populates="user")
-    arXiv_submission_flag: Mapped[List["SubmissionFlag"]] = relationship("SubmissionFlag", back_populates="user")
-    arXiv_submission_hold_reason: Mapped[List["SubmissionHoldReason"]] = relationship("SubmissionHoldReason", back_populates="user")
+    tapir_address = relationship("TapirAddress", back_populates="user")
+    tapir_email_change_tokens = relationship("TapirEmailChangeToken", back_populates="user")
+    tapir_email_templates = relationship("TapirEmailTemplate", foreign_keys="[TapirEmailTemplate.created_by]", back_populates="tapir_users")
+    tapir_email_templates_ = relationship("TapirEmailTemplate", foreign_keys="[TapirEmailTemplate.updated_by]", back_populates="tapir_users_")
+    tapir_email_tokens = relationship("TapirEmailToken", back_populates="user")
+    tapir_nicknames = relationship("TapirNickname", back_populates="user", uselist=False)
+    tapir_phone = relationship("TapirPhone", back_populates="user")
+    tapir_recovery_tokens = relationship("TapirRecoveryToken", back_populates="user")
+    tapir_sessions = relationship("TapirSession", back_populates="user")
+    arXiv_cross_controls = relationship("CrossControl", back_populates="user")
+    arXiv_endorsement_requests = relationship("EndorsementRequest", back_populates="endorsee")
+    arXiv_jref_controls = relationship("JrefControl", back_populates="user")
+    arXiv_metadata = relationship("Metadata", back_populates="submitter")
+    arXiv_show_email_requests = relationship("ShowEmailRequest", back_populates="user")
+    arXiv_submission_control = relationship("SubmissionControl", back_populates="user")
+    arXiv_submissions = relationship("Submission", back_populates="submitter")
+    tapir_admin_audit = relationship("TapirAdminAudit", foreign_keys="[TapirAdminAudit.admin_user]", back_populates="tapir_users")
+    tapir_admin_audit_ = relationship("TapirAdminAudit", foreign_keys="[TapirAdminAudit.affected_user]", back_populates="tapir_users_")
+    tapir_email_mailings = relationship("TapirEmailMailing", foreign_keys="[TapirEmailMailing.created_by]", back_populates="tapir_users")
+    tapir_email_mailings_ = relationship("TapirEmailMailing", foreign_keys="[TapirEmailMailing.sent_by]", back_populates="tapir_users_")
+    tapir_permanent_tokens = relationship("TapirPermanentToken", back_populates="user")
+    tapir_recovery_tokens_used = relationship("TapirRecoveryTokensUsed", back_populates="user")
+    endorsee_of = relationship("Endorsement", foreign_keys="[Endorsement.endorsee_id]", back_populates="endorsee")
+    endorses = relationship("Endorsement", foreign_keys="[Endorsement.endorser_id]", back_populates="endorser")
+    arXiv_ownership_requests = relationship("OwnershipRequest", back_populates="user")
+    arXiv_submission_category_proposal = relationship("SubmissionCategoryProposal", back_populates="user")
+    arXiv_submission_flag = relationship("SubmissionFlag", back_populates="user")
+    arXiv_submission_hold_reason = relationship("SubmissionHoldReason", back_populates="user")
     arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="user")
-    arXiv_submission_view_flag: Mapped[List["SubmissionViewFlag"]] = relationship("SubmissionViewFlag", back_populates="user")
-    arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="user")
-    arXiv_check_responses: Mapped[List["ArXivCheckResponses"]] = relationship("ArXivCheckResponses", back_populates="user")
-    owned_papers: Mapped[List["PaperOwner"]] = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="owner")
+    arXiv_submission_view_flag = relationship("SubmissionViewFlag", back_populates="user")
+    arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="user")
+    arXiv_check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="user")
+    owned_papers = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="owner")
     demographics = relationship("Demographic", foreign_keys="[Demographic.user_id]", uselist=False, back_populates="user")
 
 
 class AuthorIds(Base):
     __tablename__ = "arXiv_author_ids"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_author_ids_ibfk_1"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True)
     author_id: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
@@ -1977,16 +1865,13 @@ class AuthorIds(Base):
 
 class Demographic(Base):
     __tablename__ = "arXiv_demographics"
-    __table_args__ = (
-        ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"], name="0_588"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_587"),
-    )
+    __table_args__ = (ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]), Index("dem_archive", "archive", "subject_class"))
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, server_default=FetchedValue())
     country: Mapped[str] = mapped_column(String(2), nullable=False, index=True, server_default=FetchedValue())
     affiliation: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     url: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    type: Mapped[Optional[int]] = mapped_column(Integer, index=True)
+    type: Mapped[Optional[int]] = mapped_column(SmallInteger, index=True)
     archive: Mapped[Optional[str]] = mapped_column(String(16))
     subject_class: Mapped[Optional[str]] = mapped_column(String(16))
     original_subject_classes: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
@@ -2007,17 +1892,10 @@ class Demographic(Base):
     flag_group_econ: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     veto_status: Mapped[Literal["ok", "no-endorse", "no-upload", "no-replace"]] = mapped_column(Enum("ok", "no-endorse", "no-upload", "no-replace"), nullable=False, server_default=text("'ok'"))
 
-    arXiv_category: Mapped["Category"] = relationship(
-        "Category", primaryjoin="and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)", backref="category_demographics"
-    )
-
-    @property
-    def groups(self) -> List[str]:
-        """Active groups for this user profile."""
-        return [group for group, column in self.GROUP_FLAGS if getattr(self, column) == 1]
-
     # the original user
     user = relationship("TapirUser", back_populates="demographics")
+
+    arXiv_category = relationship("Category", primaryjoin="and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)", backref="arXiv_demographics")
 
     GROUP_FLAGS = [
         ("grp_physics", "flag_group_physics"),
@@ -2030,10 +1908,14 @@ class Demographic(Base):
         ("grp_eess", "flag_group_eess"),
     ]
 
+    @property
+    def groups(self) -> List[str]:
+        """Active groups for this user profile."""
+        return [group for group, column in self.GROUP_FLAGS if getattr(self, column) == 1]
+
 
 class OrcidIds(Base):
     __tablename__ = "arXiv_orcid_ids"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="arXiv_orcid_ids_ibfk_1"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True)
     orcid: Mapped[str] = mapped_column(String(19), nullable=False, index=True)
@@ -2043,17 +1925,15 @@ class OrcidIds(Base):
 
 class QueueView(Base):
     __tablename__ = "arXiv_queue_view"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], ondelete="CASCADE", name="arXiv_queue_view_ibfk_1"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
-    last_view: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    second_last_view: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    last_view: Mapped[Optional[datetime]]
+    second_last_view: Mapped[Optional[datetime]]
     total_views: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
 
 
 class SuspiciousName(Base):
     __tablename__ = "arXiv_suspicious_names"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_606"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, server_default=FetchedValue())
     full_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
@@ -2061,7 +1941,6 @@ class SuspiciousName(Base):
 
 class SwordLicense(Base):
     __tablename__ = "arXiv_sword_licenses"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="user_id_fk"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True)
     license: Mapped[Optional[str]] = mapped_column(String(127))
@@ -2070,23 +1949,21 @@ class SwordLicense(Base):
 
 class TapirDemographic(Base):
     __tablename__ = "tapir_demographics"
-    __table_args__ = (ForeignKeyConstraint(["country"], ["tapir_countries.digraph"], name="0_518"), ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_517"))
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, server_default=FetchedValue())
     gender: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     share_gender: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    birthday: Mapped[Optional[dt.date]] = mapped_column(Date, index=True)
+    birthday: Mapped[Optional[date]] = mapped_column(Date, index=True)
     share_birthday: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     country: Mapped[str] = mapped_column(ForeignKey("tapir_countries.digraph"), nullable=False, index=True, server_default=FetchedValue())
     share_country: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     postal_code: Mapped[str] = mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())
 
-    tapir_country: Mapped["TapirCountry"] = relationship("TapirCountry", primaryjoin="TapirDemographic.country == TapirCountry.digraph", backref="tapir_demographics")
+    tapir_country = relationship("TapirCountry", primaryjoin="TapirDemographic.country == TapirCountry.digraph", backref="tapir_demographics")
 
 
 class TapirUsersHot(Base):
     __tablename__ = "tapir_users_hot"
-    __table_args__ = (ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="0_514"),)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, server_default=FetchedValue())
     last_login: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
@@ -2104,107 +1981,6 @@ class TapirUsersPassword(Base):
     user = relationship("TapirUser")
 
 
-class ArXivCheckResults(Base):
-    __tablename__ = "arXiv_check_results"
-    __table_args__ = (
-        ForeignKeyConstraint(["check_id"], ["arXiv_checks.check_id"], name="check_results_checks_fk"),
-        ForeignKeyConstraint(["submission_id"], ["arXiv_submissions.submission_id"], name="check_results_sub_fk"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="check_results_user_fk"),
-    )
-
-    check_result_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
-    data_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    metadata_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    check_id: Mapped[int] = mapped_column(ForeignKey("arXiv_checks.check_id"), nullable=False, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
-    ok: Mapped[int] = mapped_column(Integer, nullable=False)
-    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    message: Mapped[Optional[str]] = mapped_column(String(40))
-    data: Mapped[Optional[str]] = mapped_column(String(2000))
-
-    check: Mapped["ArXivChecks"] = relationship("ArXivChecks", back_populates="arXiv_check_results")
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_check_results")
-    arXiv_check_responses: Mapped[List["ArXivCheckResponses"]] = relationship("ArXivCheckResponses", back_populates="check_result")
-
-
-class ArXivCheckResponses(Base):
-    __tablename__ = "arXiv_check_responses"
-    __table_args__ = (
-        ForeignKeyConstraint(["check_result_id"], ["arXiv_check_results.check_result_id"], name="check_responses_results_fk"),
-        ForeignKeyConstraint(["user_id"], ["tapir_users.user_id"], name="check_responses_user_fk"),
-    )
-
-    check_response_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    check_result_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_results.check_result_id"), nullable=False, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
-    ok: Mapped[int] = mapped_column(Integer, nullable=False)
-    persist_response: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    message: Mapped[Optional[str]] = mapped_column(String(200))
-
-    check_result: Mapped["ArXivCheckResults"] = relationship("ArXivCheckResults", back_populates="arXiv_check_responses")
-    user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_check_responses")
-
-
-class ArXivCheckResultViews(Base):
-    __tablename__ = "arXiv_check_result_views"
-
-    check_result_view_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(40), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String(200))
-
-    arXiv_checks: Mapped[List["ArXivChecks"]] = relationship("ArXivChecks", back_populates="check_result_view")
-
-
-class ArXivCheckRoles(Base):
-    __tablename__ = "arXiv_check_roles"
-
-    check_role_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(40), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String(200))
-
-    arXiv_checks: Mapped[List["ArXivChecks"]] = relationship("ArXivChecks", back_populates="check_role")
-
-
-class ArXivCheckTargets(Base):
-    __tablename__ = "arXiv_check_targets"
-
-    check_target_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(40), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String(200))
-
-    arXiv_checks: Mapped[List["ArXivChecks"]] = relationship("ArXivChecks", back_populates="check_target")
-
-
-class ArXivChecks(Base):
-    __tablename__ = "arXiv_checks"
-    __table_args__ = (
-        ForeignKeyConstraint(["check_result_view_id"], ["arXiv_check_result_views.check_result_view_id"], name="checks_result_views_fk"),
-        ForeignKeyConstraint(["check_role_id"], ["arXiv_check_roles.check_role_id"], name="checks_roles_fk"),
-        ForeignKeyConstraint(["check_target_id"], ["arXiv_check_targets.check_target_id"], name="checks_content_fk"),
-    )
-
-    check_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    check_target_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_targets.check_target_id"), nullable=False, index=True)
-    check_role_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_roles.check_role_id"), nullable=False, index=True)
-    check_result_view_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_result_views.check_result_view_id"), nullable=False, index=True, server_default=text("'1'"))
-    name: Mapped[str] = mapped_column(String(40), nullable=False)
-    enable_check: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    enable_hold: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    enable_queue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    retry_minutes: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    optional: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    persist_response: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    description: Mapped[Optional[str]] = mapped_column(String(200))
-
-    check_result_view: Mapped["ArXivCheckResultViews"] = relationship("ArXivCheckResultViews", back_populates="arXiv_checks")
-    check_role: Mapped["ArXivCheckRoles"] = relationship("ArXivCheckRoles", back_populates="arXiv_checks")
-    check_target: Mapped["ArXivCheckTargets"] = relationship("ArXivCheckTargets", back_populates="arXiv_checks")
-    arXiv_check_results: Mapped[List["ArXivCheckResults"]] = relationship("ArXivCheckResults", back_populates="check")
-
-
 class ArXivSubmissionLocks(Base):
     __tablename__ = "arXiv_submission_locks"
     __table_args__ = (
@@ -2214,8 +1990,8 @@ class ArXivSubmissionLocks(Base):
     )
 
     submission_lock_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
+    submission_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     lock_type: Mapped[str] = mapped_column(String(20), nullable=False)
     expires: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False)
@@ -2228,6 +2004,7 @@ class ArXivSubmissionLocks(Base):
 # Student-lead membership dashboard - supercedes "Subscription_UniversalInstitution"
 class MembershipInstitutions(Base):
     __tablename__ = "membership_institutions"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
 
     sid: Mapped[int] = mapped_column(Integer, primary_key=True)
     is_active: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
@@ -2245,6 +2022,7 @@ class MembershipInstitutions(Base):
 # Student-lead membership dashboard
 class MembershipUsers(Base):
     __tablename__ = "membership_users"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sid: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -2253,8 +2031,9 @@ class MembershipUsers(Base):
 
 class DBLaTeXMLDocuments(LaTeXMLBase):
     __tablename__ = "arXiv_latexml_doc"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
 
-    paper_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    paper_id: Mapped[str] = mapped_column(String(20), primary_key=True, nullable=False)
     document_version: Mapped[intpk]
     # conversion_status codes:
     #   - 0 = in progress
@@ -2265,11 +2044,12 @@ class DBLaTeXMLDocuments(LaTeXMLBase):
     tex_checksum: Mapped[Optional[str]] = mapped_column(String(255))
     conversion_start_time: Mapped[Optional[int]] = mapped_column(Integer)
     conversion_end_time: Mapped[Optional[int]] = mapped_column(Integer)
-    publish_dt: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    publish_dt: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
 
 class DBLaTeXMLSubmissions(LaTeXMLBase):
     __tablename__ = "arXiv_latexml_sub"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
 
     submission_id: Mapped[intpk]
     # conversion_status codes:
@@ -2279,12 +2059,13 @@ class DBLaTeXMLSubmissions(LaTeXMLBase):
     conversion_status: Mapped[int] = mapped_column(Integer, nullable=False)
     latexml_version: Mapped[str] = mapped_column(String(40), nullable=False)
     tex_checksum: Mapped[Optional[str]] = mapped_column(String(255))
-    conversion_start_time: Mapped[Optional[int]]
-    conversion_end_time: Mapped[Optional[int]]
+    conversion_start_time: Mapped[Optional[int]] = mapped_column(Integer)
+    conversion_end_time: Mapped[Optional[int]] = mapped_column(Integer)
 
 
 class DBLaTeXMLFeedback(LaTeXMLBase):
     __tablename__ = "feedback"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
 
     id: Mapped[str] = mapped_column(String(40), primary_key=True)
     canonical_url: Mapped[Optional[str]] = mapped_column(String(255))
@@ -2296,6 +2077,128 @@ class DBLaTeXMLFeedback(LaTeXMLBase):
     description: Mapped[Optional[str]] = mapped_column(String(255))
     selected_html: Mapped[Optional[str]] = mapped_column(String(255))
     initiation_mode: Mapped[Optional[str]] = mapped_column(String(255))
+
+
+# From modapi
+
+
+class CheckRoles(Base):
+    """swimlanes: editor, student, moderator, qa"""
+
+    __tablename__ = "arXiv_check_roles"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    check_role_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(40), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(200))
+
+    def __repr__(self):
+        return f"{ type(self).__name__ }/{ self.check_role_id }:{self.name}"
+
+
+class CheckResultViews(Base):
+    """A hint for how arxiv-check can parse and view check_results.data"""
+
+    __tablename__ = "arXiv_check_result_views"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    check_result_view_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(40), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(200))
+
+    def __repr__(self):
+        return f"{ type(self).__name__ }/{ self.check_result_view_id }:{self.name}"
+
+
+class CheckTargets(Base):
+    """Will the QA check need to respond to updates to the file or the
+    database metadata."""
+
+    __tablename__ = "arXiv_check_targets"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    check_target_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(40), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(200))
+
+    def __repr__(self):
+        return f"{ type(self).__name__ }/{ self.check_target_id }:{self.name}"
+
+
+class Checks(Base):
+    __tablename__ = "arXiv_checks"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    check_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    check_target_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_targets.check_target_id"), nullable=False, index=True)
+    # , ondelete='CASCADE', onupdate='CASCADE'
+    check_role_id = Column(ForeignKey("arXiv_check_roles.check_role_id"), index=False)
+    check_result_view_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_result_views.check_result_view_id"), nullable=False, index=True, server_default=text("'1'"))
+    name: Mapped[str] = mapped_column(String(40), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(200))
+    enable_check: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    enable_hold: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    enable_queue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    retry_minutes: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    optional: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
+    persist_response: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    target: Mapped["CheckTargets"] = relationship("CheckTargets")
+    role: Mapped["CheckRoles"] = relationship("CheckRoles")
+
+    view: Mapped["CheckResultViews"] = relationship("CheckResultViews")
+
+    def __repr__(self):
+        return f"{ type(self).__name__ }/{ self.check_id }:{self.name};{'enabled' if self.enable_check else ''}"
+
+
+class CheckResults(Base):
+    __tablename__ = "arXiv_check_results"
+
+    check_result_id = Column(Integer, primary_key=True)
+    submission_id = Column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
+    data_version = Column(Integer, nullable=False, server_default=text("'0'"))
+    metadata_version = Column(Integer, nullable=False, server_default=text("'0'"))
+    check_id = Column(ForeignKey("arXiv_checks.check_id"), nullable=False, index=True)
+    user_id = Column(ForeignKey("tapir_users.user_id"), index=True)
+    ok = Column(Integer, nullable=False)
+    created = Column(DateTime, nullable=False, server_default=func.now())
+    message = Column(VARCHAR(40), nullable=True)
+    data = Column(VARCHAR(4000), nullable=True)
+    """ 
+        select max(length(logtext)) from arXiv_admin_log; #65535
+        select length(logtext), count(*) from arXiv_admin_log where length(logtext)>200 and username like 'qaadmin' group by length(logtext) order by length(logtext) desc limit 200
+        mysql max varchar length: 65,535
+    """
+
+    submission = relationship("Submission")
+    check = relationship("Checks")
+    user = relationship("TapirUser")
+
+    check_responses = relationship("CheckResponses")
+
+    def __repr__(self):
+        return f"{ type(self).__name__ }/{ self.check_result_id };check={self.check_id};s/{ self.submission_id };d={self.data_version};m={self.metadata_version};ok={ self.ok}"
+
+
+class CheckResponses(Base):
+    __tablename__ = "arXiv_check_responses"
+
+    check_response_id = Column(Integer, primary_key=True)
+    check_result_id = Column(ForeignKey("arXiv_check_results.check_result_id"), index=True)
+    user_id = Column(ForeignKey("tapir_users.user_id"), index=True)
+    ok = Column(Integer, nullable=False)
+    """If the related CheckResults ok==0, admin/mods respond with decision on whether that qa hold should stand or be dismissed."""
+
+    persist_response = Column(Integer, nullable=False, server_default=text("'0'"))
+    """This admin/mod decision is accepted for future check_results, if the submission is updated. """
+
+    created = Column(DateTime, nullable=False, server_default=func.now())
+    message = Column(VARCHAR(200), nullable=True)
+
+    user = relationship("TapirUser")
+
+    def __repr__(self):
+        return f"{ type(self).__name__ }/{ self.check_response_id };result={self.check_result_id};ok={ self.ok}"
 
 
 def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]) -> Tuple[Engine, Optional[Engine]]:
