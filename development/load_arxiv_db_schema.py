@@ -21,10 +21,10 @@ def is_port_open(host: str, port: int):
 
 def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"):
     """Start a mysql docker"""
-    mysql_image = "mysql:5.7"
+    mysql_image = "mysql:5.7.20"
 
     subprocess.run(["docker", "pull", mysql_image], check=True)
-
+    # subprocess.run(["docker", "kill", container_name], check=False)
     subprocess.run(["docker", "rm", container_name], check=False)
 
     argv = [
@@ -49,7 +49,7 @@ def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"
 def main() -> None:
     mysql_port = 13306
     db_name = "arxiv"
-    conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", "-ptestpassword"]
+    conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", "-ptestpassword", "--ssl-mode=DISABLED"]
 
     if not is_port_open("127.0.0.1", mysql_port):
         run_mysql_container(mysql_port, container_name="fake-arxiv-db", db_name=db_name)
@@ -59,9 +59,7 @@ def main() -> None:
         if is_port_open("127.0.0.1", mysql_port):
             try:
                 mysql = subprocess.Popen(cli, encoding="utf-8",
-                                         stdin=subprocess.PIPE,
-                                         stdout=subprocess.DEVNULL,
-                                         stderr=subprocess.DEVNULL)
+                                         stdin=subprocess.PIPE)
                 mysql.communicate("select 1")
                 if mysql.returncode == 0:
                     break
