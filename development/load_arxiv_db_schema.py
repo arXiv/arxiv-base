@@ -1,10 +1,5 @@
 #!/usr/bin/python3
 import os
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.engine import Engine
-import tempfile
-import sqlite3
 import sys
 import socket
 import subprocess
@@ -15,33 +10,13 @@ import shlex
 logging.basicConfig(level=logging.INFO)
 
 arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 sys.path.append(arxiv_base_dir)
-
-# Without this import, Base.metadata does not get populated. So it may look doing nothing but do not remove this.
-import arxiv.db.models
-
-from arxiv.db import Base, LaTeXMLBase, session_factory, _classic_engine as classic_engine
-
 
 def is_port_open(host: str, port: int):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.settimeout(1)
         result = sock.connect_ex((host, port))
         return result == 0
-
-
-def _make_schemas(db_engine: Engine):
-    SessionLocal = sessionmaker(autocommit=False, autoflush=True)
-    SessionLocal.configure(bind=db_engine)
-    db_session = SessionLocal(autocommit=False, autoflush=True)
-
-    Base.metadata.drop_all(db_engine)
-    Base.metadata.create_all(db_engine)
-    LaTeXMLBase.metadata.drop_all(db_engine)
-    LaTeXMLBase.metadata.create_all(db_engine)
-
-    db_session.commit()
 
 
 def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"):
@@ -69,7 +44,6 @@ def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"
         logging.error(f"Error: {e}\n\n{shlex.join(argv)}")
     except Exception as e:
         logging.error(f"Unexpected error: {e}\n\n{shlex.join(argv)}")
-
 
 
 def main() -> None:
