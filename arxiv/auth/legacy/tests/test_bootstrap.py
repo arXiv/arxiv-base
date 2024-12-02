@@ -65,6 +65,8 @@ class TestBootstrap(TestCase):
         arxiv.db.models.configure_db_engine(engine,None)
         util.create_all(engine)
 
+        visited = set()
+
         with self.app.app_context():
             with transaction() as session:
                 edc = session.execute(select(models.Endorsement)).all()
@@ -192,6 +194,19 @@ class TestBootstrap(TestCase):
                         issued_when = util.epoch(
                             Datetime(locale).datetime().replace(tzinfo=EASTERN)
                         )
+
+                        # These are the constraints on the table.
+                        key = {
+                            "endorsee": db_user.email,
+                            "endorser_id": endorser_id,
+                            "archive": archive,
+                            "subject_class": subject_class,
+                        }
+                        key_str = repr(key)
+                        if key_str in visited:
+                            # print(f"{key_str} appeared already. This would violate the table constraint.")
+                            continue
+                        visited.add(key_str)
                         session.add(models.Endorsement(
                             endorsee=db_user,
                             endorser_id=endorser_id,
