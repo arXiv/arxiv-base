@@ -123,6 +123,24 @@ class DownloadKey:
     def __repr__(self):
         return f"Key(type: {self.download_type}, cat: {self.category}, country: {self.country}, day: {self.time.day} hour: {self.time.hour})"
 
+class AggregationResult:
+    def __init__(self, time_period_str: str, output_count: int, fetched_count: int, unique_ids_count: int, bad_id_count: int, problem_row_count: int):
+        self.time_period_str = time_period_str
+        self.output_count = output_count
+        self.fetched_count = fetched_count
+        self.unique_ids_count = unique_ids_count
+        self.bad_id_count = bad_id_count
+        self.problem_row_count = problem_row_count
+
+    def single_run_str(self)->str:
+        return f"{self.time_period_str}: SUCCESS! rows created: {self.output_count}, fetched rows: {self.fetched_count}, unique_ids: {self.unique_ids_count}, invalid_ids: {self.bad_id_count}, other unprocessable rows: {self.problem_row_count}"
+
+    def table_row_str(self)->str:
+        return f"{self.time_period_str:<30} {self.output_count:<12} {self.fetched_count:<12} {self.unique_ids_count:<10} {self.bad_id_count:<10} {self.problem_row_count:<10}"
+
+    def table_header()->str:
+        return f"{'Time Period':<30} {'Created Rows':<12} {'Fetched Rows':<12} {'Unique IDs':<10} {'Bad IDs':<10} {'Problems':<10}"
+
 def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[DownloadData], Set[str], str, int, int, List[datetime]]:
     """processes rows of data from bigquery
     returns the list of download data, a set of all unique paper_ids and a string of the time periods this covers
@@ -165,7 +183,7 @@ def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[
 
     return download_data, paper_ids, time_period_str, bad_id_count, problem_row_count, time_periods
 
-def preform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table: str):
+def preform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table: str)->AggregationResult:
     """preforms the entire aggregation process for a set of data recieved from bigquery"""
     #process and store returned data
     download_data, paper_ids, time_period_str, bad_id_count, problem_row_count, time_periods= process_table_rows(rows)
@@ -186,8 +204,8 @@ def preform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table
     
     #write all_data to tables  
     add_count=insert_into_database(aggregated_data, write_table, time_periods)
-    logging.info(f"{time_period_str}: SUCCESS! rows created: {add_count}, fetched rows: {fetched_count}, unique_ids: {unique_id_count}, invalid_ids: {bad_id_count}, other unprocessable rows: {problem_row_count}")
-
+    result = AggregationResult(time_period_str,add_count,fetched_count,unique_id_count,bad_id_count,problem_row_count)
+    return result
 
 @functions_framework.cloud_event
 def aggregate_hourly_downloads(cloud_event: CloudEvent):
@@ -230,7 +248,8 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     query_job = bq_client.query(query)
     download_result = query_job.result() 
 
-    preform_aggregation(download_result, write_table)
+    result=preform_aggregation(download_result, write_table)
+    logging.info(result.single_run_str())
 
 def get_paper_categories(paper_ids: Set[str])-> Dict[str, PaperCategories]:
     #get the category data for papers
@@ -378,16 +397,17 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
         GROUP BY 1,2,3,4
     """    
     active_hour=starttime
+    logging.info(AggregationResult.table_header())
     
     #for each hour
     while active_hour<=endtime:
-        logging.info(f"running for time period: {active_hour}")
         time_selection=f"and timestamp between TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:00:00') and TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:59:59')"
         query=f"{query_start}\n{time_selection}\n{query_end}"
         bq_client = bigquery.Client(project="arxiv-production")
         query_job = bq_client.query(query)
         download_result = query_job.result() 
-        preform_aggregation(download_result, write_table)
+        result=preform_aggregation(download_result, write_table)
+        logging.info(result.table_row_str())
 
         active_hour+= timedelta(hours=1)
 
