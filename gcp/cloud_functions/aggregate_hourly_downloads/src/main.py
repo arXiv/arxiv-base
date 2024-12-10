@@ -1,8 +1,8 @@
 import json
 import base64
 import os
-from typing import Set, Dict, List, Literal, Tuple, Any
-from datetime import datetime
+from typing import Set, Dict, List, Literal, Tuple, Any, Union
+from datetime import datetime, timedelta
 
 from arxiv.taxonomy.category import Category
 from arxiv.taxonomy.definitions import CATEGORIES
@@ -14,9 +14,9 @@ import functions_framework
 from cloudevents.http import CloudEvent
 
 from google.cloud import bigquery
+from google.cloud.bigquery.table import RowIterator, _EmptyRowIterator
 from sqlalchemy import create_engine, Column, String, Integer, DateTime, Enum, PrimaryKeyConstraint, Row, tuple_
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, aliased
+from sqlalchemy.orm import sessionmaker, aliased, declarative_base
 
 MAX_QUERY_TO_WRITE=1000 #the latexmldb we write to has a stack size limit
 
@@ -123,11 +123,76 @@ class DownloadKey:
     def __repr__(self):
         return f"Key(type: {self.download_type}, cat: {self.category}, country: {self.country}, day: {self.time.day} hour: {self.time.hour})"
 
+def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[DownloadData], Set[str], str, int, int]:
+    """processes rows of data from bigquery
+    returns the list of download data, a set of all unique paper_ids and a string of the time periods this covers
+    """
+    #process and store returned data
+    paper_ids=set() #only look things up for each paper once
+    download_data: List[DownloadData]=[] #not a dictionary because no unique keys
+    problem_rows: List[Tuple[Any], Exception]=[]
+    problem_row_count=0
+    bad_id_count=0
+    time_periods=[]
+    for row in rows:
+        try:
+            d_type = "src" if row['download_type'] == "e-print" else row['download_type'] #combine e-print and src downloads
+            paper_id=Identifier(row['paper_id']).id
+            download_data.append(
+                DownloadData(
+                    paper_id=paper_id,
+                    country=row['geo_country'],
+                    download_type=d_type,
+                    time=row['start_dttm'].replace(minute=0, second=0, microsecond=0), #bucketing by hour
+                    num=row['num_downloads']
+                )
+            )
+            paper_ids.add(paper_id)
+        except IdentifierException as e:
+            bad_id_count+=1
+            continue #dont count this download
+        except Exception as e:
+            problem_row_count+=1
+            problem_rows.append((tuple(row), e)) if len(problem_rows) < 20 else None
+            continue #dont count this download
+        time_period=row['start_dttm'].replace(minute=0, second=0, microsecond=0)
+        if time_period not in time_periods:
+            time_periods.append(time_period)
+
+    time_period_str=  ', '.join([date.strftime('%Y-%m-%d %H:%M:%S') for date in time_periods])
+    if problem_row_count>30:
+        logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows \n Selection of problem row errors: {problem_rows}")
+
+    return download_data, paper_ids, time_period_str, bad_id_count, problem_row_count
+
+def preform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table: str):
+    """preforms the entire aggregation process for a set of data recieved from bigquery"""
+    #process and store returned data
+    download_data, paper_ids, time_period_str, bad_id_count, problem_row_count= process_table_rows(rows)
+    fetched_count=len(download_data)
+    unique_id_count=len(paper_ids)
+    if len(paper_ids) ==0:
+        logging.critical("No data retrieved from BigQuery")
+        return #this will prevent retries 
+    
+    #find categories for all the papers
+    paper_categories=get_paper_categories(paper_ids)
+    if len(paper_categories) ==0:
+        logging.critical(f"{time_period_str}: No category data retrieved from database")
+        return #this will prevent retries 
+
+    #aggregate download data
+    aggregated_data=aggregate_data(download_data, paper_categories)
+    
+    #write all_data to tables  
+    add_count, update_count=insert_into_database(aggregated_data, write_table)
+    logging.info(f"{time_period_str}: SUCCESS! rows added: {add_count}, rows updated: {update_count} fetched rows: {fetched_count}, unique_ids: {unique_id_count}, invalid_ids: {bad_id_count}, other unprocessable rows: {problem_row_count}")
+
+
 @functions_framework.cloud_event
 def aggregate_hourly_downloads(cloud_event: CloudEvent):
     """ get downloads data and aggregate but category country and download type
     """
-
     data=json.loads(base64.b64decode(cloud_event.get_data()['message']['data']).decode())
     state= data.get("state","")
     if state!="SUCCEEDED":
@@ -165,62 +230,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     query_job = bq_client.query(query)
     download_result = query_job.result() 
 
-    #process and store returned data
-    paper_ids=set() #only look things up for each paper once
-    download_data: List[DownloadData]=[] #not a dictionary because no unique keys
-    problem_rows: List[Tuple[Any], Exception]=[]
-    problem_row_count=0
-    bad_id_count=0
-    time_periods=[]
-    for row in download_result:
-        try:
-            d_type = "src" if row['download_type'] == "e-print" else row['download_type'] #combine e-print and src downloads
-            paper_id=Identifier(row['paper_id']).id
-            download_data.append(
-                DownloadData(
-                    paper_id=paper_id,
-                    country=row['geo_country'],
-                    download_type=d_type,
-                    time=row['start_dttm'].replace(minute=0, second=0, microsecond=0), #bucketing by hour
-                    num=row['num_downloads']
-                )
-            )
-            paper_ids.add(paper_id)
-        except IdentifierException as e:
-            bad_id_count+=1
-            continue #dont count this download
-        except Exception as e:
-            problem_row_count+=1
-            problem_rows.append((tuple(row), e)) if len(problem_rows) < 20 else None
-            continue #dont count this download
-        time_period=row['start_dttm'].replace(minute=0, second=0, microsecond=0)
-        if time_period not in time_periods:
-            time_periods.append(time_period)
-
-    time_period_str=  ', '.join([date.strftime('%Y-%m-%d %H:%M:%S') for date in time_periods])
-    if problem_row_count>30:
-        logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows \n Selection of problem row errors: {problem_rows}")
-
-    fetched_count=len(download_data)
-    unique_id_count=len(paper_ids)
-
-    if len(paper_ids) ==0:
-        logging.critical("No data retrieved from BigQuery")
-        return #this will prevent retries (is that good?)
-    
-    #find categories for all the papers
-    paper_categories=get_paper_categories(paper_ids)
-    if len(paper_categories) ==0:
-        logging.critical(f"{time_period_str}: No category data retrieved from database")
-        return #this will prevent retries (is that good?)
-
-    #aggregate download data
-    aggregated_data=aggregate_data(download_data, paper_categories)
-    
-    #write all_data to tables  
-    add_count, update_count=insert_into_database(aggregated_data, write_table)
-    logging.info(f"{time_period_str}: SUCCESS! rows added: {add_count}, rows updated: {update_count} fetched rows: {fetched_count}, unique_ids: {unique_id_count}, invalid_ids: {bad_id_count}, other unprocessable rows: {problem_row_count}")
-
+    preform_aggregation(download_result, write_table)
 
 def get_paper_categories(paper_ids: Set[str])-> Dict[str, PaperCategories]:
     #get the category data for papers
@@ -382,3 +392,82 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
     session.commit()
     session.close()
     return (len(data_to_insert), len(update_data))
+
+def manual_aggregate(starttime:datetime, endtime: datetime):
+    """used to do a manual run for transforming downloads logs into aggreated hourly download data
+    startime and endtime are both included
+    """
+    write_table=os.environ.get('WRITE_TABLE')
+    if not write_table:
+        logging.error("Must set WRTIE_TABLE to store results to")
+
+    query_start="""
+        SELECT paper_id, geo_country, download_type, start_dttm, COUNT(*) as num_downloads, 
+        FROM (
+            SELECT
+                STRING(json_payload.remote_addr) as remote_addr,
+                REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})") as paper_id,
+                STRING(json_payload.geo_country) as geo_country,
+                REGEXP_EXTRACT(STRING(json_payload.path), r"^/(html|pdf|src|e-print)/") as download_type,
+                TIMESTAMP_TRUNC(timestamp, HOUR) as start_dttm
+            FROM arxiv_logs._AllLogs
+            WHERE log_id = "fastly_log_ingest"
+            AND REGEXP_CONTAINS(STRING(json_payload.path), "^/(html|pdf|src|e-print)/")
+            AND REGEXP_CONTAINS(STRING(json_payload.status), "^2[0-9][0-9]$")
+            AND LENGTH(REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})")) > 0
+        """
+    query_end="""
+            GROUP BY 1,2,3,4,5
+        )
+        GROUP BY 1,2,3,4
+    """    
+    active_hour=starttime
+    
+    #for each hour
+    while active_hour<=endtime:
+        logging.info(f"running for time period: {active_hour}")
+        time_selection=f"and timestamp between TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:00:00') and TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:59:59')"
+        query=f"{query_start}\n{time_selection}\n{query_end}"
+        bq_client = bigquery.Client(project="arxiv-production")
+        query_job = bq_client.query(query)
+        download_result = query_job.result() 
+        preform_aggregation(download_result, write_table)
+
+        active_hour+= timedelta(hours=1)
+
+
+def parse_arguments():
+    """accept start and end periods from commandline"""
+    import argparse
+    EARLIEST_DATE=datetime(2024,3,1,0)
+    parser = argparse.ArgumentParser(description="Process two datetime values.")
+    
+    parser.add_argument(
+        "start_datetime",
+        type=str,
+        help="Start datetime in the format YYYY-MM-DD-HH",
+    )
+    parser.add_argument(
+        "end_datetime",
+        type=str,
+        help="End datetime in the format YYYY-MM-DD-HH",
+    )
+    
+    args = parser.parse_args()
+    try:
+        start = datetime.strptime(args.start_datetime, "%Y-%m-%d-%H")
+        end = datetime.strptime(args.end_datetime, "%Y-%m-%d-%H")
+    except ValueError as e:
+        parser.error(f"Invalid datetime format: {e}")
+    
+    if end <start:
+        parser.error("end time before start time")
+    if start < EARLIEST_DATE:
+        parser.error("log data starts at 2024/03/01")
+
+    return start, end
+
+if __name__ == "__main__":
+    start, end= parse_arguments()
+    manual_aggregate(start, end)
+
