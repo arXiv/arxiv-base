@@ -123,7 +123,7 @@ class DownloadKey:
     def __repr__(self):
         return f"Key(type: {self.download_type}, cat: {self.category}, country: {self.country}, day: {self.time.day} hour: {self.time.hour})"
 
-def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[DownloadData], Set[str], str, int, int]:
+def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[DownloadData], Set[str], str, int, int, List[datetime]]:
     """processes rows of data from bigquery
     returns the list of download data, a set of all unique paper_ids and a string of the time periods this covers
     """
@@ -163,12 +163,12 @@ def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[
     if problem_row_count>30:
         logging.warning(f"{time_period_str}: Problem processing {problem_row_count} rows \n Selection of problem row errors: {problem_rows}")
 
-    return download_data, paper_ids, time_period_str, bad_id_count, problem_row_count
+    return download_data, paper_ids, time_period_str, bad_id_count, problem_row_count, time_periods
 
 def preform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table: str):
     """preforms the entire aggregation process for a set of data recieved from bigquery"""
     #process and store returned data
-    download_data, paper_ids, time_period_str, bad_id_count, problem_row_count= process_table_rows(rows)
+    download_data, paper_ids, time_period_str, bad_id_count, problem_row_count, time_periods= process_table_rows(rows)
     fetched_count=len(download_data)
     unique_id_count=len(paper_ids)
     if len(paper_ids) ==0:
@@ -185,8 +185,8 @@ def preform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table
     aggregated_data=aggregate_data(download_data, paper_categories)
     
     #write all_data to tables  
-    add_count, update_count=insert_into_database(aggregated_data, write_table)
-    logging.info(f"{time_period_str}: SUCCESS! rows added: {add_count}, rows updated: {update_count} fetched rows: {fetched_count}, unique_ids: {unique_id_count}, invalid_ids: {bad_id_count}, other unprocessable rows: {problem_row_count}")
+    add_count=insert_into_database(aggregated_data, write_table, time_periods)
+    logging.info(f"{time_period_str}: SUCCESS! rows created: {add_count}, fetched rows: {fetched_count}, unique_ids: {unique_id_count}, invalid_ids: {bad_id_count}, other unprocessable rows: {problem_row_count}")
 
 
 @functions_framework.cloud_event
@@ -293,7 +293,7 @@ def aggregate_data(download_data: List[DownloadData], paper_categories: Dict[str
 
     return all_data
 
-def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_uri: str)->Tuple[int, int]:
+def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_uri: str, time_periods:List[datetime])->int:
     """adds the data from an hour of downloads into the database
         uses bulk insert and update statements to increase efficiency
         first compiles all the keys for the data we would like to add and checks for their presence in the database
@@ -317,59 +317,6 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
             PrimaryKeyConstraint('country', 'download_type', 'category', 'start_dttm'),
         )
 
-    # Setup database connection
-    engine = create_engine(db_uri)
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    #see what data is already there
-    keys_to_check = [
-        (item.country, item.download_type, item.category, item.time)
-        for item in aggregated_data.keys()
-    ]
-    all_keys_to_update=[]
-    for i in range(0, len(keys_to_check), MAX_QUERY_TO_WRITE):
-        #query a section of data
-        existing_records = session.query(HourlyDownloadData).filter(
-            tuple_(
-                HourlyDownloadData.country,
-                HourlyDownloadData.download_type,
-                HourlyDownloadData.category,
-                HourlyDownloadData.start_dttm
-            ).in_(keys_to_check[i:i+MAX_QUERY_TO_WRITE])
-        ).all()
-
-        #record found records
-        keys_to_update=[
-            DownloadKey(
-                time=record.start_dttm,
-                country=record.country,
-                download_type=record.download_type,
-                archive=record.archive,
-                category_id=record.category
-            )
-            for record in existing_records
-        ]
-        all_keys_to_update += keys_to_update
-
-    #create data to be updated vs inserted
-    update_data=[]
-    for key in all_keys_to_update:
-        counts=aggregated_data[key]
-        entry={
-            'country': key.country,
-            'download_type': key.download_type,
-            'archive': key.archive,
-            'category': key.category,
-            'start_dttm': key.time,
-            'primary_count': counts.primary,
-            'cross_count': counts.cross
-        }
-        update_data.append(entry)
-        del aggregated_data[key] #remove before insert
-
-    #all the new data to insert
     data_to_insert = [
         HourlyDownloadData(
             country=key.country,
@@ -383,15 +330,24 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
         for key, counts in aggregated_data.items()
     ]
 
+    # Setup database connection
+    engine = create_engine(db_uri)
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    #remove previous data for the time period
+    session.query(HourlyDownloadData).filter(
+        HourlyDownloadData.start_dttm.in_(time_periods)
+    ).delete(synchronize_session=False)
+
     #add data
     for i in range(0, len(data_to_insert), MAX_QUERY_TO_WRITE):
         session.bulk_save_objects(data_to_insert[i:i+MAX_QUERY_TO_WRITE])
-    #update existing data
-    for i in range(0, len(update_data), MAX_QUERY_TO_WRITE):
-        session.bulk_update_mappings(HourlyDownloadData, update_data[i:i+MAX_QUERY_TO_WRITE])
+
     session.commit()
     session.close()
-    return (len(data_to_insert), len(update_data))
+    return (len(data_to_insert))
 
 def manual_aggregate(starttime:datetime, endtime: datetime):
     """used to do a manual run for transforming downloads logs into aggreated hourly download data
