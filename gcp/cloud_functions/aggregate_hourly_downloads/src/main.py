@@ -214,7 +214,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     data=json.loads(base64.b64decode(cloud_event.get_data()['message']['data']).decode())
     state= data.get("state","")
     if state!="SUCCEEDED":
-        logging.warning(f"recieved state other than SUCEEDED: {state}")
+        logging.warning(f"recieved state other than SUCCEEDED: {state}")
         return
 
     #get and check enviroment data
