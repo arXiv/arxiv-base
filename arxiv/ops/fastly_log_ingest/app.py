@@ -9,9 +9,10 @@ from datetime import datetime
 from threading import Condition, Thread
 from time import perf_counter
 from typing import List, Tuple
+import re
 
 import google.auth
-from google.api_core.exceptions import PermissionDenied
+from google.api_core.exceptions import PermissionDenied, DeadlineExceeded
 from google.cloud import pubsub_v1, logging as gcp_logging
 from google.cloud.logging_v2.entries import Resource
 from google.cloud.pubsub_v1.subscriber.message import Message
@@ -24,7 +25,7 @@ SUBSCRIPTION_ID = os.environ.get("SUBSCRIPTION_ID", "logs-fastly-arxiv-org-sub")
 LOGGER_NAME = os.environ.get("LOGGER_NAME", "fastly_log_ingest")
 """Name of logger in GCP, don't prefix with project-id or anything."""
 
-THREADS = int(os.environ.get("THREADS", 1))
+THREADS = int(os.environ.get("THREADS", 8))
 """Number of threads to use to send logs"""
 
 SEND_PERIOD = int(os.environ.get("SEND_PERIOD", 8.0))
@@ -33,17 +34,19 @@ SEND_PERIOD = int(os.environ.get("SEND_PERIOD", 8.0))
 PREFERRED_PER_BATCH = int(os.environ.get("PREFERRED_PER_BATCH", 50))
 """Number of records in a batch to start sending to log. Must be smaller than MAX_PER_BATCH"""
 
-MAX_PER_BATCH = int(os.environ.get("MAX_PER_BATCH", 100))
+MAX_PER_BATCH = int(os.environ.get("MAX_PER_BATCH", 60))
 """Number of log records in a batch. Limit seems to be 16kb but not sure."""
 
 MAX_BYTES_PER_VALUE = int(os.environ.get("MAX_BYTES_PER_VALUE", 1024 * 2))
-"""Maximum number of bytes allowed for a single value of a log record."""
+"""Maximum number of bytes allowed for a single value of a log record.
+
+Values longer than this are truncated."""
 
 """"############### just logging config #######################"""
 
 VERBOSE = os.environ.get("VERBOSE", "verbose_off_by_default") == "1"
 
-INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 12.0))
+INFO_PERIOD = int(os.environ.get("INFO_PERIOD", 360.0))
 """Seconds between rate info logging."""
 
 WARN_TOO_MANY_MESSAGES = int(os.environ.get("WARN_TOO_MANY_MESSAGES", 20_000))
@@ -90,8 +93,9 @@ def to_gcp_log_item(message: Message) -> Tuple[dict,dict]:
 
     All other values will be added as key values pairs to the `jsonPayload`
     """
+    value = message.data.decode('utf-8', errors="replace")
     try:
-        data: dict = json.loads(message.data.decode('utf-8').strip())
+        data: dict = json.loads(value.strip())
         return (
             {key: truncate(value) for key, value in data.items() if key != "timestamp"},
             {
@@ -104,8 +108,12 @@ def to_gcp_log_item(message: Message) -> Tuple[dict,dict]:
                                              "node_id": data.get("fastly_server", "server_unknown")})
             }
         )
-    except Exception:
-        logger.exception("Problem converting message to log item, skipping")
+    except Exception as ex:
+        example = ""
+        if match := re.search(r"\(char (\d*)\)", str(ex)):
+            start = max(0, int(match[1])-30)
+            example = " example: " + value[start:start+60]
+        logger.warning(f"Skipping pubsub msg due to problem converting message to log item: {ex}{example}")
         return {}, {}
 
 
@@ -163,16 +171,23 @@ def log_to_gcp():
 
             if work_items:
                 messages = (to_gcp_log_item(message) for message, _ in work_items)
-                with fastly_logger.batch() as batch:
-                    [batch.log_struct(info=info, **kv) for info, kv in messages if info and kv]
+                try:
+                    with fastly_logger.batch() as batch:
+                        [batch.log_struct(info=info, **kv) for info, kv in messages if info and kv]
+                except DeadlineExceeded:
+                    logger.warning("GCP log write deadline exceeded, will not ACK pub sub messages")
+                    continue
 
-                aki = 0
-                for item in work_items:
-                    item[0].ack()
-                    aki += 1
+                try:
+                    aki = 0
+                    for item in work_items:
+                        item[0].ack()
+                        aki += 1
+                    log_write_rate.event(quantity=len(work_items))
+                    logger.debug("Acked %d pubsub messages", aki)
+                except Exception as ex:
+                    logger.error(f"While ACK pubsub, may cause double entry: {ex}")
 
-                log_write_rate.event(quantity=len(work_items))
-                logger.debug("Acked %d pubsub messages", aki)
         except Exception:
             logger.exception("Exception in the write-logs-to-gcp loop")
     logger.info("Worker finished orderly shutdown.")
