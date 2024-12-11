@@ -1166,7 +1166,7 @@ class Submission(Base):
     # to arxiv check
     arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="submission")
     # to submission locks
-    arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="submission")
+    arXiv_submission_locks: Mapped[List["SubmissionLocks"]] = relationship("SubmissionLocks", back_populates="submission")
 
 
 class PilotDataset(Submission):
@@ -1922,7 +1922,7 @@ class TapirUser(Base):
     arXiv_submission_category_proposal = relationship('SubmissionCategoryProposal', back_populates='user')
     arXiv_submission_flag = relationship('SubmissionFlag', back_populates='user')
     arXiv_submission_hold_reason = relationship('SubmissionHoldReason', back_populates='user')
-    arXiv_submission_locks: Mapped[List["ArXivSubmissionLocks"]] = relationship("ArXivSubmissionLocks", back_populates="user")
+    arXiv_submission_locks: Mapped[List["SubmissionLocks"]] = relationship("SubmissionLocks", back_populates="user")
     arXiv_submission_view_flag = relationship('SubmissionViewFlag', back_populates='user')
     arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="user")
     arXiv_check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="user")
@@ -2061,7 +2061,7 @@ class TapirUsersPassword(Base):
     user = relationship('TapirUser')
 
 
-class ArXivSubmissionLocks(Base):
+class SubmissionLocks(Base):
     __tablename__ = 'arXiv_submission_locks'
     __table_args__ = (
         ForeignKeyConstraint(['submission_id'], ['arXiv_submissions.submission_id'], name='arxiv_submission_locks_sub_fk'),

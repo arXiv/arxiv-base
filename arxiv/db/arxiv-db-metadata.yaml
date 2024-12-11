@@ -9,16 +9,18 @@
 # To preserve the code change, this file exists. When the customized sqlacodegen runs, this is used to change
 # and override the behavior of codegen.
 #
-# Generally, sqlacodegen is driven from development/db_codegen.py
+# sqlacodegen is driven from development/db_codegen.py
 #
 
-# a hack
+# a minor hack
 # globally suggests the column name to python variable name
 # by default, sqlacodegen uses the suffix "_"
 #
 _names_map_:
   class: _class
 
+# ==================================================================================================================
+# MySQL arXiv tables
 #
 Subscription_UniversalInstitution:
   class_name: MemberInstitution
@@ -30,13 +32,9 @@ Subscription_UniversalInstitutionContact:
   class_name: MemberInstitutionContact
   columns:
     sid: "mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)"
-  relationships:
-    Subscription_UniversalInstitution: relationship('MemberInstitution', primaryjoin='MemberInstitutionContact.sid == MemberInstitution.id')
 
 Subscription_UniversalInstitutionIP:
   class_name: MemberInstitutionIP
-  relationships:
-    Subscription_UniversalInstitution: relationship('MemberInstitution', primaryjoin='MemberInstitutionIP.sid == MemberInstitution.id')
 
 arXiv_admin_log:
   class_name: AdminLog
@@ -71,16 +69,15 @@ arXiv_bogus_countries:
 arXiv_categories:
   class_name: Category
   relationships:
-    arXiv_demographics: ""
     arXiv_archives: ""
-    arXiv_cross_control: ""
-    arXiv_categories: ""
+    arXiv_cross_control:
+      arXiv_cross_controls: "relationship('CrossControl', back_populates='arXiv_category')"
     arXiv_endorsement_domains:
       arXiv_endorsement_domain: "relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
+    arXiv_demographics: "relationship('Demographic', back_populates='arXiv_category')"
   additional_relationships:
     - "arXiv_endorsements = relationship('Endorsement', back_populates='arXiv_categories')"
     - "arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='arXiv_categories')"
-    # - "arXiv_cross_controls = relationship('CrossControl', back_populates='arXiv_category')"
 
 arXiv_questionable_categories:
   class_name: QuestionableCategory
@@ -157,11 +154,11 @@ arXiv_endorsements:
   class_name: Endorsement
   table_args:
     - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
-    # - replace: ["Index('endorser_id_2', 'endorser_id', 'endorsee_id', 'archive', 'subject_class', unique=True),", ""]
   relationships:
     endorsee: "relationship('TapirUser', primaryjoin='Endorsement.endorsee_id == TapirUser.user_id', back_populates='endorsee_of')"
     endorser: "relationship('TapirUser', primaryjoin='Endorsement.endorser_id == TapirUser.user_id', back_populates='endorses')"
     request: "relationship('EndorsementRequest', back_populates='endorsement')"
+
 arXiv_endorsements_audit:
   class_name: EndorsementsAudit
 arXiv_freeze_log:
@@ -204,8 +201,8 @@ arXiv_metadata:
     sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions_sowrd')"
 
 arXiv_mirror_list:
-
   class_name: MirrorList
+
 arXiv_moderator_api_key:
   class_name: ModeratorApiKey
   relationships:
@@ -234,7 +231,7 @@ arXiv_ownership_requests:
     - "request_audit = relationship('OwnershipRequestsAudit', back_populates='ownership_request', uselist=False)"
     - "documents = relationship('Document', secondary=t_arXiv_ownership_requests_papers)"
 
-# Have a mixed feelig about this. This is clearly hand-edited, and not really used
+# I think this is hand-edited, and not really used anywhere it seems
 arXiv_ownership_requests_audit:
   class_name: OwnershipRequestsAudit
   table_args: drop
@@ -253,7 +250,7 @@ arXiv_ownership_requests_audit:
 arXiv_paper_owners:
   class_name: PaperOwner
   table_args:
-    # This is given by the document_id column - squalch the index name that's not relevant
+    # This is given by the document_id column - squelch the index name that's not relevant
     - replace: ["ForeignKeyConstraint(['document_id'], ['arXiv_documents.document_id'], name='0_593'),", ""]
     # This is give by the user_id column
     - replace: ["ForeignKeyConstraint(['user_id'], ['tapir_users.user_id'], name='0_594'),", ""]
@@ -297,6 +294,13 @@ arXiv_submission_category:
   
 arXiv_submission_category_proposal:
   class_name: SubmissionCategoryProposal
+  relationships:
+    arXiv_category_def: "relationship('CategoryDef', primaryjoin='SubmissionCategoryProposal.category == CategoryDef.category', back_populates='arXiv_submission_category_proposal')"
+    proposal_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.proposal_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal')"
+    response_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.response_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal_')"
+    submission: "relationship('Submission', primaryjoin='SubmissionCategoryProposal.submission_id == Submission.submission_id', back_populates='arXiv_submission_category_proposal')"
+    user: "relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', back_populates='arXiv_submission_category_proposal')"
+
 
 arXiv_submission_control:
   table_args:
@@ -308,6 +312,8 @@ arXiv_submission_flag:
   class_name: SubmissionFlag
 arXiv_submission_hold_reason:
   class_name: SubmissionHoldReason
+arXiv_submission_locks:
+  class_name: SubmissionLocks
 arXiv_submission_near_duplicates:
   class_name: SubmissionNearDuplicate
 arXiv_submission_qa_reports:
@@ -327,7 +333,6 @@ arXiv_submissions:
 arXiv_pilot_datasets:
   class_name: PilotDataset
   columns:
-    # Kill off the slot
     created: drop
 
 arXiv_submission_abs_classifier_data:
@@ -360,12 +365,12 @@ arXiv_tracking:
   class_name: Tracking
 
 # without this, arXiv_updates would become simple Table, not Model
+# IOW, someone copy&pasted and did not ues sqlacodegen
 arXiv_updates:
   class_name: Updates
   table_args:
     - replace: ["Index('document_id', 'document_id', 'date', 'action', 'category', unique=True)", "PrimaryKeyConstraint('document_id', 'date', 'action', 'category')"]
   columns:
-    
     action: ":Mapped[Optional[Literal['new', 'replace', 'absonly', 'cross', 'repcro']]] = mapped_column(Enum('new', 'replace', 'absonly', 'cross', 'repcro'))"
 
 arXiv_versions:
@@ -397,7 +402,7 @@ tapir_countries:
   class_name: TapirCountry
   relationships:
     tapir_address: "relationship('TapirAddress', back_populates='tapir_country')"
-    tapir_demographics: ""
+    tapir_demographics: "relationship('TapirDemographic', back_populates='tapir_country')"
 
 tapir_email_change_tokens:
   class_name: TapirEmailChangeToken
@@ -441,6 +446,7 @@ tapir_string_variables:
   class_name: TapirStringVariable
 tapir_strings:
   class_name: TapirString
+
 tapir_users:
   class_name: TapirUser
   relationships:
@@ -459,40 +465,6 @@ tapir_users:
       arXiv_cross_controls: "relationship('CrossControl', back_populates='user')"
       
   additional_relationships:
-    - "tapir_address = relationship('TapirAddress', back_populates='user')"
-    - "tapir_email_change_tokens = relationship('TapirEmailChangeToken', back_populates='user')"
-    - "tapir_email_templates = relationship('TapirEmailTemplate', foreign_keys='[TapirEmailTemplate.created_by]', back_populates='tapir_users')"
-    - "tapir_email_templates_ = relationship('TapirEmailTemplate', foreign_keys='[TapirEmailTemplate.updated_by]', back_populates='tapir_users_')"
-    - "tapir_email_tokens = relationship('TapirEmailToken', back_populates='user')"
-    - "tapir_nicknames = relationship('TapirNickname', back_populates='user', uselist=False)"
-    - "tapir_phone = relationship('TapirPhone', back_populates='user')"
-    - "tapir_recovery_tokens = relationship('TapirRecoveryToken', back_populates='user')"
-    - "tapir_sessions = relationship('TapirSession', back_populates='user')"
-    - "arXiv_cross_controls = relationship('CrossControl', back_populates='user')"
-    - "arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='endorsee')"
-    - "arXiv_jref_controls = relationship('JrefControl', back_populates='user')"
-    - "arXiv_metadata = relationship('Metadata', back_populates='submitter')"
-    - "arXiv_show_email_requests = relationship('ShowEmailRequest', back_populates='user')"
-    - "arXiv_submission_control = relationship('SubmissionControl', back_populates='user')"
-    - "arXiv_submissions = relationship('Submission', back_populates='submitter')"
-    - "tapir_admin_audit = relationship('TapirAdminAudit', foreign_keys='[TapirAdminAudit.admin_user]', back_populates='tapir_users')"
-    - "tapir_admin_audit_ = relationship('TapirAdminAudit', foreign_keys='[TapirAdminAudit.affected_user]', back_populates='tapir_users_')"
-    - "tapir_email_mailings = relationship('TapirEmailMailing', foreign_keys='[TapirEmailMailing.created_by]', back_populates='tapir_users')"
-    - "tapir_email_mailings_ = relationship('TapirEmailMailing', foreign_keys='[TapirEmailMailing.sent_by]', back_populates='tapir_users_')"
-    - "tapir_permanent_tokens = relationship('TapirPermanentToken', back_populates='user')"
-    - "tapir_recovery_tokens_used = relationship('TapirRecoveryTokensUsed', back_populates='user')"
-    - "endorsee_of = relationship('Endorsement', foreign_keys='[Endorsement.endorsee_id]', back_populates='endorsee')"
-    - "endorses = relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')"
-    - "arXiv_ownership_requests = relationship('OwnershipRequest', back_populates='user')"
-    - "arXiv_submission_category_proposal = relationship('SubmissionCategoryProposal', back_populates='user')"
-    - "arXiv_submission_flag = relationship('SubmissionFlag', back_populates='user')"
-    - "arXiv_submission_hold_reason = relationship('SubmissionHoldReason', back_populates='user')"
-    - "arXiv_submission_locks: Mapped[List['ArXivSubmissionLocks']] = relationship('ArXivSubmissionLocks', back_populates='user')"
-    - "arXiv_submission_view_flag = relationship('SubmissionViewFlag', back_populates='user')"
-    - "arXiv_check_results: Mapped[List['CheckResults']] = relationship('CheckResults', back_populates='user')"
-    - "arXiv_check_responses: Mapped[List['CheckResponses']] = relationship('CheckResponses', back_populates='user')"
-
-    - "owned_papers = relationship('PaperOwner',  foreign_keys='[PaperOwner.user_id]', back_populates='owner')"
     - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
 
 arXiv_author_ids:
@@ -501,7 +473,8 @@ arXiv_demographics:
   class_name: Demographic
   relationships:
     arXiv_categories:
-      arXiv_category: "relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', backref='category_demographics')"
+      arXiv_category: "relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', back_populates='arXiv_demographics')"
+
 arXiv_orcid_ids:
   class_name: OrcidIds
 arXiv_queue_view:
@@ -514,7 +487,7 @@ tapir_demographics:
   class_name: TapirDemographic
   relationships:
     tapir_countries:
-      tapir_country: relationship('TapirCountry', primaryjoin='TapirDemographic.country == TapirCountry.digraph', backref='tapir_demographics')
+      tapir_country: relationship('TapirCountry', primaryjoin='TapirDemographic.country == TapirCountry.digraph', back_populates='tapir_demographics')
 tapir_users_hot:
   class_name: TapirUsersHot
 tapir_users_password:
@@ -530,9 +503,12 @@ arXiv_latexml_sub:
   class_name: DBLaTeXMLSubmissions
 feedback:
   class_name: DBLaTeXMLFeedback
+
 arXiv_in_category:
   columns:
     document_id: "Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue())"
+  indecies:
+    - replace: ["Index('archive'", "Index('in_cat_archive'"]
 
 arXiv_moderators:
   indecies:
@@ -574,9 +550,12 @@ arXiv_checks:
 arXiv_check_results:
   class_name: CheckResults
   table_args: drop
+  relationships:
+    arXiv_check_responses:
+      check_responses: "relationship('CheckResponses', back_populates='check_result')"
 
 arXiv_check_responses:
   class_name: CheckResponses
   table_args: drop
-  
-  
+  relationships:
+    check_result: "relationship('CheckResults', back_populates='check_responses')"

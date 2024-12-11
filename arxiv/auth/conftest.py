@@ -1,14 +1,17 @@
+import logging
+import shlex
 import shutil
+import subprocess
 import tempfile
-from copy import copy
 from datetime import datetime, UTC
 
 import pytest
 import os
 
 from flask import Flask
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, make_transient_to_detached
+from sqlalchemy import create_engine, text, CursorResult
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
 
 from .legacy import util
 from .legacy.passwords import hash_password
@@ -20,26 +23,106 @@ from ..db.models import configure_db_engine
 from ..auth.auth import Auth
 from ..auth.auth.middleware import AuthMiddleware
 
+logging.basicConfig(level=logging.INFO)
 
-@pytest.fixture
-def classic_db_engine():
-    db_path = tempfile.mkdtemp()
-    uri = f'sqlite:///{db_path}/test.db'
-    engine = create_engine(uri)
-    util.create_all(engine)
-    yield engine
-    shutil.rmtree(db_path)
+DB_PORT = 25336
+DB_NAME = "testdb"
+ROOT_PASSWORD = "rootpassword"
+
+my_sql_cmd = ["mysql", f"--port={DB_PORT}", "-h", "127.0.0.1", "-u", "root", f"--password={ROOT_PASSWORD}",
+              # "--ssl-mode=DISABLED",
+              DB_NAME]
+
+def arxiv_base_dir() -> str:
+    """
+    Returns:
+    "arxiv-base" directory abs path
+    """
+    here = os.path.abspath(__file__)
+    root_dir = here
+    for _ in range(3):
+        root_dir = os.path.dirname(root_dir)
+    return root_dir
 
 
+@pytest.fixture(scope="session")
+def db_uri(request):
+    db_type = request.config.getoption("--db")
 
-@pytest.fixture
-def classic_db_engine():
-    db_path = tempfile.mkdtemp()
-    uri = f'sqlite:///{db_path}/test.db'
-    engine = create_engine(uri)
-    util.create_all(engine)
-    yield engine
-    shutil.rmtree(db_path)
+    if db_type == "sqlite":
+        # db_path = tempfile.mkdtemp()
+        # uri = f'sqlite:///{db_path}/test.db'
+        uri = f'sqlite'
+    elif db_type == "mysql":
+        # load_arxiv_db_schema.py sets up the docker and load the db schema
+        loader_py = os.path.join(arxiv_base_dir(), "development", "load_arxiv_db_schema.py")
+        subprocess.run(["poetry", "run", "python", loader_py, f"--db_name={DB_NAME}", f"--db_port={DB_PORT}",
+                        f"--root_password={ROOT_PASSWORD}"], encoding="utf-8", check=True)
+        uri = f"mysql://testuser:testpassword@127.0.0.1:{DB_PORT}/{DB_NAME}"
+    else:
+       raise ValueError(f"Unsupported database dialect: {db_type}")
+
+    yield uri
+
+
+@pytest.fixture(scope="function")
+def classic_db_engine(db_uri):
+    logger = logging.getLogger()
+    db_path = None
+    if db_uri.startswith("sqlite"):
+        db_path = tempfile.mkdtemp()
+        uri = f'sqlite:///{db_path}/test.db'
+        db_engine = create_engine(uri)
+        util.create_arxiv_db_schema(db_engine)
+    else:
+        conn_args = {}
+        # conn_args["ssl"] = None
+        db_engine = create_engine(db_uri, connect_args=conn_args, poolclass=NullPool)
+
+        # Clean up the tables to real fresh
+        targets = []
+        with db_engine.connect() as connection:
+            tables = [row[0] for row in connection.execute(text("SHOW TABLES"))]
+            for table_name in tables:
+                counter: CursorResult = connection.execute(text(f"select count(*) from {table_name}"))
+                count = counter.first()[0]
+                if count and int(count):
+                    targets.append(table_name)
+            connection.invalidate()
+
+        if targets:
+            statements = [ "SET FOREIGN_KEY_CHECKS = 0;"] + [f"TRUNCATE TABLE {table_name};" for table_name in targets] + ["SET FOREIGN_KEY_CHECKS = 1;"]
+            debug_sql = "SHOW PROCESSLIST;\nSELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;\n"
+            sql = "\n".join(statements)
+            mysql = subprocess.Popen(my_sql_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
+            try:
+                logger.info(debug_sql + sql)
+                out, err = mysql.communicate(sql, timeout=9999)
+                if out:
+                    logger.info(out)
+                if err:
+                    logger.info(err)
+            except Exception as exc:
+                logger.error(f"BOO: {str(exc)}", exc_info=True)
+
+    util.bootstrap_arxiv_db(db_engine)
+
+    yield db_engine
+
+    if db_path:
+        shutil.rmtree(db_path)
+    else:
+        with db_engine.connect() as connection:
+            danglings: CursorResult = connection.execute(text("select id from information_schema.processlist where user = 'testuser';")).all()
+            connection.invalidate()
+
+        if danglings:
+            kill_conn = "\n".join([ f"kill {id[0]};" for id in danglings ])
+            logger.info(kill_conn)
+            mysql = subprocess.Popen(my_sql_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
+            mysql.communicate(kill_conn)
+    db_engine.dispose()
+
 
 
 @pytest.fixture
@@ -90,7 +173,7 @@ def foouser(mocker):
         issued_when=n,
         issued_to='127.0.0.1',
         remote_host='foohost.foo.com',
-        session_id=0
+        session_id=1
     )
     user.tapir_nicknames = nick
     user.tapir_passwords = password
@@ -100,8 +183,17 @@ def foouser(mocker):
 
 @pytest.fixture
 def db_with_user(classic_db_engine, foouser):
-    # just combines classic_db_engine and foouser
-    with Session(classic_db_engine, expire_on_commit=False) as session:
+    try:
+        _load_test_user(classic_db_engine, foouser)
+    except Exception as e:
+        pass
+    yield classic_db_engine
+
+
+def _load_test_user(db_engine, foouser):
+    # just combines db_engine and foouser
+    with Session(db_engine) as session:
+
         user = models.TapirUser(
             user_id=foouser.user_id,
             first_name=foouser.first_name,
@@ -117,6 +209,15 @@ def db_with_user(classic_db_engine, foouser):
             flag_banned=foouser.flag_banned,
             tracking_cookie=foouser.tracking_cookie,
         )
+        session.add(user)
+        session.commit()
+
+        # Make sure the ID is correct. If you are using mysql with different auto-increment. you may get an different id
+        # However, domain.User's user_id is str, and the db/models User model user_id is int.
+        # wish they match but since tapir's user id came from auto-increment id which has to be int, I guess
+        # "it is what it is".
+        assert str(foouser.user_id) == str(user.user_id)
+
         nick = models.TapirNickname(
             nickname=foouser.tapir_nicknames.nickname,
             user_id=foouser.tapir_nicknames.user_id,
@@ -126,11 +227,30 @@ def db_with_user(classic_db_engine, foouser):
             policy=foouser.tapir_nicknames.policy,
             flag_primary=foouser.tapir_nicknames.flag_primary,
         )
+        session.add(nick)
+        session.commit()
+
         password = models.TapirUsersPassword(
             user_id=foouser.user_id,
             password_storage=foouser.tapir_passwords.password_storage,
             password_enc=foouser.tapir_passwords.password_enc,
         )
+        session.add(password)
+        session.commit()
+
+    with Session(db_engine) as session:
+        tapir_session_1 = models.TapirSession(
+            session_id = foouser.tapir_tokens.session_id,
+            user_id = foouser.user_id,
+            last_reissue = 0,
+            start_time = 0,
+            end_time = 0
+        )
+        session.add(tapir_session_1)
+        session.commit()
+        assert foouser.tapir_tokens.session_id == tapir_session_1.session_id
+
+    with Session(db_engine) as session:
         token = models.TapirPermanentToken(
             user_id=foouser.user_id,
             secret=foouser.tapir_tokens.secret,
@@ -140,20 +260,14 @@ def db_with_user(classic_db_engine, foouser):
             remote_host=foouser.tapir_tokens.remote_host,
             session_id=foouser.tapir_tokens.session_id,
         )
-        session.add(user)
         session.add(token)
-        session.add(password)
-        session.add(nick)
         session.commit()
-        session.close()
 
-    foouser.tapir_nicknames.nickname
-    yield classic_db_engine
 
 @pytest.fixture
 def db_configed(db_with_user):
-    configure_db_engine(db_with_user,None)
-
+    db_engine, _ = configure_db_engine(db_with_user,None)
+    yield None
 
 @pytest.fixture
 def app(db_with_user):
@@ -169,3 +283,8 @@ def app(db_with_user):
 @pytest.fixture
 def request_context(app):
     yield app.test_request_context()
+
+
+def pytest_addoption(parser):
+    parser.addoption("--db", action="store", default="sqlite",
+                     help="Database type to test against (sqlite/mysql)")

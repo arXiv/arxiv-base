@@ -159,6 +159,15 @@ class TablesGenerator(CodeGenerator):
         if isinstance(override, dict):
             ops = override.get(keyword)
             if ops == "drop":
+                if keyword == "table_args":
+                    try:
+                        value = eval(default)
+                        charset = value.get("mysql_charset")
+                        if charset:
+                            return repr({"mysql_charset": charset})
+                    except:
+                        return None if default is None else ""
+                        pass
                 return None if default is None else ""
             if ops:
                 for op in ops:
@@ -1247,6 +1256,7 @@ class DeclarativeGenerator(TablesGenerator):
         # Render constraints and indexes as __table_args__
         table_args = self.render_table_args(model.table, indexed_columns)
         table_args = self.get_arg_override(model.table, "table_args", table_args)
+
         if table_args:
             variables.append(f"__table_args__ = {table_args}")
 

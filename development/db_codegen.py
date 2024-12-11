@@ -329,7 +329,12 @@ class SchemaTransformer(cst.CSTTransformer):
     def has_comment(self, elem: cst.CSTNode):
         """commented? The commented line means that the statement's very last comment is not blank comment"""
         if isinstance(elem, cst.SimpleStatementLine):
-            return elem.leading_lines and elem.leading_lines[-1].comment[1:].strip()
+            return elem.leading_lines and elem.leading_lines[-1] \
+                and elem.leading_lines \
+                and elem.leading_lines[-1] \
+                and elem.leading_lines[-1].comment \
+                and elem.leading_lines[-1].comment.value \
+                and elem.leading_lines[-1].comment.value[1:].strip()
         return False
 
     def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.CSTNode:
@@ -448,7 +453,7 @@ def is_port_open(host: str, port: int):
 
 def run_mysql_container(port: int):
     """Start a mysql docker"""
-    mysql_image = "mysql:5.7"
+    mysql_image = "mysql:5.7.20"
     try:
         subprocess.run(["docker", "pull", mysql_image], check=True)
 

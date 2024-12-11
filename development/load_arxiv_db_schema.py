@@ -1,65 +1,32 @@
 #!/usr/bin/python3
 import os
 import sys
-import socket
 import subprocess
 import logging
 import time
 import shlex
+import argparse
+
+from development.run_mysql_container import is_port_open, run_mysql_container
 
 logging.basicConfig(level=logging.INFO)
 
 arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(arxiv_base_dir)
 
-def is_port_open(host: str, port: int):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.settimeout(1)
-        result = sock.connect_ex((host, port))
-        return result == 0
 
-
-def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"):
-    """Start a mysql docker"""
-    mysql_image = "mysql:5.7.20"
-
-    subprocess.run(["docker", "pull", mysql_image], check=True)
-    # subprocess.run(["docker", "kill", container_name], check=False)
-    subprocess.run(["docker", "rm", container_name], check=False)
-
-    argv = [
-        "docker", "run", "-d", "--name", container_name,
-        "-e", "MYSQL_ROOT_PASSWORD=testpassword",
-        "-e", "MYSQL_USER=testuser",
-        "-e", "MYSQL_PASSWORD=testpassword",
-        "-e", "MYSQL_DATABASE=" + db_name,
-        "-p", f"{port}:3306",
-        mysql_image
-    ]
-
-    try:
-        subprocess.run(argv, check=True)
-        logging.info("MySQL Docker container started successfully.")
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error: {e}\n\n{shlex.join(argv)}")
-    except Exception as e:
-        logging.error(f"Unexpected error: {e}\n\n{shlex.join(argv)}")
-
-
-def main() -> None:
-    mysql_port = 13306
-    db_name = "arxiv"
-    conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", "-ptestpassword", "--ssl-mode=DISABLED"]
+def main(mysql_port: int, db_name: str, root_password: str="rootpassword", schema_sql: str="arxiv_db_schema.sql") -> None:
+    conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", f"--password={root_password}"]
 
     if not is_port_open("127.0.0.1", mysql_port):
-        run_mysql_container(mysql_port, container_name="fake-arxiv-db", db_name=db_name)
+        run_mysql_container(mysql_port, container_name="fake-arxiv-db", db_name=db_name, root_password=root_password)
 
     cli = ["mysql"] + conn_argv + [db_name]
     for _ in range(20):
         if is_port_open("127.0.0.1", mysql_port):
             try:
                 mysql = subprocess.Popen(cli, encoding="utf-8",
-                                         stdin=subprocess.PIPE)
+                                         stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 mysql.communicate("select 1")
                 if mysql.returncode == 0:
                     break
@@ -68,10 +35,57 @@ def main() -> None:
                 pass
         time.sleep(1)
 
-    with open("arxiv_db_schema.sql") as schema_file:
-        subprocess.call(cli, stdin=schema_file)
+    if not os.path.exists(schema_sql) and ("/" not in schema_sql):
+        schema_sql = os.path.join(os.path.dirname(__file__), schema_sql)
+    try:
+        with open(schema_sql, encoding="utf-8") as schema_file:
+            subprocess.call(cli, encoding="utf-8", stdin=schema_file, timeout=60)
+    except:
+        logger.error("%s", shlex.join(cli), exc_info=True)
+        exit(1)
+    finally:
+        logger.info("Finish loading schema")
+    exit(0)
+
 
 if __name__ == "__main__":
     """
     """
-    main()
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    parser = argparse.ArgumentParser(description="populate database schema")
+
+    # Add arguments for db_name and db_port
+    parser.add_argument(
+        "--db_name",
+        type=str,
+        default="testdb",
+        help="The name of the database",
+    )
+    parser.add_argument(
+        "--db_port",
+        type=int,
+        default="3306",
+        help="The port number for the database",
+    )
+
+    parser.add_argument(
+        "--root_password",
+        type=str,
+        default="rootpassword",
+        help="Root password",
+    )
+
+    parser.add_argument(
+        "--schema",
+        type=str,
+        default="arxiv_db_schema.sql",
+        help="arXiv db Schema",
+    )
+
+    args = parser.parse_args()
+    db_port = int(args.db_port)
+    db_name = args.db_name
+
+    logger.info("port : %s name: %s", db_port, db_name)
+    main(db_port, db_name, root_password=args.root_password, schema_sql=args.schema)

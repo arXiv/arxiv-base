@@ -1,4 +1,15 @@
 #!/usr/bin/python3
+"""
+Create the db schema from arxiv/db/models.py
+
+NOTE: This does not work as the db/models is not fully expressing the original schema and thus
+it cannot satisfy the database constraints.
+
+The code exists for more of less for the referencing purpose.
+If one day, if we ditch the tests using sqlite3 and always use mysql, we can ues MySQL
+data types instead of generic Python types and this would work.
+
+"""
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -9,6 +20,9 @@ import sys
 import socket
 import subprocess
 import logging
+import time
+import shlex
+import argparse
 
 logging.basicConfig(level=logging.INFO)
 
@@ -44,41 +58,76 @@ def _make_schemas(db_engine: Engine):
 
 def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"):
     """Start a mysql docker"""
-    mysql_image = "mysql:5.7"
-    try:
-        subprocess.run(["docker", "pull", mysql_image], check=True)
+    mysql_image = "mysql:5.7.20"
 
-        subprocess.run(
-            [
-                "docker", "run", "-d", "--name", container_name,
-                "-e", "MYSQL_ROOT_PASSWORD=testpassword",
-                "-e", "MYSQL_USER=testuser",
-                "-e", "MYSQL_PASSWORD=testpassword",
-                "-e", "MYSQL_DATABASE=" + db_name,
-                "-p", f"{port}:3306",
-                mysql_image
-            ],
-            check=True
-        )
+    subprocess.run(["docker", "pull", mysql_image], check=True)
+
+    subprocess.run(["docker", "rm", container_name], check=False)
+
+    argv = [
+        "docker", "run", "-d", "--name", container_name,
+        "-e", "MYSQL_ROOT_PASSWORD=testpassword",
+        "-e", "MYSQL_USER=testuser",
+        "-e", "MYSQL_PASSWORD=testpassword",
+        "-e", "MYSQL_DATABASE=" + db_name,
+        "-p", f"{port}:3306",
+        mysql_image
+    ]
+
+    try:
+        subprocess.run(argv, check=True)
         logging.info("MySQL Docker container started successfully.")
     except subprocess.CalledProcessError as e:
-        logging.error(f"Error: {e}")
+        logging.error(f"Error: {e}\n\n{shlex.join(argv)}")
     except Exception as e:
-        logging.error(f"Unexpected error: {e}")
+        logging.error(f"Unexpected error: {e}\n\n{shlex.join(argv)}")
 
 
 
-def main() -> None:
-    mysql_port = 13306
-    db_name = "arxiv"
+    ping = ["mysql"] + conn_argv + [db_name]
+    logger.info(shlex.join(ping))
+    
+    for _ in range(20):
+        try:
+            mysql = subprocess.Popen(ping, encoding="utf-8", stdin=subprocess.PIPE)
+            mysql.communicate("select 1")
+            if mysql.returncode == 0:
+                break
+        except Exception as e:
+            print(e)
+            pass
+        time.sleep(1)
+
+
+def wait_for_mysql_docker(ping):
+    logger = logging.getLogger()
+    
+    for _ in range(20):
+        try:
+            mysql = subprocess.Popen(ping, encoding="utf-8", stdin=subprocess.PIPE)
+            mysql.communicate("select 1")
+            if mysql.returncode == 0:
+                break
+        except Exception as e:
+            print(e)
+            pass
+        time.sleep(1)
+
+        
+def main(mysql_port, db_name, root_password="rootpassword") -> None:
+    logger = logging.getLogger()
+    conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", f"--password={root_password}",
+                 # "--ssl-mode=DISABLED"
+                 ]
 
     if not is_port_open("127.0.0.1", mysql_port):
-        run_mysql_container(mysql_port, container_name="fake-arxiv-db", db_name=db_name)
-        for _ in range(20):
-            if is_port_open("127.0.0.1", mysql_port):
-                break
-            time.sleep(1)
-            
+        run_mysql_container(mysql_port, container_name="schema-creation-test-arxiv-db", db_name=db_name)
+
+    ping = ["mysql"] + conn_argv + [db_name]
+    logger.info(shlex.join(ping))
+    wait_for_mysql_docker(ping)
+
+
     db_uri = f"mysql://testuser:testpassword@127.0.0.1:{mysql_port}/{db_name}"
     db_engine = create_engine(db_uri)
 
@@ -98,11 +147,41 @@ def main() -> None:
     _make_schemas(db_engine)
     
     with open("schema-from-arxiv-db-model.sql", "w", encoding="utf-8") as sql_file:
-        subprocess.run(["mysqldump", "-h", "127.0.0.1", "--port", str(mysql_port), "-u",  "root", "-ptestpassword", "--no-data", db_name],
+        subprocess.run(["mysqldump"] + conn_argv + ["--no-data", db_name],
                        stdout=sql_file, check=True)
         
 
 if __name__ == "__main__":
-    """
-    """
-    main()
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+    parser = argparse.ArgumentParser(description="populate database schema")
+
+    # Add arguments for db_name and db_port
+    parser.add_argument(
+        "--db_name",
+        type=str,
+        default="testdb",
+        help="The name of the database",
+    )
+    parser.add_argument(
+        "--db_port",
+        type=int,
+        default="3306",
+        help="The port number for the database",
+    )
+
+    parser.add_argument(
+        "--root_password",
+        type=str,
+        default="rootpassword",
+        help="Root password",
+    )
+
+    args = parser.parse_args()
+    db_port = int(args.db_port)
+    db_name = args.db_name
+
+    logger.info("port : %s name: %s", db_port, db_name)
+    main(db_port, db_name, root_password=args.root_password)

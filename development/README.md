@@ -51,14 +51,14 @@ does following steps.
 
 1. start mysql docker if no MySQL running
 2. load arxiv/db/arxiv_db_schema.sql to the local mysql
-3. runs the modified development/sqlacodegen with the codegen metadata. This generates arxvi/db/autogen_models.py
+3. runs the modified development/sqlacodegen with the codegen metadata. This generates arxiv/db/autogen_models.py
 4. merges arxiv/db/autogen_models.py and arxiv/db/orig_models.py and creates arxiv/db/models.py
 
 ### Modified sqlacodegen
 
 In order to accomate the existing changes made to arxiv/db/models.py in the past, unmodified sqlacodegen cannot
 generate the code we need from the database schema. 
-The details of sqlacodegn modification is in development/sqlacodegen/ARXIV-README.md. 
+The details of sqlacodegen modification is in development/sqlacodegen/ARXIV-README.md. 
 
 Here is the TL;DR of changes made to it:
 
@@ -70,11 +70,11 @@ Here is the TL;DR of changes made to it:
 6. Override the relationship definition
 7. Append the extra relationship
 
-With these changes, auto-generated models (autogen_models.py) becomes somewhat close to what we need but 
+With these changes, auto-generated models (autogen_models.py) becomes somewhat close to what we need, but 
 it cannot be used as is. db_codegen.py post-processes the autogen .py.
 
 For more details of sqlacodegen changes from the original, see
-[development/sqlacodegen/ARXIV-README.md](development/sqlacodegen/ARXIV-README.md).
+[development/sqlacodegen/ARXIV-README.md](sqlacodegen/ARXIV-README.md).
 
 
 ### Merge autogen_models.py and orig_models.py
@@ -88,7 +88,7 @@ This is how merge works:
 2. Parse autogen_models.py. This is usually prefixed with `latest_` in the code
 3. Catalogs the classes in "latest". 
 4. Traverse the parse tree of "existing"
-5. While traversing existing parsed tree, if if finds the matching class in latest, replace the assignments in the class.
+5. While traversing existing parsed tree, if it finds the matching class in latest, replace the assignments in the class.
 6. Also update the simple assignments if it is "FOO = Table()" 
 7. Print the updated tree
 
@@ -107,7 +107,7 @@ the db_codegen.py again. It will show up.
 
 CST provides a tree traversing method that takes an object of Transformer (cst.CSTTransformer).
 
-The tree travering invokes the member functions prefixed by "enter" and "leave". Using this, the transformer 
+The tree traversing invokes the member functions prefixed by "enter" and "leave". Using this, the transformer 
 visits the classes and assignments in the `orig_models.py` and replaces the class members with the latest
 members.
 

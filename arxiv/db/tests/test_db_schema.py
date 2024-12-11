@@ -26,9 +26,16 @@ def _make_schemas(db_uri: str):
 
 
 def test_db_schema():
+    """
+    To test the MySQL and any other DB.
+
+    Note that, it's not possible to create the accurate MySQL arXiv schema from python
+    model. This is because the model object is NOT accurate representation of schema
+    as it has to be able to create sqlite3 for testing.
+    """
     db_uri = os.environ.get('TEST_ARXIV_DB_URI')
     if db_uri is None:
-        print("db_uri is not defined")
+        print("db_uri is not defined. Bypassing the test")
         return
     _make_schemas(db_uri)
 

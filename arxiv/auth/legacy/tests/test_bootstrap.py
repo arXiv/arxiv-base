@@ -1,21 +1,17 @@
 """Test the legacy integration with synthetic data."""
 
-import os
 import shutil
-import sys
 import tempfile
 from typing import Tuple
 from unittest import TestCase
 from flask import Flask
-import locale
+import pytest
 
-from typing import List
 import random
-from datetime import datetime
-from pytz import timezone, UTC
+from pytz import timezone
 from mimesis import Person, Internet, Datetime, locales
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 import arxiv.db
 from arxiv.db import transaction
@@ -82,21 +78,22 @@ class TestBootstrap(TestCase):
                     papers_to_endorse=3
                 ))
 
-            for category in definitions.CATEGORIES_ACTIVE.keys():
-                if '.' in category:
-                    archive, subject_class = category.split('.', 1)
-                else:
-                    archive, subject_class = category, ''
-
-                with transaction() as session:
-                    #print(f"arch: {archive} sc: {subject_class}")
-                    session.add(models.Category(
-                        archive=archive,
-                        subject_class=subject_class,
-                        definitive=1,
-                        active=1,
-                        endorsement_domain='test_domain_bootstrap'
-                    ))
+            # categories are loaded already
+            # for category in definitions.CATEGORIES_ACTIVE.keys():
+            #     if '.' in category:
+            #         archive, subject_class = category.split('.', 1)
+            #     else:
+            #         archive, subject_class = category, ''
+            #
+            #     with transaction() as session:
+            #         #print(f"arch: {archive} sc: {subject_class}")
+            #         session.add(models.Category(
+            #             archive=archive,
+            #             subject_class=subject_class,
+            #             definitive=1,
+            #             active=1,
+            #             endorsement_domain='test_domain_bootstrap'
+            #         ))
 
             COUNT = 100
 
@@ -250,6 +247,8 @@ class TestBootstrap(TestCase):
     def tearDown(self):
         shutil.rmtree(self.db_path)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_authenticate_and_use_session(self):
         """Attempt to authenticate users and create/load auth sessions."""
         with self.app.app_context():
