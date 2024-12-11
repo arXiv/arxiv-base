@@ -371,6 +371,7 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
 def manual_aggregate(starttime:datetime, endtime: datetime):
     """used to do a manual run for transforming downloads logs into aggreated hourly download data
     startime and endtime are both included
+    Note: not a fast program, even finishing in 1 min/hour takes 24 minutes per day
     """
     write_table=os.environ.get('WRITE_TABLE')
     if not write_table:
@@ -398,18 +399,28 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
     """    
     active_hour=starttime
     logging.info(AggregationResult.table_header())
+    failed_hours=[]
+    starttime=datetime.now()
     
     #for each hour
     while active_hour<=endtime:
         time_selection=f"and timestamp between TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:00:00') and TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:59:59')"
         query=f"{query_start}\n{time_selection}\n{query_end}"
         bq_client = bigquery.Client(project="arxiv-production")
-        query_job = bq_client.query(query)
-        download_result = query_job.result() 
-        result=preform_aggregation(download_result, write_table)
-        logging.info(result.table_row_str())
+        query_job = bq_client.query(query) 
+        try:
+            download_result = query_job.result() 
+            result=preform_aggregation(download_result, write_table)
+            logging.info(result.table_row_str())
+        except Exception:
+            logging.critical(f"Failed {active_hour}")
+            failed_hours.append(active_hour)
 
         active_hour+= timedelta(hours=1)
+    endtime=datetime.now()
+    if len(failed_hours)>0:
+        logging.critical(f"All failed time periods: {failed_hours}")
+    logging.info(f"finished processing, total time: {endtime-starttime}, started: {starttime}, ended: {endtime}")    
 
 
 def parse_arguments():
