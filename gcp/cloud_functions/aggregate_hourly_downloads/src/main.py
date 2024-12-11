@@ -389,7 +389,7 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
             FROM arxiv_logs._AllLogs
             WHERE log_id = "fastly_log_ingest"
             AND REGEXP_CONTAINS(STRING(json_payload.path), "^/(html|pdf|src|e-print)/")
-            AND REGEXP_CONTAINS(STRING(json_payload.status), "^2[0-9][0-9]$")
+            AND REGEXP_CONTAINS(JSON_VALUE(json_payload, "$.status"), "^2[0-9][0-9]$")
             AND LENGTH(REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})")) > 0
         """
     query_end="""
@@ -408,6 +408,7 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
         query=f"{query_start}\n{time_selection}\n{query_end}"
         bq_client = bigquery.Client(project="arxiv-production")
         query_job = bq_client.query(query) 
+
         try:
             download_result = query_job.result() 
             result=preform_aggregation(download_result, write_table)
@@ -420,7 +421,7 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
     endtime=datetime.now()
     if len(failed_hours)>0:
         logging.critical(f"All failed time periods: {failed_hours}")
-    logging.info(f"finished processing, total time: {endtime-starttime}, started: {starttime}, ended: {endtime}")    
+    logging.info(f"finished processing, total time: {endtime-starttime}, started: {starttime.strftime('%H:%M')}, ended: {endtime.strftime('%H:%M')}")    
 
 
 def parse_arguments():
