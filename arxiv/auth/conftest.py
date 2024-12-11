@@ -92,11 +92,11 @@ def classic_db_engine(db_uri):
 
         if targets:
             statements = [ "SET FOREIGN_KEY_CHECKS = 0;"] + [f"TRUNCATE TABLE {table_name};" for table_name in targets] + ["SET FOREIGN_KEY_CHECKS = 1;"]
-            debug_sql = "SHOW PROCESSLIST;\nSELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;\n"
+            # debug_sql = "SHOW PROCESSLIST;\nSELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;\n"
             sql = "\n".join(statements)
             mysql = subprocess.Popen(my_sql_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
             try:
-                logger.info(debug_sql + sql)
+                logger.info(sql)
                 out, err = mysql.communicate(sql, timeout=9999)
                 if out:
                     logger.info(out)
@@ -112,13 +112,14 @@ def classic_db_engine(db_uri):
     if db_path:
         shutil.rmtree(db_path)
     else:
+        # This is to shut down the client connection from the database side. Get the list of processes used by
+        # the testuser and kill them all.
         with db_engine.connect() as connection:
             danglings: CursorResult = connection.execute(text("select id from information_schema.processlist where user = 'testuser';")).all()
             connection.invalidate()
 
         if danglings:
             kill_conn = "\n".join([ f"kill {id[0]};" for id in danglings ])
-            logger.info(kill_conn)
             mysql = subprocess.Popen(my_sql_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
             mysql.communicate(kill_conn)
     db_engine.dispose()
