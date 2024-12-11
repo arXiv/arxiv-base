@@ -33,20 +33,18 @@ def test_with_nonexistant_user_w_app(app):
     with app.app_context():
         assert not accounts.does_username_exist('baruser')
 
-def test_with_nonexistant_user_wo_app(app):
+def test_with_nonexistant_user_wo_app(db_configed):
     """There is no user with the passed username."""
-    with app.app_context():
-        assert not accounts.does_username_exist('baruser')
+    assert not accounts.does_username_exist('baruser')
 
 def test_with_existant_user_w_app(app):
     """There is a user with the passed username."""
     with app.app_context():
         assert accounts.does_username_exist('foouser')
 
-def test_with_existant_user_wo_app(app):
+def test_with_existant_user_wo_app(db_configed):
     """There is a user with the passed username."""
-    with app.app_context():
-        assert accounts.does_username_exist('foouser')
+    assert accounts.does_username_exist('foouser')
 
 def test_email(app):
     """There is no user with the passed email."""

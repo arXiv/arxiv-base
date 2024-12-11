@@ -23,7 +23,8 @@ def is_port_open(host: str, port: int) -> bool:
 def run_mysql_container(port: int, container_name: str ="mysql-test", db_name: str ="testdb",
                         root_password: str = "rootpassword") -> None:
     """Start a mysql docker"""
-    mysql_image = "mysql:8.0.40"
+    # mysql_image = "mysql:8.0.40"
+    mysql_image = "mysql:5.7.20"
 
     subprocess.run(["docker", "pull", mysql_image], check=True)
     # subprocess.run(["docker", "kill", container_name], check=False)
@@ -36,7 +37,9 @@ def run_mysql_container(port: int, container_name: str ="mysql-test", db_name: s
         "-e", "MYSQL_PASSWORD=testpassword",
         "-e", "MYSQL_DATABASE=" + db_name,
         "-p", f"{port}:3306",
-        mysql_image
+        mysql_image,
+        # Add this for mysql 8 and up to turn off SSL connection
+        # "--require_secure_transport=OFF"
     ]
 
     try:
@@ -57,8 +60,10 @@ def stop_mysql_container(port: int, container_name: str = "mysql-test") -> None:
             break
 
 
-def main(mysql_port: int, db_name: str, root_password: str = "rootpassword", restart: bool = False) -> None:
+def main(mysql_port: int, db_name: str, root_password: str = "rootpassword", restart: bool = False, use_ssl: bool =False) -> None:
     conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", f"--password={root_password}"]
+    if not use_ssl:
+        conn_argv.append("--ssl=DISABLED")
 
     if is_port_open("127.0.0.1", mysql_port) and restart:
         stop_mysql_container(mysql_port, container_name="fake-arxiv-db")
@@ -113,9 +118,15 @@ if __name__ == "__main__":
         action="store_true",
     )
 
+    parser.add_argument(
+        "--use-ssl",
+        help="Use SSL",
+        action="store_true",
+    )
+
     args = parser.parse_args()
     db_port = int(args.db_port)
     db_name = args.db_name
 
     logger.info("port : %s name: %s", db_port, db_name)
-    main(db_port, db_name, root_password=args.root_password, restart=args.restart)
+    main(db_port, db_name, root_password=args.root_password, restart=args.restart, use_ssl=args.use_ssl)

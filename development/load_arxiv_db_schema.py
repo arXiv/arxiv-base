@@ -15,8 +15,12 @@ arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(arxiv_base_dir)
 
 
-def main(mysql_port: int, db_name: str, root_password: str="rootpassword", schema_sql: str="arxiv_db_schema.sql") -> None:
+def main(mysql_port: int, db_name: str, root_password: str="rootpassword", schema_sql: str="arxiv_db_schema.sql",
+         use_ssl: bool = False,
+         ) -> None:
     conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", f"--password={root_password}"]
+    if not use_ssl:
+        conn_argv.append("--ssl-mode=DISABLED")
 
     if not is_port_open("127.0.0.1", mysql_port):
         run_mysql_container(mysql_port, container_name="fake-arxiv-db", db_name=db_name, root_password=root_password)
@@ -83,9 +87,15 @@ if __name__ == "__main__":
         help="arXiv db Schema",
     )
 
+    parser.add_argument(
+        "--use_ssl",
+        help="Use SSL",
+        action="store_true",
+    )
+
     args = parser.parse_args()
     db_port = int(args.db_port)
     db_name = args.db_name
 
     logger.info("port : %s name: %s", db_port, db_name)
-    main(db_port, db_name, root_password=args.root_password, schema_sql=args.schema)
+    main(db_port, db_name, root_password=args.root_password, schema_sql=args.schema, use_ssl=args.use_ssl)

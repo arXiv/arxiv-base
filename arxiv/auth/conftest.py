@@ -17,7 +17,7 @@ from .legacy import util
 from .legacy.passwords import hash_password
 from arxiv.base import Base
 from ..base.middleware import wrap
-from ..db import models
+from ..db import models, Session as arXiv_session
 from ..db.models import configure_db_engine
 
 from ..auth.auth import Auth
@@ -29,9 +29,7 @@ DB_PORT = 25336
 DB_NAME = "testdb"
 ROOT_PASSWORD = "rootpassword"
 
-my_sql_cmd = ["mysql", f"--port={DB_PORT}", "-h", "127.0.0.1", "-u", "root", f"--password={ROOT_PASSWORD}",
-              # "--ssl-mode=DISABLED",
-              DB_NAME]
+my_sql_cmd = ["mysql", f"--port={DB_PORT}", "-h", "127.0.0.1", "-u", "root", f"--password={ROOT_PASSWORD}"]
 
 def arxiv_base_dir() -> str:
     """
@@ -69,6 +67,7 @@ def db_uri(request):
 def classic_db_engine(db_uri):
     logger = logging.getLogger()
     db_path = None
+    use_ssl = False
     if db_uri.startswith("sqlite"):
         db_path = tempfile.mkdtemp()
         uri = f'sqlite:///{db_path}/test.db'
@@ -76,7 +75,8 @@ def classic_db_engine(db_uri):
         util.create_arxiv_db_schema(db_engine)
     else:
         conn_args = {}
-        # conn_args["ssl"] = None
+        if not use_ssl:
+            conn_args["ssl"] = None
         db_engine = create_engine(db_uri, connect_args=conn_args, poolclass=NullPool)
 
         # Clean up the tables to real fresh
@@ -91,16 +91,24 @@ def classic_db_engine(db_uri):
             connection.invalidate()
 
         if targets:
+            if len(targets) > 20 or "arXiv_metadata" in targets:
+                logger.error("Too many tables used in the database. Suspect this is not the intended test database.\n"
+                             "Make sure you are not using any of production or even development database.")
+                exit(1)
             statements = [ "SET FOREIGN_KEY_CHECKS = 0;"] + [f"TRUNCATE TABLE {table_name};" for table_name in targets] + ["SET FOREIGN_KEY_CHECKS = 1;"]
             # debug_sql = "SHOW PROCESSLIST;\nSELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;\n"
             sql = "\n".join(statements)
-            mysql = subprocess.Popen(my_sql_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
+            cmd = my_sql_cmd
+            if not use_ssl:
+                cmd = my_sql_cmd + ["--ssl-mode=DISABLED"]
+            cmd = cmd + [DB_NAME]
+            mysql = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
             try:
-                logger.info(sql)
+                # logger.info(sql)
                 out, err = mysql.communicate(sql, timeout=9999)
                 if out:
                     logger.info(out)
-                if err:
+                if err and not err.startswith("[Warning] Using a password on the command line interface can be insecure"):
                     logger.info(err)
             except Exception as exc:
                 logger.error(f"BOO: {str(exc)}", exc_info=True)
@@ -111,17 +119,20 @@ def classic_db_engine(db_uri):
 
     if db_path:
         shutil.rmtree(db_path)
-    else:
-        # This is to shut down the client connection from the database side. Get the list of processes used by
-        # the testuser and kill them all.
-        with db_engine.connect() as connection:
-            danglings: CursorResult = connection.execute(text("select id from information_schema.processlist where user = 'testuser';")).all()
-            connection.invalidate()
-
-        if danglings:
-            kill_conn = "\n".join([ f"kill {id[0]};" for id in danglings ])
-            mysql = subprocess.Popen(my_sql_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
-            mysql.communicate(kill_conn)
+    # else:
+    #     # This is to shut down the client connection from the database side. Get the list of processes used by
+    #     # the testuser and kill them all.
+    #     with db_engine.connect() as connection:
+    #         danglings: CursorResult = connection.execute(text("select id from information_schema.processlist where user = 'testuser';")).all()
+    #         connection.invalidate()
+    #     if danglings:
+    #         kill_conn = "\n".join([ f"kill {id[0]};" for id in danglings ])
+    #         cmd = my_sql_cmd
+    #         if not use_ssl:
+    #             cmd = cmd + ["--ssl-mode=DISABLED"]
+    #         cmd = cmd + [DB_NAME]
+    #         mysql = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
+    #         mysql.communicate(kill_conn)
     db_engine.dispose()
 
 
@@ -269,6 +280,8 @@ def _load_test_user(db_engine, foouser):
 def db_configed(db_with_user):
     db_engine, _ = configure_db_engine(db_with_user,None)
     yield None
+    arXiv_session.remove()
+
 
 @pytest.fixture
 def app(db_with_user):
