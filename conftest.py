@@ -1,37 +1,31 @@
 import logging
-import shlex
+import os
 import shutil
 import subprocess
 import tempfile
 from datetime import datetime, UTC
 
 import pytest
-import os
-
 from flask import Flask
-from sqlalchemy import create_engine, text, CursorResult
+from sqlalchemy import create_engine, NullPool, text, CursorResult
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import NullPool
 
-from .legacy import util
-from .legacy.passwords import hash_password
+from arxiv.auth.auth import Auth
+from arxiv.auth.auth.middleware import AuthMiddleware
+
+from arxiv.auth.legacy import util
+from arxiv.auth.legacy.passwords import hash_password
 from arxiv.base import Base
-from ..base.middleware import wrap
-from ..db import models, Session as arXiv_session
-from ..db.models import configure_db_engine
-
-from ..auth.auth import Auth
-from ..auth.auth.middleware import AuthMiddleware
-
-logging.basicConfig(level=logging.INFO)
+from arxiv.base.middleware import wrap
+from arxiv.db import models, Session as arXiv_session
+from arxiv.db.models import configure_db_engine
 
 PYTHON_EXE = "python"
-
 DB_PORT = 25336
 DB_NAME = "testdb"
 ROOT_PASSWORD = "rootpassword"
-
 my_sql_cmd = ["mysql", f"--port={DB_PORT}", "-h", "127.0.0.1", "-u", "root", f"--password={ROOT_PASSWORD}"]
+
 
 def arxiv_base_dir() -> str:
     """
@@ -138,7 +132,6 @@ def classic_db_engine(db_uri):
     db_engine.dispose()
 
 
-
 @pytest.fixture
 def foouser(mocker):
     user_id = '15830'
@@ -194,6 +187,7 @@ def foouser(mocker):
     user.tapir_tokens = token
 
     return user
+
 
 @pytest.fixture
 def db_with_user(classic_db_engine, foouser):
