@@ -19,7 +19,14 @@ jobs:
           poetry --version
           # Check if poetry lock file is current with pyproject.toml
           poetry check --lock
-          poetry install --with=dev
+          poetry install --with=dev --no-ansi
+
+      - name: Run db/test with MySQL docker
+        run: |
+          sudo apt update
+          sudo apt install -y mysql-client
+          cd arxiv && poetry run pytest auth/legacy/tests --db=mysql
+
       - name: Run arxiv-base tests with coverage
         run: poetry run pytest --cov=arxiv.base fourohfour --cov-fail-under=67 arxiv/base fourohfour
       # - name: Check Types
@@ -45,5 +52,3 @@ jobs:
       - name: Run App Tests
         run: poetry run python tests/run_app_tests.py
 
-      - name: Run db/test with MySQL docker
-        run: cd arxiv && poetry run pytest auth/legacy/tests --db=mysql

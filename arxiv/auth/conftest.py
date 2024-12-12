@@ -25,6 +25,8 @@ from ..auth.auth.middleware import AuthMiddleware
 
 logging.basicConfig(level=logging.INFO)
 
+PYTHON_EXE = "python"
+
 DB_PORT = 25336
 DB_NAME = "testdb"
 ROOT_PASSWORD = "rootpassword"
@@ -54,7 +56,7 @@ def db_uri(request):
     elif db_type == "mysql":
         # load_arxiv_db_schema.py sets up the docker and load the db schema
         loader_py = os.path.join(arxiv_base_dir(), "development", "load_arxiv_db_schema.py")
-        subprocess.run(["poetry", "run", "python", loader_py, f"--db_name={DB_NAME}", f"--db_port={DB_PORT}",
+        subprocess.run(["poetry", "run", PYTHON_EXE, loader_py, f"--db_name={DB_NAME}", f"--db_port={DB_PORT}",
                         f"--root_password={ROOT_PASSWORD}"], encoding="utf-8", check=True)
         uri = f"mysql://testuser:testpassword@127.0.0.1:{DB_PORT}/{DB_NAME}"
     else:
