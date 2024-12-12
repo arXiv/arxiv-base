@@ -23,6 +23,12 @@
 #
 # We can manually backfill, by editing a time in place of the current time, and pausing the scheduled query.
 #
+# Test paper_id regex in db:
+#    select count(*)
+#      from arXiv_documents
+#     where REGEXP_LIKE(paper_id, '^[a-zA-Z-]+/[0-9]{7}$')
+#        or REGEXP_LIKE(paper_id, '^[0-9]{4}\\.[0-9]{4,5}$');
+#
 
 bq --format=json query --nouse_legacy_sql --use_cache --max_rows 10 \
 '
@@ -30,17 +36,30 @@ SELECT paper_id, geo_country, download_type, start_dttm, COUNT(*) as num_downloa
   FROM (
 SELECT
       STRING(json_payload.remote_addr) as remote_addr,
-      REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z\.-]*/?[0-9.]+[0-9])") as paper_id,
+      REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})") as paper_id,
       STRING(json_payload.geo_country) as geo_country,
       REGEXP_EXTRACT(STRING(json_payload.path), r"^/(html|pdf|src|e-print)/") as download_type,
-      TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR), HOUR) as start_dttm
+
+      # The automated one:
+      #TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR), HOUR) as start_dttm
+
+      # The manual backfill one:
+      "2024-10-17 23:00:00" as start_dttm
+
  FROM arxiv_logs._AllLogs
 WHERE log_id = "fastly_log_ingest"
   AND REGEXP_CONTAINS(STRING(json_payload.path), "^/(html|pdf|src|e-print)/")
   AND INT64(json_payload.status) in ( 200,206 )
-  AND LENGTH(REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z\.-]*/?[0-9.]+[0-9])")) > 0
-  and timestamp between TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR), HOUR) and
-                        TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 HOUR), HOUR)
+  AND LENGTH(REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})")) > 0
+
+  # The automated one:
+  #and timestamp between "2024-10-17 23:00:00" and
+  #                      "2024-10-18 20:00:00"
+
+  # The manual backfill one:
+  and timestamp between "2024-10-17 23:00:00" and
+                        "2024-10-18 20:00:00"
+
 GROUP BY 1,2,3,4,5
 )
 GROUP BY 1,2,3,4
