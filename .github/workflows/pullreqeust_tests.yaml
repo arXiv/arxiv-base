@@ -45,7 +45,7 @@ jobs:
 
       - name: Run other tests
         # These tests are split out because their coverage is low
-        run: poetry run pytest --cov=arxiv --cov-fail-under=40 arxiv --ignore=arxiv/base --ignore=arxiv/auth/legacy
+        run: poetry run pytest --cov=arxiv --cov-fail-under=40 arxiv --ignore=arxiv/base --ignore=arxiv/auth/legacy --db=sqlite
       #- name: Check Doc Style
       #  run: poetry run pydocstyle --convention=numpy --add-ignore=D401 arxiv
 
