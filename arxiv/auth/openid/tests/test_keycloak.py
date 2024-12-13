@@ -5,15 +5,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
 import time
+from shutil import which
+
+WEB_BROWSER = "/usr/bin/firefox-esr"
+WEB_DRIVER = "/usr/local/bin/geckodriver"
 
 @pytest.fixture(scope="module")
+@pytest.mark.skipif(which(WEB_BROWSER) is None or which(WEB_DRIVER) is None, reason="Web browser/driver not found")
 def web_driver() -> webdriver.Chrome:
     options = Options()
     options.headless = True
-    options.binary_location = "/usr/bin/firefox-esr"
+    options.binary_location = WEB_BROWSER
     options.add_argument('--headless')
 
-    service = Service(executable_path="/usr/local/bin/geckodriver")
+    service = Service(executable_path=WEB_DRIVER)
     _web_driver = webdriver.Firefox(service=service, options=options)
     _web_driver.implicitly_wait(10)  # Wait for elements to be ready                                                                                                                                                             
     yield _web_driver
@@ -29,6 +34,7 @@ def toy_flask():
     flask_app.terminate()
     flask_app.wait()
 
+@pytest.mark.skipif(which(WEB_BROWSER) is None or which(WEB_DRIVER) is None, reason="Web browser not found")
 def test_login(web_driver, toy_flask):
     web_driver.get("http://localhost:5101/login")  # URL of your Flask app's login route
 
