@@ -7,18 +7,17 @@ from selenium.webdriver.firefox.options import Options
 import time
 from shutil import which
 
-WEB_BROWSER = "/usr/bin/firefox-esr"
-WEB_DRIVER = "/usr/local/bin/geckodriver"
+WEB_BROWSER = "firefox-esr"
+WEB_DRIVER = "geckodriver"
 
 @pytest.fixture(scope="module")
-@pytest.mark.skipif(which(WEB_BROWSER) is None or which(WEB_DRIVER) is None, reason="Web browser/driver not found")
 def web_driver() -> webdriver.Chrome:
     options = Options()
     options.headless = True
-    options.binary_location = WEB_BROWSER
+    options.binary_location = which(WEB_BROWSER)
     options.add_argument('--headless')
 
-    service = Service(executable_path=WEB_DRIVER)
+    service = Service(executable_path=which(WEB_DRIVER))
     _web_driver = webdriver.Firefox(service=service, options=options)
     _web_driver.implicitly_wait(10)  # Wait for elements to be ready                                                                                                                                                             
     yield _web_driver
