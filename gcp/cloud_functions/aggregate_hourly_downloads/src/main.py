@@ -398,7 +398,7 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
         GROUP BY 1,2,3,4
     """    
     active_hour=starttime
-    logging.info(AggregationResult.table_header())
+    logging.info(f"{AggregationResult.table_header()}   time taken")
     failed_hours=[]
     starttime=datetime.now()
     
@@ -410,9 +410,11 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
         query_job = bq_client.query(query) 
 
         try:
+            ministart=datetime.now()
             download_result = query_job.result() 
             result=preform_aggregation(download_result, write_table)
-            logging.info(result.table_row_str())
+            miniend=datetime.now()
+            logging.info(f"{result.table_row_str()}   {miniend-ministart:.1f}")
         except Exception:
             logging.critical(f"Failed {active_hour}")
             failed_hours.append(active_hour)
