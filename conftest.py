@@ -32,11 +32,7 @@ def arxiv_base_dir() -> str:
     Returns:
     "arxiv-base" directory abs path
     """
-    here = os.path.abspath(__file__)
-    root_dir = here
-    for _ in range(3):
-        root_dir = os.path.dirname(root_dir)
-    return root_dir
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.fixture(scope="session")
