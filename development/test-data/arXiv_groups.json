@@ -1,0 +1,47 @@
+[
+  {
+    "group_id": "cs",
+    "group_name": "Computer Science",
+    "start_year": "1993"
+  },
+  {
+    "group_id": "econ",
+    "group_name": "Economics",
+    "start_year": "2017"
+  },
+  {
+    "group_id": "eess",
+    "group_name": "Electrical Engineering and Systems Science",
+    "start_year": "2017"
+  },
+  {
+    "group_id": "math",
+    "group_name": "Mathematics",
+    "start_year": "1992"
+  },
+  {
+    "group_id": "physics",
+    "group_name": "Physics",
+    "start_year": "1991"
+  },
+  {
+    "group_id": "q-bio",
+    "group_name": "Quantitative Biology",
+    "start_year": "1992"
+  },
+  {
+    "group_id": "q-fin",
+    "group_name": "Quantitative Finance",
+    "start_year": "1997"
+  },
+  {
+    "group_id": "stat",
+    "group_name": "Statistics",
+    "start_year": "1999"
+  },
+  {
+    "group_id": "test",
+    "group_name": "Test",
+    "start_year": "1995"
+  }
+]

@@ -1,0 +1,100 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "sqlacodegen"
+description = "Automatic model code generator for SQLAlchemy"
+version = "0.1.0"  # Define a fixed version or use a dynamic versioning tool
+readme = "README.rst"
+authors = ["Alex Grönholm <alex.gronholm@nextday.fi>"]
+license = "MIT"
+keywords = ["sqlalchemy"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+    "Topic :: Database",
+    "Topic :: Software Development :: Code Generators",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+repository = "https://github.com/agronholm/sqlacodegen"
+homepage = "https://github.com/agronholm/sqlacodegen"
+documentation = "https://github.com/agronholm/sqlacodegen"
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+SQLAlchemy = ">=2.0.23"
+inflect = ">=4.0.0"
+importlib_metadata = {version = "*", markers = "python_version < '3.10'"}
+sqlmodel = ">=0.0.12"
+sqlalchemy-citext = ">=1.7.0"
+geoalchemy2 = ">=0.11.1"
+pgvector = ">=0.2.4"
+ruamel-yaml = "^0.18.6"
+
+[tool.poetry.dev-dependencies]
+pydocstyle = "*"
+mypy = "*"
+pytest = "*"
+coverage = ">=7.0"
+
+[tool.poetry.extras]
+test = ["pytest", "coverage", "psycopg2-binary", "mysql-connector-python"]
+
+[tool.poetry.scripts]
+sqlacodegen = "sqlacodegen.cli:main"
+
+[tool.poetry.plugins."sqlacodegen.generators"]
+tables = "sqlacodegen.generators:TablesGenerator"
+declarative = "sqlacodegen.generators:DeclarativeGenerator"
+dataclasses = "sqlacodegen.generators:DataclassGenerator"
+sqlmodels = "sqlacodegen.generators:SQLModelGenerator"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "dirty-tag"
+
+[tool.ruff]
+select = [
+    "E", "F", "W",  # default Flake8
+    "I",            # isort
+    "ISC",          # flake8-implicit-str-concat
+    "PGH",          # pygrep-hooks
+    "RUF100",       # unused noqa (yesqa)
+    "UP",           # pyupgrade
+]
+src = ["src"]
+
+[tool.mypy]
+strict = true
+
+[tool.pytest.ini_options]
+addopts = "-rsx --tb=short"
+testpaths = ["tests"]
+
+[coverage.run]
+source = ["sqlacodegen"]
+relative_files = true
+
+[coverage.report]
+show_missing = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py38, py39, py310, py311, py312
+skip_missing_interpreters = true
+minversion = 4.0.0
+
+[testenv]
+extras = test
+commands = python -m pytest {posargs}
+"""

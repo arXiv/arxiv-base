@@ -1,11 +1,11 @@
 """Tests for :mod:`arxiv.users.legacy.endorsements` using a live test DB."""
 
-import os
 import shutil
 import tempfile
-from unittest import TestCase, mock
+from unittest import TestCase
 from datetime import datetime
 from pytz import timezone, UTC
+import pytest
 
 from flask import Flask
 from sqlalchemy import insert
@@ -43,7 +43,10 @@ class TestAutoEndorsement(TestCase):
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
             'remote_host': 'foo-host.foo.com',
-            'tracking_cookie': '0'
+            'tracking_cookie': '0',
+            'date': '2024-01-01',
+            'flag_auto': 1,
+            'added_by': 1,
         }
 
         with self.app.app_context():
@@ -97,6 +100,8 @@ class TestAutoEndorsement(TestCase):
     def tearDown(self):
         shutil.rmtree(self.db_path)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_invalidated_autoendorsements(self):
         """The user has two autoendorsements that have been invalidated."""
         with self.app.app_context():
@@ -144,6 +149,8 @@ class TestAutoEndorsement(TestCase):
             result = endorsements.invalidated_autoendorsements(self.user)
         self.assertEqual(len(result), 2, "Two revoked endorsements are loaded")
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_category_policies(self):
         """Load category endorsement policies from the database."""
         with self.app.app_context():
@@ -171,6 +178,8 @@ class TestAutoEndorsement(TestCase):
             self.assertTrue(policies[category]['endorse_email'])
             self.assertEqual(policies[category]['min_papers'], 3)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_domain_papers(self):
         """Get the number of papers published in each domain."""
         with self.app.app_context():
@@ -292,6 +301,8 @@ class TestAutoEndorsement(TestCase):
             self.assertEqual(papers['firstdomain'], 2)
             self.assertEqual(papers['seconddomain'], 2)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_is_academic(self):
         """Determine whether a user is academic based on email."""
         ok_patterns = ['%w3.org', '%aaas.org', '%agu.org', '%ams.org']

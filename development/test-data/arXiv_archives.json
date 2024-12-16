@@ -1,0 +1,314 @@
+[
+  {
+    "archive_id": "acc-phys",
+    "in_group": "physics",
+    "archive_name": "Accelerator Physics",
+    "start_date": "9411",
+    "end_date": "9609",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "adap-org",
+    "in_group": "physics",
+    "archive_name": "Adaptation, Noise, and Self-Organizing Systems",
+    "start_date": "9303",
+    "end_date": "9912",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "alg-geom",
+    "in_group": "math",
+    "archive_name": "Algebraic Geometry",
+    "start_date": "9202",
+    "end_date": "9712",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "ao-sci",
+    "in_group": "physics",
+    "archive_name": "Atmospheric-Oceanic Sciences",
+    "start_date": "9502",
+    "end_date": "9609",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "astro-ph",
+    "in_group": "physics",
+    "archive_name": "Astrophysics",
+    "start_date": "9204",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "atom-ph",
+    "in_group": "physics",
+    "archive_name": "Atomic, Molecular and Optical Physics",
+    "start_date": "9509",
+    "end_date": "9609",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "bayes-an",
+    "in_group": "physics",
+    "archive_name": "Bayesian Analysis",
+    "start_date": "9506",
+    "end_date": "9611",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "chao-dyn",
+    "in_group": "physics",
+    "archive_name": "Chaotic Dynamics",
+    "start_date": "9301",
+    "end_date": "9912",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "chem-ph",
+    "in_group": "physics",
+    "archive_name": "Chemical Physics",
+    "start_date": "9403",
+    "end_date": "9609",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "cmp-lg",
+    "in_group": "cs",
+    "archive_name": "Computation and Language",
+    "start_date": "9404",
+    "end_date": "9809",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "comp-gas",
+    "in_group": "physics",
+    "archive_name": "Cellular Automata and Lattice Gases",
+    "start_date": "9302",
+    "end_date": "9912",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "cond-mat",
+    "in_group": "physics",
+    "archive_name": "Condensed Matter",
+    "start_date": "9204",
+    "end_date": "",
+    "subdivided": 1
+  },
+  {
+    "archive_id": "cs",
+    "in_group": "cs",
+    "archive_name": "Computer Science",
+    "start_date": "9301",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "dg-ga",
+    "in_group": "math",
+    "archive_name": "Differential Geometry",
+    "start_date": "9406",
+    "end_date": "9712",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "econ",
+    "in_group": "econ",
+    "archive_name": "Economics",
+    "start_date": "1709",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "eess",
+    "in_group": "eess",
+    "archive_name": "Electrical Engineering and Systems Science",
+    "start_date": "1709",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "funct-an",
+    "in_group": "math",
+    "archive_name": "Functional Analysis",
+    "start_date": "9204",
+    "end_date": "9712",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "gr-qc",
+    "in_group": "physics",
+    "archive_name": "General Relativity and Quantum Cosmology",
+    "start_date": "9207",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "hep-ex",
+    "in_group": "physics",
+    "archive_name": "High Energy Physics - Experiment",
+    "start_date": "9404",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "hep-lat",
+    "in_group": "physics",
+    "archive_name": "High Energy Physics - Lattice",
+    "start_date": "9202",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "hep-ph",
+    "in_group": "physics",
+    "archive_name": "High Energy Physics - Phenomenology",
+    "start_date": "9203",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "hep-th",
+    "in_group": "physics",
+    "archive_name": "High Energy Physics - Theory",
+    "start_date": "9108",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "math",
+    "in_group": "math",
+    "archive_name": "Mathematics",
+    "start_date": "9202",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "math-ph",
+    "in_group": "physics",
+    "archive_name": "Mathematical Physics",
+    "start_date": "9609",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "mtrl-th",
+    "in_group": "physics",
+    "archive_name": "Materials Theory",
+    "start_date": "9411",
+    "end_date": "9609",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "nlin",
+    "in_group": "physics",
+    "archive_name": "Nonlinear Sciences",
+    "start_date": "9301",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "nucl-ex",
+    "in_group": "physics",
+    "archive_name": "Nuclear Experiment",
+    "start_date": "9412",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "nucl-th",
+    "in_group": "physics",
+    "archive_name": "Nuclear Theory",
+    "start_date": "9210",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "patt-sol",
+    "in_group": "physics",
+    "archive_name": "Pattern Formation and Solitons",
+    "start_date": "9302",
+    "end_date": "9912",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "physics",
+    "in_group": "physics",
+    "archive_name": "Physics",
+    "start_date": "9610",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "plasm-ph",
+    "in_group": "physics",
+    "archive_name": "Plasma Physics",
+    "start_date": "9509",
+    "end_date": "9609",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "q-alg",
+    "in_group": "math",
+    "archive_name": "Quantum Algebra and Topology",
+    "start_date": "9412",
+    "end_date": "9712",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "q-bio",
+    "in_group": "q-bio",
+    "archive_name": "Quantitative Biology",
+    "start_date": "0309",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "q-fin",
+    "in_group": "q-fin",
+    "archive_name": "Quantitative Finance",
+    "start_date": "0812",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "quant-ph",
+    "in_group": "physics",
+    "archive_name": "Quantum Physics",
+    "start_date": "9412",
+    "end_date": "",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "solv-int",
+    "in_group": "physics",
+    "archive_name": "Exactly Solvable and Integrable Systems",
+    "start_date": "9304",
+    "end_date": "9912",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "stat",
+    "in_group": "stat",
+    "archive_name": "Statistics",
+    "start_date": "0704",
+    "end_date": "",
+    "subdivided": 2
+  },
+  {
+    "archive_id": "supr-con",
+    "in_group": "physics",
+    "archive_name": "Superconductivity",
+    "start_date": "9411",
+    "end_date": "9609",
+    "subdivided": 0
+  },
+  {
+    "archive_id": "test",
+    "in_group": "test",
+    "archive_name": "Test",
+    "start_date": "9502",
+    "end_date": "",
+    "subdivided": 1
+  }
+]

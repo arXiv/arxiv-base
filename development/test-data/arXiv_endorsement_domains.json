@@ -1,0 +1,436 @@
+[
+  {
+    "endorsement_domain": "acc-phys",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "adap-org",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "alg-geom",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "ao-sci",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "astro-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "atom-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "bayes-an",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "chao-dyn",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "chem-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "cmp-lg",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "comp-gas",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "cond-mat",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "cs",
+    "endorse_all": "n",
+    "mods_endorse_all": "y",
+    "endorse_email": "y",
+    "papers_to_endorse": 3
+  },
+  {
+    "endorsement_domain": "dg-ga",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "econ",
+    "endorse_all": "n",
+    "mods_endorse_all": "y",
+    "endorse_email": "y",
+    "papers_to_endorse": 3
+  },
+  {
+    "endorsement_domain": "eess",
+    "endorse_all": "n",
+    "mods_endorse_all": "y",
+    "endorse_email": "y",
+    "papers_to_endorse": 3
+  },
+  {
+    "endorsement_domain": "funct-an",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "gr-qc",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "hep-ex",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "hep-lat",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "hep-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "hep-th",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "math",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "math-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "math.GM",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "mtrl-th",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "nlin",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "nucl-ex",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "nucl-th",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "patt-sol",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "phys-lib",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "physics",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "physics.acc-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.ao-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.atm-clus",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.atom-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.bio-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.chem-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.class-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.comp-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.data-an",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.ed-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.flu-dyn",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.gen-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.geo-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.hist-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.ins-det",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.med-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.optics",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.plasm-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.pop-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.soc-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "physics.space-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "plasm-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "q-alg",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "q-bio",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "q-fin",
+    "endorse_all": "n",
+    "mods_endorse_all": "y",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "quant-ph",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "solv-int",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "stat",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 2
+  },
+  {
+    "endorsement_domain": "supr-con",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  },
+  {
+    "endorsement_domain": "test",
+    "endorse_all": "n",
+    "mods_endorse_all": "n",
+    "endorse_email": "y",
+    "papers_to_endorse": 4
+  }
+]
