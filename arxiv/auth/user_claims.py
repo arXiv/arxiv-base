@@ -242,11 +242,9 @@ class ArxivUserClaims:
         # access_token = self.access_token
         # remove the access token from packing. Payload is from access token, and since I'm not using this,
         # save the space.
-        access_token = "-"
-        tokens = ["4", self.expires_at.isoformat(), self.id_token, access_token, payload]
-        if self.refresh_token:
-            assert (',' not in self.refresh_token)
-            tokens.append(self.refresh_token)
+        # I think the access token should be attached to the authentication bearer token
+        refresh_token = "" if not self.refresh_token else self.refresh_token
+        tokens = ["5", self.expires_at.isoformat(), claims['sub'], self.id_token, refresh_token, payload]
         token = ",".join(tokens)
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
@@ -258,23 +256,23 @@ class ArxivUserClaims:
         Then, ues decode_jwt_payload.
         """
         chunks = token.split(',')
-        # Chunk 0 should be 4 - is a version number
+        # Chunk 0 should be 5 - is a version number
         # chunk 1 is expiration - This is NOT internally used. This is to show
         # to the UI when the cookie expires
-        # chunk 2 is id token
-        # chunk 3 is access token == '-' (removed)
-        # chunk 4 is payload
-        # chunk 5 is refresh token (may or may not exist)
-        if len(chunks) < 5:
+        # chunk 2 is user id,
+        # chunk 3 is id token
+        # chunk 4 is refresh token
+        # chunk 5 is payload
+        if chunks[0] != '5':
             raise ValueError(f'Token is invalid')
+
         tokens = {
             'expires_at': chunks[1],
-            'idt': chunks[2],
-            'acc': chunks[3]
+            'sub': chunks[2],
+            'idt': chunks[3],
+            'refresh': chunks[4]
         }
-        if len(chunks) > 5:
-            tokens['refresh'] = chunks[5]
-        return tokens, chunks[4]
+        return tokens, chunks[5]
 
     @classmethod
     def decode_jwt_payload(cls, tokens: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
