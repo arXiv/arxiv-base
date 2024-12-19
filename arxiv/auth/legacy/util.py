@@ -1,9 +1,10 @@
 """Helpers and Flask application integration."""
-
+import json
 from typing import List, Any
 from datetime import datetime
 from pytz import timezone, UTC
 import logging
+import os
 
 from sqlalchemy import text, Engine
 from sqlalchemy.orm import Session as ORMSession
@@ -13,12 +14,13 @@ from ...base.globals import get_application_config
 from ..auth import scopes
 from .. import domain
 from ...db import Session, Base, session_factory
-from ...db.models import TapirUser, TapirPolicyClass
+from ...db.models import TapirUser, TapirPolicyClass, Category, Archive, Group, EndorsementDomain
 
 EASTERN = timezone('US/Eastern')
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
+arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 def now() -> int:
     """Get the current epoch/unix time."""
@@ -37,8 +39,19 @@ def from_epoch(t: int) -> datetime:
 
 
 def create_all(engine: Engine) -> None:
+    """Create all tables in the database, and bootstrap for test."""
+    create_arxiv_db_schema(engine)
+    bootstrap_arxiv_db(engine)
+
+
+def create_arxiv_db_schema(engine: Engine) -> None:
     """Create all tables in the database."""
     Base.metadata.create_all(engine)
+
+
+def bootstrap_arxiv_db(engine: Engine) -> None:
+    """Create all tables in the da."""
+
     with ORMSession(engine) as session:
         data = session.query(TapirPolicyClass).all()
         if data:
@@ -47,6 +60,21 @@ def create_all(engine: Engine) -> None:
         for datum in TapirPolicyClass.POLICY_CLASSES:
             session.add(TapirPolicyClass(**datum))
         session.commit()
+
+    test_data_dir = os.path.join(arxiv_base_dir, "development", "test-data")
+    for data_class, data_file in [
+        (Group, "arXiv_groups.json"),
+        (Archive, "arXiv_archives.json"),
+        (EndorsementDomain, "arXiv_endorsement_domains.json"),
+        (Category, "arXiv_categories.json"),
+    ]:
+        with ORMSession(engine) as session:
+            with open(os.path.join(test_data_dir, data_file), encoding="utf-8") as dfd:
+                data = json.load(dfd)
+            for datum in data:
+                session.add(data_class(**datum))
+            session.commit()
+
 
 def drop_all(engine: Engine) -> None:
     """Drop all tables in the database."""
