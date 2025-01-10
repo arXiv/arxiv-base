@@ -34,10 +34,8 @@ verification/testing purposes. To run the dev server (assuming that you are
 working in the root of this repository):
 
 ```bash
-<<<<<<< HEAD
 poetry install
 $ FLASK_APP=app.py FLASK_DEBUG=1 poetry run flask run
->>>>>>> master
 ```
 
 You should be able to view the rendered ``styleguide.html`` at

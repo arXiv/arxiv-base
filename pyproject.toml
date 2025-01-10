@@ -37,13 +37,16 @@ validators = "*"
 sphinx = { version = "*", optional = true }
 sphinxcontrib-websupport = { version = "*", optional = true }
 sphinx-autodoc-typehints = { version = "*", optional = true }
+psycopg2-binary = { version = ">=2.9.9", optional = true  }
 mimesis = "*"
 retry = "^0.9.2"
-pyjwt = "*"
+pyjwt = "^2.9.0"
 redis = "==2.10.6"
 redis-py-cluster = "==1.3.6"
 setuptools = "^70.0.0"
 pydantic-settings = "^2.5.2"
+jwcrypto = "^1.5.6"
+ruamel-yaml = "^0.18.6"
 
 [tool.poetry.dev-dependencies]
 pydocstyle = "*"
@@ -53,11 +56,28 @@ pytest-mock = "^3.8.2"
 pytest-cov = "*"
 hypothesis = "*"
 fakeredis = "*"
-
 click = "*"
+sqlmodel = "*"
+sqlalchemy-citext = "*"
+geoalchemy2 = "*"
+pgvector = "*"
 
 [tool.poetry.extras]
 sphinx = [ "sphinx", "sphinxcontrib-websupport", "sphinx-autodoc-typehints" ]
+postgres = ["psycopg2-binary"]
+
+[tool.poetry.group.dev.dependencies]
+selenium = "^4.23.0"
+types-requests = "^2.32.0.20240712"
+autopep8 = "^2.3.1"
+inflect = "^7.4.0"
+sqlmodel = "^0.0.22"
+geoalchemy2 = "^0.15.2"
+pgvector = "^0.3.5"
+black = "^24.10.0"
+libcst = "^1.5.0"
+functions-framework = "^3.8.1"
+google-cloud-bigquery = "^3.26.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

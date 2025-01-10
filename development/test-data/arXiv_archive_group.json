@@ -1,0 +1,86 @@
+[
+  {
+    "archive_id": "astro-ph",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "cond-mat",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "cs",
+    "group_id": "cs"
+  },
+  {
+    "archive_id": "econ",
+    "group_id": "econ"
+  },
+  {
+    "archive_id": "eess",
+    "group_id": "eess"
+  },
+  {
+    "archive_id": "gr-qc",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "hep-ex",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "hep-lat",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "hep-ph",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "hep-th",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "math",
+    "group_id": "math"
+  },
+  {
+    "archive_id": "math-ph",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "nlin",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "nucl-ex",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "nucl-th",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "physics",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "q-bio",
+    "group_id": "q-bio"
+  },
+  {
+    "archive_id": "q-fin",
+    "group_id": "q-fin"
+  },
+  {
+    "archive_id": "quant-ph",
+    "group_id": "physics"
+  },
+  {
+    "archive_id": "stat",
+    "group_id": "stat"
+  },
+  {
+    "archive_id": "test",
+    "group_id": "test"
+  }
+]
