@@ -32,6 +32,8 @@ Subscription_UniversalInstitutionContact:
   class_name: MemberInstitutionContact
   columns:
     sid: "mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)"
+  relationships:
+    Subscription_UniversalInstitution: 'relationship("MemberInstitution", primaryjoin="MemberInstitutionContact.sid == MemberInstitution.id")'
 
 Subscription_UniversalInstitutionIP:
   class_name: MemberInstitutionIP
@@ -463,7 +465,9 @@ tapir_users:
       arXiv_jref_controls: "relationship('JrefControl', back_populates='user')"
     arXiv_cross_control:
       arXiv_cross_controls: "relationship('CrossControl', back_populates='user')"
-      
+    tapir_nicknames:
+      tapir_nicknames: ":Mapped['TapirNickname'] = relationship('TapirNickname', back_populates='user', uselist=False)"
+
   additional_relationships:
     - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
 
