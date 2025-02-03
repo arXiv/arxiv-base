@@ -3,15 +3,23 @@ name = "arxiv-base"
 version = "1.0.1"
 description = "Common code for arXiv Cloud"
 authors = ["arxiv.org"]
+
 packages = [
    { include = "arxiv" },
    { include = "arxiv/py.typed" },
    { include = "gcp/service_auth" }
    ]
+
 include = [
    "arxiv/base/static/*",
    "arxiv/base/templates/*",
    "arxiv/mail/templates/*",
+   "development/test-data/*",
+   "development/*",
+]
+
+exclude = [
+   "development/sqlacodegen/*",
 ]
    
 [tool.poetry.dependencies]
