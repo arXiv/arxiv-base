@@ -227,7 +227,8 @@ class ArxivOidcIdpClient:
 
     def to_arxiv_user_claims(self,
                              idp_token: Optional[dict] = None,
-                             kc_cliams: Optional[dict] = None) -> ArxivUserClaims:
+                             kc_cliams: Optional[dict] = None,
+                             client_ipv4: Optional[str] = None) -> ArxivUserClaims:
         """
         Given the IdP's access token claims, make Arxiv user claims.
 
@@ -241,6 +242,8 @@ class ArxivOidcIdpClient:
         kc_cliams: This is the contents of (unpacked) access token. IdP signs it with the private
             key, and the value is verified using the published public cert.
 
+        client_ipv4: Client's IPv4 address if available
+
         NOTE: So this means there are two copies of access token. Unfortunate, but unpacking
               every time can be costly.
         """
@@ -248,10 +251,10 @@ class ArxivOidcIdpClient:
             idp_token = {}
         if kc_cliams is None:
             kc_cliams = {}
-        claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams)
+        claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams, client_ipv4=client_ipv4)
         return claims
 
-    def from_code_to_user_claims(self, code: str) -> ArxivUserClaims | None:
+    def from_code_to_user_claims(self, code: str, client_ipv4: Optional[str] = None) -> ArxivUserClaims | None:
         """
         Put it all together
 
@@ -262,6 +265,7 @@ class ArxivOidcIdpClient:
         Parameters
         ----------
         code: The code you get in the /callback
+        client_ipv4: This is the client IP address of the IdP
 
         Returns
         -------
@@ -286,7 +290,7 @@ class ArxivOidcIdpClient:
         if not idp_claims:
             return None
 
-        return self.to_arxiv_user_claims(idp_token, idp_claims)
+        return self.to_arxiv_user_claims(idp_token, idp_claims, client_ipv4)
 
     def logout_user(self, user: ArxivUserClaims) -> bool:
         """With user's access token, logout user.

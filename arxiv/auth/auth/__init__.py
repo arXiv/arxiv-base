@@ -12,7 +12,8 @@ from retry import retry
 from ...db import transaction
 from ..legacy import util
 from ..legacy.cookies import parse_cookie
-from .. import domain, legacy
+from .. import domain
+from ..legacy import sessions as legacy_sessions, authenticate as legacy_authenticate
 
 import logging
 
@@ -196,5 +197,5 @@ class Auth(object):
         This is useful to get an idea of what is going on with auth.
         """
         logger.setLevel(logging.DEBUG)
-        legacy.sessions.logger.setLevel(logging.DEBUG)
-        legacy.authenticate.logger.setLevel(logging.DEBUG)
+        legacy_sessions.logger.setLevel(logging.DEBUG)
+        legacy_authenticate.logger.setLevel(logging.DEBUG)

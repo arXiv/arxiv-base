@@ -12,6 +12,11 @@ include = [
    "arxiv/base/static/*",
    "arxiv/base/templates/*",
    "arxiv/mail/templates/*",
+   "development/test-data/*",
+   "development/*",
+]
+exclude = [
+   "development/sqlacodegen/*",
 ]
    
 [tool.poetry.dependencies]

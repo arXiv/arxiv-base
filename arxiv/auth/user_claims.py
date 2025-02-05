@@ -47,11 +47,16 @@ Keycloak:
 #
 
 import json
-from datetime import datetime, timezone
+from datetime import timezone
 from typing import Any, Optional, List, Tuple
-
 import jwt
+from datetime import datetime
+from pytz import timezone, UTC
+from pydantic import ConfigDict
 
+from . import domain
+from ..db.models import TapirPolicyClass
+from .auth import scopes
 
 def get_roles(realm_access: dict) -> Tuple[str, Any]:
     return 'roles', realm_access['roles']
@@ -62,11 +67,15 @@ claims_map = {
     'exp': 'exp',
     'iat': 'iat',
     'realm_access': get_roles,
-    'email_verified': 'email_p',
+    'email_verified': 'email_verified',
     'email': 'email',
     "access_token": "acc",
     "id_token": "idt",
     "refresh_token": "refresh",
+    "given_name": "first_name",
+    "family_name": "last_name",
+    "preferred_username": "username",
+    "client_ipv4": "client_ipv4",
 }
 
 class ArxivUserClaims:
@@ -75,16 +84,18 @@ class ArxivUserClaims:
     """
     _claims: dict
 
-    tapir_session_id: str
-    email_verified: bool
-    login_name: str
-    email: str
-    name: str
+    # tapir_session_id: str
+    # email_verified: bool
+    # login_name: str
+    # email: str
+    # name: str
+    _domain_session: Optional[domain.Session]
 
     def __init__(self, claims: dict) -> None:
         """
         IdP token
         """
+        self._domain_session = None
         self._claims = claims.copy()
         for key in self._claims.keys():
             self._create_property(key)
@@ -156,6 +167,13 @@ class ArxivUserClaims:
         return "Public user" in self._roles
 
     @property
+    def classic_capability_code(self) -> int:
+        for policy_class in TapirPolicyClass.POLICY_CLASSES:
+            if policy_class["name"] in self._roles:
+                return policy_class["class_id"]
+        return 0
+
+    @property
     def _roles(self) -> List[str]:
         return self._claims.get('roles', [])
 
@@ -180,6 +198,31 @@ class ArxivUserClaims:
         """
         return self._claims.get('refresh', '')
 
+    @property
+    def email(self) -> str:
+        return self._claims.get('email', '')
+
+    @property
+    def email_verified(self) -> bool:
+        return self._claims.get('email_verified', False)
+
+    @property
+    def username(self) -> str:
+        return self._claims.get('username', '')
+
+    @property
+    def first_name(self) -> str:
+        return self._claims.get('first_name', '')
+
+    @property
+    def last_name(self) -> str:
+        return self._claims.get('last_name', '')
+
+    @property
+    def client_ip4v(self) -> str:
+        return self._claims.get('client_ipv4', '')
+
+
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
         return cls(json.loads(token))
@@ -187,7 +230,8 @@ class ArxivUserClaims:
     @classmethod
     def from_keycloak_claims(cls,
                              idp_token: Optional[dict] = None,
-                             kc_claims: Optional[dict] = None) -> 'ArxivUserClaims':
+                             kc_claims: Optional[dict] = None,
+                             client_ipv4: Optional[str] = None) -> 'ArxivUserClaims':
         """Make the user cliams from the IdP token and user claims
 
         The claims need to be compact as the cookie size is limited to 4096, tossing "uninteresting"
@@ -209,6 +253,8 @@ class ArxivUserClaims:
                     claims[mapped_key] = mapped_value
             elif key in mushed:
                 claims[mapper] = value
+        if client_ipv4:
+            claims['client_ipv4'] = client_ipv4
         return cls(claims)
 
     def is_expired(self, when: datetime | None = None) -> bool:
@@ -288,5 +334,41 @@ class ArxivUserClaims:
         self._claims['acc'] = updates['acc']
         return
 
+    @property
+    def domain_session(self) -> domain.Session:
+        if self._domain_session is None:
+            user_profile = None # domain.UserProfile()
+            user = domain.User(
+                username = self.username,
+                email = self.email,
+                user_id = self.user_id,
+                name = domain.UserFullName(
+                    forename = self.first_name,
+                    surname = self.last_name,
+                ),
+                profile = user_profile,
+                verified = self.email_verified,
+            )
+            user_scopes = scopes.GENERAL_USER
+            if self.is_admin:
+                user_scopes = scopes.ADMIN_USER
 
+            authorizations = domain.Authorizations(
+                classic = self.classic_capability_code,
+                scopes = user_scopes,
+            )
+
+            session_id = self.session_id if self.session_id else "no-session-id"
+            self._domain_session = domain.Session(
+                session_id = session_id,
+                start_time = self.issued_at.isoformat(),
+                user = user,
+                client = None,
+                end_time = None,   # The ISO-8601 datetime when the session ended.
+                authorizations = authorizations, # Optional[Authorizations] = None Authorizations for the current session.
+                ip_address = self.client_ip4v, # Optional[str] = None
+                remote_host = None, #: Optional[str] = None
+                nonce = self.id_token # : Optional[str] = None
+            )
+        return self._domain_session
     pass
