@@ -11,7 +11,7 @@ and
 
 # enviroment variables for running locally
 ```
-export ENVIRONMENT=DEVELOPMENT LOG_LEVEL=INFO DOWNLOAD_TABLE=arxiv-development.arxiv_stats.papers_downloaded_by_ip_recently WRITE_TABLE='sqlite:///../tests/output_test.db' LOG_LOCALLY=1
+export ENVIRONMENT=DEVELOPMENT LOG_LEVEL=INFO  WRITE_TABLE='sqlite:///../tests/output_test.db' LOG_LOCALLY=1
 
 ```
 
@@ -19,9 +19,30 @@ you need everything in the env file plus:
 
 ```
 export CLASSIC_DB_URI='SECRET_HERE'
+
+```
+the classic db URI always needs to be for the prodution database to get category data for recent papers, adn you will need to set up a connection to the database
+
+# to run the manual backfill
+
+enviroment variables:
+```
+export LOG_LOCALLY=1
+export CLASSIC_DB_URI='SECRET_HERE'
 export WRITE_TABLE='SECRET_HERE'
 ```
-the classic db URI always needs to be for the prodution database to get category data for recent papers
+the classic DB URI should be for the main production database and the write table is currently the latexml db 
+secrets can be found in GCP and a connection to the databases will need to be established with something like cloud_sql_proxy
+
+run like:
+```
+python main.py 2024-10-03-00 2024-10-05-23
+```
+this will run for all data for october 3rd through 5th inclusive, hours can be specified with the last two numbers
+at roughly 45 seconds per hour block running an entire month can take 9 hours
+
+
+# to run the cloud function
 
 to run use this in the src folder
 ` functions-framework --target=aggregate_hourly_downloads --signature-type=cloudevent `
