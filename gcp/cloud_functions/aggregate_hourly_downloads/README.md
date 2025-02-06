@@ -21,7 +21,7 @@ you need everything in the env file plus:
 export CLASSIC_DB_URI='SECRET_HERE'
 
 ```
-the classic db URI always needs to be for the prodution database to get category data for recent papers, adn you will need to set up a connection to the database
+the classic db URI always needs to be for the prodution database to get category data for recent papers, and you will need to set up a connection to the database
 
 # to run the manual backfill
 
