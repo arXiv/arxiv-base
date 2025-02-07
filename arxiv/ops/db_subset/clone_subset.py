@@ -1,4 +1,4 @@
-sfrom typing import Sequence, List, Type, Dict, Optional, Literal, Any
+from typing import Sequence, List, Type, Dict, Optional, Literal, Any
 from dataclasses import dataclass, asdict
 import json
 import os
@@ -261,6 +261,6 @@ def clone_db_subset (n_users: int, config_directory: Optional[str] = None,
             )
         )
     graph = json.loads(open(os.path.join(config_directory, 'graph.json')).read())
-    special_cases = json.loads(open(os.path.join(confiig_directory, 'special_cases.json')).read())
+    special_cases = json.loads(open(os.path.join(config_directory, 'special_cases.json')).read())
     graph_with_edges = { k: list(map(lambda x: Edge(**x), v)) for k,v in graph.items() }
     _make_subset(graph_with_edges, special_cases, n_users, create_arxiv_db_schema, create_latexml_db_schema)
