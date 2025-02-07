@@ -16,4 +16,4 @@ EOF
 
 # echo "Database '${DB_NAME}' and user '${DB_USER}' setup completed successfully."
 
-mysql -h 127.0.0.1 --user $DB_USER -p$DB_PASSWORD  $DB_NAME < arxiv_db_schema.sql
+mysql -h 127.0.0.1 --user $DB_USER -p$DB_PASSWORD  $DB_NAME < ../arxiv/db/arxiv_db_schema.sql

@@ -21,7 +21,7 @@ EASTERN = timezone('US/Eastern')
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
-arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+arxiv_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def now() -> int:
     """Get the current epoch/unix time."""
@@ -64,7 +64,7 @@ def bootstrap_arxiv_db(engine: Engine, test_data_dir: Optional[str] = None) -> N
 
     # In case you are loading the files from library, the data files maybe elsewhere
     if test_data_dir is None:
-        test_data_dir = os.path.join(arxiv_base_dir, "development", "test-data")
+        test_data_dir = os.path.join(arxiv_dir, "db", "tests", "test-data")
 
     for data_class, data_file in [
         (Group, "arXiv_groups.json"),
@@ -75,12 +75,18 @@ def bootstrap_arxiv_db(engine: Engine, test_data_dir: Optional[str] = None) -> N
         (ArchiveGroup, "arXiv_archive_group.json"),
         (License, "arXiv_licenses.json"),
     ]:
-        with ORMSession(engine) as session:
-            with open(os.path.join(test_data_dir, data_file), encoding="utf-8") as dfd:
-                data = json.load(dfd)
-            for datum in data:
-                session.add(data_class(**datum))
-            session.commit()
+        try:
+            with ORMSession(engine) as session:
+                with open(os.path.join(test_data_dir, data_file), encoding="utf-8") as dfd:
+                    data = json.load(dfd)
+                for datum in data:
+                    session.add(data_class(**datum))
+                session.commit()
+        except FileNotFoundError:
+            # If you don't have the test-data, simply ignore it. You may have to load these files yourself
+            # for your test, however but not stopping test since bootstrapping db is only happening for
+            # development purpose only.
+            pass
 
 
 def drop_all(engine: Engine) -> None:

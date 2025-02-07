@@ -40,7 +40,9 @@ def main(mysql_port: int, db_name: str, root_password: str="rootpassword", schem
         time.sleep(1)
 
     if not os.path.exists(schema_sql) and ("/" not in schema_sql):
-        schema_sql = os.path.join(os.path.dirname(__file__), schema_sql)
+        development_dir = os.path.dirname(__file__)
+        arxiv_base_dir = os.path.dirname(development_dir)
+        schema_sql = os.path.join(os.path.join(arxiv_base_dir, "arxiv", "db", schema_sql))
     try:
         with open(schema_sql, encoding="utf-8") as schema_file:
             subprocess.call(cli, encoding="utf-8", stdin=schema_file, timeout=60)
