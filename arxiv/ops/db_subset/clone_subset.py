@@ -1,4 +1,4 @@
-from typing import Sequence, List, Type, Dict, Optional, Literal, Any
+sfrom typing import Sequence, List, Type, Dict, Optional, Literal, Any
 from dataclasses import dataclass, asdict
 import json
 import os
@@ -182,9 +182,13 @@ def _invert_db_graph_edges (db_graph: Dict[str, List[Edge]]) -> Dict[str, List[E
                 inverted_db_graph[next.to_table] = [reversed_edge]
     return inverted_db_graph
 
-def _make_subset (db_graph: Dict[str, List[Edge]], 
-                 special_cases: Dict[str, SpecialCase], 
-                 size: int):
+def _make_subset (
+        db_graph: Dict[str, List[Edge]],
+        special_cases: Dict[str, SpecialCase],
+        size: int,
+        create_arxiv_db_schema: bool,
+        create_latexml_db_schema: bool,
+        ):
     """
     algorithm:
 
@@ -198,10 +202,13 @@ def _make_subset (db_graph: Dict[str, List[Edge]],
     classic_session = session_factory()
     new_session = NewSessionLocal()
 
-    Base.metadata.drop_all(new_engine)
-    Base.metadata.create_all(new_engine)
-    LaTeXMLBase.metadata.drop_all(new_engine)
-    LaTeXMLBase.metadata.create_all(new_engine)
+    if create_arxiv_db_schema:
+        Base.metadata.drop_all(new_engine)
+        Base.metadata.create_all(new_engine)
+
+    if create_latexml_db_schema:
+        LaTeXMLBase.metadata.drop_all(new_engine)
+        LaTeXMLBase.metadata.create_all(new_engine)
     
     ### Do algorithm ###
     table_lookup = { i.__tablename__: i for i in get_tables() }
@@ -244,7 +251,8 @@ def _make_subset (db_graph: Dict[str, List[Edge]],
     new_session.commit()
     new_session.close()
 
-def clone_db_subset (n_users: int, config_directory: Optional[str] = None):
+def clone_db_subset (n_users: int, config_directory: Optional[str] = None,
+                     create_arxiv_db_schema: bool = True, create_latexml_db_schema: bool = True,):
     config_directory = config_directory or \
         os.path.abspath(
             os.path.join(
@@ -253,6 +261,6 @@ def clone_db_subset (n_users: int, config_directory: Optional[str] = None):
             )
         )
     graph = json.loads(open(os.path.join(config_directory, 'graph.json')).read())
-    special_cases = json.loads(open(os.path.join(config_directory, 'special_cases.json')).read())
+    special_cases = json.loads(open(os.path.join(confiig_directory, 'special_cases.json')).read())
     graph_with_edges = { k: list(map(lambda x: Edge(**x), v)) for k,v in graph.items() }
-    _make_subset(graph_with_edges, special_cases, n_users)
+    _make_subset(graph_with_edges, special_cases, n_users, create_arxiv_db_schema, create_latexml_db_schema)
