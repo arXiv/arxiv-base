@@ -505,8 +505,11 @@ def main() -> None:
     mysql_port = 3306
 
     arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    p_outfile = os.path.join(arxiv_base_dir, "arxiv/db/autogen_models.py")
-    db_metadata = os.path.join(arxiv_base_dir, "arxiv/db/arxiv-db-metadata.yaml")
+    arxiv_dir = os.path.join(arxiv_base_dir, "arxiv")
+
+    p_outfile = os.path.join(arxiv_dir, "db/autogen_models.py")
+    db_metadata = os.path.join(arxiv_dir, "db/arxiv-db-metadata.yaml")
+
     codegen_dir = os.path.join(arxiv_base_dir, "development/sqlacodegen")
 
     # If there is no MySQL up and running, start a container
@@ -518,7 +521,7 @@ def main() -> None:
             time.sleep(1)
 
     # Load the arxiv_db_schema.sql to the database.
-    load_sql_file(os.path.join(arxiv_base_dir, "development/arxiv_db_schema.sql"))
+    load_sql_file(os.path.join(arxiv_dir, "db/arxiv_db_schema.sql"))
 
     p_url = "mysql://testuser:testpassword@127.0.0.1/testdb"
     sys.path.append(os.path.join(codegen_dir, "src"))
@@ -540,7 +543,7 @@ def main() -> None:
     latest_classes, latest_tables = find_classes_and_tables(latest_tree)
 
     # Parse the exiting models
-    with open(os.path.join(arxiv_base_dir, 'arxiv/db/orig_models.py'), encoding='utf-8') as model_fd:
+    with open(os.path.join(arxiv_dir, 'db/orig_models.py'), encoding='utf-8') as model_fd:
         existing_models = model_fd.read()
     existing_tree = cst.parse_module(existing_models)
 
@@ -567,7 +570,7 @@ def main() -> None:
     updated_tree = existing_tree.visit(transformer)
 
     # Write out the models after the merge
-    updated_model = os.path.join(arxiv_base_dir, 'arxiv/db/models.py')
+    updated_model = os.path.join(arxiv_dir, 'db/models.py')
     with open(updated_model, "w", encoding='utf-8') as updated_fd:
         updated_fd.write(updated_tree.code)
 
