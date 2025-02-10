@@ -57,6 +57,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
 from ..config import settings, Settings
 
 metadata = MetaData()
+latexml_metadata = MetaData()
 _latexml_engine: Engine = None
 _classic_engine: Engine = None
 
@@ -64,7 +65,7 @@ class Base(DeclarativeBase):
     metadata=metadata
 
 class LaTeXMLBase(DeclarativeBase):
-    metadata=metadata
+    metadata=latexml_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -201,3 +202,4 @@ def init(settings: Settings=settings) -> None:
     # late import of arxiv.db.models to avoid loops
     from arxiv.db.models import configure_db_engine
     configure_db_engine(_classic_engine, _latexml_engine)
+    
