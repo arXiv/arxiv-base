@@ -3034,6 +3034,20 @@ MarkupSafe = ">=2.1.1"
 watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
+name = "wheel"
+version = "0.45.1"
+description = "A built-package format for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "wheel-0.45.1-py3-none-any.whl", hash = "sha256:708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248"},
+    {file = "wheel-0.45.1.tar.gz", hash = "sha256:661e1abd9198507b1409a20c02106d9670b2576e916d58f520316666abca6729"},
+]
+
+[package.extras]
+test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
+
+[[package]]
 name = "wrapt"
 version = "1.17.0"
 description = "Module for decorators, wrappers and monkey patching."
@@ -3164,4 +3178,4 @@ sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "b9ee5cbe5678ceb066489e5381c40eaccc0d75d5ec4aaca4b9ac5878b0b462d6"
+content-hash = "eec2f185a2b1d6a7f1eec780cf89fbc44797ee577679b1506610ae9398911b1e"
