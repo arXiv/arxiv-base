@@ -31,7 +31,7 @@ def get_user(session, user_id):
 def test_with_nonexistant_user_w_app(app):
     """There is no user with the passed username."""
     with app.app_context():
-            assert not accounts.does_username_exist('baruser')
+        assert not accounts.does_username_exist('baruser')
 
 def test_with_nonexistant_user_wo_app(db_configed):
     """There is no user with the passed username."""

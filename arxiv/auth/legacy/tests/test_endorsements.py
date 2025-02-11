@@ -1,11 +1,11 @@
 """Tests for :mod:`arxiv.users.legacy.endorsements` using a live test DB."""
 
-import os
 import shutil
 import tempfile
-from unittest import TestCase, mock
+from unittest import TestCase
 from datetime import datetime
 from pytz import timezone, UTC
+import pytest
 
 from flask import Flask
 from mimesis import Person, Internet, Datetime
@@ -40,7 +40,10 @@ class TestEndorsement(TestCase):
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
             'remote_host': 'foo-host.foo.com',
-            'tracking_cookie': '0'
+            'tracking_cookie': '0',
+            'date': '2024-01-01',
+            'flag_auto': 1,
+            'added_by': 1,
         }
 
         with self.app.app_context():
@@ -79,6 +82,8 @@ class TestEndorsement(TestCase):
                     joined_remote_host=ip_addr
                 )
                 session.add(db_user)
+                session.commit()
+                session.refresh(db_user)
 
                 self.user = domain.User(
                     user_id=str(db_user.user_id),
@@ -106,13 +111,13 @@ class TestEndorsement(TestCase):
                         .values(pattern=str(pattern))
                     )
 
-                session.add(models.EndorsementDomain(
-                    endorsement_domain='test_domain',
-                    endorse_all='n',
-                    mods_endorse_all='n',
-                    endorse_email='y',
-                    papers_to_endorse=3
-                ))
+                # session.add(models.EndorsementDomain(
+                #     endorsement_domain='test_domain',
+                #     endorse_all='n',
+                #     mods_endorse_all='n',
+                #     endorse_email='y',
+                #     papers_to_endorse=3
+                # ))
 
                 # for category, definition in definitions.CATEGORIES_ACTIVE.items():
                 #     if '.' in category:
@@ -130,22 +135,24 @@ class TestEndorsement(TestCase):
     def tearDown(self):
         shutil.rmtree(self.db_path)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_get_endorsements(self):
         """Test :func:`endoresement.get_endorsements`."""
         with self.app.app_context():
-            with transaction() as session:
-                for category, definition in definitions.CATEGORIES_ACTIVE.items():
-                        if '.' in category:
-                            archive, subject_class = category.split('.', 1)
-                        else:
-                            archive, subject_class = category, ''
-                        session.add(models.Category(
-                            archive=archive,
-                            subject_class=subject_class,
-                            definitive=1,
-                            active=1,
-                            endorsement_domain='test_domain'
-                        ))
+            # with transaction() as session:
+            #     for category, definition in definitions.CATEGORIES_ACTIVE.items():
+            #             if '.' in category:
+            #                 archive, subject_class = category.split('.', 1)
+            #             else:
+            #                 archive, subject_class = category, ''
+            #             session.add(models.Category(
+            #                 archive=archive,
+            #                 subject_class=subject_class,
+            #                 definitive=1,
+            #                 active=1,
+            #                 endorsement_domain='test_domain'
+            #             ))
             all_endorsements = set(
                 endorsements.get_endorsements(self.user)
             )
@@ -172,7 +179,10 @@ class TestAutoEndorsement(TestCase):
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
             'remote_host': 'foo-host.foo.com',
-            'tracking_cookie': '0'
+            'tracking_cookie': '0',
+            'date': '2024-01-01',
+            'flag_auto': 1,
+            'added_by': 1,
         }
 
         with self.app.app_context():
@@ -226,6 +236,8 @@ class TestAutoEndorsement(TestCase):
     def tearDown(self):
         shutil.rmtree(self.db_path)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_invalidated_autoendorsements(self):
         """The user has two autoendorsements that have been invalidated."""
         with self.app.app_context():
@@ -273,24 +285,26 @@ class TestAutoEndorsement(TestCase):
             result = endorsements.invalidated_autoendorsements(self.user)
         self.assertEqual(len(result), 2, "Two revoked endorsements are loaded")
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_category_policies(self):
         """Load category endorsement policies from the database."""
         with self.app.app_context():
-            with transaction() as session:
-                session.add(models.Category(
-                    archive='astro-ph',
-                    subject_class='CO',
-                    definitive=1,
-                    active=1,
-                    endorsement_domain='astro-ph'
-                ))
-                session.add(models.EndorsementDomain(
-                    endorsement_domain='astro-ph',
-                    endorse_all='n',
-                    mods_endorse_all='n',
-                    endorse_email='y',
-                    papers_to_endorse=3
-                ))
+            # with transaction() as session:
+            #     session.add(models.Category(
+            #         archive='astro-ph',
+            #         subject_class='CO',
+            #         definitive=1,
+            #         active=1,
+            #         endorsement_domain='astro-ph'
+            #     ))
+            #     session.add(models.EndorsementDomain(
+            #         endorsement_domain='astro-ph',
+            #         endorse_all='n',
+            #         mods_endorse_all='n',
+            #         endorse_email='y',
+            #         papers_to_endorse=4
+            #     ))
 
             policies = endorsements.category_policies()
             category = definitions.CATEGORIES['astro-ph.CO']
@@ -298,8 +312,10 @@ class TestAutoEndorsement(TestCase):
             self.assertEqual(policies[category]['domain'], 'astro-ph')
             self.assertFalse(policies[category]['endorse_all'])
             self.assertTrue(policies[category]['endorse_email'])
-            self.assertEqual(policies[category]['min_papers'], 3)
+            self.assertEqual(policies[category]['min_papers'], 4)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_domain_papers(self):
         """Get the number of papers published in each domain."""
         with self.app.app_context():
@@ -320,6 +336,7 @@ class TestAutoEndorsement(TestCase):
                     valid=1,
                     **self.default_tracking_data
                 ))
+
                 session.execute(
                     insert(models.t_arXiv_in_category)
                     .values(
@@ -329,13 +346,15 @@ class TestAutoEndorsement(TestCase):
                         is_primary=1
                     )
                 )
-                session.add(models.Category(
-                    archive='cs',
-                    subject_class='DL',
-                    definitive=1,
-                    active=1,
-                    endorsement_domain='firstdomain'
-                ))
+
+                # session.add(models.Category(
+                #     archive='cs',
+                #     subject_class='DL',
+                #     definitive=1,
+                #     active=1,
+                #     endorsement_domain='firstdomain'
+                # ))
+
                 # Here's another paper.
                 document2 = models.Document(
                     document_id=2,
@@ -361,13 +380,13 @@ class TestAutoEndorsement(TestCase):
                         is_primary=1
                     )
                 )
-                session.add(models.Category(
-                    archive='cs',
-                    subject_class='IR',
-                    definitive=1,
-                    active=1,
-                    endorsement_domain='firstdomain'
-                ))
+                # session.add(models.Category(
+                #     archive='cs',
+                #     subject_class='IR',
+                #     definitive=1,
+                #     active=1,
+                #     endorsement_domain='firstdomain'
+                # ))
                 # Here's a paper for which the user is an author.
                 document3 = models.Document(
                     document_id=3,
@@ -403,24 +422,26 @@ class TestAutoEndorsement(TestCase):
                         is_primary=0    # <- secondary!
                     )
                 )
-                session.add(models.Category(
-                    archive='astro-ph',
-                    subject_class='EP',
-                    definitive=1,
-                    active=1,
-                    endorsement_domain='seconddomain'
-                ))
-                session.add(models.Category(
-                    archive='astro-ph',
-                    subject_class='CO',
-                    definitive=1,
-                    active=1,
-                    endorsement_domain='seconddomain'
-                ))
+                # session.add(models.Category(
+                #     archive='astro-ph',
+                #     subject_class='EP',
+                #     definitive=1,
+                #     active=1,
+                #     endorsement_domain='seconddomain'
+                # ))
+                # session.add(models.Category(
+                #     archive='astro-ph',
+                #     subject_class='CO',
+                #     definitive=1,
+                #     active=1,
+                #     endorsement_domain='seconddomain'
+                # ))
             papers = endorsements.domain_papers(self.user)
-            self.assertEqual(papers['firstdomain'], 2)
-            self.assertEqual(papers['seconddomain'], 2)
+            self.assertEqual(papers['cs'], 2)
+            self.assertEqual(papers['astro-ph'], 2)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_is_academic(self):
         """Determine whether a user is academic based on email."""
         ok_patterns = ['%w3.org', '%aaas.org', '%agu.org', '%ams.org']

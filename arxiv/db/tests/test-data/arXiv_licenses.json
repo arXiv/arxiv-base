@@ -1,0 +1,79 @@
+[
+  {
+    "name": "",
+    "label": "None of the above licenses apply",
+    "active": 1,
+    "note": null,
+    "sequence": 99
+  },
+  {
+    "name": "http://arxiv.org/licenses/assumed-1991-2003/",
+    "label": "Assumed arXiv.org perpetual, non-exclusive license to distribute this article for submissions made before January 2004",
+    "active": 0,
+    "note": "",
+    "sequence": 9
+  },
+  {
+    "name": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+    "label": "arXiv.org perpetual, non-exclusive license",
+    "active": 1,
+    "note": "This license gives limited rights to arXiv to distribute the article, and limits re-use of any type from other entities or individuals.",
+    "sequence": 5
+  },
+  {
+    "name": "http://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "label": "CC BY-NC-ND: Creative Commons Attribution-NonCommercial-NoDerivatives",
+    "active": 1,
+    "note": "This license allows reusers to copy and distribute the material in any medium or format in unadapted form only, for noncommercial purposes only, and only so long as attribution is given to the creator.",
+    "sequence": 4
+  },
+  {
+    "name": "http://creativecommons.org/licenses/by-nc-sa/3.0/",
+    "label": "Creative Commons Attribution-Noncommercial-ShareAlike license",
+    "active": 0,
+    "note": "",
+    "sequence": 97
+  },
+  {
+    "name": "http://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "label": "CC BY-NC-SA: Creative Commons Attribution-Noncommercial-ShareAlike",
+    "active": 1,
+    "note": "This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.",
+    "sequence": 3
+  },
+  {
+    "name": "http://creativecommons.org/licenses/by-sa/4.0/",
+    "label": "CC BY-SA: Creative Commons Attribution-ShareAlike",
+    "active": 1,
+    "note": "This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.",
+    "sequence": 2
+  },
+  {
+    "name": "http://creativecommons.org/licenses/by/3.0/",
+    "label": "Creative Commons Attribution license",
+    "active": 0,
+    "note": "",
+    "sequence": 96
+  },
+  {
+    "name": "http://creativecommons.org/licenses/by/4.0/",
+    "label": "CC BY: Creative Commons Attribution",
+    "active": 1,
+    "note": "This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use.",
+    "sequence": 1
+  },
+  {
+    "name": "http://creativecommons.org/licenses/publicdomain/",
+    "label": "Creative Commons Public Domain Declaration",
+    "active": 0,
+    "note": "(Suitable for US government employees, for example)",
+    "sequence": 98
+  },
+  {
+    "name": "http://creativecommons.org/publicdomain/zero/1.0/",
+    "label": "CC Zero: No Rights Reserved",
+    "active": 1,
+    "note": "CC Zero is a public dedication tool, which allows creators to give up their copyright and put their works into the worldwide public domain. CC0 allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, with no conditions.",
+    "sequence": 6
+  }
+]

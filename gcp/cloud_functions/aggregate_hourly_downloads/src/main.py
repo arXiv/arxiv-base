@@ -2,7 +2,7 @@ import json
 import base64
 import os
 from typing import Set, Dict, List, Literal, Tuple, Any, Union
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from arxiv.taxonomy.category import Category
 from arxiv.taxonomy.definitions import CATEGORIES
@@ -19,6 +19,7 @@ from sqlalchemy import create_engine, Column, String, Integer, DateTime, Enum, P
 from sqlalchemy.orm import sessionmaker, aliased, declarative_base
 
 MAX_QUERY_TO_WRITE=1000 #the latexmldb we write to has a stack size limit
+HOUR_DELAY=3 #how many hours back to run the hourly query, gives time for logs to make it to gcp
 
 #logging setup
 if not(os.environ.get('LOG_LOCALLY')):
@@ -31,9 +32,35 @@ log_level = getattr(logging, log_level_str.upper(), logging.INFO)
 logging.basicConfig(level=log_level)
 
 # Initialize BigQuery client
-bq_client = bigquery.Client()
+bq_client = bigquery.Client(project="arxiv-production") #fastly download logs live in production project
 
 DownloadType = Literal["pdf", "html", "src"]
+
+QUERY_START="""
+    SELECT paper_id, geo_country, download_type, TIMESTAMP_TRUNC(start_dttm, HOUR) as start_dttm, COUNT(*) as num_downloads, 
+    FROM (
+    SELECT
+        STRING(json_payload.remote_addr) as remote_addr,
+        REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})") as paper_id,
+        STRING(json_payload.geo_country) as geo_country,
+        REGEXP_EXTRACT(STRING(json_payload.path), r"^/(html|pdf|src|e-print)/") as download_type,
+        FARM_FINGERPRINT(STRING(json_payload.user_agent)) AS user_agent_hash, --hoping to further distinguish between devices on the same ip
+        TIMESTAMP_TRUNC(timestamp, MINUTE) AS start_dttm
+    FROM arxiv_logs._AllLogs
+    WHERE log_id = "fastly_log_ingest" --only look at fastly logs
+    AND STRING(json_payload.state) != "HIT_SYNTH" --dont count blocks and captcha
+    AND REGEXP_CONTAINS(STRING(json_payload.path), "^/(html|pdf|src|e-print)/") --only use download paths
+    AND REGEXP_CONTAINS(JSON_VALUE(json_payload, "$.status"), "^2[0-9][0-9]$") --only succesfful responses
+    AND JSON_VALUE(json_payload, "$.status") != "206" --dont count partial content
+    AND REGEXP_CONTAINS(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})(v[0-9]+)?$") --only paths that end with a paperid
+    AND JSON_VALUE(json_payload, "$.method") = "GET" --only count actual downloads
+    """
+
+QUERY_END="""
+    GROUP BY 1,2,3,4,5,6
+    )
+    GROUP BY 1,2,3,4
+"""
 
 class PaperCategories:
     paper_id: str
@@ -136,10 +163,10 @@ class AggregationResult:
         return f"{self.time_period_str}: SUCCESS! rows created: {self.output_count}, fetched rows: {self.fetched_count}, unique_ids: {self.unique_ids_count}, invalid_ids: {self.bad_id_count}, other unprocessable rows: {self.problem_row_count}"
 
     def table_row_str(self)->str:
-        return f"{self.time_period_str:<30} {self.output_count:<12} {self.fetched_count:<12} {self.unique_ids_count:<10} {self.bad_id_count:<10} {self.problem_row_count:<10}"
+        return f"{self.time_period_str:<20} {self.output_count:<7} {self.fetched_count:<12} {self.unique_ids_count:<10} {self.bad_id_count:<7} {self.problem_row_count:<10}"
 
     def table_header()->str:
-        return f"{'Time Period':<30} {'Created Rows':<12} {'Fetched Rows':<12} {'Unique IDs':<10} {'Bad IDs':<10} {'Problems':<10}"
+        return f"{'Time Period':<20} {'New Rows':<7} {'Fetched Rows':<12} {'Unique IDs':<10} {'Bad IDs':<7} {'Problems':<10} {'Time Taken':<10}"
 
 def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[DownloadData], Set[str], str, int, int, List[datetime]]:
     """processes rows of data from bigquery
@@ -183,8 +210,8 @@ def process_table_rows(rows: Union[RowIterator, _EmptyRowIterator])->Tuple[List[
 
     return download_data, paper_ids, time_period_str, bad_id_count, problem_row_count, time_periods
 
-def preform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table: str)->AggregationResult:
-    """preforms the entire aggregation process for a set of data recieved from bigquery"""
+def perform_aggregation(rows: Union[RowIterator, _EmptyRowIterator], write_table: str)->AggregationResult:
+    """performs the entire aggregation process for a set of data recieved from bigquery"""
     #process and store returned data
     download_data, paper_ids, time_period_str, bad_id_count, problem_row_count, time_periods= process_table_rows(rows)
     fetched_count=len(download_data)
@@ -214,41 +241,30 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     data=json.loads(base64.b64decode(cloud_event.get_data()['message']['data']).decode())
     state= data.get("state","")
     if state!="SUCCEEDED":
-        logging.warning(f"recieved state other than SUCEEDED: {state}")
+        logging.warning(f"recieved state other than SUCCEEDED: {state}")
         return
+    
+    pubsub_timestamp = datetime.strptime(cloud_event['time'], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc) 
 
     #get and check enviroment data
     enviro=os.environ.get('ENVIRONMENT')
-    download_table=os.environ.get('DOWNLOAD_TABLE')
     write_table=os.environ.get('WRITE_TABLE')
-    if any(v is None for v in (enviro, download_table, write_table)):
-        logging.critical(f"Missing enviroment variable(s): ENVIRONMENT:{enviro}, DOWNLOAD_TABLE: {download_table}, WRITE_TABLE: {write_table}")
+    if any(v is None for v in (enviro,  write_table)):
+        logging.critical(f"Missing enviroment variable(s): ENVIRONMENT:{enviro}, WRITE_TABLE: {write_table}")
         return #dont bother retrying
     elif enviro == "PRODUCTION":
-        if "development" in download_table or "development" in write_table: 
-            logging.warning(f"Referencing development project in production! Downloads {download_table} Write {write_table}")
+        if "development" in write_table: 
+            logging.warning(f"Referencing development project in production! Write_table: {write_table}")
     elif enviro == "DEVELOPMENT":
-        if "production" in download_table or "production" in write_table: 
-            logging.warning(f"Referencing production project in development! Downloads {download_table} Write {write_table}")
+        if "production" in write_table: 
+            logging.warning(f"Referencing production project in development! Write table: {write_table}")
     else:
         logging.error(f"Unknown Enviroment: {enviro}")
         return #dont bother retrying
 
-    #get the download data
-    query = f"""
-        SELECT 
-            paper_id, 
-            geo_country, 
-            download_type, 
-            start_dttm, 
-            num_downloads 
-        FROM {download_table} 
-        
-    """
-    query_job = bq_client.query(query)
-    download_result = query_job.result() 
-
-    result=preform_aggregation(download_result, write_table)
+    active_hour=pubsub_timestamp- timedelta(hours=HOUR_DELAY) #give some time for logs to make it to gcp
+    time_selection=f"and timestamp between TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:00:00') and TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:59:59')"
+    result=process_an_hour(time_selection, write_table)
     logging.info(result.single_run_str())
 
 def get_paper_categories(paper_ids: Set[str])-> Dict[str, PaperCategories]:
@@ -368,48 +384,45 @@ def insert_into_database(aggregated_data: Dict[DownloadKey, DownloadCounts], db_
     session.close()
     return (len(data_to_insert))
 
+def process_an_hour(time_selection:str, write_table:str)-> AggregationResult:
+    """manages an hour's process of fetching data, prcoessing it, writing to a database and logging it"""
+    query=f"{QUERY_START}\n{time_selection}\n{QUERY_END}"
+    query_job = bq_client.query(query)
+    download_result = query_job.result() 
+    return perform_aggregation(download_result, write_table)
+
 def manual_aggregate(starttime:datetime, endtime: datetime):
     """used to do a manual run for transforming downloads logs into aggreated hourly download data
     startime and endtime are both included
+    Note: not a fast program, even finishing in 1 min/hour takes 24 minutes per day
     """
     write_table=os.environ.get('WRITE_TABLE')
     if not write_table:
         logging.error("Must set WRTIE_TABLE to store results to")
 
-    query_start="""
-        SELECT paper_id, geo_country, download_type, start_dttm, COUNT(*) as num_downloads, 
-        FROM (
-            SELECT
-                STRING(json_payload.remote_addr) as remote_addr,
-                REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})") as paper_id,
-                STRING(json_payload.geo_country) as geo_country,
-                REGEXP_EXTRACT(STRING(json_payload.path), r"^/(html|pdf|src|e-print)/") as download_type,
-                TIMESTAMP_TRUNC(timestamp, HOUR) as start_dttm
-            FROM arxiv_logs._AllLogs
-            WHERE log_id = "fastly_log_ingest"
-            AND REGEXP_CONTAINS(STRING(json_payload.path), "^/(html|pdf|src|e-print)/")
-            AND REGEXP_CONTAINS(STRING(json_payload.status), "^2[0-9][0-9]$")
-            AND LENGTH(REGEXP_EXTRACT(STRING(json_payload.path), r"^/[^/]+/([a-zA-Z-]+/[0-9]{7}|[0-9]{4}\.[0-9]{4,5})")) > 0
-        """
-    query_end="""
-            GROUP BY 1,2,3,4,5
-        )
-        GROUP BY 1,2,3,4
-    """    
     active_hour=starttime
+    failed_hours=[]
+    starttime=datetime.now()
     logging.info(AggregationResult.table_header())
     
     #for each hour
     while active_hour<=endtime:
         time_selection=f"and timestamp between TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:00:00') and TIMESTAMP('{active_hour.strftime('%Y-%m-%d %H')}:59:59')"
-        query=f"{query_start}\n{time_selection}\n{query_end}"
-        bq_client = bigquery.Client(project="arxiv-production")
-        query_job = bq_client.query(query)
-        download_result = query_job.result() 
-        result=preform_aggregation(download_result, write_table)
-        logging.info(result.table_row_str())
-
+        try:
+            ministart=datetime.now()
+            result=process_an_hour(time_selection, write_table)
+            miniend=datetime.now()
+            logging.info(f"{result.table_row_str()} {(miniend - ministart).total_seconds():.1f} seconds")
+        except Exception:
+            logging.critical(f"Failed {active_hour}")
+            failed_hours.append(active_hour)
         active_hour+= timedelta(hours=1)
+
+    endtime=datetime.now()
+    if len(failed_hours)>0:
+        logging.critical(f"All failed time periods: {failed_hours}")
+    total_time=str(endtime-starttime).split(".")[0]
+    logging.info(f"    Finished processing! total time: {total_time}, started: {starttime.strftime('%H:%M')}, ended: {endtime.strftime('%H:%M')}")    
 
 
 def parse_arguments():
