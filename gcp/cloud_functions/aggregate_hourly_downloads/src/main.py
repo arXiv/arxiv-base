@@ -3,6 +3,7 @@ import base64
 import os
 from typing import Set, Dict, List, Literal, Tuple, Any, Union
 from datetime import datetime, timedelta, timezone
+from dateutil import parser
 
 from arxiv.taxonomy.category import Category
 from arxiv.taxonomy.definitions import CATEGORIES
@@ -243,8 +244,7 @@ def aggregate_hourly_downloads(cloud_event: CloudEvent):
     if state!="SUCCEEDED":
         logging.warning(f"recieved state other than SUCCEEDED: {state}")
         return
-    
-    pubsub_timestamp = datetime.strptime(cloud_event['time'], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc) 
+    pubsub_timestamp =parser.isoparse(cloud_event['time']).replace(tzinfo=timezone.utc)
 
     #get and check enviroment data
     enviro=os.environ.get('ENVIRONMENT')
@@ -420,7 +420,8 @@ def manual_aggregate(starttime:datetime, endtime: datetime):
 
     endtime=datetime.now()
     if len(failed_hours)>0:
-        logging.critical(f"All failed time periods: {failed_hours}")
+        formatted_hours = ", ".join(dt.strftime("%Y-%m-%d %H") for dt in failed_hours)
+        logging.critical(f"All failed time periods: {formatted_hours}")
     total_time=str(endtime-starttime).split(".")[0]
     logging.info(f"    Finished processing! total time: {total_time}, started: {starttime.strftime('%H:%M')}, ended: {endtime.strftime('%H:%M')}")    
 
