@@ -4,6 +4,7 @@ import json
 import os
 import importlib
 import inspect
+import argparse
 
 from sqlalchemy import (
     create_engine, 
@@ -19,8 +20,8 @@ from sqlalchemy.orm import (
     make_transient
 )
 
-from ...db import Base, LaTeXMLBase, session_factory, _classic_engine as classic_engine
-from ...db.models import (
+from arxiv.db import Base, LaTeXMLBase, session_factory, _classic_engine as classic_engine
+from arxiv.db.models import (
     DBLaTeXMLDocuments,
     DBLaTeXMLSubmissions,
     TapirUser,
@@ -42,6 +43,7 @@ class Edge:
     from_column: str
     to_table: str
     to_column: str
+
 
     
 def generate_relationship_graph(models: List[Type]):
@@ -142,13 +144,15 @@ def _write_subquery (table: Any, subq: Subquery, classic_session: Session, new_s
             new_session.commit()
     new_session.commit()
 
+
 def _insert_latexml_tables (query_map: Dict[str, Subquery], classic_session: Session, new_session: Session):
     documents = classic_session.execute(select(query_map['arXiv_metadata'])).all()
     ids = [(x[2], x[-4]) for x in documents]
-    for i in range(0, len(ids), 500):
+    n_docs = 10000 # This was 500, and not sure of this magic number.
+    for i in range(0, len(ids), n_docs):
         latexml_docs = classic_session.execute(
             select(DBLaTeXMLDocuments)
-            .filter(tuple_(DBLaTeXMLDocuments.paper_id, DBLaTeXMLDocuments.document_version).in_(ids[i: min(len(ids), i+500)]))
+            .filter(tuple_(DBLaTeXMLDocuments.paper_id, DBLaTeXMLDocuments.document_version).in_(ids[i: min(len(ids), i+n_docs)]))
         ).scalars().all()
         for row in latexml_docs:
             make_transient(row)
@@ -157,10 +161,10 @@ def _insert_latexml_tables (query_map: Dict[str, Subquery], classic_session: Ses
 
     submissions = classic_session.execute(select(query_map['arXiv_submissions'])).all()
     sub_ids = [x[0] for x in submissions]
-    for i in range(0, len(sub_ids), 500):
+    for i in range(0, len(sub_ids), n_docs):
         latexml_subs = classic_session.execute(
             select(DBLaTeXMLSubmissions)
-            .filter(DBLaTeXMLSubmissions.submission_id.in_(sub_ids[i: min(len(sub_ids), i+500)]))
+            .filter(DBLaTeXMLSubmissions.submission_id.in_(sub_ids[i: min(len(sub_ids), i+n_docs)]))
         ).scalars().all()
         for row in latexml_subs:
             make_transient(row)
@@ -182,9 +186,13 @@ def _invert_db_graph_edges (db_graph: Dict[str, List[Edge]]) -> Dict[str, List[E
                 inverted_db_graph[next.to_table] = [reversed_edge]
     return inverted_db_graph
 
-def _make_subset (db_graph: Dict[str, List[Edge]], 
-                 special_cases: Dict[str, SpecialCase], 
-                 size: int):
+def _make_subset (
+        db_graph: Dict[str, List[Edge]],
+        special_cases: Dict[str, SpecialCase],
+        size: int,
+        create_arxiv_db_schema: bool,
+        create_latexml_db_schema: bool,
+        ):
     """
     algorithm:
 
@@ -198,11 +206,18 @@ def _make_subset (db_graph: Dict[str, List[Edge]],
     classic_session = session_factory()
     new_session = NewSessionLocal()
 
-    Base.metadata.drop_all(new_engine)
-    Base.metadata.create_all(new_engine)
-    LaTeXMLBase.metadata.drop_all(new_engine)
-    LaTeXMLBase.metadata.create_all(new_engine)
-    
+    if create_arxiv_db_schema:
+        Base.metadata.drop_all(new_engine)
+        Base.metadata.create_all(new_engine)
+
+    if create_latexml_db_schema:
+        LaTeXMLBase.metadata.drop_all(new_engine)
+        LaTeXMLBase.metadata.create_all(new_engine)
+
+    # check db connections
+    _any_tapir_user = classic_session.execute(select(TapirUser).limit(1)).scalars().all()
+    _any_latexml_doc = classic_session.execute(select(DBLaTeXMLDocuments).limit(1)).scalars().all()
+
     ### Do algorithm ###
     table_lookup = { i.__tablename__: i for i in get_tables() }
     processing_order = topological_sort({ k: list(map(lambda x: x.to_table, v)) for k,v in db_graph.items() })
@@ -244,7 +259,8 @@ def _make_subset (db_graph: Dict[str, List[Edge]],
     new_session.commit()
     new_session.close()
 
-def clone_db_subset (n_users: int, config_directory: Optional[str] = None):
+def clone_db_subset (n_users: int, config_directory: Optional[str] = None,
+                     create_arxiv_db_schema: bool = True, create_latexml_db_schema: bool = True,):
     config_directory = config_directory or \
         os.path.abspath(
             os.path.join(
@@ -255,4 +271,32 @@ def clone_db_subset (n_users: int, config_directory: Optional[str] = None):
     graph = json.loads(open(os.path.join(config_directory, 'graph.json')).read())
     special_cases = json.loads(open(os.path.join(config_directory, 'special_cases.json')).read())
     graph_with_edges = { k: list(map(lambda x: Edge(**x), v)) for k,v in graph.items() }
-    _make_subset(graph_with_edges, special_cases, n_users)
+    _make_subset(graph_with_edges, special_cases, n_users, create_arxiv_db_schema, create_latexml_db_schema)
+
+
+def main():
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Clone a subset of the classic DB to a new DB.")
+
+    # Define arguments with environment variables as defaults
+    parser.add_argument('--n-users', type=int, default=os.environ.get('N_USERS', 2000),
+                        help='Number of users to copy (default: N_USERS environment variable or 2000)')
+    parser.add_argument('--config-directory', type=str, default=os.environ.get('CONFIG_DIRECTORY'),
+                        help='Configuration directory (default: CONFIG_DIRECTORY environment variable)')
+    parser.add_argument('--create-arxiv-db-schema', type=lambda x: x.lower() == 'true',
+                        default=os.environ.get('CREATE_ARXIV_DB_SCHEMA', 'true').lower() == 'true',
+                        help='Whether to create the arXiv DB schema (default: CREATE_ARXIV_DB_SCHEMA environment variable or true)')
+    parser.add_argument('--create-latexml-db-schema', type=lambda x: x.lower() == 'true',
+                        default=os.environ.get('CREATE_LATEXML_DB_SCHEMA', 'true').lower() == 'true',
+                        help='Whether to create the LaTeXML DB schema (default: CREATE_LATEXML_DB_SCHEMA environment variable or true)')
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Call the function with the parsed arguments
+    clone_db_subset(args.n_users, args.config_directory,
+                    args.create_arxiv_db_schema, args.create_latexml_db_schema)
+
+
+if __name__ == '__main__':
+    main()
