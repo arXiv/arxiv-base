@@ -9,7 +9,7 @@ from arxiv.metadata.metacheck import combine_dispositions
 TITLE = FieldName.TITLE
 AUTHORS = FieldName.AUTHORS
 ABSTRACT = FieldName.ABSTRACT
-SOURCE_TYPE = FieldName.SOURCE_TYPE
+# Source type is "internal metadata"
 COMMENTS = FieldName.COMMENTS
 REPORT_NUM = FieldName.REPORT_NUM
 JOURNAL_REF = FieldName.JOURNAL_REF
@@ -91,11 +91,12 @@ TITLE_TESTS = [
     ('This \\\\ is a line break',
      (WARN, ["Title: contains TeX line break"])),
     ('This \\ is not a line break', None),
-    ('Don\'t use \\href{...}, \\url{...}, \\emph, \\textbf, \\texttt, \\%, or \\#: Something',
+    ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
      (WARN, [
          'Title: contains TeX \\href',
          'Title: contains TeX \\url',
          'Title: contains \\emph',
+         'Title: contains \\uline',
          'Title: contains \\textbf',
          'Title: contains \\texttt',
          'Title: contains unnecessary escape: \\#',
@@ -256,11 +257,12 @@ ABSTRACT_TESTS = [
     # (WARN, ['Abstract: starts with lower case']
     # ["Lone periods should not be allowed.\\n.\\n",'Abstract: lone period, remove or it will break the mailing!'],
     ('This \\ is not a line break', None),
-    ('Don\'t use \\href{...}, \\url{...}, \\emph, \\textbf, \\texttt, \\%, or \\#: Something',
+    ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
      (WARN, [
          'Abstract: contains TeX \\href',
          'Abstract: contains TeX \\url',
          'Abstract: contains \\emph',
+         'Abstract: contains \\uline',
          'Abstract: contains \\textbf',
          'Abstract: contains \\texttt',
          'Abstract: contains unnecessary escape: \\#',
@@ -282,30 +284,6 @@ def test_abstracts():
     #
 
 ############################################################
-# Checking source types? - no tests yet
-
-SOURCE_TYPE_TESTS = []
-
-def test_source_types():
-    for st, expected_result in SOURCE_TYPE_TESTS:
-        result = metacheck( { SOURCE_TYPE: st } )
-        assert result[SOURCE_TYPE] != []
-        check_result(result[SOURCE_TYPE], expected_result)
-    #
-    
-#     for st, expected_result in [
-#             ['H',"Source type: HTML, check it"],
-#             ['I',"Source type: Withdrawal, check it"],
-#             ['P',"Source type: PS only, check it"],
-#             ['S',None],
-#             ['D',None],
-#             ['DS',None],
-#             ['X',"Source type: DOCX/OOXML, check PDF"],
-#             ['O',"Source type: ODF, check PDF"],
-#             ['Oddball',"Source type: Strange: Oddball"],
-#     ]:
-
-############################################################
 ##### Detailed tests for COMMENTS field
 
 def test_comments():
@@ -317,11 +295,12 @@ def test_comments():
             # ['15 pages, 6 figures:',(HOLD,['Comments: ends with punctuation (:)'])],
             # ['Comments: 15 pages, 6 figures',(HOLD,['Comments: starts with the word Comments, check'])],
             # ['Poster submission to AHDF',(HOLD,["Comments: contains word 'poster'"])],
-            ('Don\'t use \\href{...}, \\url{...}, \\emph, \\textbf, \\texttt, \\%, or \\#: Something',
+            ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
              (WARN, [
                  'Comments: contains TeX \\href',
                  'Comments: contains TeX \\url',
                  'Comments: contains \\emph',
+                 'Comments: contains \\uline',
                  'Comments: contains \\textbf',
                  'Comments: contains \\texttt',
                  'Comments: contains unnecessary escape: \\#',
@@ -428,5 +407,5 @@ def test_all_brackets_balanced():
         assert metacheck.all_brackets_balanced(s) == False
 
 # pyenv activate  arxiv-base-3-11
-# python -m pytest arxiv/metadata/test_metacheck.py
+# python -m pytest arxiv/metadata/tests/test_metacheck.py
 

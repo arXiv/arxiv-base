@@ -15,7 +15,6 @@ from arxiv.metadata.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 TITLE = FieldName.TITLE
 AUTHORS = FieldName.AUTHORS
 ABSTRACT = FieldName.ABSTRACT
-SOURCE_TYPE = FieldName.SOURCE_TYPE
 COMMENTS = FieldName.COMMENTS
 REPORT_NUM = FieldName.REPORT_NUM
 JOURNAL_REF = FieldName.JOURNAL_REF
@@ -31,7 +30,6 @@ HOLD = Disposition.HOLD
 MIN_TITLE_LEN = 5
 MIN_AUTHORS_LEN = 5
 MIN_ABSTRACT_LEN = 5
-MIN_SOURCE_TYPE_LEN = 0         # Not checked
 # No MIN_COMMENTS_LEN
 MIN_REPORT_NUM_LEN = 4
 MIN_JOURNAL_REF_LEN = 5
@@ -73,8 +71,6 @@ def check(metadata:Dict[FieldName,str]):
             result[k] = check_authors(v)
         elif k == ABSTRACT:
             result[k] = check_abstract(v)
-        elif k == SOURCE_TYPE:
-            result[k] = check_source_type(v)
         elif k == COMMENTS:
             result[k] = check_comments(v)
         elif k == REPORT_NUM:
@@ -94,7 +90,6 @@ def looks_like_all_caps(s: str) -> bool:
     exact threshold is heuristic based on looking at submissions over
     March 2010.
     """
-    num_caps = s.upper()
     num_caps = sum([ c.isupper() for c in s])
     num_lower = sum([ c.islower() for c in s])
     if num_caps > num_lower * 2 + 7:
@@ -106,9 +101,11 @@ def looks_like_all_caps(s: str) -> bool:
 def long_word_caps(s: str) -> bool:
     """
     Returns true (was: a list of long words) if s appears to have
-    two or more words which are not in our list
-    KNOWN_WORDS_IN_ALL_CAPS.
-
+    two or more words which are
+    * at least 6 characters long,
+    * in all caps,
+    * contain at least one capitalized letter (not digits or punctuation!), 
+    * and which are not in our list of KNOWN_WORDS_IN_ALL_CAPS.
     """
     num_matches = 0
     for word in s.split():
@@ -513,7 +510,7 @@ def check_abstract(v: str) -> (str, str):
     #
     if contains_outside_math( r"\\uline", v):
         disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains \\emph")
+        complaints.append("Abstract: contains \\uline")
     #
     if contains_outside_math( r"\\textbf", v):
         disposition = combine_dispositions(disposition, WARN)
@@ -554,13 +551,6 @@ def check_abstract(v: str) -> (str, str):
     # not implemented: abstract MAY end in punctuation
     # not implemented: check for arXiv or arXiv:ID
     return disposition, complaints
-
-# TODO: What are valid source types?
-def check_source_type(v: str) -> (str, str):
-    if len(v) < MIN_SOURCE_TYPE_LEN:
-        return WARN, ["Source_type: too short"]
-    # TODO
-    return OK, []
 
 def check_comments(v: str) -> (str, str):
     disposition = OK
