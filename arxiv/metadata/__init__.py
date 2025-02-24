@@ -12,7 +12,7 @@ class FieldName(StrEnum):
     TITLE = "title"
     AUTHORS = "authors"
     ABSTRACT = "abstract"
-    SOURCE_TYPE = "source_type"
+    # source_type is internal, not checked 
     COMMENTS = "comments"
     REPORT_NUM = "report_num"
     JOURNAL_REF = "journal_ref"
