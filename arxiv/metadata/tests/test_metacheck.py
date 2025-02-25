@@ -1,4 +1,6 @@
 
+import pytest
+
 from arxiv.metadata import FieldName
 from arxiv.metadata import Disposition
 from arxiv.metadata import metacheck
@@ -80,6 +82,8 @@ TITLE_TESTS = [
      [WARN, ["Title: excessive capitalization"]]),
     # We allow some capitalized words
     ('The is a title with known long words capitalized AMANDA CHANDRA', None),
+    # but digit strings don't count
+    ('The is a title with 12345678 and 987654321 words not capitalized', None),
     # Check for *some* HTML entities
     ('These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>', None),
     ('Factor Ratio to Q<sup>2</sup> = 8.5 GeV<sup>2</sup>',
@@ -104,11 +108,11 @@ TITLE_TESTS = [
      ])),
 ]
 
-def test_titles():
-    for title, expected_result in TITLE_TESTS:
-        result = metacheck.check( { TITLE: title } );
-        check_result(result[TITLE], expected_result)
-    #
+@pytest.mark.parametrize("test", TITLE_TESTS)
+def test_titles(test):
+    title, expected_result = test
+    result = metacheck.check( { TITLE: title } );
+    check_result(result[TITLE], expected_result)
     
 ############################################################
 ##### Detailed tests for AUTHORS field
@@ -228,12 +232,12 @@ AUTHORS_TESTS = [
      (WARN, ["Authors: unbalanced brackets"])),
 ]    
 
-def test_authors():
-    for (authors, expected_result) in AUTHORS_TESTS:
-        result = metacheck.check( { AUTHORS: authors } )
-        # print( authors, result )
-        check_result(result[AUTHORS], expected_result)
-    #
+@pytest.mark.parametrize("test", AUTHORS_TESTS)
+def test_authors(test):
+    (authors, expected_result) = test
+    result = metacheck.check( { AUTHORS: authors } )
+    # print( authors, result )
+    check_result(result[AUTHORS], expected_result)
 
 ############################################################
 ##### Detailed tests for ABSTRACT field
@@ -276,136 +280,147 @@ ABSTRACT_TESTS = [
      (WARN, ['Abstract does not appear to be English'])),
 ]
     
-def test_abstracts():
-    for (abs, expected_result) in ABSTRACT_TESTS:
-        result = metacheck.check( { ABSTRACT: abs } );
-        # print( abs, result )
-        check_result(result[ABSTRACT], expected_result)
-    #
+@pytest.mark.parametrize("test", ABSTRACT_TESTS)
+def test_abstracts(test):
+    (abs, expected_result) = test
+    result = metacheck.check( { ABSTRACT: abs } );
+    # print( abs, result )
+    check_result(result[ABSTRACT], expected_result)
 
 ############################################################
 ##### Detailed tests for COMMENTS field
 
-def test_comments():
-    for (comments, expected_result) in [
-            ('',None),
-            ('A comment',None),            
-            ('15 pages, 6 figures',None),
-            # ('15 pages, 6 figures,',(HOLD,['Comments: ends with punctuation (,)'])],
-            # ['15 pages, 6 figures:',(HOLD,['Comments: ends with punctuation (:)'])],
-            # ['Comments: 15 pages, 6 figures',(HOLD,['Comments: starts with the word Comments, check'])],
-            # ['Poster submission to AHDF',(HOLD,["Comments: contains word 'poster'"])],
-            ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
-             (WARN, [
-                 'Comments: contains TeX \\href',
-                 'Comments: contains TeX \\url',
-                 'Comments: contains \\emph',
-                 'Comments: contains \\uline',
-                 'Comments: contains \\textbf',
-                 'Comments: contains \\texttt',
-                 'Comments: contains unnecessary escape: \\#',
-                 'Comments: contains unnecessary escape: \\%',
-             ])),            
-            ('This ] is bad',
-             (WARN, ['Comments: unbalanced brackets'])),
-            
-    ]:
-        result = metacheck.check( { COMMENTS: comments } );
-        # print( comments, result )
-        check_result(result[COMMENTS], expected_result)
-    #
+COMMENTS_TESTS = [
+    ('',None),
+    ('A comment',None),            
+    ('15 pages, 6 figures',None),
+    # ('15 pages, 6 figures,',(HOLD,['Comments: ends with punctuation (,)'])],
+    # ['15 pages, 6 figures:',(HOLD,['Comments: ends with punctuation (:)'])],
+    # ['Comments: 15 pages, 6 figures',(HOLD,['Comments: starts with the word Comments, check'])],
+    # ['Poster submission to AHDF',(HOLD,["Comments: contains word 'poster'"])],
+    ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
+     (WARN, [
+         'Comments: contains TeX \\href',
+         'Comments: contains TeX \\url',
+         'Comments: contains \\emph',
+         'Comments: contains \\uline',
+         'Comments: contains \\textbf',
+         'Comments: contains \\texttt',
+         'Comments: contains unnecessary escape: \\#',
+         'Comments: contains unnecessary escape: \\%',
+     ])),            
+    ('This ] is bad',
+     (WARN, ['Comments: unbalanced brackets'])),
+]
+
+@pytest.mark.parametrize("test", COMMENTS_TESTS)
+def test_comments(test):
+    (comments, expected_result) = test
+    result = metacheck.check( { COMMENTS: comments } );
+    # print( comments, result )
+    check_result(result[COMMENTS], expected_result)
 
 ############################################################
 ##### Detailed tests for REPORT-NO field
 
-def test_report_num():
-    for (report_num, expected_result) in [
-            ['LANL-UR/2001-01',None],
-            ['ITP 09 #1',None],
-            ['NO-NUM',(HOLD,["Report-no: no digits"])],
-            ['12',(HOLD,["Report-no: too short"])],
-            ['123',(HOLD,["Report-no: too short"])],
-            ['1234',(HOLD,["Report-no: no letters"])],
-            ['12345',(HOLD,["Report-no: no letters"])],
-    ]:
-        result = metacheck.check( { REPORT_NUM: report_num } );
-        # print( report_num, result )
-        check_result(result[REPORT_NUM], expected_result)
-    #
+REPORT_NO_TESTS = [
+    ['LANL-UR/2001-01',None],
+    ['ITP 09 #1',None],
+    ['NO-NUM',(HOLD,["Report-no: no digits"])],
+    ['12',(HOLD,["Report-no: too short"])],
+    ['123',(HOLD,["Report-no: too short"])],
+    ['1234',(HOLD,["Report-no: no letters"])],
+    ['12345',(HOLD,["Report-no: no letters"])],
+]
+
+@pytest.mark.parametrize("test", REPORT_NO_TESTS)
+def test_report_num(test):
+    (report_num, expected_result) = test
+    result = metacheck.check( { REPORT_NUM: report_num } );
+    # print( report_num, result )
+    check_result(result[REPORT_NUM], expected_result)
 
 ############################################################
 ##### journal_ref field checks
 
-def test_jrefs():
-    for jref, expected_result in [
-            # ['ibid',"Journal-ref: inappropriate word: ibid"],
-            ('Proceedings of the 34th "The Web Conference" (WWW 2025)', None),
-            ('JACM volume 1 issue 3, Jan 2024', None),            
-            ('1975',
-             (WARN, ["jref: too short"])),
-            ('Science 1.1',
-             (WARN, ["jref: missing year"])),
-            ('JACM Jan 2024 DOI:10.2345/thisisnotadoi',
-             (WARN, ["jref: contains DOI"])),
-            ('JACM Jan 2024 DOI:10.2345/thisisnotadoi',
-             (WARN, ["jref: contains DOI"])),
-            ('Accepted for publication in JACM Jan 2024',
-             (WARN, ["jref: contains 'accepted'"])),
-            ('Submitted to JACM Jan 2024',
-             (WARN, ["jref: contains 'submitted'"])),
-            # ['Science SPIE 1.1',"Journal-ref: submission from SPIE conference? Check for copyright issues"],
-            
-    ]:
-        result = metacheck.check( { JOURNAL_REF: jref } )
-        # print( jref, result )
-        check_result(result[JOURNAL_REF], expected_result)
-    #
+JREF_TESTS = [
+    # ['ibid',"Journal-ref: inappropriate word: ibid"],
+    ('Proceedings of the 34th "The Web Conference" (WWW 2025)', None),
+    ('JACM volume 1 issue 3, Jan 2024', None),            
+    ('1975',
+     (WARN, ["jref: too short"])),
+    ('Science 1.1',
+     (WARN, ["jref: missing year"])),
+    ('JACM Jan 2024 DOI:10.2345/thisisnotadoi',
+     (WARN, ["jref: contains DOI"])),
+    ('JACM Jan 2024 DOI:10.2345/thisisnotadoi',
+     (WARN, ["jref: contains DOI"])),
+    ('Accepted for publication in JACM Jan 2024',
+     (WARN, ["jref: contains 'accepted'"])),
+    ('Submitted to JACM Jan 2024',
+     (WARN, ["jref: contains 'submitted'"])),
+    # ['Science SPIE 1.1',"Journal-ref: submission from SPIE conference? Check for copyright issues"],
+]
+
+@pytest.mark.parametrize("test", JREF_TESTS)
+def test_jrefs(test):
+    jref, expected_result = test
+    result = metacheck.check( { JOURNAL_REF: jref } )
+    # print( jref, result )
+    check_result(result[JOURNAL_REF], expected_result)
 
 ############################################################    
 # (related DOI?) DOI field checks
 
-def test_doi():
-    for (doi, expected_result) in [
-            ['10.48550/arXiv.2501.18183',None],
-            ['doi.org/10.48550/arXiv.2501.18183',None],
-            ['10.485',(WARN,["doi: too short"])],
-            ['https://doi.org/10.48550/arXiv.2501.18183',(WARN,["doi: contains https:"])],
-            ['http://doi.org/10.48550/arXiv.2501.18183',(WARN,["doi: contains http:"])],
-            ['I like doi:10.48550/arXiv.2501.18183',(WARN,["doi: contains doi:"])],
-    ]:
-        result = metacheck.check( { DOI: doi } );
-        # print( doi, result )
-        check_result(result[DOI], expected_result)
-    #
+DOI_TESTS = [
+    ['10.48550/arXiv.2501.18183',None],
+    ['doi.org/10.48550/arXiv.2501.18183',None],
+    ['10.485',(WARN,["doi: too short"])],
+    ['https://doi.org/10.48550/arXiv.2501.18183',(WARN,["doi: contains https:"])],
+    ['http://doi.org/10.48550/arXiv.2501.18183',(WARN,["doi: contains http:"])],
+    ['I like doi:10.48550/arXiv.2501.18183',(WARN,["doi: contains doi:"])],
+]
+
+@pytest.mark.parametrize("test", DOI_TESTS)
+def test_doi(test):
+    (doi, expected_result) = test
+    result = metacheck.check( { DOI: doi } );
+    # print( doi, result )
+    check_result(result[DOI], expected_result)
 
 ############################################################
 #
 
-def test_all_brackets_balanced():
-    for s in [
-            '10.48550/arXiv.2501.18183'
-            '((()))',
-            '(([[{{}}]]))',
-            '(({}[[]])())[]',
-    ]:
-        assert metacheck.all_brackets_balanced(s) == True
-    #
-    for s in [
-            'this [ is wrong',
-            'this [ } wrong',            
-            'this [ ) wrong',            
-            'this ( is wrong',
-            'this ( ] wrong',
-            'this ( } wrong',                        
-            'this { is wrong',
-            'this { ) wrong',
-            'this { ] wrong',
-            'this is ) wrong',            
-            'this is } wrong',            
-            'this is ] wrong',
-    ]:
-        assert metacheck.all_brackets_balanced(s) == False
+BALANCED_BRACKETS_TESTS = [
+    '10.48550/arXiv.2501.18183'
+    '((()))',
+    '(([[{{}}]]))',
+    '(({}[[]])())[]',
+]
 
-# pyenv activate  arxiv-base-3-11
+UNBALANCED_BRACKETS_TESTS = [
+    'this [ is wrong',
+    'this [ } wrong',            
+    'this [ ) wrong',            
+    'this ( is wrong',
+    'this ( ] wrong',
+    'this ( } wrong',                        
+    'this { is wrong',
+    'this { ) wrong',
+    'this { ] wrong',
+    'this is ) ( wrong',            
+    'this is } wrong',            
+    'this is ] [ wrong',
+]
+
+@pytest.mark.parametrize("s", BALANCED_BRACKETS_TESTS)
+def test_balanced_brackets(s):
+    assert metacheck.all_brackets_balanced(s) == True
+
+@pytest.mark.parametrize("s", BALANCED_BRACKETS_TESTS)    
+def test_unbalanced_brackets(s):
+    assert metacheck.all_brackets_balanced(s) == True
+
+# pyenv activate arxiv-base-3-11
 # python -m pytest arxiv/metadata/tests/test_metacheck.py
 

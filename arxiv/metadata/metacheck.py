@@ -112,10 +112,12 @@ def long_word_caps(s: str) -> bool:
         if len(word) >= 6 and \
            word.upper() == word and \
            word.lower() != word and \
-           (word not in KNOWN_WORDS_IN_ALL_CAPS):
+           word not in KNOWN_WORDS_IN_ALL_CAPS:
+            print( word, num_matches )
             num_matches += 1
         #
     #
+    print( s, num_matches )
     if num_matches > 1:
         return True
     else:
@@ -391,79 +393,86 @@ def check_authors(v: str) -> (str, str):
     
     parsed_authors = parse_author_affil(v) # => List[List[str]]
     for author in parsed_authors:
-        # first is "keyname" second is fist name(s), third is suffix
+        # first is "keyname" (surname?), second is fist name(s), third is suffix
         keyname = author[0]
         firstname = author[1]
         suffix = author[2]
-        # Some quick special cases to skip:
-        if keyname.lower() == "author" and firstname == "" and suffix == "":
-            continue
-        if keyname.lower() == "authors" and firstname == "" and suffix == "":
-            continue
-        if keyname == ":" and firstname == "" and suffix == "":
-            continue
-        if firstname == "":
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Authors: lone surname")
-        #
-        # Don't reject Sylvie ROUX nor S ROUX
-        if re.match("^[A-Z]{3,}$", keyname) and \
-           re.match("^[A-Z]{3,}$", firstname):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Author name is in all caps")
-        #
-        if re.match(r"^[A-Z]$", keyname) or \
-           re.match(r"^[A-Z]\.$", keyname):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Author: found initial not surname")
-        #
-        # Reject e. e. cummings and "evans". Don't reject J von
-        if keyname == keyname.lower() and \
-           (firstname is None or firstname == firstname.lower()):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Authors: no caps in name")
-        #
-        if re.search(r"\[|]", keyname) or \
-           re.search(r"\[|]", firstname) or \
-           re.search(r"\[|]", suffix):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Authors: name should not contain brackets")
-        #
-        if re.search("[0-9]", keyname) or \
-           re.search("[0-9]", firstname) or \
-           re.search("[0-9]", suffix):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Authors: name should not contain digits")
-        #
-        # match A. and A.B. but not AB (or RS)
-        # This may be broken due to the rest of the author name parser
-        if re.match("^[A-Z].$", suffix) or \
-           re.match("^[A-Z].[A-Z].$", suffix) or \
-           re.match("^[A-Z].[A-Z].[A-Z].$", suffix):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Authors: name suffix should not contain initials")
-        #
-        for badword in (
-                ";",            # !
-                "IEEE", "phd", "prof", "[^a-z]dr[^a-z]",
-                "Physics", "Math[. ]", "Math$",
-                "Inst", "Institute",
-                "Dept", "Department",
-                "Univ", "University",
-                "chatgpt", "^llama$", "^gemini$", "GPT-3.5", "GPT-4", "GPT-4o",
-                "PaLM2"
-                # Claude and Bert are too common
-        ):
-            if re.search(badword, keyname, re.IGNORECASE) or \
-               re.search(badword, firstname, re.IGNORECASE) or \
-               re.search(badword, suffix, re.IGNORECASE):
-                disposition = combine_dispositions(disposition, WARN)
-                complaints.append(f"Authors: name should not contain {badword}")
-            #
-        #
-    #
-    
+
+        complaints, disposition = check_one_author(complaints, disposition, keyname, firstname, suffix)
+    # end for author in parsed_authors
+
     return disposition, complaints
+
+def check_one_author(complaints, disposition, keyname, firstname, suffix):
+            
+    # Some quick special cases to skip:
+    if keyname.lower() == "author" and firstname == "" and suffix == "":
+        return (complaints, disposition)
+    if keyname.lower() == "authors" and firstname == "" and suffix == "":
+        return (complaints, disposition)
+    if keyname == ":" and firstname == "" and suffix == "":
+        return (complaints, disposition)
+    if firstname == "":
+        disposition = combine_dispositions(disposition, WARN)
+        complaints.append("Authors: lone surname")
+    #
+    # Don't reject Sylvie ROUX nor S ROUX
+    if re.match("^[A-Z]{3,}$", keyname) and \
+       re.match("^[A-Z]{3,}$", firstname):
+        disposition = combine_dispositions(disposition, WARN)
+        complaints.append("Author name is in all caps")
+    #
+    if re.match(r"^[A-Z]$", keyname) or \
+       re.match(r"^[A-Z]\.$", keyname):
+        disposition = combine_dispositions(disposition, WARN)
+        complaints.append("Author: found initial not surname")
+    #
+    # Reject e. e. cummings and "evans". Don't reject J von
+    if keyname == keyname.lower() and \
+       (firstname is None or firstname == firstname.lower()):
+        disposition = combine_dispositions(disposition, WARN)
+        complaints.append("Authors: no caps in name")
+    #
+    if re.search(r"\[|]", keyname) or \
+       re.search(r"\[|]", firstname) or \
+       re.search(r"\[|]", suffix):
+        disposition = combine_dispositions(disposition, WARN)
+        complaints.append("Authors: name should not contain brackets")
+    #
+    if re.search("[0-9]", keyname) or \
+       re.search("[0-9]", firstname) or \
+       re.search("[0-9]", suffix):
+        disposition = combine_dispositions(disposition, WARN)
+        complaints.append("Authors: name should not contain digits")
+    #
+    # match A. and A.B. but not AB (or RS)
+    # This may be broken due to the rest of the author name parser
+    if re.match("^[A-Z].$", suffix) or \
+       re.match("^[A-Z].[A-Z].$", suffix) or \
+       re.match("^[A-Z].[A-Z].[A-Z].$", suffix):
+        disposition = combine_dispositions(disposition, WARN)
+        complaints.append("Authors: name suffix should not contain initials")
+    #
+    for badword in (
+            ";",
+            "IEEE", "phd", "prof", "[^a-z]dr[^a-z]",
+            "Physics", "Math[. ]", "Math$",
+            "Inst", "Institute",
+            "Dept", "Department",
+            "Univ", "University",
+            "chatgpt", "^llama$", "^gemini$", "GPT-3.5", "GPT-4", "GPT-4o",
+            "PaLM2"
+            # Claude and Bert are too common
+    ):
+        if re.search(badword, keyname, re.IGNORECASE) or \
+           re.search(badword, firstname, re.IGNORECASE) or \
+           re.search(badword, suffix, re.IGNORECASE):
+            disposition = combine_dispositions(disposition, WARN)
+            complaints.append(f"Authors: name should not contain {badword}")
+        #
+    # end for badword in badwords
+
+    return (complaints, disposition)
 
 
 def check_abstract(v: str) -> (str, str):
@@ -556,10 +565,6 @@ def check_comments(v: str) -> (str, str):
     disposition = OK
     complaints = []
     # Empty comments are ok!
-    # if len(v) < MIN_COMMENTS_LEN:
-    #     disposition = combine_dispositions(disposition, WARN)
-    #     complaints.append( "Comments: too short" )
-    #
     if re.search( r"\\\\", v):
         disposition = combine_dispositions(disposition, WARN)
         complaints.append("Comments: contains TeX line break")
@@ -608,7 +613,7 @@ def check_comments(v: str) -> (str, str):
         disposition = combine_dispositions(disposition, WARN)
         complaints.append("Comments: unbalanced brackets")
     #
-    # check language?
+    # TODO: check that language is English?
     
     return disposition, complaints
 
