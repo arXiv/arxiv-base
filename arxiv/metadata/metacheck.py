@@ -113,16 +113,10 @@ def long_word_caps(s: str) -> bool:
            word.upper() == word and \
            word.lower() != word and \
            word not in KNOWN_WORDS_IN_ALL_CAPS:
-            print( word, num_matches )
             num_matches += 1
         #
     #
-    print( s, num_matches )
-    if num_matches > 1:
-        return True
-    else:
-        return False
-    #
+    return (num_matches > 1):
 
 def smart_starts_with_lowercase_check(s: str) -> bool:
     """
