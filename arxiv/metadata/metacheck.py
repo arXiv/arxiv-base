@@ -116,7 +116,7 @@ def long_word_caps(s: str) -> bool:
             num_matches += 1
         #
     #
-    return (num_matches > 1):
+    return (num_matches > 1)
 
 def smart_starts_with_lowercase_check(s: str) -> bool:
     """
