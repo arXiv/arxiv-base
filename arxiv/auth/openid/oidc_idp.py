@@ -1,7 +1,6 @@
 """
 OpenID connect IdP client
 """
-import json
 import urllib.parse
 from typing import List, Optional
 import requests
@@ -31,6 +30,7 @@ class ArxivOidcIdpClient:
     _login_redirect_url: str
     _logout_redirect_url: str
     jwt_verify_options: dict
+    _ssl_cert_verify: bool
 
     def __init__(self, redirect_uri: str,
                  server_url: str = "https://openid.arxiv.org",
@@ -41,26 +41,36 @@ class ArxivOidcIdpClient:
                  login_redirect_url: str | None = None,
                  logout_redirect_url: str | None = None,
                  logger: logging.Logger | None = None,
+                 ssl_verify: bool = True,
                  ):
         """
         Make Tapir user data from pass-data
 
         Parameters
         ----------
-        redirect_uri: Callback URL - typically  FOO/callback which is POSTED when the IdP
-            authentication succeeds.
-        server_url: IdP's URL
-        realm: OpenID's realm - for arXiv users, it should be "arxiv"
-        client_id: Registered client ID. OAuth2 client/callback are registered on IdP and need to
-            match
-        scope: List of OAuth2 scopes - Apparently, keycloak (v20?) dropped the "openid" scope.
-               Trying to include "openid" results in no such scope error if you don't set up "openid" scope in the realm.
-               You need to have the "openid" scope for id_token, or else logout does not work.
-               IOW, you need to create "openid" scope for the realm if it does not exist.
-        client_secret: Registered client secret
-        login_redirect_url: redircet URL after log in
-        logout_redirect_url: redircet URL after log out
-        logger: Python logging logger instance
+        redirect_uri : str
+            str: Callback URL - typically  FOO/callback which is POSTED when the IdP authentication succeeds.
+        server_url : str
+            str: IdP's URL
+        realm : str
+            OpenID's realm - for arXiv users, it should be "arxiv"
+        client_id : str
+            Registered client ID. OAuth2 client/callback are registered on IdP and need to match
+        scope : [str]
+            List of OAuth2 scopes - Apparently, keycloak (v20?) dropped the "openid" scope.
+            Trying to include "openid" results in no such scope error if you don't set up "openid" scope in the realm.
+            You need to have the "openid" scope for id_token, or else logout does not work.
+            IOW, you need to create "openid" scope for the realm if it does not exist.
+        client_secret : str
+            Registered client secret
+        login_redirect_url: str
+            redircet URL after log in
+        logout_redirect_url : str
+            redircet URL after log out
+        logger : logging.Logger
+            Python logging logger instance
+        ssl_verify: bool
+            Verify SSL certificate - DO NOT TURN THIS OFF UNLESS YOU ARE WORKING ON LOCAL HOST
         """
         self.server_url = server_url
         self.realm = realm
@@ -80,14 +90,17 @@ class ArxivOidcIdpClient:
             "verify_iss": True,
             "verify_aud": False,  # audience is "account" when it comes from olde tapir but not so for Keycloak.
         }
+        self._ssl_cert_verify = ssl_verify
         pass
 
     @property
     def oidc(self) -> str:
+        """OIDC URL"""
         return f'{self.server_url}/realms/{self.realm}/protocol/openid-connect'
 
     @property
-    def auth_url(self) -> str:
+    def authn_url(self) -> str:
+        """Authentication URL"""
         return self.oidc + '/auth'
 
     @property
@@ -115,7 +128,7 @@ class ArxivOidcIdpClient:
     @property
     def login_url(self) -> str:
         scope = "&scope=" + "%20".join(self.scope) if self.scope else ""
-        url = f'{self.auth_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code{scope}'
+        url = f'{self.authn_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code{scope}'
         self._logger.debug(f'login_url: {url}')
         return url
 
@@ -125,7 +138,7 @@ class ArxivOidcIdpClient:
         # I'm having some 2nd thought about caching this. Fresh cert every time is probably needed
         # if not self._server_certs:
         # This adds one extra fetch but it avoids weird expired certs situation
-        certs_response = requests.get(self.certs_url)
+        certs_response = requests.get(self.certs_url, verify=self._ssl_cert_verify)
         self._server_certs = certs_response.json()
         return self._server_certs
 
@@ -145,7 +158,13 @@ class ArxivOidcIdpClient:
 
         Parameters
         ----------
-        code: When IdP calls back, it comes with the authentication code as a query parameter.
+        code : str
+            When IdP calls back, it comes with the authentication code as a query parameter.
+
+        Returns
+        -------
+        dict | None
+            IDP token when this is a success
         """
         auth = None
         if self.client_secret:
@@ -169,7 +188,8 @@ class ArxivOidcIdpClient:
                     'redirect_uri': self.redirect_uri,
                     'client_id': self.client_id,
                 },
-                auth=auth
+                auth=auth,
+                verify=self._ssl_cert_verify,
             )
             if token_response.status_code != 200:
                 self._logger.warning(f'idp %s', token_response.status_code)
@@ -187,12 +207,13 @@ class ArxivOidcIdpClient:
 
         Parameters
         ----------
-        access_token: This is the access token in the IdP's token that you get from the code
+        access_token : str
+            This is the access token in the IdP's token that you get from the code
 
-        Return
-        ------
-        None -> Invalid access token
-        dict -> The content of idp token as dict
+        Returns
+        -------
+        None | dict
+             None -> Invalid access token, dict -> The content of idp token as dict
         """
 
         try:
@@ -220,8 +241,13 @@ class ArxivOidcIdpClient:
         except jwt.ExpiredSignatureError:
             self._logger.error("IdP signature cert is expired.")
             return None
+
         except jwt.InvalidTokenError:
             self._logger.error("jwt.InvalidTokenError: Token is invalid.", exc_info=True)
+            return None
+
+        except jwt.ImmatureSignatureError:
+            self._logger.error("jwt.ImmatureSignatureError: Token is invalid.", exc_info=True)
             return None
         # not reached
 
@@ -237,15 +263,19 @@ class ArxivOidcIdpClient:
 
         Parameters
         ----------
-        idp_token: This is the IdP token which contains access, refresh, id tokens, etc.
+        idp_token : dict | None
+            This is the IdP token which contains access, refresh, id tokens, etc.
 
-        kc_cliams: This is the contents of (unpacked) access token. IdP signs it with the private
+        kc_cliams : dict | None
+            This is the contents of (unpacked) access token. IdP signs it with the private
             key, and the value is verified using the published public cert.
 
-        client_ipv4: Client's IPv4 address if available
+        client_ipv4: str | None
+            Client's IPv4 address if available
 
-        NOTE: So this means there are two copies of access token. Unfortunate, but unpacking
-              every time can be costly.
+        NOTE:
+            So this means there are two copies of access token. Unfortunate, but unpacking
+            every time can be costly.
         """
         if idp_token is None:
             idp_token = {}
@@ -264,13 +294,15 @@ class ArxivOidcIdpClient:
 
         Parameters
         ----------
-        code: The code you get in the /callback
-        client_ipv4: This is the client IP address of the IdP
+        code : str
+            The code you get in the /callback
+        client_ipv4 : str  | None
+            This is the client IP address of the IdP
 
         Returns
         -------
-        ArxivUserClaims: User's IdP claims
-        None: Something is wrong
+        ArxivUserClaims | None
+            User's IdP claims or None when something is wrong
 
         Note
         ----
@@ -297,7 +329,13 @@ class ArxivOidcIdpClient:
 
         Parameters
         ----------
-        user: ArxivUserClaims
+        user : ArxivUserClaims
+            user claims
+
+        Returns
+        -------
+        bool
+            Logout success / failure
         """
         try:
             header = {
@@ -318,7 +356,7 @@ class ArxivOidcIdpClient:
         log_extra = {'header': header, 'body': data}
         self._logger.debug('Logout request %s', url, extra=log_extra)
         try:
-            response = requests.post(url, headers=header, data=data, timeout=30)
+            response = requests.post(url, headers=header, data=data, timeout=30, verify=self._ssl_cert_verify)
             if response.status_code == 200:
                 # If Keycloak is misconfigured, this does not log out.
                 # Turn front channel logout off in the logout settings of the client."
@@ -346,13 +384,18 @@ class ArxivOidcIdpClient:
             return False
 
 
-    def refresh_access_token(self, refresh_token: str) -> ArxivUserClaims:
+    def refresh_access_token(self, refresh_token: str) -> Optional[ArxivUserClaims]:
         """With the refresh token, get a new access token
 
         Parameters
         ----------
         refresh_token: str
-           refresh token which is given by OIDC
+            refresh token which is given by OIDC
+
+        Returns
+        -------
+        ArxivUserClaims | None
+            New (refreshed) user claims when success. None - the refresh token is invalid/expired.
         """
 
         headers = {
@@ -382,6 +425,7 @@ class ArxivOidcIdpClient:
                 },
                 auth=auth,
                 headers=headers,
+                verify=self._ssl_cert_verify
             )
             if token_response.status_code != 200:
                 self._logger.warning(f'idp %s', token_response.status_code)
