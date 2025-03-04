@@ -60,9 +60,50 @@ def contains_outside_math(s1:str, s2:str) -> bool:
        
 
 ############################################################
+# Check report objects are a string (disposition)
+# and a list of complaints
+# Each complaint is a string and a list of contexts.
+
+class MetadataCheckReport:
+    def __init__(self):
+        self.disposition = OK
+        # map from complaint to context (may be "")
+        self.complaints = {}
+
+    def __repr__(self):
+        if self.disposition == OK:
+            return f"<MetadataCheckReport OK>"
+        else:
+            return f"<MetadataCheckReport {self.disposition}: {self.get_complaints_strings()}>"
+        
+
+    def add_complaint(self, disposition, complaint_string:str, context:str = ""):
+        self.disposition = combine_dispositions(self.disposition, disposition)
+        if complaint_string in self.complaints:
+            self.complaints[complaint_string].append(context)
+        else:
+            self.complaints[complaint_string] = [context]
+        #
+             
+    def get_disposition(self) -> Disposition:
+        return self.disposition
+    
+    def get_complaints_list(self) -> list[str]:
+        return list(self.complaints.keys())
+
+    def get_complaints_strings(self) -> list[str]:
+        return "; ".join([
+            complaint_string
+            if contexts == [""]
+            else complaint_string + " (" + ", ".join(contexts) + ")"
+            for (complaint_string, contexts) in self.complaints.items()
+        ])
+    
+
+############################################################
 # This is the main function
 
-def check(metadata:Dict[FieldName,str]): 
+def check(metadata:Dict[FieldName,str]) -> Dict[FieldName,MetadataCheckReport]: 
     result = {} 
     for (k,v) in metadata.items():
         if k == TITLE:
@@ -84,6 +125,9 @@ def check(metadata:Dict[FieldName,str]):
     #
     return result
 
+############################################################
+#
+
 def looks_like_all_caps(s: str) -> bool:
     """
     Returns true if s appears to have all/excessive capitals. The
@@ -103,15 +147,13 @@ def long_word_caps(s: str) -> bool:
     Returns true (was: a list of long words) if s appears to have
     two or more words which are
     * at least 6 characters long,
-    * in all caps,
-    * contain at least one capitalized letter (not digits or punctuation!), 
+    * is in all caps (TODO: strip trailing comma ","?)
     * and which are not in our list of KNOWN_WORDS_IN_ALL_CAPS.
     """
     num_matches = 0
     for word in s.split():
         if len(word) >= 6 and \
-           word.upper() == word and \
-           word.lower() != word and \
+           re.match( "^[A-Z]*$", word ) and \
            word not in KNOWN_WORDS_IN_ALL_CAPS:
             num_matches += 1
         #
@@ -120,14 +162,19 @@ def long_word_caps(s: str) -> bool:
 
 def smart_starts_with_lowercase_check(s: str) -> bool:
     """
-    Detect titles which start with a lower case char, eg "bad title"
-    but do not reject "eSpeak: A New World"
+    Detect titles which start with a lower case char, eg "bad title" or "a bad title"
+    but do not reject "eSpeak: A New World", "tuGEMM: ...", "uGMMS", or "p-Mean"
     """
 
     if len(s) < 1:
         return False
     if re.match( "[a-z]", s):
-        if re.match( "[a-z][A-Z][a-zA-Z]*: [A-Z]", s):
+        if re.match( "[a-z][a-zA-Z-]*: [A-Z]", s):
+            return False
+        elif re.match( "[a-z][A-Z][A-Z]* ", s):
+            # Matches uGMS
+            return False
+        elif re.match( "[a-z]-[A-Z]", s):
             return False
         else:
             return True
@@ -169,14 +216,14 @@ def language_is_not_english(s: str) -> bool:
         return False
 
 HTML_ELEMENTS = [
-    "<p[^a-z]", "</p>"
-    "<div[^a-z]", "</div>",
-    "<br[^a-z]", "</br>",
-    "<a[^a-z]", "</a>",
-    "<img[^a-z]", "</img>",
-    "<sup[^a-z]", "</sup>",
-    "<sub[^a-z]", "</sub>",
-    "<table[^a-z]", "</table>",
+    "<p ", "<p>", "</p>"
+    "<div ", "<div", "</div>",
+    "<br ", "<br>", "</br>",
+    "<a ", "<a>", "</a>",
+    "<img ", "<img>", "</img>",
+    "<sup ", "<sup>", "</sup>",
+    "<sub ", "<sub>", "</sub>",
+    "<table ", "<table>", "</table>",
 ]
     
 def contains_html_elements(s: str) -> bool:
@@ -195,179 +242,156 @@ def contains_html_elements(s: str) -> bool:
 
 # ) must be allowed
 # *, #, ^, @ are problematic in authors, and detected elsewhere
-ENDS_WITH_PUNCTUATION_RE = re.compile( "[!$%^&(_=`:;,.?-]$" )
+ENDS_WITH_PUNCTUATION_RE = re.compile( r"[!$%^&(_=`:;,.?-]$" )
+ENDS_WITH_PUNCTUATION_EXCEPTIONS_RE = re.compile( r"[JS]r\.$" )
 
 def ends_with_punctuation(s: str) -> bool:
     """
-    Detect common punctuation which should not appear at the end of the authors lsit
+    Detect common punctuation which should not appear at the end of the authors list
     """
-    return ENDS_WITH_PUNCTUATION_RE.search(s)
+    return ENDS_WITH_PUNCTUATION_RE.search(s) \
+        and not ENDS_WITH_PUNCTUATION_EXCEPTIONS_RE.search(s) \
 
+# Look for bad encodings:
+# [\u00C0-\u00DF][\u0080-\u00BF]
+# [\u00E0-\u00EF][\u0080-\u00BF][\u0080-\u00BF]
+# and
+# [\u00F0-\u00F7][\u0080-\u00BF][\u0080-\u00BF][\u0080-\u00BF]
+
+# Simplified to: [\u00C0-\u00DF\u00E0-\u00EF\u00F0-\u00F7][\u0080-\u00BF]
+
+def contains_bad_encoding(s: str) -> bool:
+    # Beware: \u0080 is a funny character
+    return( re.search( r"[\u00C0-\u00DF\u00E0-\u00EF\u00F0-\u00F7][\u0080-\u00BF]", s ) )
 
 ############################################################
 
-def check_title(v: str) -> (str, str):
-    disposition = OK
-    complaints = []
+# => MetadataReport ?
+def check_title(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
     if v is None or v == "":
-        disposition = combine_dispositions(disposition, HOLD)
-        complaints.append("Title cannot be empty")
+        report.add_complaint( HOLD, "Title cannot be empty")
     elif len(v) < MIN_TITLE_LEN:
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: too short")
+        report.add_complaint( WARN, "Title: too short")
     #
-    if re.match( "title", v, re.IGNORECASE):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: begins with 'title'")
+    if re.match( r"title\b", v, re.IGNORECASE):
+        report.add_complaint( WARN, "Title: begins with 'title'")
     #
     # TODO: leading, trailing, excess space?
     if re.search( r"\\\\", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains TeX line break")
+        report.add_complaint( WARN, "Title: contains line break")
     #
     if looks_like_all_caps(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: excessive capitalization")
+        report.add_complaint( WARN, "Title: excessive capitalization")
     elif long_word_caps(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: excessive capitalization (words)")
+        report.add_complaint( WARN, "Title: excessive capitalization (words)")
     #
     if smart_starts_with_lowercase_check(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: starts with a lower case letter")
+        report.add_complaint( WARN, "Title: starts with a lower case letter")
     #
     if re.search( r"\\href{", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains TeX \\href")
+        report.add_complaint( WARN, "Title: contains \\href")
     #
     if re.search( r"\\url{", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains TeX \\url")
+        report.add_complaint( WARN, "Title: contains \\url")
     #
     if contains_outside_math( r"\\emph", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains \\emph")
+        report.add_complaint( WARN, "Title: contains \\emph")
     #
     if contains_outside_math( r"\\uline", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains \\uline")
+        report.add_complaint( WARN, "Title: contains \\uline")
     #
     if contains_outside_math( r"\\textbf", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains \\textbf")
+        report.add_complaint( WARN, "Title: contains \\textbf")
     #
     if contains_outside_math( r"\\texttt", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains \\texttt")
+        report.add_complaint( WARN, "Title: contains \\texttt")
     #
     if contains_outside_math( r"\\textsc", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains \\textsc")
+        report.add_complaint( WARN, "Title: contains \\textsc")
     #
     if contains_outside_math( r"\\#", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains unnecessary escape: \\#")
+        report.add_complaint( WARN, "Title: contains unnecessary escape: \\#")
     #
     if contains_outside_math( r"\\%", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains unnecessary escape: \\%")
+        report.add_complaint( WARN, "Title: contains unnecessary escape: \\%")
     #
     if contains_html_elements(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: contains HTML")
+        report.add_complaint( WARN, "Title: contains HTML")
     #
     if not all_brackets_balanced(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Title: unbalanced brackets")
+        report.add_complaint( WARN, "Title: unbalanced brackets")
     #
     # not implemented: titles MAY end with punctuation
     # not implemented: check for arXiv or arXiv:ID
-    return disposition, complaints
+    return report
 
-def check_authors(v: str) -> (str, str):
-    disposition = OK
-    complaints = []
+############################################################
+
+def check_authors(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
     # (Field must not be blank)
     if len(v) < MIN_AUTHORS_LEN:
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: too short")
+        report.add_complaint( WARN, "Authors: too short")
     #
     if re.search( r"\\\\", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: contains TeX line break")
+        report.add_complaint( WARN, "Authors: contains line break")
     #
     if re.search( r"\*", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: contains bad character '*'")
+        report.add_complaint( WARN, "Authors: contains bad character '*'")
     #
     if re.search( r"#", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: contains bad character '#'")
+        report.add_complaint( WARN, "Authors: contains bad character '#'")
     #
-    if re.search( r"\^", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: contains bad character '^'")
+    if re.search( r"[^\\]\^", v):
+        report.add_complaint( WARN, "Authors: contains bad character '^'")
     #
     if re.search( r"@", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: contains bad character '@'")
+        report.add_complaint( WARN, "Authors: contains bad character '@'")
     #
     if re.match( r"^\s", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: leading whitespace")
+        report.add_complaint( WARN, "Authors: leading whitespace")
     #
     if re.search( r"\s$", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: trailing whitespace")
+        report.add_complaint( WARN, "Authors: trailing whitespace")
     #
     if re.search( r"\s\s", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: excess whitespace")
+        report.add_complaint( WARN, "Authors: excess whitespace")
     #
     # This should also match ", ," ?
     if re.search( r"\s,", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: whitespace before comma")
+        report.add_complaint( WARN, "Authors: whitespace before comma")
     #
     if re.search( r"anonym", v, re.IGNORECASE):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: anonymous submissions not accepted")
+        report.add_complaint( WARN, "Authors: anonymous submissions not accepted")
     #
     if re.search( r"corresponding", v, re.IGNORECASE):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: contains 'corresponding'")
+        report.add_complaint( WARN, "Authors: contains 'corresponding'")
     #
     for s in ("\\dag", "\\ddag", "\\textdag", "\\textddag"):
         if re.match( s, v, re.IGNORECASE):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append("Authors: contains dagger symbol")
+            report.add_complaint( WARN, "Authors: contains dagger symbol")
             break
         #
     #
-    if re.match( "authors", v, re.IGNORECASE):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: begins with 'authors'")
-    elif re.match( "author", v, re.IGNORECASE):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: begins with 'author'")
+    if re.match( r"authors\b", v, re.IGNORECASE):
+        report.add_complaint( WARN, "Authors: begins with 'authors'")
+    elif re.match( r"author\b", v, re.IGNORECASE):
+        report.add_complaint( WARN, "Authors: begins with 'author'")
     #
     if contains_html_elements(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: contains HTML")
+        report.add_complaint( WARN, "Authors: contains HTML")
     #
     if not all_brackets_balanced(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: unbalanced brackets")
+        report.add_complaint( WARN, "Authors: unbalanced brackets")
     #
     # Do I need to parse the authors list first?
     if re.search( r";", v) and not re.search( "(.*;.*)", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: use commas, not ';' to separate authors")
+        report.add_complaint( WARN, "Authors: use commas, not ';' to separate authors")
     #
-    # Authors list can NOT end with punctuation
+    # Authors list can NOT end with punctuation (except for Jr., Sr.
     if ends_with_punctuation(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: ends with punctuation")
+        report.add_complaint( WARN, "Authors: ends with punctuation")
     #
     
     # Parse authors, check authors names - but not affiliations - for:
@@ -392,285 +416,280 @@ def check_authors(v: str) -> (str, str):
         firstname = author[1]
         suffix = author[2]
 
-        complaints, disposition = check_one_author(complaints, disposition, keyname, firstname, suffix)
+        check_one_author(report, keyname, firstname, suffix, author)
     # end for author in parsed_authors
 
-    return disposition, complaints
+    return report
 
-def check_one_author(complaints, disposition, keyname, firstname, suffix):
-            
+def check_one_author(report, keyname, firstname, suffix, author):
+    if firstname and suffix:
+        name = f"{firstname} {keyname} {suffix}"
+    elif firstname:
+        name = f"{firstname} {keyname}"
+    elif suffix:
+        name = f"{keyname} {suffix}"
+    else:
+        name = keyname
+    #
     # Some quick special cases to skip:
     if keyname.lower() == "author" and firstname == "" and suffix == "":
-        return (complaints, disposition)
+        return
     if keyname.lower() == "authors" and firstname == "" and suffix == "":
-        return (complaints, disposition)
+        return
     if keyname == ":" and firstname == "" and suffix == "":
-        return (complaints, disposition)
+        return
+    # This is wrong
+    # if suffix.lower() == "collaboration":
+    #     return                  # ???
     if firstname == "":
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: lone surname")
+        print( author )
+        if re.search(r"collaboration", name, re.IGNORECASE) \
+           or re.search(r"collaborative", name, re.IGNORECASE) \
+           or re.search(r"project", name, re.IGNORECASE) \
+           or re.search(r"group", name, re.IGNORECASE) \
+           or re.search(r"team", name, re.IGNORECASE) \
+           or re.search(r"belle", name, re.IGNORECASE):
+            pass
+        else:
+            report.add_complaint( WARN, "Authors: lone surname", name)
+        #
     #
     # Don't reject Sylvie ROUX nor S ROUX
     if re.match("^[A-Z]{3,}$", keyname) and \
        re.match("^[A-Z]{3,}$", firstname):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Author name is in all caps")
+        report.add_complaint( WARN, "Author name is in all caps", name)
     #
     if re.match(r"^[A-Z]$", keyname) or \
        re.match(r"^[A-Z]\.$", keyname):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Author: found initial not surname")
+        report.add_complaint( WARN, "Author: found initial not surname", name)
     #
     # Reject e. e. cummings and "evans". Don't reject J von
     if keyname == keyname.lower() and \
        (firstname is None or firstname == firstname.lower()):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: no caps in name")
+        report.add_complaint( WARN, "Authors: no caps in name", name)
     #
     if re.search(r"\[|]", keyname) or \
        re.search(r"\[|]", firstname) or \
        re.search(r"\[|]", suffix):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: name should not contain brackets")
+        report.add_complaint( WARN, "Authors: name should not contain brackets", name)
     #
     if re.search("[0-9]", keyname) or \
        re.search("[0-9]", firstname) or \
        re.search("[0-9]", suffix):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: name should not contain digits")
+        report.add_complaint( WARN, "Authors: name should not contain digits", name)
     #
-    # match A. and A.B. but not AB (or RS)
+    # match A. and A.B. but not AB (or RS), Jr, Sr, III, etc.
     # This may be broken due to the rest of the author name parser
-    if re.match("^[A-Z].$", suffix) or \
-       re.match("^[A-Z].[A-Z].$", suffix) or \
-       re.match("^[A-Z].[A-Z].[A-Z].$", suffix):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Authors: name suffix should not contain initials")
+    # if re.match(r"^II|III|IV|V|VI|VII|VIII$", suffix):
+    #     pass
+    if re.match(r"^[A-Z]\.$", suffix) or \
+       re.match(r"^[A-Z]\.[A-Z]\.$", suffix) or \
+       re.match(r"^[A-Z]\.[A-Z]\.[A-Z]\.$", suffix):
+        report.add_complaint( WARN, "Authors: name suffix should not contain initials", name)
     #
-    for badword in (
-            ";",
-            "IEEE", "phd", "prof", "[^a-z]dr[^a-z]",
-            "Physics", "Math[. ]", "Math$",
-            "Inst", "Institute",
-            "Dept", "Department",
-            "Univ", "University",
-            "chatgpt", "^llama$", "^gemini$", "GPT-3.5", "GPT-4", "GPT-4o",
-            "PaLM2"
+    for badmessage, badpattern in (
+            (";", ";"),
+            ("IEEE", r"\bIEEE\b"),
+            ("PhD", r"\bphd\b"),
+            ("prof", r"\bprof\b"),
+            ("dr", r"\bdr\b"),
+            ("Physics", r"\bPhysics\b"),
+            ("Math", r"\bMath\b"),
+            ("Inst", r"\bInst\b"),
+            ("Institute", r"\bInstitute\b"),
+            ("Dept", r"\bDept\b"),
+            ("Department", r"\bDepartment\b"),
+            ("Univ", r"\bUniv\b"),
+            ("University", r"\bUniversity\b"),
+            ("chatgpt", r"\bchatgpt?\b"),
+            # ("llama", r"\bllama\b"),
+            # ("gemini", r"\bgemini\b"),
+            ("GPT-3.5", r"\bGPT-3.5\b"),
+            # ("GPT-4", r"\bGPT-4\b"),
+            ("GPT-4", r"\bGPT-4"), # Also match 4o, etc
+            ("PaLM2", r"\bPalM2\b"),
             # Claude and Bert are too common
     ):
-        if re.search(badword, keyname, re.IGNORECASE) or \
-           re.search(badword, firstname, re.IGNORECASE) or \
-           re.search(badword, suffix, re.IGNORECASE):
-            disposition = combine_dispositions(disposition, WARN)
-            complaints.append(f"Authors: name should not contain {badword}")
+        if re.search(badpattern, keyname, re.IGNORECASE) or \
+           re.search(badpattern, firstname, re.IGNORECASE) or \
+           re.search(badpattern, suffix, re.IGNORECASE):
+            print( keyname, firstname, suffix )
+            report.add_complaint( WARN, f"Authors: name should not contain {badmessage}", name)
         #
     # end for badword in badwords
 
-    return (complaints, disposition)
-
-
-def check_abstract(v: str) -> (str, str):
-    disposition = OK
-    complaints = []
-    if v is None or v == "":
-        disposition = combine_dispositions(disposition, HOLD)
-        complaints.append("Abstract cannot be empty")
-    elif len(v) < MIN_ABSTRACT_LEN:
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: too short")
+    for badword in ("Llama", "Olamma", "Gemini", "Bert", "Bart"):
+        if badword.lower() == keyname.lower() and firstname == "" and suffix == "":
+            report.add_complaint( WARN, f"Authors: name should not contain {badword}", name)
+        #
     #
-    if re.match( "abstract", v, re.IGNORECASE):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: begins with 'abstract'")
+
+    return
+
+def check_abstract(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
+    if v is None or v == "":
+        report.add_complaint( HOLD, "Abstract cannot be empty")
+    elif len(v) < MIN_ABSTRACT_LEN:
+        report.add_complaint( WARN, "Abstract: too short")
+    #
+    if re.match( r"abstract\b", v, re.IGNORECASE):
+        report.add_complaint( WARN, "Abstract: begins with 'abstract'")
     #
     if re.search( r"\\\\", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains TeX line break")
+        report.add_complaint( WARN, "Abstract: contains line break")
     #
     if looks_like_all_caps(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: excessive capitalization")
+        report.add_complaint( WARN, "Abstract: excessive capitalization")
     # elif long_word_caps(v):
-    #     disposition = combine_dispositions(disposition, WARN)
-    #     complaints.append("Abstract: excessive capitalization (words)")
+    #     report.add_complaint( WARN, "Abstract: excessive capitalization (words)")
     #
     # JHY : this is not very smart
     if smart_starts_with_lowercase_check(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: starts with a lower case letter")
+        report.add_complaint( WARN, "Abstract: starts with a lower case letter")
     #
     if re.search( r"\\href{", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains TeX \\href")
+        report.add_complaint( WARN, "Abstract: contains \\href")
     #
     if re.search( r"\\url{", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains TeX \\url")
+        report.add_complaint( WARN, "Abstract: contains \\url")
     #
     if contains_outside_math( r"\\emph", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains \\emph")
+        report.add_complaint( WARN, "Abstract: contains \\emph")
     #
     if contains_outside_math( r"\\uline", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains \\uline")
+        report.add_complaint( WARN, "Abstract: contains \\uline")
     #
     if contains_outside_math( r"\\textbf", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains \\textbf")
+        report.add_complaint( WARN, "Abstract: contains \\textbf")
     #
     if contains_outside_math( r"\\texttt", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains \\texttt")
+        report.add_complaint( WARN, "Abstract: contains \\texttt")
     #
     if contains_outside_math( r"\\textsc", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains \\textsc")
+        report.add_complaint( WARN, "Abstract: contains \\textsc")
     #
     if contains_outside_math( r"\\#", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains unnecessary escape: \\#")
+        report.add_complaint( WARN, "Abstract: contains unnecessary escape: \\#")
     #
     if contains_outside_math( r"\\%", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains unnecessary escape: \\%")
+        report.add_complaint( WARN, "Abstract: contains unnecessary escape: \\%")
     #
     if contains_html_elements(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: contains HTML")
+        report.add_complaint( WARN, "Abstract: contains HTML")
     #
     if not all_brackets_balanced(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract: unbalanced brackets")
+        report.add_complaint( WARN, "Abstract: unbalanced brackets")
     #
-    if re.search( r"\\begin", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract contains \begin")
+    # JHY: \begin{equation}, etc are permitted ...
+    if re.search( r"\\begin[^{]", v):
+        report.add_complaint( WARN, "Abstract contains \\begin")
     #
     if language_is_not_english(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Abstract does not appear to be English")
+        report.add_complaint( WARN, "Abstract does not appear to be English")
     #
     # not implemented: abstract MAY end in punctuation
     # not implemented: check for arXiv or arXiv:ID
-    return disposition, complaints
+    return report
 
-def check_comments(v: str) -> (str, str):
-    disposition = OK
-    complaints = []
+def check_comments(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
     # Empty comments are ok!
     if re.search( r"\\\\", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains TeX line break")
+        report.add_complaint( WARN, "Comments: contains line break")
     #
     if looks_like_all_caps(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: excessive capitalization")
+        report.add_complaint( WARN, "Comments: excessive capitalization")
     #
     if re.search( r"\\href{", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains TeX \\href")
+        report.add_complaint( WARN, "Comments: contains \\href")
     #
     if re.search( r"\\url{", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains TeX \\url")
+        report.add_complaint( WARN, "Comments: contains \\url")
     #
     if contains_outside_math( r"\\emph", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains \\emph")
+        report.add_complaint( WARN, "Comments: contains \\emph")
     #
     if contains_outside_math( r"\\uline", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains \\uline")
+        report.add_complaint( WARN, "Comments: contains \\uline")
     #
     if contains_outside_math( r"\\textbf", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains \\textbf")
+        report.add_complaint( WARN, "Comments: contains \\textbf")
     #
     if contains_outside_math( r"\\texttt", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains \\texttt")
+        report.add_complaint( WARN, "Comments: contains \\texttt")
     #
     if contains_outside_math( r"\\textsc", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains \\textsc")
+        report.add_complaint( WARN, "Comments: contains \\textsc")
     #
     if contains_outside_math( r"\\#", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains unnecessary escape: \\#")
+        report.add_complaint( WARN, "Comments: contains unnecessary escape: \\#")
     #
     if contains_outside_math( r"\\%", v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: contains unnecessary escape: \\%")
+        report.add_complaint( WARN, "Comments: contains unnecessary escape: \\%")
     #
     if not all_brackets_balanced(v):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append("Comments: unbalanced brackets")
+        report.add_complaint( WARN, "Comments: unbalanced brackets")
+    #
+    if contains_bad_encoding(v):
+        report.add_complaint( WARN, "Comments: bad unicode encoding")
     #
     # TODO: check that language is English?
-    
-    return disposition, complaints
+    return report
 
-def check_report_num(v: str) -> (str, str):
+def check_report_num(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
     if len(v) < MIN_REPORT_NUM_LEN:
-        return HOLD, ["Report-no: too short"]
-    if re.match(r"^[0-9]*$", v):
-        return HOLD, ["Report-no: no letters"]
+        report.add_complaint( HOLD, "Report-no: too short" )
+    elif re.match(r"^[0-9]*$", v):
+        report.add_complaint( HOLD, "Report-no: no letters" )
     elif re.match(r"^[A-Za-z-]*$", v):
-        return HOLD, ["Report-no: no digits"]
-    else:
-        return OK, []
+        report.add_complaint( HOLD, "Report-no: no digits" )
+    return report
 
-def check_journal_ref(v: str) -> (str, str):
-    disposition = OK
-    complaints = []
+def check_journal_ref(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
     if len(v) < MIN_JOURNAL_REF_LEN:
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append( "jref: too short" )
+        report.add_complaint( WARN,  "jref: too short" )
     #
     # TODO: check for author name(s) in jref
     # TODO: check for paper title in jref
     if re.search( "http:", v, re.IGNORECASE ) or \
        re.search( "https:", v, re.IGNORECASE ):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append( "jref: contains URL" )
+        report.add_complaint( WARN,  "jref: contains URL" )
     #
     if re.search( "doi", v, re.IGNORECASE ):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append( "jref: contains DOI" )
+        report.add_complaint( WARN,  "jref: contains DOI" )
     #
     if re.search( "accepted", v, re.IGNORECASE ):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append( "jref: contains 'accepted'" )
+        report.add_complaint( WARN,  "jref: contains 'accepted'" )
     #
     if re.search( "submitted", v, re.IGNORECASE ):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append( "jref: contains 'submitted'" )
+        report.add_complaint( WARN,  "jref: contains 'submitted'" )
     #
     if not re.search( "[12][90][0-9][0-9]", v ):
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append( "jref: missing year" )
+        report.add_complaint( WARN,  "jref: missing year" )
     #
     if re.search( "inproceedings", v, re.IGNORECASE ) or \
        re.search( "title=", v, re.IGNORECASE ) or \
        re.search( "booktitle=", v, re.IGNORECASE ): # redundant
-        disposition = combine_dispositions(disposition, WARN)
-        complaints.append( "jref: copy from bibtex" )
+        report.add_complaint( WARN,  "jref: copy from bibtex" )
     #
     # TODO: "validate input encoding" - what does this mean?
-    return disposition, complaints
+    return report
 
-def check_doi(v: str) -> (str, str):
+def check_doi(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
     if len(v) < MIN_DOI_LEN:
-        return WARN, ["doi: too short"]
+        report.add_complaint( WARN, "doi: too short" )
     if re.search( "http:", v ):
-        return WARN, ["doi: contains http:"]
+        report.add_complaint( WARN, "doi: contains http:" )
     if re.search( "https:", v ):
-        return WARN, ["doi: contains https:"]
+        report.add_complaint( WARN, "doi: contains https:" )
     if re.search( "doi:", v ):
-        return WARN, ["doi: contains doi:"]
+        report.add_complaint( WARN, "doi: contains doi:" )
     # Is this right?
     if re.search( "arxiv-doi", v ):
-        return WARN, ["doi: contains arxiv-doi"]
-    return OK, []
+        report.add_complaint( WARN, "doi: contains arxiv-doi" )
+    return report
 
