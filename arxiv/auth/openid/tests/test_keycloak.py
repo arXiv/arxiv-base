@@ -13,8 +13,9 @@ WEB_DRIVER = "geckodriver"
 @pytest.fixture(scope="module")
 def web_driver() -> webdriver.Chrome:
     options = Options()
-    options.headless = True
     options.binary_location = which(WEB_BROWSER)
+    # If you want to see the browser on your screen, comment out next 2 lines.
+    options.headless = True
     options.add_argument('--headless')
 
     service = Service(executable_path=which(WEB_DRIVER))
