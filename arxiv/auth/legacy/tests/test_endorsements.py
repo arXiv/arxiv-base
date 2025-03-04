@@ -1,11 +1,11 @@
 """Tests for :mod:`arxiv.users.legacy.endorsements` using a live test DB."""
 
-import os
 import shutil
 import tempfile
-from unittest import TestCase, mock
+from unittest import TestCase
 from datetime import datetime
 from pytz import timezone, UTC
+import pytest
 
 from flask import Flask
 from mimesis import Person, Internet, Datetime
@@ -40,7 +40,10 @@ class TestEndorsement(TestCase):
         self.default_tracking_data = {
             'remote_addr': '0.0.0.0',
             'remote_host': 'foo-host.foo.com',
-            'tracking_cookie': '0'
+            'tracking_cookie': '0',
+            'date': '2024-01-01',
+            'flag_auto': 1,
+            'added_by': 1,
         }
 
         with self.app.app_context():
@@ -79,6 +82,8 @@ class TestEndorsement(TestCase):
                     joined_remote_host=ip_addr
                 )
                 session.add(db_user)
+                session.commit()
+                session.refresh(db_user)
 
                 self.user = domain.User(
                     user_id=str(db_user.user_id),
@@ -106,13 +111,13 @@ class TestEndorsement(TestCase):
                         .values(pattern=str(pattern))
                     )
 
-                session.add(models.EndorsementDomain(
-                    endorsement_domain='test_domain',
-                    endorse_all='n',
-                    mods_endorse_all='n',
-                    endorse_email='y',
-                    papers_to_endorse=3
-                ))
+                # session.add(models.EndorsementDomain(
+                #     endorsement_domain='test_domain',
+                #     endorse_all='n',
+                #     mods_endorse_all='n',
+                #     endorse_email='y',
+                #     papers_to_endorse=3
+                # ))
 
                 # for category, definition in definitions.CATEGORIES_ACTIVE.items():
                 #     if '.' in category:
@@ -130,24 +135,27 @@ class TestEndorsement(TestCase):
     def tearDown(self):
         shutil.rmtree(self.db_path)
 
+    @pytest.mark.skipif(lambda request: request.config.getoption("--db") == "mysql",
+                            reason="is set up for sqlite3 only")
     def test_get_endorsements(self):
         """Test :func:`endoresement.get_endorsements`."""
         with self.app.app_context():
-            with transaction() as session:
-                for category, definition in definitions.CATEGORIES_ACTIVE.items():
-                        if '.' in category:
-                            archive, subject_class = category.split('.', 1)
-                        else:
-                            archive, subject_class = category, ''
-                        session.add(models.Category(
-                            archive=archive,
-                            subject_class=subject_class,
-                            definitive=1,
-                            active=1,
-                            endorsement_domain='test_domain'
-                        ))
+            # with transaction() as session:
+            #     for category, definition in definitions.CATEGORIES_ACTIVE.items():
+            #             if '.' in category:
+            #                 archive, subject_class = category.split('.', 1)
+            #             else:
+            #                 archive, subject_class = category, ''
+            #             session.add(models.Category(
+            #                 archive=archive,
+            #                 subject_class=subject_class,
+            #                 definitive=1,
+            #                 active=1,
+            #                 endorsement_domain='test_domain'
+            #             ))
             all_endorsements = set(
                 endorsements.get_endorsements(self.user)
             )
             all_possible = set(definitions.CATEGORIES_ACTIVE.values())
             self.assertEqual(all_endorsements, all_possible)
+

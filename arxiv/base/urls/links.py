@@ -31,6 +31,9 @@ handle FTP addresses.
 
 Updated 20 March, 2019: refactored to provide independent bleach attribute
 callbacks for each kind of link.
+
+Updated 24 Sep 2024: TLDs is just 2 or more letters.
+
 """
 from typing import (
     List,
@@ -110,7 +113,7 @@ IP_ADDRESS = (
 )
 """Regex to match an IP address."""
 
-TLDS = "|".join( list(set(bleach.linkifier.TLDS + ['xyz'])) )
+TLDS = "[a-z][a-z]+"     # TLDs are out of control. Just match on two or more alphabetic characters.
 PROTOCOLS = "|".join(bleach.linkifier.html5lib_shim.allowed_protocols)
 URL = re.compile(
     rf"""(?:{FTP.pattern})|

@@ -1,9 +1,10 @@
 """Helpers and Flask application integration."""
-
-from typing import List, Any
+import json
+from typing import List, Any, Optional
 from datetime import datetime
 from pytz import timezone, UTC
 import logging
+import os
 
 from sqlalchemy import text, Engine
 from sqlalchemy.orm import Session as ORMSession
@@ -13,12 +14,14 @@ from ...base.globals import get_application_config
 from ..auth import scopes
 from .. import domain
 from ...db import Session, Base, session_factory
-from ...db.models import TapirUser, TapirPolicyClass
+from ...db.models import TapirUser, TapirPolicyClass, Category, Archive, Group, EndorsementDomain, CategoryDef, \
+    ArchiveGroup, License
 
 EASTERN = timezone('US/Eastern')
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
+arxiv_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def now() -> int:
     """Get the current epoch/unix time."""
@@ -37,8 +40,19 @@ def from_epoch(t: int) -> datetime:
 
 
 def create_all(engine: Engine) -> None:
+    """Create all tables in the database, and bootstrap for test."""
+    create_arxiv_db_schema(engine)
+    bootstrap_arxiv_db(engine)
+
+
+def create_arxiv_db_schema(engine: Engine) -> None:
     """Create all tables in the database."""
     Base.metadata.create_all(engine)
+
+
+def bootstrap_arxiv_db(engine: Engine, test_data_dir: Optional[str] = None) -> None:
+    """Create all tables in the da."""
+
     with ORMSession(engine) as session:
         data = session.query(TapirPolicyClass).all()
         if data:
@@ -48,6 +62,33 @@ def create_all(engine: Engine) -> None:
             session.add(TapirPolicyClass(**datum))
         session.commit()
 
+    # In case you are loading the files from library, the data files maybe elsewhere
+    if test_data_dir is None:
+        test_data_dir = os.path.join(arxiv_dir, "db", "tests", "test-data")
+
+    for data_class, data_file in [
+        (Group, "arXiv_groups.json"),
+        (Archive, "arXiv_archives.json"),
+        (EndorsementDomain, "arXiv_endorsement_domains.json"),
+        (Category, "arXiv_categories.json"),
+        (CategoryDef, "arXiv_category_def.json"),
+        (ArchiveGroup, "arXiv_archive_group.json"),
+        (License, "arXiv_licenses.json"),
+    ]:
+        try:
+            with ORMSession(engine) as session:
+                with open(os.path.join(test_data_dir, data_file), encoding="utf-8") as dfd:
+                    data = json.load(dfd)
+                for datum in data:
+                    session.add(data_class(**datum))
+                session.commit()
+        except FileNotFoundError:
+            # If you don't have the test-data, simply ignore it. You may have to load these files yourself
+            # for your test, however but not stopping test since bootstrapping db is only happening for
+            # development purpose only.
+            pass
+
+
 def drop_all(engine: Engine) -> None:
     """Drop all tables in the database."""
     Base.metadata.drop_all(engine)
@@ -55,9 +96,13 @@ def drop_all(engine: Engine) -> None:
 
 def compute_capabilities(tapir_user: TapirUser) -> int:
     """Calculate the privilege level code for a user."""
-    return int(sum([2 * tapir_user.flag_edit_users,
-                    4 * tapir_user.flag_email_verified,
-                    8 * tapir_user.flag_edit_system]))
+    return _compute_capabilities(tapir_user.flag_edit_users,
+                                 tapir_user.flag_email_verified,
+                                 tapir_user.flag_edit_system)
+
+def _compute_capabilities(is_admin: int | bool, email_verified: int | bool, is_god: int | bool) -> int:
+    """Calculate the privilege level code for a user."""
+    return int(sum([2 if is_admin else 0, 4 if email_verified else 0, 8 if is_god else 0]))
 
 
 def get_scopes(db_user: TapirUser) -> List[domain.Scope]:

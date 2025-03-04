@@ -1,0 +1,922 @@
+[
+  {
+    "category": "acc-phys",
+    "name": "Accelerator Physics",
+    "active": 0
+  },
+  {
+    "category": "adap-org",
+    "name": "Adaptation, Noise, and Self-Organizing Systems",
+    "active": 0
+  },
+  {
+    "category": "alg-geom",
+    "name": "Algebraic Geometry",
+    "active": 0
+  },
+  {
+    "category": "ao-sci",
+    "name": "Atmospheric-Oceanic Sciences",
+    "active": 0
+  },
+  {
+    "category": "astro-ph",
+    "name": "Astrophysics",
+    "active": 0
+  },
+  {
+    "category": "astro-ph.CO",
+    "name": "Cosmology and Nongalactic Astrophysics",
+    "active": 1
+  },
+  {
+    "category": "astro-ph.EP",
+    "name": "Earth and Planetary Astrophysics",
+    "active": 1
+  },
+  {
+    "category": "astro-ph.GA",
+    "name": "Astrophysics of Galaxies",
+    "active": 1
+  },
+  {
+    "category": "astro-ph.HE",
+    "name": "High Energy Astrophysical Phenomena",
+    "active": 1
+  },
+  {
+    "category": "astro-ph.IM",
+    "name": "Instrumentation and Methods for Astrophysics",
+    "active": 1
+  },
+  {
+    "category": "astro-ph.SR",
+    "name": "Solar and Stellar Astrophysics",
+    "active": 1
+  },
+  {
+    "category": "atom-ph",
+    "name": "Atomic, Molecular and Optical Physics",
+    "active": 0
+  },
+  {
+    "category": "bayes-an",
+    "name": "Bayesian Analysis",
+    "active": 0
+  },
+  {
+    "category": "chao-dyn",
+    "name": "Chaotic Dynamics",
+    "active": 0
+  },
+  {
+    "category": "chem-ph",
+    "name": "Chemical Physics",
+    "active": 0
+  },
+  {
+    "category": "cmp-lg",
+    "name": "Computation and Language",
+    "active": 0
+  },
+  {
+    "category": "comp-gas",
+    "name": "Cellular Automata and Lattice Gases",
+    "active": 0
+  },
+  {
+    "category": "cond-mat",
+    "name": "Condensed Matter",
+    "active": 0
+  },
+  {
+    "category": "cond-mat.dis-nn",
+    "name": "Disordered Systems and Neural Networks",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.mes-hall",
+    "name": "Mesoscale and Nanoscale Physics",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.mtrl-sci",
+    "name": "Materials Science",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.other",
+    "name": "Other Condensed Matter",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.quant-gas",
+    "name": "Quantum Gases",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.soft",
+    "name": "Soft Condensed Matter",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.stat-mech",
+    "name": "Statistical Mechanics",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.str-el",
+    "name": "Strongly Correlated Electrons",
+    "active": 1
+  },
+  {
+    "category": "cond-mat.supr-con",
+    "name": "Superconductivity",
+    "active": 1
+  },
+  {
+    "category": "cs.AI",
+    "name": "Artificial Intelligence",
+    "active": 1
+  },
+  {
+    "category": "cs.AR",
+    "name": "Hardware Architecture",
+    "active": 1
+  },
+  {
+    "category": "cs.CC",
+    "name": "Computational Complexity",
+    "active": 1
+  },
+  {
+    "category": "cs.CE",
+    "name": "Computational Engineering, Finance, and Science",
+    "active": 1
+  },
+  {
+    "category": "cs.CG",
+    "name": "Computational Geometry",
+    "active": 1
+  },
+  {
+    "category": "cs.CL",
+    "name": "Computation and Language",
+    "active": 1
+  },
+  {
+    "category": "cs.CR",
+    "name": "Cryptography and Security",
+    "active": 1
+  },
+  {
+    "category": "cs.CV",
+    "name": "Computer Vision and Pattern Recognition",
+    "active": 1
+  },
+  {
+    "category": "cs.CY",
+    "name": "Computers and Society",
+    "active": 1
+  },
+  {
+    "category": "cs.DB",
+    "name": "Databases",
+    "active": 1
+  },
+  {
+    "category": "cs.DC",
+    "name": "Distributed, Parallel, and Cluster Computing",
+    "active": 1
+  },
+  {
+    "category": "cs.DL",
+    "name": "Digital Libraries",
+    "active": 1
+  },
+  {
+    "category": "cs.DM",
+    "name": "Discrete Mathematics",
+    "active": 1
+  },
+  {
+    "category": "cs.DS",
+    "name": "Data Structures and Algorithms",
+    "active": 1
+  },
+  {
+    "category": "cs.ET",
+    "name": "Emerging Technologies",
+    "active": 1
+  },
+  {
+    "category": "cs.FL",
+    "name": "Formal Languages and Automata Theory",
+    "active": 1
+  },
+  {
+    "category": "cs.GL",
+    "name": "General Literature",
+    "active": 1
+  },
+  {
+    "category": "cs.GR",
+    "name": "Graphics",
+    "active": 1
+  },
+  {
+    "category": "cs.GT",
+    "name": "Computer Science and Game Theory",
+    "active": 1
+  },
+  {
+    "category": "cs.HC",
+    "name": "Human-Computer Interaction",
+    "active": 1
+  },
+  {
+    "category": "cs.IR",
+    "name": "Information Retrieval",
+    "active": 1
+  },
+  {
+    "category": "cs.IT",
+    "name": "Information Theory",
+    "active": 1
+  },
+  {
+    "category": "cs.LG",
+    "name": "Machine Learning",
+    "active": 1
+  },
+  {
+    "category": "cs.LO",
+    "name": "Logic in Computer Science",
+    "active": 1
+  },
+  {
+    "category": "cs.MA",
+    "name": "Multiagent Systems",
+    "active": 1
+  },
+  {
+    "category": "cs.MM",
+    "name": "Multimedia",
+    "active": 1
+  },
+  {
+    "category": "cs.MS",
+    "name": "Mathematical Software",
+    "active": 1
+  },
+  {
+    "category": "cs.NA",
+    "name": "Numerical Analysis",
+    "active": 1
+  },
+  {
+    "category": "cs.NE",
+    "name": "Neural and Evolutionary Computing",
+    "active": 1
+  },
+  {
+    "category": "cs.NI",
+    "name": "Networking and Internet Architecture",
+    "active": 1
+  },
+  {
+    "category": "cs.OH",
+    "name": "Other Computer Science",
+    "active": 1
+  },
+  {
+    "category": "cs.OS",
+    "name": "Operating Systems",
+    "active": 1
+  },
+  {
+    "category": "cs.PF",
+    "name": "Performance",
+    "active": 1
+  },
+  {
+    "category": "cs.PL",
+    "name": "Programming Languages",
+    "active": 1
+  },
+  {
+    "category": "cs.RO",
+    "name": "Robotics",
+    "active": 1
+  },
+  {
+    "category": "cs.SC",
+    "name": "Symbolic Computation",
+    "active": 1
+  },
+  {
+    "category": "cs.SD",
+    "name": "Sound",
+    "active": 1
+  },
+  {
+    "category": "cs.SE",
+    "name": "Software Engineering",
+    "active": 1
+  },
+  {
+    "category": "cs.SI",
+    "name": "Social and Information Networks",
+    "active": 1
+  },
+  {
+    "category": "cs.SY",
+    "name": "Systems and Control",
+    "active": 1
+  },
+  {
+    "category": "dg-ga",
+    "name": "Differential Geometry",
+    "active": 0
+  },
+  {
+    "category": "econ.EM",
+    "name": "Econometrics",
+    "active": 1
+  },
+  {
+    "category": "econ.GN",
+    "name": "General Economics",
+    "active": 1
+  },
+  {
+    "category": "econ.TH",
+    "name": "Theoretical Economics",
+    "active": 1
+  },
+  {
+    "category": "eess.AS",
+    "name": "Audio and Speech Processing",
+    "active": 1
+  },
+  {
+    "category": "eess.IV",
+    "name": "Image and Video Processing",
+    "active": 1
+  },
+  {
+    "category": "eess.SP",
+    "name": "Signal Processing",
+    "active": 1
+  },
+  {
+    "category": "eess.SY",
+    "name": "Systems and Control",
+    "active": 1
+  },
+  {
+    "category": "funct-an",
+    "name": "Functional Analysis",
+    "active": 0
+  },
+  {
+    "category": "gr-qc",
+    "name": "General Relativity and Quantum Cosmology",
+    "active": 1
+  },
+  {
+    "category": "hep-ex",
+    "name": "High Energy Physics - Experiment",
+    "active": 1
+  },
+  {
+    "category": "hep-lat",
+    "name": "High Energy Physics - Lattice",
+    "active": 1
+  },
+  {
+    "category": "hep-ph",
+    "name": "High Energy Physics - Phenomenology",
+    "active": 1
+  },
+  {
+    "category": "hep-th",
+    "name": "High Energy Physics - Theory",
+    "active": 1
+  },
+  {
+    "category": "math-ph",
+    "name": "Mathematical Physics",
+    "active": 1
+  },
+  {
+    "category": "math.AC",
+    "name": "Commutative Algebra",
+    "active": 1
+  },
+  {
+    "category": "math.AG",
+    "name": "Algebraic Geometry",
+    "active": 1
+  },
+  {
+    "category": "math.AP",
+    "name": "Analysis of PDEs",
+    "active": 1
+  },
+  {
+    "category": "math.AT",
+    "name": "Algebraic Topology",
+    "active": 1
+  },
+  {
+    "category": "math.CA",
+    "name": "Classical Analysis and ODEs",
+    "active": 1
+  },
+  {
+    "category": "math.CO",
+    "name": "Combinatorics",
+    "active": 1
+  },
+  {
+    "category": "math.CT",
+    "name": "Category Theory",
+    "active": 1
+  },
+  {
+    "category": "math.CV",
+    "name": "Complex Variables",
+    "active": 1
+  },
+  {
+    "category": "math.DG",
+    "name": "Differential Geometry",
+    "active": 1
+  },
+  {
+    "category": "math.DS",
+    "name": "Dynamical Systems",
+    "active": 1
+  },
+  {
+    "category": "math.FA",
+    "name": "Functional Analysis",
+    "active": 1
+  },
+  {
+    "category": "math.GM",
+    "name": "General Mathematics",
+    "active": 1
+  },
+  {
+    "category": "math.GN",
+    "name": "General Topology",
+    "active": 1
+  },
+  {
+    "category": "math.GR",
+    "name": "Group Theory",
+    "active": 1
+  },
+  {
+    "category": "math.GT",
+    "name": "Geometric Topology",
+    "active": 1
+  },
+  {
+    "category": "math.HO",
+    "name": "History and Overview",
+    "active": 1
+  },
+  {
+    "category": "math.IT",
+    "name": "Information Theory",
+    "active": 1
+  },
+  {
+    "category": "math.KT",
+    "name": "K-Theory and Homology",
+    "active": 1
+  },
+  {
+    "category": "math.LO",
+    "name": "Logic",
+    "active": 1
+  },
+  {
+    "category": "math.MG",
+    "name": "Metric Geometry",
+    "active": 1
+  },
+  {
+    "category": "math.MP",
+    "name": "Mathematical Physics",
+    "active": 1
+  },
+  {
+    "category": "math.NA",
+    "name": "Numerical Analysis",
+    "active": 1
+  },
+  {
+    "category": "math.NT",
+    "name": "Number Theory",
+    "active": 1
+  },
+  {
+    "category": "math.OA",
+    "name": "Operator Algebras",
+    "active": 1
+  },
+  {
+    "category": "math.OC",
+    "name": "Optimization and Control",
+    "active": 1
+  },
+  {
+    "category": "math.PR",
+    "name": "Probability",
+    "active": 1
+  },
+  {
+    "category": "math.QA",
+    "name": "Quantum Algebra",
+    "active": 1
+  },
+  {
+    "category": "math.RA",
+    "name": "Rings and Algebras",
+    "active": 1
+  },
+  {
+    "category": "math.RT",
+    "name": "Representation Theory",
+    "active": 1
+  },
+  {
+    "category": "math.SG",
+    "name": "Symplectic Geometry",
+    "active": 1
+  },
+  {
+    "category": "math.SP",
+    "name": "Spectral Theory",
+    "active": 1
+  },
+  {
+    "category": "math.ST",
+    "name": "Statistics Theory",
+    "active": 1
+  },
+  {
+    "category": "mtrl-th",
+    "name": "Materials Theory",
+    "active": 0
+  },
+  {
+    "category": "nlin.AO",
+    "name": "Adaptation and Self-Organizing Systems",
+    "active": 1
+  },
+  {
+    "category": "nlin.CD",
+    "name": "Chaotic Dynamics",
+    "active": 1
+  },
+  {
+    "category": "nlin.CG",
+    "name": "Cellular Automata and Lattice Gases",
+    "active": 1
+  },
+  {
+    "category": "nlin.PS",
+    "name": "Pattern Formation and Solitons",
+    "active": 1
+  },
+  {
+    "category": "nlin.SI",
+    "name": "Exactly Solvable and Integrable Systems",
+    "active": 1
+  },
+  {
+    "category": "nucl-ex",
+    "name": "Nuclear Experiment",
+    "active": 1
+  },
+  {
+    "category": "nucl-th",
+    "name": "Nuclear Theory",
+    "active": 1
+  },
+  {
+    "category": "patt-sol",
+    "name": "Pattern Formation and Solitons",
+    "active": 0
+  },
+  {
+    "category": "physics.acc-ph",
+    "name": "Accelerator Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.ao-ph",
+    "name": "Atmospheric and Oceanic Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.app-ph",
+    "name": "Applied Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.atm-clus",
+    "name": "Atomic and Molecular Clusters",
+    "active": 1
+  },
+  {
+    "category": "physics.atom-ph",
+    "name": "Atomic Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.bio-ph",
+    "name": "Biological Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.chem-ph",
+    "name": "Chemical Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.class-ph",
+    "name": "Classical Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.comp-ph",
+    "name": "Computational Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.data-an",
+    "name": "Data Analysis, Statistics and Probability",
+    "active": 1
+  },
+  {
+    "category": "physics.ed-ph",
+    "name": "Physics Education",
+    "active": 1
+  },
+  {
+    "category": "physics.flu-dyn",
+    "name": "Fluid Dynamics",
+    "active": 1
+  },
+  {
+    "category": "physics.gen-ph",
+    "name": "General Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.geo-ph",
+    "name": "Geophysics",
+    "active": 1
+  },
+  {
+    "category": "physics.hist-ph",
+    "name": "History and Philosophy of Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.ins-det",
+    "name": "Instrumentation and Detectors",
+    "active": 1
+  },
+  {
+    "category": "physics.med-ph",
+    "name": "Medical Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.optics",
+    "name": "Optics",
+    "active": 1
+  },
+  {
+    "category": "physics.plasm-ph",
+    "name": "Plasma Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.pop-ph",
+    "name": "Popular Physics",
+    "active": 1
+  },
+  {
+    "category": "physics.soc-ph",
+    "name": "Physics and Society",
+    "active": 1
+  },
+  {
+    "category": "physics.space-ph",
+    "name": "Space Physics",
+    "active": 1
+  },
+  {
+    "category": "plasm-ph",
+    "name": "Plasma Physics",
+    "active": 0
+  },
+  {
+    "category": "q-alg",
+    "name": "Quantum Algebra and Topology",
+    "active": 0
+  },
+  {
+    "category": "q-bio",
+    "name": "Quantitative Biology",
+    "active": 0
+  },
+  {
+    "category": "q-bio.BM",
+    "name": "Biomolecules",
+    "active": 1
+  },
+  {
+    "category": "q-bio.CB",
+    "name": "Cell Behavior",
+    "active": 1
+  },
+  {
+    "category": "q-bio.GN",
+    "name": "Genomics",
+    "active": 1
+  },
+  {
+    "category": "q-bio.MN",
+    "name": "Molecular Networks",
+    "active": 1
+  },
+  {
+    "category": "q-bio.NC",
+    "name": "Neurons and Cognition",
+    "active": 1
+  },
+  {
+    "category": "q-bio.OT",
+    "name": "Other Quantitative Biology",
+    "active": 1
+  },
+  {
+    "category": "q-bio.PE",
+    "name": "Populations and Evolution",
+    "active": 1
+  },
+  {
+    "category": "q-bio.QM",
+    "name": "Quantitative Methods",
+    "active": 1
+  },
+  {
+    "category": "q-bio.SC",
+    "name": "Subcellular Processes",
+    "active": 1
+  },
+  {
+    "category": "q-bio.TO",
+    "name": "Tissues and Organs",
+    "active": 1
+  },
+  {
+    "category": "q-fin.CP",
+    "name": "Computational Finance",
+    "active": 1
+  },
+  {
+    "category": "q-fin.EC",
+    "name": "Economics",
+    "active": 1
+  },
+  {
+    "category": "q-fin.GN",
+    "name": "General Finance",
+    "active": 1
+  },
+  {
+    "category": "q-fin.MF",
+    "name": "Mathematical Finance",
+    "active": 1
+  },
+  {
+    "category": "q-fin.PM",
+    "name": "Portfolio Management",
+    "active": 1
+  },
+  {
+    "category": "q-fin.PR",
+    "name": "Pricing of Securities",
+    "active": 1
+  },
+  {
+    "category": "q-fin.RM",
+    "name": "Risk Management",
+    "active": 1
+  },
+  {
+    "category": "q-fin.ST",
+    "name": "Statistical Finance",
+    "active": 1
+  },
+  {
+    "category": "q-fin.TR",
+    "name": "Trading and Market Microstructure",
+    "active": 1
+  },
+  {
+    "category": "quant-ph",
+    "name": "Quantum Physics",
+    "active": 1
+  },
+  {
+    "category": "solv-int",
+    "name": "Exactly Solvable and Integrable Systems",
+    "active": 0
+  },
+  {
+    "category": "stat.AP",
+    "name": "Applications",
+    "active": 1
+  },
+  {
+    "category": "stat.CO",
+    "name": "Computation",
+    "active": 1
+  },
+  {
+    "category": "stat.ME",
+    "name": "Methodology",
+    "active": 1
+  },
+  {
+    "category": "stat.ML",
+    "name": "Machine Learning",
+    "active": 1
+  },
+  {
+    "category": "stat.OT",
+    "name": "Other Statistics",
+    "active": 1
+  },
+  {
+    "category": "stat.TH",
+    "name": "Statistics Theory",
+    "active": 1
+  },
+  {
+    "category": "supr-con",
+    "name": "Superconductivity",
+    "active": 0
+  },
+  {
+    "category": "test",
+    "name": "Test",
+    "active": 0
+  },
+  {
+    "category": "test.dis-nn",
+    "name": "Test Disruptive Networks",
+    "active": 1
+  },
+  {
+    "category": "test.mes-hall",
+    "name": "Test Hall",
+    "active": 1
+  },
+  {
+    "category": "test.mtrl-sci",
+    "name": "Test Mtrl-Sci",
+    "active": 1
+  },
+  {
+    "category": "test.soft",
+    "name": "Test Soft",
+    "active": 1
+  },
+  {
+    "category": "test.stat-mech",
+    "name": "Test Mechanics",
+    "active": 1
+  },
+  {
+    "category": "test.str-el",
+    "name": "Test Electrons",
+    "active": 1
+  },
+  {
+    "category": "test.supr-con",
+    "name": "Test Superconductivity",
+    "active": 1
+  }
+]

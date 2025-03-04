@@ -1,0 +1,561 @@
+#
+# sqlacodegen input
+#
+# Essentially, this is a catalog of changes made to the original sqlacodegen
+#
+# For example, the first class def - Subscription_UniversalInstitution -> MemberInstitution
+# This is obviously not auto-generated from the db schema, or heavily modified.
+#
+# To preserve the code change, this file exists. When the customized sqlacodegen runs, this is used to change
+# and override the behavior of codegen.
+#
+# sqlacodegen is driven from development/db_codegen.py
+#
+
+# a minor hack
+# globally suggests the column name to python variable name
+# by default, sqlacodegen uses the suffix "_"
+#
+_names_map_:
+  class: _class
+
+# ==================================================================================================================
+# MySQL arXiv tables
+#
+Subscription_UniversalInstitution:
+  class_name: MemberInstitution
+  relationships:
+    Subscription_UniversalInstitutionContact: ""
+    Subscription_UniversalInstitutionIP: ""
+
+Subscription_UniversalInstitutionContact:
+  class_name: MemberInstitutionContact
+  columns:
+    sid: "mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)"
+
+Subscription_UniversalInstitutionIP:
+  class_name: MemberInstitutionIP
+
+arXiv_admin_log:
+  class_name: AdminLog
+arXiv_admin_metadata:
+  class_name: AdminMetadata
+  table_args:
+    - replace: ["Index('pidv', 'paper_id', 'version', unique=True)", "Index('arxiv_admin_pidv', 'paper_id', 'version', unique=True)"]
+arXiv_archive_category:
+  class_name: ArchiveCategory
+arXiv_archive_def:
+  class_name: ArchiveDef
+arXiv_archive_group:
+  class_name: ArchiveGroup
+
+arXiv_archives:
+  class_name: Archive
+  relationships:
+    arXiv_categories: "relationship('Category', back_populates='arXiv_archive')"
+    arXiv_groups: ""
+
+arXiv_aws_config:
+  class_name: AwsConfig
+arXiv_aws_files:
+  class_name: AwsFile
+arXiv_bib_feeds:
+  class_name: BibFeed
+arXiv_bib_updates:
+  class_name: BibUpdate
+arXiv_bogus_countries:
+  class_name: BogusCountries
+
+arXiv_categories:
+  class_name: Category
+  relationships:
+    arXiv_archives: ""
+    arXiv_cross_control:
+      arXiv_cross_controls: "relationship('CrossControl', back_populates='arXiv_category')"
+    arXiv_endorsement_domains:
+      arXiv_endorsement_domain: "relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
+    arXiv_demographics: "relationship('Demographic', back_populates='arXiv_category')"
+  additional_relationships:
+    - "arXiv_endorsements = relationship('Endorsement', back_populates='arXiv_categories')"
+    - "arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='arXiv_categories')"
+
+arXiv_questionable_categories:
+  class_name: QuestionableCategory
+arXiv_category_def:
+  class_name: CategoryDef
+
+arXiv_control_holds:
+  class_name: ControlHold
+
+arXiv_cross_control:
+  class_name: CrossControl
+  table_args:
+    - replace: ["Index('document_id', 'document_id', 'version'),", ""]
+  columns:
+    freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+  relationships:
+    arXiv_categories:
+      arXiv_category: "relationship('Category', primaryjoin='and_(CrossControl.archive == Category.archive, CrossControl.subject_class == Category.subject_class)', back_populates='arXiv_cross_controls')"
+    document: "relationship('Document', primaryjoin='CrossControl.document_id == Document.document_id', back_populates='arXiv_cross_controls')"
+    user: "relationship('TapirUser', primaryjoin='CrossControl.user_id == TapirUser.user_id', back_populates='arXiv_cross_controls')"
+
+arXiv_datacite_dois:
+  class_name: DataciteDois
+
+arXiv_dblp_authors:
+  class_name: DBLPAuthor
+arXiv_dblp_document_authors:
+  class_name: DBLPDocumentAuthor
+
+arXiv_document_category:
+  class_name: DocumentCategory
+
+arXiv_documents:
+  class_name: Document
+  relationships:
+    arXiv_dblp_document_authors: ""
+    arXiv_paper_owners: ""
+    arXiv_cross_control: ""
+    arXiv_jref_control:
+      arXiv_jref_controls: "relationship('JrefControl', back_populates='document')"
+  additional_relationships:
+    - "arXiv_cross_controls = relationship('CrossControl', back_populates='document')"
+    - "owners = relationship('PaperOwner', back_populates='document')"
+
+arXiv_dblp:
+  class_name: DBLP
+
+arXiv_paper_pw:
+  class_name: PaperPw
+  columns:
+    document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())"
+    password_storage: mapped_column(Integer)
+    password_enc: mapped_column(String(50))
+    
+arXiv_endorsement_domains:
+  class_name: EndorsementDomain
+  relationships:
+    arXiv_categories: "relationship('Category', back_populates='arXiv_endorsement_domain')"
+
+arXiv_endorsement_requests:
+  class_name: EndorsementRequest
+  relationships:
+    arXiv_categories: "relationship('Category', primaryjoin='and_(EndorsementRequest.archive == Category.archive, EndorsementRequest.subject_class == Category.subject_class)', back_populates='arXiv_endorsement_requests')"
+    endorsee: "relationship('TapirUser', primaryjoin='EndorsementRequest.endorsee_id == TapirUser.user_id', back_populates='arXiv_endorsement_requests', uselist=False)"
+    arXiv_endorsements:
+      endorsement: ":Mapped['Endorsement'] = relationship('Endorsement', back_populates='request', uselist=False)"
+  additional_relationships:
+    - "audit = relationship('EndorsementRequestsAudit', uselist=False)"
+
+arXiv_endorsement_requests_audit:
+  class_name: EndorsementRequestsAudit
+
+arXiv_endorsements:
+  class_name: Endorsement
+  table_args:
+    - replace: ["Index('archive', 'archive', 'subject_class'),", ""]
+  relationships:
+    endorsee: "relationship('TapirUser', primaryjoin='Endorsement.endorsee_id == TapirUser.user_id', back_populates='endorsee_of')"
+    endorser: "relationship('TapirUser', primaryjoin='Endorsement.endorser_id == TapirUser.user_id', back_populates='endorses')"
+    request: "relationship('EndorsementRequest', back_populates='endorsement')"
+
+arXiv_endorsements_audit:
+  class_name: EndorsementsAudit
+arXiv_freeze_log:
+  class_name: FreezeLog
+arXiv_group_def:
+  class_name: GroupDef
+arXiv_groups:
+  class_name: Group
+  relationships:
+    arXiv_archives: "relationship('Archive', back_populates='arXiv_group')"
+
+arXiv_jref_control:
+  class_name: JrefControl
+  table_args:
+    - replace: ["Index('document_id', 'document_id', 'version'", "Index('jref_ctrl_document_id', 'document_id', 'version'"]
+  columns:
+    freeze_date: "mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())"
+    status: "mapped_column(Enum('new', 'frozen', 'published', 'rejected'), nullable=False, index=True, server_default=FetchedValue())"
+  relationships:
+    document: "relationship('Document', back_populates='arXiv_jref_controls')"
+    user: "relationship('TapirUser', back_populates='arXiv_jref_controls')"
+
+arXiv_licenses:
+  class_name: License
+  relationships:
+    arXiv_metadata: ""
+    arXiv_submissions: "relationship('Submission', back_populates='arXiv_license')"
+    
+arXiv_log_positions:
+  class_name: LogPosition
+
+arXiv_metadata:
+  class_name: Metadata
+  columns:
+    source_format: ": Mapped[Optional[SOURCE_FORMAT]] = mapped_column(String(12))"
+  relationships:
+    arXiv_licenses: ""
+    document: "relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', back_populates='arXiv_metadata')"
+    submitter: "relationship('TapirUser', primaryjoin='Metadata.submitter_id == TapirUser.user_id', back_populates='arXiv_metadata')"
+    sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions_sowrd')"
+
+arXiv_mirror_list:
+  class_name: MirrorList
+
+arXiv_moderator_api_key:
+  class_name: ModeratorApiKey
+  relationships:
+    user: "relationship('TapirUser', primaryjoin='ModeratorApiKey.user_id == TapirUser.user_id', back_populates='arXiv_moderator_api_keys')"
+arXiv_monitor_klog:
+  class_name: MonitorKlog
+arXiv_monitor_mailq:
+  class_name: MonitorMailq
+arXiv_monitor_mailsent:
+  class_name: MonitorMailsent
+arXiv_next_mail:
+  class_name: NextMail
+arXiv_orcid_config:
+  class_name: OrcidConfig
+arXiv_ownership_requests:
+  class_name: OwnershipRequest
+  table_args: drop
+  columns:
+    user_id: mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
+    endorsement_request_id: mapped_column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
+
+  relationships:
+    endorsement_request: "relationship('EndorsementRequest', primaryjoin='OwnershipRequest.endorsement_request_id == EndorsementRequest.request_id', back_populates='arXiv_ownership_requests')"
+    user: "relationship('TapirUser', primaryjoin='OwnershipRequest.user_id == TapirUser.user_id', back_populates='arXiv_ownership_requests')"
+  additional_relationships:
+    - "request_audit = relationship('OwnershipRequestsAudit', back_populates='ownership_request', uselist=False)"
+    - "documents = relationship('Document', secondary=t_arXiv_ownership_requests_papers)"
+
+# I think this is hand-edited, and not really used anywhere it seems
+arXiv_ownership_requests_audit:
+  class_name: OwnershipRequestsAudit
+  table_args: drop
+  columns:
+    request_id: "mapped_column(ForeignKey('arXiv_ownership_requests.request_id'), primary_key=True, server_default=FetchedValue())"
+  additional_relationships:
+    - "ownership_request = relationship('OwnershipRequest', primaryjoin='OwnershipRequestsAudit.request_id == OwnershipRequest.request_id', back_populates='request_audit', uselist=False)"
+
+# Without this, arXiv_paper_owners would become simple Table, not Model
+#
+# The definition of PaperOwner is problematic. The main issue is that the table has no simple
+# primary key. If this had a surrogate key as primary with the constraints as secondary,
+# the table was a lot more usuable.
+# Because of this, referencing the paper owner record from elsewhere is inconvinent, and
+# sqlalchemy has trouble making the table to begin with.
+arXiv_paper_owners:
+  class_name: PaperOwner
+  table_args:
+    # This is given by the document_id column - squelch the index name that's not relevant
+    - replace: ["ForeignKeyConstraint(['document_id'], ['arXiv_documents.document_id'], name='0_593'),", ""]
+    # This is give by the user_id column
+    - replace: ["ForeignKeyConstraint(['user_id'], ['tapir_users.user_id'], name='0_594'),", ""]
+    # Define this as primary key - don't add primay = true in the column 
+    - replace: ["Index('document_id', 'document_id', 'user_id', unique=True)", "PrimaryKeyConstraint('document_id', 'user_id')"]
+  columns:
+    document_id: "mapped_column(ForeignKey('arXiv_documents.document_id'))"
+    user_id: "mapped_column(ForeignKey('tapir_users.user_id'))"
+  relationships:
+    document: "relationship('Document', back_populates='owners')"
+    tapir_users: ""
+    user: ""
+      
+  additional_relationships:
+    - "owner = relationship('TapirUser', foreign_keys='[PaperOwner.user_id]', back_populates='owned_papers')"
+arXiv_paper_sessions:
+  class_name: PaperSession
+arXiv_pilot_files:
+  class_name: PilotFile
+arXiv_publish_log:
+  class_name: PublishLog
+arXiv_reject_session_usernames:
+  class_name: RejectSessionUsername
+arXiv_sciencewise_pings:
+  class_name: SciencewisePing
+arXiv_show_email_requests:
+  class_name: ShowEmailRequest
+  table_args:
+    - replace: ["Index('email_reqs_user_id', 'user_id', 'dated'),", ""]
+    - replace: ["Index('user_id', 'user_id', 'dated')", "Index('email_reqs_user_id', 'user_id', 'dated')"]
+arXiv_state:
+  class_name: State
+arXiv_stats_monthly_downloads:
+  class_name: StatsMonthlyDownload
+arXiv_stats_monthly_submissions:
+  class_name: StatsMonthlySubmission
+arXiv_submission_agreements:
+  class_name: SubmissionAgreement
+arXiv_submission_category:
+  class_name: SubmissionCategory
+  
+arXiv_submission_category_proposal:
+  class_name: SubmissionCategoryProposal
+  relationships:
+    arXiv_category_def: "relationship('CategoryDef', primaryjoin='SubmissionCategoryProposal.category == CategoryDef.category', back_populates='arXiv_submission_category_proposal')"
+    proposal_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.proposal_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal')"
+    response_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.response_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal_')"
+    submission: "relationship('Submission', primaryjoin='SubmissionCategoryProposal.submission_id == Submission.submission_id', back_populates='arXiv_submission_category_proposal')"
+    user: "relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', back_populates='arXiv_submission_category_proposal')"
+
+
+arXiv_submission_control:
+  table_args:
+    # the document_id conflicts
+    - replace: ["Index('document_id', 'document_id', 'version'", "Index('sub_ctrl_document_id', 'document_id', 'version'"]
+  class_name: SubmissionControl
+
+arXiv_submission_flag:
+  class_name: SubmissionFlag
+arXiv_submission_hold_reason:
+  class_name: SubmissionHoldReason
+arXiv_submission_locks:
+  class_name: SubmissionLocks
+arXiv_submission_near_duplicates:
+  class_name: SubmissionNearDuplicate
+arXiv_submission_qa_reports:
+  class_name: SubmissionQaReport
+arXiv_submission_view_flag:
+  class_name: SubmissionViewFlag
+arXiv_submissions:
+  class_name: Submission
+  relationships:
+    agreement: "relationship('SubmissionAgreement', primaryjoin='Submission.agreement_id == SubmissionAgreement.agreement_id', back_populates='arXiv_submissions')"
+    document: "relationship('Document', primaryjoin='Submission.document_id == Document.document_id', back_populates='arXiv_submissions')"
+    submitter: "relationship('TapirUser', primaryjoin='Submission.submitter_id == TapirUser.user_id', back_populates='arXiv_submissions')"
+    sword: "relationship('Tracking', primaryjoin='Submission.sword_id == Tracking.sword_id', back_populates='arXiv_submissions')"
+    arXiv_licenses:
+      arXiv_license: "relationship('License', primaryjoin='Submission.license == License.name', back_populates='arXiv_submissions')"
+
+arXiv_pilot_datasets:
+  class_name: PilotDataset
+  columns:
+    created: drop
+
+arXiv_submission_abs_classifier_data:
+  class_name: SubmissionAbsClassifierDatum
+arXiv_submission_classifier_data:
+  class_name: SubmissionClassifierDatum
+arXiv_submitter_flags:
+  class_name: SubmitterFlag
+arXiv_suspect_emails:
+  class_name: SuspectEmail
+arXiv_titles:
+  class_name: Title
+
+arXiv_top_papers:
+  class_name: TopPaper
+  relationships:
+    document: "relationship('Document', primaryjoin='TopPaper.document_id == Document.document_id', back_populates='arXiv_top_papers')"
+
+arXiv_trackback_pings:
+  class_name: TrackbackPing
+  columns:
+    status: ":Mapped[Literal['pending', 'pending2', 'accepted', 'rejected', 'spam']] = mapped_column(Enum('pending', 'pending2', 'accepted', 'rejected', 'spam'), nullable=False, index=True, server_default=FetchedValue())"
+
+arXiv_trackback_sites:
+  class_name: TrackbackSite
+  columns:
+    action: ":Mapped[Literal['neutral', 'accept', 'reject', 'spam']] = mapped_column(Enum('neutral', 'accept', 'reject', 'spam'), nullable=False, server_default=FetchedValue())"
+
+arXiv_tracking:
+  class_name: Tracking
+
+# without this, arXiv_updates would become simple Table, not Model
+# IOW, someone copy&pasted and did not ues sqlacodegen
+arXiv_updates:
+  class_name: Updates
+  table_args:
+    - replace: ["Index('document_id', 'document_id', 'date', 'action', 'category', unique=True)", "PrimaryKeyConstraint('document_id', 'date', 'action', 'category')"]
+  columns:
+    action: ":Mapped[Optional[Literal['new', 'replace', 'absonly', 'cross', 'repcro']]] = mapped_column(Enum('new', 'replace', 'absonly', 'cross', 'repcro'))"
+
+arXiv_versions:
+  class_name: Version
+arXiv_versions_checksum:
+  class_name: VersionsChecksum
+dbix_class_schema_versions:
+  class_name: DbixClassSchemaVersion
+sessions:
+  class_name: Session
+
+tapir_address:
+  class_name: TapirAddress
+  table_args: drop
+  columns:
+    user_id: "mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, nullable=False, server_default=FetchedValue())"
+    country: "mapped_column(ForeignKey('tapir_countries.digraph'), nullable=False, index=True, server_default=FetchedValue())"
+  relationships:
+    tapir_countries:
+      tapir_country: "relationship('TapirCountry', primaryjoin='TapirAddress.country == TapirCountry.digraph', back_populates='tapir_address')"
+    user: "relationship('TapirUser', primaryjoin='TapirAddress.user_id == TapirUser.user_id', back_populates='tapir_address')"
+
+tapir_admin_audit:
+  class_name: TapirAdminAudit
+  columns:
+    data: mapped_column(String(255))
+
+tapir_countries:
+  class_name: TapirCountry
+  relationships:
+    tapir_address: "relationship('TapirAddress', back_populates='tapir_country')"
+    tapir_demographics: "relationship('TapirDemographic', back_populates='tapir_country')"
+
+tapir_email_change_tokens:
+  class_name: TapirEmailChangeToken
+tapir_email_headers:
+  class_name: TapirEmailHeader
+tapir_email_log:
+  class_name: TapirEmailLog
+tapir_email_mailings:
+  class_name: TapirEmailMailing
+tapir_email_templates:
+  class_name: TapirEmailTemplate
+tapir_email_tokens:
+  class_name: TapirEmailToken
+tapir_integer_variables:
+  class_name: TapirIntegerVariable
+tapir_nicknames:
+  class_name: TapirNickname
+tapir_nicknames_audit:
+  class_name: TapirNicknamesAudit
+tapir_permanent_tokens:
+  class_name: TapirPermanentToken
+tapir_phone:
+  class_name: TapirPhone
+tapir_policy_classes:
+  class_name: TapirPolicyClass
+tapir_presessions:
+  class_name: TapirPresession
+tapir_recovery_tokens:
+  class_name: TapirRecoveryToken
+tapir_recovery_tokens_used:
+  class_name: TapirRecoveryTokensUsed
+tapir_sessions:
+  class_name: TapirSession
+  additional_relationships:
+    - "user = relationship('TapirUser', primaryjoin='TapirSession.user_id == TapirUser.user_id', back_populates='tapir_sessions')"
+tapir_sessions_audit:
+  class_name: TapirSessionsAudit
+  additional_relationships:
+    - "session = relationship('TapirSession')"
+tapir_string_variables:
+  class_name: TapirStringVariable
+tapir_strings:
+  class_name: TapirString
+
+tapir_users:
+  class_name: TapirUser
+  relationships:
+    arXiv_endorsements:
+      endorsee_of: "relationship('Endorsement', foreign_keys='[Endorsement.endorsee_id]', back_populates='endorsee')"
+    arXiv_endorsements_:
+      endorses: "relationship('Endorsement', foreign_keys='[Endorsement.endorser_id]', back_populates='endorser')"
+    arXiv_moderator_api_key:
+      arXiv_moderator_api_keys: "relationship('ModeratorApiKey', back_populates='user')"
+    arXiv_paper_owners:
+      owned_papers: "relationship('PaperOwner',  foreign_keys='[PaperOwner.user_id]', back_populates='owner')"
+    arXiv_paper_owners_: ""
+    arXiv_jref_control:
+      arXiv_jref_controls: "relationship('JrefControl', back_populates='user')"
+    arXiv_cross_control:
+      arXiv_cross_controls: "relationship('CrossControl', back_populates='user')"
+      
+  additional_relationships:
+    - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
+
+arXiv_author_ids:
+  class_name: AuthorIds
+arXiv_demographics:
+  class_name: Demographic
+  relationships:
+    arXiv_categories:
+      arXiv_category: "relationship('Category', primaryjoin='and_(Demographic.archive == Category.archive, Demographic.subject_class == Category.subject_class)', back_populates='arXiv_demographics')"
+
+arXiv_orcid_ids:
+  class_name: OrcidIds
+arXiv_queue_view:
+  class_name: QueueView
+arXiv_suspicious_names:
+  class_name: SuspiciousName
+arXiv_sword_licenses:
+  class_name: SwordLicense
+tapir_demographics:
+  class_name: TapirDemographic
+  relationships:
+    tapir_countries:
+      tapir_country: relationship('TapirCountry', primaryjoin='TapirDemographic.country == TapirCountry.digraph', back_populates='tapir_demographics')
+tapir_users_hot:
+  class_name: TapirUsersHot
+tapir_users_password:
+  class_name: TapirUsersPassword
+  table_args: drop
+  columns:
+    user_id: "mapped_column(ForeignKey('tapir_users.user_id'), primary_key=True, server_default=FetchedValue())"
+  additional_relationships:
+    - "user = relationship('TapirUser')"
+arXiv_latexml_doc:
+  class_name: DBLaTeXMLDocuments
+arXiv_latexml_sub:
+  class_name: DBLaTeXMLSubmissions
+feedback:
+  class_name: DBLaTeXMLFeedback
+
+arXiv_in_category:
+  columns:
+    document_id: "Column('document_id', ForeignKey('arXiv_documents.document_id'), nullable=False, index=True, server_default=FetchedValue())"
+  indecies:
+    - replace: ["Index('archive'", "Index('in_cat_archive'"]
+
+arXiv_moderators:
+  indecies:
+    - replace: ["Index('user_id'", "Index('mod_user_id'"]
+
+# Student-lead membership dashboard
+membership_institutions:
+  class_name: MembershipInstitutions
+membership_users:
+  class_name: MembershipUsers
+
+# arXiv check from modapi
+
+arXiv_check_roles:
+  class_name: CheckRoles
+  relationships:
+    arXiv_checks: ""
+
+arXiv_check_result_views:
+  class_name: CheckResultViews
+  relationships:
+    arXiv_checks: ""
+
+arXiv_check_targets:
+  class_name: CheckTargets
+  relationships:
+    arXiv_checks: ""
+
+arXiv_checks:
+  class_name: Checks
+  relationships:
+    check_target:
+      target: "relationship('CheckTargets')"
+    check_role:
+      role: "relationship('CheckRoles')"
+    check_result_view:
+      view: "relationship('CheckResultViews')"
+
+arXiv_check_results:
+  class_name: CheckResults
+  table_args: drop
+  relationships:
+    arXiv_check_responses:
+      check_responses: "relationship('CheckResponses', back_populates='check_result')"
+
+arXiv_check_responses:
+  class_name: CheckResponses
+  table_args: drop
+  relationships:
+    check_result: "relationship('CheckResults', back_populates='check_responses')"
