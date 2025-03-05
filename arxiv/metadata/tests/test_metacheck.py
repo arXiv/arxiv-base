@@ -5,7 +5,10 @@ from arxiv.metadata import FieldName
 from arxiv.metadata import Disposition
 from arxiv.metadata import metacheck
 
+from arxiv.metadata.metacheck import MetadataCheckReport
+
 from arxiv.metadata.metacheck import combine_dispositions
+from arxiv.metadata.metacheck import contains_bad_encoding
 
 ############################################################
 TITLE = FieldName.TITLE
@@ -24,15 +27,15 @@ HOLD = Disposition.HOLD
 ############################################################
 # Helper functions for unit tests
     
-def check_result( result, expected_result ):
+def check_result( result: MetadataCheckReport, expected_result ):
     # result should be ( OK, [] ) or (HOLD, [message, message...]) or (WARN, ...)
     if expected_result is None:
-        assert result[0] == OK
+        assert result.disposition == OK
     else:
-        assert result[0] == expected_result[0]
-        assert result[1] != None    
-        # assert len(result[1]) == len( expected_result[1] )
-        assert result[1] == expected_result[1]
+        assert result.disposition == expected_result[0]
+        assert result.get_complaints_list() != None    
+        # TODO: test complaints with context, too?
+        assert result.get_complaints_list() == expected_result[1]
     #
     
 
@@ -49,6 +52,12 @@ def test_combine_dispositions():
     assert WARN == combine_dispositions( WARN, OK )
     assert WARN == combine_dispositions( OK, WARN )
     assert OK == combine_dispositions( OK, OK )
+
+def test_contains_bad_encoding():
+
+    assert( not contains_bad_encoding( "This is a test with one accented char: Ã hmmm" ) )
+    assert( contains_bad_encoding( "blah Ã¨Ã©ÃªÃ«Ã¬Ã­Ã®Ã test" ) )
+    assert( contains_bad_encoding( "test æ®éè test" ) )
 
 ############################################################l    
 ##### TITLE field checks
@@ -82,8 +91,15 @@ TITLE_TESTS = [
      [WARN, ["Title: excessive capitalization"]]),
     # We allow some capitalized words
     ('The is a title with known long words capitalized AMANDA CHANDRA', None),
+    # But in general, we complain if there are 2 or more capitalized words
+    ('The is a title with unknown long words capitalized UNIQUEWORD THISISATEST',
+     [WARN, ["Title: excessive capitalization (words)"]]),
     # but digit strings don't count
     ('The is a title with 12345678 and 987654321 words not capitalized', None),
+    # hyphenated words don't count
+    ('The is a title with S-FABLE COSMO-RS-ES capitalized', None),
+    # Words with digits and other punctuation also don't count
+    ('The is a title with C/2019 Y4 (ATLAS), HD167971, and HD168112 - should be OK', None),
     # Check for *some* HTML entities
     ('These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>', None),
     ('Factor Ratio to Q<sup>2</sup> = 8.5 GeV<sup>2</sup>',
@@ -93,12 +109,12 @@ TITLE_TESTS = [
     ('Title: Something',
      (WARN, ["Title: begins with 'title'"])),
     ('This \\\\ is a line break',
-     (WARN, ["Title: contains TeX line break"])),
+     (WARN, ["Title: contains line break"])),
     ('This \\ is not a line break', None),
     ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
      (WARN, [
-         'Title: contains TeX \\href',
-         'Title: contains TeX \\url',
+         'Title: contains \\href',
+         'Title: contains \\url',
          'Title: contains \\emph',
          'Title: contains \\uline',
          'Title: contains \\textbf',
@@ -112,6 +128,7 @@ TITLE_TESTS = [
 def test_titles(test):
     title, expected_result = test
     result = metacheck.check( { TITLE: title } );
+    print( title, result )
     check_result(result[TITLE], expected_result)
     
 ############################################################
@@ -125,7 +142,7 @@ AUTHORS_TESTS = [
     #  (WARN, ["Authors: ends with punctuation"])),
     ('Fred Smith, \\ Joe Bloggs', None ),
     ('Fred Smith, \\\\ Joe Bloggs',     
-     (WARN, ["Authors: contains TeX line break"])),
+     (WARN, ["Authors: contains line break"])),
     ('Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon',     
      (WARN, [
          "Authors: contains bad character '*'",
@@ -154,7 +171,11 @@ AUTHORS_TESTS = [
      (WARN, ['Authors: contains HTML'])),
     ('C. Sivaram (1) and Kenath Arun (2) ((1) Indian Institute of Astrophysics, Bangalore, (2) Christ Junior College, Bangalore)', None), # should not flag physics in astrophys as inappropriate
     ('Sylvie Roux', None),
-    ('S Roux', None),
+    ('Louis Anthony Cox III', None),
+    ('Louis Anthony Cox Jr.', None),
+    ('Louis Anthony Cox Sr', None),
+    ('Louis Anthony Cox, Jr', None),    
+    ('Jaganathan SR', None),
     ('Jaganathan SR', None),
     ('Sylvie ROUX', None),      # ?
     ('S ROUX', None),
@@ -167,6 +188,7 @@ AUTHORS_TESTS = [
      (WARN, ["Authors: name should not contain brackets"])),
     ('Jennifer 8 Lee',          # An actual name
      (WARN, ["Authors: name should not contain digits"])),
+    # The 2023 Windows on the Universe Workshop White Paper Working Group: T. Ahumada, J. E. Andrews, S. Antier, E. Blaufuss, 
     ('Someone Smith Physics Dept',
      (WARN, [
          'Authors: name should not contain Physics',
@@ -187,6 +209,8 @@ AUTHORS_TESTS = [
     ('Fred Smith (Cornell), Bob Smith (MIT)', None),
     ('Hsi-Sheng Goan*, Chung-Chin Jian, Po-Wen Chen',
      (WARN, ["Authors: contains bad character '*'"])),
+    ("Ph\\`ung H\\^o Hai, Jo\\~ao Pedro dos Santos, Pham Thanh T\\^am, {\\DJ}\\`ao V\\u{a}n Thinh",
+     None),
     # ('Zhe-Xuan Gong G.-D. Lin L.-M.','Authors: surprisingly low number of commas|Authors: ends with punctuation (.)'),
     # ('Zhe-Xuan Gong G.-D. Lin L.-M. Duan','Authors: surprisingly low number of commas'),
     # TODO: We don't check for this yet
@@ -213,16 +237,34 @@ AUTHORS_TESTS = [
     ## ('UNIV of Hard Knocks',"Authors: uppercase surname or incorrectly formatted institution"),
     ('Fred Smith, Joe Bloggs, Univ of Hard Knocks',
      (WARN, ["Authors: name should not contain Univ"])),
+    ('Arthur Rubinstein, Devika Kamath, A. Taraphder, and Stefano Profumo',
+     None),
+    ('Joe Llama', None),        # really...
+    ('Llama',
+     (WARN, [
+         "Authors: lone surname",
+         "Authors: name should not contain Llama",
+     ])),
     ('Adrienne Bloss, Audie Cornish, and ChatGPT',
      (WARN, [
          "Authors: lone surname",
          "Authors: name should not contain chatgpt",         
      ])),
+    ('Bloss, Adrienne and Cornish, Audie',
+     (WARN, [
+         "Authors: lone surname",
+     ])),
     # ('Paul R.~Archer', "Authors: tilde as hard space?"),
     # "Authors: includes semicolon not in affiliation, comma intended?"
     ('Ancille Ngendakumana; Joachim Nzotungicimpaye',
      (WARN, ["Authors: name should not contain ;"])),
+    ('Ngendakumana, Ancille; Nzotungicimpaye, Joachim',
+     (WARN, [
+         "Authors: lone surname",
+         "Authors: name should not contain ;",
+     ])),
     ('Stefano Liberati (SISSA, INFN; Trieste), Carmen Molina-Paris (Los Alamos)', None),
+    ("The Dark Energy Survey Collaboration: T. M. C. Abbott, M. Acevedo, M. Aguena, A. Alarcon, S. Allam, O. Alves, A. Amon, F. Andrade", None),
     # ('A.N.~Author, O K Author','Authors: tilde as hard space?'),
     ('T. L\\"u', None),
     ('T. Cs\\"org\\H{o}', None),
@@ -236,7 +278,7 @@ AUTHORS_TESTS = [
 def test_authors(test):
     (authors, expected_result) = test
     result = metacheck.check( { AUTHORS: authors } )
-    # print( authors, result )
+    print( authors, result )
     check_result(result[AUTHORS], expected_result)
 
 ############################################################
@@ -248,12 +290,13 @@ ABSTRACT_TESTS = [
     ('Both \\phi and \\varphi may be used', None),
     ('Abstract: some text',
      (WARN, ["Abstract: begins with 'abstract'"])),
+    ('Abstractive summarization is ok', None),
     # ['  abstract : here  ',"Abstract: starts with the word Abstract, remove"],
     ('These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>', None),
     # ['Factor Ratio to Q<sup>2</sup> = 8.5 GeV<sup>2</sup>','Abstract: HTML elements: <sup> </sup> <sup> </sup>'],
     # ['With HTML<br/>linebreaks<br />there','Abstract: HTML elements: <br/> <br />'],
     ('Some words\\\\\\\\ more words',
-     (WARN, ['Abstract: contains TeX line break'])),
+     (WARN, ['Abstract: contains line break'])),
     # (MathJax now handles "$3$-coloring")
     ('Work \\cite{8} established a connection between the edge $3$-coloring', None), 
     # Not yet:
@@ -261,10 +304,11 @@ ABSTRACT_TESTS = [
     # (WARN, ['Abstract: starts with lower case']
     # ["Lone periods should not be allowed.\\n.\\n",'Abstract: lone period, remove or it will break the mailing!'],
     ('This \\ is not a line break', None),
+    ('This is an equation: \\begin{equation}P=NP\\end{equation} and should work', None),
     ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
      (WARN, [
-         'Abstract: contains TeX \\href',
-         'Abstract: contains TeX \\url',
+         'Abstract: contains \\href',
+         'Abstract: contains \\url',
          'Abstract: contains \\emph',
          'Abstract: contains \\uline',
          'Abstract: contains \\textbf',
@@ -283,7 +327,7 @@ ABSTRACT_TESTS = [
 @pytest.mark.parametrize("test", ABSTRACT_TESTS)
 def test_abstracts(test):
     (abs, expected_result) = test
-    result = metacheck.check( { ABSTRACT: abs } );
+    result = metacheck.check( { ABSTRACT: abs } )
     # print( abs, result )
     check_result(result[ABSTRACT], expected_result)
 
@@ -292,16 +336,26 @@ def test_abstracts(test):
 
 COMMENTS_TESTS = [
     ('',None),
-    ('A comment',None),            
+    ('A comment',None),       
     ('15 pages, 6 figures',None),
+    ('A comment with èéêëìíîï accents',None),
+    ('A comment with èéêëìíîï accents'.encode("UTF-8").decode("LATIN-1"),
+     (WARN, [
+         "Comments: bad unicode encoding"
+     ])),
+    ('A comment with 普通话 Chinese',None),
+    ('A comment with 普通话 Chinese'.encode("UTF-8").decode("LATIN-1"),
+     (WARN, [
+         "Comments: bad unicode encoding"
+     ])),
     # ('15 pages, 6 figures,',(HOLD,['Comments: ends with punctuation (,)'])],
     # ['15 pages, 6 figures:',(HOLD,['Comments: ends with punctuation (:)'])],
     # ['Comments: 15 pages, 6 figures',(HOLD,['Comments: starts with the word Comments, check'])],
     # ['Poster submission to AHDF',(HOLD,["Comments: contains word 'poster'"])],
     ('Don\'t use \\href{...}, \\url{...}, \\emph, \\uline, \\textbf, \\texttt, \\%, or \\#: Something',
      (WARN, [
-         'Comments: contains TeX \\href',
-         'Comments: contains TeX \\url',
+         'Comments: contains \\href',
+         'Comments: contains \\url',
          'Comments: contains \\emph',
          'Comments: contains \\uline',
          'Comments: contains \\textbf',
@@ -316,8 +370,8 @@ COMMENTS_TESTS = [
 @pytest.mark.parametrize("test", COMMENTS_TESTS)
 def test_comments(test):
     (comments, expected_result) = test
-    result = metacheck.check( { COMMENTS: comments } );
-    # print( comments, result )
+    result = metacheck.check( { COMMENTS: comments } )
+    print( comments, result )
     check_result(result[COMMENTS], expected_result)
 
 ############################################################
@@ -336,7 +390,7 @@ REPORT_NO_TESTS = [
 @pytest.mark.parametrize("test", REPORT_NO_TESTS)
 def test_report_num(test):
     (report_num, expected_result) = test
-    result = metacheck.check( { REPORT_NUM: report_num } );
+    result = metacheck.check( { REPORT_NUM: report_num } )
     # print( report_num, result )
     check_result(result[REPORT_NUM], expected_result)
 
@@ -420,7 +474,4 @@ def test_balanced_brackets(s):
 @pytest.mark.parametrize("s", BALANCED_BRACKETS_TESTS)    
 def test_unbalanced_brackets(s):
     assert metacheck.all_brackets_balanced(s) == True
-
-# pyenv activate arxiv-base-3-11
-# python -m pytest arxiv/metadata/tests/test_metacheck.py
 
