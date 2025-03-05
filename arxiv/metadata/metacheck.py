@@ -1,6 +1,8 @@
 
 import re
 
+from collections import defaultdict
+
 from typing import Dict
 
 import gcld3
@@ -40,7 +42,7 @@ MIN_CHARS_FOR_LID = 20
 
 ############################################################
 
-def combine_dispositions(d1:Disposition, d2:Disposition) -> Disposition:
+def combine_dispositions(d1: Disposition, d2: Disposition) -> Disposition:
     if d1 == HOLD or d2 == HOLD:
         return HOLD
     elif d1 == WARN or d2 == WARN:
@@ -48,7 +50,7 @@ def combine_dispositions(d1:Disposition, d2:Disposition) -> Disposition:
     else:
         return OK
 
-def contains_outside_math(s1:str, s2:str) -> bool:
+def contains_outside_math(s1: str, s2: str) -> bool:
     """ Looks for s1, outside of TeX math
     Not perfect: fails to find xyzzy in $math$ xyzzy $$more math$$.
     """
@@ -68,7 +70,7 @@ class MetadataCheckReport:
     def __init__(self):
         self.disposition = OK
         # map from complaint to context (may be "")
-        self.complaints = {}
+        self.complaints = defaultdict(list)
 
     def __repr__(self):
         if self.disposition == OK:
@@ -77,13 +79,9 @@ class MetadataCheckReport:
             return f"<MetadataCheckReport {self.disposition}: {self.get_complaints_strings()}>"
         
 
-    def add_complaint(self, disposition, complaint_string:str, context:str = ""):
+    def add_complaint(self, disposition: Disposition, complaint_string: str, context: str = ""):
         self.disposition = combine_dispositions(self.disposition, disposition)
-        if complaint_string in self.complaints:
-            self.complaints[complaint_string].append(context)
-        else:
-            self.complaints[complaint_string] = [context]
-        #
+        self.complaints[complaint_string].append(context)
              
     def get_disposition(self) -> Disposition:
         return self.disposition
@@ -103,7 +101,7 @@ class MetadataCheckReport:
 ############################################################
 # This is the main function
 
-def check(metadata:Dict[FieldName,str]) -> Dict[FieldName,MetadataCheckReport]: 
+def check(metadata: Dict[FieldName,str]) -> Dict[FieldName,MetadataCheckReport]: 
     result = {} 
     for (k,v) in metadata.items():
         if k == TITLE:
@@ -322,6 +320,9 @@ def check_title(v: str) -> MetadataCheckReport:
     if not all_brackets_balanced(v):
         report.add_complaint( WARN, "Title: unbalanced brackets")
     #
+    if contains_bad_encoding(v):
+        report.add_complaint( WARN, "title: bad unicode encoding")
+    #
     # not implemented: titles MAY end with punctuation
     # not implemented: check for arXiv or arXiv:ID
     return report
@@ -392,6 +393,9 @@ def check_authors(v: str) -> MetadataCheckReport:
     # Authors list can NOT end with punctuation (except for Jr., Sr.
     if ends_with_punctuation(v):
         report.add_complaint( WARN, "Authors: ends with punctuation")
+    #
+    if contains_bad_encoding(v):
+        report.add_complaint( WARN, "Authors: bad unicode encoding")
     #
     
     # Parse authors, check authors names - but not affiliations - for:
@@ -587,6 +591,9 @@ def check_abstract(v: str) -> MetadataCheckReport:
     #
     if language_is_not_english(v):
         report.add_complaint( WARN, "Abstract does not appear to be English")
+    #
+    if contains_bad_encoding(v):
+        report.add_complaint( WARN, "Abstract: bad unicode encoding")
     #
     # not implemented: abstract MAY end in punctuation
     # not implemented: check for arXiv or arXiv:ID
