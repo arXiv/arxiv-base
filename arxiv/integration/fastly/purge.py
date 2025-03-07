@@ -33,38 +33,29 @@ def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None):
     purge_fastly_keys(keys)
     return
 
-def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, date]:
+def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
     """fetches the current categories for a paper as well as the last date it had announced changes to determine if it belongs in recent or new page
         extra days were added to accomidate for weekends and holidays, 
         these will occasionally purge new and recent papers more than is needed, but better to over clear than underclear
     """
     meta=aliased(Metadata)
     up=aliased(Updates)
-    sub= (
-        Session.query(
-            meta.abs_categories,
-            meta.document_id
-        )
-        .filter(meta.paper_id==arxiv_id.id)
-        .filter(meta.is_current==1)
-        .subquery()
-    )
 
     result=(
         Session.query(
-            sub.c.abs_categories,
-            func.max(up.date)
+        meta.abs_categories, 
+        func.max(up.date)
         )
-        .join(up, up.document_id==sub.c.document_id)
-        .group_by(sub.c.document_id)
-        .filter(up.action != "absonly")
+        .outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly")) #left join
+        .filter(meta.paper_id==arxiv_id.id)
+        .filter(meta.is_current==1)
         .first()
     )
     if not result:
-        raise IdentifierException(f'paper id does not exist: {arxiv_id.id}')
+        raise IdentifierException(f'paper id not found: {arxiv_id.id}')
 
     new_cats: str=result[0]
-    recent_date: date=result[1]
+    recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
     return new_cats, recent_date
 
 def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> List[str]:
@@ -80,10 +71,11 @@ def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> 
     today=date.today()
     new=False 
     recent=False
-    if today - timedelta(days=3) <= recent_date: #farthest away a date on the new page would likely be
-        new=True
-    if today - timedelta(days=7) <= recent_date:
-        recent=True
+    if recent_date:
+        if today - timedelta(days=3) <= recent_date: #farthest away a date on the new page would likely be
+            new=True
+        if today - timedelta(days=7) <= recent_date:
+            recent=True
     
     groups, archives, cats = get_all_cats_from_string(new_cats, True)
     new_archive_ids={arch.id for arch in archives}
