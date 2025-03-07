@@ -324,7 +324,7 @@ class Category(Base):
     arXiv_endorsement_domain = relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')
     arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='arXiv_categories')
 
-class QuestionableCategory(Category):
+class QuestionableCategory(Base):
     __tablename__ = 'arXiv_questionable_categories'
     __table_args__ = (
         ForeignKeyConstraint(['archive', 'subject_class'], ['arXiv_categories.archive', 'arXiv_categories.subject_class']),
@@ -466,14 +466,14 @@ class Document(Base):
     owners = relationship("PaperOwner", back_populates="document")
     arXiv_cross_controls = relationship('CrossControl', back_populates='document')
 
-class DBLP(Document):
+class DBLP(Base):
     __tablename__ = 'arXiv_dblp'
 
     document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())
     url: Mapped[Optional[str]] = mapped_column(String(80))
 
 
-class PaperPw(Document):
+class PaperPw(Base):
     __tablename__ = 'arXiv_paper_pw'
 
     document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id'), primary_key=True, server_default=FetchedValue())
@@ -523,7 +523,7 @@ class EndorsementRequest(Base):
     audit = relationship('EndorsementRequestsAudit', uselist=False)
 
 
-class EndorsementRequestsAudit(EndorsementRequest):
+class EndorsementRequestsAudit(Base):
     __tablename__ = 'arXiv_endorsement_requests_audit'
 
     request_id: Mapped[int] = mapped_column(ForeignKey('arXiv_endorsement_requests.request_id'), primary_key=True, server_default=FetchedValue())
@@ -559,7 +559,7 @@ class Endorsement(Base):
     request = relationship('EndorsementRequest', primaryjoin='Endorsement.request_id == EndorsementRequest.request_id', back_populates='endorsement')
 
 
-class EndorsementsAudit(Endorsement):
+class EndorsementsAudit(Base):
     __tablename__ = 'arXiv_endorsements_audit'
 
     endorsement_id: Mapped[int] = mapped_column(ForeignKey('arXiv_endorsements.endorsement_id'), primary_key=True, server_default=FetchedValue())
@@ -1169,7 +1169,7 @@ class Submission(Base):
     arXiv_submission_locks: Mapped[List["SubmissionLocks"]] = relationship("SubmissionLocks", back_populates="submission")
 
 
-class PilotDataset(Submission):
+class PilotDataset(Base):
     """arXiv_pilot is deprecated"""
     __tablename__ = 'arXiv_pilot_datasets'
 

@@ -330,7 +330,7 @@ class Category(Base):
     arXiv_archive = relationship("Archive", primaryjoin="Category.archive == Archive.archive_id", back_populates="arXiv_categories")
 
 
-class QuestionableCategory(Category):
+class QuestionableCategory(Base):
     __tablename__ = "arXiv_questionable_categories"
     __table_args__ = (ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]), {"mysql_charset": "latin1"})
 
@@ -476,7 +476,7 @@ class Document(Base):
     arXiv_versions: Mapped[List["Version"]] = relationship("Version", back_populates="document")
 
 
-class DBLP(Document):
+class DBLP(Base):
     __tablename__ = "arXiv_dblp"
     __table_args__ = {"mysql_charset": "latin1"}
 
@@ -484,7 +484,7 @@ class DBLP(Document):
     url: Mapped[Optional[str]] = mapped_column(String(80))
 
 
-class PaperPw(Document):
+class PaperPw(Base):
     __tablename__ = "arXiv_paper_pw"
     __table_args__ = {"mysql_charset": "latin1"}
 
@@ -541,7 +541,7 @@ class EndorsementRequest(Base):
     arXiv_ownership_requests: Mapped[List["OwnershipRequest"]] = relationship("OwnershipRequest", back_populates="endorsement_request")
 
 
-class EndorsementRequestsAudit(EndorsementRequest):
+class EndorsementRequestsAudit(Base):
     __tablename__ = "arXiv_endorsement_requests_audit"
     __table_args__ = {"mysql_charset": "latin1"}
 
@@ -577,7 +577,7 @@ class Endorsement(Base):
     request: Mapped["EndorsementRequest"] = relationship("EndorsementRequest", back_populates="endorsement")
 
 
-class EndorsementsAudit(Endorsement):
+class EndorsementsAudit(Base):
     __tablename__ = "arXiv_endorsements_audit"
     __table_args__ = {"mysql_charset": "latin1"}
 
@@ -1195,7 +1195,7 @@ class Submission(Base):
     arXiv_submission_view_flag: Mapped[List["SubmissionViewFlag"]] = relationship("SubmissionViewFlag", back_populates="submission")
 
 
-class PilotDataset(Submission):
+class PilotDataset(Base):
     """arXiv_pilot is deprecated"""
 
     __tablename__ = "arXiv_pilot_datasets"
