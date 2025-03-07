@@ -51,11 +51,12 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
         .filter(meta.is_current==1)
         .first()
     )
-    if not result:
-        raise IdentifierException(f'paper id not found: {arxiv_id.id}')
-
     new_cats: str=result[0]
     recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
+
+    if not new_cats:
+        raise IdentifierException(f'paper id not found: {arxiv_id.id}')
+
     return new_cats, recent_date
 
 def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> List[str]:
