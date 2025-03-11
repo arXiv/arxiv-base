@@ -1,11 +1,18 @@
 
 import pytest
 
-from arxiv.metadata import FieldName
-from arxiv.metadata import Disposition
-from arxiv.metadata import metacheck
+try:
+    from arxiv.metadata import FieldName
+    from arxiv.metadata import Disposition
+    from arxiv.metadata import metacheck
 
-from arxiv.metadata.metacheck import combine_dispositions
+    from arxiv.metadata.metacheck import combine_dispositions
+except ModuleNotFoundError:
+    pytest.skip(
+        """"gcld3 and/or protobuf-compile are not installed.
+            To run these tests, install with:
+            sudo apt install -y protobuf-compiler
+            poetry install --with-dev --extras qa""", allow_module_level=True)
 
 ############################################################
 TITLE = FieldName.TITLE
@@ -23,18 +30,18 @@ HOLD = Disposition.HOLD
 
 ############################################################
 # Helper functions for unit tests
-    
+
 def check_result( result, expected_result ):
     # result should be ( OK, [] ) or (HOLD, [message, message...]) or (WARN, ...)
     if expected_result is None:
         assert result[0] == OK
     else:
         assert result[0] == expected_result[0]
-        assert result[1] != None    
+        assert result[1] != None
         # assert len(result[1]) == len( expected_result[1] )
         assert result[1] == expected_result[1]
     #
-    
+
 
 ############################################################
 # Tests for internal (helper) function combine_dispositions
@@ -44,13 +51,13 @@ def test_combine_dispositions():
     assert HOLD == combine_dispositions( HOLD, WARN )
     assert HOLD == combine_dispositions( WARN, HOLD )
     assert HOLD == combine_dispositions( HOLD, OK )
-    assert HOLD == combine_dispositions( OK, HOLD )        
+    assert HOLD == combine_dispositions( OK, HOLD )
     assert WARN == combine_dispositions( WARN, WARN )
     assert WARN == combine_dispositions( WARN, OK )
     assert WARN == combine_dispositions( OK, WARN )
     assert OK == combine_dispositions( OK, OK )
 
-############################################################l    
+############################################################l
 ##### TITLE field checks
 
 TITLE_TESTS = [
@@ -75,7 +82,7 @@ TITLE_TESTS = [
     ('NOT EVEN BORDERLINE ALL CAPS TITLE',
      (WARN, ["Title: excessive capitalization"])),
     ('BORDERLINE All Caps TITLE', None),
-    ('BORDERLINE ALL caps TITLE', 
+    ('BORDERLINE ALL caps TITLE',
      (WARN, ["Title: excessive capitalization"])),
     ('This is a title WITH ONE LONG WORD CAPITALIZED', None),
     ('This is a title WITH SOME EXTRAEXTRA LONG WORDS CAPITALIZED',
@@ -113,25 +120,25 @@ def test_titles(test):
     title, expected_result = test
     result = metacheck.check( { TITLE: title } );
     check_result(result[TITLE], expected_result)
-    
+
 ############################################################
 ##### Detailed tests for AUTHORS field
 
 AUTHORS_TESTS = [
     ('Fred Smith', None),
     ('Fred Smith, Joe Bloggs', None),
-    # We don't check for ellipsis, but 
+    # We don't check for ellipsis, but
     # ('Fred Smith, Joe Bloggs, ...',
     #  (WARN, ["Authors: ends with punctuation"])),
     ('Fred Smith, \\ Joe Bloggs', None ),
-    ('Fred Smith, \\\\ Joe Bloggs',     
+    ('Fred Smith, \\\\ Joe Bloggs',
      (WARN, ["Authors: contains TeX line break"])),
-    ('Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon',     
+    ('Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon',
      (WARN, [
          "Authors: contains bad character '*'",
          "Authors: contains bad character '#'",
          "Authors: contains bad character '^'",
-         "Authors: contains bad character '@'",         
+         "Authors: contains bad character '@'",
      ])),
     (' Jane  Austen ',
      (WARN, [
@@ -148,8 +155,8 @@ AUTHORS_TESTS = [
     ('Person with <sup>1</sup>',
      (WARN, ['Authors: contains HTML',
              # 'Authors: no caps in name',
-             'Authors: name should not contain digits',             
-             ])), 
+             'Authors: name should not contain digits',
+             ])),
     ('Jane Smith<br/>Joe linebreaks<br />Alice Third',
      (WARN, ['Authors: contains HTML'])),
     ('C. Sivaram (1) and Kenath Arun (2) ((1) Indian Institute of Astrophysics, Bangalore, (2) Christ Junior College, Bangalore)', None), # should not flag physics in astrophys as inappropriate
@@ -158,7 +165,7 @@ AUTHORS_TESTS = [
     ('Jaganathan SR', None),
     ('Sylvie ROUX', None),      # ?
     ('S ROUX', None),
-    ('SYLVIE ROUX', 
+    ('SYLVIE ROUX',
      (WARN, ["Author name is in all caps"])),
     ('Sylvie roux', None),      # ?
     ('sylvie roux',
@@ -216,7 +223,7 @@ AUTHORS_TESTS = [
     ('Adrienne Bloss, Audie Cornish, and ChatGPT',
      (WARN, [
          "Authors: lone surname",
-         "Authors: name should not contain chatgpt",         
+         "Authors: name should not contain chatgpt",
      ])),
     # ('Paul R.~Archer', "Authors: tilde as hard space?"),
     # "Authors: includes semicolon not in affiliation, comma intended?"
@@ -230,7 +237,7 @@ AUTHORS_TESTS = [
     ('T. Zaj\\k{a}c', None),
     ('(T. Zaj\\k{a}c',
      (WARN, ["Authors: unbalanced brackets"])),
-]    
+]
 
 @pytest.mark.parametrize("test", AUTHORS_TESTS)
 def test_authors(test):
@@ -255,7 +262,7 @@ ABSTRACT_TESTS = [
     ('Some words\\\\\\\\ more words',
      (WARN, ['Abstract: contains TeX line break'])),
     # (MathJax now handles "$3$-coloring")
-    ('Work \\cite{8} established a connection between the edge $3$-coloring', None), 
+    ('Work \\cite{8} established a connection between the edge $3$-coloring', None),
     # Not yet:
     # ('he abstract is sometimes missing a first letter, warn if starts with lower',
     # (WARN, ['Abstract: starts with lower case']
@@ -271,7 +278,7 @@ ABSTRACT_TESTS = [
          'Abstract: contains \\texttt',
          'Abstract: contains unnecessary escape: \\#',
          'Abstract: contains unnecessary escape: \\%',
-     ])),            
+     ])),
     ('This ] is bad',
      (WARN, ['Abstract: unbalanced brackets'])),
     ('Учењето со засилување е разноврсна рамка за учење за решавање на сложени задачи од реалниот свет. Конечно, разговараме за отворените предизвици на техниките за анализа за RL алгоритми.',
@@ -279,7 +286,7 @@ ABSTRACT_TESTS = [
     ('El aprendizaje por refuerzo es un marco versátil para aprender a resolver tareas complejas del mundo real. Sin embargo, las influencias en el rendimiento de aprendizaje de los algoritmos de aprendizaje por refuerzo suelen comprenderse mal en la práctica.',
      (WARN, ['Abstract does not appear to be English'])),
 ]
-    
+
 @pytest.mark.parametrize("test", ABSTRACT_TESTS)
 def test_abstracts(test):
     (abs, expected_result) = test
@@ -292,7 +299,7 @@ def test_abstracts(test):
 
 COMMENTS_TESTS = [
     ('',None),
-    ('A comment',None),            
+    ('A comment',None),
     ('15 pages, 6 figures',None),
     # ('15 pages, 6 figures,',(HOLD,['Comments: ends with punctuation (,)'])],
     # ['15 pages, 6 figures:',(HOLD,['Comments: ends with punctuation (:)'])],
@@ -308,7 +315,7 @@ COMMENTS_TESTS = [
          'Comments: contains \\texttt',
          'Comments: contains unnecessary escape: \\#',
          'Comments: contains unnecessary escape: \\%',
-     ])),            
+     ])),
     ('This ] is bad',
      (WARN, ['Comments: unbalanced brackets'])),
 ]
@@ -346,7 +353,7 @@ def test_report_num(test):
 JREF_TESTS = [
     # ['ibid',"Journal-ref: inappropriate word: ibid"],
     ('Proceedings of the 34th "The Web Conference" (WWW 2025)', None),
-    ('JACM volume 1 issue 3, Jan 2024', None),            
+    ('JACM volume 1 issue 3, Jan 2024', None),
     ('1975',
      (WARN, ["jref: too short"])),
     ('Science 1.1',
@@ -369,7 +376,7 @@ def test_jrefs(test):
     # print( jref, result )
     check_result(result[JOURNAL_REF], expected_result)
 
-############################################################    
+############################################################
 # (related DOI?) DOI field checks
 
 DOI_TESTS = [
@@ -400,16 +407,16 @@ BALANCED_BRACKETS_TESTS = [
 
 UNBALANCED_BRACKETS_TESTS = [
     'this [ is wrong',
-    'this [ } wrong',            
-    'this [ ) wrong',            
+    'this [ } wrong',
+    'this [ ) wrong',
     'this ( is wrong',
     'this ( ] wrong',
-    'this ( } wrong',                        
+    'this ( } wrong',
     'this { is wrong',
     'this { ) wrong',
     'this { ] wrong',
-    'this is ) ( wrong',            
-    'this is } wrong',            
+    'this is ) ( wrong',
+    'this is } wrong',
     'this is ] [ wrong',
 ]
 
@@ -417,10 +424,9 @@ UNBALANCED_BRACKETS_TESTS = [
 def test_balanced_brackets(s):
     assert metacheck.all_brackets_balanced(s) == True
 
-@pytest.mark.parametrize("s", BALANCED_BRACKETS_TESTS)    
+@pytest.mark.parametrize("s", BALANCED_BRACKETS_TESTS)
 def test_unbalanced_brackets(s):
     assert metacheck.all_brackets_balanced(s) == True
 
 # pyenv activate arxiv-base-3-11
 # python -m pytest arxiv/metadata/tests/test_metacheck.py
-

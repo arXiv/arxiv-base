@@ -21,7 +21,10 @@ jobs:
           poetry --version
           # Check if poetry lock file is current with pyproject.toml
           poetry check --lock
+          # Must be able to install without QA/gcld3/protobuf-compile
           poetry install --with=dev --no-ansi
+          # Install with QA/gcld3
+          poetry install --with=dev --no-ansi --extras qa
 
       - name: Run db/test with MySQL docker
         run: |
