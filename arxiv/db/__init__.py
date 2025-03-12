@@ -47,8 +47,12 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 from typing import Tuple, Optional
 
-from flask.globals import app_ctx
-from flask import has_app_context, Flask
+try:
+    from flask.globals import app_ctx
+    from flask import has_app_context, Flask
+except ImportError:
+    def has_app_context():
+        return False
 
 from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.event import listens_for
@@ -202,4 +206,4 @@ def init(settings: Settings=settings) -> None:
     # late import of arxiv.db.models to avoid loops
     from arxiv.db.models import configure_db_engine
     configure_db_engine(_classic_engine, _latexml_engine)
-    
+
