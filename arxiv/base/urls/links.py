@@ -52,6 +52,7 @@ from urllib.parse import quote, urlparse
 
 from flask import url_for, g
 import bleach
+from tlds import tld_set
 
 from arxiv.taxonomy.definitions import CATEGORIES
 from arxiv import identifier
@@ -113,7 +114,7 @@ IP_ADDRESS = (
 )
 """Regex to match an IP address."""
 
-TLDS = "[a-z][a-z]+"     # TLDs are out of control. Just match on two or more alphabetic characters.
+TLDS = "|".join(tld_set)
 PROTOCOLS = "|".join(bleach.linkifier.html5lib_shim.allowed_protocols)
 URL = re.compile(
     rf"""(?:{FTP.pattern})|
