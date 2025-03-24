@@ -670,13 +670,13 @@ urllib3 = ">=1.25.3"
 
 [[package]]
 name = "fire"
-version = "0.5.0"
+version = "0.6.0"
 description = "A library for automatically generating command line interfaces."
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "fire-0.5.0.tar.gz", hash = "sha256:a6b0d49e98c8963910021f92bba66f65ab440da2982b78eb1bbf95a0a34aacc6"},
+    {file = "fire-0.6.0.tar.gz", hash = "sha256:54ec5b996ecdd3c0309c800324a0703d6da512241bc73b553db959d98de0aa66"},
 ]
 
 [package.dependencies]
@@ -3346,4 +3346,4 @@ sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "d28160c429e28e56da359b16487c4120ddc43a241a511c97aa06ae2694f88c04"
+content-hash = "49967c398fefa34d82aba22dcddc6da308dbf0c9ca0f755cc3276ef8302a3fd4"
