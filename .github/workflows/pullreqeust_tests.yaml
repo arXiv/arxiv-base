@@ -13,13 +13,19 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: |
+          sudo apt update
+          sudo apt install -y protobuf-compiler
+          protoc --version        
           python -m pip install --upgrade pip
           python -m pip install poetry
           pip --version
           poetry --version
           # Check if poetry lock file is current with pyproject.toml
           poetry check --lock
+          # Must be able to install without QA/gcld3/protobuf-compile
           poetry install --with=dev --no-ansi
+          # Install with QA/gcld3
+          poetry install --with=dev --no-ansi --extras qa
 
       - name: Run db/test with MySQL docker
         run: |

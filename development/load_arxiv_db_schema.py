@@ -18,11 +18,13 @@ sys.path.append(arxiv_base_dir)
 def main(mysql_port: int, db_name: str, root_password: str="rootpassword", schema_sql: str="arxiv_db_schema.sql",
          use_ssl: bool = False,
          ) -> None:
+    logger = logging.getLogger()
     conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", f"--password={root_password}"]
     if not use_ssl:
         conn_argv.append("--ssl-mode=DISABLED")
 
     if not is_port_open("127.0.0.1", mysql_port):
+        logger.warning("Starting fake-arxiv-db")
         run_mysql_container(mysql_port, container_name="fake-arxiv-db", db_name=db_name, root_password=root_password)
 
     cli = ["mysql"] + conn_argv + [db_name]
@@ -40,7 +42,9 @@ def main(mysql_port: int, db_name: str, root_password: str="rootpassword", schem
         time.sleep(1)
 
     if not os.path.exists(schema_sql) and ("/" not in schema_sql):
-        schema_sql = os.path.join(os.path.dirname(__file__), schema_sql)
+        development_dir = os.path.dirname(__file__)
+        arxiv_base_dir = os.path.dirname(development_dir)
+        schema_sql = os.path.join(os.path.join(arxiv_base_dir, "arxiv", "db", schema_sql))
     try:
         with open(schema_sql, encoding="utf-8") as schema_file:
             subprocess.call(cli, encoding="utf-8", stdin=schema_file, timeout=60)
