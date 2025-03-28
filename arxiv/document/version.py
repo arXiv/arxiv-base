@@ -1,9 +1,10 @@
 """Representations of a version of a document."""
-from typing import Literal, Optional, List
+from typing import Optional, List
 from dataclasses import dataclass, field
 from datetime import datetime
 
-SOURCE_FORMAT = Literal["tex", "ps", "html", "pdf", "withdrawn", "pdftex", "docx"]
+from arxiv.formats import formats_from_source_flag, get_all_formats, SOURCE_FORMAT
+
 """All values used in DB for the source_format column.
 
 Excluding NULL.
@@ -134,20 +135,6 @@ class VersionEntry:
             else:
                 return []
 
-        formats = []
-        if self.source_flag.ps_only or self.source_format == "ps":
-            formats.extend(['pdf', 'ps'])
-        elif self.source_flag.pdflatex or self.source_format == "pdflatex":
-            formats.extend(['pdf', 'src'])
-        elif self.source_flag.pdf_only or self.source_format == "pdf":
-            formats.extend(['pdf'])
-        elif self.source_flag.html or self.source_format == "html":
-            formats.extend(['html'])
-        elif self.source_flag.docx or self.source_format == "docx":
-            formats.extend(['pdf', 'docx'])
-        else:  # default format is tex source
-            formats.extend(['pdf', 'ps', 'src'])
-
-        # other is added for display purposes maybe move to controller or template?
-        formats.extend(['other'])
+        formats = list(set(formats_from_source_flag(str(self.source_flag))
+                           + get_all_formats(self.source_format)))
         return formats

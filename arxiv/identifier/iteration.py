@@ -8,7 +8,7 @@ from ..db import Session
 from ..db.models import Metadata
 from . import Identifier
 from ..taxonomy.category import Category
-from ..document.version import SOURCE_FORMAT
+from ..formats import SOURCE_FORMAT
 
 
 class arXivIDIterator:
