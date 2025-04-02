@@ -28,17 +28,21 @@ TL;DR - If you need to add to db/models.py, you either add it to db/orig_models.
 
 First, you need a venv with poetry. Set it up with arxiv-base's pyproject.toml as usual.
 
-Second, you need one of two:
+Second, you need to download the database schema. Prepare the database password at `~/.arxiv/arxvi-db-read-only-password`
 
-* docker to run the mysql
-* local mysql
+Third, you need one of two:
+
+* docker to run the mysql (recommended)
+* local mysql 
 
 If you do not have local mysql, docker mysql is used. development/db_codegen pulls and 
 starts the docker, if you just run it, the docker mysql is used.
 
 so once
 
+    cd <YOUR-ARXIV-BASE like ~/arxiv/arxiv-base> 
     . venv/bin/activate
+    development/dump-schema.sh
     python development/db_codegen.py
 
 generates `arxiv/db/models.py`

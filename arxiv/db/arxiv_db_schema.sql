@@ -1,35 +1,17 @@
--- MySQL dump 10.13  Distrib 5.7.20, for Linux (x86_64)
---
--- Host: localhost    Database: arXiv
--- ------------------------------------------------------
--- Server version	5.7.20
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
-SET @@SESSION.SQL_LOG_BIN= 0;
-
---
--- GTID state at the beginning of the backup 
---
-
--- SET @@GLOBAL.GTID_PURGED='2d19f914-b050-11e7-95e6-005056a34791:1-572482257';
-
---
--- Table structure for table `Subscription_UniversalInstitution`
---
-
 DROP TABLE IF EXISTS `Subscription_UniversalInstitution`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Subscription_UniversalInstitution` (
   `resolver_URL` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
@@ -42,14 +24,9 @@ CREATE TABLE `Subscription_UniversalInstitution` (
   KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `Subscription_UniversalInstitutionContact`
---
-
 DROP TABLE IF EXISTS `Subscription_UniversalInstitutionContact`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Subscription_UniversalInstitutionContact` (
   `email` varchar(255) DEFAULT NULL,
   `sid` int(11) NOT NULL,
@@ -63,14 +40,9 @@ CREATE TABLE `Subscription_UniversalInstitutionContact` (
   CONSTRAINT `Subscription_Institution_Contact_Universal` FOREIGN KEY (`sid`) REFERENCES `Subscription_UniversalInstitution` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `Subscription_UniversalInstitutionIP`
---
-
 DROP TABLE IF EXISTS `Subscription_UniversalInstitutionIP`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Subscription_UniversalInstitutionIP` (
   `sid` int(11) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -85,18 +57,13 @@ CREATE TABLE `Subscription_UniversalInstitutionIP` (
   CONSTRAINT `Subscription_Institution_IP_Universal` FOREIGN KEY (`sid`) REFERENCES `Subscription_UniversalInstitution` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_admin_log`
---
-
 DROP TABLE IF EXISTS `arXiv_admin_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_admin_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `logtime` varchar(24) DEFAULT NULL,
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `paper_id` varchar(20) DEFAULT NULL,
   `username` varchar(20) DEFAULT NULL,
   `host` varchar(64) DEFAULT NULL,
@@ -106,6 +73,8 @@ CREATE TABLE `arXiv_admin_log` (
   `document_id` mediumint(8) unsigned DEFAULT NULL,
   `submission_id` int(11) DEFAULT NULL,
   `notify` tinyint(1) DEFAULT '0',
+  `old_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `arXiv_admin_log_idx_submission_id` (`submission_id`),
   KEY `arXiv_admin_log_idx_command` (`command`),
@@ -113,14 +82,9 @@ CREATE TABLE `arXiv_admin_log` (
   KEY `arXiv_admin_log_idx_username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_admin_metadata`
---
-
 DROP TABLE IF EXISTS `arXiv_admin_metadata`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_admin_metadata` (
   `metadata_id` int(11) NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) unsigned DEFAULT NULL,
@@ -154,14 +118,9 @@ CREATE TABLE `arXiv_admin_metadata` (
   CONSTRAINT `meta_doc_fk` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_admin_state`
---
-
 DROP TABLE IF EXISTS `arXiv_admin_state`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_admin_state` (
   `document_id` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -173,56 +132,36 @@ CREATE TABLE `arXiv_admin_state` (
   UNIQUE KEY `document_id` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_archive_category`
---
-
 DROP TABLE IF EXISTS `arXiv_archive_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_archive_category` (
   `archive_id` varchar(16) NOT NULL DEFAULT '',
   `category_id` varchar(32) NOT NULL,
   PRIMARY KEY (`archive_id`,`category_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_archive_def`
---
-
 DROP TABLE IF EXISTS `arXiv_archive_def`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_archive_def` (
   `archive` varchar(16) NOT NULL DEFAULT '',
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`archive`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_archive_group`
---
-
 DROP TABLE IF EXISTS `arXiv_archive_group`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_archive_group` (
   `archive_id` varchar(16) NOT NULL DEFAULT '',
   `group_id` varchar(16) NOT NULL DEFAULT '',
   PRIMARY KEY (`archive_id`,`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_archives`
---
-
 DROP TABLE IF EXISTS `arXiv_archives`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_archives` (
   `archive_id` varchar(16) NOT NULL DEFAULT '',
   `in_group` varchar(16) NOT NULL DEFAULT '',
@@ -235,14 +174,9 @@ CREATE TABLE `arXiv_archives` (
   CONSTRAINT `0_576` FOREIGN KEY (`in_group`) REFERENCES `arXiv_groups` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_author_ids`
---
-
 DROP TABLE IF EXISTS `arXiv_author_ids`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_author_ids` (
   `user_id` int(4) unsigned NOT NULL,
   `author_id` varchar(50) NOT NULL,
@@ -252,14 +186,9 @@ CREATE TABLE `arXiv_author_ids` (
   CONSTRAINT `arXiv_author_ids_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_aws_config`
---
-
 DROP TABLE IF EXISTS `arXiv_aws_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_aws_config` (
   `domain` varchar(75) NOT NULL,
   `keyname` varchar(60) NOT NULL,
@@ -267,14 +196,9 @@ CREATE TABLE `arXiv_aws_config` (
   PRIMARY KEY (`domain`,`keyname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_aws_files`
---
-
 DROP TABLE IF EXISTS `arXiv_aws_files`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_aws_files` (
   `type` varchar(10) NOT NULL DEFAULT '',
   `filename` varchar(100) NOT NULL DEFAULT '',
@@ -291,28 +215,18 @@ CREATE TABLE `arXiv_aws_files` (
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_bad_pw`
---
-
 DROP TABLE IF EXISTS `arXiv_bad_pw`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_bad_pw` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   KEY `user_id` (`user_id`),
   CONSTRAINT `0_601` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_bib_feeds`
---
-
 DROP TABLE IF EXISTS `arXiv_bib_feeds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_bib_feeds` (
   `bib_id` mediumint(8) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL DEFAULT '',
@@ -330,14 +244,9 @@ CREATE TABLE `arXiv_bib_feeds` (
   PRIMARY KEY (`bib_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_bib_updates`
---
-
 DROP TABLE IF EXISTS `arXiv_bib_updates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_bib_updates` (
   `update_id` mediumint(8) NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) NOT NULL DEFAULT '0',
@@ -348,52 +257,32 @@ CREATE TABLE `arXiv_bib_updates` (
   PRIMARY KEY (`update_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_black_email`
---
-
 DROP TABLE IF EXISTS `arXiv_black_email`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_black_email` (
   `pattern` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_block_email`
---
-
 DROP TABLE IF EXISTS `arXiv_block_email`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_block_email` (
   `pattern` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_bogus_countries`
---
-
 DROP TABLE IF EXISTS `arXiv_bogus_countries`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_bogus_countries` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `country_name` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_bogus_subject_class`
---
-
 DROP TABLE IF EXISTS `arXiv_bogus_subject_class`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_bogus_subject_class` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `category_name` varchar(255) NOT NULL DEFAULT '',
@@ -401,14 +290,9 @@ CREATE TABLE `arXiv_bogus_subject_class` (
   CONSTRAINT `0_604` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_categories`
---
-
 DROP TABLE IF EXISTS `arXiv_categories`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_categories` (
   `archive` varchar(16) NOT NULL DEFAULT '',
   `subject_class` varchar(16) NOT NULL DEFAULT '',
@@ -425,14 +309,9 @@ CREATE TABLE `arXiv_categories` (
   CONSTRAINT `0_753` FOREIGN KEY (`endorsement_domain`) REFERENCES `arXiv_endorsement_domains` (`endorsement_domain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_category_def`
---
-
 DROP TABLE IF EXISTS `arXiv_category_def`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_category_def` (
   `category` varchar(32) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
@@ -440,14 +319,9 @@ CREATE TABLE `arXiv_category_def` (
   PRIMARY KEY (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_check_responses`
---
-
 DROP TABLE IF EXISTS `arXiv_check_responses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_check_responses` (
   `check_response_id` int(11) NOT NULL AUTO_INCREMENT,
   `check_result_id` int(11) NOT NULL,
@@ -463,14 +337,9 @@ CREATE TABLE `arXiv_check_responses` (
   CONSTRAINT `check_responses_user_fk` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_check_result_views`
---
-
 DROP TABLE IF EXISTS `arXiv_check_result_views`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_check_result_views` (
   `check_result_view_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(40) NOT NULL,
@@ -478,14 +347,9 @@ CREATE TABLE `arXiv_check_result_views` (
   PRIMARY KEY (`check_result_view_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_check_results`
---
-
 DROP TABLE IF EXISTS `arXiv_check_results`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_check_results` (
   `check_result_id` int(11) NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -495,8 +359,8 @@ CREATE TABLE `arXiv_check_results` (
   `user_id` int(10) unsigned NOT NULL,
   `ok` tinyint(1) NOT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `message` varchar(40) DEFAULT NULL,
-  `data` varchar(2000) DEFAULT NULL,
+  `message` varchar(200) DEFAULT NULL,
+  `data` text,
   PRIMARY KEY (`check_result_id`),
   KEY `check_results_submission_index` (`submission_id`),
   KEY `check_results_check_index` (`check_id`),
@@ -506,14 +370,9 @@ CREATE TABLE `arXiv_check_results` (
   CONSTRAINT `check_results_user_fk` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_check_roles`
---
-
 DROP TABLE IF EXISTS `arXiv_check_roles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_check_roles` (
   `check_role_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(40) NOT NULL,
@@ -521,14 +380,9 @@ CREATE TABLE `arXiv_check_roles` (
   PRIMARY KEY (`check_role_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_check_targets`
---
-
 DROP TABLE IF EXISTS `arXiv_check_targets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_check_targets` (
   `check_target_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(40) NOT NULL,
@@ -536,14 +390,9 @@ CREATE TABLE `arXiv_check_targets` (
   PRIMARY KEY (`check_target_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_checks`
---
-
 DROP TABLE IF EXISTS `arXiv_checks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_checks` (
   `check_id` int(11) NOT NULL AUTO_INCREMENT,
   `check_target_id` int(11) NOT NULL,
@@ -566,14 +415,9 @@ CREATE TABLE `arXiv_checks` (
   CONSTRAINT `checks_roles_fk` FOREIGN KEY (`check_role_id`) REFERENCES `arXiv_check_roles` (`check_role_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_control_holds`
---
-
 DROP TABLE IF EXISTS `arXiv_control_holds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_control_holds` (
   `hold_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `control_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -596,14 +440,9 @@ CREATE TABLE `arXiv_control_holds` (
   CONSTRAINT `arXiv_control_holds_ibfk_2` FOREIGN KEY (`last_changed_by`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_cross_control`
---
-
 DROP TABLE IF EXISTS `arXiv_cross_control`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_cross_control` (
   `control_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -628,14 +467,9 @@ CREATE TABLE `arXiv_cross_control` (
   CONSTRAINT `arXiv_cross_control_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_datacite_dois`
---
-
 DROP TABLE IF EXISTS `arXiv_datacite_dois`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_datacite_dois` (
   `doi` varchar(255) NOT NULL,
   `account` enum('test','prod') DEFAULT NULL,
@@ -649,14 +483,9 @@ CREATE TABLE `arXiv_datacite_dois` (
   CONSTRAINT `arXiv_datacite_dois_ibfk_1` FOREIGN KEY (`metadata_id`) REFERENCES `arXiv_metadata` (`metadata_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_dblp`
---
-
 DROP TABLE IF EXISTS `arXiv_dblp`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_dblp` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `url` varchar(80) DEFAULT NULL,
@@ -664,14 +493,9 @@ CREATE TABLE `arXiv_dblp` (
   CONSTRAINT `arXiv_DBLP_cdfk1` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_dblp_authors`
---
-
 DROP TABLE IF EXISTS `arXiv_dblp_authors`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_dblp_authors` (
   `author_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(40) DEFAULT NULL,
@@ -680,14 +504,9 @@ CREATE TABLE `arXiv_dblp_authors` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_dblp_document_authors`
---
-
 DROP TABLE IF EXISTS `arXiv_dblp_document_authors`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_dblp_document_authors` (
   `document_id` mediumint(8) unsigned NOT NULL,
   `author_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -699,14 +518,9 @@ CREATE TABLE `arXiv_dblp_document_authors` (
   CONSTRAINT `arXiv_DBLP_ibfk2` FOREIGN KEY (`author_id`) REFERENCES `arXiv_dblp_authors` (`author_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_demographics`
---
-
 DROP TABLE IF EXISTS `arXiv_demographics`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_demographics` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `country` char(2) NOT NULL DEFAULT '',
@@ -753,14 +567,9 @@ CREATE TABLE `arXiv_demographics` (
   CONSTRAINT `0_588` FOREIGN KEY (`archive`, `subject_class`) REFERENCES `arXiv_categories` (`archive`, `subject_class`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_document_category`
---
-
 DROP TABLE IF EXISTS `arXiv_document_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_document_category` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `category` varchar(32) NOT NULL,
@@ -772,14 +581,9 @@ CREATE TABLE `arXiv_document_category` (
   CONSTRAINT `doc_cat_doc` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_documents`
---
-
 DROP TABLE IF EXISTS `arXiv_documents`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_documents` (
   `document_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `paper_id` varchar(20) NOT NULL DEFAULT '',
@@ -799,14 +603,9 @@ CREATE TABLE `arXiv_documents` (
   CONSTRAINT `0_580` FOREIGN KEY (`submitter_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_duplicates`
---
-
 DROP TABLE IF EXISTS `arXiv_duplicates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_duplicates` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `email` varchar(255) DEFAULT NULL,
@@ -815,14 +614,9 @@ CREATE TABLE `arXiv_duplicates` (
   CONSTRAINT `0_599` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_endorsement_domains`
---
-
 DROP TABLE IF EXISTS `arXiv_endorsement_domains`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_endorsement_domains` (
   `endorsement_domain` varchar(32) NOT NULL DEFAULT '',
   `endorse_all` enum('y','n') NOT NULL DEFAULT 'n',
@@ -832,14 +626,9 @@ CREATE TABLE `arXiv_endorsement_domains` (
   PRIMARY KEY (`endorsement_domain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_endorsement_requests`
---
-
 DROP TABLE IF EXISTS `arXiv_endorsement_requests`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_endorsement_requests` (
   `request_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `endorsee_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -858,14 +647,9 @@ CREATE TABLE `arXiv_endorsement_requests` (
   CONSTRAINT `0_723` FOREIGN KEY (`archive`, `subject_class`) REFERENCES `arXiv_categories` (`archive`, `subject_class`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_endorsement_requests_audit`
---
-
 DROP TABLE IF EXISTS `arXiv_endorsement_requests_audit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_endorsement_requests_audit` (
   `request_id` int(10) unsigned NOT NULL DEFAULT '0',
   `session_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -876,14 +660,9 @@ CREATE TABLE `arXiv_endorsement_requests_audit` (
   CONSTRAINT `0_725` FOREIGN KEY (`request_id`) REFERENCES `arXiv_endorsement_requests` (`request_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_endorsements`
---
-
 DROP TABLE IF EXISTS `arXiv_endorsements`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_endorsements` (
   `endorsement_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `endorser_id` int(10) unsigned DEFAULT NULL,
@@ -907,14 +686,9 @@ CREATE TABLE `arXiv_endorsements` (
   CONSTRAINT `0_730` FOREIGN KEY (`request_id`) REFERENCES `arXiv_endorsement_requests` (`request_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_endorsements_audit`
---
-
 DROP TABLE IF EXISTS `arXiv_endorsements_audit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_endorsements_audit` (
   `endorsement_id` int(10) unsigned NOT NULL DEFAULT '0',
   `session_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -928,41 +702,26 @@ CREATE TABLE `arXiv_endorsements_audit` (
   CONSTRAINT `0_732` FOREIGN KEY (`endorsement_id`) REFERENCES `arXiv_endorsements` (`endorsement_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_freeze_log`
---
-
 DROP TABLE IF EXISTS `arXiv_freeze_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_freeze_log` (
   `date` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_group_def`
---
-
 DROP TABLE IF EXISTS `arXiv_group_def`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_group_def` (
   `archive_group` varchar(16) NOT NULL DEFAULT '',
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`archive_group`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_groups`
---
-
 DROP TABLE IF EXISTS `arXiv_groups`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_groups` (
   `group_id` varchar(16) NOT NULL DEFAULT '',
   `group_name` varchar(255) NOT NULL DEFAULT '',
@@ -970,14 +729,9 @@ CREATE TABLE `arXiv_groups` (
   PRIMARY KEY (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_in_category`
---
-
 DROP TABLE IF EXISTS `arXiv_in_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_in_category` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `archive` varchar(16) NOT NULL DEFAULT '',
@@ -990,14 +744,9 @@ CREATE TABLE `arXiv_in_category` (
   CONSTRAINT `0_583` FOREIGN KEY (`archive`, `subject_class`) REFERENCES `arXiv_categories` (`archive`, `subject_class`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_jref_control`
---
-
 DROP TABLE IF EXISTS `arXiv_jref_control`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_jref_control` (
   `control_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -1018,14 +767,9 @@ CREATE TABLE `arXiv_jref_control` (
   CONSTRAINT `arXiv_jref_control_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_licenses`
---
-
 DROP TABLE IF EXISTS `arXiv_licenses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_licenses` (
   `name` varchar(255) NOT NULL,
   `label` varchar(255) DEFAULT NULL,
@@ -1035,14 +779,9 @@ CREATE TABLE `arXiv_licenses` (
   PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_log_positions`
---
-
 DROP TABLE IF EXISTS `arXiv_log_positions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_log_positions` (
   `id` varchar(255) NOT NULL DEFAULT '',
   `position` int(10) unsigned DEFAULT NULL,
@@ -1050,14 +789,9 @@ CREATE TABLE `arXiv_log_positions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_metadata`
---
-
 DROP TABLE IF EXISTS `arXiv_metadata`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_metadata` (
   `metadata_id` int(11) NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -1096,14 +830,9 @@ CREATE TABLE `arXiv_metadata` (
   CONSTRAINT `arXiv_metadata_fk_submitter_id` FOREIGN KEY (`submitter_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_mirror_list`
---
-
 DROP TABLE IF EXISTS `arXiv_mirror_list`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_mirror_list` (
   `mirror_list_id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime DEFAULT NULL,
@@ -1118,14 +847,9 @@ CREATE TABLE `arXiv_mirror_list` (
   CONSTRAINT `arXiv_mirror_list_fk_document_id` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_moderator_api_key`
---
-
 DROP TABLE IF EXISTS `arXiv_moderator_api_key`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_moderator_api_key` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -1137,14 +861,9 @@ CREATE TABLE `arXiv_moderator_api_key` (
   CONSTRAINT `arXiv_moderator_api_key_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_moderators`
---
-
 DROP TABLE IF EXISTS `arXiv_moderators`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_moderators` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `archive` varchar(16) NOT NULL DEFAULT '',
@@ -1164,28 +883,18 @@ CREATE TABLE `arXiv_moderators` (
   CONSTRAINT `fk_archive_id` FOREIGN KEY (`archive`) REFERENCES `arXiv_archive_group` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_monitor_klog`
---
-
 DROP TABLE IF EXISTS `arXiv_monitor_klog`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_monitor_klog` (
   `t` int(10) unsigned NOT NULL DEFAULT '0',
   `sent` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`t`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_monitor_mailq`
---
-
 DROP TABLE IF EXISTS `arXiv_monitor_mailq`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_monitor_mailq` (
   `t` int(10) unsigned NOT NULL DEFAULT '0',
   `main_q` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1197,28 +906,18 @@ CREATE TABLE `arXiv_monitor_mailq` (
   PRIMARY KEY (`t`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_monitor_mailsent`
---
-
 DROP TABLE IF EXISTS `arXiv_monitor_mailsent`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_monitor_mailsent` (
   `t` int(10) unsigned NOT NULL DEFAULT '0',
   `sent` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`t`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_next_mail`
---
-
 DROP TABLE IF EXISTS `arXiv_next_mail`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_next_mail` (
   `next_mail_id` int(11) NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -1234,14 +933,9 @@ CREATE TABLE `arXiv_next_mail` (
   KEY `arXiv_next_mail_idx_document_id_version` (`document_id`,`version`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_orcid_config`
---
-
 DROP TABLE IF EXISTS `arXiv_orcid_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_orcid_config` (
   `domain` varchar(75) NOT NULL,
   `keyname` varchar(60) NOT NULL,
@@ -1249,14 +943,9 @@ CREATE TABLE `arXiv_orcid_config` (
   PRIMARY KEY (`domain`,`keyname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_orcid_ids`
---
-
 DROP TABLE IF EXISTS `arXiv_orcid_ids`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_orcid_ids` (
   `user_id` int(4) unsigned NOT NULL,
   `orcid` varchar(19) NOT NULL,
@@ -1267,14 +956,9 @@ CREATE TABLE `arXiv_orcid_ids` (
   CONSTRAINT `arXiv_orcid_ids_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_ownership_requests`
---
-
 DROP TABLE IF EXISTS `arXiv_ownership_requests`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_ownership_requests` (
   `request_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1287,14 +971,9 @@ CREATE TABLE `arXiv_ownership_requests` (
   CONSTRAINT `0_735` FOREIGN KEY (`endorsement_request_id`) REFERENCES `arXiv_endorsement_requests` (`request_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_ownership_requests_audit`
---
-
 DROP TABLE IF EXISTS `arXiv_ownership_requests_audit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_ownership_requests_audit` (
   `request_id` int(10) unsigned NOT NULL DEFAULT '0',
   `session_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1306,14 +985,9 @@ CREATE TABLE `arXiv_ownership_requests_audit` (
   CONSTRAINT `0_737` FOREIGN KEY (`request_id`) REFERENCES `arXiv_ownership_requests` (`request_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_ownership_requests_papers`
---
-
 DROP TABLE IF EXISTS `arXiv_ownership_requests_papers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_ownership_requests_papers` (
   `request_id` int(10) unsigned NOT NULL DEFAULT '0',
   `document_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1321,14 +995,9 @@ CREATE TABLE `arXiv_ownership_requests_papers` (
   KEY `document_id` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_paper_owners`
---
-
 DROP TABLE IF EXISTS `arXiv_paper_owners`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_paper_owners` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1348,14 +1017,9 @@ CREATE TABLE `arXiv_paper_owners` (
   CONSTRAINT `0_595` FOREIGN KEY (`added_by`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_paper_pw`
---
-
 DROP TABLE IF EXISTS `arXiv_paper_pw`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_paper_pw` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `password_storage` int(1) unsigned DEFAULT NULL,
@@ -1364,14 +1028,9 @@ CREATE TABLE `arXiv_paper_pw` (
   CONSTRAINT `0_585` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_paper_sessions`
---
-
 DROP TABLE IF EXISTS `arXiv_paper_sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_paper_sessions` (
   `paper_session_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `paper_id` varchar(16) NOT NULL DEFAULT '',
@@ -1381,14 +1040,9 @@ CREATE TABLE `arXiv_paper_sessions` (
   PRIMARY KEY (`paper_session_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_pilot_datasets`
---
-
 DROP TABLE IF EXISTS `arXiv_pilot_datasets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_pilot_datasets` (
   `submission_id` int(11) NOT NULL,
   `numfiles` smallint(4) unsigned DEFAULT '0',
@@ -1401,14 +1055,9 @@ CREATE TABLE `arXiv_pilot_datasets` (
   CONSTRAINT `arXiv_pilot_datasets_cdfk3` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_pilot_files`
---
-
 DROP TABLE IF EXISTS `arXiv_pilot_files`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_pilot_files` (
   `file_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -1421,27 +1070,17 @@ CREATE TABLE `arXiv_pilot_files` (
   CONSTRAINT `arXiv_pilot_files_cdfk3` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_publish_log`
---
-
 DROP TABLE IF EXISTS `arXiv_publish_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_publish_log` (
   `date` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_questionable_categories`
---
-
 DROP TABLE IF EXISTS `arXiv_questionable_categories`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_questionable_categories` (
   `archive` varchar(16) NOT NULL DEFAULT '',
   `subject_class` varchar(16) NOT NULL DEFAULT '',
@@ -1449,14 +1088,9 @@ CREATE TABLE `arXiv_questionable_categories` (
   CONSTRAINT `0_756` FOREIGN KEY (`archive`, `subject_class`) REFERENCES `arXiv_categories` (`archive`, `subject_class`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_queue_view`
---
-
 DROP TABLE IF EXISTS `arXiv_queue_view`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_queue_view` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `last_view` datetime DEFAULT NULL,
@@ -1466,55 +1100,35 @@ CREATE TABLE `arXiv_queue_view` (
   CONSTRAINT `arXiv_queue_view_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_refresh_list`
---
-
 DROP TABLE IF EXISTS `arXiv_refresh_list`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_refresh_list` (
   `filename` varchar(255) DEFAULT NULL,
   `mtime` int(10) unsigned DEFAULT NULL,
   KEY `arXiv_refresh_list_mtime` (`mtime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_reject_session_usernames`
---
-
 DROP TABLE IF EXISTS `arXiv_reject_session_usernames`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_reject_session_usernames` (
   `username` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_sciencewise_pings`
---
-
 DROP TABLE IF EXISTS `arXiv_sciencewise_pings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_sciencewise_pings` (
   `paper_id_v` varchar(32) NOT NULL,
   `updated` datetime DEFAULT NULL,
   PRIMARY KEY (`paper_id_v`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_show_email_requests`
---
-
 DROP TABLE IF EXISTS `arXiv_show_email_requests`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_show_email_requests` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1534,14 +1148,9 @@ CREATE TABLE `arXiv_show_email_requests` (
   CONSTRAINT `arXiv_show_email_requests_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_state`
---
-
 DROP TABLE IF EXISTS `arXiv_state`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_state` (
   `id` int(11) NOT NULL,
   `name` varchar(24) DEFAULT NULL,
@@ -1549,14 +1158,9 @@ CREATE TABLE `arXiv_state` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_stats_hourly`
---
-
 DROP TABLE IF EXISTS `arXiv_stats_hourly`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_stats_hourly` (
   `ymd` date NOT NULL,
   `hour` tinyint(3) unsigned NOT NULL,
@@ -1569,28 +1173,18 @@ CREATE TABLE `arXiv_stats_hourly` (
   KEY `arXiv_stats_hourly_idx_access_type` (`access_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_stats_monthly_downloads`
---
-
 DROP TABLE IF EXISTS `arXiv_stats_monthly_downloads`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_stats_monthly_downloads` (
   `ym` date NOT NULL,
   `downloads` int(10) unsigned NOT NULL,
   PRIMARY KEY (`ym`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_stats_monthly_submissions`
---
-
 DROP TABLE IF EXISTS `arXiv_stats_monthly_submissions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_stats_monthly_submissions` (
   `ym` date NOT NULL DEFAULT '0000-00-00',
   `num_submissions` smallint(5) unsigned NOT NULL,
@@ -1598,14 +1192,9 @@ CREATE TABLE `arXiv_stats_monthly_submissions` (
   PRIMARY KEY (`ym`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_abs_classifier_data`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_abs_classifier_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_abs_classifier_data` (
   `submission_id` int(11) NOT NULL DEFAULT '0',
   `json` text,
@@ -1623,14 +1212,9 @@ CREATE TABLE `arXiv_submission_abs_classifier_data` (
   CONSTRAINT `arXiv_submission_abs_classifier_data_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_agreements`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_agreements`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_agreements` (
   `agreement_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `effective_date` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -1639,14 +1223,9 @@ CREATE TABLE `arXiv_submission_agreements` (
   PRIMARY KEY (`agreement_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_category`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_category` (
   `submission_id` int(11) NOT NULL,
   `category` varchar(32) NOT NULL DEFAULT '',
@@ -1661,14 +1240,9 @@ CREATE TABLE `arXiv_submission_category` (
   CONSTRAINT `arXiv_submission_category_fk_submission_id` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_category_proposal`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_category_proposal`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_category_proposal` (
   `proposal_id` int(11) NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -1694,14 +1268,9 @@ CREATE TABLE `arXiv_submission_category_proposal` (
   CONSTRAINT `arXiv_submission_category_proposal_fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_classifier_data`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_classifier_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_classifier_data` (
   `submission_id` int(11) NOT NULL DEFAULT '0',
   `json` text,
@@ -1713,14 +1282,9 @@ CREATE TABLE `arXiv_submission_classifier_data` (
   CONSTRAINT `arXiv_submission_classifier_data_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_control`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_control`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_control` (
   `control_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -1743,14 +1307,9 @@ CREATE TABLE `arXiv_submission_control` (
   CONSTRAINT `arXiv_submission_control_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_flag`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_flag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_flag` (
   `flag_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
@@ -1758,6 +1317,9 @@ CREATE TABLE `arXiv_submission_flag` (
   `flag` tinyint(4) NOT NULL DEFAULT '0',
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `flag_pdf_opened` smallint(6) NOT NULL DEFAULT '0',
+  `flag_done` smallint(6) NOT NULL DEFAULT '0',
+  `flag_done_cleared` smallint(6) NOT NULL DEFAULT '0',
+  `flag_viewed` smallint(6) NOT NULL DEFAULT '0',
   PRIMARY KEY (`flag_id`),
   UNIQUE KEY `uniq_one_flag_per_mod` (`submission_id`,`user_id`),
   KEY `user_id` (`user_id`),
@@ -1765,14 +1327,9 @@ CREATE TABLE `arXiv_submission_flag` (
   CONSTRAINT `arXiv_submission_flag_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_hold_reason`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_hold_reason`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_hold_reason` (
   `reason_id` int(11) NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -1789,14 +1346,9 @@ CREATE TABLE `arXiv_submission_hold_reason` (
   CONSTRAINT `arXiv_submission_hold_reason_ibfk_3` FOREIGN KEY (`comment_id`) REFERENCES `arXiv_admin_log` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_locks`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_locks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_locks` (
   `submission_lock_id` int(11) NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -1812,14 +1364,9 @@ CREATE TABLE `arXiv_submission_locks` (
   CONSTRAINT `arxiv_submission_locks_user_fk` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_near_duplicates`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_near_duplicates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_near_duplicates` (
   `submission_id` int(11) NOT NULL DEFAULT '0',
   `matching_id` int(11) NOT NULL DEFAULT '0',
@@ -1830,14 +1377,9 @@ CREATE TABLE `arXiv_submission_near_duplicates` (
   CONSTRAINT `arXiv_submission_near_duplicates_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_qa_reports`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_qa_reports`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_qa_reports` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `submission_id` int(11) NOT NULL,
@@ -1852,14 +1394,9 @@ CREATE TABLE `arXiv_submission_qa_reports` (
   CONSTRAINT `arXiv_submission_qa_reports_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submission_view_flag`
---
-
 DROP TABLE IF EXISTS `arXiv_submission_view_flag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submission_view_flag` (
   `submission_id` int(11) NOT NULL,
   `flag` tinyint(1) DEFAULT '0',
@@ -1871,14 +1408,9 @@ CREATE TABLE `arXiv_submission_view_flag` (
   CONSTRAINT `arXiv_submission_view_flag_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submissions`
---
-
 DROP TABLE IF EXISTS `arXiv_submissions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submissions` (
   `submission_id` int(11) NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) unsigned DEFAULT NULL,
@@ -1935,6 +1467,7 @@ CREATE TABLE `arXiv_submissions` (
   `metadata_version_queued` smallint(6) NOT NULL DEFAULT '0',
   `data_queued_time` datetime DEFAULT NULL,
   `metadata_queued_time` datetime DEFAULT NULL,
+  `preflight` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`submission_id`),
   KEY `arXiv_submissions_idx_document_id` (`document_id`),
   KEY `arXiv_submissions_idx_license` (`license`),
@@ -1954,14 +1487,9 @@ CREATE TABLE `arXiv_submissions` (
   CONSTRAINT `arXiv_submissions_fk_sword_id` FOREIGN KEY (`sword_id`) REFERENCES `arXiv_tracking` (`sword_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_submitter_flags`
---
-
 DROP TABLE IF EXISTS `arXiv_submitter_flags`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_submitter_flags` (
   `flag_id` int(11) NOT NULL,
   `comment` varchar(255) DEFAULT NULL,
@@ -1969,14 +1497,9 @@ CREATE TABLE `arXiv_submitter_flags` (
   PRIMARY KEY (`flag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_suspect_emails`
---
-
 DROP TABLE IF EXISTS `arXiv_suspect_emails`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_suspect_emails` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(10) NOT NULL,
@@ -1986,14 +1509,9 @@ CREATE TABLE `arXiv_suspect_emails` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_suspicious_names`
---
-
 DROP TABLE IF EXISTS `arXiv_suspicious_names`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_suspicious_names` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `full_name` varchar(255) NOT NULL DEFAULT '',
@@ -2001,14 +1519,9 @@ CREATE TABLE `arXiv_suspicious_names` (
   CONSTRAINT `0_606` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_sword_licenses`
---
-
 DROP TABLE IF EXISTS `arXiv_sword_licenses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_sword_licenses` (
   `user_id` int(4) unsigned NOT NULL,
   `license` varchar(127) DEFAULT NULL,
@@ -2017,14 +1530,9 @@ CREATE TABLE `arXiv_sword_licenses` (
   CONSTRAINT `user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_titles`
---
-
 DROP TABLE IF EXISTS `arXiv_titles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_titles` (
   `paper_id` varchar(64) NOT NULL,
   `title` varchar(255) DEFAULT NULL,
@@ -2035,14 +1543,9 @@ CREATE TABLE `arXiv_titles` (
   KEY `arXiv_repno_idx` (`report_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_top_papers`
---
-
 DROP TABLE IF EXISTS `arXiv_top_papers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_top_papers` (
   `from_week` date NOT NULL DEFAULT '0000-00-00',
   `class` char(1) NOT NULL DEFAULT '',
@@ -2054,14 +1557,9 @@ CREATE TABLE `arXiv_top_papers` (
   CONSTRAINT `arXiv_top_papers_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_trackback_pings`
---
-
 DROP TABLE IF EXISTS `arXiv_trackback_pings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_trackback_pings` (
   `trackback_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `document_id` mediumint(8) unsigned DEFAULT NULL,
@@ -2084,14 +1582,9 @@ CREATE TABLE `arXiv_trackback_pings` (
   KEY `arXiv_trackback_pings__status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_trackback_sites`
---
-
 DROP TABLE IF EXISTS `arXiv_trackback_sites`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_trackback_sites` (
   `pattern` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -2100,14 +1593,9 @@ CREATE TABLE `arXiv_trackback_sites` (
   KEY `arXiv_trackback_sites__pattern` (`pattern`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_tracking`
---
-
 DROP TABLE IF EXISTS `arXiv_tracking`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_tracking` (
   `tracking_id` int(11) NOT NULL AUTO_INCREMENT,
   `sword_id` int(8) unsigned zerofill NOT NULL DEFAULT '00000000',
@@ -2118,14 +1606,9 @@ CREATE TABLE `arXiv_tracking` (
   UNIQUE KEY `sword_id` (`sword_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_updates`
---
-
 DROP TABLE IF EXISTS `arXiv_updates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_updates` (
   `document_id` int(11) DEFAULT NULL,
   `version` int(4) NOT NULL DEFAULT '1',
@@ -2140,14 +1623,9 @@ CREATE TABLE `arXiv_updates` (
   KEY `document_id_index` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_updates_tmp`
---
-
 DROP TABLE IF EXISTS `arXiv_updates_tmp`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_updates_tmp` (
   `document_id` int(11) DEFAULT NULL,
   `date` date DEFAULT NULL,
@@ -2156,14 +1634,9 @@ CREATE TABLE `arXiv_updates_tmp` (
   UNIQUE KEY `document_id` (`document_id`,`date`,`action`,`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_versions`
---
-
 DROP TABLE IF EXISTS `arXiv_versions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_versions` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `version` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -2178,14 +1651,9 @@ CREATE TABLE `arXiv_versions` (
   CONSTRAINT `arXiv_versions_ibfk_1` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_versions_checksum`
---
-
 DROP TABLE IF EXISTS `arXiv_versions_checksum`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_versions_checksum` (
   `document_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `version` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -2203,27 +1671,17 @@ CREATE TABLE `arXiv_versions_checksum` (
   CONSTRAINT `arXiv_versions_checksum_ibfk_1` FOREIGN KEY (`document_id`, `version`) REFERENCES `arXiv_versions` (`document_id`, `version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_white_email`
---
-
 DROP TABLE IF EXISTS `arXiv_white_email`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_white_email` (
   `pattern` varchar(64) DEFAULT NULL,
   UNIQUE KEY `uc_pattern` (`pattern`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `arXiv_xml_notifications`
---
-
 DROP TABLE IF EXISTS `arXiv_xml_notifications`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `arXiv_xml_notifications` (
   `control_id` int(10) unsigned DEFAULT NULL,
   `type` enum('submission','cross','jref') DEFAULT NULL,
@@ -2234,28 +1692,18 @@ CREATE TABLE `arXiv_xml_notifications` (
   KEY `status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `dbix_class_schema_versions`
---
-
 DROP TABLE IF EXISTS `dbix_class_schema_versions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `dbix_class_schema_versions` (
   `version` varchar(10) NOT NULL,
   `installed` varchar(20) NOT NULL,
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `demographics_backup`
---
-
 DROP TABLE IF EXISTS `demographics_backup`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `demographics_backup` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `country` char(2) NOT NULL DEFAULT '',
@@ -2282,14 +1730,9 @@ CREATE TABLE `demographics_backup` (
   `veto_status` enum('ok','no-endorse','no-upload') DEFAULT 'ok'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `membership_institutions`
---
-
 DROP TABLE IF EXISTS `membership_institutions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `membership_institutions` (
   `sid` int(11) NOT NULL,
   `name` varchar(256) DEFAULT NULL,
@@ -2306,14 +1749,9 @@ CREATE TABLE `membership_institutions` (
   KEY `membership_Institution_name_index` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `membership_users`
---
-
 DROP TABLE IF EXISTS `membership_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `membership_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `sid` int(11) NOT NULL,
@@ -2321,14 +1759,9 @@ CREATE TABLE `membership_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `sessions`
---
-
 DROP TABLE IF EXISTS `sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sessions` (
   `id` char(72) NOT NULL,
   `session_data` text,
@@ -2336,14 +1769,9 @@ CREATE TABLE `sessions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_address`
---
-
 DROP TABLE IF EXISTS `tapir_address`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_address` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `address_type` int(1) NOT NULL DEFAULT '0',
@@ -2364,14 +1792,9 @@ CREATE TABLE `tapir_address` (
   CONSTRAINT `0_523` FOREIGN KEY (`country`) REFERENCES `tapir_countries` (`digraph`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_admin_audit`
---
-
 DROP TABLE IF EXISTS `tapir_admin_audit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_admin_audit` (
   `log_date` int(10) unsigned NOT NULL DEFAULT '0',
   `session_id` int(4) unsigned DEFAULT NULL,
@@ -2398,14 +1821,9 @@ CREATE TABLE `tapir_admin_audit` (
   CONSTRAINT `0_555` FOREIGN KEY (`affected_user`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_countries`
---
-
 DROP TABLE IF EXISTS `tapir_countries`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_countries` (
   `digraph` char(2) NOT NULL DEFAULT '',
   `country_name` varchar(255) NOT NULL DEFAULT '',
@@ -2413,14 +1831,9 @@ CREATE TABLE `tapir_countries` (
   PRIMARY KEY (`digraph`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_demographics`
---
-
 DROP TABLE IF EXISTS `tapir_demographics`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_demographics` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `gender` int(1) NOT NULL DEFAULT '0',
@@ -2438,14 +1851,9 @@ CREATE TABLE `tapir_demographics` (
   CONSTRAINT `0_518` FOREIGN KEY (`country`) REFERENCES `tapir_countries` (`digraph`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_change_tokens`
---
-
 DROP TABLE IF EXISTS `tapir_email_change_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_change_tokens` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `old_email` varchar(255) DEFAULT NULL,
@@ -2465,14 +1873,9 @@ CREATE TABLE `tapir_email_change_tokens` (
   CONSTRAINT `0_535` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_change_tokens_used`
---
-
 DROP TABLE IF EXISTS `tapir_email_change_tokens_used`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_change_tokens_used` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -2486,14 +1889,9 @@ CREATE TABLE `tapir_email_change_tokens_used` (
   CONSTRAINT `0_538` FOREIGN KEY (`session_id`) REFERENCES `tapir_sessions` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_headers`
---
-
 DROP TABLE IF EXISTS `tapir_email_headers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_headers` (
   `template_id` int(10) unsigned NOT NULL DEFAULT '0',
   `header_name` varchar(32) NOT NULL DEFAULT '',
@@ -2502,14 +1900,9 @@ CREATE TABLE `tapir_email_headers` (
   CONSTRAINT `0_563` FOREIGN KEY (`template_id`) REFERENCES `tapir_email_templates` (`template_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_log`
---
-
 DROP TABLE IF EXISTS `tapir_email_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_log` (
   `mail_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `reference_type` char(1) DEFAULT NULL,
@@ -2523,14 +1916,9 @@ CREATE TABLE `tapir_email_log` (
   KEY `mailing_id` (`mailing_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_mailings`
---
-
 DROP TABLE IF EXISTS `tapir_email_mailings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_mailings` (
   `mailing_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `template_id` int(10) unsigned DEFAULT NULL,
@@ -2550,14 +1938,9 @@ CREATE TABLE `tapir_email_mailings` (
   CONSTRAINT `0_567` FOREIGN KEY (`template_id`) REFERENCES `tapir_email_templates` (`template_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_templates`
---
-
 DROP TABLE IF EXISTS `tapir_email_templates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_templates` (
   `template_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `short_name` varchar(32) NOT NULL DEFAULT '',
@@ -2579,14 +1962,9 @@ CREATE TABLE `tapir_email_templates` (
   CONSTRAINT `0_561` FOREIGN KEY (`updated_by`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_tokens`
---
-
 DROP TABLE IF EXISTS `tapir_email_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_tokens` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -2601,14 +1979,9 @@ CREATE TABLE `tapir_email_tokens` (
   CONSTRAINT `0_530` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_email_tokens_used`
---
-
 DROP TABLE IF EXISTS `tapir_email_tokens_used`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_email_tokens_used` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -2622,14 +1995,9 @@ CREATE TABLE `tapir_email_tokens_used` (
   CONSTRAINT `0_533` FOREIGN KEY (`session_id`) REFERENCES `tapir_sessions` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_error_log`
---
-
 DROP TABLE IF EXISTS `tapir_error_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_error_log` (
   `error_date` int(4) unsigned NOT NULL DEFAULT '0',
   `user_id` int(4) unsigned DEFAULT NULL,
@@ -2648,28 +2016,18 @@ CREATE TABLE `tapir_error_log` (
   KEY `message` (`message`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_integer_variables`
---
-
 DROP TABLE IF EXISTS `tapir_integer_variables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_integer_variables` (
   `variable_id` varchar(32) NOT NULL DEFAULT '',
   `value` int(4) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`variable_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_nicknames`
---
-
 DROP TABLE IF EXISTS `tapir_nicknames`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_nicknames` (
   `nick_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `nickname` varchar(20) NOT NULL DEFAULT '',
@@ -2688,14 +2046,9 @@ CREATE TABLE `tapir_nicknames` (
   CONSTRAINT `0_570` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_nicknames_audit`
---
-
 DROP TABLE IF EXISTS `tapir_nicknames_audit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_nicknames_audit` (
   `nick_id` int(10) unsigned NOT NULL DEFAULT '0',
   `creation_date` int(10) unsigned NOT NULL DEFAULT '0',
@@ -2708,14 +2061,9 @@ CREATE TABLE `tapir_nicknames_audit` (
   KEY `tracking_cookie` (`tracking_cookie`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_no_cookies`
---
-
 DROP TABLE IF EXISTS `tapir_no_cookies`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_no_cookies` (
   `log_date` int(10) unsigned NOT NULL DEFAULT '0',
   `ip_addr` varchar(16) NOT NULL DEFAULT '',
@@ -2725,28 +2073,18 @@ CREATE TABLE `tapir_no_cookies` (
   `user_agent` varchar(255) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_periodic_tasks_log`
---
-
 DROP TABLE IF EXISTS `tapir_periodic_tasks_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_periodic_tasks_log` (
   `t` int(4) unsigned NOT NULL DEFAULT '0',
   `entry` text,
   KEY `tapir_periodic_tasks_log_1` (`t`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_permanent_tokens`
---
-
 DROP TABLE IF EXISTS `tapir_permanent_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_permanent_tokens` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -2761,14 +2099,9 @@ CREATE TABLE `tapir_permanent_tokens` (
   CONSTRAINT `0_541` FOREIGN KEY (`session_id`) REFERENCES `tapir_sessions` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_permanent_tokens_used`
---
-
 DROP TABLE IF EXISTS `tapir_permanent_tokens_used`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_permanent_tokens_used` (
   `user_id` int(4) unsigned DEFAULT NULL,
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -2782,14 +2115,9 @@ CREATE TABLE `tapir_permanent_tokens_used` (
   CONSTRAINT `0_544` FOREIGN KEY (`session_id`) REFERENCES `tapir_sessions` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_phone`
---
-
 DROP TABLE IF EXISTS `tapir_phone`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_phone` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `phone_type` int(1) NOT NULL DEFAULT '0',
@@ -2801,14 +2129,9 @@ CREATE TABLE `tapir_phone` (
   CONSTRAINT `0_520` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_policy_classes`
---
-
 DROP TABLE IF EXISTS `tapir_policy_classes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_policy_classes` (
   `class_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL DEFAULT '',
@@ -2819,14 +2142,9 @@ CREATE TABLE `tapir_policy_classes` (
   PRIMARY KEY (`class_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_presessions`
---
-
 DROP TABLE IF EXISTS `tapir_presessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_presessions` (
   `presession_id` int(4) unsigned NOT NULL AUTO_INCREMENT,
   `ip_num` varchar(16) NOT NULL DEFAULT '',
@@ -2836,14 +2154,9 @@ CREATE TABLE `tapir_presessions` (
   PRIMARY KEY (`presession_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_recovery_tokens`
---
-
 DROP TABLE IF EXISTS `tapir_recovery_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_recovery_tokens` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -2858,14 +2171,9 @@ CREATE TABLE `tapir_recovery_tokens` (
   CONSTRAINT `0_546` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_recovery_tokens_used`
---
-
 DROP TABLE IF EXISTS `tapir_recovery_tokens_used`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_recovery_tokens_used` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `secret` varchar(32) NOT NULL DEFAULT '',
@@ -2879,14 +2187,9 @@ CREATE TABLE `tapir_recovery_tokens_used` (
   CONSTRAINT `0_549` FOREIGN KEY (`session_id`) REFERENCES `tapir_sessions` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_save_post_variables`
---
-
 DROP TABLE IF EXISTS `tapir_save_post_variables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_save_post_variables` (
   `presession_id` int(4) unsigned NOT NULL DEFAULT '0',
   `name` varchar(255) DEFAULT NULL,
@@ -2896,14 +2199,9 @@ CREATE TABLE `tapir_save_post_variables` (
   CONSTRAINT `0_558` FOREIGN KEY (`presession_id`) REFERENCES `tapir_presessions` (`presession_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_sessions`
---
-
 DROP TABLE IF EXISTS `tapir_sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_sessions` (
   `session_id` int(4) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
@@ -2917,14 +2215,9 @@ CREATE TABLE `tapir_sessions` (
   CONSTRAINT `0_525` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_sessions_audit`
---
-
 DROP TABLE IF EXISTS `tapir_sessions_audit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_sessions_audit` (
   `session_id` int(4) unsigned NOT NULL DEFAULT '0',
   `ip_addr` varchar(16) NOT NULL DEFAULT '',
@@ -2936,28 +2229,18 @@ CREATE TABLE `tapir_sessions_audit` (
   CONSTRAINT `0_527` FOREIGN KEY (`session_id`) REFERENCES `tapir_sessions` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_string_variables`
---
-
 DROP TABLE IF EXISTS `tapir_string_variables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_string_variables` (
   `variable_id` varchar(32) NOT NULL DEFAULT '',
   `value` text NOT NULL,
   PRIMARY KEY (`variable_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_strings`
---
-
 DROP TABLE IF EXISTS `tapir_strings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_strings` (
   `name` varchar(32) NOT NULL DEFAULT '',
   `module` varchar(32) NOT NULL DEFAULT '',
@@ -2966,14 +2249,9 @@ CREATE TABLE `tapir_strings` (
   PRIMARY KEY (`module`,`name`,`language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_users`
---
-
 DROP TABLE IF EXISTS `tapir_users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_users` (
   `user_id` int(4) unsigned NOT NULL AUTO_INCREMENT,
   `first_name` varchar(50) DEFAULT NULL,
@@ -3017,14 +2295,9 @@ CREATE TABLE `tapir_users` (
   CONSTRAINT `0_510` FOREIGN KEY (`policy_class`) REFERENCES `tapir_policy_classes` (`class_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_users_hot`
---
-
 DROP TABLE IF EXISTS `tapir_users_hot`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_users_hot` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `last_login` int(4) unsigned NOT NULL DEFAULT '0',
@@ -3037,14 +2310,9 @@ CREATE TABLE `tapir_users_hot` (
   CONSTRAINT `0_514` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tapir_users_password`
---
-
 DROP TABLE IF EXISTS `tapir_users_password`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tapir_users_password` (
   `user_id` int(4) unsigned NOT NULL DEFAULT '0',
   `password_storage` int(1) unsigned NOT NULL DEFAULT '0',
@@ -3053,7 +2321,6 @@ CREATE TABLE `tapir_users_password` (
   CONSTRAINT `0_512` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -3064,4 +2331,3 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-21 10:44:33

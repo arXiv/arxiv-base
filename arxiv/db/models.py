@@ -122,6 +122,8 @@ class AdminLog(Base):
     document_id: Mapped[Optional[int]] = mapped_column(Integer)
     submission_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     notify: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    old_created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
 
     arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship(
         "SubmissionCategoryProposal", foreign_keys="[SubmissionCategoryProposal.proposal_comment_id]", back_populates="proposal_comment"
@@ -1057,6 +1059,9 @@ class SubmissionFlag(Base):
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_flag")
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_flag")
     flag_pdf_opened: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_done: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_done_cleared: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_viewed: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
 
 
 class SubmissionHoldReason(Base):
@@ -1183,6 +1188,7 @@ class Submission(Base):
     data_needed: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     data_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     metadata_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    preflight: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     data_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     metadata_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     arXiv_pilot_files: Mapped[List["PilotFile"]] = relationship("PilotFile", back_populates="submission")
@@ -2270,8 +2276,8 @@ class CheckResults(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     ok: Mapped[int] = mapped_column(Integer, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
-    message: Mapped[Optional[str]] = mapped_column(String(40))
-    data: Mapped[Optional[str]] = mapped_column(String(2000))
+    message: Mapped[Optional[str]] = mapped_column(String(200))
+    data: Mapped[Optional[str]] = mapped_column(Text)
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
 
     check: Mapped["Checks"] = relationship("Checks", back_populates="arXiv_check_results")
