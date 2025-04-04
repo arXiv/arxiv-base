@@ -57,6 +57,7 @@ from pydantic import ConfigDict
 from . import domain
 from ..db.models import TapirPolicyClass
 from .auth import scopes
+from ..auth.domain import Session as ArxivSession
 
 def get_roles(realm_access: dict) -> Tuple[str, Any]:
     return 'roles', realm_access['roles']
@@ -222,6 +223,13 @@ class ArxivUserClaims:
     def client_ip4v(self) -> str:
         return self._claims.get('client_ipv4', '')
 
+    @property
+    def tapir_session_id(self) -> int | None:
+        return self._claims.get('ts_id', None)
+
+    @tapir_session_id.setter
+    def tapir_session_id(self, ts_id: int):
+        self._claims['ts_id'] = ts_id
 
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
@@ -358,7 +366,7 @@ class ArxivUserClaims:
                 scopes = user_scopes,
             )
 
-            session_id = self.session_id if self.session_id else "no-session-id"
+            session_id = self.tapir_session_id if self.tapir_session_id else "no-session-id"
             self._domain_session = domain.Session(
                 session_id = session_id,
                 start_time = self.issued_at.isoformat(),
@@ -371,4 +379,10 @@ class ArxivUserClaims:
                 nonce = self.id_token # : Optional[str] = None
             )
         return self._domain_session
+
+
+    def set_tapir_session(self, _tapir_cookie: str, tapir_session: ArxivSession):
+        self.tapir_session_id = tapir_session.session_id
+
     pass
+
