@@ -8,7 +8,7 @@ jobs:
   post-comment:
     runs-on: ubuntu-latest
     steps:
-      - name Warning comment on pr
+      - name: Warning comment on pr
         uses: actions/github-script@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
