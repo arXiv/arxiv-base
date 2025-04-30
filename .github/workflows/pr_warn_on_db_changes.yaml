@@ -1,0 +1,23 @@
+name: Warn on changes to DB files
+on:
+  pull_request:
+    paths:
+      - 'arxiv/db/**'
+
+jobs:
+  post-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name Warning comment on pr
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+            issue_number: ${{ github.event.number }},
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '[!WARNGING] **Changes to the db files should be done using code generation tools.** See [source repo](https://github.com/<owner>/<repo>/arxiv/db/).'
+          })
+
+      
