@@ -2,6 +2,25 @@
 
 **DO NOT EDIT db/models.py.**
 
+## How to generate
+
+TODO Tai, please put in specific steps to generated all auto generated files from the production db.
+It it should not use make.
+
+    cd arxiv-base
+    python -v
+    # 3.11
+    python -m venv .venv
+    . .venv/bin/activate
+    pip install poetry
+    poetry install
+
+    python development/db_codegen.
+
+## Overiew
+
+TODO
+
 ## Ingredients
 
 * MySQL database access in order to get the database schema from

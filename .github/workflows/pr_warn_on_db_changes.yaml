@@ -17,7 +17,7 @@ jobs:
             issue_number: ${{ github.event.number }},
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: '[!WARNGING] **Changes to the db files should be done using code generation tools.** See [source repo](https://github.com/<owner>/<repo>/arxiv/db/).'
+            body: '[!WARNGING] **Changes to the db files should be done using code generation tools.** See [](https://github.com/<owner>/<repo>/arxiv/development/README.md#How-to-generate).'
           })
 
       
