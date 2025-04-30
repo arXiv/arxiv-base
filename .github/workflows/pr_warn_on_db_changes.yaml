@@ -18,7 +18,7 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: ':warning: :warning: :warning:\n'+
-            '### Do not manually change the db files!**\n\n'+
+            '### Do not manually change the db files!\n\n'+
             'Changes to the db files must be done using code generation tools.\n\n'+
             'Only accept this PR if the changes to the file under arxiv/db were done with the code gen tools or are unrelated to the db schema. '+
             'See [How to generate](https://github.com/arxiv/arxiv-base/arxiv/development/README.md#How-to-generate).\n\n'+
