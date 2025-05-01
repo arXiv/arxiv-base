@@ -2,10 +2,30 @@
 
 **DO NOT EDIT db/models.py.**
 
-## How to generate
+## How to generate db/models.py from prod
 
-TODO Tai, please put in specific steps to generated all auto generated files from the production db.
-It it should not use make.
+You should unload the latest schema from the production database.
+There is a shell script for this as development/dump-schema.sh
+
+Assuming you have access to the replica with the cloud sql proxy,
+
+    /usr/local/bin/cloud-sql-proxy --address 0.0.0.0 --port 2021 arxiv-production:us-central1:arxiv-production-rep9 > /dev/null 2>&1 &
+    
+Have a read only database password in `~/.arxiv/arxvi-db-read-only-password` so that
+the shell script to unload schema works.Then you run
+
+    ./dump-schema.sh
+
+This creates a SQL schema dump "arxiv_db_schema.sql". Compare this with `arxiv-base/arxiv/db/arxiv_db_schema.sql`.
+It is strongly recmmended to comment out `SET @@GLOBAL.GTID_PURGED=` line in it before checking in.
+It would look like:
+
+    -- SET @@GLOBAL.GTID_PURGED='2d19f914-b050-11e7-95e6-005056a34791:1-572482257';
+
+Once it's done, move the .sql to `arxiv-base/arxiv/db` if the schema is changed.
+If they are the same, you may not need to update the db/models.py.
+Run this in arxiv-base directory.
+
 
     cd arxiv-base
     python -v
@@ -14,12 +34,13 @@ It it should not use make.
     . .venv/bin/activate
     pip install poetry
     poetry install
-
     python development/db_codegen.
+
 
 ## Overiew
 
-TODO
+See page 7 of presentation.
+https://docs.google.com/presentation/d/14uWeVSOTUUm186KIyhMi-TiXvDS-KzLza93LJbyv0gc/edit?slide=id.gc6f9e470d_0_24#slide=id.gc6f9e470d_0_24
 
 ## Ingredients
 
