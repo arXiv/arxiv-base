@@ -164,6 +164,65 @@ This is where the latest table def is replaced.
 Generally, you don't need any special set-up other than running MySQL/arxiv database.
 
 
+## FAQ
+
+Q:
+After update, sqlite3 based test failed. And error looks like this.
+
+    self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x7f1708d218d0>, cursor = <sqlite3.Cursor object at 0x7f1708d3e640>
+    statement = '\nCREATE TABLE "arXiv_admin_log" (\n\tid INTEGER NOT NULL, \n\tlogtime VARCHAR(24), \n\tcreated DATETIME DEFAULT CURR...NULL, \n\tupdated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (id)\n)\n\n'
+    parameters = (), context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x7f1708ee8710>
+    
+        def do_execute(self, cursor, statement, parameters, context=None):
+    >       cursor.execute(statement, parameters)
+    E       sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) near "ON": syntax error
+    E       [SQL: 
+    E       CREATE TABLE "arXiv_admin_log" (
+    E               id INTEGER NOT NULL, 
+    E               logtime VARCHAR(24), 
+    E               created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+    E               paper_id VARCHAR(20), 
+    E               username VARCHAR(20), 
+    E               host VARCHAR(64), 
+    E               program VARCHAR(20), 
+    E               command VARCHAR(20), 
+    E               logtext TEXT, 
+    E               document_id INTEGER, 
+    E               submission_id INTEGER, 
+    E               notify INTEGER, 
+    E               old_created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+    E               updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, 
+    E               PRIMARY KEY (id)
+    E       )
+    E       
+    E       ]
+    E       (Background on this error at: https://sqlalche.me/e/20/e3q8)
+    
+    ../../.pyenv/versions/3.11.4/envs/base/lib/python3.11/site-packages/sqlalchemy/engine/default.py:942: OperationalError
+
+
+A: The error indicates (sqlite3.OperationalError) near "ON": syntax error so
+
+    E               updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, 
+
+Failed. Looking at the generated models.py, the offending column definition is
+
+        updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+
+which came from the prod db schema. The column definition is specific to MySQL and does not work with sqlite3.
+In other word, you need to override the RHS of updated. in `arxiv/db/arxiv-db-metadata-yaml`, add the RHS of updated. In this case,
+you want to have the default and on-update, set to the current timestamp.
+
+    arXiv_admin_log:
+      class_name: AdminLog
+      columns:
+        updated: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))"
+    
+In short, the sqlacodegen is NOT capable of understanding how to generalize the MySQL construct of setting timestamp to the `updated` column.
+This works fine for MySQL but we never create db schema from Python model, this part is meaningless. It only matters to sqlite3 tests.
+(and therefore, with missing charset of table, sqlite3 tests do not detect charset inconsitent joins, etc.)
+
+
 ## Helpers
 
 `extract_class_n_table.py` parses a model python file and prints out the table and class name map. 
