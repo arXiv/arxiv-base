@@ -123,7 +123,7 @@ class AdminLog(Base):
     submission_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     notify: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     old_created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"), server_onupdate=text("CURRENT_TIMESTAMP"))
 
     arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship(
         "SubmissionCategoryProposal", foreign_keys="[SubmissionCategoryProposal.proposal_comment_id]", back_populates="proposal_comment"

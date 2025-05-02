@@ -40,6 +40,9 @@ Subscription_UniversalInstitutionIP:
 
 arXiv_admin_log:
   class_name: AdminLog
+  columns:
+    updated: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))"
+  
 arXiv_admin_metadata:
   class_name: AdminMetadata
   table_args:
