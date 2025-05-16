@@ -203,13 +203,16 @@ def long_word_caps(s: str) -> bool:
 def smart_starts_with_lowercase_check(s: str) -> bool:
     """
     Detect titles which start with a lower case char, eg "bad title"
-    but do not reject "eSpeak: A New World"
+    but do not reject
+    "eSpeak: A New World",
+    "tugEMM: A New TUG",
+    or "p-Means"
     """
 
     if len(s) < 1:
         return False
     if re.match( "[a-z]", s):
-        if re.match( "[a-z][A-Z][a-zA-Z]*: [A-Z]", s):
+        if re.match( "[a-z][a-z]*[A-Z][a-zA-Z]*: [A-Z]", s):
             return False
         else:
             return True

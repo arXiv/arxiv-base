@@ -26,6 +26,7 @@ from arxiv.metadata.metacheck import MetadataCheckReport
 from arxiv.metadata.metacheck import combine_dispositions
 from arxiv.metadata.metacheck import contains_bad_encoding
 from arxiv.metadata.metacheck import long_word_caps
+from arxiv.metadata.metacheck import smart_starts_with_lowercase_check
 
 ############################################################
 TITLE = FieldName.TITLE
@@ -506,6 +507,19 @@ def test_unbalanced_brackets(s):
 
 ############################################################
 #
+
+def test_smart_lowercase_check():
+    assert( smart_starts_with_lowercase_check("book") )
+    assert( not smart_starts_with_lowercase_check("Book") )
+    assert( not smart_starts_with_lowercase_check("BOOK") )
+    assert( not smart_starts_with_lowercase_check("McBOOK") )    
+    assert( not smart_starts_with_lowercase_check("1234") )
+    assert( not smart_starts_with_lowercase_check("eSpeak: A new world") )
+    assert( smart_starts_with_lowercase_check("eSpeak") )
+    # https://arxiv.org/abs/2412.17966
+    assert( not smart_starts_with_lowercase_check("tuGEMM: Temporal Unary GEMM Architecture" ) )
+    assert( smart_starts_with_lowercase_check("tugEMM") )
+    assert( smart_starts_with_lowercase_check("tugEMM: 2 Tugs") )
 
 def test_long_word_caps():
     assert( not long_word_caps("HOMESTAKE") )
