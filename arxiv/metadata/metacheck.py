@@ -186,22 +186,17 @@ def long_word_caps(s: str) -> bool:
     two or more words which are
     * at least 6 characters long,
     * in all caps,
-    * contain at least one capitalized letter (not digits or punctuation!), 
     * and which are not in our list of KNOWN_WORDS_IN_ALL_CAPS.
     """
     num_matches = 0
     for word in s.split():
         if len(word) >= 6 and \
-           word.upper() == word and \
-           word.lower() != word and \
+           re.match( "^[A-Z]*$", word ) and \
            word not in KNOWN_WORDS_IN_ALL_CAPS:
             num_matches += 1
         #
     #
     return (num_matches > 1)
-
-# Test cases (elsewhere):
-# assert( long_word_caps("abc") )
 
 ############################################################
 
