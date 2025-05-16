@@ -69,7 +69,7 @@ MIN_CHARS_FOR_LID = 20
 
 ############################################################
 
-def combine_dispositions(d1:Disposition, d2:Disposition) -> Disposition:
+def combine_dispositions(d1: Disposition, d2: Disposition) -> Disposition:
     if d1 == HOLD or d2 == HOLD:
         return HOLD
     elif d1 == WARN or d2 == WARN:
@@ -77,7 +77,7 @@ def combine_dispositions(d1:Disposition, d2:Disposition) -> Disposition:
     else:
         return OK
 
-def contains_outside_math(s1:str, s2:str) -> bool:
+def contains_outside_math(s1: str, s2: str) -> bool:
     """ Looks for s1, outside of TeX math
     Not perfect: fails to find xyzzy in $math$ xyzzy $$more math$$.
     """
@@ -199,6 +199,9 @@ def long_word_caps(s: str) -> bool:
         #
     #
     return (num_matches > 1)
+
+# Test cases (elsewhere):
+# assert( long_word_caps("abc") )
 
 ############################################################
 
