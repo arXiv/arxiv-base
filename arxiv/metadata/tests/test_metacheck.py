@@ -97,7 +97,10 @@ TITLE_TESTS = [
      (WARN, [TOO_SHORT])),
     ('a title with lowercase',
      (WARN, [CONTAINS_BAD_STRING])),
-    ('aTITLE: Not So Lowercase', None),
+    # Fewer than 0.25% of all papers start with a lower-case letter,
+    # but there are some patterns, which we are not checking for:
+    ('aTITLE: Not So Lowercase',
+     (WARN, [CONTAINS_BAD_STRING])),
     # NOTE: we don't check for extra spaces
     # ['  A title with leading space',"Title: leading spaces"],
     # ['A title with trailing space ',"Title: trailing spaces"],
