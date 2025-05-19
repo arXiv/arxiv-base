@@ -89,8 +89,18 @@ def contains_outside_math(s1: str, s2: str) -> bool:
        
 ############################################################
 
-# UTF-8 is either
-# 
+# UTF-8 encoding for non-ASCII characters involves a lead byte plus
+# 1-3 additional bytes. See https://en.wikipedia.org/wiki/UTF-8
+# The first byte is one of:
+# 110xxxyy (signalling 2 bytes)
+# 1110wwww (signalling 3 bytes)
+# or 11110uvv (signalling 4 bytes)
+# and the following bytes are 10yyzzzz
+
+# We "detect" UTF-8 which has been decoded (e.g. as Latin-1)
+# by looking for two high-bit bytes which match this pattern
+# NOTE that this may incorrectly match some real Unicode.
+
 bad_encoding_re = re.compile("[\u00A0-\u00DF][\u0080-\u00BF]+")
 
 def contains_bad_encoding(s: str) -> Optional[str]:
@@ -351,8 +361,8 @@ def check_title(v: str) -> MetadataCheckReport:
     if not all_brackets_balanced(v):
         report.add_complaint( UNBALANCED_BRACKETS )
     #
-    if contains_bad_encoding (v):
-        report.add_complaint( BAD_UNICODE )
+    if s := contains_bad_encoding (v):
+        report.add_complaint( BAD_UNICODE, s )
     #
     # not implemented: titles MAY end with punctuation
     # not implemented: check for arXiv or arXiv:ID
@@ -423,8 +433,8 @@ def check_authors(v: str) -> MetadataCheckReport:
     if ends_with_punctuation(v):
         report.add_complaint( CONTAINS_BAD_STRING, v[-1] )
     #
-    if contains_bad_encoding(v):
-        report.add_complaint( BAD_UNICODE )
+    if s := contains_bad_encoding(v):
+        report.add_complaint( BAD_UNICODE, s )
     #
     
     # Parse authors, check authors names - but not affiliations - for:
@@ -662,8 +672,8 @@ def check_comments(v: str) -> MetadataCheckReport:
     if not all_brackets_balanced(v):
         report.add_complaint( UNBALANCED_BRACKETS )
     #
-    if contains_bad_encoding(v):
-        report.add_complaint( BAD_UNICODE )
+    if s := contains_bad_encoding(v):
+        report.add_complaint( BAD_UNICODE, s )
     #
     # TODO: check that language is English?
     
