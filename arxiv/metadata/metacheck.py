@@ -56,12 +56,12 @@ def complaint2disposition(complaint: Complaint) -> Disposition:
 ############################################################
 # Some constants
 
-MIN_TITLE_LEN = 5               # 
+MIN_TITLE_LEN = 5
 MIN_AUTHORS_LEN = 4             # C LI is possible but not C L ?
-MIN_ABSTRACT_LEN = 5            # 
+MIN_ABSTRACT_LEN = 5
 # No MIN_COMMENTS_LEN
-MIN_REPORT_NUM_LEN = 4          # 
-MIN_JOURNAL_REF_LEN = 5         # 
+MIN_REPORT_NUM_LEN = 4
+MIN_JOURNAL_REF_LEN = 5
 MIN_DOI_LEN = 10                # such as: 10.1234/5678 
 
 # Language identification is pretty fragile, particularly on short abstracts.
@@ -195,13 +195,13 @@ def long_word_caps(s: str) -> bool:
     Returns true (was: a list of long words) if s appears to have
     two or more words which are
     * at least 6 characters long,
-    * in all caps,
+    * in all caps (possibly including internal hyphens),
     * and which are not in our list of KNOWN_WORDS_IN_ALL_CAPS.
     """
     num_matches = 0
     for word in s.split():
         if len(word) >= 6 and \
-           re.match( "^[A-Z]*$", word ) and \
+           re.match( "^[A-Z][A-Z-]*[A-Z]$", word ) and \
            word not in KNOWN_WORDS_IN_ALL_CAPS:
             num_matches += 1
         #
@@ -210,22 +210,16 @@ def long_word_caps(s: str) -> bool:
 
 ############################################################
 
-def smart_starts_with_lowercase_check(s: str) -> bool:
+def starts_with_lowercase(s: str) -> bool:
     """
     Detect titles which start with a lower case char, eg "bad title"
-    but do not reject
-    "eSpeak: A New World",
-    "tugEMM: A New TUG",
-    or "p-Means"
+    Do nothing smart with "k-means", "eSpeak", or "tugEMM".
     """
 
     if len(s) < 1:
         return False
     if re.match( "[a-z]", s):
-        if re.match( "[a-z][a-z]*[A-Z][a-zA-Z]*: [A-Z]", s):
-            return False
-        else:
-            return True
+        return True
     else:
         return False
     #
@@ -325,7 +319,7 @@ def check_title(v: str) -> MetadataCheckReport:
     elif long_word_caps(v):
         report.add_complaint( CONTAINS_BAD_STRING, "excessive capitalization")
     #
-    if smart_starts_with_lowercase_check(v):
+    if starts_with_lowercase(v):
         report.add_complaint( CONTAINS_BAD_STRING, v[0] )
     #
     if re.search( r"\\href{", v):
@@ -481,7 +475,6 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
         name = f"{firstname} {keyname}"
     #
     if firstname == "":
-        # print( author )
         if re.search(r"collaboration", name, re.IGNORECASE) \
            or re.search(r"collaborative", name, re.IGNORECASE) \
            or re.search(r"project", name, re.IGNORECASE) \
@@ -499,7 +492,6 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
         report.add_complaint( EXCESSIVE_CAPITALIZATION, name)
     #
     # Allow "Chandrasekar R" but not "Chandra R."
-    # re.match(r"^[A-Z]$", keyname) or \
     if re.match(r"^[A-Z]\.$", keyname):
         report.add_complaint( CONTAINS_INITIALS, name)
     #
@@ -518,10 +510,7 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
        re.search("[0-9]", suffix):
         report.add_complaint( CONTAINS_BAD_STRING, name)
     #
-    # match A. and A.B. but not 
-    # This may be broken due to the rest of the author name parser
-    # if re.match(r"^II|III|IV|V|VI|VII|VIII$", suffix):
-    #     pass
+    # match A. and A.B. but not IV or other roman numerals
     if re.match(r"^[A-Z]\.$", suffix) or \
        re.match(r"^[A-Z]\.[A-Z]\.$", suffix) or \
        re.match(r"^[A-Z]\.[A-Z]\.[A-Z]\.$", suffix):
@@ -582,8 +571,7 @@ def check_abstract(v: str) -> MetadataCheckReport:
     if looks_like_all_caps(v):
         report.add_complaint( CONTAINS_BAD_STRING, "(capitalization)")
     #
-    # JHY
-    if smart_starts_with_lowercase_check(v):
+    if starts_with_lowercase(v):
         report.add_complaint( CONTAINS_BAD_STRING, f"starts with a lower case letter ({v[0]})" )
     #
     if re.search( r"\\href{", v):
