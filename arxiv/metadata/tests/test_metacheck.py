@@ -24,7 +24,6 @@ from arxiv.metadata import metacheck
 from arxiv.metadata.metacheck import MetadataCheckReport
 
 from arxiv.metadata.metacheck import combine_dispositions
-from arxiv.metadata.metacheck import contains_bad_encoding
 from arxiv.metadata.metacheck import long_word_caps
 
 ############################################################

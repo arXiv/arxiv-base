@@ -101,10 +101,10 @@ def contains_outside_math(s1: str, s2: str) -> bool:
 # by looking for two high-bit bytes which match this pattern
 # NOTE that this may incorrectly match some real Unicode.
 
-bad_encoding_re = re.compile("[\u00A0-\u00DF][\u0080-\u00BF]+")
+utf8_in_latin1_re = re.compile("[\u00A0-\u00DF][\u0080-\u00BF]+")
 
-def contains_bad_encoding(s: str) -> Optional[str]:
-    match = bad_encoding_re.search(s)
+def contains_utf8_in_latin1(s: str) -> Optional[str]:
+    match = utf8_in_latin1_re.search(s)
     if match:
         return match.group(0)
     else:
@@ -355,7 +355,7 @@ def check_title(v: str) -> MetadataCheckReport:
     if not all_brackets_balanced(v):
         report.add_complaint( UNBALANCED_BRACKETS )
     #
-    if s := contains_bad_encoding (v):
+    if s := contains_utf8_in_latin1(v):
         report.add_complaint( BAD_UNICODE, s )
     #
     # not implemented: titles MAY end with punctuation
@@ -427,7 +427,7 @@ def check_authors(v: str) -> MetadataCheckReport:
     if ends_with_punctuation(v):
         report.add_complaint( CONTAINS_BAD_STRING, v[-1] )
     #
-    if s := contains_bad_encoding(v):
+    if s := contains_utf8_in_latin1(v):
         report.add_complaint( BAD_UNICODE, s )
     #
     
@@ -614,7 +614,7 @@ def check_abstract(v: str) -> MetadataCheckReport:
     if language_is_not_english(v):
         report.add_complaint( MUST_BE_ENGLISH )
     #
-    if s := contains_bad_encoding(v):
+    if s := contains_utf8_in_latin1(v):
         report.add_complaint( BAD_UNICODE, s )
     #
     # not implemented: abstract MAY end in punctuation
@@ -660,7 +660,7 @@ def check_comments(v: str) -> MetadataCheckReport:
     if not all_brackets_balanced(v):
         report.add_complaint( UNBALANCED_BRACKETS )
     #
-    if s := contains_bad_encoding(v):
+    if s := contains_utf8_in_latin1(v):
         report.add_complaint( BAD_UNICODE, s )
     #
     # TODO: check that language is English?
