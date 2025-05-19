@@ -302,7 +302,6 @@ def ends_with_punctuation(s: str) -> bool:
 def check_title(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
     if v is None or v == "":
-        # report.add_complaint( HOLD, "Title cannot be empty")
         report.add_complaint( CANNOT_BE_EMPTY )
     elif len(v) < MIN_TITLE_LEN:
         report.add_complaint( TOO_SHORT )
@@ -718,9 +717,7 @@ def check_doi(v: str) -> MetadataCheckReport:
         report.add_complaint( CONTAINS_BAD_STRING, "http:" )
     if re.search( "https:", v ):
         report.add_complaint( CONTAINS_BAD_STRING, "https:" )
-    # if re.search( "doi:", v ):
-    #     report.add_complaint( CONTAINS_BAD_STRING, "doi:" )
-    # Is this right?
+    # TODO: should we look for "doi:"?
     if re.search( "arxiv-doi", v ):
         report.add_complaint( CONTAINS_BAD_STRING, "arxiv-doi" )
     return report
