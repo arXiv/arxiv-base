@@ -55,10 +55,10 @@ adapter is in turn used by :func:`external_url_handler` on demand.
 
 See ARXIVNG-2085.
 """
-
+import os
 import sys
-from typing import Dict, Any, List
-from urllib.parse import parse_qs
+from typing import Dict, Any, List, Optional
+from urllib.parse import parse_qs, urlparse
 from werkzeug.routing import Map, Rule, BuildError, MapAdapter
 from flask import current_app, g, Flask
 
@@ -77,6 +77,25 @@ def build_adapter(app: Flask) -> MapAdapter:
     """Build a :class:`.MapAdapter` from configured URLs."""
     # Get the base URLs (configured in this package).
     configured_urls = {url[0]: url for url in base_config.URLS}
+
+
+    # In order to provide something close to the config_url behavior, this will
+    # look for ARXIV_{endpoint}_URL variables in the environ, and update `URLS`
+    # accordingly.
+    for key, value in os.environ.items():
+        if key.startswith("ARXIV_") and key.endswith("_URL"):
+            endpoint = "_".join(key.split("_")[1:-1]).lower()
+            o = urlparse(value)
+            if not o.netloc:  # Doesn't raise an exception.
+                continue
+            i: Optional[int]
+            try:
+                i = list(zip(*configured_urls))[0].index(endpoint)
+            except ValueError:
+                i = None
+            if i is not None:
+                configured_urls[i] = (endpoint, o.path, o.netloc)
+
     # Privilege ARXIV_URLs set on the application config.
     current_urls = app.config.get('URLS', [])
     if current_urls:

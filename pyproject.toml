@@ -14,11 +14,16 @@ include = [
    "arxiv/base/static/*",
    "arxiv/base/templates/*",
    "arxiv/mail/templates/*",
+   "development/test-data/*",
+   "development/*",
+]
+exclude = [
+   "development/sqlacodegen/*",
 ]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pydantic = "==1.10.*"
+pydantic = "^2.8.2"
 flask = "3.0.*"
 pytz = "*"
 wtforms = "*"
@@ -45,6 +50,7 @@ pyjwt = "^2.9.0"
 redis = "==2.10.6"
 redis-py-cluster = "==1.3.6"
 setuptools = "^70.0.0"
+pydantic-settings = "^2.5.2"
 jwcrypto = "^1.5.6"
 ruamel-yaml = "^0.18.6"
 gcld3 = { version = "^3.0.13", optional = true }
