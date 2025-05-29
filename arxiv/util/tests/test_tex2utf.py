@@ -94,7 +94,7 @@ class TextTex2Utf(TestCase):
         test_str = '\\alpha{\\beta{\\gamma\\macro}'
         utf_out = tex2utf(test_str)
         self.assertEqual(utf_out, 'α{β{γ\\macro}')
-
+        
         # use "\ " as textlet delimiter
         test_str = 'foo \\alpha\\ bar'
         utf_out = tex2utf(test_str)
