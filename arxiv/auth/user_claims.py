@@ -47,8 +47,10 @@ Keycloak:
 #
 
 import json
-from datetime import timezone
+from datetime import datetime, timezone
 from typing import Any, Optional, List, Tuple
+from pydantic import BaseModel, Field, EmailStr
+
 import jwt
 from datetime import datetime
 from pytz import timezone, UTC
@@ -58,6 +60,31 @@ from . import domain
 from ..db.models import TapirPolicyClass
 from .auth import scopes
 from ..auth.domain import Session as ArxivSession
+
+class ArxivUserClaimsModel(BaseModel):
+    sub: str            # User ID (subject)
+    exp: int            # Expiration
+    iat: int            # Issued at (time)
+    roles: Optional[List[str]] = None
+    email_verified: bool
+    email: str
+
+    acc: Optional[str] = None      # Access token
+    idt: Optional[str] = None      # ID Token
+    refresh: Optional[str] = None  # Refresh tokel
+
+    first_name: str
+    last_name: str
+    username: str
+
+    client_ipv4: Optional[str] = None
+    ts_id: Optional[int] = None    # Tapir session ID
+
+    class Config:
+        extra = "ignore"
+        populate_by_name = True
+        from_attributes = True
+
 
 def get_roles(realm_access: dict) -> Tuple[str, Any]:
     return 'roles', realm_access['roles']
@@ -83,7 +110,7 @@ class ArxivUserClaims:
     """
     arXiv logged in user claims
     """
-    _claims: dict
+    _claims: ArxivUserClaimsModel
 
     # tapir_session_id: str
     # email_verified: bool
@@ -92,44 +119,36 @@ class ArxivUserClaims:
     # name: str
     _domain_session: Optional[domain.Session]
 
-    def __init__(self, claims: dict) -> None:
+    def __init__(self, claims: ArxivUserClaimsModel) -> None:
         """
         IdP token
         """
         self._domain_session = None
-        self._claims = claims.copy()
-        for key in self._claims.keys():
-            self._create_property(key)
+        self._claims = claims.model_copy()
         pass
 
 
-    def _create_property(self, name: str) -> None:
-        if not hasattr(self.__class__, name):
-            def getter(self: "ArxivUserClaims") -> Any:
-                return self._claims.get(name)
-            setattr(self.__class__, name, property(getter))
-
     @property
     def expires_at(self) -> datetime:
-        return datetime.utcfromtimestamp(float(self._claims.get('exp', 0)))
+        return datetime.utcfromtimestamp(float(self._claims.exp))
 
     @property
     def issued_at(self) -> datetime:
-        return datetime.utcfromtimestamp(float(self._claims.get('iat', 0)))
+        return datetime.utcfromtimestamp(float(self._claims.iat))
 
     @property
     def session_id(self) -> Optional[str]:
-        return self._claims.get('sid')
+        return self._claims.sid
 
     @property
     def user_id(self) -> Optional[str]:
-        return self._claims.get('sub')
+        return self._claims.sub
 
     # jwt.encode/decode serialize/deserialize dict, not string so not really needed
     # you should not use this for real. okay for testing
     @property
     def to_arxiv_token_string(self) -> Optional[str]:
-        return json.dumps(self._claims)
+        return json.dumps(self._claims.model_dump())
 
     @property
     def is_tex_pro(self) -> bool:
@@ -170,70 +189,70 @@ class ArxivUserClaims:
     @property
     def classic_capability_code(self) -> int:
         for policy_class in TapirPolicyClass.POLICY_CLASSES:
-            if policy_class["name"] in self._roles:
+            if policy_class["name"] in self._claims.roles:
                 return policy_class["class_id"]
         return 0
 
     @property
     def _roles(self) -> List[str]:
-        return self._claims.get('roles', [])
+        return self._claims.roles
 
     @property
     def id_token(self) -> str:
         """
         Keycloak id_token
         """
-        return self._claims.get('idt', "")
+        return self._claims.idt
 
     @property
     def access_token(self) -> str:
         """
         Keycloak access (bearer) token
         """
-        return self._claims.get('acc', '')
+        return self._claims.acc
 
     @property
     def refresh_token(self) -> str:
         """
         Keycloak refresh token
         """
-        return self._claims.get('refresh', '')
+        return self._claims.refresh
 
     @property
     def email(self) -> str:
-        return self._claims.get('email', '')
+        return self._claims.email
 
     @property
     def email_verified(self) -> bool:
-        return self._claims.get('email_verified', False)
+        return self._claims.email_verified
 
     @property
     def username(self) -> str:
-        return self._claims.get('username', '')
+        return self._claims.username
 
     @property
     def first_name(self) -> str:
-        return self._claims.get('first_name', '')
+        return self._claims.first_name
 
     @property
     def last_name(self) -> str:
-        return self._claims.get('last_name', '')
+        return self._claims.last_name
 
     @property
     def client_ip4v(self) -> str:
-        return self._claims.get('client_ipv4', '')
+        return self._claims.client_ipv4 if self._claims.client_ipv4 else "0.0.0.0"
 
     @property
     def tapir_session_id(self) -> int | None:
-        return self._claims.get('ts_id', None)
+        return self._claims.ts_id
 
     @tapir_session_id.setter
     def tapir_session_id(self, ts_id: int):
-        self._claims['ts_id'] = ts_id
+        self._claims.ts_id = ts_id
 
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
-        return cls(json.loads(token))
+        return cls(ArxivUserClaimsModel.model_validate(json.loads(token)))
 
     @classmethod
     def from_keycloak_claims(cls,
@@ -263,7 +282,7 @@ class ArxivUserClaims:
                 claims[mapper] = value
         if client_ipv4:
             claims['client_ipv4'] = client_ipv4
-        return cls(claims)
+        return cls(ArxivUserClaimsModel.model_validate(claims))
 
     def is_expired(self, when: datetime | None = None) -> bool:
         """
@@ -282,7 +301,7 @@ class ArxivUserClaims:
 
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
         """packing user claims"""
-        claims = self._claims.copy()
+        claims = self._claims.model_dump()
         # you probably forgot to add "openid" scope in Keycloak if id_token is not in it.
         if 'idt' in claims:
             del claims['idt']
@@ -335,7 +354,7 @@ class ArxivUserClaims:
         """
         payload = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
         tokens.update(payload)
-        return cls(tokens)
+        return cls(ArxivUserClaimsModel.model_validate(tokens))
 
 
     def update_keycloak_access_token(self, updates: dict) -> None:
@@ -385,4 +404,3 @@ class ArxivUserClaims:
         self.tapir_session_id = tapir_session.session_id
 
     pass
-

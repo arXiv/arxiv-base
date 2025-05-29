@@ -11,7 +11,8 @@ from jwt.algorithms import RSAAlgorithm, RSAPublicKey
 import logging
 from arxiv.base import logging as arxiv_logging
 
-from ..user_claims import ArxivUserClaims
+from ..user_claims import ArxivUserClaims, ArxivUserClaimsModel
+
 
 class ArxivOidcIdpClient:
     """arXiv OpenID Connect IdP client
@@ -197,6 +198,7 @@ class ArxivOidcIdpClient:
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
             return token_response.json()
+
         except requests.exceptions.RequestException:
             return None
 
