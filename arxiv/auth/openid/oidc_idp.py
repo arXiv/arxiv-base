@@ -11,7 +11,8 @@ from jwt.algorithms import RSAAlgorithm, RSAPublicKey
 import logging
 from arxiv.base import logging as arxiv_logging
 
-from ..user_claims import ArxivUserClaims
+from ..user_claims import ArxivUserClaims, ArxivUserClaimsModel
+
 
 class ArxivOidcIdpClient:
     """arXiv OpenID Connect IdP client
@@ -197,6 +198,7 @@ class ArxivOidcIdpClient:
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
             return token_response.json()
+
         except requests.exceptions.RequestException:
             return None
 
@@ -253,7 +255,8 @@ class ArxivOidcIdpClient:
 
     def to_arxiv_user_claims(self,
                              idp_token: Optional[dict] = None,
-                             kc_cliams: Optional[dict] = None) -> ArxivUserClaims:
+                             kc_cliams: Optional[dict] = None,
+                             client_ipv4: Optional[str] = None) -> ArxivUserClaims:
         """
         Given the IdP's access token claims, make Arxiv user claims.
 
@@ -269,15 +272,21 @@ class ArxivOidcIdpClient:
             This is the contents of (unpacked) access token. IdP signs it with the private
             key, and the value is verified using the published public cert.
 
+        client_ipv4: str | None
+            Client's IPv4 address if available
+
+        NOTE:
+            So this means there are two copies of access token. Unfortunate, but unpacking
+            every time can be costly.
         """
         if idp_token is None:
             idp_token = {}
         if kc_cliams is None:
             kc_cliams = {}
-        claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams)
+        claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams, client_ipv4=client_ipv4)
         return claims
 
-    def from_code_to_user_claims(self, code: str) -> ArxivUserClaims | None:
+    def from_code_to_user_claims(self, code: str, client_ipv4: Optional[str] = None) -> ArxivUserClaims | None:
         """
         Put it all together
 
@@ -289,6 +298,8 @@ class ArxivOidcIdpClient:
         ----------
         code : str
             The code you get in the /callback
+        client_ipv4 : str  | None
+            This is the client IP address of the IdP
 
         Returns
         -------
@@ -313,7 +324,7 @@ class ArxivOidcIdpClient:
         if not idp_claims:
             return None
 
-        return self.to_arxiv_user_claims(idp_token, idp_claims)
+        return self.to_arxiv_user_claims(idp_token, idp_claims, client_ipv4)
 
     def logout_user(self, user: ArxivUserClaims) -> bool:
         """With user's access token, logout user.
