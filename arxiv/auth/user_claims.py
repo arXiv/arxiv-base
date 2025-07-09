@@ -47,14 +47,13 @@ Keycloak:
 #
 
 import json
-from datetime import datetime, timezone
+from datetime import timezone
 from typing import Any, Optional, List, Tuple
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel
 
 import jwt
 from datetime import datetime
-from pytz import timezone, UTC
-from pydantic import ConfigDict
+from pytz import timezone
 
 from . import domain
 from ..db.models import TapirPolicyClass
@@ -385,10 +384,10 @@ class ArxivUserClaims:
                 scopes = user_scopes,
             )
 
-            session_id = self.tapir_session_id if self.tapir_session_id else "no-session-id"
+            session_id = str(self.tapir_session_id) if self.tapir_session_id else "no-session-id"
             self._domain_session = domain.Session(
                 session_id = session_id,
-                start_time = self.issued_at.isoformat(),
+                start_time = self.issued_at,
                 user = user,
                 client = None,
                 end_time = None,   # The ISO-8601 datetime when the session ended.
