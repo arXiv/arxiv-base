@@ -195,5 +195,7 @@ class Auth(object):
         This is useful to get an idea of what is going on with auth.
         """
         logger.setLevel(logging.DEBUG)
-        legacy.sessions.logger.setLevel(logging.DEBUG)
-        legacy.authenticate.logger.setLevel(logging.DEBUG)
+        from ..legacy.sessions import logger as legacy_sessions_logger
+        legacy_sessions_logger.setLevel(logging.DEBUG)
+        from ..legacy.authenticate import logger as legacy_authenticate_logger
+        legacy_authenticate_logger.setLevel(logging.DEBUG)
