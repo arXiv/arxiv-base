@@ -2269,6 +2269,46 @@ class CheckResponses(Base):
       return f"{ type(self).__name__ }/{ self.check_response_id };result={self.check_result_id};ok={ self.ok}"
 
     
+class flagged_user_comment(Base):
+    __tablename__ = 'flagged_user_comment'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+class flagged_user_detail(Base):
+    __tablename__ = 'flagged_user_detail'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    created: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    updated: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+    creator_user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True)
+    flagged_user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True)
+    active: Mapped[Optional[int]] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    all_categories: Mapped[Optional[int]] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    flagged_user_comment_id: Mapped[Optional[int]] = mapped_column(INTEGER(11))
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+    creator_user: Mapped['TapirUser'] = relationship('TapirUser', foreign_keys=[creator_user_id], back_populates='flagged_user_detail')
+    flagged_user: Mapped['TapirUser'] = relationship('TapirUser', foreign_keys=[flagged_user_id], back_populates='flagged_user_detail_')
+    flagged_user_detail_category_relation: Mapped[List['flagged_user_detail_category_relation']] = relationship('flagged_user_detail_category_relation', back_populates='flagged_user_detail_')
+
+
+class flagged_user_detail_category_relation(Base):
+    __tablename__ = 'flagged_user_detail_category_relation'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    flagged_user_detail_id: Mapped[int] = mapped_column(ForeignKey('flagged_user_detail.id'), primary_key=True, nullable=False)
+    created: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    category: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+
+    flagged_user_detail_: Mapped['flagged_user_detail'] = relationship('flagged_user_detail', back_populates='flagged_user_detail_category_relation')
+
+
+
 def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]) -> Tuple[Engine, Optional[Engine]]:
     session_factory.configure(binds={
         Base: classic_engine,

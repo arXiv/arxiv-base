@@ -519,7 +519,7 @@ def run_mysql_container(port: int):
         logging.error(f"Unexpected error: {e}")
 
 
-def load_sql_file(sql_file):
+def load_sql_file(sql_file, ssl_enabled=True):
     """Load a sql file to mysql
 
     If you see
@@ -546,6 +546,7 @@ def main() -> None:
 
     # This is the default mysql port. If you are using a native MySQL, that's fine. If you don't want to install
     # mysql, it uses the MySQL docker.
+    ssl_enabled = False
     mysql_port = 3306
 
     arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -563,6 +564,7 @@ def main() -> None:
             if is_port_open("127.0.0.1", mysql_port):
                 break
             time.sleep(1)
+
 
     # Load the arxiv_db_schema.sql to the database.
     load_sql_file(os.path.join(arxiv_dir, "db/arxiv_db_schema.sql"))

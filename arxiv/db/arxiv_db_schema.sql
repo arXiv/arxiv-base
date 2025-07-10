@@ -156,7 +156,8 @@ DROP TABLE IF EXISTS `arXiv_archive_group`;
 CREATE TABLE `arXiv_archive_group` (
   `archive_id` varchar(16) NOT NULL DEFAULT '',
   `group_id` varchar(16) NOT NULL DEFAULT '',
-  PRIMARY KEY (`archive_id`,`group_id`)
+  PRIMARY KEY (`archive_id`,`group_id`),
+  UNIQUE KEY `arXiv_archive_group_idx_archiveid` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `arXiv_archives`;
@@ -1728,6 +1729,48 @@ CREATE TABLE `demographics_backup` (
   `flag_no_upload` int(1) unsigned NOT NULL DEFAULT '0',
   `flag_no_endorse` int(1) unsigned NOT NULL DEFAULT '0',
   `veto_status` enum('ok','no-endorse','no-upload') DEFAULT 'ok'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `flagged_user_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flagged_user_comment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `action` varchar(32) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `flagged_user_detail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flagged_user_detail` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `active` tinyint(1) DEFAULT '1',
+  `creator_user_id` int(10) unsigned NOT NULL,
+  `flagged_user_id` int(10) unsigned NOT NULL,
+  `all_categories` tinyint(1) DEFAULT '1',
+  `flagged_user_comment_id` int(11) DEFAULT NULL,
+  `action` varchar(32) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `creator_user_id` (`creator_user_id`),
+  KEY `flagged_user_id` (`flagged_user_id`),
+  CONSTRAINT `flagged_user_detail_ibfk_1` FOREIGN KEY (`creator_user_id`) REFERENCES `tapir_users` (`user_id`),
+  CONSTRAINT `flagged_user_detail_ibfk_2` FOREIGN KEY (`flagged_user_id`) REFERENCES `tapir_users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `flagged_user_detail_category_relation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `flagged_user_detail_category_relation` (
+  `flagged_user_detail_id` int(11) NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `category` varchar(32) NOT NULL,
+  PRIMARY KEY (`flagged_user_detail_id`,`category`),
+  CONSTRAINT `flagged_user_detail_category_relation_ibfk_1` FOREIGN KEY (`flagged_user_detail_id`) REFERENCES `flagged_user_detail` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `membership_institutions`;

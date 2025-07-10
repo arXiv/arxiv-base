@@ -200,7 +200,7 @@ class ArchiveGroup(Base):
     __tablename__ = "arXiv_archive_group"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
+    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, unique=True, index=True, server_default=FetchedValue())
     group_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
 
 
@@ -1959,6 +1959,8 @@ class TapirUser(Base):
     arXiv_check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="user")
     owned_papers: Mapped[List["PaperOwner"]] = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="owner")
     demographics = relationship("Demographic", foreign_keys="[Demographic.user_id]", uselist=False, back_populates="user")
+    flagged_user_detail: Mapped[List["flagged_user_detail"]] = relationship("flagged_user_detail", foreign_keys="[flagged_user_detail.creator_user_id]", back_populates="creator_user")
+    flagged_user_detail_: Mapped[List["flagged_user_detail"]] = relationship("flagged_user_detail", foreign_keys="[flagged_user_detail.flagged_user_id]", back_populates="flagged_user")
 
 
 class AuthorIds(Base):
@@ -2312,6 +2314,46 @@ class CheckResponses(Base):
 
     def __repr__(self):
         return f"{ type(self).__name__ }/{ self.check_response_id };result={self.check_result_id};ok={ self.ok}"
+
+
+class flagged_user_comment(Base):
+    __tablename__ = "flagged_user_comment"
+    __table_args__ = {"mysql_charset": "latin1"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+
+class flagged_user_detail(Base):
+    __tablename__ = "flagged_user_detail"
+    __table_args__ = {"mysql_charset": "latin1"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    creator_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
+    flagged_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
+    active: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'1'"))
+    all_categories: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'1'"))
+    flagged_user_comment_id: Mapped[Optional[int]] = mapped_column(Integer)
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+    creator_user: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[creator_user_id], back_populates="flagged_user_detail")
+    flagged_user: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[flagged_user_id], back_populates="flagged_user_detail_")
+    flagged_user_detail_category_relation: Mapped[List["flagged_user_detail_category_relation"]] = relationship("flagged_user_detail_category_relation", back_populates="flagged_user_detail_")
+
+
+class flagged_user_detail_category_relation(Base):
+    __tablename__ = "flagged_user_detail_category_relation"
+    __table_args__ = {"mysql_charset": "latin1"}
+
+    flagged_user_detail_id: Mapped[int] = mapped_column(ForeignKey("flagged_user_detail.id"), primary_key=True, nullable=False)
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    category: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+
+    flagged_user_detail_: Mapped["flagged_user_detail"] = relationship("flagged_user_detail", back_populates="flagged_user_detail_category_relation")
 
 
 def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]) -> Tuple[Engine, Optional[Engine]]:
