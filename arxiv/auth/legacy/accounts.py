@@ -259,7 +259,6 @@ def _create(user: domain.User, password: str, ip: str, remote_host: str) \
             last_name=user.name.surname,
             suffix_name=user.name.suffix
         ))
-    print (data)
 
     # Main user entry.
     db_user = TapirUser(**data)
@@ -286,5 +285,4 @@ def _create(user: domain.User, password: str, ip: str, remote_host: str) \
     )
     Session.add(db_pass)
     from sqlalchemy import select
-    print(Session.execute(select(TapirUser.email)).all())
     return db_user, db_nick, db_profile
