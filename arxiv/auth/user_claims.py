@@ -64,6 +64,7 @@ class ArxivUserClaimsModel(BaseModel):
     sub: str            # User ID (subject)
     exp: int            # Expiration
     iat: int            # Issued at (time)
+    sid: str            # Keycloak session ID
     roles: Optional[List[str]] = None
     email_verified: bool
     email: str
@@ -93,6 +94,7 @@ claims_map = {
     'sub': 'sub',
     'exp': 'exp',
     'iat': 'iat',
+    'sid': 'sid',
     'realm_access': get_roles,
     'email_verified': 'email_verified',
     'email': 'email',
@@ -129,18 +131,22 @@ class ArxivUserClaims:
 
     @property
     def expires_at(self) -> datetime:
-        return datetime.utcfromtimestamp(float(self._claims.exp))
+        """Keycloak token expiration time"""
+        return datetime.fromtimestamp(float(self._claims.exp), tz=timezone.utc)
 
     @property
     def issued_at(self) -> datetime:
-        return datetime.utcfromtimestamp(float(self._claims.iat))
+        """Keycloak token issue timestamp"""
+        return datetime.fromtimestamp(float(self._claims.iat), tz=timezone.utc)
 
     @property
-    def session_id(self) -> Optional[str]:
+    def kc_session_id(self) -> Optional[str]:
+        """Keycloak session ID"""
         return self._claims.sid
 
     @property
     def user_id(self) -> Optional[str]:
+        """Keycloak/Tapir user ID"""
         return self._claims.sub
 
     # jwt.encode/decode serialize/deserialize dict, not string so not really needed
@@ -187,8 +193,9 @@ class ArxivUserClaims:
 
     @property
     def classic_capability_code(self) -> int:
+        roles = self._claims.roles if self._claims.roles else []
         for policy_class in TapirPolicyClass.POLICY_CLASSES:
-            if policy_class["name"] in self._claims.roles:
+            if policy_class["name"] in roles:
                 return policy_class["class_id"]
         return 0
 
@@ -296,7 +303,7 @@ class ArxivUserClaims:
         Add a value to the claims. Somewhat special so use it with caution
         """
         self._claims[tag] = value
-        self._create_property(tag)
+
 
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
         """packing user claims"""
