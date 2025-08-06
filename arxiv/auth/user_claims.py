@@ -47,14 +47,10 @@ Keycloak:
 #
 
 import json
-from datetime import timezone
+from datetime import datetime, timezone
 from typing import Any, Optional, List, Tuple
 from pydantic import BaseModel
-
 import jwt
-from datetime import datetime
-from pytz import timezone
-
 from . import domain
 from ..db.models import TapirPolicyClass
 from .auth import scopes
@@ -201,7 +197,7 @@ class ArxivUserClaims:
 
     @property
     def _roles(self) -> List[str]:
-        return self._claims.roles
+        return self._claims.roles if self._claims.roles else []
 
     @property
     def id_token(self) -> str:
@@ -253,8 +249,8 @@ class ArxivUserClaims:
         return self._claims.ts_id
 
     @tapir_session_id.setter
-    def tapir_session_id(self, ts_id: int):
-        self._claims.ts_id = ts_id
+    def tapir_session_id(self, ts_id: int) -> None:
+        setattr(self._claims, 'ts_id', ts_id)
 
     @classmethod
     def from_arxiv_token_string(cls, token: str) -> 'ArxivUserClaims':
@@ -302,7 +298,7 @@ class ArxivUserClaims:
         """
         Add a value to the claims. Somewhat special so use it with caution
         """
-        self._claims[tag] = value
+        setattr(self._claims, tag, value)
 
 
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
@@ -364,7 +360,7 @@ class ArxivUserClaims:
 
 
     def update_keycloak_access_token(self, updates: dict) -> None:
-        self._claims['acc'] = updates['acc']
+        setattr(self._claims, 'acc', updates['acc'])
         return
 
     @property
@@ -406,7 +402,7 @@ class ArxivUserClaims:
         return self._domain_session
 
 
-    def set_tapir_session(self, _tapir_cookie: str, tapir_session: ArxivSession):
-        self.tapir_session_id = tapir_session.session_id
+    def set_tapir_session(self, _tapir_cookie: str, tapir_session: ArxivSession) -> None:
+        self.tapir_session_id = int(tapir_session.session_id) if tapir_session.session_id else None
 
     pass
