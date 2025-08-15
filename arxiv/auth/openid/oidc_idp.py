@@ -123,8 +123,8 @@ class ArxivOidcIdpClient:
 
     def logout_url(self, user: ArxivUserClaims, redirect_url: str | None = None) -> str:
         url = self._logout_redirect_url if redirect_url is None else redirect_url
-        post_logout = f"&post_logout_redirect_uri={urllib.parse.quote(url)}" if url else ""
-        return self.oidc + f'/logout?id_token_hint={user.id_token}{post_logout}'
+        post_logout = f"post_logout_redirect_uri={urllib.parse.quote(url)}" if url else ""
+        return self.oidc + f'/logout?{post_logout}'
 
     @property
     def login_url(self) -> str:
@@ -326,7 +326,7 @@ class ArxivOidcIdpClient:
 
         return self.to_arxiv_user_claims(idp_token, idp_claims, client_ipv4)
 
-    def logout_user(self, user: ArxivUserClaims) -> bool:
+    def logout_user(self, user: ArxivUserClaims, redirect_url: Optional[str] = None) -> bool:
         """With user's access token, logout user.
 
         Parameters
@@ -341,47 +341,37 @@ class ArxivOidcIdpClient:
         """
         try:
             header = {
-                "Authorization": f"Bearer {user.access_token}",
                 "Content-Type": "application/x-www-form-urlencoded"
             }
+            data = {
+                "client_id": self.client_id,
+                "refresh_token": user.refresh_token,
+            }
+            if self.client_secret:
+                data["client_secret"] = self.client_secret
+
         except KeyError:
-            return None
+            return False
 
-        data = {
-            "client_id": self.client_id,
-            "id_token_hint": user.id_token,
-        }
-        if  self.client_secret:
-            data["client_secret"] = self.client_secret
-
-        url = self.logout_url(user)
+        # Use revoke endpoint instead of logout endpoint
+        url = self.logout_url(user, redirect_url=redirect_url)
         log_extra = {'header': header, 'body': data}
-        self._logger.debug('Logout request %s', url, extra=log_extra)
+        self._logger.debug('Token revocation request %s', url, extra=log_extra)
+
         try:
             response = requests.post(url, headers=header, data=data, timeout=30, verify=self._ssl_cert_verify)
             if response.status_code == 200:
-                # If Keycloak is misconfigured, this does not log out.
-                # Turn front channel logout off in the logout settings of the client."
-                self._logger.info("Uesr %s logged out. - 200", user.user_id)
+                self._logger.info("User %s tokens revoked.", user.user_id)
                 return True
-
-            if response.status_code == 204:
-                self._logger.info("Uesr %s logged out.", user.user_id)
-                return True
-
-            if response.status_code == 400:
-                self._logger.info("Uesr %s did not log. But, it's likely not logged in", user.user_id)
-                return True
-
+            self._logger.warning(f"User %s tokens is not revoked. {response!r}", user.user_id)
             return False
 
         except requests.exceptions.RequestException as exc:
-            self._logger.error("Logout failed to connect to %s - %s", url, str(exc), exc_info=True,
+            self._logger.error("Token revocation failed to connect to %s - %s", url, str(exc), exc_info=True,
                                extra=log_extra)
             return False
-
         except Exception as exc:
-            self._logger.error("Logout failed to connect to %s - %s", url, str(exc), exc_info=True,
+            self._logger.error("Token revocation failed to connect to %s - %s", url, str(exc), exc_info=True,
                                extra=log_extra)
             return False
 

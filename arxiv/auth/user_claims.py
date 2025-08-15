@@ -305,13 +305,15 @@ class ArxivUserClaims:
         """packing user claims"""
         claims = self._claims.model_dump()
         # you probably forgot to add "openid" scope in Keycloak if id_token is not in it.
+        # 2025-08-15 ntai: good news! I don't need to carry ID Token anymore. It was needed only for log out,
+        # but I found out that you can revoke the keycloak user session with refresh token.
         if 'idt' in claims:
             del claims['idt']
         del claims['acc']
         if 'refresh' in claims:
             del claims['refresh']
         payload = jwt.encode(claims, secret, algorithm=algorithm)
-        assert(',' not in self.id_token)
+        # assert(',' not in self.id_token)
         assert(',' not in self.access_token)
         assert(',' not in payload)
         # access_token = self.access_token
@@ -319,7 +321,8 @@ class ArxivUserClaims:
         # save the space.
         # I think the access token should be attached to the authentication bearer token
         refresh_token = "" if not self.refresh_token else self.refresh_token
-        tokens = ["5", self.expires_at.isoformat(), claims['sub'], self.id_token, refresh_token, payload]
+        # "no-idt" was ID token - self.id_token
+        tokens = ["5", self.expires_at.isoformat(), claims['sub'], "no-idt", refresh_token, payload]
         token = ",".join(tokens)
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
@@ -397,7 +400,7 @@ class ArxivUserClaims:
                 authorizations = authorizations, # Optional[Authorizations] = None Authorizations for the current session.
                 ip_address = self.client_ip4v, # Optional[str] = None
                 remote_host = None, #: Optional[str] = None
-                nonce = self.id_token # : Optional[str] = None
+                nonce = self.refresh_token # : Optional[str] = None
             )
         return self._domain_session
 
