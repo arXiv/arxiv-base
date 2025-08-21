@@ -163,6 +163,9 @@ def create(authorizations: domain.Authorizations,
             start_time=util.epoch(start),
             end_time=0
         )
+        db.add(tapir_session)
+        db.flush()
+        db.refresh(tapir_session)
         tapir_sessions_audit = TapirSessionsAudit(
             session_id=tapir_session.session_id,
             ip_addr=ip,
