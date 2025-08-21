@@ -6,11 +6,12 @@ import logging
 
 from typing import Optional, Tuple
 
-from sqlalchemy.exc import SQLAlchemyError, OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import Session as SQLAlchemySession
 
 from .. import domain
-from ...db import Session
+from ...db import Session as ScopedSession
 from . import cookies, util
 
 from ...db.models import TapirSession, TapirSessionsAudit, TapirUser, \
@@ -22,9 +23,13 @@ logger = logging.getLogger(__name__)
 EASTERN = timezone('US/Eastern')
 
 
-def _load(session_id: str) -> TapirSession:
+def _load(session_id: str,
+          db: Optional[SQLAlchemySession] = None
+          ) -> TapirSession:
     """Get TapirSession from session id."""
-    db_session: TapirSession = Session.query(TapirSession) \
+    if db is None:
+        db = ScopedSession
+    db_session: Optional[TapirSession] = db.query(TapirSession) \
         .filter(TapirSession.session_id == session_id) \
         .first()
     if not db_session:
@@ -33,9 +38,13 @@ def _load(session_id: str) -> TapirSession:
     return db_session
 
 
-def _load_audit(session_id: str) -> TapirSessionsAudit:
+def _load_audit(session_id: str,
+                db: Optional[SQLAlchemySession] = None
+                ) -> TapirSessionsAudit:
     """Get TapirSessionsAudit from session id."""
-    db_sessions_audit: TapirSessionsAudit = Session.query(TapirSessionsAudit) \
+    if db is None:
+        db = ScopedSession
+    db_sessions_audit: Optional[TapirSessionsAudit] = db.query(TapirSessionsAudit) \
         .filter(TapirSessionsAudit.session_id == session_id) \
         .first()
     if not db_sessions_audit:
@@ -44,7 +53,9 @@ def _load_audit(session_id: str) -> TapirSessionsAudit:
     return db_sessions_audit
 
 
-def load(cookie: str) -> domain.Session:
+def load(cookie: str,
+         db: Optional[SQLAlchemySession] = None
+         ) -> domain.Session:
     """
     Given a session cookie (from request), load the logged-in user.
 
@@ -52,6 +63,8 @@ def load(cookie: str) -> domain.Session:
     ----------
     cookie : str
         Legacy cookie value passed with the request.
+    db : SQLAlchemySession
+        SQLAlchemy Session object. Default uses global session.
 
     Returns
     -------
@@ -63,6 +76,8 @@ def load(cookie: str) -> domain.Session:
     :class:`.legacy.exceptions.UnknownSession`
 
     """
+    if db is None:
+        db = ScopedSession
     session_id, user_id, ip, issued_at, expires_at, _ = cookies.unpack(cookie)
     logger.debug('Load session %s for user %s at %s',
                  session_id, user_id, ip)
@@ -70,8 +85,8 @@ def load(cookie: str) -> domain.Session:
     if expires_at <= datetime.now(tz=UTC):
         raise SessionExpired(f'Session {session_id} has expired in cookie')
 
-    data: Tuple[TapirUser, TapirSession, TapirNickname, Demographic]
-    data = Session.query(TapirUser, TapirSession, TapirNickname, Demographic) \
+    data: Optional[Tuple[TapirUser, TapirSession, TapirNickname, Demographic]]
+    data = db.query(TapirUser, TapirSession, TapirNickname, Demographic) \
         .join(TapirSession).join(TapirNickname).join(Demographic) \
         .filter(TapirUser.user_id == user_id) \
         .filter(TapirSession.session_id == session_id ) \
@@ -90,7 +105,7 @@ def load(cookie: str) -> domain.Session:
         username=db_nick.nickname,
         email=db_user.email,
         name=domain.UserFullName(
-            forename=db_user.first_name,
+            forename=db_user.first_name if db_user.first_name else '',
             surname=db_user.last_name,
             suffix=db_user.suffix_name
         ),
@@ -111,7 +126,8 @@ def load(cookie: str) -> domain.Session:
 
 def create(authorizations: domain.Authorizations,
            ip: str, remote_host: str, tracking_cookie: str = '',
-           user: Optional[domain.User] = None) -> domain.Session:
+           user: Optional[domain.User] = None,
+           db: Optional[SQLAlchemySession] = None) -> domain.Session:
     """
     Create a new legacy session for an authenticated user.
 
@@ -124,6 +140,8 @@ def create(authorizations: domain.Authorizations,
         Client hostname.
     tracking_cookie : str
         Tracking cookie payload from client request.
+    db : SQLAlchemySession
+        SQLAlchemy Session object. Default uses global session.
 
     Returns
     -------
@@ -133,24 +151,26 @@ def create(authorizations: domain.Authorizations,
     if user is None:
         raise SessionCreationFailed('Legacy sessions require a user')
 
+    if db is None:
+        db =  ScopedSession
     logger.debug('create session for user %s', user.user_id)
     start = datetime.now(tz=UTC)
     end = start + timedelta(seconds=util.get_session_duration())
     try:
         tapir_session = TapirSession(
-            user_id=user.user_id,
+            user_id=int(user.user_id),
             last_reissue=util.epoch(start),
             start_time=util.epoch(start),
             end_time=0
         )
         tapir_sessions_audit = TapirSessionsAudit(
-            session=tapir_session,
+            session_id=tapir_session.session_id,
             ip_addr=ip,
             remote_host=remote_host,
             tracking_cookie=tracking_cookie
         )
-        Session.add(tapir_sessions_audit)
-        Session.commit()
+        db.add(tapir_sessions_audit)
+        db.commit()
     except Exception as e:
         raise SessionCreationFailed(f'Failed to create: {e}') from e
 
@@ -188,7 +208,9 @@ def generate_cookie(session: domain.Session) -> str:
                         str(session.authorizations.classic))
 
 
-def invalidate(cookie: str) -> None:
+def invalidate(cookie: str,
+               db: Optional[SQLAlchemySession] = None
+               ) -> None:
     """
     Invalidate a legacy user session.
 
@@ -196,6 +218,8 @@ def invalidate(cookie: str) -> None:
     ----------
     cookie : str
         Session cookie generated when the session was created.
+    db : SQLAlchemySession
+        SQLAlchemy Session object. Default uses global session.
 
     Raises
     ------
@@ -208,10 +232,10 @@ def invalidate(cookie: str) -> None:
     except InvalidCookie as e:
         raise UnknownSession('No such session') from e
 
-    invalidate_by_id(session_id)
+    invalidate_by_id(session_id, db=db)
 
 
-def invalidate_by_id(session_id: str) -> None:
+def invalidate_by_id(session_id: str, db: Optional[SQLAlchemySession] = None) -> None:
     """
     Invalidate a legacy user session by ID.
 
@@ -219,6 +243,8 @@ def invalidate_by_id(session_id: str) -> None:
     ----------
     session_id : str
         Unique identifier for the session.
+    db : SQLAlchemySession
+        SQLAlchemy Session object. Default uses global session.
 
     Raises
     ------
@@ -227,12 +253,14 @@ def invalidate_by_id(session_id: str) -> None:
 
     """
     delta = datetime.now(tz=UTC) - datetime.fromtimestamp(0, tz=EASTERN)
-    end = (delta).total_seconds()
+    end = delta.total_seconds()
+    if db is None:
+        db = ScopedSession
     try:
         tapir_session = _load(session_id)
         tapir_session.end_time = end - 1
-        Session.merge(tapir_session)
-        Session.commit()
+        db.merge(tapir_session)
+        db.commit()
     except NoResultFound as e:
         raise UnknownSession(f'No such session {session_id}') from e
     except SQLAlchemyError as e:
