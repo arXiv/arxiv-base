@@ -65,11 +65,12 @@ class MemberInstitution(Base):
     """Deprecated - superceded by membership_institutions"""
 
     __tablename__ = "Subscription_UniversalInstitution"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
     resolver_URL: Mapped[Optional[str]] = mapped_column(String(255))
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     label: Mapped[Optional[str]] = mapped_column(String(255))
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     alt_text: Mapped[Optional[str]] = mapped_column(String(255))
     link_icon: Mapped[Optional[str]] = mapped_column(String(255))
@@ -80,17 +81,18 @@ class MemberInstitutionContact(Base):
     """Deprecated - superceded by membership_institution_users"""
 
     __tablename__ = "Subscription_UniversalInstitutionContact"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
     email: Mapped[Optional[str]] = mapped_column(String(255))
 
     sid: Mapped[int] = mapped_column(ForeignKey("Subscription_UniversalInstitution.id", ondelete="CASCADE"), nullable=False, index=True)
     active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     contact_name: Mapped[Optional[str]] = mapped_column(String(255))
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     phone: Mapped[Optional[str]] = mapped_column(String(255))
     note: Mapped[Optional[str]] = mapped_column(String(2048))
 
-    Subscription_UniversalInstitution: Mapped["MemberInstitution"] = relationship("MemberInstitution", primaryjoin="MemberInstitutionContact.sid == MemberInstitution.id")
+    Subscription_UniversalInstitution: Mapped["MemberInstitution"] = relationship("MemberInstitution", back_populates="Subscription_UniversalInstitutionContact")
 
 
 class MemberInstitutionIP(Base):
@@ -98,6 +100,7 @@ class MemberInstitutionIP(Base):
     __table_args__ = (Index("ip", "start", "end"),)
 
     sid: Mapped[int] = mapped_column(ForeignKey("Subscription_UniversalInstitution.id", ondelete="CASCADE"), nullable=False, index=True)
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     exclude: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     end: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
@@ -110,6 +113,7 @@ class AdminLog(Base):
     __tablename__ = "arXiv_admin_log"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     logtime: Mapped[Optional[str]] = mapped_column(String(24))
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
@@ -122,6 +126,8 @@ class AdminLog(Base):
     document_id: Mapped[Optional[int]] = mapped_column(Integer)
     submission_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     notify: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
+    old_created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
 
     arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship(
         "SubmissionCategoryProposal", foreign_keys="[SubmissionCategoryProposal.proposal_comment_id]", back_populates="proposal_comment"
@@ -198,7 +204,7 @@ class ArchiveGroup(Base):
     __tablename__ = "arXiv_archive_group"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
+    archive_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, unique=True, index=True, server_default=FetchedValue())
     group_id: Mapped[str] = mapped_column(String(16), primary_key=True, nullable=False, server_default=FetchedValue())
 
 
@@ -221,7 +227,7 @@ class Archive(Base):
 
 class AwsConfig(Base):
     __tablename__ = "arXiv_aws_config"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     domain: Mapped[str] = mapped_column(String(75), primary_key=True, nullable=False)
     keyname: Mapped[str] = mapped_column(String(60), primary_key=True, nullable=False)
@@ -230,7 +236,7 @@ class AwsConfig(Base):
 
 class AwsFile(Base):
     __tablename__ = "arXiv_aws_files"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     type: Mapped[str] = mapped_column(String(10), nullable=False, index=True, server_default=FetchedValue())
     filename: Mapped[str] = mapped_column(String(100), primary_key=True, server_default=FetchedValue())
@@ -252,6 +258,7 @@ class BibFeed(Base):
     __tablename__ = "arXiv_bib_feeds"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     bib_id: Mapped[intpk]
     name: Mapped[str] = mapped_column(String(64), nullable=False, server_default=FetchedValue())
     priority: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -271,6 +278,7 @@ class BibUpdate(Base):
     __tablename__ = "arXiv_bib_updates"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     update_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     bib_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -316,13 +324,11 @@ class Category(Base):
     papers_to_endorse: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     endorsement_domain: Mapped[Optional[str]] = mapped_column(ForeignKey("arXiv_endorsement_domains.endorsement_domain"), index=True)
     arXiv_endorsements: Mapped[List["Endorsement"]] = relationship("Endorsement", back_populates="arXiv_categories")
-    arXiv_endorsements = relationship("Endorsement", back_populates="arXiv_categories")
 
     arXiv_endorsement_domain: Mapped["EndorsementDomain"] = relationship(
         "EndorsementDomain", primaryjoin="Category.endorsement_domain == EndorsementDomain.endorsement_domain", back_populates="arXiv_categories"
     )
     arXiv_endorsement_requests: Mapped[List["EndorsementRequest"]] = relationship("EndorsementRequest", back_populates="arXiv_categories")
-    arXiv_endorsement_requests = relationship("EndorsementRequest", back_populates="arXiv_categories")
     arXiv_cross_controls: Mapped[List["CrossControl"]] = relationship("CrossControl", back_populates="arXiv_category")
     arXiv_demographics: Mapped[List["Demographic"]] = relationship("Demographic", back_populates="arXiv_category")
 
@@ -355,6 +361,7 @@ class ControlHold(Base):
     __tablename__ = "arXiv_control_holds"
     __table_args__ = (Index("control_id", "control_id", "hold_type", unique=True), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     hold_id: Mapped[intpk]
     control_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     hold_type: Mapped[Literal["submission", "cross", "jref"]] = mapped_column(Enum("submission", "cross", "jref"), nullable=False, index=True, server_default=FetchedValue())
@@ -375,6 +382,7 @@ class CrossControl(Base):
     __tablename__ = "arXiv_cross_control"
     __table_args__ = (ForeignKeyConstraint(["archive", "subject_class"], ["arXiv_categories.archive", "arXiv_categories.subject_class"]), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -450,6 +458,7 @@ class Document(Base):
     __tablename__ = "arXiv_documents"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     document_id: Mapped[intpk]
     paper_id: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, index=True, server_default=FetchedValue())
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
@@ -523,6 +532,7 @@ class EndorsementRequest(Base):
         {"mysql_charset": "latin1"},
     )
 
+    # noinspection PyTypeHints
     request_id: Mapped[intpk]
     endorsee_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
     archive: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
@@ -560,6 +570,7 @@ class Endorsement(Base):
         {"mysql_charset": "latin1"},
     )
 
+    # noinspection PyTypeHints
     endorsement_id: Mapped[intpk]
     endorser_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
     endorsee_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
@@ -634,6 +645,7 @@ class JrefControl(Base):
     __tablename__ = "arXiv_jref_control"
     __table_args__ = (Index("jref_ctrl_document_id", "document_id", "version", unique=True), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -675,6 +687,7 @@ class Metadata(Base):
     __tablename__ = "arXiv_metadata"
     __table_args__ = (Index("pidv", "paper_id", "version", unique=True), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     metadata_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False, index=True, server_default=FetchedValue())
     paper_id: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -714,6 +727,7 @@ class MirrorList(Base):
     __tablename__ = "arXiv_mirror_list"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     mirror_list_id: Mapped[intpk]
     created: Mapped[Optional[datetime]] = mapped_column(DateTime)
     updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -728,7 +742,7 @@ class MirrorList(Base):
 
 class ModeratorApiKey(Base):
     __tablename__ = "arXiv_moderator_api_key"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -789,6 +803,7 @@ class NextMail(Base):
     __tablename__ = "arXiv_next_mail"
     __table_args__ = (Index("arXiv_next_mail_idx_document_id_version", "document_id", "version"), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     next_mail_id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(Integer, nullable=False)
     document_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
@@ -802,7 +817,7 @@ class NextMail(Base):
 
 class OrcidConfig(Base):
     __tablename__ = "arXiv_orcid_config"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     domain: Mapped[str] = mapped_column(String(75), primary_key=True, nullable=False)
     keyname: Mapped[str] = mapped_column(String(60), primary_key=True, nullable=False)
@@ -822,6 +837,7 @@ class OwnershipRequest(Base):
     __tablename__ = "arXiv_ownership_requests"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     request_id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())
     endorsement_request_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_endorsement_requests.request_id"), index=True)
@@ -872,6 +888,7 @@ class PaperSession(Base):
     __tablename__ = "arXiv_paper_sessions"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     paper_session_id: Mapped[intpk]
     paper_id: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     start_time: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -885,6 +902,7 @@ class PilotFile(Base):
     __tablename__ = "arXiv_pilot_files"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     file_id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     filename: Mapped[Optional[str]] = mapped_column(String(256), server_default=FetchedValue())
@@ -914,7 +932,7 @@ class RejectSessionUsername(Base):
 
 class SciencewisePing(Base):
     __tablename__ = "arXiv_sciencewise_pings"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     paper_id_v: Mapped[str] = mapped_column(String(32), primary_key=True)
     updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -932,6 +950,7 @@ class ShowEmailRequest(Base):
     remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
+    # noinspection PyTypeHints
     request_id: Mapped[intpk]
 
     document: Mapped["Document"] = relationship("Document", back_populates="arXiv_show_email_requests")
@@ -942,6 +961,7 @@ class State(Base):
     __tablename__ = "arXiv_state"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     name: Mapped[Optional[str]] = mapped_column(String(24))
     value: Mapped[Optional[str]] = mapped_column(String(24))
@@ -1002,7 +1022,7 @@ class SubmissionCategory(Base):
 
 class SubmissionCategoryProposal(Base):
     __tablename__ = "arXiv_submission_category_proposal"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     proposal_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True, nullable=False, index=True)
@@ -1029,6 +1049,7 @@ class SubmissionControl(Base):
     __tablename__ = "arXiv_submission_control"
     __table_args__ = (Index("sub_ctrl_document_id", "document_id", "version", unique=True), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1046,8 +1067,9 @@ class SubmissionControl(Base):
 
 class SubmissionFlag(Base):
     __tablename__ = "arXiv_submission_flag"
-    __table_args__ = (Index("uniq_one_flag_per_mod", "submission_id", "user_id", unique=True), {"mysql_charset": "utf8mb3"})
+    __table_args__ = (Index("uniq_one_flag_per_mod", "submission_id", "user_id", unique=True), {"mysql_charset": "utf8"})
 
+    # noinspection PyTypeHints
     flag_id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), nullable=False, index=True, server_default=FetchedValue())
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), nullable=False)
@@ -1056,11 +1078,15 @@ class SubmissionFlag(Base):
 
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_flag")
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_flag")
+    flag_pdf_opened: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_done: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_done_cleared: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_viewed: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
 
 
 class SubmissionHoldReason(Base):
     __tablename__ = "arXiv_submission_hold_reason"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     reason_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), nullable=False, index=True)
@@ -1076,7 +1102,7 @@ class SubmissionHoldReason(Base):
 
 class SubmissionNearDuplicate(Base):
     __tablename__ = "arXiv_submission_near_duplicates"
-    __table_args__ = (Index("match", "submission_id", "matching_id", unique=True), {"mysql_charset": "utf8mb3"})
+    __table_args__ = (Index("match", "submission_id", "matching_id", unique=True), {"mysql_charset": "utf8"})
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, nullable=False, server_default=FetchedValue())
     matching_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1088,13 +1114,14 @@ class SubmissionNearDuplicate(Base):
 
 class SubmissionQaReport(Base):
     __tablename__ = "arXiv_submission_qa_reports"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     report_key_name: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     created: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
-    num_flags: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
+    num_flags: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     report: Mapped[dict] = mapped_column(JSON, nullable=False)
     report_uri: Mapped[Optional[str]] = mapped_column(String(256))
 
@@ -1103,7 +1130,7 @@ class SubmissionQaReport(Base):
 
 class SubmissionViewFlag(Base):
     __tablename__ = "arXiv_submission_view_flag"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, nullable=False)
     flag: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -1116,8 +1143,9 @@ class SubmissionViewFlag(Base):
 
 class Submission(Base):
     __tablename__ = "arXiv_submissions"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
+    # noinspection PyTypeHints
     submission_id: Mapped[intpk]
     document_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"), index=True)
     doc_paper_id: Mapped[Optional[str]] = mapped_column(String(20), index=True)
@@ -1177,11 +1205,12 @@ class Submission(Base):
     arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="submission")
     # to submission locks
     arXiv_submission_locks: Mapped[List["SubmissionLocks"]] = relationship("SubmissionLocks", back_populates="submission")
-    data_version: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
-    metadata_version: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
-    data_needed: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
-    data_version_queued: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
-    metadata_version_queued: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    data_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
+    metadata_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
+    data_needed: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    data_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    metadata_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    preflight: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     data_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     metadata_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     arXiv_pilot_files: Mapped[List["PilotFile"]] = relationship("PilotFile", back_populates="submission")
@@ -1212,7 +1241,7 @@ class PilotDataset(Submission):
 
 class SubmissionAbsClassifierDatum(Base):
     __tablename__ = "arXiv_submission_abs_classifier_data"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
@@ -1230,7 +1259,7 @@ class SubmissionAbsClassifierDatum(Base):
 
 class SubmissionClassifierDatum(Base):
     __tablename__ = "arXiv_submission_classifier_data"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
@@ -1244,6 +1273,7 @@ class SubmitterFlag(Base):
     __tablename__ = "arXiv_submitter_flags"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     flag_id: Mapped[intpk]
     comment: Mapped[Optional[str]] = mapped_column(String(255))
     pattern: Mapped[Optional[str]] = mapped_column(String(255))
@@ -1253,6 +1283,7 @@ class SuspectEmail(Base):
     __tablename__ = "arXiv_suspect_emails"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     type: Mapped[str] = mapped_column(String(10), nullable=False)
     pattern: Mapped[str] = mapped_column(Text, nullable=False)
@@ -1287,6 +1318,7 @@ class TrackbackPing(Base):
     __tablename__ = "arXiv_trackback_pings"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     trackback_id: Mapped[intpk]
     document_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
@@ -1315,7 +1347,7 @@ class TrackbackPing(Base):
         """Get the URL without the protocol, for display."""
         return str(
             re.sub(
-                r"^[a-z]+:\/\/",
+                r"^[a-z]+://",
                 "",
                 self.url.strip(),
                 flags=re.IGNORECASE,
@@ -1341,6 +1373,7 @@ class TrackbackSite(Base):
     __table_args__ = {"mysql_charset": "latin1"}
 
     pattern: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
+    # noinspection PyTypeHints
     site_id: Mapped[intpk]
     action: Mapped[Literal["neutral", "accept", "reject", "spam"]] = mapped_column(Enum("neutral", "accept", "reject", "spam"), nullable=False, server_default=FetchedValue())
 
@@ -1349,6 +1382,7 @@ class Tracking(Base):
     __tablename__ = "arXiv_tracking"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     tracking_id: Mapped[intpk]
     sword_id: Mapped[int] = mapped_column(Integer, nullable=False, unique=True, index=True, server_default=FetchedValue())
     paper_id: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -1471,7 +1505,7 @@ t_demographics_backup = Table(
 
 class Session(Base):
     __tablename__ = "sessions"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     id: Mapped[str] = mapped_column(String(72), primary_key=True)
     session_data: Mapped[Optional[str]] = mapped_column(Text)
@@ -1511,6 +1545,7 @@ class TapirAdminAudit(Base):
     action: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
     data: Mapped[str] = mapped_column(String(255))
     comment: Mapped[str] = mapped_column(Text, nullable=False)
+    # noinspection PyTypeHints
     entry_id: Mapped[intpk]
 
     tapir_users: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[admin_user], back_populates="tapir_admin_audit")
@@ -1578,6 +1613,7 @@ class TapirEmailLog(Base):
     __tablename__ = "tapir_email_log"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     mail_id: Mapped[intpk]
     reference_type: Mapped[Optional[str]] = mapped_column(String(1))
     reference_id: Mapped[Optional[int]] = mapped_column(Integer)
@@ -1592,6 +1628,7 @@ class TapirEmailMailing(Base):
     __tablename__ = "tapir_email_mailings"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     mailing_id: Mapped[intpk]
     template_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_email_templates.template_id"), index=True)
     created_by: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
@@ -1611,6 +1648,7 @@ class TapirEmailTemplate(Base):
     __tablename__ = "tapir_email_templates"
     __table_args__ = (Index("short_name", "short_name", "lang", unique=True), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     template_id: Mapped[intpk]
     short_name: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
     lang: Mapped[str] = mapped_column(String(2), nullable=False, server_default=FetchedValue())
@@ -1684,6 +1722,7 @@ class TapirNickname(Base):
     __tablename__ = "tapir_nicknames"
     __table_args__ = (Index("user_id", "user_id", "user_seq", unique=True), {"mysql_charset": "latin1"})
 
+    # noinspection PyTypeHints
     nick_id: Mapped[intpk]
     nickname: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, index=True, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, server_default=FetchedValue())
@@ -1788,6 +1827,7 @@ class TapirPresession(Base):
     __tablename__ = "tapir_presessions"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     presession_id: Mapped[intpk]
     ip_num: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
@@ -1847,7 +1887,6 @@ class TapirSession(Base):
     end_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
 
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="tapir_sessions")
-    user = relationship("TapirUser", primaryjoin="TapirSession.user_id == TapirUser.user_id", back_populates="tapir_sessions")
     tapir_admin_audit: Mapped[List["TapirAdminAudit"]] = relationship("TapirAdminAudit", back_populates="session")
     tapir_permanent_tokens: Mapped[List["TapirPermanentToken"]] = relationship("TapirPermanentToken", back_populates="session")
     tapir_recovery_tokens_used: Mapped[List["TapirRecoveryTokensUsed"]] = relationship("TapirRecoveryTokensUsed", back_populates="session")
@@ -1887,6 +1926,7 @@ class TapirUser(Base):
     __tablename__ = "tapir_users"
     __table_args__ = {"mysql_charset": "latin1"}
 
+    # noinspection PyTypeHints
     user_id: Mapped[intpk]
     first_name: Mapped[Optional[str]] = mapped_column(String(50), index=True)
     last_name: Mapped[Optional[str]] = mapped_column(String(50), index=True)
@@ -1952,6 +1992,8 @@ class TapirUser(Base):
     arXiv_check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="user")
     owned_papers: Mapped[List["PaperOwner"]] = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="owner")
     demographics = relationship("Demographic", foreign_keys="[Demographic.user_id]", uselist=False, back_populates="user")
+    flagged_user_detail: Mapped[List["flagged_user_detail"]] = relationship("flagged_user_detail", foreign_keys="[flagged_user_detail.creator_user_id]", back_populates="creator_user")
+    flagged_user_detail_: Mapped[List["flagged_user_detail"]] = relationship("flagged_user_detail", foreign_keys="[flagged_user_detail.flagged_user_id]", back_populates="flagged_user")
 
 
 class AuthorIds(Base):
@@ -2018,7 +2060,7 @@ class Demographic(Base):
 
 class OrcidIds(Base):
     __tablename__ = "arXiv_orcid_ids"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True)
     orcid: Mapped[str] = mapped_column(String(19), nullable=False, index=True)
@@ -2028,7 +2070,7 @@ class OrcidIds(Base):
 
 class QueueView(Base):
     __tablename__ = "arXiv_queue_view"
-    __table_args__ = {"mysql_charset": "utf8mb3"}
+    __table_args__ = {"mysql_charset": "utf8"}
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     last_view: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -2141,6 +2183,7 @@ class DBLaTeXMLDocuments(LaTeXMLBase):
     __tablename__ = "arXiv_latexml_doc"
 
     paper_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    # noinspection PyTypeHints
     document_version: Mapped[intpk]
     # conversion_status codes:
     #   - 0 = in progress
@@ -2157,6 +2200,7 @@ class DBLaTeXMLDocuments(LaTeXMLBase):
 class DBLaTeXMLSubmissions(LaTeXMLBase):
     __tablename__ = "arXiv_latexml_sub"
 
+    # noinspection PyTypeHints
     submission_id: Mapped[intpk]
     # conversion_status codes:
     #   - 0 = in progress
@@ -2244,7 +2288,7 @@ class Checks(Base):
     enable_check: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     enable_hold: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     enable_queue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    retry_minutes: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    retry_minutes: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     optional: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     persist_response: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     target: Mapped["CheckTargets"] = relationship("CheckTargets")
@@ -2269,8 +2313,8 @@ class CheckResults(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     ok: Mapped[int] = mapped_column(Integer, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
-    message: Mapped[Optional[str]] = mapped_column(String(40))
-    data: Mapped[Optional[str]] = mapped_column(String(2000))
+    message: Mapped[Optional[str]] = mapped_column(String(200))
+    data: Mapped[Optional[str]] = mapped_column(Text)
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
 
     check: Mapped["Checks"] = relationship("Checks", back_populates="arXiv_check_results")
@@ -2307,6 +2351,46 @@ class CheckResponses(Base):
         return f"{ type(self).__name__ }/{ self.check_response_id };result={self.check_result_id};ok={ self.ok}"
 
 
+class flagged_user_comment(Base):
+    __tablename__ = "flagged_user_comment"
+    __table_args__ = {"mysql_charset": "latin1"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+
+class flagged_user_detail(Base):
+    __tablename__ = "flagged_user_detail"
+    __table_args__ = {"mysql_charset": "latin1"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    creator_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
+    flagged_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
+    active: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'1'"))
+    all_categories: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'1'"))
+    flagged_user_comment_id: Mapped[Optional[int]] = mapped_column(Integer)
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+    creator_user: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[creator_user_id], back_populates="flagged_user_detail")
+    flagged_user: Mapped["TapirUser"] = relationship("TapirUser", foreign_keys=[flagged_user_id], back_populates="flagged_user_detail_")
+    flagged_user_detail_category_relation: Mapped[List["flagged_user_detail_category_relation"]] = relationship("flagged_user_detail_category_relation", back_populates="flagged_user_detail_")
+
+
+class flagged_user_detail_category_relation(Base):
+    __tablename__ = "flagged_user_detail_category_relation"
+    __table_args__ = {"mysql_charset": "latin1"}
+
+    flagged_user_detail_id: Mapped[int] = mapped_column(ForeignKey("flagged_user_detail.id"), primary_key=True, nullable=False)
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    category: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+
+    flagged_user_detail_: Mapped["flagged_user_detail"] = relationship("flagged_user_detail", back_populates="flagged_user_detail_category_relation")
+
+
 def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]) -> Tuple[Engine, Optional[Engine]]:
     session_factory.configure(
         binds={
@@ -2331,7 +2415,6 @@ def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]
             t_tapir_email_tokens_used: classic_engine,
             t_tapir_error_log: classic_engine,
             t_tapir_no_cookies: classic_engine,
-            t_tapir_periodic_tasks_log: classic_engine,
             t_tapir_periodic_tasks_log: classic_engine,
             t_tapir_permanent_tokens_used: classic_engine,
             t_tapir_save_post_variables: classic_engine,

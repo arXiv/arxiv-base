@@ -26,25 +26,25 @@ from sqlalchemy.dialects.mysql import VARCHAR
 from validators import url as is_valid_url
 
 from sqlalchemy import (
-    BINARY, 
-    BigInteger, 
+    BINARY,
+    BigInteger,
     Column,
-    Date, 
-    DateTime, 
+    Date,
+    DateTime,
     Engine,
     Enum,
-    ForeignKey, 
-    ForeignKeyConstraint, 
-    Index, 
-    Integer, 
-    JSON, 
+    ForeignKey,
+    ForeignKeyConstraint,
+    Index,
+    Integer,
+    JSON,
     Numeric,
-    PrimaryKeyConstraint, 
-    SmallInteger, 
-    String, 
+    PrimaryKeyConstraint,
+    SmallInteger,
+    String,
     TIMESTAMP,
     Table,
-    Text, 
+    Text,
     func,
     text,
 )
@@ -73,6 +73,7 @@ class MemberInstitution(Base):
     resolver_URL: Mapped[Optional[str]] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     label: Mapped[Optional[str]] = mapped_column(String(255))
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     alt_text: Mapped[Optional[str]] = mapped_column(String(255))
     link_icon: Mapped[Optional[str]] = mapped_column(String(255))
@@ -87,6 +88,7 @@ class MemberInstitutionContact(Base):
     sid: Mapped[int] = mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)
     active: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     contact_name: Mapped[Optional[str]] = mapped_column(String(255))
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     phone: Mapped[Optional[str]] = mapped_column(String(255))
     note: Mapped[Optional[str]] = mapped_column(String(2048))
@@ -101,6 +103,7 @@ class MemberInstitutionIP(Base):
     )
 
     sid: Mapped[int] = mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     exclude: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     end: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
@@ -113,6 +116,7 @@ class MemberInstitutionIP(Base):
 class AdminLog(Base):
     __tablename__ = 'arXiv_admin_log'
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     logtime: Mapped[Optional[str]] = mapped_column(String(24))
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))
@@ -249,6 +253,7 @@ t_arXiv_bad_pw = Table(
 class BibFeed(Base):
     __tablename__ = 'arXiv_bib_feeds'
 
+    # noinspection PyTypeHints
     bib_id: Mapped[intpk]
     name: Mapped[str] = mapped_column(String(64), nullable=False, server_default=FetchedValue())
     priority: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -268,6 +273,7 @@ class BibFeed(Base):
 class BibUpdate(Base):
     __tablename__ = 'arXiv_bib_updates'
 
+    # noinspection PyTypeHints
     update_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     bib_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -350,6 +356,7 @@ class ControlHold(Base):
         Index('control_id', 'hold_type'),
     )
 
+    # noinspection PyTypeHints
     hold_id: Mapped[intpk]
     control_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     hold_type: Mapped[Literal['submission', 'cross', 'jref']] = mapped_column(Enum('submission', 'cross', 'jref'), nullable=False, index=True, server_default=FetchedValue())
@@ -373,6 +380,7 @@ class CrossControl(Base):
         Index('archive', 'archive', 'subject_class')
     )
 
+    # noinspection PyTypeHints
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -451,6 +459,7 @@ class DocumentCategory(Base):
 class Document(Base):
     __tablename__ = 'arXiv_documents'
 
+    # noinspection PyTypeHints
     document_id: Mapped[intpk]
     paper_id: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, server_default=FetchedValue())
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
@@ -508,6 +517,7 @@ class EndorsementRequest(Base):
         Index('endorsee_id_2', 'endorsee_id', 'archive', 'subject_class')
     )
 
+    # noinspection PyTypeHints
     request_id: Mapped[intpk]
     endorsee_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
     archive: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
@@ -542,6 +552,7 @@ class Endorsement(Base):
         Index('endorser_id_2', 'endorser_id', 'endorsee_id', 'archive', 'subject_class')
     )
 
+    # noinspection PyTypeHints
     endorsement_id: Mapped[intpk]
     endorser_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_users.user_id'), index=True)
     endorsee_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
@@ -615,6 +626,7 @@ class JrefControl(Base):
         Index('jref_ctrl_document_id', 'document_id', 'version'),
     )
 
+    # noinspection PyTypeHints
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -657,6 +669,7 @@ class Metadata(Base):
         Index('pidv', 'paper_id', 'version'),
     )
 
+    # noinspection PyTypeHints
     metadata_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, server_default=FetchedValue())
     paper_id: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -695,6 +708,7 @@ class Metadata(Base):
 class MirrorList(Base):
     __tablename__ = 'arXiv_mirror_list'
 
+    # noinspection PyTypeHints
     mirror_list_id: Mapped[intpk]
     created: Mapped[Optional[datetime]]
     updated: Mapped[Optional[datetime]]
@@ -772,6 +786,7 @@ class NextMail(Base):
         Index('arXiv_next_mail_idx_document_id_version', 'document_id', 'version'),
     )
 
+    # noinspection PyTypeHints
     next_mail_id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(Integer, nullable=False)
     document_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
@@ -802,6 +817,7 @@ t_arXiv_ownership_requests_papers = Table(
 class OwnershipRequest(Base):
     __tablename__ = 'arXiv_ownership_requests'
 
+    # noinspection PyTypeHints
     request_id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True, server_default=FetchedValue())
     endorsement_request_id: Mapped[Optional[int]] = mapped_column(ForeignKey('arXiv_endorsement_requests.request_id'), index=True)
@@ -854,6 +870,7 @@ class PaperOwner(Base):
 class PaperSession(Base):
     __tablename__ = 'arXiv_paper_sessions'
 
+    # noinspection PyTypeHints
     paper_session_id: Mapped[intpk]
     paper_id: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     start_time: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -866,6 +883,7 @@ class PilotFile(Base):
     """arXiv_pilot is deprecated"""
     __tablename__ = 'arXiv_pilot_files'
 
+    # noinspection PyTypeHints
     file_id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id'), nullable=False, index=True)
     filename: Mapped[Optional[str]] = mapped_column(String(256), server_default=FetchedValue())
@@ -920,6 +938,7 @@ class ShowEmailRequest(Base):
     remote_addr: Mapped[str] = mapped_column(String(16), nullable=False, index=True, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
     tracking_cookie: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
+    # noinspection PyTypeHints
     request_id: Mapped[intpk]
 
     document = relationship('Document', primaryjoin='ShowEmailRequest.document_id == Document.document_id', backref='arXiv_show_email_requests')
@@ -930,6 +949,7 @@ class ShowEmailRequest(Base):
 class State(Base):
     __tablename__ = 'arXiv_state'
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     name: Mapped[Optional[str]] = mapped_column(String(24))
     value: Mapped[Optional[str]] = mapped_column(String(24))
@@ -1013,6 +1033,7 @@ class SubmissionControl(Base):
         Index('sub_ctrl_document_id', 'document_id', 'version'),
     )
 
+    # noinspection PyTypeHints
     control_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey('arXiv_documents.document_id'), nullable=False, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1035,6 +1056,7 @@ class SubmissionFlag(Base):
         Index('uniq_one_flag_per_mod', 'submission_id', 'user_id'),
     )
 
+    # noinspection PyTypeHints
     flag_id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id', ondelete='CASCADE'), nullable=False, index=True, server_default=FetchedValue())
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE'), nullable=False)
@@ -1080,6 +1102,7 @@ class SubmissionNearDuplicate(Base):
 class SubmissionQaReport(Base):
     __tablename__ = 'arXiv_submission_qa_reports'
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey('arXiv_submissions.submission_id'), nullable=False, index=True)
     report_key_name: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
@@ -1108,6 +1131,7 @@ class SubmissionViewFlag(Base):
 class Submission(Base):
     __tablename__ = 'arXiv_submissions'
 
+    # noinspection PyTypeHints
     submission_id: Mapped[intpk]
     document_id: Mapped[Optional[int]] = mapped_column(ForeignKey('arXiv_documents.document_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     doc_paper_id: Mapped[Optional[str]] = mapped_column(String(20), index=True)
@@ -1214,6 +1238,7 @@ class SubmissionClassifierDatum(Base):
 class SubmitterFlag(Base):
     __tablename__ = 'arXiv_submitter_flags'
 
+    # noinspection PyTypeHints
     flag_id: Mapped[intpk]
     comment: Mapped[Optional[str]] = mapped_column(String(255))
     pattern: Mapped[Optional[str]] = mapped_column(String(255))
@@ -1223,6 +1248,7 @@ class SubmitterFlag(Base):
 class SuspectEmail(Base):
     __tablename__ = 'arXiv_suspect_emails'
 
+    # noinspection PyTypeHints
     id: Mapped[intpk]
     type: Mapped[str] = mapped_column(String(10), nullable=False)
     pattern: Mapped[str] = mapped_column(Text, nullable=False)
@@ -1257,6 +1283,7 @@ class TopPaper(Base):
 class TrackbackPing(Base):
     __tablename__ = 'arXiv_trackback_pings'
 
+    # noinspection PyTypeHints
     trackback_id: Mapped[intpk]
     document_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
@@ -1281,7 +1308,7 @@ class TrackbackPing(Base):
     @property
     def display_url(self) -> str:
         """Get the URL without the protocol, for display."""
-        return str(re.sub(r"^[a-z]+:\/\/", "", self.url.strip(), flags=re.IGNORECASE,))
+        return str(re.sub(r"^[a-z]+://", "", self.url.strip(), flags=re.IGNORECASE,))
 
     @property
     def has_valid_url(self) -> bool:
@@ -1300,6 +1327,7 @@ class TrackbackSite(Base):
     __tablename__ = 'arXiv_trackback_sites'
 
     pattern: Mapped[str] = mapped_column(String(255), nullable=False, index=True, server_default=FetchedValue())
+    # noinspection PyTypeHints
     site_id: Mapped[intpk]
     action: Mapped[Literal['neutral', 'accept', 'reject', 'spam']] = mapped_column(Enum('neutral', 'accept', 'reject', 'spam'), nullable=False, server_default=FetchedValue())
 
@@ -1308,6 +1336,7 @@ class TrackbackSite(Base):
 class Tracking(Base):
     __tablename__ = 'arXiv_tracking'
 
+    # noinspection PyTypeHints
     tracking_id: Mapped[intpk]
     sword_id: Mapped[int] = mapped_column(Integer, nullable=False, unique=True, server_default=FetchedValue())
     paper_id: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -1471,6 +1500,7 @@ class TapirAdminAudit(Base):
     action: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
     data: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     comment: Mapped[str] = mapped_column(Text, nullable=False)
+    # noinspection PyTypeHints
     entry_id: Mapped[intpk]
 
     tapir_users = relationship('TapirUser', foreign_keys=[admin_user], back_populates='tapir_admin_audit')
@@ -1532,6 +1562,7 @@ class TapirEmailHeader(Base):
 class TapirEmailLog(Base):
     __tablename__ = 'tapir_email_log'
 
+    # noinspection PyTypeHints
     mail_id: Mapped[intpk]
     reference_type: Mapped[Optional[str]] = mapped_column(String(1))
     reference_id: Mapped[Optional[int]] = mapped_column(Integer)
@@ -1546,6 +1577,7 @@ class TapirEmailLog(Base):
 class TapirEmailMailing(Base):
     __tablename__ = 'tapir_email_mailings'
 
+    # noinspection PyTypeHints
     mailing_id: Mapped[intpk]
     template_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_email_templates.template_id'), index=True)
     created_by: Mapped[Optional[int]] = mapped_column(ForeignKey('tapir_users.user_id'), index=True)
@@ -1568,6 +1600,7 @@ class TapirEmailTemplate(Base):
         Index('short_name', 'short_name', 'lang'),
     )
 
+    # noinspection PyTypeHints
     template_id: Mapped[intpk]
     short_name: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
     lang: Mapped[str] = mapped_column(String(2), nullable=False, server_default=FetchedValue())
@@ -1642,6 +1675,7 @@ class TapirNickname(Base):
         Index('user_id', 'user_id', 'user_seq'),
     )
 
+    # noinspection PyTypeHints
     nick_id: Mapped[intpk]
     nickname: Mapped[str] = mapped_column(String(20), nullable=False, unique=True, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, server_default=FetchedValue())
@@ -1750,6 +1784,7 @@ class TapirPolicyClass(Base):
 class TapirPresession(Base):
     __tablename__ = 'tapir_presessions'
 
+    # noinspection PyTypeHints
     presession_id: Mapped[intpk]
     ip_num: Mapped[str] = mapped_column(String(16), nullable=False, server_default=FetchedValue())
     remote_host: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
@@ -1861,6 +1896,7 @@ class TapirUser(Base):
         Index('tracking_cookie', 'tracking_cookie')
     )
 
+    # noinspection PyTypeHints
     user_id: Mapped[intpk]
     first_name: Mapped[Optional[str]] = mapped_column(String(50), index=True)
     last_name: Mapped[Optional[str]] = mapped_column(String(50), index=True)
@@ -2114,6 +2150,7 @@ class DBLaTeXMLDocuments(LaTeXMLBase):
     __tablename__ = 'arXiv_latexml_doc'
 
     paper_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    # noinspection PyTypeHints
     document_version: Mapped[intpk]
     # conversion_status codes:
     #   - 0 = in progress
@@ -2129,6 +2166,7 @@ class DBLaTeXMLDocuments(LaTeXMLBase):
 class DBLaTeXMLSubmissions (LaTeXMLBase):
     __tablename__ = 'arXiv_latexml_sub'
 
+    # noinspection PyTypeHints
     submission_id: Mapped[intpk]
     # conversion_status codes: 
     #   - 0 = in progress
@@ -2269,6 +2307,47 @@ class CheckResponses(Base):
       return f"{ type(self).__name__ }/{ self.check_response_id };result={self.check_result_id};ok={ self.ok}"
 
     
+class flagged_user_comment(Base):
+    __tablename__ = 'flagged_user_comment'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+
+class flagged_user_detail(Base):
+    __tablename__ = 'flagged_user_detail'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    created: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    updated: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+    creator_user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True)
+    flagged_user_id: Mapped[int] = mapped_column(ForeignKey('tapir_users.user_id'), nullable=False, index=True)
+    active: Mapped[Optional[int]] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    all_categories: Mapped[Optional[int]] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    flagged_user_comment_id: Mapped[Optional[int]] = mapped_column(INTEGER(11))
+    action: Mapped[Optional[str]] = mapped_column(String(32))
+    comment: Mapped[Optional[str]] = mapped_column(String(255))
+
+    creator_user: Mapped['TapirUser'] = relationship('TapirUser', foreign_keys=[creator_user_id], back_populates='flagged_user_detail')
+    flagged_user: Mapped['TapirUser'] = relationship('TapirUser', foreign_keys=[flagged_user_id], back_populates='flagged_user_detail_')
+    flagged_user_detail_category_relation: Mapped[List['flagged_user_detail_category_relation']] = relationship('flagged_user_detail_category_relation', back_populates='flagged_user_detail_')
+
+
+class flagged_user_detail_category_relation(Base):
+    __tablename__ = 'flagged_user_detail_category_relation'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    flagged_user_detail_id: Mapped[int] = mapped_column(ForeignKey('flagged_user_detail.id'), primary_key=True, nullable=False)
+    created: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    category: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+
+    flagged_user_detail_: Mapped['flagged_user_detail'] = relationship('flagged_user_detail', back_populates='flagged_user_detail_category_relation')
+
+
+
 def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]) -> Tuple[Engine, Optional[Engine]]:
     session_factory.configure(binds={
         Base: classic_engine,
@@ -2292,7 +2371,6 @@ def configure_db_engine(classic_engine: Engine, latexml_engine: Optional[Engine]
         t_tapir_email_tokens_used: classic_engine,
         t_tapir_error_log: classic_engine,
         t_tapir_no_cookies: classic_engine,
-        t_tapir_periodic_tasks_log: classic_engine,
         t_tapir_periodic_tasks_log: classic_engine,
         t_tapir_permanent_tokens_used: classic_engine,
         t_tapir_save_post_variables: classic_engine

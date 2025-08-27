@@ -75,9 +75,6 @@ arXiv_categories:
     arXiv_endorsement_domains:
       arXiv_endorsement_domain: "relationship('EndorsementDomain', primaryjoin='Category.endorsement_domain == EndorsementDomain.endorsement_domain', back_populates='arXiv_categories')"
     arXiv_demographics: "relationship('Demographic', back_populates='arXiv_category')"
-  additional_relationships:
-    - "arXiv_endorsements = relationship('Endorsement', back_populates='arXiv_categories')"
-    - "arXiv_endorsement_requests = relationship('EndorsementRequest', back_populates='arXiv_categories')"
 
 arXiv_questionable_categories:
   class_name: QuestionableCategory
@@ -436,8 +433,6 @@ tapir_recovery_tokens_used:
   class_name: TapirRecoveryTokensUsed
 tapir_sessions:
   class_name: TapirSession
-  additional_relationships:
-    - "user = relationship('TapirUser', primaryjoin='TapirSession.user_id == TapirUser.user_id', back_populates='tapir_sessions')"
 tapir_sessions_audit:
   class_name: TapirSessionsAudit
   additional_relationships:
