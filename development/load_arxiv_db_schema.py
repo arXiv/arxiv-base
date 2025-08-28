@@ -34,7 +34,22 @@ def main(mysql_port: int, db_name: str, root_password: str="rootpassword", schem
                 mysql = subprocess.Popen(cli, encoding="utf-8",
                                          stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 mysql.communicate("select 1")
+                container_name = "fake-arxiv-db"
                 if mysql.returncode == 0:
+                    sql_cmd = [
+                        "docker", "exec", container_name, "mysql",
+                        "-uroot", f"-p{root_password}",
+                        "-e",
+                        "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO';"
+                    ]
+                    subprocess.run(sql_cmd, check=True)
+                    debug_cmd = [
+                        "docker", "exec", container_name, "mysql",
+                        "-uroot", f"-p{root_password}",
+                        "-e", "SELECT @@sql_mode;"
+                    ]
+                    result = subprocess.run(debug_cmd, capture_output=True, text=True)
+                    logger.info(f"Current SQL mode: {result.stdout}")
                     break
             except Exception as e:
                 print(e)

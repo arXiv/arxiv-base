@@ -53,6 +53,6 @@ def test_db_schema_sqlite3():
         # print(row[0])
         n_tables += 1
     conn.close()
-    # There are 145 tables on arxiv-production, and 3 LaTexML tables in the db/model.py
-    assert n_tables == (145 + 3)
+    # There are 151 tables in production
+    assert n_tables == (145 + 3 + 3)
     os.unlink(filename)

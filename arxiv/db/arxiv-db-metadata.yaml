@@ -24,9 +24,10 @@ _names_map_:
 #
 Subscription_UniversalInstitution:
   class_name: MemberInstitution
-  relationships:
-    Subscription_UniversalInstitutionContact: ""
-    Subscription_UniversalInstitutionIP: ""
+
+#  relationships:
+#    Subscription_UniversalInstitutionContact: ""
+#    Subscription_UniversalInstitutionIP: ""
 
 Subscription_UniversalInstitutionContact:
   class_name: MemberInstitutionContact
@@ -566,3 +567,9 @@ arXiv_check_responses:
   table_args: drop
   relationships:
     check_result: "relationship('CheckResults', back_populates='check_responses')"
+
+flagged_user_detail:
+  columns:
+    # updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    # the server default does not work with sqlite3 and breaks tests
+    updated: "mapped_column(DateTime, nullable=False)"

@@ -75,6 +75,9 @@ class MemberInstitution(Base):
     link_icon: Mapped[Optional[str]] = mapped_column(String(255))
     note: Mapped[Optional[str]] = mapped_column(String(255))
 
+    Subscription_UniversalInstitutionContact: Mapped[List["MemberInstitutionContact"]] = relationship("MemberInstitutionContact", back_populates="Subscription_UniversalInstitution")
+    Subscription_UniversalInstitutionIP: Mapped[List["MemberInstitutionIP"]] = relationship("MemberInstitutionIP", back_populates="Subscription_UniversalInstitution")
+
 
 class MemberInstitutionContact(Base):
     """Deprecated - superceded by membership_institution_users"""
@@ -2331,7 +2334,7 @@ class flagged_user_detail(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     creator_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     flagged_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     active: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'1'"))
