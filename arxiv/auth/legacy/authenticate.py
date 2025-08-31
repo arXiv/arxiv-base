@@ -24,7 +24,7 @@ PassData = Tuple[TapirUser, TapirUsersPassword, TapirNickname, Demographic]
 def authenticate(username_or_email: Optional[str] = None,
                  password: Optional[str] = None,
                  token: Optional[str] = None,
-                 session: Optional[SASession] = DefaultSession) \
+                 session: SASession = DefaultSession) \
         -> Tuple[domain.User, domain.Authorizations]:
     """
     Validate username/password. If successful, retrieve user details.
@@ -69,7 +69,7 @@ def authenticate(username_or_email: Optional[str] = None,
     except Exception as ex:
         raise AuthenticationFailed() from ex
 
-    return instantiate_tapir_user(passdata, session=session)
+    return instantiate_tapir_user(passdata)
 
 
 def instantiate_tapir_user(passdata: PassData) -> Tuple[domain.User, domain.Authorizations]:
@@ -199,6 +199,7 @@ def _authenticate_password(username_or_email: str, password: str, session: SASes
             return passdata
     except PasswordAuthenticationFailed as e:
         raise AuthenticationFailed('Invalid username or password') from e
+    raise AuthenticationFailed('Invalid username or password')
 
 
 def _get_user_by_user_id(user_id: int, session = DefaultSession) -> PassData:
@@ -240,6 +241,8 @@ def _get_user_by_username(username: str, session: SASession = DefaultSession) ->
                 .filter(TapirUser.flag_deleted == 0) \
                 .filter(TapirUser.flag_banned == 0) \
                 .first()
+    if tapir_user is None:
+        raise NoSuchUser('TapirUser is not found')
     return _get_passdata(tapir_user, session=session)
 
 
