@@ -34,7 +34,7 @@ def create_tapir_session_from_user_claims(db: SQLAlchemySession,
         pass
 
     try:
-        passdata = _get_user_by_user_id(user_id)
+        passdata = _get_user_by_user_id(user_id, session=db)
     except NoSuchUser:
         pass
 
