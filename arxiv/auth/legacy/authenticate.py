@@ -209,7 +209,7 @@ def _get_user_by_user_id(user_id: int, session = DefaultSession) -> PassData:
         .filter(TapirUser.flag_deleted == 0) \
         .filter(TapirUser.flag_banned == 0) \
         .first()
-    return _get_passdata(tapir_user)
+    return _get_passdata(tapir_user, session=session)
 
 
 def _get_user_by_email(email: str, session: SASession = DefaultSession) -> PassData:
@@ -221,7 +221,7 @@ def _get_user_by_email(email: str, session: SASession = DefaultSession) -> PassD
         .filter(TapirUser.flag_deleted == 0) \
         .filter(TapirUser.flag_banned == 0) \
         .first()
-    return _get_passdata(tapir_user)
+    return _get_passdata(tapir_user, session=session)
 
 
 def _get_user_by_username(username: str, session: SASession = DefaultSession) -> PassData:
