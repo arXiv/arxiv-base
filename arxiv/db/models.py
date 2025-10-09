@@ -65,7 +65,7 @@ class MemberInstitution(Base):
     """Deprecated - superceded by membership_institutions"""
 
     __tablename__ = "Subscription_UniversalInstitution"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
     resolver_URL: Mapped[Optional[str]] = mapped_column(String(255))
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
@@ -83,7 +83,7 @@ class MemberInstitutionContact(Base):
     """Deprecated - superceded by membership_institution_users"""
 
     __tablename__ = "Subscription_UniversalInstitutionContact"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
     email: Mapped[Optional[str]] = mapped_column(String(255))
 
     sid: Mapped[int] = mapped_column(ForeignKey("Subscription_UniversalInstitution.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -141,7 +141,7 @@ class AdminMetadata(Base):
     __tablename__ = "arXiv_admin_metadata"
     __table_args__ = (Index("arxiv_admin_pidv", "paper_id", "version", unique=True), {"mysql_charset": "latin1"})
 
-    metadata_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    metadata_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
     document_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE"), index=True)
     paper_id: Mapped[Optional[str]] = mapped_column(String(64))
     created: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -226,7 +226,7 @@ class Archive(Base):
 
 class AwsConfig(Base):
     __tablename__ = "arXiv_aws_config"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     domain: Mapped[str] = mapped_column(String(75), primary_key=True, nullable=False)
     keyname: Mapped[str] = mapped_column(String(60), primary_key=True, nullable=False)
@@ -235,7 +235,7 @@ class AwsConfig(Base):
 
 class AwsFile(Base):
     __tablename__ = "arXiv_aws_files"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     type: Mapped[str] = mapped_column(String(10), nullable=False, index=True, server_default=FetchedValue())
     filename: Mapped[str] = mapped_column(String(100), primary_key=True, server_default=FetchedValue())
@@ -733,7 +733,7 @@ class MirrorList(Base):
 
 class ModeratorApiKey(Base):
     __tablename__ = "arXiv_moderator_api_key"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True, nullable=False, server_default=FetchedValue())
     secret: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False, server_default=FetchedValue())
@@ -807,7 +807,7 @@ class NextMail(Base):
 
 class OrcidConfig(Base):
     __tablename__ = "arXiv_orcid_config"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     domain: Mapped[str] = mapped_column(String(75), primary_key=True, nullable=False)
     keyname: Mapped[str] = mapped_column(String(60), primary_key=True, nullable=False)
@@ -919,7 +919,7 @@ class RejectSessionUsername(Base):
 
 class SciencewisePing(Base):
     __tablename__ = "arXiv_sciencewise_pings"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     paper_id_v: Mapped[str] = mapped_column(String(32), primary_key=True)
     updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -984,7 +984,7 @@ class SubmissionAgreement(Base):
     __tablename__ = "arXiv_submission_agreements"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    agreement_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    agreement_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     effective_date: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
     commit_ref: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[Optional[str]] = mapped_column(Text)
@@ -1007,9 +1007,9 @@ class SubmissionCategory(Base):
 
 class SubmissionCategoryProposal(Base):
     __tablename__ = "arXiv_submission_category_proposal"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
-    proposal_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True)
+    proposal_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True, autoincrement=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True, nullable=False, index=True)
     category: Mapped[str] = mapped_column(ForeignKey("arXiv_category_def.category"), primary_key=True, nullable=False, index=True)
     is_primary: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True, server_default=FetchedValue())
@@ -1051,7 +1051,7 @@ class SubmissionControl(Base):
 
 class SubmissionFlag(Base):
     __tablename__ = "arXiv_submission_flag"
-    __table_args__ = (Index("uniq_one_flag_per_mod", "submission_id", "user_id", unique=True), {"mysql_charset": "utf8"})
+    __table_args__ = (Index("uniq_one_flag_per_mod", "submission_id", "user_id", unique=True), {"mysql_charset": "utf8mb3"})
 
     flag_id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), nullable=False, index=True, server_default=FetchedValue())
@@ -1061,17 +1061,17 @@ class SubmissionFlag(Base):
 
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_submission_flag")
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_submission_flag")
-    flag_pdf_opened: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    flag_done: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    flag_done_cleared: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    flag_viewed: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    flag_pdf_opened: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_done: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_done_cleared: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    flag_viewed: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
 
 
 class SubmissionHoldReason(Base):
     __tablename__ = "arXiv_submission_hold_reason"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
-    reason_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
+    reason_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), nullable=False, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), primary_key=True, nullable=False, index=True)
     reason: Mapped[Optional[str]] = mapped_column(String(30))
@@ -1085,7 +1085,7 @@ class SubmissionHoldReason(Base):
 
 class SubmissionNearDuplicate(Base):
     __tablename__ = "arXiv_submission_near_duplicates"
-    __table_args__ = (Index("match", "submission_id", "matching_id", unique=True), {"mysql_charset": "utf8"})
+    __table_args__ = (Index("match", "submission_id", "matching_id", unique=True), {"mysql_charset": "utf8mb3"})
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, nullable=False, server_default=FetchedValue())
     matching_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, server_default=FetchedValue())
@@ -1097,13 +1097,13 @@ class SubmissionNearDuplicate(Base):
 
 class SubmissionQaReport(Base):
     __tablename__ = "arXiv_submission_qa_reports"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     report_key_name: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     created: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
-    num_flags: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    num_flags: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
     report: Mapped[dict] = mapped_column(JSON, nullable=False)
     report_uri: Mapped[Optional[str]] = mapped_column(String(256))
 
@@ -1112,7 +1112,7 @@ class SubmissionQaReport(Base):
 
 class SubmissionViewFlag(Base):
     __tablename__ = "arXiv_submission_view_flag"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, nullable=False)
     flag: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -1125,7 +1125,7 @@ class SubmissionViewFlag(Base):
 
 class Submission(Base):
     __tablename__ = "arXiv_submissions"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     submission_id: Mapped[intpk]
     document_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"), index=True)
@@ -1186,11 +1186,11 @@ class Submission(Base):
     arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="submission")
     # to submission locks
     arXiv_submission_locks: Mapped[List["SubmissionLocks"]] = relationship("SubmissionLocks", back_populates="submission")
-    data_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    metadata_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    data_needed: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    data_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    metadata_version_queued: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    data_version: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
+    metadata_version: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'1'"))
+    data_needed: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    data_version_queued: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
+    metadata_version_queued: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
     preflight: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     data_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     metadata_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -1222,7 +1222,7 @@ class PilotDataset(Base):
 
 class SubmissionAbsClassifierDatum(Base):
     __tablename__ = "arXiv_submission_abs_classifier_data"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
@@ -1240,7 +1240,7 @@ class SubmissionAbsClassifierDatum(Base):
 
 class SubmissionClassifierDatum(Base):
     __tablename__ = "arXiv_submission_classifier_data"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     json: Mapped[Optional[str]] = mapped_column(Text)
@@ -1481,7 +1481,7 @@ t_demographics_backup = Table(
 
 class Session(Base):
     __tablename__ = "sessions"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     id: Mapped[str] = mapped_column(String(72), primary_key=True)
     session_data: Mapped[Optional[str]] = mapped_column(Text)
@@ -1775,7 +1775,7 @@ class TapirPolicyClass(Base):
     __tablename__ = "tapir_policy_classes"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    class_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    class_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, server_default=FetchedValue())
     description: Mapped[str] = mapped_column(Text, nullable=False)
     password_storage: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1850,7 +1850,7 @@ class TapirSession(Base):
     __tablename__ = "tapir_sessions"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    session_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    session_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=text("'0'"))
     last_reissue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     start_time: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
@@ -2030,7 +2030,7 @@ class Demographic(Base):
 
 class OrcidIds(Base):
     __tablename__ = "arXiv_orcid_ids"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), primary_key=True)
     orcid: Mapped[str] = mapped_column(String(19), nullable=False, index=True)
@@ -2040,7 +2040,7 @@ class OrcidIds(Base):
 
 class QueueView(Base):
     __tablename__ = "arXiv_queue_view"
-    __table_args__ = {"mysql_charset": "utf8"}
+    __table_args__ = {"mysql_charset": "utf8mb3"}
 
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), primary_key=True, server_default=FetchedValue())
     last_view: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -2106,7 +2106,7 @@ class SubmissionLocks(Base):
     __tablename__ = "arXiv_submission_locks"
     __table_args__ = (Index("arxiv_submission_locks_sub_index", "submission_id", "lock_type", unique=True), {"mysql_charset": "latin1"})
 
-    submission_lock_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    submission_lock_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     lock_type: Mapped[str] = mapped_column(String(20), nullable=False)
@@ -2142,7 +2142,7 @@ class MembershipUsers(Base):
     __tablename__ = "membership_users"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     sid: Mapped[int] = mapped_column(Integer, nullable=False)
     user_id: Mapped[Optional[int]] = mapped_column(Integer)
 
@@ -2205,7 +2205,7 @@ class CheckRoles(Base):
     __tablename__ = "arXiv_check_roles"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    check_role_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    check_role_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(40), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(200))
 
@@ -2219,7 +2219,7 @@ class CheckResultViews(Base):
     __tablename__ = "arXiv_check_result_views"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    check_result_view_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    check_result_view_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(40), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(200))
 
@@ -2234,7 +2234,7 @@ class CheckTargets(Base):
     __tablename__ = "arXiv_check_targets"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    check_target_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    check_target_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(40), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(200))
 
@@ -2246,7 +2246,7 @@ class Checks(Base):
     __tablename__ = "arXiv_checks"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    check_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    check_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     check_target_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_targets.check_target_id"), nullable=False, index=True)
     # , ondelete='CASCADE', onupdate='CASCADE'
     check_role_id = Column(ForeignKey("arXiv_check_roles.check_role_id"), index=False)
@@ -2256,7 +2256,7 @@ class Checks(Base):
     enable_check: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     enable_hold: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     enable_queue: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    retry_minutes: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    retry_minutes: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
     optional: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     persist_response: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     target: Mapped["CheckTargets"] = relationship("CheckTargets")
@@ -2273,7 +2273,7 @@ class CheckResults(Base):
     __tablename__ = "arXiv_check_results"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    check_result_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    check_result_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     data_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     metadata_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
@@ -2302,7 +2302,7 @@ class CheckResponses(Base):
     __tablename__ = "arXiv_check_responses"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    check_response_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    check_response_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     check_result_id: Mapped[int] = mapped_column(ForeignKey("arXiv_check_results.check_result_id"), nullable=False, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     ok: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -2323,7 +2323,7 @@ class flagged_user_comment(Base):
     __tablename__ = "flagged_user_comment"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     action: Mapped[Optional[str]] = mapped_column(String(32))
     comment: Mapped[Optional[str]] = mapped_column(String(255))
 
@@ -2332,7 +2332,7 @@ class flagged_user_detail(Base):
     __tablename__ = "flagged_user_detail"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     updated: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     creator_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)

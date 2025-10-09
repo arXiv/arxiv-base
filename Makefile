@@ -1,4 +1,5 @@
 PROD_DB_PROXY_PORT := 2021
+PROD_REPLICA_DB_NAME := arxiv-production-rep11
 
 .PHONY: prod-proxy test db-codegen
 
@@ -37,7 +38,7 @@ venv/lib/python3.11/site-packages/sqlalchemy: venv/bin/poetry
 
 
 prod-proxy:
-	/usr/local/bin/cloud-sql-proxy --address 0.0.0.0 --port ${PROD_DB_PROXY_PORT} arxiv-production:us-central1:arxiv-production-rep9 > /dev/null 2>&1 &
+	/usr/local/bin/cloud-sql-proxy --address 0.0.0.0 --port ${PROD_DB_PROXY_PORT} arxiv-production:us-central1:{PROD_REPLICA_DB_NAME} > /dev/null 2>&1 &
 
 test: venv/bin/poetry
 	venv/bin/poetry run pytest --cov=arxiv.base fourohfour --cov-fail-under=67 arxiv/base fourohfour

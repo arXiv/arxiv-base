@@ -11,6 +11,7 @@ import re
 import sys
 import os
 import time
+import argparse
 from typing import Tuple
 import logging
 import libcst as cst
@@ -496,7 +497,7 @@ def is_port_open(host: str, port: int):
 
 def run_mysql_container(port: int):
     """Start a mysql docker"""
-    mysql_image = "mysql:5.7.20"
+    mysql_image = "mysql:8.4.5"
     try:
         subprocess.run(["docker", "pull", mysql_image], check=True)
 
@@ -519,7 +520,7 @@ def run_mysql_container(port: int):
         logging.error(f"Unexpected error: {e}")
 
 
-def load_sql_file(sql_file, ssl_enabled=True):
+def load_sql_file(sql_file, mysql_port=3306, ssl_enabled=True):
     """Load a sql file to mysql
 
     If you see
@@ -532,9 +533,16 @@ ERROR:root:Error loading SQL file: Command '['mysql', '--host=127.0.0.1', '-uroo
     """
     with open(sql_file, encoding="utf-8") as sql:
         try:
-            subprocess.run(["mysql", "--host=127.0.0.1", "-uroot", "-ptestpassword", "--ssl-mode=disabled", "testdb"],
-                           stdin=sql, check=True)
-            logging.info(f"SQL file '{sql_file}' loaded successfully into 'testdb'.")
+            subprocess.run([
+                "mysql",
+                "--host=127.0.0.1",
+                f"--port={mysql_port}",
+                "-uroot",
+                "-ptestpassword",
+                "--ssl-mode=disabled",
+                "testdb"
+            ], stdin=sql, check=True)
+            logging.info(f"SQL file '{sql_file}' loaded successfully into 'testdb' on port {mysql_port}.")
         except subprocess.CalledProcessError as e:
             logging.error(f"Error loading SQL file: {e}")
             exit(1)
@@ -543,11 +551,27 @@ ERROR:root:Error loading SQL file: Command '['mysql', '--host=127.0.0.1', '-uroo
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description='Generate SQLAlchemy models from database schema'
+    )
+    parser.add_argument(
+        '--mysql-port',
+        type=int,
+        default=3306,
+        help='MySQL database port (default: 3306)'
+    )
+    parser.add_argument(
+        '--no-ssl',
+        action='store_true',
+        default=False,
+        help='Disable SSL/TLS for MySQL connection (default: SSL enabled)'
+    )
+    args = parser.parse_args()
 
     # This is the default mysql port. If you are using a native MySQL, that's fine. If you don't want to install
     # mysql, it uses the MySQL docker.
-    ssl_enabled = False
-    mysql_port = 3306
+    ssl_enabled = not args.no_ssl  # SSL enabled by default unless --no-ssl is specified
+    mysql_port = args.mysql_port
 
     arxiv_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     arxiv_dir = os.path.join(arxiv_base_dir, "arxiv")
@@ -567,9 +591,11 @@ def main() -> None:
 
 
     # Load the arxiv_db_schema.sql to the database.
-    load_sql_file(os.path.join(arxiv_dir, "db/arxiv_db_schema.sql"))
-    ssl_flags = "?ssl=false&ssl_mode=DISABLED"
-    p_url = "mysql://testuser:testpassword@127.0.0.1/testdb" + ssl_flags
+    load_sql_file(os.path.join(arxiv_dir, "db/arxiv_db_schema.sql"), mysql_port)
+
+    # Configure SSL flags based on ssl_enabled
+    ssl_flags = "" if ssl_enabled else "?ssl=false&ssl_mode=DISABLED"
+    p_url = f"mysql://testuser:testpassword@127.0.0.1:{mysql_port}/testdb" + ssl_flags
 
     sys.path.append(os.path.join(codegen_dir, "src"))
     subprocess.run(['venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile,
