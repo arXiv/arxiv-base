@@ -1010,9 +1010,9 @@ class SubmissionCategoryProposal(Base):
     __table_args__ = {"mysql_charset": "utf8mb3"}
 
     proposal_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True, autoincrement=True)
-    submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True, nullable=False, index=True)
-    category: Mapped[str] = mapped_column(ForeignKey("arXiv_category_def.category"), primary_key=True, nullable=False, index=True)
-    is_primary: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, index=True, server_default=FetchedValue())
+    submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    category: Mapped[str] = mapped_column(ForeignKey("arXiv_category_def.category"), nullable=False)
+    is_primary: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     proposal_status: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     updated: Mapped[Optional[datetime]] = mapped_column(DateTime)

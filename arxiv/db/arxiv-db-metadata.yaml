@@ -300,13 +300,16 @@ arXiv_submission_category:
   
 arXiv_submission_category_proposal:
   class_name: SubmissionCategoryProposal
+  columns:
+    submission_id: "mapped_column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)"
+    category: "mapped_column(ForeignKey('arXiv_category_def.category'), nullable=False)"
+    is_primary: "mapped_column(Integer, nullable=False, server_default=FetchedValue())"
   relationships:
     arXiv_category_def: "relationship('CategoryDef', primaryjoin='SubmissionCategoryProposal.category == CategoryDef.category', back_populates='arXiv_submission_category_proposal')"
     proposal_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.proposal_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal')"
     response_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.response_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal_')"
     submission: "relationship('Submission', primaryjoin='SubmissionCategoryProposal.submission_id == Submission.submission_id', back_populates='arXiv_submission_category_proposal')"
     user: "relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', back_populates='arXiv_submission_category_proposal')"
-
 
 arXiv_submission_control:
   table_args:
