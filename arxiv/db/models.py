@@ -1073,7 +1073,7 @@ class SubmissionHoldReason(Base):
 
     reason_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id", ondelete="CASCADE"), nullable=False, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), primary_key=True, nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), nullable=False)
     reason: Mapped[Optional[str]] = mapped_column(String(30))
     type: Mapped[Optional[str]] = mapped_column(String(30))
     comment_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_admin_log.id"), index=True)

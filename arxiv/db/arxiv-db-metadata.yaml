@@ -321,6 +321,9 @@ arXiv_submission_flag:
   class_name: SubmissionFlag
 arXiv_submission_hold_reason:
   class_name: SubmissionHoldReason
+  columns:
+    user_id: mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), nullable=False)
+
 arXiv_submission_locks:
   class_name: SubmissionLocks
 arXiv_submission_near_duplicates:
