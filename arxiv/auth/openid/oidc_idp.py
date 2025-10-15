@@ -326,13 +326,17 @@ class ArxivOidcIdpClient:
 
         return self.to_arxiv_user_claims(idp_token, idp_claims, client_ipv4)
 
-    def logout_user(self, user: ArxivUserClaims, redirect_url: Optional[str] = None) -> bool:
+    def logout_user(self, user: ArxivUserClaims, refresh_token: Optional[str] = None, redirect_url: Optional[str] = None) -> bool:
         """With user's access token, logout user.
 
         Parameters
         ----------
         user : ArxivUserClaims
             user claims
+        refresh_token : str
+            Keycloak Refresh Token - it doesn't work without it
+        redirect_url : str
+            redirect url
 
         Returns
         -------
@@ -345,7 +349,7 @@ class ArxivOidcIdpClient:
             }
             data = {
                 "client_id": self.client_id,
-                "refresh_token": user.refresh_token,
+                "refresh_token": str(refresh_token),
             }
             if self.client_secret:
                 data["client_secret"] = self.client_secret

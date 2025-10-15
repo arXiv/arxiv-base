@@ -53,8 +53,10 @@ from pydantic import BaseModel
 import jwt
 from . import domain
 from ..db.models import TapirPolicyClass
-from .auth import scopes
+from .auth import scopes, tokens
+from .auth.tokens import encode as ng_encode, decode as ng_decode
 from ..auth.domain import Session as ArxivSession
+
 
 class ArxivUserClaimsModel(BaseModel):
     sub: str            # User ID (subject)
@@ -102,6 +104,8 @@ claims_map = {
     "preferred_username": "username",
     "client_ipv4": "client_ipv4",
 }
+
+NG_COOKIE_HITCHHIKER_NAME = 'UserClaims'
 
 class ArxivUserClaims:
     """
@@ -303,61 +307,35 @@ class ArxivUserClaims:
 
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
         """packing user claims"""
+
+        # First, create a NG compatible payload
+        payload_ng = self.domain_session.json_safe_dict()
+
         claims = self._claims.model_dump()
         # you probably forgot to add "openid" scope in Keycloak if id_token is not in it.
         # 2025-08-15 ntai: good news! I don't need to carry ID Token anymore. It was needed only for log out,
         # but I found out that you can revoke the keycloak user session with refresh token.
+        del claims['acc']
         if 'idt' in claims:
             del claims['idt']
-        del claims['acc']
         if 'refresh' in claims:
             del claims['refresh']
-        payload = jwt.encode(claims, secret, algorithm=algorithm)
-        # assert(',' not in self.id_token)
-        assert(',' not in self.access_token)
-        assert(',' not in payload)
-        # access_token = self.access_token
-        # remove the access token from packing. Payload is from access token, and since I'm not using this,
-        # save the space.
-        # I think the access token should be attached to the authentication bearer token
-        refresh_token = "" if not self.refresh_token else self.refresh_token
-        # "no-idt" was ID token - self.id_token
-        tokens = ["5", self.expires_at.isoformat(), claims['sub'], "no-idt", refresh_token, payload]
-        token = ",".join(tokens)
+
+        # then hitch the claims
+        payload_ng[NG_COOKIE_HITCHHIKER_NAME] = claims
+        token = jwt.encode(payload_ng, secret, algorithm=algorithm)
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
         return token
 
-    @classmethod
-    def unpack_token(cls, token: str) -> Tuple[dict, str]:
-        """the cookie/token needs to be split between non-encrypted and encrypted claims.
-        Then, ues decode_jwt_payload.
-        """
-        chunks = token.split(',')
-        # Chunk 0 should be 5 - is a version number
-        # chunk 1 is expiration - This is NOT internally used. This is to show
-        # to the UI when the cookie expires
-        # chunk 2 is user id,
-        # chunk 3 is id token
-        # chunk 4 is refresh token
-        # chunk 5 is payload
-        if chunks[0] != '5':
-            raise ValueError(f'Token is invalid')
-
-        tokens = {
-            'expires_at': chunks[1],
-            'sub': chunks[2],
-            'idt': chunks[3],
-            'refresh': chunks[4]
-        }
-        return tokens, chunks[5]
 
     @classmethod
     def decode_jwt_payload(cls, tokens: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
         """
         Decodes the user claims.
         """
-        payload = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
+        payload_ng = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
+        payload = payload_ng.get(NG_COOKIE_HITCHHIKER_NAME, {})
         tokens.update(payload)
         return cls(ArxivUserClaimsModel.model_validate(tokens))
 
@@ -381,14 +359,14 @@ class ArxivUserClaims:
                 profile = user_profile,
                 verified = self.email_verified,
             )
-            user_scopes = scopes.GENERAL_USER
-            if self.is_admin:
-                user_scopes = scopes.ADMIN_USER
-
-            authorizations = domain.Authorizations(
-                classic = self.classic_capability_code,
-                scopes = user_scopes,
-            )
+            # user_scopes = scopes.GENERAL_USER
+            # if self.is_admin:
+            #     user_scopes = scopes.ADMIN_USER
+            # authorizations = domain.Authorizations(
+            #     classic = self.classic_capability_code,
+            #     scopes = user_scopes,
+            # )
+            authorizations = None
 
             session_id = str(self.tapir_session_id) if self.tapir_session_id else "no-session-id"
             self._domain_session = domain.Session(
@@ -400,7 +378,7 @@ class ArxivUserClaims:
                 authorizations = authorizations, # Optional[Authorizations] = None Authorizations for the current session.
                 ip_address = self.client_ip4v, # Optional[str] = None
                 remote_host = None, #: Optional[str] = None
-                nonce = self.refresh_token # : Optional[str] = None
+                nonce=self.kc_session_id  # : Optional[str] = None
             )
         return self._domain_session
 
