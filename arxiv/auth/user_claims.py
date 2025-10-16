@@ -52,6 +52,7 @@ from typing import Any, Optional, List, Tuple
 from pydantic import BaseModel
 import jwt
 from . import domain
+from .auth.sessions.ng_session_types import NGSessionPayload
 from ..db.models import TapirPolicyClass
 from .auth import scopes, tokens
 from .auth.tokens import encode as ng_encode, decode as ng_decode
@@ -105,7 +106,7 @@ claims_map = {
     "client_ipv4": "client_ipv4",
 }
 
-NG_COOKIE_HITCHHIKER_NAME = 'UserClaims'
+NG_COOKIE_HITCHHIKER_NAME = 'nonce'
 
 class ArxivUserClaims:
     """
@@ -308,9 +309,6 @@ class ArxivUserClaims:
     def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
         """packing user claims"""
 
-        # First, create a NG compatible payload
-        payload_ng = self.domain_session.json_safe_dict()
-
         claims = self._claims.model_dump()
         # you probably forgot to add "openid" scope in Keycloak if id_token is not in it.
         # 2025-08-15 ntai: good news! I don't need to carry ID Token anymore. It was needed only for log out,
@@ -321,8 +319,17 @@ class ArxivUserClaims:
         if 'refresh' in claims:
             del claims['refresh']
 
-        # then hitch the claims
-        payload_ng[NG_COOKIE_HITCHHIKER_NAME] = claims
+        # create a NG compatible payload
+        # FixMe?: This is "randomly created" in arxiv.auth.sessions.store without the shape. I gave it a shape.
+        # modapi has the same shape as Auth. It would
+        ng_session = NGSessionPayload(
+            user_id=str(self.user_id),
+            session_id=str(self.tapir_session_id),
+            nonce=json.dumps(claims), # hitch the payload as nonce
+            expires=self.expires_at.isoformat()
+        )
+        payload_ng = ng_session.model_dump()
+
         token = jwt.encode(payload_ng, secret, algorithm=algorithm)
         if len(token) > 4096:
             raise ValueError(f'JWT token is too long {len(token)} bytes')
@@ -335,7 +342,11 @@ class ArxivUserClaims:
         Decodes the user claims.
         """
         payload_ng = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
-        payload = payload_ng.get(NG_COOKIE_HITCHHIKER_NAME, {})
+        try:
+            payload = json.loads(payload_ng.get(NG_COOKIE_HITCHHIKER_NAME))
+        except Exception as e:
+            payload = {}
+            pass
         tokens.update(payload)
         return cls(ArxivUserClaimsModel.model_validate(tokens))
 
@@ -359,13 +370,13 @@ class ArxivUserClaims:
                 profile = user_profile,
                 verified = self.email_verified,
             )
-            # user_scopes = scopes.GENERAL_USER
-            # if self.is_admin:
-            #     user_scopes = scopes.ADMIN_USER
-            # authorizations = domain.Authorizations(
-            #     classic = self.classic_capability_code,
-            #     scopes = user_scopes,
-            # )
+            user_scopes = scopes.GENERAL_USER
+            if self.is_admin:
+                user_scopes = scopes.ADMIN_USER
+            authorizations = domain.Authorizations(
+                classic = self.classic_capability_code,
+                scopes = user_scopes,
+            )
             authorizations = None
 
             session_id = str(self.tapir_session_id) if self.tapir_session_id else "no-session-id"
