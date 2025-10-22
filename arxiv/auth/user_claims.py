@@ -347,8 +347,13 @@ class ArxivUserClaims:
         except Exception as e:
             payload = {}
             pass
-        tokens.update(payload)
-        return cls(ArxivUserClaimsModel.model_validate(tokens))
+        if isinstance(payload, dict):
+            try:
+                tokens.update(payload)
+                return cls(ArxivUserClaimsModel.model_validate(tokens))
+            except Exception as e:
+                raise ValueError(f'Failed to decode ArxivUserClaimsModel: {payload}') from e
+        raise ValueError(f'Failed to decode JWT payload {payload}')
 
 
     def update_keycloak_access_token(self, updates: dict) -> None:
