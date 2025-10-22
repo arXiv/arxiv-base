@@ -6,7 +6,8 @@ class NGSessionPayload(BaseModel):
     user_id: str
     session_id: str
     nonce: Optional[str] = None
-    expires: str     # ISO date format
+    expires: str                  # ISO date format
+    claims: Optional[str] = None  # NG_COOKIE_HITCHHIKER_NAME
     class Config:
         from_attributes = True
         extra = "ignore"

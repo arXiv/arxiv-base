@@ -106,7 +106,7 @@ claims_map = {
     "client_ipv4": "client_ipv4",
 }
 
-NG_COOKIE_HITCHHIKER_NAME = 'nonce'
+NG_COOKIE_HITCHHIKER_NAME = 'claims'
 
 class ArxivUserClaims:
     """
@@ -322,11 +322,15 @@ class ArxivUserClaims:
         # create a NG compatible payload
         # FixMe?: This is "randomly created" in arxiv.auth.sessions.store without the shape. I gave it a shape.
         # modapi has the same shape as Auth. It would
+        payload_ce = {
+            NG_COOKIE_HITCHHIKER_NAME: json.dumps(claims),
+        }
+
         ng_session = NGSessionPayload(
             user_id=str(self.user_id),
             session_id=str(self.tapir_session_id),
-            nonce=json.dumps(claims), # hitch the payload as nonce
-            expires=self.expires_at.isoformat()
+            expires=self.expires_at.isoformat(),
+            **payload_ce
         )
         payload_ng = ng_session.model_dump()
 
