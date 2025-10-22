@@ -41,16 +41,18 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
     meta=aliased(Metadata)
     up=aliased(Updates)
 
-    result=(
-        Session.query(
-        meta.abs_categories, 
-        func.max(up.date)
+    with Session() as session:
+        result=(
+            session.query(
+            meta.abs_categories, 
+            func.max(up.date)
+            )
+            .outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly")) #left join
+            .filter(meta.paper_id==arxiv_id.id)
+            .filter(meta.is_current==1)
+            .first()
         )
-        .outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly")) #left join
-        .filter(meta.paper_id==arxiv_id.id)
-        .filter(meta.is_current==1)
-        .first()
-    )
+        
     new_cats: str=result[0]
     recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
 
