@@ -539,7 +539,7 @@ ERROR:root:Error loading SQL file: Command '['mysql', '--host=127.0.0.1', '-uroo
                 f"--port={mysql_port}",
                 "-uroot",
                 "-ptestpassword",
-                "--ssl-mode=disabled",
+                "--ssl-mode=REQUIRED" if ssl_enabled else "--ssl-mode=disabled",
                 "testdb"
             ], stdin=sql, check=True)
             logging.info(f"SQL file '{sql_file}' loaded successfully into 'testdb' on port {mysql_port}.")
@@ -591,7 +591,7 @@ def main() -> None:
 
 
     # Load the arxiv_db_schema.sql to the database.
-    load_sql_file(os.path.join(arxiv_dir, "db/arxiv_db_schema.sql"), mysql_port)
+    load_sql_file(os.path.join(arxiv_dir, "db/arxiv_db_schema.sql"), mysql_port, ssl_enabled)
 
     # Configure SSL flags based on ssl_enabled
     ssl_flags = "" if ssl_enabled else "?ssl=false&ssl_mode=DISABLED"

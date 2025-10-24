@@ -57,6 +57,9 @@ from . import Base, LaTeXMLBase, metadata, session_factory, _classic_engine, _la
 from .types import intpk
 from ..document.version import SOURCE_FORMAT
 
+# This is used. Don't take it out unless we move onto ues utf-8 database
+from .column_types import Utf8Text, Utf8String
+
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
 
@@ -1622,10 +1625,10 @@ class TapirEmailTemplate(Base):
     __table_args__ = (Index("short_name", "short_name", "lang", unique=True), {"mysql_charset": "latin1"})
 
     template_id: Mapped[intpk]
-    short_name: Mapped[str] = mapped_column(String(32), nullable=False, server_default=FetchedValue())
+    short_name: Mapped[str] = mapped_column(Utf8String(32), nullable=False, server_default=FetchedValue())
     lang: Mapped[str] = mapped_column(String(2), nullable=False, server_default=FetchedValue())
-    long_name: Mapped[str] = mapped_column(String(255), nullable=False, server_default=FetchedValue())
-    data: Mapped[str] = mapped_column(Text, nullable=False)
+    long_name: Mapped[str] = mapped_column(Utf8String(255), nullable=False, server_default=FetchedValue())
+    data: Mapped[str] = mapped_column(Utf8Text, nullable=False)
     sql_statement: Mapped[str] = mapped_column(Text, nullable=False)
     update_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     created_by: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())

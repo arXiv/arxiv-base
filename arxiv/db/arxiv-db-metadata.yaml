@@ -424,8 +424,14 @@ tapir_email_log:
   class_name: TapirEmailLog
 tapir_email_mailings:
   class_name: TapirEmailMailing
+
 tapir_email_templates:
   class_name: TapirEmailTemplate
+  columns:
+    short_name: "mapped_column(Utf8String(32), nullable=False, server_default=FetchedValue())"
+    long_name: "mapped_column(Utf8String(255), nullable=False, server_default=FetchedValue())"
+    data: "mapped_column(Utf8Text, nullable=False)"
+
 tapir_email_tokens:
   class_name: TapirEmailToken
 tapir_integer_variables:

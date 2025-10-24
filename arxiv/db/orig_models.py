@@ -62,6 +62,9 @@ from . import Base, LaTeXMLBase, metadata, \
 from .types import intpk
 from ..document.version import SOURCE_FORMAT
 
+# This is used. Don't take it out unless we move onto ues utf-8 database
+from .column_types import Utf8Text, Utf8String
+
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
 
