@@ -1,6 +1,6 @@
 // File: member_acknowledgement.js
 
-(function() {
+(function () {
   getMemberInstitutionName();
   async function getMemberInstitutionName() {
     label = localStorage.getItem("member_label");
@@ -19,24 +19,24 @@
       localStorage.removeItem("member_label");
       localStorage.removeItem("member_expires");
 
-      lookup_failed = false
+      lookup_failed = false;
       label = localStorage.getItem("member_label");
-      if (! label) {
+      if (!label) {
         let result = await fetch("/institutional_banner");
         if (result && result.ok) {
-            let j = await result.json();
-            label = j["label"];
-            if (label) {
-              localStorage.setItem("member_label", label);
-            }
+          let j = await result.json();
+          label = j["label"];
+          if (label) {
+            localStorage.setItem("member_label", label);
+          }
         } else {
-          lookup_failed = true
+          lookup_failed = true;
         }
       }
 
-      expires_ms = 30*24*60*60*1000;
+      expires_ms = 30 * 24 * 60 * 60 * 1000;
       if (lookup_failed) {
-        expires_ms = 1*60*60*1000; // try sooner if db issue.
+        expires_ms = 1 * 60 * 60 * 1000; // try sooner if db issue.
       }
       const new_expires = new Date();
       new_expires.setTime(new_expires.getTime() + expires_ms);
@@ -44,9 +44,12 @@
     }
 
     if (label) {
-      s = 'We gratefully acknowledge support from<br/>';
-      s += 'the Simons Foundation, <a href="https://info.arxiv.org/about/ourmembers.html">' + label + "</a>, and all contributors.";
-      support_elem = document.getElementById('support-ack-url');
+      s = "We gratefully acknowledge support from<br/>";
+      s +=
+        'the Simons Foundation, Schmidt Sciences, <a href="https://info.arxiv.org/about/ourmembers.html">' +
+        label +
+        "</a>, and all contributors.";
+      support_elem = document.getElementById("support-ack-url");
       if (support_elem) {
         support_elem.innerHTML = s;
       }
