@@ -52,7 +52,7 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
             .filter(meta.is_current==1)
             .first()
         )
-
+        
     new_cats: str=result[0]
     recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
 
