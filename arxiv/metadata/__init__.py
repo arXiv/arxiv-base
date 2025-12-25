@@ -1,28 +1,32 @@
-
 # placeholder
 
 from enum import StrEnum
 from enum import IntEnum
+
 
 class Color(StrEnum):
     RED = "red"
     GREEN = "green"
     BLUE = "blue"
 
+
 class FieldName(StrEnum):
     TITLE = "title"
     AUTHORS = "authors"
     ABSTRACT = "abstract"
-    # source_type is internal, not checked 
+    # source_type is internal, not checked
     COMMENTS = "comments"
     REPORT_NUM = "report_num"
     JOURNAL_REF = "journal_ref"
     DOI = "doi"
+    MSC_CLASS = "msc_class"
+
 
 class Disposition(StrEnum):
     OK = "ok"
     WARN = "warn"
     HOLD = "hold"
+
 
 class Complaint(IntEnum):
     CANNOT_BE_EMPTY = 1
@@ -38,3 +42,4 @@ class Complaint(IntEnum):
     MUST_CONTAIN_DIGITS = 11
     MUST_CONTAIN_YEAR = 12
     MUST_BE_ENGLISH = 13
+    TOO_LONG = 14
