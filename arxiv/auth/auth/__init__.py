@@ -10,7 +10,6 @@ from flask import Flask, request, Response
 from retry import retry
 
 from ...db import transaction
-from ..legacy import util
 from ..legacy.cookies import parse_cookie
 from .. import domain, legacy
 
@@ -143,7 +142,7 @@ class Auth(object):
             raise req_auth
 
         if not req_auth:
-            if util.is_configured():
+            if legacy.util.is_configured():
                 req_auth = self.first_valid(self.legacy_cookies())
             else:
                 logger.warning('No legacy DB, will not check tapir auth.')
@@ -196,5 +195,7 @@ class Auth(object):
         This is useful to get an idea of what is going on with auth.
         """
         logger.setLevel(logging.DEBUG)
-        legacy.sessions.logger.setLevel(logging.DEBUG)
-        legacy.authenticate.logger.setLevel(logging.DEBUG)
+        from ..legacy.sessions import logger as legacy_sessions_logger
+        legacy_sessions_logger.setLevel(logging.DEBUG)
+        from ..legacy.authenticate import logger as legacy_authenticate_logger
+        legacy_authenticate_logger.setLevel(logging.DEBUG)
