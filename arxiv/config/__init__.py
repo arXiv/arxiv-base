@@ -5,7 +5,8 @@ import os
 from sqlalchemy.engine.interfaces import IsolationLevel
 from secrets import token_hex
 from urllib.parse import urlparse
-from pydantic import BaseSettings, SecretStr
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings
 
 DEFAULT_DB = "sqlite:///tests/data/browse.db"
 DEFAULT_LATEXML_DB = "sqlite:///tests/data/latexml.db"
@@ -114,24 +115,6 @@ class Settings(BaseSettings):
     For details, see :mod:`arxiv.base.urls`.
     """
 
-    # In order to provide something close to the config_url behavior, this will
-    # look for ARXIV_{endpoint}_URL variables in the environ, and update `URLS`
-    # accordingly.
-    for key, value in os.environ.items():
-        if key.startswith("ARXIV_") and key.endswith("_URL"):
-            endpoint = "_".join(key.split("_")[1:-1]).lower()
-            o = urlparse(value)
-            if not o.netloc:  # Doesn't raise an exception.
-                continue
-            i: Optional[int]
-            try:
-                i = list(zip(*URLS))[0].index(endpoint)
-            except ValueError:
-                i = None
-            if i is not None:
-                URLS[i] = (endpoint, o.path, o.netloc)
-
-
     ARXIV_BUSINESS_TZ: str = "US/Eastern"
     """Timezone of the arxiv business offices."""
 
@@ -195,4 +178,6 @@ class Settings(BaseSettings):
     FASTLY_SERVICE_IDS:str='{"arxiv.org":"umpGzwE2hXfa2aRXsOQXZ4", "browse.dev.arxiv.org":"5eZxUHBG78xXKNrnWcdDO7", "export.arxiv.org": "hCz5jlkWV241zvUN0aWxg2", "rss.arxiv.org": "yPg50VJsPLwZQ5lFsD7rA1"}'
     """a dictionary of the various fastly services and their ids"""
     FASTLY_PURGE_TOKEN:str= "FASTLY_PURGE_TOKEN"
+
+
 settings = Settings()

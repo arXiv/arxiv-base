@@ -24,20 +24,26 @@ _names_map_:
 #
 Subscription_UniversalInstitution:
   class_name: MemberInstitution
-  relationships:
-    Subscription_UniversalInstitutionContact: ""
-    Subscription_UniversalInstitutionIP: ""
+
+#  relationships:
+#    Subscription_UniversalInstitutionContact: ""
+#    Subscription_UniversalInstitutionIP: ""
 
 Subscription_UniversalInstitutionContact:
   class_name: MemberInstitutionContact
   columns:
     sid: "mapped_column(ForeignKey('Subscription_UniversalInstitution.id', ondelete='CASCADE'), nullable=False, index=True)"
+  relationships:
+    Subscription_UniversalInstitution: 'relationship("MemberInstitution", primaryjoin="MemberInstitutionContact.sid == MemberInstitution.id")'
 
 Subscription_UniversalInstitutionIP:
   class_name: MemberInstitutionIP
 
 arXiv_admin_log:
   class_name: AdminLog
+  columns:
+    updated: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))"
+  
 arXiv_admin_metadata:
   class_name: AdminMetadata
   table_args:
@@ -294,13 +300,16 @@ arXiv_submission_category:
   
 arXiv_submission_category_proposal:
   class_name: SubmissionCategoryProposal
+  columns:
+    submission_id: "mapped_column(ForeignKey('arXiv_submissions.submission_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)"
+    category: "mapped_column(ForeignKey('arXiv_category_def.category'), nullable=False)"
+    is_primary: "mapped_column(Integer, nullable=False, server_default=FetchedValue())"
   relationships:
     arXiv_category_def: "relationship('CategoryDef', primaryjoin='SubmissionCategoryProposal.category == CategoryDef.category', back_populates='arXiv_submission_category_proposal')"
     proposal_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.proposal_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal')"
     response_comment: "relationship('AdminLog', primaryjoin='SubmissionCategoryProposal.response_comment_id == AdminLog.id', back_populates='arXiv_submission_category_proposal_')"
     submission: "relationship('Submission', primaryjoin='SubmissionCategoryProposal.submission_id == Submission.submission_id', back_populates='arXiv_submission_category_proposal')"
     user: "relationship('TapirUser', primaryjoin='SubmissionCategoryProposal.user_id == TapirUser.user_id', back_populates='arXiv_submission_category_proposal')"
-
 
 arXiv_submission_control:
   table_args:
@@ -312,6 +321,9 @@ arXiv_submission_flag:
   class_name: SubmissionFlag
 arXiv_submission_hold_reason:
   class_name: SubmissionHoldReason
+  columns:
+    user_id: mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE"), nullable=False)
+
 arXiv_submission_locks:
   class_name: SubmissionLocks
 arXiv_submission_near_duplicates:
@@ -412,8 +424,14 @@ tapir_email_log:
   class_name: TapirEmailLog
 tapir_email_mailings:
   class_name: TapirEmailMailing
+
 tapir_email_templates:
   class_name: TapirEmailTemplate
+  columns:
+    short_name: "mapped_column(Utf8String(32), nullable=False, server_default=FetchedValue())"
+    long_name: "mapped_column(Utf8String(255), nullable=False, server_default=FetchedValue())"
+    data: "mapped_column(Utf8Text, nullable=False)"
+
 tapir_email_tokens:
   class_name: TapirEmailToken
 tapir_integer_variables:
@@ -463,7 +481,9 @@ tapir_users:
       arXiv_jref_controls: "relationship('JrefControl', back_populates='user')"
     arXiv_cross_control:
       arXiv_cross_controls: "relationship('CrossControl', back_populates='user')"
-      
+    tapir_nicknames:
+      tapir_nicknames: ":Mapped['TapirNickname'] = relationship('TapirNickname', back_populates='user', uselist=False)"
+
   additional_relationships:
     - "demographics = relationship('Demographic', foreign_keys='[Demographic.user_id]', uselist=False, back_populates='user')"
 
@@ -559,3 +579,9 @@ arXiv_check_responses:
   table_args: drop
   relationships:
     check_result: "relationship('CheckResults', back_populates='check_responses')"
+
+flagged_user_detail:
+  columns:
+    # updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    # the server default does not work with sqlite3 and breaks tests
+    updated: "mapped_column(DateTime, nullable=False)"

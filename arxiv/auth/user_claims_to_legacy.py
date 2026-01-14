@@ -6,19 +6,19 @@ from .legacy.sessions import (
     generate_cookie as generate_legacy_cookie,
     invalidate as legacy_invalidate,
 )
-from ..db import transaction
-
+from sqlalchemy.orm import Session as SQLAlchemySession
 
 from .user_claims import ArxivUserClaims
-from .domain import Authorizations, Session
+from .domain import Session as DomainSession
 
 # PassData = Tuple[TapirUser, TapirUsersPassword, TapirNickname, Demographic]
 
-def create_tapir_session_from_user_claims(user_claims: ArxivUserClaims,
+def create_tapir_session_from_user_claims(db: SQLAlchemySession,
+                                          user_claims: ArxivUserClaims,
                                           client_host: str,
                                           client_ip: str,
                                           tracking_cookie: str = '',
-                                          ) -> Optional[Tuple[str, Session]]:
+                                          ) -> Optional[Tuple[str, DomainSession]]:
     """
     Using the legacy tapir models, establish the session and return the legacy cookie.
 
@@ -34,7 +34,7 @@ def create_tapir_session_from_user_claims(user_claims: ArxivUserClaims,
         pass
 
     try:
-        passdata = _get_user_by_user_id(user_id)
+        passdata = _get_user_by_user_id(user_id, session=db)
     except NoSuchUser:
         pass
 
@@ -43,23 +43,9 @@ def create_tapir_session_from_user_claims(user_claims: ArxivUserClaims,
         return None
 
     tapir_user, legacy_auth = instantiate_tapir_user(passdata)
-    session: Session = create_legacy_session(legacy_auth, client_ip, client_host,
-                                             tracking_cookie=tracking_cookie,
-                                             user=tapir_user)
+    session: DomainSession = create_legacy_session(
+        legacy_auth, client_ip, client_host,
+        tracking_cookie=tracking_cookie, user=tapir_user, db=db)
     legacy_cookie = generate_legacy_cookie(session)
     return legacy_cookie, session
 
-
-def create_legacy_user(user_claims: ArxivUserClaims) -> PassData:
-    """
-    Very likely, this isn't going to happen here.
-    """
-    return "TBD"
-
-
-def terminate_legacy_session(legacy_cookie: str) -> None:
-    """
-    This is an alias to existing session killer.
-    """
-    with transaction() as session:
-        legacy_invalidate(legacy_cookie)
