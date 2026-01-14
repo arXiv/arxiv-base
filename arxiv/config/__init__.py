@@ -178,7 +178,7 @@ class Settings(BaseSettings):
 
     FASTLY_SERVICE_IDS: str = '{"arxiv.org":"umpGzwE2hXfa2aRXsOQXZ4", "browse.dev.arxiv.org":"5eZxUHBG78xXKNrnWcdDO7", "export.arxiv.org": "hCz5jlkWV241zvUN0aWxg2", "rss.arxiv.org": "yPg50VJsPLwZQ5lFsD7rA1"}'
     """a dictionary of the various fastly services and their ids"""
-    FASTLY_PURGE_TOKEN:str= "FASTLY_PURGE_TOKEN"
+    FASTLY_PURGE_TOKEN: str= "FASTLY_PURGE_TOKEN"
 
 
 settings = Settings()
