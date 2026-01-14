@@ -26,7 +26,7 @@ class ISO8601JSONDecoder(json.JSONDecoder):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Pass :func:`object_hook` to the base constructor."""
-        kwargs['object_hook'] = kwargs.get('object_hook', self.object_hook)
+        kwargs["object_hook"] = kwargs.get("object_hook", self.object_hook)
         super(ISO8601JSONDecoder, self).__init__(*args, **kwargs)
 
     def _try_isoparse(self, value: Any) -> Any:

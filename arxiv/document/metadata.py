@@ -1,4 +1,5 @@
 """Representations of arXiv document metadata."""
+
 from collections import abc
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -23,7 +24,7 @@ class Submitter:
     email: str
     """Email address."""
 
-    __slots__ = ['name', 'email']
+    __slots__ = ["name", "email"]
 
 
 @dataclass
@@ -33,7 +34,7 @@ class AuthorList:
     raw: str
     """Raw author field string."""
 
-    __slots__ = ['raw']
+    __slots__ = ["raw"]
 
     def __str__(self) -> str:
         """Return the string representation of AuthorList."""
@@ -67,8 +68,6 @@ class DocMetadata:
 
     submitter: Submitter
     """Submitter of the article."""
-
-    
 
     categories: Optional[str]
     """Article classification (raw string)."""
@@ -104,7 +103,12 @@ class DocMetadata:
     comments: Optional[str] = None
     """Submitter- and/or administrator-provided comments about the article."""
 
-    __source_format_options__ = Literal['tex', 'pdftex', 'ps', 'html', ]
+    __source_format_options__ = Literal[
+        "tex",
+        "pdftex",
+        "ps",
+        "html",
+    ]
     source_format: Optional[__source_format_options__] = None
 
     version: int = 1
@@ -125,8 +129,6 @@ class DocMetadata:
     """Indicates whether this DocMetadata is from the latest version of this
     article."""
 
-
-
     private: bool = field(default=False)
     """TODO: NOT IMPLEMENTED """
     """Description from arxiv classic: Flag set by init_from_file to
@@ -141,9 +143,9 @@ class DocMetadata:
         """Post-initialization checks if is_definitive is True."""
         if self.is_definitive:
             if self.categories is None:
-                raise ValueError('categories must be defined')
+                raise ValueError("categories must be defined")
             if self.primary_category is None:
-                raise ValueError('primary category must be defined')
+                raise ValueError("primary category must be defined")
 
     def get_browse_context_list(self) -> List[str]:
         """Get the list of archive/category IDs to generate browse context."""
@@ -153,11 +155,10 @@ class DocMetadata:
             else:
                 return []
 
-
         if self.primary_category:
             options = {
                 self.primary_category.id: True,
-                self.primary_category.in_archive: True
+                self.primary_category.in_archive: True,
             }
         else:
             options = {}
@@ -179,17 +180,18 @@ class DocMetadata:
             return 1
         if not isinstance(self.version_history, abc.Iterable):
             raise ValueError(
-                f'version_history was not an Iterable for {self.arxiv_id_v}')
+                f"version_history was not an Iterable for {self.arxiv_id_v}"
+            )
         return max(map(lambda ve: ve.version, self.version_history))
 
     def get_requested_version(self) -> VersionEntry:
         """Get the version indicated in `self.arxiv_identifier.version`."""
         ver_obj = self.get_version()
         if not ver_obj:
-            raise ValueError('{self.arxiv_id} version_history has no version {version}')
+            raise ValueError("{self.arxiv_id} version_history has no version {version}")
         return ver_obj
 
-    def get_version(self, version:Optional[int] = None) -> Optional[VersionEntry]:
+    def get_version(self, version: Optional[int] = None) -> Optional[VersionEntry]:
         """Gets `VersionEntry` for `version`.
 
         Returns None if version does not exist.
@@ -202,18 +204,17 @@ class DocMetadata:
 
         if version < 1:
             raise ValueError("Version must be > 1")
-        versions = list(
-            v for v in self.version_history if v.version == version)
+        versions = list(v for v in self.version_history if v.version == version)
         if len(versions) > 1:
             raise ValueError(
-                '{self.arxiv_id} version_history had more than one version {version}')
+                "{self.arxiv_id} version_history had more than one version {version}"
+            )
         if not versions:
             return None
         else:
             return versions[0]
 
-    def get_datetime_of_version(
-            self, version: Optional[int]) -> Optional[datetime]:
+    def get_datetime_of_version(self, version: Optional[int]) -> Optional[datetime]:
         """Returns python datetime of version.
 
         version: Version to get datetime of. Must be in range
@@ -222,22 +223,22 @@ class DocMetadata:
         if not version:
             version = self.highest_version()
 
-        versions = list(
-            v for v in self.version_history if v.version == version)
+        versions = list(v for v in self.version_history if v.version == version)
         if len(versions) > 1:
             raise ValueError(
-                '{self.arxiv_id} version_history had more than one version {version}')
+                "{self.arxiv_id} version_history had more than one version {version}"
+            )
         if not versions:
             return None
         else:
             return versions[0].submitted_date
-    
+
     def get_secondaries(self) -> Set[Category]:
         """Unalias and deduplicate secondary categories."""
         if not self.secondary_categories or not self.primary_category:
             return set()
-  
-        result=set()
+
+        result = set()
         for cat in self.secondary_categories:
             result.add(cat.get_canonical())
         result.discard(self.primary_category.get_canonical())
@@ -246,9 +247,9 @@ class DocMetadata:
 
     def display_secondaries(self) -> List[str]:
         """Unalias, dedup and sort secondaries for display."""
-        
-        de_primaried=sorted(self.get_secondaries(), key=lambda cat: cat.id)
-        result=[]
+
+        de_primaried = sorted(self.get_secondaries(), key=lambda cat: cat.id)
+        result = []
         for cat in de_primaried:
             result.append(cat.display())
         return result
@@ -268,7 +269,7 @@ class DocMetadata:
     def raw(self) -> str:
         """Produces a txt output of the object.
 
-        Based on arXiv::Schema:Role:WrtieAbs
+        Based on arXiv::Schema:Role:WriteAbs
         """
         rv = "------------------------------------------------------------------------------\n"
         rv += "\\\n"
@@ -276,9 +277,14 @@ class DocMetadata:
         rv += f"From: {self.submitter.name}\n"
         for version in self.version_history:
             rev = "" if version.version == 1 else f" (revised v{version.version})"
-            rv += f"Date{rev}: {version.submitted_date.strftime('%a, %-d %b %Y %H:%M:%S %Z')}   "\
+            rv += (
+                f"Date{rev}: {version.submitted_date.strftime('%a, %-d %b %Y %H:%M:%S %Z')}   "
                 f"({version.size_kilobytes}kb"
-            if version.source_flag.code and version.source_flag.code.upper() == version.source_flag.code:
+            )
+            if (
+                version.source_flag.code
+                and version.source_flag.code.upper() == version.source_flag.code
+            ):
                 rv += f",{version.source_flag.code}"
             rv += ")\n"
 

@@ -6,35 +6,35 @@ import importlib
 import inspect
 import argparse
 
-from sqlalchemy import (
-    create_engine, 
-    func, 
-    select, 
-    Subquery,
-    insert
-)
+from sqlalchemy import create_engine, func, select, Subquery, insert
 from sqlalchemy.sql import tuple_
-from sqlalchemy.orm import (
-    sessionmaker, 
-    Session,
-    make_transient
-)
+from sqlalchemy.orm import sessionmaker, Session, make_transient
 
-from arxiv.db import Base, LaTeXMLBase, session_factory, _classic_engine as classic_engine
+from arxiv.db import (
+    Base,
+    LaTeXMLBase,
+    session_factory,
+    _classic_engine as classic_engine,
+)
 from arxiv.db.models import (
     DBLaTeXMLDocuments,
     DBLaTeXMLSubmissions,
     TapirUser,
 )
 
-new_engine = create_engine(os.environ.get('NEW_DB_URI', 'sqlite:///temp.db'))
+new_engine = create_engine(os.environ.get("NEW_DB_URI", "sqlite:///temp.db"))
 
 NewSessionLocal = sessionmaker(autocommit=False, autoflush=True)
 NewSessionLocal.configure(bind=new_engine)
 
-def get_tables () -> List[Type]:
-    module = importlib.import_module('arxiv.db.models')
-    classes = [cls for _, cls in inspect.getmembers(module, inspect.isclass) if cls.__module__ == 'arxiv.db.models']
+
+def get_tables() -> List[Type]:
+    module = importlib.import_module("arxiv.db.models")
+    classes = [
+        cls
+        for _, cls in inspect.getmembers(module, inspect.isclass)
+        if cls.__module__ == "arxiv.db.models"
+    ]
     return classes
 
 
@@ -45,7 +45,6 @@ class Edge:
     to_column: str
 
 
-    
 def generate_relationship_graph(models: List[Type]):
     adjacency_list = {}
 
@@ -56,7 +55,7 @@ def generate_relationship_graph(models: List[Type]):
 
         for column in model.__table__.columns:
             for fk in column.foreign_keys:
-                origin_table, origin_column = fk.target_fullname.split('.')
+                origin_table, origin_column = fk.target_fullname.split(".")
 
                 edge = Edge(origin_column, table_name, column.name)
 
@@ -90,115 +89,160 @@ def topological_sort(graph: Dict[str, List[str]]):
     return stack[::-1]
 
 
-SpecialCase = Literal['all', 'none']
+SpecialCase = Literal["all", "none"]
 
-def _copy_all_rows (table: Type, classic_session: Session, new_session: Session):
+
+def _copy_all_rows(table: Type, classic_session: Session, new_session: Session):
     rows = classic_session.execute(select(table)).scalars().all()
     for i, row in enumerate(rows):
         values = row.__dict__
-        del values['_sa_instance_state']
+        del values["_sa_instance_state"]
         new_session.execute(insert(row.__table__).values(**values))
         if i % 1000 == 0:
-            print (f'Writing {table.__tablename__}, on row #{i}')
+            print(f"Writing {table.__tablename__}, on row #{i}")
             new_session.commit()
     new_session.commit()
 
-def _process_node (table: Any, edges: List[Edge], query_map: Dict[str, Subquery], special_cases: Dict[str, str]) -> Subquery:
-    stmt = select(*[getattr(table.__table__.c, col.key) for col in table.__table__.columns])
+
+def _process_node(
+    table: Any,
+    edges: List[Edge],
+    query_map: Dict[str, Subquery],
+    special_cases: Dict[str, str],
+) -> Subquery:
+    stmt = select(
+        *[getattr(table.__table__.c, col.key) for col in table.__table__.columns]
+    )
     uniq_parents = set(map(lambda x: x.to_table, edges))
-    parent_edges = { x: list(filter(lambda y: y.to_table == x, edges)) for x in uniq_parents }
+    parent_edges = {
+        x: list(filter(lambda y: y.to_table == x, edges)) for x in uniq_parents
+    }
     for parent, edge_list in parent_edges.items():
-        if special_cases.get(parent) == 'all':
+        if special_cases.get(parent) == "all":
             continue
         if len(edge_list) > 1:
             subq = query_map[parent]
-            on = getattr(table, edge_list[0].from_column) == getattr(subq.c, edge_list[0].to_column)
+            on = getattr(table, edge_list[0].from_column) == getattr(
+                subq.c, edge_list[0].to_column
+            )
             for edge in edge_list[1:]:
-                on = on & (getattr(table, edge.from_column) == getattr(subq.c, edge.to_column))
+                on = on & (
+                    getattr(table, edge.from_column) == getattr(subq.c, edge.to_column)
+                )
             stmt = stmt.join(subq, onclause=on)
         else:
             edge = edge_list[0]
             subq = query_map[edge.to_table]
-            stmt = stmt.join(subq, onclause=(getattr(table, edge.from_column) == getattr(subq.c, edge.to_column)))
+            stmt = stmt.join(
+                subq,
+                onclause=(
+                    getattr(table, edge.from_column) == getattr(subq.c, edge.to_column)
+                ),
+            )
     return stmt.subquery()
 
-def _generate_seed_table (n_users: int, classic_session: Session) -> Subquery:
-    ids = classic_session.scalars(select(TapirUser.user_id).order_by(func.random()).limit(n_users)).all()
+
+def _generate_seed_table(n_users: int, classic_session: Session) -> Subquery:
+    ids = classic_session.scalars(
+        select(TapirUser.user_id).order_by(func.random()).limit(n_users)
+    ).all()
     return select(TapirUser).filter(TapirUser.user_id.in_(ids)).subquery()
 
-def _write_subquery (table: Any, subq: Subquery, classic_session: Session, new_session: Session):
+
+def _write_subquery(
+    table: Any, subq: Subquery, classic_session: Session, new_session: Session
+):
     stmt = select(subq)
     column_keys: List = table.__table__.columns.keys()
-    if 'class' in column_keys:
-        column_keys[column_keys.index('class')] = '_class'
-    rows = map(lambda x: table(**dict(zip(column_keys, x._t))), classic_session.execute(stmt, bind_arguments={'bind': classic_engine}).all())
+    if "class" in column_keys:
+        column_keys[column_keys.index("class")] = "_class"
+    rows = map(
+        lambda x: table(**dict(zip(column_keys, x._t))),
+        classic_session.execute(stmt, bind_arguments={"bind": classic_engine}).all(),
+    )
     for i, row in enumerate(rows):
         values = row.__dict__
-        del values['_sa_instance_state']
-        if '_class' in values:
-            values['class'] = values['_class']
-            del values['_class']
+        del values["_sa_instance_state"]
+        if "_class" in values:
+            values["class"] = values["_class"]
+            del values["_class"]
         new_session.execute(insert(row.__table__).values(**values))
         if i % 1000 == 0:
-            print (f'Writing {table.__tablename__}, on row #{i}')
+            print(f"Writing {table.__tablename__}, on row #{i}")
             new_session.commit()
     new_session.commit()
 
 
-def _insert_latexml_tables (query_map: Dict[str, Subquery], classic_session: Session, new_session: Session):
-    documents = classic_session.execute(select(query_map['arXiv_metadata'])).all()
+def _insert_latexml_tables(
+    query_map: Dict[str, Subquery], classic_session: Session, new_session: Session
+):
+    documents = classic_session.execute(select(query_map["arXiv_metadata"])).all()
     ids = [(x[2], x[-4]) for x in documents]
-    n_docs = 10000 # This was 500, and not sure of this magic number.
+    n_docs = 10000  # This was 500, and not sure of this magic number.
     for i in range(0, len(ids), n_docs):
-        latexml_docs = classic_session.execute(
-            select(DBLaTeXMLDocuments)
-            .filter(tuple_(DBLaTeXMLDocuments.paper_id, DBLaTeXMLDocuments.document_version).in_(ids[i: min(len(ids), i+n_docs)]))
-        ).scalars().all()
+        latexml_docs = (
+            classic_session.execute(
+                select(DBLaTeXMLDocuments).filter(
+                    tuple_(
+                        DBLaTeXMLDocuments.paper_id, DBLaTeXMLDocuments.document_version
+                    ).in_(ids[i : min(len(ids), i + n_docs)])
+                )
+            )
+            .scalars()
+            .all()
+        )
         for row in latexml_docs:
             make_transient(row)
             new_session.add(row)
         new_session.commit()
 
-    submissions = classic_session.execute(select(query_map['arXiv_submissions'])).all()
+    submissions = classic_session.execute(select(query_map["arXiv_submissions"])).all()
     sub_ids = [x[0] for x in submissions]
     for i in range(0, len(sub_ids), n_docs):
-        latexml_subs = classic_session.execute(
-            select(DBLaTeXMLSubmissions)
-            .filter(DBLaTeXMLSubmissions.submission_id.in_(sub_ids[i: min(len(sub_ids), i+n_docs)]))
-        ).scalars().all()
+        latexml_subs = (
+            classic_session.execute(
+                select(DBLaTeXMLSubmissions).filter(
+                    DBLaTeXMLSubmissions.submission_id.in_(
+                        sub_ids[i : min(len(sub_ids), i + n_docs)]
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
         for row in latexml_subs:
             make_transient(row)
             new_session.add(row)
         new_session.commit()
 
-def _invert_db_graph_edges (db_graph: Dict[str, List[Edge]]) -> Dict[str, List[Edge]]:
-    inverted_db_graph = { i: [] for i in db_graph }
+
+def _invert_db_graph_edges(db_graph: Dict[str, List[Edge]]) -> Dict[str, List[Edge]]:
+    inverted_db_graph = {i: [] for i in db_graph}
     for node in db_graph:
         for next in db_graph[node]:
             reversed_edge = Edge(
-                    from_column=next.to_column,
-                    to_table=node,
-                    to_column=next.from_column
-                )
+                from_column=next.to_column, to_table=node, to_column=next.from_column
+            )
             if next.to_table in inverted_db_graph:
                 inverted_db_graph[next.to_table].append(reversed_edge)
             else:
                 inverted_db_graph[next.to_table] = [reversed_edge]
     return inverted_db_graph
 
-def _make_subset (
-        db_graph: Dict[str, List[Edge]],
-        special_cases: Dict[str, SpecialCase],
-        size: int,
-        create_arxiv_db_schema: bool,
-        create_latexml_db_schema: bool,
-        ):
+
+def _make_subset(
+    db_graph: Dict[str, List[Edge]],
+    special_cases: Dict[str, SpecialCase],
+    size: int,
+    create_arxiv_db_schema: bool,
+    create_latexml_db_schema: bool,
+):
     """
     algorithm:
 
     1. make topological sort of nodes
     2. work through nodes, looking up what action to take for each
-    in special cases config, otherwise defaulting to join on 
+    in special cases config, otherwise defaulting to join on
     FK's
     """
 
@@ -215,12 +259,18 @@ def _make_subset (
         LaTeXMLBase.metadata.create_all(new_engine)
 
     # check db connections
-    _any_tapir_user = classic_session.execute(select(TapirUser).limit(1)).scalars().all()
-    _any_latexml_doc = classic_session.execute(select(DBLaTeXMLDocuments).limit(1)).scalars().all()
+    _any_tapir_user = (
+        classic_session.execute(select(TapirUser).limit(1)).scalars().all()
+    )
+    _any_latexml_doc = (
+        classic_session.execute(select(DBLaTeXMLDocuments).limit(1)).scalars().all()
+    )
 
     ### Do algorithm ###
-    table_lookup = { i.__tablename__: i for i in get_tables() }
-    processing_order = topological_sort({ k: list(map(lambda x: x.to_table, v)) for k,v in db_graph.items() })
+    table_lookup = {i.__tablename__: i for i in get_tables()}
+    processing_order = topological_sort(
+        {k: list(map(lambda x: x.to_table, v)) for k, v in db_graph.items()}
+    )
     inverted_db_graph = _invert_db_graph_edges(db_graph)
     table_queries: Dict[str, Subquery] = {}
     TapirUser.__table__.columns.keys
@@ -229,29 +279,28 @@ def _make_subset (
         table = table_lookup[table_name]
         if table_name in special_cases:
             special_case = special_cases[table_name]
-            if special_case == 'all':
-                print (f'COPYING ENTIRE TABLE {table_name}')
+            if special_case == "all":
+                print(f"COPYING ENTIRE TABLE {table_name}")
                 _copy_all_rows(table, classic_session, new_session)
                 continue
-            elif special_case == 'seed':
-                table_queries[table_name] = _generate_seed_table (size, classic_session)
-            else: # special case is 'none'
+            elif special_case == "seed":
+                table_queries[table_name] = _generate_seed_table(size, classic_session)
+            else:  # special case is 'none'
                 continue
         else:
-            table_queries[table_name] = _process_node (table, 
-                                                       inverted_db_graph[table_name], 
-                                                       table_queries,
-                                                       special_cases)
-        
+            table_queries[table_name] = _process_node(
+                table, inverted_db_graph[table_name], table_queries, special_cases
+            )
+
     for table in processing_order:
-        print (f"WRITING TABLE {table}")
+        print(f"WRITING TABLE {table}")
         subq = table_queries.get(table)
         if subq is not None:
             _write_subquery(table_lookup[table], subq, classic_session, new_session)
         else:
-            print ("NO SUBQUERY AVAILABLE")
+            print("NO SUBQUERY AVAILABLE")
 
-    _insert_latexml_tables (table_queries, classic_session, new_session)
+    _insert_latexml_tables(table_queries, classic_session, new_session)
 
     ### Clean up ###
     classic_session.close()
@@ -259,44 +308,73 @@ def _make_subset (
     new_session.commit()
     new_session.close()
 
-def clone_db_subset (n_users: int, config_directory: Optional[str] = None,
-                     create_arxiv_db_schema: bool = True, create_latexml_db_schema: bool = True,):
-    config_directory = config_directory or \
-        os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__),
-                'config'
-            )
-        )
-    graph = json.loads(open(os.path.join(config_directory, 'graph.json')).read())
-    special_cases = json.loads(open(os.path.join(config_directory, 'special_cases.json')).read())
-    graph_with_edges = { k: list(map(lambda x: Edge(**x), v)) for k,v in graph.items() }
-    _make_subset(graph_with_edges, special_cases, n_users, create_arxiv_db_schema, create_latexml_db_schema)
+
+def clone_db_subset(
+    n_users: int,
+    config_directory: Optional[str] = None,
+    create_arxiv_db_schema: bool = True,
+    create_latexml_db_schema: bool = True,
+):
+    config_directory = config_directory or os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "config")
+    )
+    graph = json.loads(open(os.path.join(config_directory, "graph.json")).read())
+    special_cases = json.loads(
+        open(os.path.join(config_directory, "special_cases.json")).read()
+    )
+    graph_with_edges = {k: list(map(lambda x: Edge(**x), v)) for k, v in graph.items()}
+    _make_subset(
+        graph_with_edges,
+        special_cases,
+        n_users,
+        create_arxiv_db_schema,
+        create_latexml_db_schema,
+    )
 
 
 def main():
     # Set up argument parser
-    parser = argparse.ArgumentParser(description="Clone a subset of the classic DB to a new DB.")
+    parser = argparse.ArgumentParser(
+        description="Clone a subset of the classic DB to a new DB."
+    )
 
     # Define arguments with environment variables as defaults
-    parser.add_argument('--n-users', type=int, default=os.environ.get('N_USERS', 2000),
-                        help='Number of users to copy (default: N_USERS environment variable or 2000)')
-    parser.add_argument('--config-directory', type=str, default=os.environ.get('CONFIG_DIRECTORY'),
-                        help='Configuration directory (default: CONFIG_DIRECTORY environment variable)')
-    parser.add_argument('--create-arxiv-db-schema', type=lambda x: x.lower() == 'true',
-                        default=os.environ.get('CREATE_ARXIV_DB_SCHEMA', 'true').lower() == 'true',
-                        help='Whether to create the arXiv DB schema (default: CREATE_ARXIV_DB_SCHEMA environment variable or true)')
-    parser.add_argument('--create-latexml-db-schema', type=lambda x: x.lower() == 'true',
-                        default=os.environ.get('CREATE_LATEXML_DB_SCHEMA', 'true').lower() == 'true',
-                        help='Whether to create the LaTeXML DB schema (default: CREATE_LATEXML_DB_SCHEMA environment variable or true)')
+    parser.add_argument(
+        "--n-users",
+        type=int,
+        default=os.environ.get("N_USERS", 2000),
+        help="Number of users to copy (default: N_USERS environment variable or 2000)",
+    )
+    parser.add_argument(
+        "--config-directory",
+        type=str,
+        default=os.environ.get("CONFIG_DIRECTORY"),
+        help="Configuration directory (default: CONFIG_DIRECTORY environment variable)",
+    )
+    parser.add_argument(
+        "--create-arxiv-db-schema",
+        type=lambda x: x.lower() == "true",
+        default=os.environ.get("CREATE_ARXIV_DB_SCHEMA", "true").lower() == "true",
+        help="Whether to create the arXiv DB schema (default: CREATE_ARXIV_DB_SCHEMA environment variable or true)",
+    )
+    parser.add_argument(
+        "--create-latexml-db-schema",
+        type=lambda x: x.lower() == "true",
+        default=os.environ.get("CREATE_LATEXML_DB_SCHEMA", "true").lower() == "true",
+        help="Whether to create the LaTeXML DB schema (default: CREATE_LATEXML_DB_SCHEMA environment variable or true)",
+    )
 
     # Parse arguments
     args = parser.parse_args()
 
     # Call the function with the parsed arguments
-    clone_db_subset(args.n_users, args.config_directory,
-                    args.create_arxiv_db_schema, args.create_latexml_db_schema)
+    clone_db_subset(
+        args.n_users,
+        args.config_directory,
+        args.create_arxiv_db_schema,
+        args.create_latexml_db_schema,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

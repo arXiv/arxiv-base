@@ -11,20 +11,23 @@ import string
 
 class TestCheckPassword(TestCase):
     """Tests passwords."""
+
     @given(st.text(alphabet=string.printable))
     @settings(max_examples=500)
     def test_check_passwords_successful(self, passw):
         encrypted = hash_password(passw)
-        self.assertTrue( check_password(passw, encrypted.encode('ascii')),
-                         f"should work for password '{passw}'")
+        self.assertTrue(
+            check_password(passw, encrypted.encode("ascii")),
+            f"should work for password '{passw}'",
+        )
 
     @given(st.text(alphabet=string.printable), st.text(alphabet=st.characters()))
     @settings(max_examples=5000)
     def test_check_passwords_fuzz(self, passw, fuzzpw):
         if passw == fuzzpw:
-            self.assertTrue(check_password(fuzzpw,
-                                hash_password(passw).encode('ascii')))
+            self.assertTrue(
+                check_password(fuzzpw, hash_password(passw).encode("ascii"))
+            )
         else:
             with self.assertRaises(PasswordAuthenticationFailed):
-                check_password(fuzzpw,
-                                    hash_password(passw).encode('ascii'))
+                check_password(fuzzpw, hash_password(passw).encode("ascii"))

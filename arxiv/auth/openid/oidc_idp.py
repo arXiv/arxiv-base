@@ -1,6 +1,7 @@
 """
 OpenID connect IdP client
 """
+
 import urllib.parse
 from typing import List, Optional
 import requests
@@ -14,6 +15,7 @@ from arxiv.base import logging as arxiv_logging
 from ..user_claims import ArxivUserClaims, ArxivUserClaimsModel
 
 
+
 class ArxivOidcIdpClient:
     """arXiv OpenID Connect IdP client
     This is implemented for Keycloak at the moment.
@@ -25,7 +27,9 @@ class ArxivOidcIdpClient:
     client_secret: str | None
     realm: str
     redirect_uri: str  #
-    scope: List[str]  # it's okay to be empty. Keycloak should be configured to provide scopes.
+    scope: List[
+        str
+    ]  # it's okay to be empty. Keycloak should be configured to provide scopes.
     _server_certs: dict  # Cache for the IdP certs
     _logger: logging.Logger
     _login_redirect_url: str
@@ -33,17 +37,19 @@ class ArxivOidcIdpClient:
     jwt_verify_options: dict
     _ssl_cert_verify: bool
 
-    def __init__(self, redirect_uri: str,
-                 server_url: str = "https://openid.arxiv.org",
-                 realm: str = "arxiv",
-                 client_id: str = "arxiv-user",
-                 scope: List[str] | None = None,
-                 client_secret: str | None = None,
-                 login_redirect_url: str | None = None,
-                 logout_redirect_url: str | None = None,
-                 logger: logging.Logger | None = None,
-                 ssl_verify: bool = True,
-                 ):
+    def __init__(
+        self,
+        redirect_uri: str,
+        server_url: str = "https://openid.arxiv.org",
+        realm: str = "arxiv",
+        client_id: str = "arxiv-user",
+        scope: List[str] | None = None,
+        client_secret: str | None = None,
+        login_redirect_url: str | None = None,
+        logout_redirect_url: str | None = None,
+        logger: logging.Logger | None = None,
+        ssl_verify: bool = True,
+    ):
         """
         Make Tapir user data from pass-data
 
@@ -97,45 +103,46 @@ class ArxivOidcIdpClient:
     @property
     def oidc(self) -> str:
         """OIDC URL"""
-        return f'{self.server_url}/realms/{self.realm}/protocol/openid-connect'
+        return f"{self.server_url}/realms/{self.realm}/protocol/openid-connect"
 
     @property
     def authn_url(self) -> str:
         """Authentication URL"""
-        return self.oidc + '/auth'
+        return self.oidc + "/auth"
 
     @property
     def token_url(self) -> str:
         """https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint"""
-        return self.oidc + '/token'
+        return self.oidc + "/token"
 
     @property
     def token_introspect_url(self) -> str:
-        return self.oidc + '/token/introspect'
+        return self.oidc + "/token/introspect"
 
     @property
     def certs_url(self) -> str:
-        return self.oidc + '/certs'
+        return self.oidc + "/certs"
 
     @property
     def user_info_url(self) -> str:
-        return self.oidc + '/userinfo'
+        return self.oidc + "/userinfo"
 
     def logout_url(self, user: ArxivUserClaims, redirect_url: str | None = None) -> str:
         url = self._logout_redirect_url if redirect_url is None else redirect_url
         post_logout = f"post_logout_redirect_uri={urllib.parse.quote(url)}" if url else ""
-        return self.oidc + f'/logout?{post_logout}'
+        return self.oidc + f"/logout?{post_logout}"
 
     @property
     def login_url(self) -> str:
         scope = "&scope=" + "%20".join(self.scope) if self.scope else ""
-        url = f'{self.authn_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code{scope}'
-        self._logger.debug(f'login_url: {url}')
+        url = f"{self.authn_url}?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code{scope}"
+        print("LOGIN URL", url)
+        self._logger.debug(f"login_url: {url}")
         return url
 
     @property
     def server_certs(self) -> dict:
-        """Get IdP server's SSL certificates""""openid"
+        """Get IdP server's SSL certificates""" "openid"
         # I'm having some 2nd thought about caching this. Fresh cert every time is probably needed
         # if not self._server_certs:
         # This adds one extra fetch but it avoids weird expired certs situation
@@ -147,8 +154,8 @@ class ArxivOidcIdpClient:
         """
         Find the public key for the given key
         """
-        for key in self.server_certs['keys']:
-            if key['kid'] == kid:
+        for key in self.server_certs["keys"]:
+            if key["kid"] == kid:
                 pkey = RSAAlgorithm.from_jwk(key)
                 if isinstance(pkey, RSAPublicKey):
                     return pkey
@@ -171,12 +178,12 @@ class ArxivOidcIdpClient:
         if self.client_secret:
             try:
                 auth = HTTPBasicAuth(self.client_id, self.client_secret)
-                self._logger.debug(f'client auth success')
+                self._logger.debug(f"client auth success")
             except requests.exceptions.RequestException:
-                self._logger.debug(f'client auth failed')
+                self._logger.debug(f"client auth failed")
                 return None
             except Exception as exc:
-                self._logger.warning(f'client auth failed', exc_info=True)
+                self._logger.warning(f"client auth failed", exc_info=True)
                 raise
 
         try:
@@ -184,16 +191,16 @@ class ArxivOidcIdpClient:
             token_response = requests.post(
                 self.token_url,
                 data={
-                    'grant_type': 'authorization_code',
-                    'code': code,
-                    'redirect_uri': self.redirect_uri,
-                    'client_id': self.client_id,
+                    "grant_type": "authorization_code",
+                    "code": code,
+                    "redirect_uri": self.redirect_uri,
+                    "client_id": self.client_id,
                 },
                 auth=auth,
                 verify=self._ssl_cert_verify,
             )
             if token_response.status_code != 200:
-                self._logger.warning(f'idp %s', token_response.status_code)
+                self._logger.warning(f"idp %s", token_response.status_code)
                 return None
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
@@ -220,21 +227,24 @@ class ArxivOidcIdpClient:
 
         try:
             unverified_header = jwt.get_unverified_header(access_token)
-            kid = unverified_header['kid']  # key id
-            algorithm = unverified_header['alg']  # key algo
+            kid = unverified_header["kid"]  # key id
+            algorithm = unverified_header["alg"]  # key algo
             if algorithm[0:2] == "RS":
                 public_key = self.get_public_key(kid)
                 if public_key is None:
-                    self._logger.info("Validating the token failed. kid=%s alg=%s", kid, algorithm)
+                    self._logger.info(
+                        "Validating the token failed. kid=%s alg=%s", kid, algorithm
+                    )
                     return None
             else:
                 public_key = None
 
-            decoded_token: dict = jwt.decode(access_token,
-                                             key=public_key,
-                                             options=self.jwt_verify_options,
-                                             algorithms=[algorithm],
-                                             )
+            decoded_token: dict = jwt.decode(
+                access_token,
+                key=public_key,
+                options=self.jwt_verify_options,
+                algorithms=[algorithm],
+            )
             return dict(decoded_token)
         except jwt.InvalidAudienceError:
             self._logger.error("")
@@ -245,11 +255,15 @@ class ArxivOidcIdpClient:
             return None
 
         except jwt.InvalidTokenError:
-            self._logger.error("jwt.InvalidTokenError: Token is invalid.", exc_info=True)
+            self._logger.error(
+                "jwt.InvalidTokenError: Token is invalid.", exc_info=True
+            )
             return None
 
         except jwt.ImmatureSignatureError:
-            self._logger.error("jwt.ImmatureSignatureError: Token is invalid.", exc_info=True)
+            self._logger.error(
+                "jwt.ImmatureSignatureError: Token is invalid.", exc_info=True
+            )
             return None
         # not reached
 
@@ -317,7 +331,7 @@ class ArxivOidcIdpClient:
         idp_token = self.acquire_idp_token(code)
         if not idp_token:
             return None
-        access_token = idp_token.get('access_token')  # oauth 2 access token
+        access_token = idp_token.get("access_token")  # oauth 2 access token
         if not access_token:
             return None
         idp_claims = self.validate_access_token(access_token)
@@ -363,7 +377,9 @@ class ArxivOidcIdpClient:
         self._logger.debug('Token revocation request %s', url, extra=log_extra)
 
         try:
-            response = requests.post(url, headers=header, data=data, timeout=30, verify=self._ssl_cert_verify)
+            response = requests.post(
+                url, headers=header, data=data, timeout=30, verify=self._ssl_cert_verify
+            )
             if response.status_code == 200:
                 self._logger.info("User %s tokens revoked.", user.user_id)
                 return True
@@ -379,7 +395,6 @@ class ArxivOidcIdpClient:
                                extra=log_extra)
             return False
 
-
     def refresh_access_token(self, refresh_token: str) -> Optional[ArxivUserClaims]:
         """With the refresh token, get a new access token
 
@@ -394,20 +409,18 @@ class ArxivOidcIdpClient:
             New (refreshed) user claims when success. None - the refresh token is invalid/expired.
         """
 
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         auth = None
         if self.client_secret:
             try:
                 auth = HTTPBasicAuth(self.client_id, self.client_secret)
-                self._logger.debug(f'client auth success')
+                self._logger.debug(f"client auth success")
             except requests.exceptions.RequestException:
-                self._logger.debug(f'client auth failed')
+                self._logger.debug(f"client auth failed")
                 return None
             except Exception as exc:
-                self._logger.warning(f'client auth failed', exc_info=True)
+                self._logger.warning(f"client auth failed", exc_info=True)
                 raise
 
         try:
@@ -415,23 +428,23 @@ class ArxivOidcIdpClient:
             token_response = requests.post(
                 self.token_url,
                 data={
-                    'grant_type': 'refresh_token',
-                    'client_id': self.client_id,
-                    'refresh_token': refresh_token
+                    "grant_type": "refresh_token",
+                    "client_id": self.client_id,
+                    "refresh_token": refresh_token,
                 },
                 auth=auth,
                 headers=headers,
-                verify=self._ssl_cert_verify
+                verify=self._ssl_cert_verify,
             )
             if token_response.status_code != 200:
-                self._logger.warning(f'idp %s', token_response.status_code)
+                self._logger.warning(f"idp %s", token_response.status_code)
                 return None
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
             # This should be identical shape payload as to the login
             refreshed = token_response.json()
             # be defensive and don't assume to have access_token
-            access_token = refreshed.get('access_token')
+            access_token = refreshed.get("access_token")
             if not access_token:
                 return None
             idp_claims = self.validate_access_token(access_token)

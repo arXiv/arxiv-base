@@ -6,6 +6,7 @@ from werkzeug.datastructures import MultiDict
 from wtforms import StringField
 from . import csrf
 
+
 @skip("The class under test is deprecated")
 class TestCSRFForm(TestCase):
     """Tests for :class:`arxiv.forms.csrf.CSRFForm`."""
@@ -79,6 +80,7 @@ class TestCSRFForm(TestCase):
         data = MultiDict({"something_sensitive": "foo", "csrf_token": csrf_token})
         form = ProtectedForm(data)
         self.assertFalse(form.validate(), "The form is not valid")
+
 
 @skip("The class under test is deprecated")
 class TestCSRFFormWithNewSessionRef(TestCase):

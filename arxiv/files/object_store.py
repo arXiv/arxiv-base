@@ -2,8 +2,7 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Iterable, \
-    Literal, Tuple, Iterator
+from typing import Iterable, Literal, Tuple, Iterator
 
 from google.cloud.storage.blob import Blob
 from google.cloud.storage.bucket import Bucket
@@ -11,9 +10,8 @@ from google.cloud.storage.retry import DEFAULT_RETRY
 
 from . import FileObj
 
-GCS_RETRY = DEFAULT_RETRY \
-    .with_deadline(12) \
-    .with_delay(0.25, 2.5)
+GCS_RETRY = DEFAULT_RETRY.with_deadline(12).with_delay(0.25, 2.5)
+
 
 class ObjectStore(ABC):
     """ABC for an object store."""
@@ -43,30 +41,32 @@ class ObjectStore(ABC):
         """
         pass
 
+
 ##########################################################################
 ###### Local Object Store
 ##########################################################################
 
 from . import FileDoesNotExist, FileObj, LocalFileObj
 
+
 class LocalObjectStore(ObjectStore):
     """ObjectStore that uses local FS and Path."""
-    def __init__(self, prefix:str):
+
+    def __init__(self, prefix: str):
         if not prefix:
             raise ValueError("Must have a prefix")
-        if not prefix.endswith('/'):
+        if not prefix.endswith("/"):
             prefix = prefix + "/"
 
         self.prefix = prefix
 
-    def to_obj(self,  key:str) -> FileObj:
+    def to_obj(self, key: str) -> FileObj:
         """Gets a `LocalFileObj` from local file system."""
         item = Path(self.prefix + key)
         if not item or not item.exists():
             return FileDoesNotExist(self.prefix + key)
         else:
             return LocalFileObj(Path(item))
-
 
     def list(self, key: str) -> Iterator[FileObj]:
         """Gets a listing similar to what would be returned by
@@ -76,7 +76,7 @@ class LocalObjectStore(ObjectStore):
         `prefix` + `key` * listing.
         """
         if key.endswith("/"):
-            return (LocalFileObj(item) for item in Path(self.prefix+key).glob("*"))
+            return (LocalFileObj(item) for item in Path(self.prefix + key).glob("*"))
         else:
             parent, file = Path(self.prefix + key).parent, Path(self.prefix + key).name
             return (LocalFileObj(item) for item in Path(parent).glob(f"{file}*"))
@@ -92,13 +92,14 @@ class LocalObjectStore(ObjectStore):
 
     def __str__(self) -> str:
         return f"<LocalObjectStore {self.prefix}>"
-    
-    
+
+
 ##########################################################################
 ###### GCS Object Store
 ##########################################################################
 
 FileObj.register(Blob)
+
 
 class GsObjectStore(ObjectStore):
     def __init__(self, bucket: Bucket):
@@ -116,7 +117,7 @@ class GsObjectStore(ObjectStore):
         except:
             blob = None
         if not blob:
-            return FileDoesNotExist("gs://" + self.bucket.name + '/' + key)
+            return FileDoesNotExist("gs://" + self.bucket.name + "/" + key)
         else:
             return blob  # type: ignore
 
@@ -130,11 +131,13 @@ class GsObjectStore(ObjectStore):
         try:
             return self.bucket.client.list_blobs(self.bucket, prefix=prefix)  # type: ignore
         except Exception as e:
-            raise RuntimeError (f'.list failed on gs://{self.bucket.name}/{prefix}') from e
+            raise RuntimeError(
+                f".list failed on gs://{self.bucket.name}/{prefix}"
+            ) from e
 
     def status(self) -> Tuple[Literal["GOOD", "BAD"], str]:
         """Gets if bucket can be read."""
         if self.bucket.exists():
-            return ("GOOD", '')
+            return ("GOOD", "")
         else:
-            return ("BAD", 'bucket does not exist or API down')
+            return ("BAD", "bucket does not exist or API down")

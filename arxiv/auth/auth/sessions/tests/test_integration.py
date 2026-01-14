@@ -12,26 +12,21 @@ class TestDistributedSessionServiceIntegration(TestCase):
 
     @classmethod
     def setUpClass(self):
-        self.secret = 'bazsecret'
+        self.secret = "bazsecret"
 
-    @mock.patch(f'{store.__name__}.get_application_config')
+    @mock.patch(f"{store.__name__}.get_application_config")
     def test_store_create(self, mock_get_config):
         """An entry should be created in Redis."""
-        mock_get_config.return_value = {
-            'JWT_SECRET': self.secret,
-            'REDIS_FAKE': True
-        }
-        ip = '127.0.0.1'
-        remote_host = 'foo-host.foo.com'
+        mock_get_config.return_value = {"JWT_SECRET": self.secret, "REDIS_FAKE": True}
+        ip = "127.0.0.1"
+        remote_host = "foo-host.foo.com"
         user = domain.User(
-            user_id='1',
-            username='theuser',
-            email='the@user.com',
+            user_id="1",
+            username="theuser",
+            email="the@user.com",
         )
         authorizations = domain.Authorizations(
-            classic=2,
-            scopes=['foo:write'],
-            endorsements=[]
+            classic=2, scopes=["foo:write"], endorsements=[]
         )
         s = store.SessionStore.current_session()
         session = s.create(authorizations, ip, remote_host, user=user)
@@ -44,9 +39,9 @@ class TestDistributedSessionServiceIntegration(TestCase):
 
         r = s.r
         raw = r.get(session.session_id)
-        stored_data = jwt.decode(raw, self.secret, algorithms=['HS256'])
-        cookie_data = jwt.decode(cookie, self.secret, algorithms=['HS256'])
-        self.assertEqual(stored_data['nonce'], cookie_data['nonce'])
+        stored_data = jwt.decode(raw, self.secret, algorithms=["HS256"])
+        cookie_data = jwt.decode(cookie, self.secret, algorithms=["HS256"])
+        self.assertEqual(stored_data["nonce"], cookie_data["nonce"])
 
     # def test_invalidate_session(self):
     #     """Invalidate a session from the datastore."""
@@ -68,15 +63,12 @@ class TestDistributedSessionServiceIntegration(TestCase):
     #     now = time.time()
     #     self.assertGreaterEqual(now, data1['end_time'])
 
-    @mock.patch(f'{store.__name__}.get_application_config')
+    @mock.patch(f"{store.__name__}.get_application_config")
     def test_delete_session(self, mock_get_config):
         """Delete a session from the datastore."""
-        mock_get_config.return_value = {
-            'JWT_SECRET': self.secret,
-            'REDIS_FAKE': True
-        }
+        mock_get_config.return_value = {"JWT_SECRET": self.secret, "REDIS_FAKE": True}
         s = store.SessionStore.current_session()
         r = s.r
-        r.set('fookey', b'foovalue')
-        s.delete_by_id('fookey')
-        self.assertIsNone(r.get('fookey'))
+        r.set("fookey", b"foovalue")
+        s.delete_by_id("fookey")
+        self.assertIsNone(r.get("fookey"))

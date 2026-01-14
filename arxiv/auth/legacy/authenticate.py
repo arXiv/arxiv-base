@@ -11,10 +11,14 @@ from .. import domain
 
 from . passwords import check_password, is_ascii
 from ...db import Session as DefaultSession
-from ...db.models import TapirUser, TapirUsersPassword, TapirPermanentToken, \
-    TapirNickname, Demographic
-from .exceptions import NoSuchUser, AuthenticationFailed, \
-    PasswordAuthenticationFailed
+from ...db.models import (
+    TapirUser,
+    TapirUsersPassword,
+    TapirPermanentToken,
+    TapirNickname,
+    Demographic
+)
+from .exceptions import NoSuchUser, AuthenticationFailed, PasswordAuthenticationFailed
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +66,8 @@ def authenticate(username_or_email: Optional[str] = None,
             db_token = _authenticate_token(token, session=session)
             passdata = _get_user_by_user_id(db_token.user_id)
         else:
-            logger.debug('Neither username/password nor token provided')
-            raise AuthenticationFailed('Username+password or token required')
+            logger.debug("Neither username/password nor token provided")
+            raise AuthenticationFailed("Username+password or token required")
     except OperationalError as e:
         raise e  # want to just pass all these on
     except Exception as ex:
@@ -72,7 +76,9 @@ def authenticate(username_or_email: Optional[str] = None,
     return instantiate_tapir_user(passdata)
 
 
-def instantiate_tapir_user(passdata: PassData) -> Tuple[domain.User, domain.Authorizations]:
+def instantiate_tapir_user(
+    passdata: PassData,
+) -> Tuple[domain.User, domain.Authorizations]:
     """
     Make Tapir user data from pass-data
 
@@ -100,10 +106,10 @@ def instantiate_tapir_user(passdata: PassData) -> Tuple[domain.User, domain.Auth
         name=domain.UserFullName(
             forename=db_user.first_name,
             surname=db_user.last_name,
-            suffix=db_user.suffix_name
+            suffix=db_user.suffix_name,
         ),
         profile=domain.UserProfile.from_orm(db_profile) if db_profile else None,
-        verified=bool(db_user.flag_email_verified)
+        verified=bool(db_user.flag_email_verified),
     )
     auths = domain.Authorizations(
         classic=util.compute_capabilities(db_user),
@@ -135,14 +141,14 @@ def _authenticate_token(token: str, session: SASession = DefaultSession) -> Tapi
 
     """
     try:
-        user_id, secret = token.split('-')
+        user_id, secret = token.split("-")
     except ValueError as e:
-        raise AuthenticationFailed('Token is malformed') from e
+        raise AuthenticationFailed("Token is malformed") from e
     try:
         return _get_token(user_id, secret, session=session)
     except NoSuchUser as e:
-        logger.debug('Not a valid permanent token')
-        raise AuthenticationFailed('Invalid token') from e
+        logger.debug("Not a valid permanent token")
+        raise AuthenticationFailed("Invalid token") from e
 
 
 def _authenticate_password(username_or_email: str, password: str, session: SASession = DefaultSession) -> PassData:
@@ -169,23 +175,25 @@ def _authenticate_password(username_or_email: str, password: str, session: SASes
         Raised when other problems arise.
 
     """
-    logger.debug(f'Authenticate with password, user: {username_or_email}')
+    logger.debug(f"Authenticate with password, user: {username_or_email}")
 
     if not password:
-        raise ValueError('Passed empty password')
+        raise ValueError("Passed empty password")
     if not isinstance(password, str):
-        raise ValueError('Passed non-str password: {type(password)}')
+        raise ValueError("Passed non-str password: {type(password)}")
     if not is_ascii(password):
-        raise ValueError('Password non-ascii password')
+        raise ValueError("Password non-ascii password")
 
     if not username_or_email:
-        raise ValueError('Passed empty username_or_email')
+        raise ValueError("Passed empty username_or_email")
     if not isinstance(password, str):
-        raise ValueError('Passed non-str username_or_email: {type(username_or_email)}')
+        raise ValueError("Passed non-str username_or_email: {type(username_or_email)}")
     if len(username_or_email) > 255:
-        raise ValueError(f'Passed username_or_email too long: len {len(username_or_email)}')
+        raise ValueError(
+            f"Passed username_or_email too long: len {len(username_or_email)}"
+        )
     if not is_ascii(username_or_email):
-        raise ValueError('Passed non-ascii username_or_email')
+        raise ValueError("Passed non-ascii username_or_email")
 
     if '@' in username_or_email:
         passdata = _get_user_by_email(username_or_email, session=session)
@@ -193,7 +201,7 @@ def _authenticate_password(username_or_email: str, password: str, session: SASes
         passdata = _get_user_by_username(username_or_email, session=session)
 
     db_user, db_pass, db_nick, db_profile = passdata
-    logger.debug(f'Got user with user_id: {db_user.user_id}')
+    logger.debug(f"Got user with user_id: {db_user.user_id}")
     try:
         if check_password(password, db_pass.password_enc):
             return passdata
@@ -223,17 +231,16 @@ def _get_user_by_email(email: str, session: SASession = DefaultSession) -> PassD
         .first()
     return _get_passdata(tapir_user, session=session)
 
-
 def _get_user_by_username(username: str, session: SASession = DefaultSession) -> PassData:
     """Username is the tapir nickname."""
-    if not username or '@' in username:
+    if not username or "@" in username:
         raise ValueError("username must not contain a @")
     tapir_nick = session.query(TapirNickname) \
             .filter(TapirNickname.nickname == username) \
             .filter(TapirNickname.flag_valid == 1) \
             .first()
     if not tapir_nick:
-        raise NoSuchUser('User lacks a nickname')
+        raise NoSuchUser("User lacks a nickname")
 
     tapir_user = session.query(TapirUser) \
                 .filter(TapirUser.user_id == tapir_nick.user_id) \
@@ -244,7 +251,6 @@ def _get_user_by_username(username: str, session: SASession = DefaultSession) ->
     if tapir_user is None:
         raise NoSuchUser('TapirUser is not found')
     return _get_passdata(tapir_user, session=session)
-
 
 def _get_passdata(tapir_user: TapirUser, session: SASession = DefaultSession) -> PassData:
     """
@@ -270,20 +276,20 @@ def _get_passdata(tapir_user: TapirUser, session: SASession = DefaultSession) ->
 
     """
     if not tapir_user:
-        raise NoSuchUser('User does not exist')
+        raise NoSuchUser("User does not exist")
 
     tapir_nick = session.query(TapirNickname) \
-            .filter(TapirNickname.user_id ==tapir_user.user_id) \
+            .filter(TapirNickname.user_id == tapir_user.user_id) \
             .filter(TapirNickname.flag_valid == 1) \
             .first()
     if not tapir_nick:
-        raise NoSuchUser('User lacks a nickname')
+        raise NoSuchUser("User lacks a nickname")
 
     tapir_password: TapirUsersPassword = session.query(TapirUsersPassword) \
         .filter(TapirUsersPassword.user_id == tapir_user.user_id) \
         .first()
     if not tapir_password:
-        raise RuntimeError(f'Missing password')
+        raise RuntimeError(f"Missing password")
 
     tapir_profile: Demographic = session.query(Demographic) \
         .filter(Demographic.user_id == tapir_user.user_id) \
@@ -350,6 +356,6 @@ def _get_token(user_id: str, secret: str, session: SASession = DefaultSession) -
         .filter(TapirPermanentToken.valid == 1) \
         .first()    # The token must still be valid.
     if not db_token:
-        raise NoSuchUser('No such token')
+        raise NoSuchUser("No such token")
     else:
         return db_token

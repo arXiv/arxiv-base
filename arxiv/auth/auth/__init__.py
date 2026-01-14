@@ -63,14 +63,13 @@ class Auth(object):
         """
         if app is not None:
             self.init_app(app)
-            if self.app.config.get('AUTH_UPDATED_SESSION_REF'):
+            if self.app.config.get("AUTH_UPDATED_SESSION_REF"):
                 self.auth_session_name = "auth"
             else:
                 self.auth_session_name = "session"
 
     @retry(OperationalError, tries=2, delay=0.5, backoff=2)
-    def _get_legacy_session(self,
-                            cookie_value: str) -> Optional[domain.Session]:
+    def _get_legacy_session(self, cookie_value: str) -> Optional[domain.Session]:
         """
         Attempt to load a legacy auth session.
 
@@ -85,11 +84,11 @@ class Auth(object):
             with transaction():
                 return legacy.sessions.load(cookie_value)
         except legacy.exceptions.UnknownSession as e:
-            logger.debug('No legacy session available: %s', e)
+            logger.debug("No legacy session available: %s", e)
         except legacy.exceptions.InvalidCookie as e:
-            logger.debug('Invalid legacy cookie: %s', e)
+            logger.debug("Invalid legacy cookie: %s", e)
         except legacy.exceptions.SessionExpired as e:
-            logger.debug('Legacy session is expired: %s', e)
+            logger.debug("Legacy session is expired: %s", e)
         return None
 
     def init_app(self, app: Flask) -> None:
@@ -102,22 +101,23 @@ class Auth(object):
 
         """
         self.app = app
-        app.config['arxiv_auth.Auth'] = self
+        app.config["arxiv_auth.Auth"] = self
 
-        if app.config.get('ARXIV_AUTH_DEBUG') or os.getenv('ARXIV_AUTH_DEBUG'):
+        if app.config.get("ARXIV_AUTH_DEBUG") or os.getenv("ARXIV_AUTH_DEBUG"):
             self.auth_debug()
-            logger.debug("ARXIV_AUTH_DEBUG is set and auth debug messages to logging are turned on")
+            logger.debug(
+                "ARXIV_AUTH_DEBUG is set and auth debug messages to logging are turned on"
+            )
 
         self.app.before_request(self.load_session)
-        self.app.config.setdefault('DEFAULT_LOGOUT_REDIRECT_URL',
-                                   'https://arxiv.org')
-        self.app.config.setdefault('DEFAULT_LOGIN_REDIRECT_URL',
-                                   'https://arxiv.org')
+        self.app.config.setdefault("DEFAULT_LOGOUT_REDIRECT_URL", "https://arxiv.org")
+        self.app.config.setdefault("DEFAULT_LOGIN_REDIRECT_URL", "https://arxiv.org")
 
-        if app.config.get('ARXIV_AUTH_DEBUG') or os.getenv('ARXIV_AUTH_DEBUG'):
+        if app.config.get("ARXIV_AUTH_DEBUG") or os.getenv("ARXIV_AUTH_DEBUG"):
             self.auth_debug()
-            logger.debug("ARXIV_AUTH_DEBUG is set and auth debug messages to logging is turned on")
-
+            logger.debug(
+                "ARXIV_AUTH_DEBUG is set and auth debug messages to logging is turned on"
+            )
 
     def load_session(self) -> Optional[Response]:
         """Look for an active session, and attach it to the request.
@@ -133,19 +133,20 @@ class Auth(object):
         # Check the WSGI request environ for the key, which is where the auth
         # middleware puts any unpacked auth information from the request OR any
         # exceptions that need to be raised withing the request context.
-        req_auth: Optional[Union[domain.Session, Exception]] = \
-            request.environ.get(self.auth_session_name)
+        req_auth: Optional[Union[domain.Session, Exception]] = request.environ.get(
+            self.auth_session_name
+        )
 
         # Middlware may raise exception, needs to be raised in to be handled correctly.
         if isinstance(req_auth, Exception):
-            logger.debug('Middleware passed an exception: %s', req_auth)
+            logger.debug("Middleware passed an exception: %s", req_auth)
             raise req_auth
 
         if not req_auth:
             if legacy.util.is_configured():
                 req_auth = self.first_valid(self.legacy_cookies())
             else:
-                logger.warning('No legacy DB, will not check tapir auth.')
+                logger.warning("No legacy DB, will not check tapir auth.")
 
         # Attach auth to the request so other can access easily. request.auth
         setattr(request, self.auth_session_name, req_auth)
@@ -153,9 +154,7 @@ class Auth(object):
 
     def first_valid(self, cookies: List[str]) -> Optional[domain.Session]:
         """First valid legacy session or None if there are none."""
-        first =  next(filter(bool,
-                             map(self._get_legacy_session,
-                                 cookies)), None)
+        first = next(filter(bool, map(self._get_legacy_session, cookies)), None)
 
         if first is None:
             logger.debug("Out of %d cookies, no legacy cookie found", len(cookies))
@@ -183,11 +182,11 @@ class Auth(object):
         # single value per key. This isn't really up to speed with RFC 6265.
         # Luckily we can just pass in an alternate struct to parse_cookie()
         # that can cope with multiple values.
-        raw_cookie = request.environ.get('HTTP_COOKIE', None)
+        raw_cookie = request.environ.get("HTTP_COOKIE", None)
         if raw_cookie is None:
             return []
         cookies = parse_cookie(raw_cookie, cls=MultiDict)
-        return cookies.getlist(self.app.config['CLASSIC_COOKIE_NAME'])
+        return cookies.getlist(self.app.config["CLASSIC_COOKIE_NAME"])
 
     def auth_debug(self) -> None:
         """Sets several auth loggers to DEBUG.

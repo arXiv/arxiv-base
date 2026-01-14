@@ -1,7 +1,9 @@
 """Exceptions for legacy user/session integration."""
 
+
 class ArxivAuthException(RuntimeError):
     """Super class for all auth errors."""
+
 
 class AuthenticationFailed(ArxivAuthException):
     """Failed to authenticate user with provided credentials."""

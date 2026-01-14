@@ -8,14 +8,17 @@ import re
 
 from arxiv.taxonomy.definitions import ARCHIVES, CATEGORIES
 
-__all__ = ('parse_arxiv_id', 'Identifier', )
+__all__ = (
+    "parse_arxiv_id",
+    "Identifier",
+)
 
-_archive = '|'.join([re.escape(key) for key in ARCHIVES.keys()])
+_archive = "|".join([re.escape(key) for key in ARCHIVES.keys()])
 """string for use in Regex for all arXiv archives"""
 
-_category = '|'.join([re.escape(key) for key in CATEGORIES.keys()])
+_category = "|".join([re.escape(key) for key in CATEGORIES.keys()])
 
-_prefix = r'(?P<arxiv_prefix>ar[xX]iv:)'
+_prefix = r"(?P<arxiv_prefix>ar[xX]iv:)"
 """Attempt to catch the arxiv prefix in front of arxiv ids.
 
 E.g. so that it can be included in the <a> tag anchor (ARXIVNG-1284).
@@ -28,25 +31,21 @@ ARXIV_REGEX = (
 )
 
 OLD_STYLE_WITH_ARCHIVE = re.compile(
-    r'(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)' % (_prefix, _archive),
-    re.I
+    r"(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)" % (_prefix, _archive), re.I
 )
 
 OLD_STYLE_WITH_CATEGORY = re.compile(
-    r'(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)' % (_prefix, _category),
-    re.I
+    r"(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)" % (_prefix, _category), re.I
 )
 
 OLD_STYLE = re.compile(
-    r'(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)'
-    % (_prefix, f'{_archive}|{_category}'),
-    re.I
+    r"(?:%s)?(?P<arxiv_id>(%s)\/\d{2}[01]\d{4}(v\d*)?)"
+    % (_prefix, f"{_archive}|{_category}"),
+    re.I,
 )
 
 STANDARD = re.compile(
-    r'(?<![\d=\.])(?:%s)?(?P<arxiv_id>\d{4}\.\d{4,5}(v\d*)?)'
-    % _prefix,
-    re.I
+    r"(?<![\d=\.])(?:%s)?(?P<arxiv_id>\d{4}\.\d{4,5}(v\d*)?)" % _prefix, re.I
 )
 
 
@@ -57,12 +56,11 @@ def parse_arxiv_id(value: str) -> str:
     """
     m = re.search(STANDARD, value)
     if m:
-        return m.group('arxiv_id')
+        return m.group("arxiv_id")
     m = re.search(OLD_STYLE, value)
     if m:
-        return m.group('arxiv_id')
-    raise ValueError('Not a valid arXiv ID')
-
+        return m.group("arxiv_id")
+    raise ValueError("Not a valid arXiv ID")
 
 
 class IdentifierException(Exception):
@@ -80,31 +78,34 @@ class IdentifierIsArchiveException(IdentifierException):
 # arXiv ID format used from 1991 to 2007-03
 # For use with the Identifier class
 RE_ARXIV_OLD_ID = re.compile(
-    r'^(?P<archive>[a-z]{1,}(\-[a-z]{2,})?)(\.([a-zA-Z\-]{2,}))?\/'
-    r'(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))(?P<num>\d\d\d)'
-    r'(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$')
+    r"^(?P<archive>[a-z]{1,}(\-[a-z]{2,})?)(\.([a-zA-Z\-]{2,}))?\/"
+    r"(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))(?P<num>\d\d\d)"
+    r"(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$"
+)
 
 # arXiv ID format used from 2007-04 to present
 # For use with the Identifier class
 RE_ARXIV_NEW_ID = re.compile(
-    r'^(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))\.(?P<num>\d{4,5})'
-    r'(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$'
+    r"^(?P<yymm>(?P<yy>\d\d)(?P<mm>\d\d))\.(?P<num>\d{4,5})"
+    r"(v(?P<version>[1-9]\d*))?(?P<extra>[#\/].*)?$"
 )
 
-Sub_type = List[Tuple[str, Union[str, Callable[[Match[str]], str]],
-                      int, Union[int, RegexFlag]]]
+Sub_type = List[
+    Tuple[str, Union[str, Callable[[Match[str]], str]], int, Union[int, RegexFlag]]
+]
 
 # For use with the Identifier class
 SUBSTITUTIONS: Sub_type = [
     # pattern, replacement, count, flags
-    (r'\.(pdf|ps|gz|ps\.gz)$', '', 0, 0),
-    (r'^/', '', 0, 0),
-    (r'^arxiv:', '', 1, re.I),
-    (r'//+', '/', 0, 0),
-    (r'--+', '-', 0, 0),
-    (r'^([^/]+)', lambda x: str.lower(x.group(0)), 1, 0),
-    (r'([^a\-])(ph|ex|th|qc|mat|lat|sci)(\/|$)', r'\g<1>-\g<2>\g<3>', 1, 0)
+    (r"\.(pdf|ps|gz|ps\.gz)$", "", 0, 0),
+    (r"^/", "", 0, 0),
+    (r"^arxiv:", "", 1, re.I),
+    (r"//+", "/", 0, 0),
+    (r"--+", "-", 0, 0),
+    (r"^([^/]+)", lambda x: str.lower(x.group(0)), 1, 0),
+    (r"([^a\-])(ph|ex|th|qc|mat|lat|sci)(\/|$)", r"\g<1>-\g<2>\g<3>", 1, 0),
 ]
+
 
 class Identifier:
     """Class for arXiv identifiers of published papers."""
@@ -130,23 +131,22 @@ class Identifier:
         """
 
         if self.ids in ARCHIVES:
-            raise IdentifierIsArchiveException(
-                ARCHIVES[self.ids].full_name)
+            raise IdentifierIsArchiveException(ARCHIVES[self.ids].full_name)
 
         if self.ids.startswith("arxiv:"):
             self.arxiv_prefix = True
             arxiv_id = arxiv_id.removeprefix("arxiv:")
 
         for subtup in SUBSTITUTIONS:
-            arxiv_id = re.sub(subtup[0],
-                              subtup[1],
-                              arxiv_id,
-                              count=subtup[2],
-                              flags=subtup[3])
+            arxiv_id = re.sub(
+                subtup[0], subtup[1], arxiv_id, count=subtup[2], flags=subtup[3]
+            )
 
         self.version = 0
-        parse_actions = ((RE_ARXIV_OLD_ID, self._parse_old_id),
-                         (RE_ARXIV_NEW_ID, self._parse_new_id))
+        parse_actions = (
+            (RE_ARXIV_OLD_ID, self._parse_old_id),
+            (RE_ARXIV_NEW_ID, self._parse_new_id),
+        )
 
         id_match = None
         for regex, parse_action in parse_actions:
@@ -156,48 +156,43 @@ class Identifier:
                 break
 
         if not id_match:
-            raise IdentifierException(
-                f'invalid arXiv identifier {self.ids}'
-            )
+            raise IdentifierException(f"invalid arXiv identifier {self.ids}")
 
-        self.num: Optional[int] = int(id_match.group('num'))
+        self.num: Optional[int] = int(id_match.group("num"))
         if self.num is None:
-            raise IdentifierException('arXiv identifier is empty')
+            raise IdentifierException("arXiv identifier is empty")
         if self.year is None:
-            raise IdentifierException('year is empty')
+            raise IdentifierException("year is empty")
         if self.num is not None and self.year is not None:
-            if self.num == 0 \
-               or (self.num > 99999 and self.year >= 2015) \
-               or (self.num > 9999 and self.year < 2015) \
-               or (self.num > 999 and self.is_old_id):
-                raise IdentifierException(
-                    f'invalid arXiv identifier {self.ids}'
-                )
+            if (
+                self.num == 0
+                or (self.num > 99999 and self.year >= 2015)
+                or (self.num > 9999 and self.year < 2015)
+                or (self.num > 999 and self.is_old_id)
+            ):
+                raise IdentifierException(f"invalid arXiv identifier {self.ids}")
         self.has_version: bool = False
         self.idv: str = self.id
-        if id_match.group('version'):
-            self.version = int(id_match.group('version'))
-            self.idv = f'{self.id}v{self.version}'
+        if id_match.group("version"):
+            self.version = int(id_match.group("version"))
+            self.idv = f"{self.id}v{self.version}"
             self.has_version = True
-        self.squashed: str = self.id.replace('/', '')
-        self.squashedv: str = self.idv.replace('/', '')
-        self.yymm: str = id_match.group('yymm')
-        self.month = int(id_match.group('mm'))
+        self.squashed: str = self.id.replace("/", "")
+        self.squashedv: str = self.idv.replace("/", "")
+        self.yymm: str = id_match.group("yymm")
+        self.month = int(id_match.group("mm"))
         if self.month > 12 or self.month < 1:
-            raise IdentifierException(
-                f'invalid arXiv identifier {self.ids}'
-            )
+            raise IdentifierException(f"invalid arXiv identifier {self.ids}")
         if self.is_old_id:
-            if self.year < 1991 or self.year > 2007 \
-               or (self.year == 2007 and self.month > 3):
-                raise IdentifierException(
-                    f'invalid arXiv identifier {self.ids}'
-                )
+            if (
+                self.year < 1991
+                or self.year > 2007
+                or (self.year == 2007 and self.month > 3)
+            ):
+                raise IdentifierException(f"invalid arXiv identifier {self.ids}")
         else:
             if self.year < 2007 or (self.year == 2007 and self.month < 4):
-                raise IdentifierException(
-                    f'invalid arXiv identifier {self.ids}'
-                )
+                raise IdentifierException(f"invalid arXiv identifier {self.ids}")
 
     def _parse_old_id(self, match_obj: Match[str]) -> None:
         """Populate instance attributes parsed from old arXiv identifier.
@@ -214,17 +209,17 @@ class Identifier:
         None
         """
         self.is_old_id = True
-        self.archive = match_obj.group('archive')
-        self.year = int(match_obj.group('yy')) + 1900
-        self.year += 100 if int(match_obj.group('yy')) < 91 else 0
+        self.archive = match_obj.group("archive")
+        self.year = int(match_obj.group("yy")) + 1900
+        self.year += 100 if int(match_obj.group("yy")) < 91 else 0
 
-        if match_obj.group('version'):
-            self.version = int(match_obj.group('version'))
-        self.filename = f'{match_obj.group("yymm")}{int(match_obj.group("num")):03d}'
-        self.id = f'{self.archive}/{self.filename}'
+        if match_obj.group("version"):
+            self.version = int(match_obj.group("version"))
+        self.filename = f"{match_obj.group('yymm')}{int(match_obj.group('num')):03d}"
+        self.id = f"{self.archive}/{self.filename}"
 
-        if match_obj.group('extra'):
-            self.extra = match_obj.group('extra')
+        if match_obj.group("extra"):
+            self.extra = match_obj.group("extra")
 
     def _parse_new_id(self, match_obj: Match[str]) -> None:
         """Populate instance attributes from a new arXiv identifier.
@@ -246,22 +241,27 @@ class Identifier:
         None
         """
         self.is_old_id = False
-        self.archive = 'arxiv'
+        self.archive = "arxiv"
         # NB: this works only until 2099
-        self.year = int(match_obj.group('yy')) + 2000
+        self.year = int(match_obj.group("yy")) + 2000
         if self.year >= 2015:
-            self.id = f'{int(match_obj.group("yymm")):04d}.{int(match_obj.group("num")):05d}'
+            self.id = (
+                f"{int(match_obj.group('yymm')):04d}.{int(match_obj.group('num')):05d}"
+            )
         else:
-            self.id = f'{int(match_obj.group("yymm")):04d}.{int(match_obj.group("num")):04d}'
+            self.id = (
+                f"{int(match_obj.group('yymm')):04d}.{int(match_obj.group('num')):04d}"
+            )
         self.filename = self.id
 
-        if match_obj.group('extra'):
-            self.extra = match_obj.group('extra')
+        if match_obj.group("extra"):
+            self.extra = match_obj.group("extra")
 
     def __str__(self) -> str:
         """Return the string representation of the instance in json."""
-        return json.dumps(self, default=lambda o: o.__dict__,
-                          sort_keys=True, indent=True)
+        return json.dumps(
+            self, default=lambda o: o.__dict__, sort_keys=True, indent=True
+        )
 
     def __repr__(self) -> str:
         """Return the instance representation."""
@@ -279,7 +279,6 @@ class Identifier:
             return self.__dict__ == other.__dict__
         except AttributeError:
             return False
-
 
     @staticmethod
     def is_mostly_safe(idin: Optional[str]) -> bool:

@@ -53,7 +53,7 @@ WARN_TOO_MANY_MESSAGES = int(os.environ.get("WARN_TOO_MANY_MESSAGES", 20_000))
 """The size to warn that there are too many messages in the queue."""
 
 
-logging.basicConfig(encoding='utf-8', level=logging.INFO)
+logging.basicConfig(encoding="utf-8", level=logging.INFO)
 logger = logging.getLogger(__name__)
 if VERBOSE:
     logger.setLevel(logging.DEBUG)
@@ -81,19 +81,19 @@ def truncate(value):
         return ""
     out_value = str(value)
     if len(out_value) > MAX_BYTES_PER_VALUE:
-        return out_value[:MAX_BYTES_PER_VALUE-11] + "-TRUNCATED"
+        return out_value[: MAX_BYTES_PER_VALUE - 11] + "-TRUNCATED"
     else:
         return out_value
 
 
-def to_gcp_log_item(message: Message) -> Tuple[dict,dict]:
+def to_gcp_log_item(message: Message) -> Tuple[dict, dict]:
     """The format of the message from Fastly is not too important.
 
     It MUST have a timestamp in Y-M-DTH:M:S+0000 format.
 
     All other values will be added as key values pairs to the `jsonPayload`
     """
-    value = message.data.decode('utf-8', errors="replace")
+    value = message.data.decode("utf-8", errors="replace")
     try:
         data: dict = json.loads(value.strip())
         return (
@@ -101,19 +101,27 @@ def to_gcp_log_item(message: Message) -> Tuple[dict,dict]:
             {
                 "severity": status_to_severity(data.get("status", 500)),
                 # This cause the log line to show up in GCP at the date of the original http request
-                "timestamp": datetime.strptime(data["timestamp"], "%Y-%m-%dT%H:%M:%S%z"),
-                "resource": Resource(type="generic_node",
-                                     labels={"project_id": PROJECT_ID,
-                                             "namespace": "fastly",
-                                             "node_id": data.get("fastly_server", "server_unknown")})
-            }
+                "timestamp": datetime.strptime(
+                    data["timestamp"], "%Y-%m-%dT%H:%M:%S%z"
+                ),
+                "resource": Resource(
+                    type="generic_node",
+                    labels={
+                        "project_id": PROJECT_ID,
+                        "namespace": "fastly",
+                        "node_id": data.get("fastly_server", "server_unknown"),
+                    },
+                ),
+            },
         )
     except Exception as ex:
         example = ""
         if match := re.search(r"\(char (\d*)\)", str(ex)):
-            start = max(0, int(match[1])-30)
-            example = " example: " + value[start:start+60]
-        logger.warning(f"Skipping pubsub msg due to problem converting message to log item: {ex}{example}")
+            start = max(0, int(match[1]) - 30)
+            example = " example: " + value[start : start + 60]
+        logger.warning(
+            f"Skipping pubsub msg due to problem converting message to log item: {ex}{example}"
+        )
         return {}, {}
 
 
@@ -124,7 +132,9 @@ WorkItem = Tuple[Message, float]
 RUN = True
 """Global used to force threads to stop."""
 
-shared_messages: deque[WorkItem] = deque()  # thread safe, left side: oldest, right newest.
+shared_messages: deque[WorkItem] = (
+    deque()
+)  # thread safe, left side: oldest, right newest.
 msg_rate = Rate(plural_noun="pub/sub messages")  # thread safe
 log_write_rate = Rate(plural_noun=f"log entries written to GCP")
 cv = Condition()  # Used only for notification waiting log_to_gcp threads
@@ -160,12 +170,22 @@ def log_to_gcp():
         try:
             work_items: List[WorkItem] = []
             with cv:
-                cv.wait_for(lambda: (len(shared_messages) and (
-                        len(shared_messages) > PREFERRED_PER_BATCH
-                        or shared_messages[0][1] and (perf_counter() - shared_messages[0][1]) > SEND_PERIOD)),
-                        timeout=1.0)
+                cv.wait_for(
+                    lambda: (
+                        len(shared_messages)
+                        and (
+                            len(shared_messages) > PREFERRED_PER_BATCH
+                            or shared_messages[0][1]
+                            and (perf_counter() - shared_messages[0][1]) > SEND_PERIOD
+                        )
+                    ),
+                    timeout=1.0,
+                )
                 try:
-                    [work_items.append(shared_messages.popleft()) for _ in range(MAX_PER_BATCH)]
+                    [
+                        work_items.append(shared_messages.popleft())
+                        for _ in range(MAX_PER_BATCH)
+                    ]
                 except IndexError:
                     pass  # ran out of messages, not a problem
 
@@ -173,9 +193,15 @@ def log_to_gcp():
                 messages = (to_gcp_log_item(message) for message, _ in work_items)
                 try:
                     with fastly_logger.batch() as batch:
-                        [batch.log_struct(info=info, **kv) for info, kv in messages if info and kv]
+                        [
+                            batch.log_struct(info=info, **kv)
+                            for info, kv in messages
+                            if info and kv
+                        ]
                 except DeadlineExceeded:
-                    logger.warning("GCP log write deadline exceeded, will not ACK pub sub messages")
+                    logger.warning(
+                        "GCP log write deadline exceeded, will not ACK pub sub messages"
+                    )
                     continue
 
                 try:
@@ -208,17 +234,24 @@ def monitor() -> None:
             logger.info(log_write_rate.rate_msg())
             queue_size = len(shared_messages)
             if queue_size > WARN_TOO_MANY_MESSAGES:
-                logger.warning(f"shared_messages size getting unusually large: {queue_size} messages")
+                logger.warning(
+                    f"shared_messages size getting unusually large: {queue_size} messages"
+                )
         except Exception:
             logger.exception("Exception in monitor thread")
 
 
 if __name__ == "__main__":
     credentials, project = google.auth.default()
-    logger.info("GOOGLE_APPLICATION_CREDENTIALS envvar:" f"{os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '(not set)')}")
+    logger.info(
+        "GOOGLE_APPLICATION_CREDENTIALS envvar:"
+        f"{os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '(not set)')}"
+    )
     _log_credentials(credentials)
     logger.info("about to start logging threads")
-    threads = [Thread(target=monitor)] + [Thread(target=log_to_gcp) for _ in range(THREADS)]
+    threads = [Thread(target=monitor)] + [
+        Thread(target=log_to_gcp) for _ in range(THREADS)
+    ]
     [t.start() for t in threads]
     logger.info(f"Started {THREADS} log writer threads and one monitor thread.")
 
@@ -229,7 +262,9 @@ if __name__ == "__main__":
     # in the form `projects/{project_id}/subscriptions/{subscription_id}`
     subscription_path = subscriber.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
 
-    streaming_pull_future = subscriber.subscribe(subscription_path, callback=receive_pubsub_callback)
+    streaming_pull_future = subscriber.subscribe(
+        subscription_path, callback=receive_pubsub_callback
+    )
     logger.info(f"Listening for pub/sub messages on {subscription_path}..\n")
     with subscriber:
         try:

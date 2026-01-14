@@ -1,11 +1,12 @@
 """Parse Authors lines to extract author and affiliation data."""
+
 import re
 from itertools import dropwhile
 from typing import Dict, Iterator, List, Tuple
 
 from ..util.tex2utf import tex2utf
 
-PREFIX_MATCH = 'van|der|de|la|von|del|della|da|mac|ter|dem|di|vaziri'
+PREFIX_MATCH = "van|der|de|la|von|del|della|da|mac|ter|dem|di|vaziri"
 """
 Takes data from an Author: line in the current arXiv abstract
 file and returns a structured set of data:
@@ -58,8 +59,7 @@ def parse_author_affil(authors: str) -> List[List[str]]:
        [ author3_keyname, author3_firstnames, author1_suffix ]
     ]
     """
-    return _parse_author_affil_back_propagate(
-        **_parse_author_affil_split(authors))
+    return _parse_author_affil_back_propagate(**_parse_author_affil_split(authors))
 
 
 def _parse_author_affil_split(author_line: str) -> Dict:
@@ -74,75 +74,79 @@ def _parse_author_affil_split(author_line: str) -> Dict:
     Does not handle multiple collaboration names.
     """
     if not author_line:
-        return {'author_list': [], 'back_prop': 0}
+        return {"author_list": [], "back_prop": 0}
 
     names: List[str] = split_authors(author_line)
     if not names:
-        return {'author_list': [], 'back_prop': 0}
+        return {"author_list": [], "back_prop": 0}
 
     names = _remove_double_commas(names)
     # get rid of commas at back
     namesIter: Iterator[str] = reversed(
-        list(dropwhile(lambda x: x == ',', reversed(names))))
+        list(dropwhile(lambda x: x == ",", reversed(names)))
+    )
     # get rid of commas at front
-    names = list(dropwhile(lambda x: x == ',', namesIter))
+    names = list(dropwhile(lambda x: x == ",", namesIter))
 
     # Extract all names (all parts not starting with comma or paren)
-    names = list(map(_tidy_name, filter(
-        lambda x: re.match('^[^](,]', x), names)))
-    names = list(filter(lambda n: not re.match(
-        r'^\s*et\.?\s+al\.?\s*', n, flags=re.IGNORECASE), names))
+    names = list(map(_tidy_name, filter(lambda x: re.match("^[^](,]", x), names)))
+    names = list(
+        filter(
+            lambda n: not re.match(r"^\s*et\.?\s+al\.?\s*", n, flags=re.IGNORECASE),
+            names,
+        )
+    )
 
-    (names, author_list,
-     back_propagate_affiliations_to) = _collaboration_at_start(names)
+    (names, author_list, back_propagate_affiliations_to) = _collaboration_at_start(
+        names
+    )
 
     (enumaffils) = _enum_collaboration_at_end(author_line)
 
     # Split name into keyname and firstnames/initials.
     # Deal with different patterns in turn: prefixes, suffixes, plain
     # and single name.
-    patterns = [('double-prefix',
-                 r'^(.*)\s+(' + PREFIX_MATCH + r')\s(' +
-                 PREFIX_MATCH + r')\s(\S+)$'),
-                ('name-prefix-name',
-                 r'^(.*)\s+(' + PREFIX_MATCH + r')\s(\S+)$'),
-                ('name-name-prefix',
-                 r'^(.*)\s+(\S+)\s(I|II|III|IV|V|Sr|Jr|Sr\.|Jr\.)$'),
-                ('name-name',
-                 r'^(.*)\s+(\S+)$'), ]
+    patterns = [
+        (
+            "double-prefix",
+            r"^(.*)\s+(" + PREFIX_MATCH + r")\s(" + PREFIX_MATCH + r")\s(\S+)$",
+        ),
+        ("name-prefix-name", r"^(.*)\s+(" + PREFIX_MATCH + r")\s(\S+)$"),
+        ("name-name-prefix", r"^(.*)\s+(\S+)\s(I|II|III|IV|V|Sr|Jr|Sr\.|Jr\.)$"),
+        ("name-name", r"^(.*)\s+(\S+)$"),
+    ]
 
     # Now go through names in turn and try to get affiliations
     # to go with them
     for name in names:
-        pattern_matches = ((mtype, re.match(m, name, flags=re.IGNORECASE))
-                           for (mtype, m) in patterns)
+        pattern_matches = (
+            (mtype, re.match(m, name, flags=re.IGNORECASE)) for (mtype, m) in patterns
+        )
 
-        (mtype, match) = next(((mtype, m)
-                               for (mtype, m) in pattern_matches
-                               if m is not None), ('default', None))
+        (mtype, match) = next(
+            ((mtype, m) for (mtype, m) in pattern_matches if m is not None),
+            ("default", None),
+        )
         if match is None:
-            author_entry = [name, '', '']
-        elif mtype == 'double-prefix':
-            s = '{} {} {}'.format(match.group(
-                2), match.group(3), match.group(4))
-            author_entry = [s, match.group(1), '']
-        elif mtype == 'name-prefix-name':
-            s = '{} {}'.format(match.group(2), match.group(3))
-            author_entry = [s, match.group(1), '']
-        elif mtype == 'name-name-prefix':
+            author_entry = [name, "", ""]
+        elif mtype == "double-prefix":
+            s = "{} {} {}".format(match.group(2), match.group(3), match.group(4))
+            author_entry = [s, match.group(1), ""]
+        elif mtype == "name-prefix-name":
+            s = "{} {}".format(match.group(2), match.group(3))
+            author_entry = [s, match.group(1), ""]
+        elif mtype == "name-name-prefix":
             author_entry = [match.group(2), match.group(1), match.group(3)]
-        elif mtype == 'name-name':
-            author_entry = [match.group(2), match.group(1), '']
+        elif mtype == "name-name":
+            author_entry = [match.group(2), match.group(1), ""]
         else:
-            author_entry = [name, '', '']
+            author_entry = [name, "", ""]
 
         # search back in author_line for affiliation
-        author_entry = _add_affiliation(
-            author_line, enumaffils, author_entry, name)
+        author_entry = _add_affiliation(author_line, enumaffils, author_entry, name)
         author_list.append(author_entry)
 
-    return {'author_list': author_list,
-            'back_prop': back_propagate_affiliations_to}
+    return {"author_list": author_list, "back_prop": back_propagate_affiliations_to}
 
 
 def parse_author_affil_utf(authors: str) -> List:
@@ -152,16 +156,16 @@ def parse_author_affil_utf(authors: str) -> List:
     """
     if not authors:
         return []
-    return list(map(lambda author: list(map(tex2utf, author)),
-                    parse_author_affil(authors)))
+    return list(
+        map(lambda author: list(map(tex2utf, author)), parse_author_affil(authors))
+    )
 
 
 def _remove_double_commas(items: List[str]) -> List[str]:
-
     parts: List[str] = []
-    last = ''
+    last = ""
     for pt in items:
-        if pt == ',' and last == ',':
+        if pt == "," and last == ",":
             continue
         else:
             parts.append(pt)
@@ -170,78 +174,77 @@ def _remove_double_commas(items: List[str]) -> List[str]:
 
 
 def _tidy_name(name: str) -> str:
-    name = re.sub(r'\s\s+', ' ', name)  # also gets rid of CR
+    name = re.sub(r"\s\s+", " ", name)  # also gets rid of CR
     # add space after dot (except in TeX)
-    name = re.sub(r'(?<!\\)\.(\S)', r'. \g<1>', name)
+    name = re.sub(r"(?<!\\)\.(\S)", r". \g<1>", name)
     return name
 
 
-def _collaboration_at_start(names: List[str]) \
-        -> Tuple[List[str], List[List[str]], int]:
+def _collaboration_at_start(names: List[str]) -> Tuple[List[str], List[List[str]], int]:
     """Perform special handling of collaboration at start."""
     author_list = []
 
     back_propagate_affiliations_to = 0
     while len(names) > 0:
-        m = re.search(r'([a-z0-9\s]+\s+(collaboration|group|team))',
-                      names[0], flags=re.IGNORECASE)
+        m = re.search(
+            r"([a-z0-9\s]+\s+(collaboration|group|team))", names[0], flags=re.IGNORECASE
+        )
         if not m:
             break
 
         # Add to author list
-        author_list.append([m.group(1), '', ''])
+        author_list.append([m.group(1), "", ""])
         back_propagate_affiliations_to += 1
         # Remove from names
         names.pop(0)
         # Also swallow and following comma or colon
-        if names and (names[0] == ',' or names[0] == ':'):
+        if names and (names[0] == "," or names[0] == ":"):
             names.pop(0)
 
     return names, author_list, back_propagate_affiliations_to
 
 
-def _enum_collaboration_at_end(author_line: str)->Dict:
+def _enum_collaboration_at_end(author_line: str) -> Dict:
     """Get separate set of enumerated affiliations from end of author_line."""
     # Now see if we have a separate set of enumerated affiliations
     # This is indicated by finding '(\s*('
-    line_m = re.search(r'\(\s*\((.*)$', author_line)
+    line_m = re.search(r"\(\s*\((.*)$", author_line)
     if not line_m:
         return {}
 
     enumaffils = {}
-    affils = re.sub(r'\s*\)\s*$', '', line_m.group(1))
+    affils = re.sub(r"\s*\)\s*$", "", line_m.group(1))
 
     # Now expect to have '1) affil1 (2) affil2 (3) affil3'
-    for affil in affils.split('('):
+    for affil in affils.split("("):
         # Now expect `1) affil1 ', discard if no match
-        m = re.match(r'^(\d+)\)\s*(\S.*\S)\s*$', affil)
+        m = re.match(r"^(\d+)\)\s*(\S.*\S)\s*$", affil)
         if m:
-            enumaffils[m.group(1)] = re.sub(r'[\.,\s]*$', '', m.group(2))
+            enumaffils[m.group(1)] = re.sub(r"[\.,\s]*$", "", m.group(2))
 
     return enumaffils
 
 
-def _add_affiliation(author_line: str,
-                     enumaffils: Dict,
-                     author_entry: List[str],
-                     name: str) -> List:
+def _add_affiliation(
+    author_line: str, enumaffils: Dict, author_entry: List[str], name: str
+) -> List:
     """Add author affiliation to author_entry if one is found in author_line.
 
     This should deal with these cases Smith B(labX) Smith B(1) Smith
     B(1, 2) Smith B(1 & 2) Smith B(1 and 2)
     """
     en = re.escape(name)
-    namerex = r'{}\s*\(([^\(\)]+)'.format(en.replace(' ', 's*'))
+    namerex = r"{}\s*\(([^\(\)]+)".format(en.replace(" ", "s*"))
     m = re.search(namerex, author_line, flags=re.IGNORECASE)
     if not m:
         return author_entry
 
     # Now see if we have enumerated references (just commas, digits, &, and)
     affils = m.group(1).rstrip().lstrip()
-    affils = re.sub(r'\s+(&|and)\s+', ',', affils, flags=re.IGNORECASE)
+    affils = re.sub(r"\s+(&|and)\s+", ",", affils, flags=re.IGNORECASE)
 
-    if re.match(r'^[\d,\s]+$', affils):
-        for affil in affils.split(','):
+    if re.match(r"^[\d,\s]+$", affils):
+        for affil in affils.split(","):
             if affil in enumaffils:
                 author_entry.append(enumaffils[affil])
     else:
@@ -250,8 +253,9 @@ def _add_affiliation(author_line: str,
     return author_entry
 
 
-def _parse_author_affil_back_propagate(author_list: List[List[str]],
-                                       back_prop: int) -> List[List[str]]:
+def _parse_author_affil_back_propagate(
+    author_list: List[List[str]], back_prop: int
+) -> List[List[str]]:
     """Back propagate author affiliation.
 
     Take the author list structure generated by parse_author_affil_split(..)
@@ -293,31 +297,31 @@ def split_authors(authors: str) -> List:
     # split authors field into blocks with boundaries of ( and )
     if not authors:
         return []
-    aus = re.split(r'(\(|\))', authors)
-    aus = list(filter(lambda x: x != '', aus))
+    aus = re.split(r"(\(|\))", authors)
+    aus = list(filter(lambda x: x != "", aus))
 
     blocks = []
     if len(aus) == 1:
         blocks.append(authors)
     else:
-        c = ''
+        c = ""
         depth = 0
         for bit in aus:
-            if bit == '':
+            if bit == "":
                 continue
-            if bit == '(':  # track open parentheses
+            if bit == "(":  # track open parentheses
                 depth += 1
                 if depth == 1:
                     blocks.append(c)
-                    c = '('
+                    c = "("
                 else:
                     c = c + bit
-            elif bit == ')':  # track close parentheses
+            elif bit == ")":  # track close parentheses
                 depth -= 1
                 c = c + bit
                 if depth == 0:
                     blocks.append(c)
-                    c = ''
+                    c = ""
                 else:  # haven't closed, so keep accumulating
                     continue
             else:
@@ -328,12 +332,12 @@ def split_authors(authors: str) -> List:
     listx = []
 
     for block in blocks:
-        block = re.sub(r'\s+', ' ', block)
-        if re.match(r'^\(', block):  # it is a comment
+        block = re.sub(r"\s+", " ", block)
+        if re.match(r"^\(", block):  # it is a comment
             listx.append(block)
         else:  # it is a name
-            block = re.sub(r',?\s+(and|\&)\s', ',', block)
-            names = re.split(r'(,|:)\s*', block)
+            block = re.sub(r",?\s+(and|\&)\s", ",", block)
+            names = re.split(r"(,|:)\s*", block)
             for name in names:
                 if not name:
                     continue
@@ -344,10 +348,12 @@ def split_authors(authors: str) -> List:
     # Recombine suffixes that were separated with a comma
     parts: List[str] = []
     for p in listx:
-        if re.match(r'^(Jr\.?|Sr\.?\[IV]{2,})$', p) \
-                and len(parts) >= 2 \
-                and parts[-1] == ',' \
-                and not re.match(r'\)$', parts[-2]):
+        if (
+            re.match(r"^(Jr\.?|Sr\.?\[IV]{2,})$", p)
+            and len(parts) >= 2
+            and parts[-1] == ","
+            and not re.match(r"\)$", parts[-2])
+        ):
             separator = parts.pop()
             last = parts.pop()
             recomb = "{}{} {}".format(last, separator, p)

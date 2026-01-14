@@ -7,42 +7,51 @@ from pytz import timezone
 from ..auth import scopes
 from ..auth import domain
 
-EASTERN = timezone('US/Eastern')
+EASTERN = timezone("US/Eastern")
 
 
 class TestSession(TestCase):
     def test_with_session(self):
         session = domain.Session(
-            session_id='asdf1234',
-            start_time=datetime.now(), end_time=datetime.now(),
+            session_id="asdf1234",
+            start_time=datetime.now(),
+            end_time=datetime.now(),
             user=domain.User(
-                user_id='12345',
-                email='foo@bar.com',
-                username='emanresu',
-                name=domain.UserFullName(forename='First', surname='Last', suffix='Lastest'),
+                user_id="12345",
+                email="foo@bar.com",
+                username="emanresu",
+                name=domain.UserFullName(
+                    forename="First", surname="Last", suffix="Lastest"
+                ),
                 profile=domain.UserProfile(
-                    affiliation='FSU',
+                    affiliation="FSU",
                     rank=3,
-                    country='us',
-                    default_category=definitions.CATEGORIES['astro-ph.CO'],
-                    submission_groups=['grp_physics']
-                )
+                    country="us",
+                    default_category=definitions.CATEGORIES["astro-ph.CO"],
+                    submission_groups=["grp_physics"],
+                ),
             ),
             authorizations=domain.Authorizations(
                 scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION],
-            )
+            ),
         )
         session_data = session.dict()
-        self.assertEqual(session_data['authorizations']['scopes'],
-                         ['submission:read','submission:create'])
-
-        self.assertEqual(session_data['user']['profile']['affiliation'], 'FSU')
-        self.assertEqual(session_data['user']['profile']['country'], 'us')
-        self.assertEqual(session_data['user']['profile']['submission_groups'], ['grp_physics'])
-        self.assertEqual(session_data['user']['profile']['default_category']['id'], 'astro-ph.CO')
         self.assertEqual(
-            session_data['user']['name'],
-            {'forename': 'First', 'surname': 'Last', 'suffix': 'Lastest'}
+            session_data["authorizations"]["scopes"],
+            ["submission:read", "submission:create"],
+        )
+
+        self.assertEqual(session_data["user"]["profile"]["affiliation"], "FSU")
+        self.assertEqual(session_data["user"]["profile"]["country"], "us")
+        self.assertEqual(
+            session_data["user"]["profile"]["submission_groups"], ["grp_physics"]
+        )
+        self.assertEqual(
+            session_data["user"]["profile"]["default_category"]["id"], "astro-ph.CO"
+        )
+        self.assertEqual(
+            session_data["user"]["name"],
+            {"forename": "First", "surname": "Last", "suffix": "Lastest"},
         )
 
         as_session = domain.session_from_dict(session_data)

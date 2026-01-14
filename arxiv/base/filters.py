@@ -14,7 +14,7 @@ from arxiv.base.urls import urlizer, canonical_url, clickthrough_url
 from arxiv.util.tex2utf import tex2utf
 from arxiv.taxonomy.category import Archive, Category, Group
 
-ET = timezone('US/Eastern')
+ET = timezone("US/Eastern")
 
 
 JinjaFilterInput = Union[Markup, str]
@@ -35,13 +35,12 @@ def abstract_lf_to_br(text: JinjaFilterInput) -> Markup:
         etxt = Markup(escape(text))
 
     # if line starts with spaces, replace the white space with <br />
-    br = re.sub(r'((?<!^)\n +)', '\n<br />', etxt)
-    dedup = re.sub(r'\n\n', '\n', br)  # skip if blank
+    br = re.sub(r"((?<!^)\n +)", "\n<br />", etxt)
+    dedup = re.sub(r"\n\n", "\n", br)  # skip if blank
     return Markup(dedup)
 
 
-def f_tex2utf(text: JinjaFilterInput,
-              greek: bool = True) -> Markup:
+def f_tex2utf(text: JinjaFilterInput, greek: bool = True) -> Markup:
     """Return output of tex2utf function as escaped Markup."""
     if isinstance(text, Markup):
         return escape(tex2utf(text.unescape(), greek=greek))
@@ -51,7 +50,7 @@ def f_tex2utf(text: JinjaFilterInput,
 
 def embed_content(path: str) -> Markup:
     """Embed the content of a static file."""
-    stat = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
+    stat = os.path.join(os.path.dirname(os.path.realpath(__file__)), "static")
     with open(os.path.join(stat, path)) as f:
         return Markup(f.read())
 
@@ -70,12 +69,12 @@ def tidy_filesize(size: Union[int, float]) -> str:
     if size == 0:
         return "0B"
     if size > 1000000000:
-        return '{} {}'.format(size, units[3])
+        return "{} {}".format(size, units[3])
     units_index = 0
     while size > 1000:
         units_index += 1
         size = round(size / 1000, 3)
-    return '{} {}'.format(size, units[units_index])
+    return "{} {}".format(size, units[units_index])
 
 
 def as_eastern(utc_datetime: datetime) -> datetime:
@@ -90,14 +89,14 @@ def register_filters(app: Flask) -> None:
     ----------
     app : :class:`Flask`
     """
-    app.template_filter('abstract_lf_to_br')(abstract_lf_to_br)
-    app.template_filter('urlize')(urlizer())
-    app.template_filter('tex2utf')(partial(f_tex2utf, greek=True))
-    app.template_filter('tex2utf_no_symbols')(partial(f_tex2utf, greek=False))
-    app.template_filter('canonical_url')(canonical_url)
-    app.template_filter('clickthrough_url')(clickthrough_url)
-    app.template_filter('embed_content')(embed_content)
-    app.template_filter('tidy_filesize')(tidy_filesize)
-    app.template_filter('as_eastern')(as_eastern)
-    app.template_filter('abs_doi_to_urls')(urlizer(['doi_field']))
-    app.template_filter('arxiv_id_urlize')(urlizer(['arxiv_id']))
+    app.template_filter("abstract_lf_to_br")(abstract_lf_to_br)
+    app.template_filter("urlize")(urlizer())
+    app.template_filter("tex2utf")(partial(f_tex2utf, greek=True))
+    app.template_filter("tex2utf_no_symbols")(partial(f_tex2utf, greek=False))
+    app.template_filter("canonical_url")(canonical_url)
+    app.template_filter("clickthrough_url")(clickthrough_url)
+    app.template_filter("embed_content")(embed_content)
+    app.template_filter("tidy_filesize")(tidy_filesize)
+    app.template_filter("as_eastern")(as_eastern)
+    app.template_filter("abs_doi_to_urls")(urlizer(["doi_field"]))
+    app.template_filter("arxiv_id_urlize")(urlizer(["arxiv_id"]))

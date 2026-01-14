@@ -16,15 +16,22 @@ markup.
 
 from typing import Callable, List, Tuple, Type, Dict
 
-from werkzeug.exceptions import NotFound, Forbidden, Unauthorized, \
-    MethodNotAllowed, RequestEntityTooLarge, BadRequest, InternalServerError, \
-    HTTPException, default_exceptions
+from werkzeug.exceptions import (
+    NotFound,
+    Forbidden,
+    Unauthorized,
+    MethodNotAllowed,
+    RequestEntityTooLarge,
+    BadRequest,
+    InternalServerError,
+    HTTPException,
+    default_exceptions,
+)
 from flask import render_template, make_response, Response, request
 
 from http import HTTPStatus as status
 
-_handlers: List[Tuple[Type[HTTPException],
-                      Callable[[HTTPException], Response]]] = []
+_handlers: List[Tuple[Type[HTTPException], Callable[[HTTPException], Response]]] = []
 
 
 class ConfigurationError(InternalServerError):
@@ -33,10 +40,12 @@ class ConfigurationError(InternalServerError):
 
 def handler(exception_type: Type[HTTPException]) -> Callable:
     """Generate a decorator to register a handler for an exception."""
+
     def deco(func: Callable) -> Callable:
         """Register a function as an exception handler."""
         _handlers.append((exception_type, func))
         return func
+
     return deco
 
 
@@ -53,8 +62,9 @@ def get_handlers() -> List[Tuple[Type[HTTPException], Callable]]:
 
 def handle_exception(error: HTTPException) -> Response:
     """Render a generic error handler."""
-    rendered = render_template("base/exception.html", error=error,
-                               pagetitle=f"{error.code} {error.name }")
+    rendered = render_template(
+        "base/exception.html", error=error, pagetitle=f"{error.code} {error.name}"
+    )
     response: Response = make_response(rendered, error.code)
     return response
 

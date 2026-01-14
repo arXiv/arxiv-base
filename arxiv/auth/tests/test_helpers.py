@@ -23,41 +23,39 @@ class TestGenerateToken(TestCase):
 
     def test_token_is_usable(self):
         """Verify that :func:`.helpers.generate_token` makes usable tokens."""
-        os.environ['JWT_SECRET'] = 'thesecret'
+        os.environ["JWT_SECRET"] = "thesecret"
         scope = [VIEW_SUBMISSION, EDIT_SUBMISSION, CREATE_SUBMISSION]
-        token = helpers.generate_token("1234", "user@foo.com", "theuser",
-                                       scope=scope)
+        token = helpers.generate_token("1234", "user@foo.com", "theuser", scope=scope)
 
-        app = Flask('test')
-        app.config['CLASSIC_SESSION_HASH'] = 'foohash'
-        app.config['CLASSIC_COOKIE_NAME'] = 'tapir_session_cookie'
-        app.config['SESSION_DURATION'] = '36000'
-        app.config['AUTH_UPDATED_SESSION_REF'] = True
+        app = Flask("test")
+        app.config["CLASSIC_SESSION_HASH"] = "foohash"
+        app.config["CLASSIC_COOKIE_NAME"] = "tapir_session_cookie"
+        app.config["SESSION_DURATION"] = "36000"
+        app.config["AUTH_UPDATED_SESSION_REF"] = True
 
-        app.config.update({
-            'JWT_SECRET': 'thesecret',
-        })
+        app.config.update(
+            {
+                "JWT_SECRET": "thesecret",
+            }
+        )
 
-        settings = Settings(
-                        CLASSIC_DB_URI='sqlite:///:memory:',
-                        LATEXML_DB_URI=None)
+        settings = Settings(CLASSIC_DB_URI="sqlite:///:memory:", LATEXML_DB_URI=None)
 
-        configure_db (settings)
+        configure_db(settings)
 
         Base(app)
         auth.Auth(app)
         wrap(app, [AuthMiddleware])
 
-        @app.route('/')
+        @app.route("/")
         @decorators.scoped(EDIT_SUBMISSION)
         def protected():
             return "this is protected"
 
         client = app.test_client()
         with app.app_context():
-            response = client.get('/')
-            self.assertEqual(response.status_code,
-                             status.HTTP_401_UNAUTHORIZED)
+            response = client.get("/")
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-            response = client.get('/', headers={'Authorization': token})
+            response = client.get("/", headers={"Authorization": token})
             self.assertEqual(response.status_code, status.HTTP_200_OK)

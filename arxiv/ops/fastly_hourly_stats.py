@@ -33,7 +33,12 @@ import click
 import configparser
 
 import google.auth
-from google.cloud.monitoring_v3 import TimeInterval, Aggregation, MetricServiceClient, ListTimeSeriesRequest
+from google.cloud.monitoring_v3 import (
+    TimeInterval,
+    Aggregation,
+    MetricServiceClient,
+    ListTimeSeriesRequest,
+)
 
 from sqlalchemy import create_engine
 from sqlalchemy.sql import text
@@ -54,8 +59,8 @@ def config_file_example():
 
 
 @cli.command()
-@click.option('--dry-run', default=False, is_flag=True)
-@click.option('--verbose', default=False, is_flag=True)
+@click.option("--dry-run", default=False, is_flag=True)
+@click.option("--verbose", default=False, is_flag=True)
 @click.option("--config-file", required=True)
 def last_hour(dry_run: bool, config_file: str, verbose: bool):
     """Adds request count for last clock hour.
@@ -82,8 +87,12 @@ def last_hour(dry_run: bool, config_file: str, verbose: bool):
 
 def _get_default_time() -> Tuple[datetime.datetime, str, str]:
     # Since this uses only UTC, there should be no problems with DST transitions
-    now = (datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(hours=1))
-    return now, now.strftime("%Y-%m-%dT%H:00:00.000000000Z"), now.strftime("%Y-%m-%dT%H:59:59.999999999Z")
+    now = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(hours=1)
+    return (
+        now,
+        now.strftime("%Y-%m-%dT%H:00:00.000000000Z"),
+        now.strftime("%Y-%m-%dT%H:59:59.999999999Z"),
+    )
 
 
 def _get_count_from_gcp_v2(config: MutableMapping, start: str, end: str, verbose: bool):
@@ -95,12 +104,12 @@ def _get_count_from_gcp_v2(config: MutableMapping, start: str, end: str, verbose
     # noinspection PyTypeChecker
     request = ListTimeSeriesRequest(
         name="projects/" + config["gcp_project"],
-        filter=F"metric.type = \"logging.googleapis.com/user/{config['gcp_metric']}\"",
+        filter=f'metric.type = "logging.googleapis.com/user/{config["gcp_metric"]}"',
         interval=TimeInterval(start_time=start, end_time=end),
         aggregation=Aggregation(
             alignment_period="3600s",  # 1 hour
-            per_series_aligner="ALIGN_SUM"
-        )
+            per_series_aligner="ALIGN_SUM",
+        ),
     )
 
     page_result = client.list_time_series(request)
@@ -115,30 +124,46 @@ def _get_count_from_gcp_v2(config: MutableMapping, start: str, end: str, verbose
         points.extend(response.points)
 
     if len(points) == 0:
-        print(f"No points in fastly request metric between {start} and {end}. Expected 1. May be due to no traffic to fastly.")
+        print(
+            f"No points in fastly request metric between {start} and {end}. Expected 1. May be due to no traffic to fastly."
+        )
         sys.exit(1)
 
     return sum([point.value.int64_value for point in points])
 
 
-def _load_count_to_db(config: MutableMapping, count: int, now: datetime.datetime, dry_run: bool = True, verbose: bool = False) -> None:
-    insert = text("INSERT "
-                  "INTO arXiv_stats_hourly "
-                  "(ymd, hour, node_num, access_type, connections) "
-                  "VALUES "
-                  "(:ymd, :hour, :node_num, 'A', :connections)")
-    insert = insert.bindparams(ymd=now.date().isoformat(),
-                               hour=now.hour,
-                               node_num=config['row_node_num'],
-                               connections=count)
+def _load_count_to_db(
+    config: MutableMapping,
+    count: int,
+    now: datetime.datetime,
+    dry_run: bool = True,
+    verbose: bool = False,
+) -> None:
+    insert = text(
+        "INSERT "
+        "INTO arXiv_stats_hourly "
+        "(ymd, hour, node_num, access_type, connections) "
+        "VALUES "
+        "(:ymd, :hour, :node_num, 'A', :connections)"
+    )
+    insert = insert.bindparams(
+        ymd=now.date().isoformat(),
+        hour=now.hour,
+        node_num=config["row_node_num"],
+        connections=count,
+    )
     if dry_run or verbose:
-        print(insert.compile(dialect=mysql.dialect(), compile_kwargs={"literal_binds": True}))
+        print(
+            insert.compile(
+                dialect=mysql.dialect(), compile_kwargs={"literal_binds": True}
+            )
+        )
 
     if dry_run:
         print("SQL not executed due to dry_run.")
         sys.exit(1)
 
-    engine = create_engine(config['sqlalchemy_database_uri'])
+    engine = create_engine(config["sqlalchemy_database_uri"])
     with engine.begin() as conn:
         conn.execute(insert)
 

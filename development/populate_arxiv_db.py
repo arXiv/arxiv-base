@@ -10,6 +10,7 @@ If one day, if we ditch the tests using sqlite3 and always use mysql, we can ues
 data types instead of generic Python types and this would work.
 
 """
+
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -33,7 +34,12 @@ sys.path.append(arxiv_base_dir)
 # Without this import, Base.metadata does not get populated. So it may look doing nothing but do not remove this.
 import arxiv.db.models
 
-from arxiv.db import Base, LaTeXMLBase, session_factory, _classic_engine as classic_engine
+from arxiv.db import (
+    Base,
+    LaTeXMLBase,
+    session_factory,
+    _classic_engine as classic_engine,
+)
 
 
 def is_port_open(host: str, port: int):
@@ -65,13 +71,22 @@ def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"
     subprocess.run(["docker", "rm", container_name], check=False)
 
     argv = [
-        "docker", "run", "-d", "--name", container_name,
-        "-e", "MYSQL_ROOT_PASSWORD=testpassword",
-        "-e", "MYSQL_USER=testuser",
-        "-e", "MYSQL_PASSWORD=testpassword",
-        "-e", "MYSQL_DATABASE=" + db_name,
-        "-p", f"{port}:3306",
-        mysql_image
+        "docker",
+        "run",
+        "-d",
+        "--name",
+        container_name,
+        "-e",
+        "MYSQL_ROOT_PASSWORD=testpassword",
+        "-e",
+        "MYSQL_USER=testuser",
+        "-e",
+        "MYSQL_PASSWORD=testpassword",
+        "-e",
+        "MYSQL_DATABASE=" + db_name,
+        "-p",
+        f"{port}:3306",
+        mysql_image,
     ]
 
     try:
@@ -82,11 +97,9 @@ def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"
     except Exception as e:
         logging.error(f"Unexpected error: {e}\n\n{shlex.join(argv)}")
 
-
-
     ping = ["mysql"] + conn_argv + [db_name]
     logger.info(shlex.join(ping))
-    
+
     for _ in range(20):
         try:
             mysql = subprocess.Popen(ping, encoding="utf-8", stdin=subprocess.PIPE)
@@ -101,7 +114,7 @@ def run_mysql_container(port: int, container_name="mysql-test", db_name="testdb"
 
 def wait_for_mysql_docker(ping):
     logger = logging.getLogger()
-    
+
     for _ in range(20):
         try:
             mysql = subprocess.Popen(ping, encoding="utf-8", stdin=subprocess.PIPE)
@@ -113,20 +126,27 @@ def wait_for_mysql_docker(ping):
             pass
         time.sleep(1)
 
-        
+
 def main(mysql_port, db_name, root_password="rootpassword") -> None:
     logger = logging.getLogger()
-    conn_argv = [f"--port={mysql_port}", "-h", "127.0.0.1", "-u", "root", f"--password={root_password}",
-                 # "--ssl-mode=DISABLED"
-                 ]
+    conn_argv = [
+        f"--port={mysql_port}",
+        "-h",
+        "127.0.0.1",
+        "-u",
+        "root",
+        f"--password={root_password}",
+        # "--ssl-mode=DISABLED"
+    ]
 
     if not is_port_open("127.0.0.1", mysql_port):
-        run_mysql_container(mysql_port, container_name="schema-creation-test-arxiv-db", db_name=db_name)
+        run_mysql_container(
+            mysql_port, container_name="schema-creation-test-arxiv-db", db_name=db_name
+        )
 
     ping = ["mysql"] + conn_argv + [db_name]
     logger.info(shlex.join(ping))
     wait_for_mysql_docker(ping)
-
 
     db_uri = f"mysql://testuser:testpassword@127.0.0.1:{mysql_port}/{db_name}"
     db_engine = create_engine(db_uri)
@@ -136,25 +156,27 @@ def main(mysql_port, db_name, root_password="rootpassword") -> None:
             SessionLocal = sessionmaker(autocommit=False, autoflush=True)
             SessionLocal.configure(bind=db_engine)
             db_session = SessionLocal(autocommit=False, autoflush=True)
-            
+
             db_session.commit()
             break
         except:
             pass
         time.sleep(1)
-    
-    
+
     _make_schemas(db_engine)
-    
+
     with open("schema-from-arxiv-db-model.sql", "w", encoding="utf-8") as sql_file:
-        subprocess.run(["mysqldump"] + conn_argv + ["--no-data", db_name],
-                       stdout=sql_file, check=True)
-        
+        subprocess.run(
+            ["mysqldump"] + conn_argv + ["--no-data", db_name],
+            stdout=sql_file,
+            check=True,
+        )
+
 
 if __name__ == "__main__":
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser(description="populate database schema")
 

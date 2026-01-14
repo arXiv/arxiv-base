@@ -24,7 +24,7 @@ with Session() as session:
         select(...)
     )
 
-    
+
 for writing within a transaction in any type of app do:
 
 from arxiv.db import transaction
@@ -40,6 +40,7 @@ with Session() as session:
 
 
 """
+
 import logging
 import json
 import threading
@@ -58,11 +59,14 @@ latexml_metadata = MetaData()
 _latexml_engine: Engine = None
 _classic_engine: Engine = None
 
+
 class Base(DeclarativeBase):
-    metadata=metadata
+    metadata = metadata
+
 
 class LaTeXMLBase(DeclarativeBase):
-    metadata=latexml_metadata
+    metadata = latexml_metadata
+
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +132,7 @@ def transaction ():
         if db.new or db.dirty or db.deleted:
             db.commit()
     except Exception as e:
-        logger.warning(f'Commit failed, rolling back', exc_info=1)
+        logger.warning(f"Commit failed, rolling back", exc_info=1)
         db.rollback()
         raise
     finally:
@@ -138,55 +142,63 @@ def transaction ():
 
 def config_query_timing(engine: Engine, slightly_long_sec: float, long_sec: float):
     @listens_for(engine, "before_cursor_execute")
-    def _record_query_start (conn, cursor, statement, parameters, context, executemany):
-        conn.info['query_start'] = datetime.now()
+    def _record_query_start(conn, cursor, statement, parameters, context, executemany):
+        conn.info["query_start"] = datetime.now()
 
     @listens_for(engine, "after_cursor_execute")
-    def _calculate_query_run_time (conn, cursor, statement, parameters, context, executemany):
-        if conn.info.get('query_start'):
-            delta: timedelta = (datetime.now() - conn.info['query_start'])
-            query_time = delta.seconds+(delta.microseconds/1000000)
+    def _calculate_query_run_time(
+        conn, cursor, statement, parameters, context, executemany
+    ):
+        if conn.info.get("query_start"):
+            delta: timedelta = datetime.now() - conn.info["query_start"]
+            query_time = delta.seconds + (delta.microseconds / 1000000)
             if query_time > slightly_long_sec and query_time < long_sec:
                 log = dict(
                     severity="INFO",
                     message=f"Slightly long query",
                     query_seconds=query_time,
-                    query=str(statement)
+                    query=str(statement),
                 )
-                print (json.dumps(log))
+                print(json.dumps(log))
             elif query_time >= long_sec:
                 log = dict(
                     severity="WARNING",
                     message=f"Very long query",
                     query_seconds=query_time,
-                    query=str(statement)
+                    query=str(statement),
                 )
-                print (json.dumps(log))
+                print(json.dumps(log))
 
 
-def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
-    if 'sqlite' in base_settings.CLASSIC_DB_URI:
+def configure_db(base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
+    if "sqlite" in base_settings.CLASSIC_DB_URI:
         engine = create_engine(base_settings.CLASSIC_DB_URI)
         if base_settings.LATEXML_DB_URI:
             latexml_engine = create_engine(base_settings.LATEXML_DB_URI)
         else:
             latexml_engine = None
     else:
-        engine = create_engine(base_settings.CLASSIC_DB_URI,
-                        echo=base_settings.ECHO_SQL,
-                        isolation_level=base_settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
-                        pool_recycle=600,
-                        max_overflow=(base_settings.REQUEST_CONCURRENCY - 5), # max overflow is how many + base pool size, which is 5 by default
-                        pool_pre_ping=base_settings.POOL_PRE_PING)
+        engine = create_engine(
+            base_settings.CLASSIC_DB_URI,
+            echo=base_settings.ECHO_SQL,
+            isolation_level=base_settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
+            pool_recycle=600,
+            max_overflow=(
+                base_settings.REQUEST_CONCURRENCY - 5
+            ),  # max overflow is how many + base pool size, which is 5 by default
+            pool_pre_ping=base_settings.POOL_PRE_PING,
+        )
         if base_settings.LATEXML_DB_URI:
             stmt_timeout: int = max(base_settings.LATEXML_DB_QUERY_TIMEOUT, 1)
-            latexml_engine = create_engine(base_settings.LATEXML_DB_URI,
-                                    connect_args={"options": f"-c statement_timeout={stmt_timeout}s"},
-                                    echo=base_settings.ECHO_SQL,
-                                    isolation_level=base_settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL,
-                                    pool_recycle=600,
-                                    max_overflow=(base_settings.REQUEST_CONCURRENCY - 5),
-                                    pool_pre_ping=base_settings.POOL_PRE_PING)
+            latexml_engine = create_engine(
+                base_settings.LATEXML_DB_URI,
+                connect_args={"options": f"-c statement_timeout={stmt_timeout}s"},
+                echo=base_settings.ECHO_SQL,
+                isolation_level=base_settings.LATEXML_DB_TRANSACTION_ISOLATION_LEVEL,
+                pool_recycle=600,
+                max_overflow=(base_settings.REQUEST_CONCURRENCY - 5),
+                pool_pre_ping=base_settings.POOL_PRE_PING,
+            )
         else:
             latexml_engine = None
 
@@ -201,14 +213,14 @@ def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
 _classic_engine, _latexml_engine = configure_db(settings)
 
 
-def init(settings: Settings=settings) -> None:
+def init(settings: Settings = settings) -> None:
     """Reset up with new `settings` for the db engines AND models.
 
-    This uses the values from `settings`. """
+    This uses the values from `settings`."""
     # configure_db was called at package load, but need to call again to change
     configure_db(settings)
 
     # late import of arxiv.db.models to avoid loops
     from arxiv.db.models import configure_db_engine
+
     configure_db_engine(_classic_engine, _latexml_engine)
-    

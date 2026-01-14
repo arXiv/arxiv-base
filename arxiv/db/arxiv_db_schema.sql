@@ -1,3 +1,8 @@
+-- MySQL dump 10.13  Distrib 5.7.20, for Linux (x86_64)
+--
+-- Host: localhost    Database: arXiv
+-- ------------------------------------------------------
+-- Server version       5.7.20
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -2363,6 +2368,50 @@ CREATE TABLE `tapir_users_password` (
   PRIMARY KEY (`user_id`),
   CONSTRAINT `0_512` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- ARXIVCE-2813: Tables for flagged user reasons
+-- Submissions will include these reasons, so
+-- flagged_user_canned_reasons.comment and
+-- flagged_user_details.comment should be suitable for
+-- moderator consumption
+
+CREATE TABLE flagged_user_canned_reasons (
+  id INT NOT NULL AUTO_INCREMENT,
+  active tinyint(1) NOT NULL default 1,
+  shortname VARCHAR(255) NOT NULL,
+  action VARCHAR(32) NOT NULL,
+  comment VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id)
+) CHARACTER SET utf8mb4;
+
+CREATE TABLE flagged_user_details (
+  id INT NOT NULL AUTO_INCREMENT,
+  flagged_user_id INT NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  expires TIMESTAMP default NULL,
+  creator_user_id INT NOT NULL,
+  all_categories tinyint(1) default 1,
+  flagged_user_canned_reason_id INT,
+  action VARCHAR(32) NOT NULL,
+  comment VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (flagged_user_id) REFERENCES tapir_users,
+  FOREIGN KEY (creator_user_id) REFERENCES tapir_users
+  FOREIGN KEY (flagged_user_canned_reason_id) REFERENCES flagged_user_canned_reasons
+) CHARACTER SET utf8mb4;
+
+CREATE TABLE flagged_user_details_category_relation (
+  flagged_user_detail_id INT NOT NULL,
+  archive varchar(16) NOT NULL,
+  subject_class varchar(16) NOT NULL,  
+  PRIMARY KEY (flagged_user_detail_id, archive, subject_class),
+  FOREIGN KEY (flagged_user_detail_id) REFERENCES flagged_user_details,
+  FOREIGN KEY (archive, subject_class) REFERENCES arXiv_categories
+) CHARACTER SET utf8mb4;
+
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

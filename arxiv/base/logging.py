@@ -9,6 +9,7 @@ It sets some defaults that should be applied consistently across all arXiv
 services (e.g. date formatting, overall message structure), so that we can
 parse application log messages in a consistent way.
 """
+
 from typing import IO
 import logging
 import sys
@@ -36,20 +37,19 @@ def getLogger(name: str, stream: IO = sys.stderr) -> logging.Logger:
     # as described here https://docs.python.org/3/howto/logging.html#configuring-logging
 
     # # Set the log level from the Flask app configuration.
-    level = int(config.get('LOGLEVEL', logging.INFO))
+    level = int(config.get("LOGLEVEL", logging.INFO))
     logger.setLevel(level)
 
     # Log messages should be in Eastern local time, for consistency with
     # classic CUL/Apache logs.
-    tz = timezone(config.get('ARXIV_BUSINESS_TZ', 'US/Eastern'))
+    tz = timezone(config.get("ARXIV_BUSINESS_TZ", "US/Eastern"))
     logging.Formatter.converter = lambda *args: datetime.now(tz=tz).timetuple()
 
-    fmt = ("application %(asctime)s - %(name)s"
-           " - %(levelname)s: \"%(message)s\"")
-    datefmt = '%d/%b/%Y:%H:%M:%S %z'    # Used to format asctime.
+    fmt = 'application %(asctime)s - %(name)s - %(levelname)s: "%(message)s"'
+    datefmt = "%d/%b/%Y:%H:%M:%S %z"  # Used to format asctime.
     handler = logging.StreamHandler(stream)
     handler.setLevel(level)
     handler.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
-    logger.handlers = []    # Clear default handler(s).
+    logger.handlers = []  # Clear default handler(s).
     logger.addHandler(handler)
     return logger

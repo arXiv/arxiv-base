@@ -24,7 +24,15 @@ PYTHON_EXE = "python"
 DB_PORT = 25336
 DB_NAME = "testdb"
 ROOT_PASSWORD = "rootpassword"
-my_sql_cmd = ["mysql", f"--port={DB_PORT}", "-h", "127.0.0.1", "-u", "root", f"--password={ROOT_PASSWORD}"]
+my_sql_cmd = [
+    "mysql",
+    f"--port={DB_PORT}",
+    "-h",
+    "127.0.0.1",
+    "-u",
+    "root",
+    f"--password={ROOT_PASSWORD}",
+]
 
 
 def arxiv_base_dir() -> str:
@@ -42,15 +50,28 @@ def db_uri(request):
     if db_type == "sqlite":
         # db_path = tempfile.mkdtemp()
         # uri = f'sqlite:///{db_path}/test.db'
-        uri = f'sqlite'
+        uri = f"sqlite"
     elif db_type == "mysql":
         # load_arxiv_db_schema.py sets up the docker and load the db schema
-        loader_py = os.path.join(arxiv_base_dir(), "development", "load_arxiv_db_schema.py")
-        subprocess.run(["poetry", "run", PYTHON_EXE, loader_py, f"--db_name={DB_NAME}", f"--db_port={DB_PORT}",
-                        f"--root_password={ROOT_PASSWORD}"], encoding="utf-8", check=True)
+        loader_py = os.path.join(
+            arxiv_base_dir(), "development", "load_arxiv_db_schema.py"
+        )
+        subprocess.run(
+            [
+                "poetry",
+                "run",
+                PYTHON_EXE,
+                loader_py,
+                f"--db_name={DB_NAME}",
+                f"--db_port={DB_PORT}",
+                f"--root_password={ROOT_PASSWORD}",
+            ],
+            encoding="utf-8",
+            check=True,
+        )
         uri = f"mysql://testuser:testpassword@127.0.0.1:{DB_PORT}/{DB_NAME}"
     else:
-       raise ValueError(f"Unsupported database dialect: {db_type}")
+        raise ValueError(f"Unsupported database dialect: {db_type}")
 
     yield uri
 
@@ -62,7 +83,7 @@ def classic_db_engine(db_uri):
     use_ssl = False
     if db_uri.startswith("sqlite"):
         db_path = tempfile.mkdtemp()
-        uri = f'sqlite:///{db_path}/test.db'
+        uri = f"sqlite:///{db_path}/test.db"
         db_engine = create_engine(uri)
         util.create_arxiv_db_schema(db_engine)
     else:
@@ -76,7 +97,9 @@ def classic_db_engine(db_uri):
         with db_engine.connect() as connection:
             tables = [row[0] for row in connection.execute(text("SHOW TABLES"))]
             for table_name in tables:
-                counter: CursorResult = connection.execute(text(f"select count(*) from {table_name}"))
+                counter: CursorResult = connection.execute(
+                    text(f"select count(*) from {table_name}")
+                )
                 count = counter.first()[0]
                 if count and int(count):
                     targets.append(table_name)
@@ -84,23 +107,37 @@ def classic_db_engine(db_uri):
 
         if targets:
             if len(targets) > 20 or "arXiv_metadata" in targets:
-                logger.error("Too many tables used in the database. Suspect this is not the intended test database.\n"
-                             "Make sure you are not using any of production or even development database.")
+                logger.error(
+                    "Too many tables used in the database. Suspect this is not the intended test database.\n"
+                    "Make sure you are not using any of production or even development database."
+                )
                 exit(1)
-            statements = [ "SET FOREIGN_KEY_CHECKS = 0;"] + [f"TRUNCATE TABLE {table_name};" for table_name in targets] + ["SET FOREIGN_KEY_CHECKS = 1;"]
+            statements = (
+                ["SET FOREIGN_KEY_CHECKS = 0;"]
+                + [f"TRUNCATE TABLE {table_name};" for table_name in targets]
+                + ["SET FOREIGN_KEY_CHECKS = 1;"]
+            )
             # debug_sql = "SHOW PROCESSLIST;\nSELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;\n"
             sql = "\n".join(statements)
             cmd = my_sql_cmd
             if not use_ssl:
                 cmd = my_sql_cmd + ["--ssl-mode=DISABLED"]
             cmd = cmd + [DB_NAME]
-            mysql = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
+            mysql = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                encoding="utf-8",
+            )
             try:
                 # logger.info(sql)
                 out, err = mysql.communicate(sql, timeout=9999)
                 if out:
                     logger.info(out)
-                if err and not err.startswith("[Warning] Using a password on the command line interface can be insecure"):
+                if err and not err.startswith(
+                    "[Warning] Using a password on the command line interface can be insecure"
+                ):
                     logger.info(err)
             except Exception as exc:
                 logger.error(f"BOO: {str(exc)}", exc_info=True)
@@ -130,16 +167,16 @@ def classic_db_engine(db_uri):
 
 @pytest.fixture
 def foouser(mocker):
-    user_id = '15830'
-    email = 'first@last.iv'
+    user_id = "15830"
+    email = "first@last.iv"
     # Why does this use a mock for the use and not a models.TapirUser?
     # Using an ORM obj caused problems when outside a session, but it seems
     # like there should be a way to do that.
     user = mocker.MagicMock(
         user_id=user_id,
-        first_name='first',
-        last_name='last',
-        suffix_name='iv',
+        first_name="first",
+        last_name="last",
+        suffix_name="iv",
         email=email,
         policy_class=2,
         flag_edit_users=1,
@@ -148,18 +185,18 @@ def foouser(mocker):
         flag_approved=1,
         flag_deleted=0,
         flag_banned=0,
-        tracking_cookie='foocookie',
+        tracking_cookie="foocookie",
     )
     nick = mocker.MagicMock(
-        nickname='foouser',
+        nickname="foouser",
         user_id=user_id,
         user_seq=1,
         flag_valid=1,
         role=0,
         policy=0,
-        flag_primary=1
+        flag_primary=1,
     )
-    password = 'thepassword'
+    password = "thepassword"
     hashed = hash_password(password)
     password = mocker.MagicMock(
         user_id=user_id,
@@ -168,15 +205,15 @@ def foouser(mocker):
         test_only_password=password,  # this is not on the real obj, just used so tests have access to it
     )
     n = util.epoch(datetime.now(tz=UTC))
-    secret = 'foosecret'
+    secret = "foosecret"
     token = mocker.MagicMock(
         user_id=user_id,
         secret=secret,
         valid=1,
         issued_when=n,
-        issued_to='127.0.0.1',
-        remote_host='foohost.foo.com',
-        session_id=1
+        issued_to="127.0.0.1",
+        remote_host="foohost.foo.com",
+        session_id=1,
     )
     user.tapir_nicknames = nick
     user.tapir_passwords = password
@@ -197,7 +234,6 @@ def db_with_user(classic_db_engine, foouser):
 def _load_test_user(db_engine, foouser):
     # just combines db_engine and foouser
     with Session(db_engine) as session:
-
         user = models.TapirUser(
             user_id=foouser.user_id,
             first_name=foouser.first_name,
@@ -244,11 +280,11 @@ def _load_test_user(db_engine, foouser):
 
     with Session(db_engine) as session:
         tapir_session_1 = models.TapirSession(
-            session_id = foouser.tapir_tokens.session_id,
-            user_id = foouser.user_id,
-            last_reissue = 0,
-            start_time = 0,
-            end_time = 0
+            session_id=foouser.tapir_tokens.session_id,
+            user_id=foouser.user_id,
+            last_reissue=0,
+            start_time=0,
+            end_time=0,
         )
         session.add(tapir_session_1)
         session.commit()
@@ -270,14 +306,14 @@ def _load_test_user(db_engine, foouser):
 
 @pytest.fixture
 def db_configed(db_with_user):
-    db_engine, _ = configure_db_engine(db_with_user,None)
+    db_engine, _ = configure_db_engine(db_with_user, None)
     yield None
     arXiv_session.remove()
 
 
 @pytest.fixture
 def app(db_with_user):
-    app = Flask('test_auth_app')
+    app = Flask("test_auth_app")
 
     engine, _ = configure_db_engine(db_with_user, None)
     Base(app)
@@ -292,5 +328,9 @@ def request_context(app):
 
 
 def pytest_addoption(parser):
-    parser.addoption("--db", action="store", default="sqlite",
-                     help="Database type to test against (sqlite/mysql)")
+    parser.addoption(
+        "--db",
+        action="store",
+        default="sqlite",
+        help="Database type to test against (sqlite/mysql)",
+    )

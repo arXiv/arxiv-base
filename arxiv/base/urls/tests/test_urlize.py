@@ -301,12 +301,11 @@ class TestURLize(unittest.TestCase):
     def test_arxiv_prefix(self):
         with self.app.app_context():
             urlized = links.urlize("see arxiv:1201.12345")
-            self.assertIn('see <a ', urlized)
+            self.assertIn("see <a ", urlized)
             self.assertIn('class="link-https"', urlized)
             self.assertIn('data-arxiv-id="1201.12345"', urlized)
             self.assertIn('href="https://arxiv.org/abs/1201.12345"', urlized)
-            self.assertIn('>arXiv:1201.12345</a>', urlized)
-
+            self.assertIn(">arXiv:1201.12345</a>", urlized)
 
     @mock.patch(f"{links.__name__}.clickthrough")
     def test_doi_2(self, mock_clickthrough):

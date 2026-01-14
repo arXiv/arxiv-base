@@ -1,4 +1,5 @@
 """Helpers and Flask application integration."""
+
 import json
 from typing import List, Any, Optional
 from datetime import datetime
@@ -14,14 +15,24 @@ from ...base.globals import get_application_config
 from ..auth import scopes
 from .. import domain
 from ...db import Session, Base, session_factory
-from ...db.models import TapirUser, TapirPolicyClass, Category, Archive, Group, EndorsementDomain, CategoryDef, \
-    ArchiveGroup, License
+from ...db.models import (
+    TapirUser,
+    TapirPolicyClass,
+    Category,
+    Archive,
+    Group,
+    EndorsementDomain,
+    CategoryDef,
+    ArchiveGroup,
+    License,
+)
 
-EASTERN = timezone('US/Eastern')
+EASTERN = timezone("US/Eastern")
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
 arxiv_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def now() -> int:
     """Get the current epoch/unix time."""
@@ -77,7 +88,9 @@ def bootstrap_arxiv_db(engine: Engine, test_data_dir: Optional[str] = None) -> N
     ]:
         try:
             with ORMSession(engine) as session:
-                with open(os.path.join(test_data_dir, data_file), encoding="utf-8") as dfd:
+                with open(
+                    os.path.join(test_data_dir, data_file), encoding="utf-8"
+                ) as dfd:
                     data = json.load(dfd)
                 for datum in data:
                     session.add(data_class(**datum))
@@ -96,13 +109,20 @@ def drop_all(engine: Engine) -> None:
 
 def compute_capabilities(tapir_user: TapirUser) -> int:
     """Calculate the privilege level code for a user."""
-    return _compute_capabilities(tapir_user.flag_edit_users,
-                                 tapir_user.flag_email_verified,
-                                 tapir_user.flag_edit_system)
+    return _compute_capabilities(
+        tapir_user.flag_edit_users,
+        tapir_user.flag_email_verified,
+        tapir_user.flag_edit_system,
+    )
 
-def _compute_capabilities(is_admin: int | bool, email_verified: int | bool, is_god: int | bool) -> int:
+
+def _compute_capabilities(
+    is_admin: int | bool, email_verified: int | bool, is_god: int | bool
+) -> int:
     """Calculate the privilege level code for a user."""
-    return int(sum([2 if is_admin else 0, 4 if email_verified else 0, 8 if is_god else 0]))
+    return int(
+        sum([2 if is_admin else 0, 4 if email_verified else 0, 8 if is_god else 0])
+    )
 
 
 def get_scopes(db_user: TapirUser) -> List[domain.Scope]:
@@ -119,23 +139,28 @@ def is_configured() -> bool:
     config = get_application_config()
     return not bool(missing_configs(config))
 
+
 def missing_configs(config) -> List[str]:
     """Returns missing keys for configs  needed in `Flask.config` for legacy auth to work."""
-    missing = [key for key in ['CLASSIC_SESSION_HASH', 'SESSION_DURATION', 'CLASSIC_COOKIE_NAME']
-               if key not in config]
+    missing = [
+        key
+        for key in ["CLASSIC_SESSION_HASH", "SESSION_DURATION", "CLASSIC_COOKIE_NAME"]
+        if key not in config
+    ]
     return missing
+
 
 def get_session_hash() -> str:
     """Get the legacy hash secret."""
     config = get_application_config()
-    session_hash: str = config['CLASSIC_SESSION_HASH']
+    session_hash: str = config["CLASSIC_SESSION_HASH"]
     return session_hash
 
 
 def get_session_duration() -> int:
     """Get the session duration from the config."""
     config = get_application_config()
-    timeout: str = config['SESSION_DURATION']
+    timeout: str = config["SESSION_DURATION"]
     return int(timeout)
 
 
@@ -144,6 +169,6 @@ def is_available(**kwargs: Any) -> bool:
     try:
         Session.query("1").from_statement(text("SELECT 1")).all()
     except Exception as e:
-        logger.error('Encountered an error talking to database: %s', e)
+        logger.error("Encountered an error talking to database: %s", e)
         return False
     return True

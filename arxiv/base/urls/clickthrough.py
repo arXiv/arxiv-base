@@ -15,7 +15,7 @@ from flask import url_for, current_app
 
 def create_hash(secret: str, url: str) -> str:
     """Create a hash of the secret and url."""
-    s = f'{secret}{url}'
+    s = f"{secret}{url}"
     return str(hashlib.md5(s.encode()).hexdigest()[0:8])
 
 
@@ -26,6 +26,6 @@ def is_hash_valid(secret: str, url: str, ct_hash: str) -> bool:
 
 def clickthrough_url(url: str) -> str:
     """Create a URL to the clickthrough service with a valid hash."""
-    secret = current_app.config.get('CLICKTHROUGH_SECRET', 'foo')
-    ct_url: str = url_for('clickthrough', url=url, v=create_hash(secret, url))
+    secret = current_app.config.get("CLICKTHROUGH_SECRET", "foo")
+    ct_url: str = url_for("clickthrough", url=url, v=create_hash(secret, url))
     return ct_url

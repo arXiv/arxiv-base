@@ -74,32 +74,32 @@ class AuthMiddleware(BaseMiddleware):
 
     def before(self, environ: dict, start_response: Callable) -> WSGIRequest:
         """Decode and unpack the auth token on the request."""
-        environ['auth'] = None      # Create the session key, at a minimum.
-        environ['token'] = None
-        token = environ.get('HTTP_AUTHORIZATION')    # We may not have a token.
+        environ["auth"] = None  # Create the session key, at a minimum.
+        environ["token"] = None
+        token = environ.get("HTTP_AUTHORIZATION")  # We may not have a token.
         if token is None:
-            logger.debug('No auth token')
+            logger.debug("No auth token")
             return environ, start_response
 
         # The token secret should be set in the WSGI environ, or in os.environ.
-        secret = environ.get('JWT_SECRET', os.environ.get('JWT_SECRET'))
+        secret = environ.get("JWT_SECRET", os.environ.get("JWT_SECRET"))
         if secret is None:
-            raise ConfigurationError('Missing decryption token')
+            raise ConfigurationError("Missing decryption token")
 
         try:
             # Try to verify the token in the Authorization header, and attach
             # the decoded session data to the request.
             session: domain.Session = tokens.decode(token, secret)
-            environ['auth'] = session
+            environ["auth"] = session
 
             # Attach the encrypted token so that we can use it in subrequests.
-            environ['token'] = token
-        except InvalidToken as e:   # Let the application decide what to do.
-            logger.debug(f'Auth token not valid: {token}')
-            exception = Unauthorized('Invalid auth token')
-            environ['auth'] = exception
+            environ["token"] = token
+        except InvalidToken as e:  # Let the application decide what to do.
+            logger.debug(f"Auth token not valid: {token}")
+            exception = Unauthorized("Invalid auth token")
+            environ["auth"] = exception
         except Exception as e:
-            logger.error(f'Unhandled exception: {e}')
-            exception = InternalServerError(f'Unhandled: {e}')  # type: ignore
-            environ['auth'] = exception
+            logger.error(f"Unhandled exception: {e}")
+            exception = InternalServerError(f"Unhandled: {e}")  # type: ignore
+            environ["auth"] = exception
         return environ, start_response

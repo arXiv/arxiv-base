@@ -1,4 +1,5 @@
 """Flask configuration."""
+
 import importlib.metadata
 from typing import Optional, List, Tuple
 import os
@@ -11,8 +12,8 @@ from pydantic_settings import BaseSettings
 DEFAULT_DB = "sqlite:///tests/data/browse.db"
 DEFAULT_LATEXML_DB = "sqlite:///tests/data/latexml.db"
 
-class Settings(BaseSettings):
 
+class Settings(BaseSettings):
     SERVER_NAME: Optional[str] = None
     """The name and port number of the server. Required for subdomain support
     (e.g.: 'myapp.dev:5000') Note that localhost does not support subdomains so
@@ -72,38 +73,39 @@ class Settings(BaseSettings):
         ("help_archive_description", "/help/<archive>/index.html", HELP_SERVER),
         ("help_identifier", "/help/arxiv_identifier.html", HELP_SERVER),
         ("help_mathjax", "/help/mathjax.html", HELP_SERVER),
-        ("help_social_bookmarking", "/help/social_bookmarking", HELP_SERVER), # Does not resolve
+        (
+            "help_social_bookmarking",
+            "/help/social_bookmarking",
+            HELP_SERVER,
+        ),  # Does not resolve
         ("help_submit", "/help/submit/index.html", HELP_SERVER),
         ("help_trackback", "/help/trackback.html", HELP_SERVER),
-        ("new", "/", HELP_SERVER),    # this help page might be gone, use to go to very old news
+        (
+            "new",
+            "/",
+            HELP_SERVER,
+        ),  # this help page might be gone, use to go to very old news
         ("privacy_policy", "/help/policies/privacy_policy.html", HELP_SERVER),
         ("subscribe", "/help/subscribe", HELP_SERVER),
         ("team", "/about/people/leadership_team.html", HELP_SERVER),
-
         ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
         ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
         ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
-
         ("canonical_pdf", "/pdf/<arxiv:paper_id>v<string:version>", CANONICAL_SERVER),
         ("canonical_pdf_by_id", "/pdf/<arxiv:paper_id>", CANONICAL_SERVER),
         ("canonical_abs", "/abs/<arxiv:paper_id>v<string:version>", CANONICAL_SERVER),
         ("canonical_abs_by_id", "/abs/<arxiv:paper_id>", CANONICAL_SERVER),
-
         ("clickthrough", "/ct", BASE_SERVER),
         ("home", "/", BASE_SERVER),
         ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honneypot.
-
         ("account", "/user", AUTH_SERVER),
         ("login", "/login", AUTH_SERVER),
         ("logout", "/logout", AUTH_SERVER),
-
         ("create", "/user/create", SUBMIT_SERVER),
         ("submit", "/submit", SUBMIT_SERVER),
-
         ("search_advanced", "/search/advanced", SEARCH_SERVER),
         ("search_archive", "/search/<archive>", SEARCH_SERVER),
         ("search_box", "/search", SEARCH_SERVER),
-
         ("blog", "/arxiv", "blogs.cornell.edu"),
         ("library", "/", "library.cornell.edu"),
         ("twitter", "/arxiv", "twitter.com"),
@@ -120,7 +122,7 @@ class Settings(BaseSettings):
 
     FS_TZ: str = "US/Eastern"
 
-    BASE_VERSION: str = importlib.metadata.version('arxiv-base')
+    BASE_VERSION: str = importlib.metadata.version("arxiv-base")
     """The version of the arxiv-base package."""
 
     APP_VERSION: str = BASE_VERSION
@@ -174,8 +176,7 @@ class Settings(BaseSettings):
     POOL_PRE_PING: bool = True
     """ Liveness check of sqlalchemy connections before checking out of pool """
 
-
-    FASTLY_SERVICE_IDS:str='{"arxiv.org":"umpGzwE2hXfa2aRXsOQXZ4", "browse.dev.arxiv.org":"5eZxUHBG78xXKNrnWcdDO7", "export.arxiv.org": "hCz5jlkWV241zvUN0aWxg2", "rss.arxiv.org": "yPg50VJsPLwZQ5lFsD7rA1"}'
+    FASTLY_SERVICE_IDS: str = '{"arxiv.org":"umpGzwE2hXfa2aRXsOQXZ4", "browse.dev.arxiv.org":"5eZxUHBG78xXKNrnWcdDO7", "export.arxiv.org": "hCz5jlkWV241zvUN0aWxg2", "rss.arxiv.org": "yPg50VJsPLwZQ5lFsD7rA1"}'
     """a dictionary of the various fastly services and their ids"""
     FASTLY_PURGE_TOKEN:str= "FASTLY_PURGE_TOKEN"
 

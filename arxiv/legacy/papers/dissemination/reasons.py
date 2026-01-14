@@ -13,11 +13,11 @@ from google.cloud import storage
 
 from arxiv.files import FileObj
 
-FORMATS = Literal['ps', 'pdf', 'html', 'dvi', 'postscript']
+FORMATS = Literal["ps", "pdf", "html", "dvi", "postscript"]
 
 DEFAULT_REASONS_GS_URL = "gs://arxiv-production-data/reasons.json"
 
-_verregex = re.compile(r'v\d+$')
+_verregex = re.compile(r"v\d+$")
 
 _reasons_data = None
 
@@ -43,10 +43,12 @@ def get_reasons_data(file: FileObj) -> dict:
     if _reasons_data is not None:
         return _reasons_data
     if _reasons_data == "LOAD FAILED":
-        raise Exception("Previous load of reasons data failed, not trying again "
-                        "until _reasons_data is cleared by setting it to None")
+        raise Exception(
+            "Previous load of reasons data failed, not trying again "
+            "until _reasons_data is cleared by setting it to None"
+        )
     try:
-        with file.open('r') as fp:
+        with file.open("r") as fp:
             _reasons_data = json.load(fp)
             return _reasons_data
     except Exception as ex:
@@ -54,7 +56,7 @@ def get_reasons_data(file: FileObj) -> dict:
         raise ex
 
 
-def reasons(reasons_data: dict, id: str, format: FORMATS) -> Optional[str] :
+def reasons(reasons_data: dict, id: str, format: FORMATS) -> Optional[str]:
     """Find any reasons for inability to process this paper.
 
     Find all the recorded reasons for inability to process this paper (if any),
@@ -76,15 +78,15 @@ def reasons(reasons_data: dict, id: str, format: FORMATS) -> Optional[str] :
 
     if not id:
         return None
-    if format == 'postscript':
-        format = 'ps'
+    if format == "postscript":
+        format = "ps"
 
     if id in reasons_data:
         return reasons_data[id]
     if f"{id}.{format}" in reasons_data:
         return reasons_data[f"{id}.{format}"]
 
-    idnov = re.sub(_verregex, '', id)
+    idnov = re.sub(_verregex, "", id)
     has_ver = id != idnov
     if not has_ver:
         return None
@@ -95,4 +97,3 @@ def reasons(reasons_data: dict, id: str, format: FORMATS) -> Optional[str] :
         return reasons_data[f"{idnov}.{format}"]
     else:
         return None
-

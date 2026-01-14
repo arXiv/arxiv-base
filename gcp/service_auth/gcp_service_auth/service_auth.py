@@ -5,6 +5,7 @@ This is expected to use the default SA cred.
 Make sure that the service account has the cloud run invoker role enabled if used to talk to
 the service that needs auth.
 """
+
 import typing
 import datetime
 
@@ -12,6 +13,7 @@ import logging
 from google.auth.credentials import Credentials as GcpCredentials
 import google.auth.transport.requests
 import google.oauth2.id_token
+
 
 class GcpIdentityToken:
     _credentials: GcpCredentials
@@ -22,12 +24,18 @@ class GcpIdentityToken:
     _logger: logging.Logger | None
     expiration: datetime.timedelta
 
-    def __init__(self, target: str, logger: logging.Logger | None =None,
-                 expiration: datetime.timedelta = datetime.timedelta(minutes=30)):
+    def __init__(
+        self,
+        target: str,
+        logger: logging.Logger | None = None,
+        expiration: datetime.timedelta = datetime.timedelta(minutes=30),
+    ):
         self.expiration = expiration
         self.target = target
         self._logger = logger
-        self._credentials, self._project = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
+        self._credentials, self._project = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
         self.refresh()
         pass
 

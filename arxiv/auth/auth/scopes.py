@@ -20,40 +20,44 @@ semantics of code, and reduces the risk of programming errors. For an example,
 see :mod:`arxiv.users.auth.decorators`.
 
 """
+
 from typing import Optional, Dict
 from ..domain import Scope
 
-def _scope_str(domain:str, action:str, resource:str = None):
+
+def _scope_str(domain: str, action: str, resource: str = None):
     return str(Scope(domain=domain, action=action, resource=resource))
 
 
 class domains:
-        """Known authorization domains."""
+    """Known authorization domains."""
 
-        PUBLIC = 'public'
-        """The public arXiv site, including APIs."""
-        PROFILE = 'profile'
-        """arXiv user profile."""
-        SUBMISSION = 'submission'
-        """Submission interfaces and actions."""
-        UPLOAD = 'upload'
-        """File uploads, including those for submissions."""
-        COMPILE = 'compile'
-        """PDF compilation."""
-        FULLTEXT = 'fulltext'
-        """Fulltext extraction."""
-        PREVIEW = 'preview'
-        """Submission previews."""
+    PUBLIC = "public"
+    """The public arXiv site, including APIs."""
+    PROFILE = "profile"
+    """arXiv user profile."""
+    SUBMISSION = "submission"
+    """Submission interfaces and actions."""
+    UPLOAD = "upload"
+    """File uploads, including those for submissions."""
+    COMPILE = "compile"
+    """PDF compilation."""
+    FULLTEXT = "fulltext"
+    """Fulltext extraction."""
+    PREVIEW = "preview"
+    """Submission previews."""
+
 
 class actions:
-        """Known authorization actions."""
+    """Known authorization actions."""
 
-        UPDATE = 'update'
-        CREATE = 'create'
-        DELETE = 'delete'
-        RELEASE = 'release'
-        READ = 'read'
-        PROXY = 'proxy'
+    UPDATE = "update"
+    CREATE = "create"
+    DELETE = "delete"
+    RELEASE = "release"
+    READ = "read"
+    PROXY = "proxy"
+
 
 READ_PUBLIC = _scope_str(domains.PUBLIC, actions.READ)
 """
@@ -108,28 +112,28 @@ WRITE_UPLOAD = _scope_str(domains.UPLOAD, actions.UPDATE)
 RELEASE_UPLOAD = _scope_str(domains.UPLOAD, actions.RELEASE)
 """Authorizes releasing an upload workspace."""
 
-DELETE_UPLOAD_WORKSPACE = _scope_str(domains.UPLOAD, 'delete_workspace')
+DELETE_UPLOAD_WORKSPACE = _scope_str(domains.UPLOAD, "delete_workspace")
 """Can delete an entire workspace in the file management service."""
 
 DELETE_UPLOAD_FILE = _scope_str(domains.UPLOAD, actions.DELETE)
 """Can delete files from a file management upload workspace."""
 
-READ_UPLOAD_LOGS = _scope_str(domains.UPLOAD, 'read_logs')
+READ_UPLOAD_LOGS = _scope_str(domains.UPLOAD, "read_logs")
 """Can read logs for a file management upload workspace."""
 
-READ_UPLOAD_SERVICE_LOGS = _scope_str(domains.UPLOAD, 'read_service_logs')
+READ_UPLOAD_SERVICE_LOGS = _scope_str(domains.UPLOAD, "read_service_logs")
 """Can read service logs in the file management service."""
 
-CREATE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'create_checkpoint')
+CREATE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, "create_checkpoint")
 """Create an upload workspace checkpoint."""
 
-DELETE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'delete_checkpoint')
+DELETE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, "delete_checkpoint")
 """Delete an upload workspace checkpoint."""
 
-READ_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'read_checkpoints')
+READ_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, "read_checkpoints")
 """Read from an upload workspace checkpoint."""
 
-RESTORE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, 'restore_checkpoint')
+RESTORE_UPLOAD_CHECKPOINT = _scope_str(domains.UPLOAD, "restore_checkpoint")
 """Restore an upload workspace to a checkpoint."""
 
 READ_COMPILE = _scope_str(domains.COMPILE, actions.READ)
@@ -151,27 +155,22 @@ CREATE_PREVIEW = _scope_str(domains.PREVIEW, actions.CREATE)
 """Can create a new submission preview."""
 
 GENERAL_USER = [
-    READ_PUBLIC,    # Access to public APIs.
-
+    READ_PUBLIC,  # Access to public APIs.
     # Profile management.
     EDIT_PROFILE,
     VIEW_PROFILE,
-
     # Ability to use the submission system.
     CREATE_SUBMISSION,
     EDIT_SUBMISSION,
     VIEW_SUBMISSION,
     DELETE_SUBMISSION,
-
     # Allows usage of the compilation service during submission.
     READ_COMPILE,
     CREATE_COMPILE,
-
     # Allows usage of the file management service during submission.
     READ_UPLOAD,
     WRITE_UPLOAD,
     DELETE_UPLOAD_FILE,
-
     # Ability to create and view submission previews.
     READ_PREVIEW,
     CREATE_PREVIEW,
@@ -192,7 +191,7 @@ _ADMIN_USER = GENERAL_USER + [
     CREATE_FULLTEXT,
     DELETE_UPLOAD_WORKSPACE,
     READ_UPLOAD_LOGS,
-    READ_UPLOAD_SERVICE_LOGS
+    READ_UPLOAD_SERVICE_LOGS,
 ]
 ADMIN_USER = [str(Scope.from_str(scope).as_global()) for scope in _ADMIN_USER]
 """
@@ -204,34 +203,33 @@ later milestone of arXiv.
 
 _HUMAN_LABELS: Dict[Scope, str] = {
     EDIT_PROFILE: "Grants authorization to change the contents of your user"
-                  " profile. This includes your affiliation, preferred name,"
-                  " default submission category, etc.",
+    " profile. This includes your affiliation, preferred name,"
+    " default submission category, etc.",
     VIEW_PROFILE: "Grants authorization to view the contents of your user"
-                  " profile. This includes your affiliation, preferred name,"
-                  " default submission category, etc.",
+    " profile. This includes your affiliation, preferred name,"
+    " default submission category, etc.",
     CREATE_SUBMISSION: "Grants authorization to submit papers on your behalf.",
     EDIT_SUBMISSION: "Grants authorization to make changes to your submissions"
-                     " that have not yet been announced. For example, to"
-                     " update the DOI or journal reference field on your"
-                     " behalf. Note that this affects only the metadata of"
-                     " your submission, and not the content.",
+    " that have not yet been announced. For example, to"
+    " update the DOI or journal reference field on your"
+    " behalf. Note that this affects only the metadata of"
+    " your submission, and not the content.",
     VIEW_SUBMISSION: "Grants authorization to view your submissions, including"
-                     " those that have not yet been announced. Note that this"
-                     " only applies to the submission metadata, and not to the"
-                     " uploaded submission content.",
+    " those that have not yet been announced. Note that this"
+    " only applies to the submission metadata, and not to the"
+    " uploaded submission content.",
     READ_UPLOAD: "Grants authorization to view the contents of your uploads.",
-    WRITE_UPLOAD: "Grants authorization to add and delete files on your"
-                  " behalf.",
+    WRITE_UPLOAD: "Grants authorization to add and delete files on your behalf.",
     READ_UPLOAD_LOGS: "Grants authorization to read logs of upload activity"
-                      " related to your submissions.",
+    " related to your submissions.",
     READ_COMPILE: "Grants authorization to read a compilation task, product,"
-                  " and any log output, related to your submissions.",
+    " and any log output, related to your submissions.",
     CREATE_COMPILE: "Grants authorization to compile your submission source"
-                    " files, e.g. to produce a PDF.",
+    " files, e.g. to produce a PDF.",
     READ_PREVIEW: "Grants authorization to retrieve the preview (e.g. PDF) of"
-                  " your submission.",
+    " your submission.",
     CREATE_PREVIEW: "Grants authorization to update the preview (e.g. PDF) of"
-                    " your submission.",
+    " your submission.",
 }
 
 

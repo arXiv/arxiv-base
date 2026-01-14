@@ -43,7 +43,7 @@ def encode(session: domain.Session, secret: str) -> str:
 def decode(token: str, secret: str) -> domain.Session:
     """Decode an auth token to access session information."""
     try:
-        data = dict(jwt.decode(token, secret, algorithms=['HS256']))
+        data = dict(jwt.decode(token, secret, algorithms=["HS256"]))
     except jwt.exceptions.DecodeError as e:
-        raise exceptions.InvalidToken('Not a valid token') from e
+        raise exceptions.InvalidToken("Not a valid token") from e
     return domain.session_from_dict(data)

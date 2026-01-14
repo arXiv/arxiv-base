@@ -9,13 +9,14 @@ import arxiv.db.models
 
 from .. import Base, LaTeXMLBase, session_factory, _classic_engine as classic_engine
 
+
 def _make_schemas(db_uri: str):
     db_engine = create_engine(db_uri)
 
     SessionLocal = sessionmaker(autocommit=False, autoflush=True)
     SessionLocal.configure(bind=db_engine)
     db_session = SessionLocal(autocommit=False, autoflush=True)
-    db_session.execute(text('select 1'))
+    db_session.execute(text("select 1"))
 
     Base.metadata.drop_all(db_engine)
     Base.metadata.create_all(db_engine)
@@ -33,7 +34,7 @@ def test_db_schema():
     model. This is because the model object is NOT accurate representation of schema
     as it has to be able to create sqlite3 for testing.
     """
-    db_uri = os.environ.get('TEST_ARXIV_DB_URI')
+    db_uri = os.environ.get("TEST_ARXIV_DB_URI")
     if db_uri is None:
         print("db_uri is not defined. Bypassing the test")
         return
@@ -41,7 +42,7 @@ def test_db_schema():
 
 
 def test_db_schema_sqlite3():
-    with tempfile.NamedTemporaryFile(suffix='.sqlite3', delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".sqlite3", delete=False) as tmp:
         filename = tmp.name
     # TIL - you need 4 slashes as the hostname is between 2nd and 3rd slashes
     _make_schemas("sqlite:///" + filename)

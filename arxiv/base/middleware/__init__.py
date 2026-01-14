@@ -98,11 +98,11 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
     :class:`.Flask`
         The original Flask ``app``, with middlewares applied.
     """
-    if not hasattr(app, 'wsgi_app'):
-        raise TypeError('Not a valid Flask app or middleware')
+    if not hasattr(app, "wsgi_app"):
+        raise TypeError("Not a valid Flask app or middleware")
 
-    if not hasattr(app, 'middlewares'):
-        app.middlewares = {}  #type: ignore
+    if not hasattr(app, "middlewares"):
+        app.middlewares = {}  # type: ignore
 
     # Apply the last middleware first, so that the first middleware is called
     # first upon the request.
@@ -113,15 +113,17 @@ def wrap(app: Flask, middlewares: List[IWSGIMiddlewareFactory]) -> Callable:
         except TypeError as ex:
             # Maintain backward compatibility with middlewares that don't
             # accept kwargs.
-            logger.debug('Encountered TypeError while initializing'
-                         ' midleware: %s', ex)
-            warnings.warn('Middlewares that do not accept kwargs are'
-                          ' deprecated. You should update your middleware'
-                          ' to accept arbitrary kwargs', DeprecationWarning)
+            logger.debug("Encountered TypeError while initializing midleware: %s", ex)
+            warnings.warn(
+                "Middlewares that do not accept kwargs are"
+                " deprecated. You should update your middleware"
+                " to accept arbitrary kwargs",
+                DeprecationWarning,
+            )
             wrapped_app = middleware(wrapped_app)
 
-        key = getattr(middleware, '__name__', str(middleware))
-        app.middlewares[key] = wrapped_app #type: ignore
+        key = getattr(middleware, "__name__", str(middleware))
+        app.middlewares[key] = wrapped_app  # type: ignore
 
     app.wsgi_app = wrapped_app  # type: ignore
     return app

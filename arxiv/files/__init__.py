@@ -10,9 +10,10 @@ from types import TracebackType
 import typing
 from typing import BinaryIO, Optional, Union
 
+
 class BinaryMinimalFile(typing.Protocol):
     """A minimal file `Protocol` for a python binary file."""
-    
+
     def read(self, size: Optional[int] = -1) -> bytes:
         """Read the bytes of the file."""
         pass
@@ -21,28 +22,31 @@ class BinaryMinimalFile(typing.Protocol):
         """Read a line of the file."""
         pass
 
-    def seek(self, pos: int, whence:int=io.SEEK_SET) -> int:
+    def seek(self, pos: int, whence: int = io.SEEK_SET) -> int:
         """Seek into a file."""
         pass
-    
-    def close(self)->None:
+
+    def close(self) -> None:
         """Close the file."""
         pass
 
-    def __enter__(self) -> 'BinaryMinimalFile':
+    def __enter__(self) -> "BinaryMinimalFile":
         """Context fn."""
         pass
 
-    def __exit__(self,
-                 exc_type: Optional[typing.Type[BaseException]],
-                 exc_val: Optional[BaseException],
-                 exc_tb: Optional[TracebackType]) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[typing.Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         """Exist the context."""
         pass
 
     def __iter__(self) -> typing.Iterator[bytes]:
         """Iterator of bytes for the file."""
         pass
+
 
 class FileObj(ABC):
     """FileObj is a subset of the methods on GS `Blob`.
@@ -71,7 +75,7 @@ class FileObj(ABC):
         pass
 
     @abstractmethod
-    def open(self, mode:str) -> BinaryMinimalFile:
+    def open(self, mode: str) -> BinaryMinimalFile:
         """Opens the object similar to the normal Python `open()`."""
         pass
 
@@ -95,8 +99,9 @@ class FileObj(ABC):
 
 class FileDoesNotExist(FileObj):
     """Represents a file that does not exist."""
+
     # noqa
-    
+
     def __init__(self, item: str):
         self.item = item
 
@@ -107,7 +112,7 @@ class FileDoesNotExist(FileObj):
     def exists(self) -> bool:
         return False
 
-    def open(self, mode:str) -> BinaryMinimalFile:
+    def open(self, mode: str) -> BinaryMinimalFile:
         raise Exception("File does not exist")
 
     @property
@@ -156,8 +161,7 @@ class LocalFileObj(FileObj):
 
     @property
     def updated(self) -> datetime:
-        return datetime.fromtimestamp(self.item.stat().st_mtime,
-                                      tz=timezone.utc)
+        return datetime.fromtimestamp(self.item.stat().st_mtime, tz=timezone.utc)
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -171,7 +175,7 @@ class MockStringFileObj(FileObj):
 
     def __init__(self, name: str, data: str):
         self._name = name
-        self._data = bytes(data, 'utf-8')
+        self._data = bytes(data, "utf-8")
         self._size = len(self._data)
 
     @property
@@ -181,7 +185,7 @@ class MockStringFileObj(FileObj):
     def exists(self) -> bool:
         return True
 
-    def open(self, mode:str) -> BinaryMinimalFile:
+    def open(self, mode: str) -> BinaryMinimalFile:
         return io.BytesIO(self._data)
 
     @property
@@ -222,10 +226,8 @@ class UngzippedFileObj(FileObj):
     def exists(self) -> bool:
         return self._fileobj.exists()
 
-    def open(self, mode:str) -> BinaryMinimalFile:
-        return gzip.GzipFile(filename="",
-                             mode=mode,
-                             fileobj=self._fileobj.open(mode))
+    def open(self, mode: str) -> BinaryMinimalFile:
+        return gzip.GzipFile(filename="", mode=mode, fileobj=self._fileobj.open(mode))
 
     @property
     def etag(self) -> str:
@@ -299,7 +301,7 @@ class FileFromTar(FileObj):
                     self._path_exists = False
                     return False
 
-    def open(self, mode:str) -> BinaryMinimalFile:
+    def open(self, mode: str) -> BinaryMinimalFile:
         # Why does this not use `with`? Because after the return it would be out of the with scope
         # and the file will be closed and unusable.
         fh = self._fileobj.open(mode)
@@ -337,14 +339,15 @@ class FileFromTar(FileObj):
         return f"<FileFromTar fileobj={self._fileobj} path={self._path}>"
 
 
-
 DEFAULT_IO_SIZE = 8 * 1024 * 1024
 
 
 class BinaryMinimalFileTransformed(BinaryMinimalFile):
     """A file like object that includes a transform."""
 
-    def __init__(self, inner_io: BinaryMinimalFile, transform: typing.Callable[[bytes], bytes]):
+    def __init__(
+        self, inner_io: BinaryMinimalFile, transform: typing.Callable[[bytes], bytes]
+    ):
         self.transform = transform
         self.io = inner_io
         self.buffer = b""
@@ -396,20 +399,20 @@ class BinaryMinimalFileTransformed(BinaryMinimalFile):
         self.buffer = b""
         self.at_start = True
 
-    def __enter__(self) -> 'BinaryMinimalFile':
+    def __enter__(self) -> "BinaryMinimalFile":
         return self
 
-    def __exit__(self,
-                 exc_type: Optional[typing.Type[BaseException]],
-                 exc_val: Optional[BaseException],
-                 exc_tb: Optional[TracebackType]) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[typing.Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     def __iter__(self) -> typing.Iterator[bytes]:
         for line in self.io:
             yield self.transform(line)
-
-
 
 
 class FileTransform(FileObj):
@@ -426,12 +429,13 @@ class FileTransform(FileObj):
     def exists(self) -> bool:
         return self.fileobj.exists()
 
-    def open(self, mode:str) -> BinaryMinimalFile:
-        return BinaryMinimalFileTransformed(self.fileobj.open('rb'), self.transform)
+    def open(self, mode: str) -> BinaryMinimalFile:
+        return BinaryMinimalFileTransformed(self.fileobj.open("rb"), self.transform)
 
     @property
     def etag(self) -> str:
-            return self.fileobj.etag
+        return self.fileobj.etag
+
     @property
     def size(self) -> int:
         """This is only set after `open()` or `exists()` were called."""

@@ -56,9 +56,7 @@ def main() -> None:
     parser.add_argument(
         "--tables", help="tables to process (comma-delimited, default: all)"
     )
-    parser.add_argument(
-        "--model-metadata", help="the model's codegen metadata"
-    )
+    parser.add_argument("--model-metadata", help="the model's codegen metadata")
     parser.add_argument("--noviews", action="store_true", help="ignore views")
     parser.add_argument("--outfile", help="file to write output to (default: stdout)")
     args = parser.parse_args()
@@ -87,7 +85,7 @@ def main() -> None:
         "uq": "uq_%(table_name)s_%(column_0_name)s",
         "ck": "ck_%(table_name)s_%(constraint_name)s",
         "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-        "pk": "pk_%(table_name)s"
+        "pk": "pk_%(table_name)s",
     }
 
     engine = create_engine(args.url)

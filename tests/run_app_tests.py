@@ -5,6 +5,6 @@ from arxiv.base.app_tests import *
 
 app = create_web_app()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with app.app_context():
         unittest.main()

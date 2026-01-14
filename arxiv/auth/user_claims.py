@@ -86,7 +86,7 @@ class ArxivUserClaimsModel(BaseModel):
 
 
 def get_roles(realm_access: dict) -> Tuple[str, Any]:
-    return 'roles', realm_access['roles']
+    return "roles", realm_access["roles"]
 
 
 claims_map = {
@@ -128,7 +128,6 @@ class ArxivUserClaims:
         self._domain_session = None
         self._claims = claims.model_copy()
         pass
-
 
     @property
     def expires_at(self) -> datetime:
@@ -306,7 +305,7 @@ class ArxivUserClaims:
         setattr(self._claims, tag, value)
 
 
-    def encode_jwt_token(self, secret: str, algorithm: str = 'HS256') -> str:
+    def encode_jwt_token(self, secret: str, algorithm: str = "HS256") -> str:
         """packing user claims"""
 
         claims = self._claims.model_dump()
@@ -336,12 +335,13 @@ class ArxivUserClaims:
 
         token = jwt.encode(payload_ng, secret, algorithm=algorithm)
         if len(token) > 4096:
-            raise ValueError(f'JWT token is too long {len(token)} bytes')
+            raise ValueError(f"JWT token is too long {len(token)} bytes")
         return token
 
-
     @classmethod
-    def decode_jwt_payload(cls, tokens: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+    def decode_jwt_payload(
+        cls, tokens: dict, jwt_payload: str, secret: str, algorithm: str = "HS256"
+    ) -> "ArxivUserClaims":
         """
         Decodes the user claims.
         """
@@ -358,7 +358,6 @@ class ArxivUserClaims:
             except Exception as e:
                 raise ValueError(f'Failed to decode ArxivUserClaimsModel: {payload}') from e
         raise ValueError(f'Failed to decode JWT payload {payload}')
-
 
     def update_keycloak_access_token(self, updates: dict) -> None:
         setattr(self._claims, 'acc', updates['acc'])

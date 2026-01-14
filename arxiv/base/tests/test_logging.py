@@ -12,20 +12,20 @@ class TestGetLogger(TestCase):
         """There is no application nor request context."""
         stream = StringIO()
 
-        logger = logging.getLogger('foologger')
+        logger = logging.getLogger("foologger")
         handler = logging.StreamHandler(stream)
-        handler.setFormatter(
-            logging.Formatter(
-                '%(levelname)s: "%(message)s"'
-            )
-        )
-        handler.terminator = ''
+        handler.setFormatter(logging.Formatter('%(levelname)s: "%(message)s"'))
+        handler.terminator = ""
         logger.addHandler(handler)
-        self.assertIsInstance(logger, pyLogging.Logger,
-                              "Should return a logging.Logger instance")
+        self.assertIsInstance(
+            logger, pyLogging.Logger, "Should return a logging.Logger instance"
+        )
 
-        logger.error('foo')
+        logger.error("foo")
         captured_value = stream.getvalue()
         stream.close()
-        self.assertIn('ERROR: "foo"', captured_value,
-                      "Should log normally even if request is not present")
+        self.assertIn(
+            'ERROR: "foo"',
+            captured_value,
+            "Should log normally even if request is not present",
+        )

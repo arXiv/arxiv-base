@@ -25,7 +25,7 @@ def application(environ, start_response):
     Updates the Flask app config before using it to handle the request.
     """
     for key, value in environ.items():
-        if key == 'SERVER_NAME':
+        if key == "SERVER_NAME":
             continue
         os.environ[key] = str(value)
         if __flask_app__ is not None and key in __flask_app__.config:
@@ -44,11 +44,11 @@ def create_web_app() -> Flask:
     for _, error in default_exceptions.items():
         app.errorhandler(error)(content_aware_exception_handler)
 
-    app.route('/healthz')(healthz)
-    app.route('/')(echo)
+    app.route("/healthz")(healthz)
+    app.route("/")(echo)
     return app
 
-  
+
 def healthz() -> Response:
     """Health check endpoint."""
     response: Response = make_response("i'm still here", status.OK)
@@ -59,14 +59,14 @@ def echo() -> None:
     """Propagate an exception from NGINX."""
     try:
         make_error_response()
-    except KeyError:    # Fall back to a 404 if error info is not available.
-        raise NotFound('Nope')
+    except KeyError:  # Fall back to a 404 if error info is not available.
+        raise NotFound("Nope")
 
 
 def make_error_response() -> None:
     """Raise an :class:`.HTTPException` based on the status in ``X-Code``."""
-    data = {'request_id': request.headers['X-Request-ID']}
-    code = int(request.headers['X-Code'])
+    data = {"request_id": request.headers["X-Request-ID"]}
+    code = int(request.headers["X-Code"])
     exception = default_exceptions[code]
     raise exception(data)
 
@@ -80,9 +80,8 @@ def content_aware_exception_handler(error: HTTPException) -> Response:
 
     Falls back to the base exception handler.
     """
-    if request.headers.get('X-Format') == 'application/json':
-        data = {'error': error.code, 'name': error.name,
-                'detail': error.description}
+    if request.headers.get("X-Format") == "application/json":
+        data = {"error": error.code, "name": error.name, "detail": error.description}
         return make_response(jsonify(data), error.code)
     return exceptions.handle_exception(error)
 

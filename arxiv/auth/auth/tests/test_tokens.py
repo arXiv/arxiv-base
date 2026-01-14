@@ -15,24 +15,29 @@ class TestEncodeDecode(TestCase):
     def test_encode_session(self):
         """Encode a typical user session."""
         session = domain.Session(
-            session_id='asdf1234',
-            start_time=datetime.now(), end_time=datetime.now(),
+            session_id="asdf1234",
+            start_time=datetime.now(),
+            end_time=datetime.now(),
             user=domain.User(
-                user_id='12345',
-                email='foo@bar.com',
-                username='emanresu',
-                name=domain.UserFullName(forename='First', surname='Last', suffix='Lastest'),
+                user_id="12345",
+                email="foo@bar.com",
+                username="emanresu",
+                name=domain.UserFullName(
+                    forename="First", surname="Last", suffix="Lastest"
+                ),
                 profile=domain.UserProfile(
-                    affiliation='FSU',
+                    affiliation="FSU",
                     rank=3,
-                    country='us',
-                    default_category=CATEGORIES['astro-ph.CO'],
-                    submission_groups=['grp_physics']
-                )
+                    country="us",
+                    default_category=CATEGORIES["astro-ph.CO"],
+                    submission_groups=["grp_physics"],
+                ),
             ),
-            authorizations=domain.Authorizations(scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION])
+            authorizations=domain.Authorizations(
+                scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION]
+            ),
         )
-        secret = 'foosecret'
+        secret = "foosecret"
         token = tokens.encode(session, secret)
 
         data = tokens.decode(token, secret)
@@ -41,25 +46,30 @@ class TestEncodeDecode(TestCase):
     def test_mismatched_secrets(self):
         """Secret used to encode is not the same as the one used to decode."""
         session = domain.Session(
-            session_id='asdf1234',
-            start_time=datetime.now(), end_time=datetime.now(),
+            session_id="asdf1234",
+            start_time=datetime.now(),
+            end_time=datetime.now(),
             user=domain.User(
-                user_id='12345',
-                email='foo@bar.com',
-                username='emanresu',
-                name=domain.UserFullName(forename='First', surname='Last', suffix='Lastest'),
+                user_id="12345",
+                email="foo@bar.com",
+                username="emanresu",
+                name=domain.UserFullName(
+                    forename="First", surname="Last", suffix="Lastest"
+                ),
                 profile=domain.UserProfile(
-                    affiliation='FSU',
+                    affiliation="FSU",
                     rank=3,
-                    country='us',
-                    default_category=CATEGORIES['astro-ph.CO'],
-                    submission_groups=['grp_physics']
-                )
+                    country="us",
+                    default_category=CATEGORIES["astro-ph.CO"],
+                    submission_groups=["grp_physics"],
+                ),
             ),
-            authorizations=domain.Authorizations(scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION])
+            authorizations=domain.Authorizations(
+                scopes=[scopes.VIEW_SUBMISSION, scopes.CREATE_SUBMISSION]
+            ),
         )
-        secret = 'foosecret'
+        secret = "foosecret"
         token = tokens.encode(session, secret)
 
         with self.assertRaises(tokens.exceptions.InvalidToken):
-            tokens.decode(token, 'not the secret')
+            tokens.decode(token, "not the secret")

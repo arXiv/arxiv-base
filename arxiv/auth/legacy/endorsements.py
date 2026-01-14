@@ -23,19 +23,26 @@ from . import util
 from .. import domain
 from ...taxonomy import definitions
 from ...db import Session
-from ...db.models import Endorsement, PaperOwner, Document, \
-    t_arXiv_in_category, Category, EndorsementDomain, t_arXiv_white_email, \
-    t_arXiv_black_email
+from ...db.models import (
+    Endorsement,
+    PaperOwner,
+    Document,
+    t_arXiv_in_category,
+    Category,
+    EndorsementDomain,
+    t_arXiv_white_email,
+    t_arXiv_black_email,
+)
 
 
 GENERAL_CATEGORIES = [
-    definitions.CATEGORIES['math.GM'],
-    definitions.CATEGORIES['physics.gen-ph'],
+    definitions.CATEGORIES["math.GM"],
+    definitions.CATEGORIES["physics.gen-ph"],
 ]
 
 WINDOW_START = util.from_epoch(157783680)
 
-Endorsements = List[Union[domain.Category,str]]
+Endorsements = List[Union[domain.Category, str]]
 
 
 def get_endorsements(user: domain.User) -> Endorsements:
@@ -53,23 +60,26 @@ def get_endorsements(user: domain.User) -> Endorsements:
         either explicitly or implicitly endorsed.
 
     """
-    endorsements = list(set(explicit_endorsements(user))
-                        | set(implicit_endorsements(user)))
+    endorsements = list(
+        set(explicit_endorsements(user)) | set(implicit_endorsements(user))
+    )
 
     return endorsements
 
 
 @memoize()
 def _categories_in_archive(archive: str) -> Set[str]:
-    return set(category for category, definition
-               in definitions.CATEGORIES_ACTIVE.items()
-               if definition.in_archive == archive)
+    return set(
+        category
+        for category, definition in definitions.CATEGORIES_ACTIVE.items()
+        if definition.in_archive == archive
+    )
 
 
 @memoize()
 def _category(archive: str, subject_class: str) -> domain.Category:
     if subject_class:
-        return definitions.CATEGORIES[f'{archive}.{subject_class}']
+        return definitions.CATEGORIES[f"{archive}.{subject_class}"]
     return definitions.CATEGORIES[archive]
 
 
@@ -79,10 +89,13 @@ def _get_archive(category: domain.Category) -> str:
 
 
 def _all_archives(endorsements: Endorsements) -> bool:
-    archives = set(_get_archive(category) for category in endorsements
-                   if category.id.endswith(".*"))
+    archives = set(
+        _get_archive(category)
+        for category in endorsements
+        if category.id.endswith(".*")
+    )
     missing = set(definitions.ARCHIVES_ACTIVE.keys()) - archives
-    return len(missing) == 0 or (len(missing) == 1 and 'test' in missing)
+    return len(missing) == 0 or (len(missing) == 1 and "test" in missing)
 
 
 def _all_subjects_in_archive(archive: str, endorsements: Endorsements) -> bool:
@@ -113,12 +126,15 @@ def compress_endorsements(endorsements: Endorsements) -> Endorsements:
     for archive, archive_endorsements in grouped:
         archive_endorsements_list = list(archive_endorsements)
         if _all_subjects_in_archive(archive, archive_endorsements_list):
-            compressed.append(domain.Category(id=f"{archive}.*",
-                                       full_name=f"all of {archive}",
-                                       is_active=True,
-                                       in_archive=archive,
-                                       is_general=False,
-                                       ))
+            compressed.append(
+                domain.Category(
+                    id=f"{archive}.*",
+                    full_name=f"all of {archive}",
+                    is_active=True,
+                    in_archive=archive,
+                    is_general=False,
+                )
+            )
 
         else:
             for endorsement in archive_endorsements_list:
@@ -187,19 +203,24 @@ def implicit_endorsements(user: domain.User) -> Endorsements:
         auto-endorsed.
 
     """
-    candidates = [definitions.CATEGORIES[category]
-                  for category, data in definitions.CATEGORIES_ACTIVE.items()]
+    candidates = [
+        definitions.CATEGORIES[category]
+        for category, data in definitions.CATEGORIES_ACTIVE.items()
+    ]
     policies = category_policies()
     invalidated = invalidated_autoendorsements(user)
     papers = domain_papers(user)
     user_is_academic = is_academic(user)
     return [
-        category for category in candidates
+        category
+        for category in candidates
         if category in policies
         and not _disqualifying_invalidations(category, invalidated)
-        and (policies[category]['endorse_all']
-             or _endorse_by_email(category, policies, user_is_academic)
-             or _endorse_by_papers(category, policies, papers))
+        and (
+            policies[category]["endorse_all"]
+            or _endorse_by_email(category, policies, user_is_academic)
+            or _endorse_by_papers(category, policies, papers)
+        )
     ]
 
 
@@ -235,8 +256,9 @@ def is_academic(user: domain.User) -> bool:
     return True
 
 
-def _disqualifying_invalidations(category: domain.Category,
-                                 invalidated: Endorsements) -> bool:
+def _disqualifying_invalidations(
+    category: domain.Category, invalidated: Endorsements
+) -> bool:
     """
     Evaluate whether endorsement invalidations are disqualifying.
 
@@ -256,13 +278,17 @@ def _disqualifying_invalidations(category: domain.Category,
     bool
 
     """
-    return bool((category in GENERAL_CATEGORIES and category in invalidated)
-                or (category not in GENERAL_CATEGORIES and invalidated))
+    return bool(
+        (category in GENERAL_CATEGORIES and category in invalidated)
+        or (category not in GENERAL_CATEGORIES and invalidated)
+    )
 
 
-def _endorse_by_email(category: domain.Category,
-                      policies: Dict[domain.Category, Dict],
-                      user_is_academic: bool) -> bool:
+def _endorse_by_email(
+    category: domain.Category,
+    policies: Dict[domain.Category, Dict],
+    user_is_academic: bool,
+) -> bool:
     """
     Evaluate whether an auto-endorsement can be issued based on email address.
 
@@ -285,14 +311,16 @@ def _endorse_by_email(category: domain.Category,
 
     """
     policy = policies.get(category)
-    if policy is None or 'endorse_email' not in policy:
+    if policy is None or "endorse_email" not in policy:
         return False
-    return policy['endorse_email'] and user_is_academic
+    return policy["endorse_email"] and user_is_academic
 
 
-def _endorse_by_papers(category: domain.Category,
-                       policies: Dict[domain.Category, Dict],
-                       papers: Dict[str, int]) -> bool:
+def _endorse_by_papers(
+    category: domain.Category,
+    policies: Dict[domain.Category, Dict],
+    papers: Dict[str, int],
+) -> bool:
     """
     Evaluate whether an auto-endorsement can be issued based on prior papers.
 
@@ -316,13 +344,14 @@ def _endorse_by_papers(category: domain.Category,
     bool
 
     """
-    N_papers = papers.get(policies[category]['domain'], 0)
-    min_papers = policies[category]['min_papers']
+    N_papers = papers.get(policies[category]["domain"], 0)
+    min_papers = policies[category]["min_papers"]
     return bool(N_papers >= min_papers)
 
 
-def domain_papers(user: domain.User,
-                  start_date: Optional[datetime] = None) -> Dict[str, int]:
+def domain_papers(
+    user: domain.User, start_date: Optional[datetime] = None
+) -> Dict[str, int]:
     """
     Calculate the number of papers that a user owns in each endorsement domain.
 
@@ -341,15 +370,19 @@ def domain_papers(user: domain.User,
         in each respective domain (int).
 
     """
-    query = Session.query(PaperOwner.document_id,
-                          Document.document_id,
-                          t_arXiv_in_category.c.document_id,
-                          Category.endorsement_domain) \
-        .filter(PaperOwner.user_id == user.user_id) \
-        .filter(Document.document_id == PaperOwner.document_id) \
-        .filter(t_arXiv_in_category.c.document_id == Document.document_id) \
-        .filter(Category.archive == t_arXiv_in_category.c.archive) \
+    query = (
+        Session.query(
+            PaperOwner.document_id,
+            Document.document_id,
+            t_arXiv_in_category.c.document_id,
+            Category.endorsement_domain,
+        )
+        .filter(PaperOwner.user_id == user.user_id)
+        .filter(Document.document_id == PaperOwner.document_id)
+        .filter(t_arXiv_in_category.c.document_id == Document.document_id)
+        .filter(Category.archive == t_arXiv_in_category.c.archive)
         .filter(Category.subject_class == t_arXiv_in_category.c.subject_class)
+    )
 
     if start_date:
         query = query.filter(Document.dated > util.epoch(start_date))
@@ -372,25 +405,28 @@ def category_policies() -> Dict[domain.Category, Dict]:
         policiy details.
 
     """
-    data = Session.query(Category.archive,
-                         Category.subject_class,
-                         EndorsementDomain.endorse_all,
-                         EndorsementDomain.endorse_email,
-                         EndorsementDomain.papers_to_endorse,
-                         EndorsementDomain.endorsement_domain) \
-        .filter(Category.definitive == 1) \
-        .filter(Category.active == 1) \
-        .filter(Category.endorsement_domain
-                == EndorsementDomain.endorsement_domain) \
+    data = (
+        Session.query(
+            Category.archive,
+            Category.subject_class,
+            EndorsementDomain.endorse_all,
+            EndorsementDomain.endorse_email,
+            EndorsementDomain.papers_to_endorse,
+            EndorsementDomain.endorsement_domain,
+        )
+        .filter(Category.definitive == 1)
+        .filter(Category.active == 1)
+        .filter(Category.endorsement_domain == EndorsementDomain.endorsement_domain)
         .all()
+    )
 
     policies = {}
     for arch, subj, endorse_all, endorse_email, min_papers, e_domain in data:
         policies[_category(arch, subj)] = {
-            'domain': e_domain,
-            'endorse_all': endorse_all == 'y',
-            'endorse_email': endorse_email == 'y',
-            'min_papers': min_papers
+            "domain": e_domain,
+            "endorse_all": endorse_all == "y",
+            "endorse_email": endorse_email == "y",
+            "min_papers": min_papers,
         }
 
     return policies
@@ -411,10 +447,11 @@ def invalidated_autoendorsements(user: domain.User) -> Endorsements:
         auto-endorsements revoked.
 
     """
-    data: List[Endorsement] = Session.query(Endorsement.archive,
-                                            Endorsement.subject_class) \
-        .filter(Endorsement.endorsee_id == user.user_id) \
-        .filter(Endorsement.flag_valid == 0) \
-        .filter(Endorsement.type == 'auto') \
+    data: List[Endorsement] = (
+        Session.query(Endorsement.archive, Endorsement.subject_class)
+        .filter(Endorsement.endorsee_id == user.user_id)
+        .filter(Endorsement.flag_valid == 0)
+        .filter(Endorsement.type == "auto")
         .all()
+    )
     return [_category(archive, subject) for archive, subject in data]

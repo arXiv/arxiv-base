@@ -97,16 +97,20 @@ def build_adapter(app: Flask) -> MapAdapter:
                 configured_urls[i] = (endpoint, o.path, o.netloc)
 
     # Privilege ARXIV_URLs set on the application config.
-    current_urls = app.config.get('URLS', [])
+    current_urls = app.config.get("URLS", [])
     if current_urls:
         configured_urls.update({url[0]: url for url in current_urls})
-    url_map = Map([
-        Rule(pattern, endpoint=name, host=host, build_only=True)
-        for name, pattern, host in configured_urls.values()
-    ], converters={'arxiv': ArXivConverter}, host_matching=True)
+    url_map = Map(
+        [
+            Rule(pattern, endpoint=name, host=host, build_only=True)
+            for name, pattern, host in configured_urls.values()
+        ],
+        converters={"arxiv": ArXivConverter},
+        host_matching=True,
+    )
 
-    scheme = app.config.get('EXTERNAL_URL_SCHEME', 'https')
-    base_host = app.config.get('BASE_SERVER', 'arxiv.org')
+    scheme = app.config.get("EXTERNAL_URL_SCHEME", "https")
+    base_host = app.config.get("BASE_SERVER", "arxiv.org")
     adapter: MapAdapter = url_map.bind(base_host, url_scheme=scheme)
     return adapter
 
@@ -117,16 +121,16 @@ def external_url_handler(err: BuildError, endpoint: str, values: Dict) -> str:
     This gets attached to a Flask application via the
     :func:`flask.Flask.url_build_error_handlers` hook.
     """
-    values.pop('_external')
+    values.pop("_external")
     try:
-        url: str = current_app.external_url_adapter.build(endpoint,
-                                                          values=values,
-                                                          force_external=True)
+        url: str = current_app.external_url_adapter.build(
+            endpoint, values=values, force_external=True
+        )
     except BuildError:
         # Re-raise the original BuildError, in context of original traceback.
         exc_type, exc_value, tb = sys.exc_info()
         if exc_value is err:
-            raise exc_type(exc_value).with_traceback(tb)    # type: ignore
+            raise exc_type(exc_value).with_traceback(tb)  # type: ignore
         else:
             raise err
     return url
@@ -143,11 +147,11 @@ def canonical_url(id: str, version: int = 0) -> str:
     # There should probably be something like INTERNAL_URL_SCHEMA
     # Also, /abs should probably be specified somewhere else
     # like arxiv.base.canonical
-    scheme = current_app.config.get('EXTERNAL_URL_SCHEME', 'https')
-    host = current_app.config.get('MAIN_SERVER', 'arxiv.org')
+    scheme = current_app.config.get("EXTERNAL_URL_SCHEME", "https")
+    host = current_app.config.get("MAIN_SERVER", "arxiv.org")
     if version:
-        return f'{scheme}://{host}/abs/{id}v{version}'
-    return f'{scheme}://{host}/abs/{id}'
+        return f"{scheme}://{host}/abs/{id}v{version}"
+    return f"{scheme}://{host}/abs/{id}"
 
 
 def register_external_urls(app: Flask) -> None:

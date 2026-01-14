@@ -148,39 +148,20 @@ def contains_outside_math(s1: str, s2: str) -> bool:
 # by looking for two high-bit bytes which match this pattern
 # NOTE that this may incorrectly match some real Unicode.
 
-utf8_in_latin1_re = re.compile("[\u00a0-\u00df][\u0080-\u00bf]+")
+# NOTE: we can't use re.compile here because we use the re.IGNORECASE flags in add_complaints_matching
 
-
-def contains_utf8_in_latin1(s: str) -> Optional[str]:
-    match = utf8_in_latin1_re.search(s)
-    if match:
-        return match.group(0)
-    else:
-        return None
-
+# utf8_in_latin1_re = re.compile("[\u00a0-\u00df][\u0080-\u00bf]+")
+utf8_in_latin1_re = r"[\u00a0-\u00df][\u0080-\u00bf]+"
 
 # \p{C} would require the regex (not re) module.
 # control_chars_re = re.compile("\p{C}+") # looking for "Unicode control characters"
 # Looking just for control characters < 32 decimal:
-control_chars_re = re.compile("[\u0000-\u001f]+")
-
-
-def contains_control_characters(s: str) -> Optional[str]:
-    match = control_chars_re.search(s)
-    if match:
-        return match.group(0)
-    else:
-        return None
+# control_chars_re = re.compile("[\u0000-\u001f]+")
+control_chars_re = r"[\u0000-\u001f]+"
 
 # Allow newlines (\n = u\000a) in abstracts
-control_chars_for_abs_re = re.compile("[\u0000-\u0009\u000b-\u001f]+")
-
-def contains_control_characters_for_abs(s: str) -> Optional[str]:
-    match = control_chars_for_abs_re.search(s)
-    if match:
-        return match.group(0)
-    else:
-        return None
+# control_chars_for_abs_re = re.compile("[\u0000-\u0009\u000b-\u001f]+")
+control_chars_for_abs_re = r"[\u0000-\u0009\u000b-\u001f]+"
     
 
 ############################################################
@@ -437,40 +418,27 @@ def ends_with_punctuation(s: str) -> bool:
     else:
         return None
 
+def add_complaints_matching(regex: str, v: str, complaint: Complaint, report: MetadataCheckReport):
+    for m in re.finditer(regex, v, re.IGNORECASE):
+        print( "MATCH", regex, m )
+        report.add_complaint(complaint, (m.start(), m.end()))
 
 def check_bad_whitespace(v: str, report):
     #
-    if re.match(r"^\s", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "leading whitespace")
-    #
-    if re.search(r"\s$", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "trailing whitespace")
-    #
+    add_complaints_matching(r"^\s", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching( r"\s$", v, CONTAINS_BAD_STRING, report)
     # Careful: \s matches \n!
-    if re.search(r"[ \t][ \t]", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "excess whitespace")
+    add_complaints_matching(r"[ \t][ \t]", v, CONTAINS_BAD_STRING, report)
     #
+    # Problems: space comma; comma (spaces) comma; comma alpha
     # JHY: these should be "fixable": s/\s*,\s*,\s*/, / and s/\s*,\s*/, / !
-    if re.search(r",\s*,", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "two adjacent commas")
-    elif re.search(r"\s,", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "whitespace before comma")
-    elif re.search(r",[a-zA-Z]", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "no whitespace after comma")
-    #
-    if re.match(r"[^\s]\(", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "no space before open paren")
-    #
-    if re.match(r"\(\s", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "space after open paren")
-    #
-    if re.match(r"\s\)", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "space before close paren")
-    #
-    if re.match(r"\)[^\s]", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "no space after close paren")
-    #
-    
+    add_complaints_matching(r"\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+[a-zA-Z]?|\s*,(\s*,)*[a-zA-Z]", v, CONTAINS_BAD_STRING, report)
+    # Open parens can be preceded by parens and other things???
+    add_complaints_matching(r"[a-zA-Z]\(", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"\(\s", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"\s\)", v, CONTAINS_BAD_STRING, report)
+    # Careful: parens can be followed by whitespace or punctuation
+    add_complaints_matching(r"\)[a-zA-Z]", v, CONTAINS_BAD_STRING, report)        
 
 
 ############################################################
@@ -482,53 +450,42 @@ def check_title(v: str) -> MetadataCheckReport:
         report.add_complaint(CANNOT_BE_EMPTY)
     elif len(v) < MIN_TITLE_LEN:
         report.add_complaint(TOO_SHORT)
-        print( "jjj: TITLE TOO SHORT", report.get_complaints() )
+        # print( "jjj: TITLE TOO SHORT", report.get_complaints() )
     elif len(v) > MAX_TITLE_LEN:
         report.add_complaint(TOO_LONG)
     else:
-        print( "jjj: TITLE NOT TOO SHORT NOR LONG" )
+        # print( "jjj: TITLE NOT TOO SHORT NOR LONG" )
+        pass
     #
-    if re.match(r"title\b", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "title")
+    add_complaints_matching(r"^title:?\b", v, CONTAINS_BAD_STRING, report)
     #
-    # TODO: leading, trailing, excess space?
-    if re.search(r"\\\\", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\\\ (line break)")
+    add_complaints_matching(r"\\\\", v, CONTAINS_BAD_STRING, report)
     #
     if looks_like_all_caps(v):
-        report.add_complaint(CONTAINS_BAD_STRING, "excessive capitalization")
+        report.add_complaint(CONTAINS_BAD_STRING) # "excessive capitalization"
     elif long_word_caps(v):
-        report.add_complaint(CONTAINS_BAD_STRING, "excessive capitalization")
+        report.add_complaint(CONTAINS_BAD_STRING) # "excessive capitalization"
     #
     if starts_with_lowercase(v):
-        report.add_complaint(CONTAINS_BAD_STRING, v[0])
+        # report.add_complaint(CONTAINS_BAD_STRING, v[0])
+        report.add_complaint(CONTAINS_BAD_STRING, (0, 1))
     #
-    if re.search(r"\\href{", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\href")
+    add_complaints_matching(r"\\href{", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"\\url{", v, CONTAINS_BAD_STRING, report)
     #
-    if re.search(r"\\url{", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\url")
-    #
-    if contains_outside_math(r"\\emph", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
-    #
-    if contains_outside_math(r"\\uline", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\uline")
-    #
-    if contains_outside_math(r"\\textbf", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\textbf")
-    #
-    if contains_outside_math(r"\\texttt", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\texttt")
-    #
-    if contains_outside_math(r"\\textsc", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\textsc")
-    #
-    if contains_outside_math(r"\\#", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "unnecessary escape: \\#")
-    #
-    if contains_outside_math(r"\\%", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "unnecessary escape: \\%")
+    for pat in [
+            r"\\emph",
+            r"\\uline",
+            r"\\textbf",
+            r"\\texttt",
+
+            r"\\textsc",
+            r"\\#",
+            r"\\%"]:
+        if contains_outside_math(pat, v):
+            # report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
+            add_complaints_matching(pat, v, CONTAINS_BAD_STRING, report)
+        #
     #
     check_bad_whitespace(v, report)
     #
@@ -538,11 +495,8 @@ def check_title(v: str) -> MetadataCheckReport:
     if not all_brackets_balanced(v):
         report.add_complaint(UNBALANCED_BRACKETS)
     #
-    if s := contains_control_characters(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
-    #
-    if s := contains_utf8_in_latin1(v):
-        report.add_complaint(BAD_UNICODE, s)
+    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     #
     # not implemented: titles MAY end with punctuation
     # not implemented: check for arXiv or arXiv:ID
@@ -558,44 +512,26 @@ def check_authors(v: str) -> MetadataCheckReport:
     # elif len(v) > MAX_AUTHORS_LEN:
     #     report.add_complaint(TOO_LONG)
     #
-    if re.search(r"\\\\", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "line break (\\\\)")
-    #
-    if re.search(r"\*", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "bad character '*'")
-    #
-    if re.search(r"#", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "bad character '#'")
-    #
-    if re.search(r"[^\\]\^", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "bad character '^'")
-    #
-    if re.search(r"@", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "bad character '@'")
+    add_complaints_matching(r"\\\\", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"\*", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"#", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"[^\\]\^", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"@", v, CONTAINS_BAD_STRING, report)                
     #
     check_bad_whitespace(v, report)
     #
-    if re.search(r"anonym", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "anonymous")
-    #
-    if re.search(r"corresponding", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "'corresponding'")
+    add_complaints_matching(r"anonymous", v, CONTAINS_BAD_STRING, report)                
+    add_complaints_matching(r"corresponding", v, CONTAINS_BAD_STRING, report)                
     #
     for s in ("\\dag", "\\ddag", "\\textdag", "\\textddag"):
-        if re.match(s, v, re.IGNORECASE):
-            report.add_complaint(CONTAINS_BAD_STRING, f"dagger symbol {s}")
-            break
-        #
+        add_complaints_matching(s, v, CONTAINS_BAD_STRING, report)                
     #
-    if re.match(r"authors\b", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "authors")
-    elif re.match(r"author\b", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "author")
+    add_complaints_matching(r"authors?:?\b", v, CONTAINS_BAD_STRING, report)                
     #
     if contains_html_elements(v):
         report.add_complaint(CONTAINS_BAD_STRING, "HTML")
     #
-    print( "CHECKING BREACKETS" )
+    # print( "CHECKING BREACKETS" )
     if not all_brackets_balanced(v):
         report.add_complaint(UNBALANCED_BRACKETS)
     #
@@ -614,10 +550,7 @@ def check_authors(v: str) -> MetadataCheckReport:
         )
     # Are tildes allowed anywhere? Yes, as a TeX accent
     # (Consider: only check names?)
-    if re.search(r"[^\\]~", v):
-        report.add_complaint(
-            CONTAINS_BAD_STRING, "~ (tilde)"
-        )
+    add_complaints_matching(r"[^\\]~", v, CONTAINS_BAD_STRING, report)
     #
     # Authors list can NOT end with punctuation
     if s := ends_with_punctuation(v):
@@ -625,11 +558,8 @@ def check_authors(v: str) -> MetadataCheckReport:
             report.add_complaint(CONTAINS_BAD_STRING, s)
         #
     #
-    if s := contains_control_characters(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
-    #
-    if s := contains_utf8_in_latin1(v):
-        report.add_complaint(BAD_UNICODE, s)
+    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     #
 
     # Parse authors, check authors names - but not affiliations - for:
@@ -816,26 +746,18 @@ def check_abstract(v: str) -> MetadataCheckReport:
     if re.search(r"\\url{", v):
         report.add_complaint(CONTAINS_BAD_STRING, "\\url")
     #
-    if contains_outside_math(r"\\emph", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
-    #
-    if contains_outside_math(r"\\uline", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\uline")
-    #
-    if contains_outside_math(r"\\textbf", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\textbf")
-    #
-    if contains_outside_math(r"\\texttt", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\texttt")
-    #
-    if contains_outside_math(r"\\textsc", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\textsc")
-    #
-    if contains_outside_math(r"\\#", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "unnecessary escape: \\#")
-    #
-    if contains_outside_math(r"\\%", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "unnecessary escape: \\%")
+    for pat in [
+            r"\\emph",
+            r"\\uline",
+            r"\\textbf",
+            r"\\texttt",
+            r"\\textsc",
+            r"\\#",
+            r"\\%"]:
+        if contains_outside_math(pat, v):
+            # report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
+            add_complaints_matching(pat, v, CONTAINS_BAD_STRING, report)
+        #
     #
     check_bad_whitespace(v, report)
     #
@@ -852,11 +774,9 @@ def check_abstract(v: str) -> MetadataCheckReport:
     if language_is_not_english(v):
         report.add_complaint(MUST_BE_ENGLISH)
     #
-    if s := contains_control_characters_for_abs(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
-    #
-    if s := contains_utf8_in_latin1(v):
-        report.add_complaint(BAD_UNICODE, s)
+    # SUBTLE: don't complain about \n newlins in abstracts!
+    add_complaints_matching(control_chars_for_abs_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     #
     # not implemented: abstract MAY end in punctuation
     # not implemented: check for arXiv or arXiv:ID
@@ -878,37 +798,26 @@ def check_comments(v: str) -> MetadataCheckReport:
     if re.search(r"\\url{", v):
         report.add_complaint(CONTAINS_BAD_STRING, "\\url")
     #
-    if contains_outside_math(r"\\emph", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
-    #
-    if contains_outside_math(r"\\uline", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\uline")
-    #
-    if contains_outside_math(r"\\textbf", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\textbf")
-    #
-    if contains_outside_math(r"\\texttt", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\texttt")
-    #
-    if contains_outside_math(r"\\textsc", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\textsc")
-    #
-    if contains_outside_math(r"\\#", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "unnecessary escape: \\#")
-    #
-    if contains_outside_math(r"\\%", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "unnecessary escape: \\%")
+    for pat in [
+            r"\\emph",
+            r"\\uline",
+            r"\\textbf",
+            r"\\texttt",
+            r"\\textsc",
+            r"\\#",
+            r"\\%"]:
+        if contains_outside_math(pat, v):
+            # report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
+            add_complaints_matching(pat, v, CONTAINS_BAD_STRING, report)
+        #
     #
     check_bad_whitespace(v, report)
     #
     if not all_brackets_balanced(v):
         report.add_complaint(UNBALANCED_BRACKETS)
     #
-    if s := contains_control_characters(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
-    #
-    if s := contains_utf8_in_latin1(v):
-        report.add_complaint(BAD_UNICODE, s)
+    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     #
     # TODO: check that language is English?
 
@@ -931,11 +840,9 @@ def check_report_num(v: str) -> MetadataCheckReport:
     #
     check_bad_whitespace(v, report)
     #
-    if s := contains_control_characters(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
+    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     #
-    if s := contains_utf8_in_latin1(v):
-        report.add_complaint(BAD_UNICODE, s)
     return report
 
 
@@ -974,12 +881,8 @@ def check_journal_ref(v: str) -> MetadataCheckReport:
             break
         #
     #
-    if s := contains_control_characters(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
-    #
-    # Hopefully, this is "validate input encoding"
-    if s := contains_utf8_in_latin1(v):
-        report.add_complaint(BAD_UNICODE, s)
+    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     #
     return report
 
@@ -1004,15 +907,9 @@ def check_doi(v: str) -> MetadataCheckReport:
 
     check_bad_whitespace(v, report)
 
+    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     
-    #
-    if s := contains_control_characters(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
-    #
-    # Hopefully, this is "validate input encoding"
-    # if s := contains_utf8_in_latin1(v):
-    #     report.add_complaint(BAD_UNICODE, s)
-    #
     # Consider separating this out?
     for doi in v.split():
         if not re.match("^[0-9][0-9]*.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$", doi):
@@ -1036,11 +933,8 @@ def check_msc_class(v: str) -> MetadataCheckReport:
     #
     check_bad_whitespace(v, report)
     #
-    if s := contains_control_characters(v):
-        report.add_complaint(CONTAINS_BAD_STRING, repr(s))
-    #
-    if s := contains_utf8_in_latin1(v):
-        report.add_complaint(BAD_UNICODE, s)
+    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
     #
     if re.search(r";", v):
         report.add_complaint(

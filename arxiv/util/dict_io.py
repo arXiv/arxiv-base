@@ -11,6 +11,7 @@ import json
 from ruamel.yaml import YAML, MappingNode, ScalarNode
 from ruamel.yaml.representer import RoundTripRepresenter
 
+
 #
 # ruamel.yaml to represent the OrderedDict correctly
 #
@@ -25,9 +26,9 @@ def _repr_str(dumper: RoundTripRepresenter, data: str) -> ScalarNode:
     Returns:
         ScalarNode
     """
-    if '\n' in data:
-        return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
-    return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+    if "\n" in data:
+        return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data)
 
 
 def _repr_ordered_dict(dumper: RoundTripRepresenter, data: OrderedDict) -> MappingNode:
@@ -40,7 +41,7 @@ def _repr_ordered_dict(dumper: RoundTripRepresenter, data: OrderedDict) -> Mappi
     Returns:
         MappingNode: mapped representation
     """
-    return dumper.represent_mapping('tag:yaml.org,2002:map', dict(data))
+    return dumper.represent_mapping("tag:yaml.org,2002:map", dict(data))
 
 
 def from_yaml_to_dict(filename: str) -> dict:
@@ -52,7 +53,7 @@ def from_yaml_to_dict(filename: str) -> dict:
     Returns: dict object
 
     """
-    with open(filename, encoding='utf-8') as yamlfile:
+    with open(filename, encoding="utf-8") as yamlfile:
         yaml = YAML()
         return yaml.load(yamlfile)
 
@@ -67,7 +68,7 @@ def from_json_to_dict(filename: str) -> dict:
     Returns: dict object
 
     """
-    with open(filename, encoding='utf-8') as jsonfile:
+    with open(filename, encoding="utf-8") as jsonfile:
         return json.load(jsonfile)
 
 

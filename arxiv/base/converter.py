@@ -14,7 +14,7 @@ class ArXivConverter(BaseConverter):
         try:
             return identifier.parse_arxiv_id(value)
         except ValueError as ex:
-            raise ValidationError('Not a valid arXiv ID') from ex
+            raise ValidationError("Not a valid arXiv ID") from ex
 
     def to_url(self, value: str) -> str:
         """Cast Python rep (str) to URL path part."""

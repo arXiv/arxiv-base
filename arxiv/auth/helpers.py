@@ -12,41 +12,49 @@ from arxiv.base.globals import get_application_config
 from arxiv.taxonomy.definitions import CATEGORIES
 
 
-def generate_token(user_id: str, email: str, username: str,
-                   first_name: str = 'Jane', last_name: str = 'Doe',
-                   suffix_name: str = 'IV',
-                   affiliation: str = 'Cornell University',
-                   rank: int = 3,
-                   country: str = 'us',
-                   default_category: domain.Category = CATEGORIES['astro-ph.GA'],
-                   submission_groups: str = 'grp_physics',
-                   scope: List[domain.Scope] = [],
-                   verified: bool = False,
-                   jwt_secret: Optional[str] = None) -> str:
+def generate_token(
+    user_id: str,
+    email: str,
+    username: str,
+    first_name: str = "Jane",
+    last_name: str = "Doe",
+    suffix_name: str = "IV",
+    affiliation: str = "Cornell University",
+    rank: int = 3,
+    country: str = "us",
+    default_category: domain.Category = CATEGORIES["astro-ph.GA"],
+    submission_groups: str = "grp_physics",
+    scope: List[domain.Scope] = [],
+    verified: bool = False,
+    jwt_secret: Optional[str] = None,
+) -> str:
     """Generate an auth token for dev/testing purposes."""
     # Specify the validity period for the session.
-    start = datetime.now(tz=timezone('US/Eastern'))
-    end = start + timedelta(seconds=36000)   # Make this as long as you want.
+    start = datetime.now(tz=timezone("US/Eastern"))
+    end = start + timedelta(seconds=36000)  # Make this as long as you want.
 
     # Create a user
     session = domain.Session(
         session_id=str(uuid.uuid4()),
-        start_time=start, end_time=end,
+        start_time=start,
+        end_time=end,
         user=domain.User(
             user_id=user_id,
             email=email,
             username=username,
-            name=domain.UserFullName(forename=first_name, surname=last_name, suffix=suffix_name),
+            name=domain.UserFullName(
+                forename=first_name, surname=last_name, suffix=suffix_name
+            ),
             profile=domain.UserProfile(
                 affiliation=affiliation,
                 rank=int(rank),
                 country=country,
                 default_category=default_category,
-                submission_groups=submission_groups.split(',')
+                submission_groups=submission_groups.split(","),
             ),
-            verified=verified
+            verified=verified,
         ),
-        authorizations=domain.Authorizations(scopes=scope)
+        authorizations=domain.Authorizations(scopes=scope),
     )
-    token = tokens.encode(session, jwt_secret or get_application_config()['JWT_SECRET'])
+    token = tokens.encode(session, jwt_secret or get_application_config()["JWT_SECRET"])
     return token

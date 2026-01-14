@@ -22,6 +22,7 @@ Intended for use in an application factory. For example:
       app.register_blueprint(routes.blueprint)    # Your blueprint.
    return app
 """
+
 import types
 import logging
 from typing import Optional, Any, Dict
@@ -45,28 +46,30 @@ class Base(object):
     def init_app(self, app: Flask) -> None:
         """Create and register the base UI blueprint."""
         # Attach the arXiv identifier converter for URLs with IDs.
-        app.url_map.converters['arxiv'] = ArXivConverter
+        app.url_map.converters["arxiv"] = ArXivConverter
 
         # Set the static url path.
         app_version = app.config.get("APP_VERSION", "null")
-        app_static_path = f'/static/{app.name}/{app_version}'
+        app_static_path = f"/static/{app.name}/{app_version}"
         app.static_url_path = app_static_path
 
         # We also need to update the app's url_map, since that's how url_for()
         # builds URLs.
         # Remove the rule from the url_map.
-        for rule in app.url_map.iter_rules('static'):
+        for rule in app.url_map.iter_rules("static"):
             app.url_map._rules.remove(rule)
         # Werkzeug maintains this for faster lookup; we need to clear it, too.
-        app.url_map._rules_by_endpoint['static'] = []
+        app.url_map._rules_by_endpoint["static"] = []
         # Need to clear flask endpoint tools
-        del app.view_functions['static']
+        del app.view_functions["static"]
         # Add the updated rule.
-        app.add_url_rule(f'{app.static_url_path}/<path:filename>',
-                         endpoint='static',
-                         view_func=app.send_static_file)
+        app.add_url_rule(
+            f"{app.static_url_path}/<path:filename>",
+            endpoint="static",
+            view_func=app.send_static_file,
+        )
 
-        base_static_url_path = f'/static/base/{base_config.BASE_VERSION}'
+        base_static_url_path = f"/static/base/{base_config.BASE_VERSION}"
 
         # In some cases, we want an app to handle all of its static files, e.g.
         # when deploying in a development environment. Setting the
@@ -74,9 +77,9 @@ class Base(object):
         # ``/{RELATIVE_STATIC_PATHS}`` to be prepended to the static paths for
         # base assets. This should have no impact on static paths for
         # blueprints.
-        if app.config.get('RELATIVE_STATIC_PATHS'):
-            prefix = app.config.get('RELATIVE_STATIC_PREFIX', '').strip('/')
-            base_static_url_path = f'/{prefix}{base_static_url_path}'
+        if app.config.get("RELATIVE_STATIC_PATHS"):
+            prefix = app.config.get("RELATIVE_STATIC_PREFIX", "").strip("/")
+            base_static_url_path = f"/{prefix}{base_static_url_path}"
 
         # The base blueprint attaches static assets and templates. These are
         # used by many different apps.
@@ -85,11 +88,11 @@ class Base(object):
         # apps can run slightly different versions of this package without
         # clobbering each other.
         blueprint = Blueprint(
-            'base',
+            "base",
             __name__,
-            template_folder='templates',
-            static_folder='static',
-            static_url_path=base_static_url_path
+            template_folder="templates",
+            static_folder="static",
+            static_url_path=base_static_url_path,
         )
         app.register_blueprint(blueprint)
 
@@ -104,13 +107,14 @@ class Base(object):
         # Blueprint.register() is called, we swap out the app's
         # register_blueprint() method for a closure (below) that alters the
         # static URL path.
-        def register_blueprint(self: Flask, blueprint: Blueprint,
-                               **options: Any) -> None:
-            blueprint.static_url_path = f'{app_static_path}/{blueprint.name}'
+        def register_blueprint(
+            self: Flask, blueprint: Blueprint, **options: Any
+        ) -> None:
+            blueprint.static_url_path = f"{app_static_path}/{blueprint.name}"
             self._register_blueprint(blueprint, **options)
 
         app._register_blueprint = app.register_blueprint
-        app.register_blueprint = types.MethodType(register_blueprint, app)    # type: ignore
+        app.register_blueprint = types.MethodType(register_blueprint, app)  # type: ignore
 
         # Register base exception handlers.
         for error, handler in exceptions.get_handlers():
@@ -124,7 +128,7 @@ class Base(object):
         context_processors.register_context_processors(app)
 
         @app.teardown_appcontext
-        def remove_scoped_session (response_or_exc: BaseException | None) -> None:
+        def remove_scoped_session(response_or_exc: BaseException | None) -> None:
             """Cleans up the DB session.
 
             Will rollback any uncomitted transactions (via Session.remove()

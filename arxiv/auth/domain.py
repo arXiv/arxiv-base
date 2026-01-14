@@ -1,6 +1,5 @@
 """Defines user concepts for use in arXiv services."""
 
-
 from typing import Any, Optional, List, NamedTuple
 from collections.abc import Iterable
 
@@ -12,13 +11,13 @@ from arxiv.taxonomy.category import Category
 from arxiv.taxonomy import definitions
 from arxiv.db.models import Demographic
 
-EASTERN = timezone('US/Eastern')
+EASTERN = timezone("US/Eastern")
 
-STAFF = ('1', 'Staff')
-PROFESSOR = ('2', 'Professor')
-POST_DOC = ('3', 'Post doc')
-GRAD_STUDENT = ('4', 'Grad student')
-OTHER = ('5', 'Other')
+STAFF = ("1", "Staff")
+PROFESSOR = ("2", "Professor")
+POST_DOC = ("3", "Post doc")
+GRAD_STUDENT = ("4", "Grad student")
+OTHER = ("5", "Other")
 RANKS = [STAFF, PROFESSOR, POST_DOC, GRAD_STUDENT, OTHER]
 
 
@@ -26,9 +25,11 @@ def _check_category(data: Any) -> Category:
     if isinstance(data, Category):
         return data
     if not isinstance(data, str):
-        raise ValidationError(f"object of type {type(data)} cannnot be used as a Category", Category)
+        raise ValidationError(
+            f"object of type {type(data)} cannnot be used as a Category", Category
+        )
     cat = Category(data)
-    cat.name # possible rasie value error on non-existance
+    cat.name  # possible rasie value error on non-existance
     return cat
 
 
@@ -66,7 +67,7 @@ class UserProfile(BaseModel):
     #     """Checks if `data` is a category."""
     #     return _check_category(data)
 
-    homepage_url: str = ''
+    homepage_url: str = ""
     """User's homepage or external profile URL."""
 
     remember_me: bool = True
@@ -88,8 +89,8 @@ class UserProfile(BaseModel):
         """The subject of the default category."""
         if self.default_category is not None:
             subject: str
-            if '.' in self.default_category.id:
-                subject = self.default_category.id.split('.', 1)[1]
+            if "." in self.default_category.id:
+                subject = self.default_category.id.split(".", 1)[1]
             else:
                 subject = self.default_category.id
             return subject
@@ -98,17 +99,16 @@ class UserProfile(BaseModel):
     @property
     def groups_display(self) -> str:
         """Display-ready representation of active groups for this profile."""
-        return ", ".join([
-            definitions.GROUPS[group]['name']
-            for group in self.submission_groups
-        ])
-    
+        return ", ".join(
+            [definitions.GROUPS[group]["name"] for group in self.submission_groups]
+        )
+
     @staticmethod
-    def from_orm (model: Demographic) -> 'UserProfile':
+    def from_orm(model: Demographic) -> "UserProfile":
         if model.subject_class:
-            category = definitions.CATEGORIES[f'{model.archive}.{model.subject_class}']
+            category = definitions.CATEGORIES[f"{model.archive}.{model.subject_class}"]
         elif model.archive:
-            category = definitions.CATEGORIES[f'{model.archive}']
+            category = definitions.CATEGORIES[f"{model.archive}"]
         else:
             category = None
 
@@ -151,31 +151,31 @@ class Scope(str):
     @property
     def parts(self) -> str:
         """Get parts of the Scope."""
-        parts = self.split(':')
+        parts = self.split(":")
         parts = parts + [None] * (3 - len(parts))
         return parts
 
-    def for_resource(self, resource_id: str) -> 'Scope':
+    def for_resource(self, resource_id: str) -> "Scope":
         """Create a copy of this scope with a specific resource."""
         return Scope(domain=self.domain, action=self.action, resource=resource_id)
 
-    def as_global(self) -> 'Scope':
+    def as_global(self) -> "Scope":
         """Create a copy of this scope with a global resource."""
-        return self.for_resource('*')
+        return self.for_resource("*")
 
     @classmethod
     def from_parts(cls, domain, action=None, resource=None):
         """Create a scope string from parts."""
-        return ":".join([o for o in [domain,action,resource] if o is not None])
+        return ":".join([o for o in [domain, action, resource] if o is not None])
 
     @classmethod
     def to_parts(cls, scopestr):
         """Split a scop string to parts."""
-        parts = scopestr.split(':')
+        parts = scopestr.split(":")
         return parts + [None] * (3 - len(parts))
 
     @classmethod
-    def from_str(cls, scopestr:str) -> "Scope":
+    def from_str(cls, scopestr: str) -> "Scope":
         """Make a Scope from a string."""
         parts = cls.to_parts(scopestr)
         return cls(domain=parts[0], action=parts[1], resource=parts[2])
@@ -192,20 +192,17 @@ class Authorizations(BaseModel):
     scopes: List[str] = []
     """Authorized :class:`.scope`s. See also :mod:`arxiv.users.auth.scopes`."""
 
-
     @classmethod
     def before_init(cls, data: dict) -> None:
-        if 'scopes' in data:
-            if type(data['scopes']) is str:
-                data['scopes'] = [
-                    Scope(*scope.split(':')) for scope
-                    in data['scopes'].split()
+        if "scopes" in data:
+            if type(data["scopes"]) is str:
+                data["scopes"] = [
+                    Scope(*scope.split(":")) for scope in data["scopes"].split()
                 ]
-            elif type(data['scopes']) is list:
-                data['scopes'] = [
-                    Scope(**scope) if type(scope) is dict
-                    else Scope(*scope.split(':'))
-                    for scope in data['scopes']
+            elif type(data["scopes"]) is list:
+                data["scopes"] = [
+                    Scope(**scope) if type(scope) is dict else Scope(*scope.split(":"))
+                    for scope in data["scopes"]
                 ]
 
 
@@ -218,7 +215,7 @@ class UserFullName(BaseModel):
     surname: str
     """Last name or family name."""
 
-    suffix: Optional[str] = ''
+    suffix: Optional[str] = ""
     """Any title or qualifier used as a suffix/postfix."""
 
 
@@ -321,15 +318,15 @@ class Session(BaseModel):
 
     def is_authorized(self, scope: Scope, resource: str) -> bool:
         """Check whether this session is authorized for a specific resource."""
-        return (self.authorizations is not None and (
-                scope.as_global() in self.authorizations.scopes
-                or scope.for_resource(resource) in self.authorizations.scopes))
+        return self.authorizations is not None and (
+            scope.as_global() in self.authorizations.scopes
+            or scope.for_resource(resource) in self.authorizations.scopes
+        )
 
     @property
     def expired(self) -> bool:
         """Expired if the current time is later than :attr:`.end_time`."""
-        return bool(self.end_time is not None
-                    and datetime.now(tz=UTC) >= self.end_time)
+        return bool(self.end_time is not None and datetime.now(tz=UTC) >= self.end_time)
 
     @property
     def expires(self) -> Optional[int]:
@@ -347,10 +344,11 @@ class Session(BaseModel):
         """Creates a json dict with the datetimes converted to ISO datetime strs."""
         out = self.dict()
         if self.start_time:
-            out['start_time'] = self.start_time.isoformat()
+            out["start_time"] = self.start_time.isoformat()
         if self.end_time:
-            out['end_time'] = self.end_time.isoformat()
+            out["end_time"] = self.end_time.isoformat()
         return out
+
 
 def session_from_dict(data: dict) -> Session:
     """Create a Session from a dict."""

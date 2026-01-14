@@ -58,9 +58,9 @@ def unpack(cookie: str) -> Tuple[str, str, str, datetime, datetime, str]:
         Raised if the cookie is detectably malformed or tampered with.
 
     """
-    parts = cookie.split(':')
+    parts = cookie.split(":")
     if len(parts) < 5:
-        raise InvalidCookie('Malformed cookie')
+        raise InvalidCookie("Malformed cookie")
 
     session_id = parts[0]
     user_id = parts[1]
@@ -71,16 +71,17 @@ def unpack(cookie: str) -> Tuple[str, str, str, datetime, datetime, str]:
     try:
         expected = pack(session_id, user_id, ip, issued_at, capabilities)
     except Exception as e:
-        raise InvalidCookie('Invalid session cookie; problem while repacking') from e
+        raise InvalidCookie("Invalid session cookie; problem while repacking") from e
 
     if expected == cookie:
         return session_id, user_id, ip, issued_at, expires_at, capabilities
     else:
-        raise InvalidCookie('Invalid session cookie; not as expected')
+        raise InvalidCookie("Invalid session cookie; not as expected")
 
 
-def pack(session_id: str, user_id: str, ip: str, issued_at: datetime,
-         capabilities: str) -> str:
+def pack(
+    session_id: str, user_id: str, ip: str, issued_at: datetime, capabilities: str
+) -> str:
     """
     Generate a value for the classic session cookie.
 
@@ -104,14 +105,15 @@ def pack(session_id: str, user_id: str, ip: str, issued_at: datetime,
 
     """
     session_hash = util.get_session_hash()
-    value = ':'.join(map(str, [session_id, user_id, ip, util.epoch(issued_at),
-                               capabilities]))
-    to_sign = f'{value}-{session_hash}'.encode('utf-8')
+    value = ":".join(
+        map(str, [session_id, user_id, ip, util.epoch(issued_at), capabilities])
+    )
+    to_sign = f"{value}-{session_hash}".encode("utf-8")
     cookie_hash = b64encode(hashlib.sha1(to_sign).digest())
-    return value + ':' + cookie_hash.decode('utf-8')[:-1]
+    return value + ":" + cookie_hash.decode("utf-8")[:-1]
 
 
-def get_cookies(request, cookie_name:str) -> List[str]:
+def get_cookies(request, cookie_name: str) -> List[str]:
     """Gets list of legacy cookies.
 
     Duplicate cookies occur due to the browser sending both the
@@ -130,7 +132,7 @@ def get_cookies(request, cookie_name:str) -> List[str]:
     # single value per key. This isn't really up to speed with RFC 6265.
     # Luckily we can just pass in an alternate struct to parse_cookie()
     # that can cope with multiple values.
-    raw_cookie = request.environ.get('HTTP_COOKIE', None)
+    raw_cookie = request.environ.get("HTTP_COOKIE", None)
     if raw_cookie is None:
         return []
     cookies = parse_cookie(raw_cookie, cls=MultiDict)

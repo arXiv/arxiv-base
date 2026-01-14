@@ -6,10 +6,12 @@ a REST endpoint and sending to BigTable.
 
 A docker file for this is at ./deploy/Dockerfile-fastlylogingest.
 """
+
 import math
 from collections import deque
 from time import perf_counter
 from typing import Optional
+
 
 class Rate:
     """Class to record the rate of events."""
@@ -40,11 +42,10 @@ class Rate:
 
     def rate_msg(self):
         """Returns a rate message."""
-        self.event(quantity=0) # catch up on any missing bins
+        self.event(quantity=0)  # catch up on any missing bins
         qsize = len(self.fifo)
         if qsize == 0:
             return f"Zero {self.noun} happened"
         ave_per_bin = sum(self.fifo) / qsize
         ave_per_sec = ave_per_bin / self.bin_sec
         return f"Rate: {ave_per_sec:.2f} {self.noun}per sec over last {self.window} sec"
-

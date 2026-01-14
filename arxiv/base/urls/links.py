@@ -35,6 +35,7 @@ callbacks for each kind of link.
 Updated 24 Sep 2024: TLDs is just 2 or more letters.
 
 """
+
 from typing import (
     List,
     Pattern,
@@ -113,7 +114,7 @@ IP_ADDRESS = (
 )
 """Regex to match an IP address."""
 
-TLDS = "[a-z][a-z]+"     # TLDs are out of control. Just match on two or more alphabetic characters.
+TLDS = "[a-z][a-z]+"  # TLDs are out of control. Just match on two or more alphabetic characters.
 PROTOCOLS = "|".join(bleach.linkifier.html5lib_shim.allowed_protocols)
 URL = re.compile(
     rf"""(?:{FTP.pattern})|

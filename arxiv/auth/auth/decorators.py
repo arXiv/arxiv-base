@@ -85,18 +85,20 @@ import logging
 
 from .. import domain
 
-INVALID_TOKEN = {'reason': 'Invalid authorization token'}
-INVALID_SCOPE = {'reason': 'Token not authorized for this action'}
+INVALID_TOKEN = {"reason": "Invalid authorization token"}
+INVALID_SCOPE = {"reason": "Token not authorized for this action"}
 
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
 
-def scoped(required: Optional[domain.Scope] = None,
-           resource: Optional[Callable] = None,
-           authorizer: Optional[Callable] = None,
-           unauthorized: Optional[Callable] = None) -> Callable:
+def scoped(
+    required: Optional[domain.Scope] = None,
+    resource: Optional[Callable] = None,
+    authorizer: Optional[Callable] = None,
+    unauthorized: Optional[Callable] = None,
+) -> Callable:
     """
     Generate a decorator to enforce authorization requirements.
 
@@ -141,6 +143,7 @@ def scoped(required: Optional[domain.Scope] = None,
 
     def protector(func: Callable) -> Callable:
         """Decorator that provides scope enforcement."""
+
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """
@@ -157,29 +160,33 @@ def scoped(required: Optional[domain.Scope] = None,
                 provided authorizer returns ``False``.
 
             """
-            if hasattr(request, 'auth'):
+            if hasattr(request, "auth"):
                 session = request.auth
-            elif hasattr(request, 'session'):
+            elif hasattr(request, "session"):
                 session = request.session
             else:
-                raise Unauthorized('No active session on request')
+                raise Unauthorized("No active session on request")
             scopes: List[domain.Scope] = []
             authorized: bool = False
-            logger.debug('Required: %s, authorizer: %s, unauthorized: %s',
-                         required, authorizer, unauthorized)
+            logger.debug(
+                "Required: %s, authorizer: %s, unauthorized: %s",
+                required,
+                authorizer,
+                unauthorized,
+            )
             # Use of the decorator implies that an auth session ought to be
             # present. So we'll complain here if it's not.
             if not session or not (session.user or session.client):
-                logger.debug('No valid session; aborting')
+                logger.debug("No valid session; aborting")
                 if unauthorized is not None:
                     response = unauthorized(*args, **kwargs)
                     if response is not None:
                         return response
-                raise Unauthorized('Not a valid session')
+                raise Unauthorized("Not a valid session")
 
             if session.authorizations is not None:
                 scopes = session.authorizations.scopes
-                logger.debug('session has scopes: %s', scopes)
+                logger.debug("session has scopes: %s", scopes)
 
             # If a required scope is provided, we first check to see whether
             # the session globally or explicitly authorizes the request. We
@@ -190,7 +197,7 @@ def scoped(required: Optional[domain.Scope] = None,
                 # perhaps moderators (e.g. view submission content).
                 # For example: `submission:read:*`.
                 if required.as_global() in scopes:
-                    logger.debug('Authorized with global scope')
+                    logger.debug("Authorized with global scope")
                     authorized = True
 
                 # A resource-specific scope may be granted at the auth layer.
@@ -198,51 +205,53 @@ def scoped(required: Optional[domain.Scope] = None,
                 # specific resource for a specific role. This kind of
                 # authorization is only supported if the service provides a
                 # ``resource()`` callback to get the resource identifier.
-                elif (resource is not None
-                      and (
-                        required.for_resource(str(resource(*args, **kwargs)))
-                        in scopes)):
-                    logger.debug('Authorized by specific resource')
+                elif resource is not None and (
+                    required.for_resource(str(resource(*args, **kwargs))) in scopes
+                ):
+                    logger.debug("Authorized by specific resource")
                     authorized = True
 
                 # If both the global and resource-specific scope authorization
                 # fail, then we look for the general scope in the session.
                 elif required in scopes:
-                    logger.debug('Required scope is present')
+                    logger.debug("Required scope is present")
                     # If an authorizer callback is provided by the service,
                     # then we will enforce whatever it returns.
                     if authorizer:
                         authorized = authorizer(session, *args, **kwargs)
-                        logger.debug('Authorizer func returned %s', authorized)
+                        logger.debug("Authorizer func returned %s", authorized)
                     # If no authorizer callback is provided, it is implied that
                     # the general scope is sufficient to authorize the request.
                     elif authorizer is None:
-                        logger.debug('No authorizer func provided')
+                        logger.debug("No authorizer func provided")
                         authorized = True
                 # The required scope is not present. There is nothing left to
                 # check.
                 else:
-                    logger.debug('Required scope is not present')
+                    logger.debug("Required scope is not present")
                     authorized = False
 
             elif required is None and authorizer is None:
-                logger.debug('No scope required, no authorizer function;'
-                             ' request is authorized.')
+                logger.debug(
+                    "No scope required, no authorizer function; request is authorized."
+                )
                 authorized = True
 
             # If a specific scope is not required, we rely entirely on the
             # authorizer callback.
             elif authorizer is not None:
-                logger.debug('Calling authorizer callback')
+                logger.debug("Calling authorizer callback")
                 authorized = authorizer(session, *args, **kwargs)
             else:
-                logger.debug('No authorization path available')
+                logger.debug("No authorization path available")
 
             if not authorized:
-                logger.debug('Session is not authorized')
-                raise Forbidden('Access denied')
+                logger.debug("Session is not authorized")
+                raise Forbidden("Access denied")
 
-            logger.debug('Request is authorized, proceeding')
+            logger.debug("Request is authorized, proceeding")
             return func(*args, **kwargs)
+
         return wrapper
+
     return protector
