@@ -53,7 +53,7 @@ class UserProfile(BaseModel):
     Items should be one of :ref:`arxiv.taxonomy.definitions.GROUPS`.
     """
 
-    default_category: Optional[Category]
+    default_category: Optional[Category] = None
     """
     Default submission category.
 

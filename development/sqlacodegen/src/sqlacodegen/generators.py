@@ -534,6 +534,7 @@ class TablesGenerator(CodeGenerator):
             set(i.columns) == {column} and uses_default_name(i)
             for i in column.table.indexes
         ) or column.index
+        is_autoincrement = isinstance(column.autoincrement, bool) and column.autoincrement
 
         if show_name:
             args.append(repr(column.name))
@@ -563,6 +564,8 @@ class TablesGenerator(CodeGenerator):
             column.index = True
             kwarg.append("index")
             kwargs["index"] = True
+        if is_autoincrement:
+            kwargs["autoincrement"] = True
 
         if isinstance(column.server_default, DefaultClause):
             kwargs["server_default"] = render_callable(

@@ -11,7 +11,8 @@ from jwt.algorithms import RSAAlgorithm, RSAPublicKey
 import logging
 from arxiv.base import logging as arxiv_logging
 
-from ..user_claims import ArxivUserClaims
+from ..user_claims import ArxivUserClaims, ArxivUserClaimsModel
+
 
 class ArxivOidcIdpClient:
     """arXiv OpenID Connect IdP client
@@ -122,8 +123,8 @@ class ArxivOidcIdpClient:
 
     def logout_url(self, user: ArxivUserClaims, redirect_url: str | None = None) -> str:
         url = self._logout_redirect_url if redirect_url is None else redirect_url
-        post_logout = f"&post_logout_redirect_uri={urllib.parse.quote(url)}" if url else ""
-        return self.oidc + f'/logout?id_token_hint={user.id_token}{post_logout}'
+        post_logout = f"post_logout_redirect_uri={urllib.parse.quote(url)}" if url else ""
+        return self.oidc + f'/logout?{post_logout}'
 
     @property
     def login_url(self) -> str:
@@ -197,6 +198,7 @@ class ArxivOidcIdpClient:
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
             return token_response.json()
+
         except requests.exceptions.RequestException:
             return None
 
@@ -253,7 +255,8 @@ class ArxivOidcIdpClient:
 
     def to_arxiv_user_claims(self,
                              idp_token: Optional[dict] = None,
-                             kc_cliams: Optional[dict] = None) -> ArxivUserClaims:
+                             kc_cliams: Optional[dict] = None,
+                             client_ipv4: Optional[str] = None) -> ArxivUserClaims:
         """
         Given the IdP's access token claims, make Arxiv user claims.
 
@@ -269,15 +272,21 @@ class ArxivOidcIdpClient:
             This is the contents of (unpacked) access token. IdP signs it with the private
             key, and the value is verified using the published public cert.
 
+        client_ipv4: str | None
+            Client's IPv4 address if available
+
+        NOTE:
+            So this means there are two copies of access token. Unfortunate, but unpacking
+            every time can be costly.
         """
         if idp_token is None:
             idp_token = {}
         if kc_cliams is None:
             kc_cliams = {}
-        claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams)
+        claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams, client_ipv4=client_ipv4)
         return claims
 
-    def from_code_to_user_claims(self, code: str) -> ArxivUserClaims | None:
+    def from_code_to_user_claims(self, code: str, client_ipv4: Optional[str] = None) -> ArxivUserClaims | None:
         """
         Put it all together
 
@@ -289,6 +298,8 @@ class ArxivOidcIdpClient:
         ----------
         code : str
             The code you get in the /callback
+        client_ipv4 : str  | None
+            This is the client IP address of the IdP
 
         Returns
         -------
@@ -313,15 +324,19 @@ class ArxivOidcIdpClient:
         if not idp_claims:
             return None
 
-        return self.to_arxiv_user_claims(idp_token, idp_claims)
+        return self.to_arxiv_user_claims(idp_token, idp_claims, client_ipv4)
 
-    def logout_user(self, user: ArxivUserClaims) -> bool:
+    def logout_user(self, user: ArxivUserClaims, refresh_token: Optional[str] = None, redirect_url: Optional[str] = None) -> bool:
         """With user's access token, logout user.
 
         Parameters
         ----------
         user : ArxivUserClaims
             user claims
+        refresh_token : str
+            Keycloak Refresh Token - it doesn't work without it
+        redirect_url : str
+            redirect url
 
         Returns
         -------
@@ -330,47 +345,37 @@ class ArxivOidcIdpClient:
         """
         try:
             header = {
-                "Authorization": f"Bearer {user.access_token}",
                 "Content-Type": "application/x-www-form-urlencoded"
             }
+            data = {
+                "client_id": self.client_id,
+                "refresh_token": str(refresh_token),
+            }
+            if self.client_secret:
+                data["client_secret"] = self.client_secret
+
         except KeyError:
-            return None
+            return False
 
-        data = {
-            "client_id": self.client_id,
-            "id_token_hint": user.id_token,
-        }
-        if  self.client_secret:
-            data["client_secret"] = self.client_secret
-
-        url = self.logout_url(user)
+        # Use revoke endpoint instead of logout endpoint
+        url = self.logout_url(user, redirect_url=redirect_url)
         log_extra = {'header': header, 'body': data}
-        self._logger.debug('Logout request %s', url, extra=log_extra)
+        self._logger.debug('Token revocation request %s', url, extra=log_extra)
+
         try:
             response = requests.post(url, headers=header, data=data, timeout=30, verify=self._ssl_cert_verify)
             if response.status_code == 200:
-                # If Keycloak is misconfigured, this does not log out.
-                # Turn front channel logout off in the logout settings of the client."
-                self._logger.info("Uesr %s logged out. - 200", user.user_id)
+                self._logger.info("User %s tokens revoked.", user.user_id)
                 return True
-
-            if response.status_code == 204:
-                self._logger.info("Uesr %s logged out.", user.user_id)
-                return True
-
-            if response.status_code == 400:
-                self._logger.info("Uesr %s did not log. But, it's likely not logged in", user.user_id)
-                return True
-
+            self._logger.warning(f"User %s tokens is not revoked. {response!r}", user.user_id)
             return False
 
         except requests.exceptions.RequestException as exc:
-            self._logger.error("Logout failed to connect to %s - %s", url, str(exc), exc_info=True,
+            self._logger.error("Token revocation failed to connect to %s - %s", url, str(exc), exc_info=True,
                                extra=log_extra)
             return False
-
         except Exception as exc:
-            self._logger.error("Logout failed to connect to %s - %s", url, str(exc), exc_info=True,
+            self._logger.error("Token revocation failed to connect to %s - %s", url, str(exc), exc_info=True,
                                extra=log_extra)
             return False
 

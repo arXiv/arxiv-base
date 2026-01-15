@@ -25,7 +25,7 @@ def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None):
     """purges all keys needed for an unspecified change to a paper
     clears everything related to the paper, as well as any list and year pages it is on
     old_cats: include this string if the paper undergoes a category change to also purge pages the paper may have been removed from (or new year pages it is added to)
-    raises an IdentifierException if the paper_id is invalid, and KeyError if the category string contains invalid categories
+    raises an IdentifierException if the paper_id is invalid, and KeyError if the category string contains invalid categories, and a fastly.ApiException if the purge request fails
     """
     arxiv_id = Identifier(paper_id)
     keys=_purge_category_change(arxiv_id, old_cats)
@@ -41,16 +41,18 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
     meta=aliased(Metadata)
     up=aliased(Updates)
 
-    result=(
-        Session.query(
-        meta.abs_categories, 
-        func.max(up.date)
+    with Session() as session:
+        result=(
+            session.query(
+            meta.abs_categories, 
+            func.max(up.date)
+            )
+            .outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly")) #left join
+            .filter(meta.paper_id==arxiv_id.id)
+            .filter(meta.is_current==1)
+            .first()
         )
-        .outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly")) #left join
-        .filter(meta.paper_id==arxiv_id.id)
-        .filter(meta.is_current==1)
-        .first()
-    )
+        
     new_cats: str=result[0]
     recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
 
@@ -124,12 +126,14 @@ def purge_fastly_keys(key:Union[str, List[str]], service_name: Optional[str]="ar
                 logger.info(f"Fastly Purge service: {service_name}, key: {key}, status: {api_response.get('status')}, id: {api_response.get('id')}")
             except fastly.ApiException as e:
                 logger.error(f"Exception purging fastly key(s): {e} service: {service_name}, key: {key}")
+                raise
         else:
             try:
                 _purge_multiple_keys(key, SERVICE_IDS[service_name], api_instance, soft_purge)
                 logger.info(f"Fastly bulk purge complete service: {service_name}, keys ({len(key)}): {key}")
             except fastly.ApiException as e:
                 logger.error(f"Exception purging fastly key(s): {e} service: {service_name}, for {len(key)} keys")
+                raise
 
 def _purge_single_key(key:str, service_id: str, api_instance: PurgeApi, soft_purge: bool=False)->Any:
     """purge all pages with a specific key from fastly, fastly will not indicate if the key does not exist"""

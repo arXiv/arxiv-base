@@ -30,16 +30,19 @@ def run_mysql_container(port: int, container_name: str ="mysql-test", db_name: s
     # subprocess.run(["docker", "kill", container_name], check=False)
     subprocess.run(["docker", "rm", container_name], check=False)
 
+    # for mysql mode, don't use ONLY_FULL_GROUP_BY
     argv = [
         "docker", "run", "-d", "--name", container_name,
         "-e", f"MYSQL_ROOT_PASSWORD={root_password}",
         "-e", "MYSQL_USER=testuser",
         "-e", "MYSQL_PASSWORD=testpassword",
         "-e", "MYSQL_DATABASE=" + db_name,
+        "-e", "MYSQL_SQL_MODE=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO",
         "-p", f"{port}:3306",
         mysql_image,
         # Add this for mysql 8 and up to turn off SSL connection
         # "--require_secure_transport=OFF"
+        "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO"
     ]
 
     try:
