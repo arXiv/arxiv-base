@@ -9,6 +9,7 @@ LICENSES = {
     # key is the license URI
     'http://creativecommons.org/licenses/by/4.0/': {
         'label': 'CC BY: Creative Commons Attribution',
+        "short_label": "CC BY 4.0",
         'note': 'This license allows reusers to distribute, remix, adapt, and '
                 'build upon the material in any medium or format, so long as '
                 'attribution is given to the creator. The license allows for '
@@ -19,6 +20,7 @@ LICENSES = {
     'http://creativecommons.org/licenses/by-sa/4.0/': {
         'order': 2,
         'label': 'CC BY-SA: Creative Commons Attribution-ShareAlike',
+        "short_label": "CC BY-SA 4.0",
         'note': 'This license allows reusers to distribute, remix, adapt, and '
                 'build upon the material in any medium or format, so long as '
                 'attribution is given to the creator. The license allows for '
@@ -31,6 +33,7 @@ LICENSES = {
         'order': 3,
         'label': 'CC BY-NC-SA: Creative Commons '
                  'Attribution-Noncommercial-ShareAlike ',
+        "short_label": "CC BY-NC-SA 4.0",
         'note': 'This license allows reusers to distribute, remix, adapt, and '
                 'build upon the material in any medium or format for '
                 'noncommercial purposes only, and only so long as attribution '
@@ -43,6 +46,7 @@ LICENSES = {
         'order': 4,
         'label': 'CC BY-NC-ND: Creative Commons '
                  'Attribution-Noncommercial-NoDerivatives',
+        "short_label": "CC BY-NC-ND 4.0",
         'note': 'This license allows reusers to copy and distribute the '
                 'material in any medium or format in unadapted form only, for '
                 'noncommercial purposes only, and only so long as attribution '
@@ -52,6 +56,7 @@ LICENSES = {
     'http://arxiv.org/licenses/nonexclusive-distrib/1.0/': {
         'label': 'arXiv.org perpetual, non-exclusive license to '
                  'distribute this article',
+        "short_label": "arXiv.org perpetual non-exclusive license",
         'note': 'This license gives limited rights to arXiv to distribute the '
                 'article, and limits re-use of any type from other entities '
                 'or individuals.',
@@ -60,6 +65,7 @@ LICENSES = {
     },
     'http://creativecommons.org/publicdomain/zero/1.0/': {
         'label': 'CC Zero: No Rights Reserved',
+        "short_label": "CC Zero",
         'note': 'CC Zero is a public dedication tool, which allows creators '
                 'to give up their copyright and put their works into the '
                 'worldwide public domain. CC0 allows reusers to distribute, '
@@ -73,11 +79,13 @@ LICENSES = {
         'label': 'Assumed arXiv.org perpetual, non-exclusive license to '
                  'distribute this article for submissions made before '
                  'January 2004',
+        "short_label": "Assumed arXiv.org perpetual non-exclusive license",
         'order': 9,
         'is_current': False,
     },
     'http://creativecommons.org/licenses/by/3.0/': {
         'label': 'Creative Commons Attribution license',
+        "short_label": "CC BY 3.0",
         'order': 10,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-3.0.png'
@@ -85,12 +93,14 @@ LICENSES = {
     'http://creativecommons.org/licenses/by-nc-sa/3.0/': {
         'label': 'Creative Commons Attribution-Noncommercial-ShareAlike '
                  'license',
+        "short_label": "CC BY-NC-SA 3.0",
         'order': 11,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-3.0.png'
     },
     'http://creativecommons.org/licenses/publicdomain/': {
         'label': 'Creative Commons Public Domain Declaration',
+        "short_label": "CC Zero",
         'note': '(Suitable for US government employees, for example)',
         'order': 12,
         'is_current': False,
@@ -192,3 +202,12 @@ class License:
                 self.icon_uri_path = LICENSES[self.effective_uri]['icon_uri']
             if 'label' in LICENSES[self.effective_uri]:
                 self.label = LICENSES[self.effective_uri]['label']
+
+    def get_short_label(self) -> Optional[str]:
+        """Get the short label for the license."""
+        if self.effective_uri in LICENSES:
+            return LICENSES[self.effective_uri].get("short_label",
+                        LICENSES[self.effective_uri].get("label", "No License")
+            )
+        else:
+            return "No License"
