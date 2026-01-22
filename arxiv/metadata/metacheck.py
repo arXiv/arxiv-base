@@ -1,8 +1,16 @@
 import re
 
-from typing import Dict
-from typing import Optional
-from typing import Tuple
+from typing import (
+    Dict,
+    Optional,
+    Protocol,
+    Set,
+    Tuple,
+    TypedDict,
+    runtime_checkable,
+)
+
+from dataclasses import dataclass
 
 from collections import defaultdict
 
@@ -29,59 +37,117 @@ OK = Disposition.OK
 WARN = Disposition.WARN
 HOLD = Disposition.HOLD
 
-CANNOT_BE_EMPTY = Complaint.CANNOT_BE_EMPTY
-TOO_SHORT = Complaint.TOO_SHORT
-TOO_LONG = Complaint.TOO_LONG
-CONTAINS_BAD_STRING = Complaint.CONTAINS_BAD_STRING
-EXCESSIVE_CAPITALIZATION = Complaint.EXCESSIVE_CAPITALIZATION
-UNBALANCED_BRACKETS = Complaint.UNBALANCED_BRACKETS
-BAD_UNICODE = Complaint.BAD_UNICODE
-CONTAINS_LONE_SURNAME = Complaint.CONTAINS_LONE_SURNAME
-CONTAINS_INITIALS = Complaint.CONTAINS_INITIALS
-NO_CAPS_IN_NAME = Complaint.NO_CAPS_IN_NAME
-MUST_CONTAIN_LETTERS = Complaint.MUST_CONTAIN_LETTERS
-MUST_CONTAIN_DIGITS = Complaint.MUST_CONTAIN_DIGITS
-MUST_CONTAIN_YEAR = Complaint.MUST_CONTAIN_YEAR
-MUST_BE_ENGLISH = Complaint.MUST_BE_ENGLISH
-
-
 def complaint2str(complaint: Complaint) -> str:
-    if complaint == CANNOT_BE_EMPTY:
-        return "Cannot be empty"
-    elif complaint == TOO_SHORT:
-        return "Too short"
-    elif complaint == CONTAINS_BAD_STRING:
-        return "Contains bad string"
-    elif complaint == EXCESSIVE_CAPITALIZATION:
-        return "Excessive capitalization"
-    elif complaint == UNBALANCED_BRACKETS:
-        return "Unbalanced brackets"
-    elif complaint == BAD_UNICODE:
-        return "Bad Unicode"
-    elif complaint == CONTAINS_LONE_SURNAME:
+    if complaint == Complaint.CANNOT_BE_EMPTY:
+        return "Cannot be empty."
+    elif complaint == Complaint.TOO_SHORT:
+        return "Text likely too short"
+    elif complaint == Complaint.BEGINS_WITH_TITLE:
+        return "Begins with 'title'."
+    elif complaint == Complaint.BEGINS_WITH_AUTHOR:
+        return "Begins with 'author'."
+    elif complaint == Complaint.BEGINS_WITH_ABSTRACT:
+        return "Begins with 'abstract'."
+    elif complaint == Complaint.CONTAINS_LINEBREAK:
+        return "Contains a line break."
+    elif complaint == Complaint.EXCESSIVE_CAPITALIZATION:
+        return "Likely excessive capitalization"
+    elif complaint == Complaint.BEGINS_WITH_LOWERCASE:
+        return "Begins with a lower case letter."
+    elif complaint == Complaint.CONAINS_TEX:
+        return "Contains TeX."
+    elif complaint == Complaint.UNNECESSARY_ESCAPE:
+        return "Contains unnecessary escape."
+    elif complaint == Complaint.CONTAINS_HTML:
+        return "Contains HTML."
+    elif complaint == Complaint.UNBALANCED_BRACKETS:
+        return "Unbalanced brackets."
+    elif complaint == Complaint.BAD_UNICODE_ENCODING:
+        return "Bad Unicode encoding."
+    elif complaint == Complaint.BAD_CHARACTER:
+        return "Unusual character detected."
+    elif complaint == Complaint.LEADING_WHITESPACE:
+        return "Leading whitespace."
+    elif complaint == Complaint.TRAILING_WHITESPACE:
+        return "Trailing whitespace."
+    elif complaint == Complaint.WHITESPACE_BEFORE_COMMA:
+        return "Whitespace before a comma."
+    elif complaint == Complaint.CONTAINS_ANONYMOUS:
+        return "Contains anonymous or missing author name." # ???
+    elif complaint == Complaint.CONTAINS_CORRESPONDING:
+        return "Contains 'corresponding'."
+    elif complaint == Complaint.CONTAINS_DAGGER:
+        return "Contains a dagger symbol."
+    elif complaint == Complaint.CONTAINS_SEMICOLON:
+        return "Contains semicolon(s) - use ',' or 'and' to separate authors."
+    elif complaint == Complaint.CONTAINS_LONE_SURNAME:
         return "Contains lone surname"
-    elif complaint == CONTAINS_INITIALS:
-        return "Name contains initials"
-    elif complaint == NO_CAPS_IN_NAME:
-        return "No_caps_in_name"
+    # elif complaint == Complaint.CONTAINS_INITIALS:
+    #     return "Name contains initials"
+    elif complaint == Complaint.CONTAINS_AFFILIATION:
+        return "Contains a suffix that may be university affiliation or degree related."
+    elif complaint == Complaint.EXTRA_WHITESPACE:
+        return "Excessive whitespace."
+    elif complaint == Complaint.CONTAINS_CONTROL_CHARS:
+        return "Contains control characters: newlines, tabs, or backspaces."
+    elif complaint == Complaint.CONTAINS_CONTROL_CHARS_ABS:
+        return "Contains control characters: newlines or tabs."
+    # elif complaint == 29
+    #     return "???"
+    elif complaint == Complaint.TRAILING_PUNCTUATION:
+        return "Ends with punctuation."
+    elif complaint == Complaint.CONTAINS_NUMBER:
+        return "Contains a number."
+    elif complaint == Complaint.BAD_TEX_ACCENT:
+        return "Contains TeXism that is not allowed."
+    elif complaint == Complaint.TILDE_AS_HARD_SPACE:
+        return "Tilde as hard space."
+    elif complaint == Complaint.UNNECESSARY_SPACE_IN_PARENS:
+        return "Unnecessary space inside parentheses."
+    elif complaint == Complaint.MUST_BE_ENGLISH:
+        return "Does not appear to be in English."
+    elif complaint == Complaint.EXTRA_WHITESPACE_ABS:
+        return "Paragraphs begin or end with whitespace."
+    elif complaint == Complaint.TOO_LONG:
+        return "Too long."
+    elif complaint == Complaint.MUST_CONTAIN_DIGITS:
+        return "No digits found."
     elif complaint == Complaint.MUST_CONTAIN_LETTERS:
-        return "Must contain some letters"
-    elif complaint == MUST_CONTAIN_DIGITS:
-        return "Must contain some digits"
+        return "No letters found."
+    elif complaint == Complaint.CONTAINS_URL:
+        return "Contains a URL."
+    elif complaint == Complaint.CONTAINS_DOI:
+        return "Contains a DOI."
+    elif complaint == Complaint.CONTAINS_ACCEPTED:
+        return "Contains 'ACCEPTED'."
+    elif complaint == Complaint.CONTAINS_SUBMITTED:
+        return "Contains 'SUBMITTED'."
     elif complaint == Complaint.MUST_CONTAIN_YEAR:
-        return "Must contain a year"
-    elif complaint == MUST_BE_ENGLISH:
-        return "Must be English"
+        return "Missing year."
+    elif complaint == Complaint.CONTAINS_BIBTEX:
+        return "Contains bibtex."
+    elif complaint == Complaint.CONTAINS_DOI2:
+        return "Contains 'DOI'."
+    elif complaint == Complaint.CONTAINS_ARXIV_DOI:
+        return "Contains 'arxiv-doi'."
+    elif complaint == Complaint.BAD_DOI_PREFIX:
+        return "Contains unnecessary prefix."
+    elif complaint == Complaint.INSUFFICIENT_ALPHA:
+        return "Insufficient text."
+    elif complaint == Complaint.LLM_AUTHOR_DETECTED:
+        return "LLM author detected."
+    elif complaint == Complaint.INVALID_DOI:
+        return "Invalid DOI."
     else:
         return "(Unknown issue)"
 
 
 def complaint2disposition(complaint: Complaint) -> Disposition:
-    if complaint == CANNOT_BE_EMPTY:
+    if complaint == Complaint.CANNOT_BE_EMPTY:
         return HOLD
-    elif complaint == MUST_CONTAIN_LETTERS:
+    elif complaint == Complaint.MUST_CONTAIN_LETTERS:
         return HOLD
-    elif complaint == MUST_CONTAIN_DIGITS:
+    elif complaint == Complaint.MUST_CONTAIN_DIGITS:
         return HOLD
     else:
         return WARN
@@ -174,7 +240,7 @@ control_chars_for_abs_re = r"[\u0000-\u0009\u000b-\u001f]+"
 class MetadataCheckReport:
     def __init__(self):
         self.disposition: Disposition = OK
-        self.complaints = set()
+        self.complaints: Set[Complaint] = set()
         # map from complaint to offsets, if available
         self.offsets: Dict[Complaint, list[Tuple[int,int]]] = defaultdict(list)
 
@@ -195,19 +261,13 @@ class MetadataCheckReport:
         return self.disposition
 
     def get_offsets(self):
-        return self.offsets     # ???
+        return self.offsets     # no copy !?
     
-    def get_complaints(self):
+    def get_complaints(self) -> Set[Complaint]:
         return self.complaints
 
 
 ############################################################
-
-# This is the main function
-
-from typing import TypedDict
-from typing import Protocol, runtime_checkable
-from dataclasses import dataclass
 
 @runtime_checkable
 class MetadataProtocol(Protocol):
@@ -246,7 +306,8 @@ class Metadata:      # implements MetadataProtocol
         pass
 
 ############################################################    
-# def check(metadata: Dict[FieldName, str]) -> Dict[FieldName, MetadataCheckReport]:
+# This is the main function
+
 def check(metadata: MetadataProtocol) -> Dict[FieldName, MetadataCheckReport]:
     result = {}
     if metadata.title is not None:
@@ -265,7 +326,8 @@ def check(metadata: MetadataProtocol) -> Dict[FieldName, MetadataCheckReport]:
         result[DOI] = check_doi(metadata.doi)
     if metadata.msc_class is not None:
         result[MSC_CLASS] = check_msc_class(metadata.msc_class)
-    # TODO: acm_class?
+    if metadata.acm_class is not None:
+        result[ACM_CLASS] = check_acm_class(metadata.acm_class)
     return result
 
 
@@ -282,9 +344,7 @@ def looks_like_all_caps(s: str) -> bool:
     else:
         return False
 
-
 ############################################################
-
 
 def long_word_caps(s: str) -> bool:
     """
@@ -308,25 +368,7 @@ def long_word_caps(s: str) -> bool:
 
 
 ############################################################
-
-
-def starts_with_lowercase(s: str) -> bool:
-    """
-    Detect titles which start with a lower case char, eg "bad title"
-    Do nothing smart with "k-means", "eSpeak", or "tugEMM".
-    """
-
-    if len(s) < 1:
-        return False
-    if re.match("[a-z]", s):
-        return True
-    else:
-        return False
-    #
-
-
-############################################################
-
+# TODO: offsets to highlight the problem?
 
 def all_brackets_balanced(s: str) -> bool:
     pending_brackets = []
@@ -334,10 +376,15 @@ def all_brackets_balanced(s: str) -> bool:
         if c == "(":
             pending_brackets.append(")")
         elif c == "[":
-            pending_brackets.append("]")
+            pending_brackets.append("]") # 
         elif c == "{":
             pending_brackets.append("}")
-        elif len(pending_brackets) > 0 and c == pending_brackets[-1]:
+        elif (len(pending_brackets) > 0
+              and (c == pending_brackets[-1]
+                   or (c == ")" and pending_brackets[-1] == "]")
+                   or (c == "]" and pending_brackets[-1] == ")")
+                   )):
+            # Pop one
             pending_brackets = pending_brackets[:-1]
         elif c in ")}]":
             return False
@@ -347,26 +394,62 @@ def all_brackets_balanced(s: str) -> bool:
 # assert( all_brackets_balanced( "(())[({})] [] {}" ) )
 # assert( not all_brackets_balanced( "test ] test" ) )
 
+# assert( all_brackets_balanced( "The open interval [0,1)" ) )
 
-def language_is_not_english(s: str) -> bool:
-    """
-    use gcld3 to detect the "primary" language (abstract only)
-
-    return True only if the primary language appears to be
-    something other than English.
-    """
-    if len(s) < MIN_CHARS_FOR_LID:
-        return False  #
-    # Not very reliable with < 50 chars...
-    lid = gcld3.NNetLanguageIdentifier(MIN_CHARS_FOR_LID, 1000)  # min, max num bytes
-    result = lid.FindLanguage(s)
-    if result.is_reliable and result.language != "en":
-        return True
-    else:
-        return False
 
 
 ############################################################
+
+def add_complaints_matching(regex: str, v: str, complaint: Complaint, report: MetadataCheckReport):
+    for m in re.finditer(regex, v, re.IGNORECASE):
+        report.add_complaint(complaint, (m.start(), m.end()))
+
+def check_bad_whitespace(v: str, report: MetadataCheckReport, for_abs: bool = False):
+    #
+    add_complaints_matching(r"^\s", v, Complaint.LEADING_WHITESPACE, report)
+    add_complaints_matching(r"\s$", v, Complaint.TRAILING_WHITESPACE, report)
+    # Fixable!
+    # Careful: \s matches \n!
+    # Careful: [ \t][ \t] matches beginning and end of strings, too!
+    # Careful: now it's matching the surrounding chars, too!
+    if for_abs:
+        # space followed by newline is still a problem
+        add_complaints_matching(r"\s+\n", v, Complaint.EXTRA_WHITESPACE_ABS, report)
+        # \n \n should not be detected here !?
+        add_complaints_matching(r"[^ \t\n,][ \t][ \t]+[^ \t\n,]", v, Complaint.EXTRA_WHITESPACE, report)
+    else:
+        add_complaints_matching(r"[^ \t,][ \t][ \t]+[^ \t,]", v, Complaint.EXTRA_WHITESPACE, report)    
+    #
+    # Problems: space comma; comma (spaces) comma;
+    # DO NOT fix "comma alpha" (e.g. f(a,b) !)
+    # JHY: these should be "fixable": s/\s*,\s*,\s*/, / and s/\s*,\s*/, / !
+    # add_complaints_matching(r"\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+[a-zA-Z]?|\s*,(\s*,)+", v, Complaint.EXTRA_WHITESPACE, report)
+    add_complaints_matching(r"\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+", v, Complaint.EXTRA_WHITESPACE, report)    
+
+    # Careful: parens can be preceded by letters
+    # also, parens can be followed by whitespace or punctuation
+    # Stop complaining about "O(n)" and "sin(x)"!
+    # add_complaints_matching(r"[a-zA-Z]\(", v, Complaint.BAD_CHARACTER, report)
+    # Also letters, e.g. H2SO4
+    # e.g. Ca10(PO4)6(OH)2 – Hydroxyapatite
+    # add_complaints_matching(r"\)[a-zA-Z]", v, Complaint.BAD_CHARACTER, report)        
+    
+    add_complaints_matching(r"\(\s", v, Complaint.UNNECESSARY_SPACE_IN_PARENS, report)
+    add_complaints_matching(r"\s\)", v, Complaint.UNNECESSARY_SPACE_IN_PARENS, report)
+
+def check_bad_whitespace_for_abs(v: str, report: MetadataCheckReport):
+    check_bad_whitespace(v, report, True)
+    
+def check_starts_with_lowercase(v: str, report: MetadataCheckReport):
+    """
+    Detect fields (especially titles) which start with a lower case char, eg "bad title"
+    TODO: Do nothing smart with "k-means", "eSpeak", or "tugEMM".
+    """
+    # Don't use add_complaints_matching - it is case-insensitive!
+    if re.match(r"^[a-z]", v):
+        report.add_complaint(Complaint.BEGINS_WITH_LOWERCASE, (0, 1))
+    #
+    
 
 HTML_ELEMENTS = [
     "<p[^a-z]",
@@ -387,7 +470,7 @@ HTML_ELEMENTS = [
 ]
 
 
-def contains_html_elements(s: str) -> bool:
+def check_html_elements(v: str, report: MetadataCheckReport):
     """
     Detect common HTML elements:
     <p> <div> <br> <img> <sup> <sub> and <table>
@@ -396,51 +479,39 @@ def contains_html_elements(s: str) -> bool:
     (note that <p> is still banned!)
     """
     for element in HTML_ELEMENTS:
-        if re.search(element, s, re.IGNORECASE):
-            return True
-        #
+        add_complaints_matching(element, v, Complaint.CONTAINS_HTML, report)
     #
-    return False
-
 
 # ) must be allowed
 # *, #, ^, @ are problematic in authors, and detected elsewhere
-ENDS_WITH_PUNCTUATION_RE = re.compile("^.*[!$%^&(_=`:;,.?-]$")
+# ENDS_WITH_PUNCTUATION_RE = re.compile("^.*[!$%^&(_=`:;,.?-]$")
+ENDS_WITH_PUNCTUATION_RE = r"^.*[!$%^&(_=`:;,.?-]$"
 
-
-def ends_with_punctuation(s: str) -> bool:
+def check_ends_with_punctuation(v: str, report: MetadataCheckReport):
     """
     Detect common punctuation which should not appear at the end of the authors list
     """
-    # match = ENDS_WITH_PUNCTUATION_RE.search(s)
-    match = ENDS_WITH_PUNCTUATION_RE.match(s)
-    if match:
-        return match.group(0)
-    else:
-        return None
+    # if not v.endswith("et al."):
+    add_complaints_matching(ENDS_WITH_PUNCTUATION_RE, v, Complaint.TRAILING_PUNCTUATION, report)
 
-def add_complaints_matching(regex: str, v: str, complaint: Complaint, report: MetadataCheckReport):
-    for m in re.finditer(regex, v, re.IGNORECASE):
-        print( "MATCH", regex, m )
-        report.add_complaint(complaint, (m.start(), m.end()))
+def check_language_is_not_english(s: str, report: MetadataCheckReport):
+    """
+    use gcld3 to detect the "primary" language (abstract only)
 
-def check_bad_whitespace(v: str, report):
+    Add a Complaint to report if the primary language appears to be
+    something other than English.
+    """
+    if len(s) < MIN_CHARS_FOR_LID:
+        return                  #
+    # Not very reliable with < 50 chars...
+    lid = gcld3.NNetLanguageIdentifier(MIN_CHARS_FOR_LID, 1000)  # min, max num bytes
+    result = lid.FindLanguage(s)
+    if result.is_reliable and result.language != "en":
+        # No offsets available!
+        report.add_complaint(Complaint.MUST_BE_ENGLISH)
     #
-    add_complaints_matching(r"^\s", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching( r"\s$", v, CONTAINS_BAD_STRING, report)
-    # Careful: \s matches \n!
-    add_complaints_matching(r"[ \t][ \t]", v, CONTAINS_BAD_STRING, report)
-    #
-    # Problems: space comma; comma (spaces) comma; comma alpha
-    # JHY: these should be "fixable": s/\s*,\s*,\s*/, / and s/\s*,\s*/, / !
-    add_complaints_matching(r"\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+[a-zA-Z]?|\s*,(\s*,)*[a-zA-Z]", v, CONTAINS_BAD_STRING, report)
-    # Open parens can be preceded by parens and other things???
-    add_complaints_matching(r"[a-zA-Z]\(", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(r"\(\s", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(r"\s\)", v, CONTAINS_BAD_STRING, report)
-    # Careful: parens can be followed by whitespace or punctuation
-    add_complaints_matching(r"\)[a-zA-Z]", v, CONTAINS_BAD_STRING, report)        
 
+    
 
 ############################################################
 
@@ -448,56 +519,50 @@ def check_bad_whitespace(v: str, report):
 def check_title(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
     if v is None or v == "":
-        report.add_complaint(CANNOT_BE_EMPTY)
+        report.add_complaint(Complaint.CANNOT_BE_EMPTY)
     elif len(v) < MIN_TITLE_LEN:
-        report.add_complaint(TOO_SHORT)
-        # print( "jjj: TITLE TOO SHORT", report.get_complaints() )
+        report.add_complaint(Complaint.TOO_SHORT)
     elif len(v) > MAX_TITLE_LEN:
-        report.add_complaint(TOO_LONG)
+        report.add_complaint(Complaint.TOO_LONG)
     else:
-        # print( "jjj: TITLE NOT TOO SHORT NOR LONG" )
         pass
     #
-    add_complaints_matching(r"^title:?\b", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"^title:?\b", v, Complaint.BEGINS_WITH_TITLE, report)
     #
-    add_complaints_matching(r"\\\\", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"\\\\", v, Complaint.CONTAINS_LINEBREAK, report)
     #
     if looks_like_all_caps(v):
-        report.add_complaint(CONTAINS_BAD_STRING) # "excessive capitalization"
+        report.add_complaint(Complaint.EXCESSIVE_CAPITALIZATION)
     elif long_word_caps(v):
-        report.add_complaint(CONTAINS_BAD_STRING) # "excessive capitalization"
+        report.add_complaint(Complaint.EXCESSIVE_CAPITALIZATION)
     #
-    if starts_with_lowercase(v):
-        # report.add_complaint(CONTAINS_BAD_STRING, v[0])
-        report.add_complaint(CONTAINS_BAD_STRING, (0, 1))
+    check_starts_with_lowercase(v, report)
     #
-    add_complaints_matching(r"\\href{", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(r"\\url{", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"\\#", v, Complaint.UNNECESSARY_ESCAPE, report)
+    add_complaints_matching(r"\\%", v, Complaint.UNNECESSARY_ESCAPE, report)
+    add_complaints_matching(r"\\href{", v, Complaint.CONTAINS_TEX, report)
+    add_complaints_matching(r"\\url{", v, Complaint.CONTAINS_TEX, report)
     #
-    for pat in [
-            r"\\emph",
-            r"\\uline",
-            r"\\textbf",
-            r"\\texttt",
-
-            r"\\textsc",
-            r"\\#",
-            r"\\%"]:
-        if contains_outside_math(pat, v):
-            # report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
-            add_complaints_matching(pat, v, CONTAINS_BAD_STRING, report)
-        #
+    # for pat in [
+    #         r"\\emph",
+    #         r"\\uline",
+    #         r"\\textbf",
+    #         r"\\texttt",
+    #         r"\\textsc",
+    # ]:
+    #     if contains_outside_math(pat, v):
+    #         add_complaints_matching(pat, v, Complaint.CONTAINS_TEX, report)
+    #     #
     #
     check_bad_whitespace(v, report)
     #
-    if contains_html_elements(v):
-        report.add_complaint(CONTAINS_BAD_STRING, "HTML")
-    #
+    check_html_elements(v, report)
+    # 
     if not all_brackets_balanced(v):
-        report.add_complaint(UNBALANCED_BRACKETS)
+        report.add_complaint(Complaint.UNBALANCED_BRACKETS)
     #
-    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
     # not implemented: titles MAY end with punctuation
     # not implemented: check for arXiv or arXiv:ID
@@ -508,59 +573,51 @@ def check_authors(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
     # (Field must not be blank)
     if len(v) < MIN_AUTHORS_LEN:
-        report.add_complaint(TOO_SHORT)
+        report.add_complaint(Complaint.TOO_SHORT)
     # NO max authors len!
     # elif len(v) > MAX_AUTHORS_LEN:
     #     report.add_complaint(TOO_LONG)
     #
-    add_complaints_matching(r"\\\\", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(r"\*", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(r"#", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(r"[^\\]\^", v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(r"@", v, CONTAINS_BAD_STRING, report)                
+    add_complaints_matching(r"\\\\", v, Complaint.CONTAINS_TEX, report)
+    add_complaints_matching(r"\*", v, Complaint.BAD_CHARACTER, report)
+    add_complaints_matching(r"#", v, Complaint.BAD_CHARACTER, report)
+    add_complaints_matching(r"[^\\]\^", v, Complaint.BAD_CHARACTER, report)
+    add_complaints_matching(r"@", v, Complaint.BAD_CHARACTER, report)                
     #
     check_bad_whitespace(v, report)
     #
-    add_complaints_matching(r"anonymous", v, CONTAINS_BAD_STRING, report)                
-    add_complaints_matching(r"corresponding", v, CONTAINS_BAD_STRING, report)                
+    add_complaints_matching(r"anonymous", v, Complaint.CONTAINS_ANONYMOUS, report)
+    add_complaints_matching(r"corresponding", v, Complaint.CONTAINS_CORRESPONDING, report)
     #
     for s in ("\\dag", "\\ddag", "\\textdag", "\\textddag"):
-        add_complaints_matching(s, v, CONTAINS_BAD_STRING, report)                
+        add_complaints_matching(s, v, Complaint.CONTAINS_TEX, report)                
     #
-    add_complaints_matching(r"authors?:?\b", v, CONTAINS_BAD_STRING, report)                
+    add_complaints_matching(r"^authors?:?\b", v, Complaint.BEGINS_WITH_AUTHOR, report)
     #
-    if contains_html_elements(v):
-        report.add_complaint(CONTAINS_BAD_STRING, "HTML")
+    check_html_elements(v, report)
     #
-    # print( "CHECKING BREACKETS" )
     if not all_brackets_balanced(v):
-        report.add_complaint(UNBALANCED_BRACKETS)
+        report.add_complaint(Complaint.UNBALANCED_BRACKETS)
     #
-    if re.search(r"\( ", v):
-        report.add_complaint(
-            CONTAINS_BAD_STRING, "space after open paren"
-        )
-    if re.search(r" \)", v):
-        report.add_complaint(
-            CONTAINS_BAD_STRING, "space before close paren"
-        )
-    # Do I need to parse the authors list first?
-    if re.search(r";", v) and not re.search("(.*;.*)", v):
-        report.add_complaint(
-            CONTAINS_BAD_STRING, "use commas, not ';' to separate authors"
-        )
+    add_complaints_matching(r"\( ", v, Complaint.UNNECESSARY_SPACE_IN_PARENS, report)
+    add_complaints_matching(r" \)", v, Complaint.UNNECESSARY_SPACE_IN_PARENS, report)    
+
+    # This is wrong !
+    # Parse the authors list first, then complaing about ";" in any author name
+    # if re.search(r";", v) and not re.search(r"\(.*;.*\)", v):
+    #     # "use commas, not ';' to separate authors"
+    #     report.add_complaint(Complaint.CONTAINS_SEMICOLON)
+    
     # Are tildes allowed anywhere? Yes, as a TeX accent
     # (Consider: only check names?)
-    add_complaints_matching(r"[^\\]~", v, CONTAINS_BAD_STRING, report)
+    add_complaints_matching(r"[^\\]~", v, Complaint.TILDE_AS_HARD_SPACE, report)
     #
     # Authors list can NOT end with punctuation
-    if s := ends_with_punctuation(v):
-        if not v.endswith("et al."):
-            report.add_complaint(CONTAINS_BAD_STRING, s)
-        #
+    if not v.endswith("et al."):
+        check_ends_with_punctuation(v, report)
     #
-    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
 
     # Parse authors, check authors names - but not affiliations - for:
@@ -576,10 +633,11 @@ def check_authors(v: str) -> MetadataCheckReport:
     # (TODO: allow all Unicode ?)
     # TODO: urls
 
-    # TODO: maybe remove duplicates from the complaints list
+    # TODO: need offsets from parse_author_affil ...
 
     parsed_authors = parse_author_affil(v)  # => List[List[str]]
     for author in parsed_authors:
+        # for "Cecil B. Demille", firstname should be "Cecil B." and keyname shoudl be "Demille"
         # first is "keyname" (surname?), second is fist name(s), third is suffix
         keyname = author[0]
         firstname = author[1]
@@ -592,7 +650,7 @@ def check_authors(v: str) -> MetadataCheckReport:
 
 
 def check_one_author(report, keyname, firstname, suffix) -> None:
-    # report may be side-effected
+    # Bad things result in side-effecting calls to report
 
     # Some quick special cases to skip:
     if keyname.lower() == "author" and firstname == "" and suffix == "":
@@ -624,82 +682,116 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
         ):
             pass
         else:
-            report.add_complaint(CONTAINS_LONE_SURNAME, f"'{name}'")
+            # Check for bad standalone LLM names
+            found_llm_author = False
+            for badword in (
+                    "Llama", "Olamma", "Gemini", "Claude", "Bert", "Bart", "Grok",
+                    "ChatGPT",
+                    "GPT-3", "GPT-3.",
+                    "GPT-4", "GPT-4.",
+                    "GPT-5", "GPT-5."
+                    "PalM2",
+            ):
+                if badword.lower() == keyname.lower():
+                    # TODO: offsets
+                    report.add_complaint(Complaint.LLM_AUTHOR_DETECTED)
+                    found_llm_author = True
+                #
+            #
+            if not found_llm_author:
+                # TODO: offsets
+                report.add_complaint(Complaint.CONTAINS_LONE_SURNAME)
+            #
         #
     #
     # Don't reject Sylvie ROUX nor S ROUX
-    if re.match("^[A-Z]{3,}$", keyname) and re.match("^[A-Z]{3,}$", firstname):
-        report.add_complaint(EXCESSIVE_CAPITALIZATION, f"'{name}'")
+    # if re.match("^[A-Z]{3,}$", keyname) and re.match("^[A-Z]{3,}$", firstname):
+    #     report.add_complaint(Complaint.EXCESSIVE_CAPITALIZATION, f"'{name}'")
     #
     # Allow "Chandrasekar R" but not "Chandra R."
-    if re.match(r"^[A-Z]\.$", keyname):
-        report.add_complaint(CONTAINS_INITIALS, f"'{name}'")
-    elif keyname and re.match(r"\.$", keyname):
-        report.add_complaint(CONTAINS_BAD_STRING, f"final '.'")
-    elif (not keyname) and re.match(r"\.$", surname):
-        report.add_complaint(CONTAINS_BAD_STRING, f"final '.'")
+    # if re.match(r"^[A-Z]\.$", keyname):
+    #     report.add_complaint(CONTAINS_INITIALS, f"'{name}'")
+    # if keyname and re.match(r"\.$", keyname):
+    #     report.add_complaint(Complaint.TRAILING_PUNCTUATION)
+    # elif (not keyname) and re.match(r"\.$", surname):
+    #     report.add_complaint(Complaint.TRAILING_PUNCTUATION)
     #
     # Reject e. e. cummings and "evans". Don't reject J von
-    if keyname == keyname.lower() and (
-        firstname is None or firstname == firstname.lower()
-    ):
-        report.add_complaint(NO_CAPS_IN_NAME, f"'{name}'")
-    #
+    # if keyname == keyname.lower() and (
+    #     firstname is None or firstname == firstname.lower()
+    # ):
+    #     report.add_complaint(NO_CAPS_IN_NAME, f"'{name}'")
+
+    if re.search( ";", name ):
+        report.add_complaint(Complaint.CONTAINS_SEMICOLON)
+
     if (
         re.search(r"\[|]", keyname)
         or re.search(r"\[|]", firstname)
         or re.search(r"\[|]", suffix)
     ):
-        report.add_complaint(CONTAINS_BAD_STRING, f"'|' in '{name}'")
+        # TODO: offsets
+        report.add_complaint(Complaint.BAD_CHARACTER)
     #
     if (
         re.search("[0-9]", keyname)
         or re.search("[0-9]", firstname)
         or re.search("[0-9]", suffix)
     ):
-        report.add_complaint(CONTAINS_BAD_STRING, f"Digits in '{name}'")
+        # TODO: offsets
+        report.add_complaint(Complaint.CONTAINS_NUMBER)
     #
     # match A. and A.B. but not IV or other roman numerals
-    if (
-        re.match(r"^[A-Z]\.$", suffix)
-        or re.match(r"^[A-Z]\.[A-Z]\.$", suffix)
-        or re.match(r"^[A-Z]\.[A-Z]\.[A-Z]\.$", suffix)
-    ):
-        report.add_complaint(CONTAINS_INITIALS, f"Initials in '{name}'")
+    # if (
+    #     re.match(r"^[A-Z]\.$", suffix)
+    #     or re.match(r"^[A-Z]\.[A-Z]\.$", suffix)
+    #     or re.match(r"^[A-Z]\.[A-Z]\.[A-Z]\.$", suffix)
+    # ):
+    #     report.add_complaint(CONTAINS_INITIALS, f"Initials in '{name}'")
     #
     for badmessage, badpattern in (
-        (";", ";"),
-        ("IEEE", r"\bIEEE\b"),
-        ("PhD", r"\bphd\b"),
-        ("prof", r"\bprof\b"),
-        ("dr", r"\bdr\b"),
-        ("Physics", r"\bPhysics\b"),
-        ("Math", r"\bMath\b"),  # BUT watch out for Math\'eo ?
-        ("Inst", r"\bInst\b"),
-        ("Institute", r"\bInstitute\b"),
-        ("Dept", r"\bDept\b"),
-        ("Department", r"\bDepartment\b"),
-        ("Univ", r"\bUniv\b"),
-        ("University", r"\bUniversity\b"),
-        ("chatgpt", r"\bchatgpt?\b"),
-        ("GPT-3.5", r"\bGPT-3.5\b"),
-        ("GPT-4", r"\bGPT-4"),  # Also match 4o, etc
-        ("PaLM2", r"\bPalM2\b"),
-        # Claude and Bert are too common
+            ("IEEE", r"\bIEEE\b"),
+            ("PhD", r"\bphd\b"),
+            ("prof", r"\bprof\b"),
+            ("dr", r"\bdr\b"),
+            ("Physics", r"\bPhysics\b"),
+            ("Math", r"\bMath\b"),  # BUT watch out for Math\'eo ?
+            ("Inst", r"\bInst\b"),
+            ("Institute", r"\bInstitute\b"),
+            ("Dept", r"\bDept\b"),
+            ("Department", r"\bDepartment\b"),
+            ("Univ", r"\bUniv\b"),
+            ("University", r"\bUniversity\b"),
     ):
         if (
             re.search(badpattern, keyname, re.IGNORECASE)
             or re.search(badpattern, firstname, re.IGNORECASE)
             or re.search(badpattern, suffix, re.IGNORECASE)
         ):
-            # print( keyname, firstname, suffix )
-            report.add_complaint(CONTAINS_BAD_STRING, f"{badmessage} in '{name}'")
+            # TODO: offsets
+            report.add_complaint(Complaint.CONTAINS_AFFILIATION)
         #
-    # end for badword in badwords
+    # end for affiliations
 
-    for badword in ("Llama", "Olamma", "Gemini", "Claude", "Bert", "Bart"):
-        if badword.lower() == keyname.lower() and firstname == "" and suffix == "":
-            report.add_complaint(CONTAINS_BAD_STRING, f"'{badword}'")
+    for badmessage, badpattern in (
+            # LLM "names"
+            ("chatgpt", r"\bchatgpt?\b"),
+            ("GPT-4", r"\bGPT-4"),  # Also match 4o, etc
+            ("GPT-5", r"\bGPT-5"),
+            ("GPT-3.x", r"\bGPT-3\."),
+            ("GPT-3.5", r"\bGPT-3.5\b"),
+            ("GPT-4.x", r"\bGPT-4\."),  # Should also match 4.x
+            ("GPT-5.x", r"\bGPT-5\."),  # Should also match 5.x
+            ("PaLM2", r"\bPalM2\b"),
+            # Claude and Bert are common names; see above
+            # Is Gemini too common?
+            ("Gemini", r"\bGemini\b"),
+    ):
+        if (
+            re.search(badpattern, name, re.IGNORECASE)
+        ):
+            # TODO: offsets
+            report.add_complaint(Complaint.LLM_AUTHOR_DETECTED)
         #
     #
 
@@ -707,15 +799,14 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
 def check_abstract(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
     if v is None or v == "":
-        report.add_complaint(CANNOT_BE_EMPTY)
+        report.add_complaint(Complaint.CANNOT_BE_EMPTY)
     elif len(v) < MIN_ABSTRACT_LEN:
-        report.add_complaint(TOO_SHORT)
+        report.add_complaint(Complaint.TOO_SHORT)
     elif len(v) > MAX_ABSTRACT_LEN:
-        report.add_complaint(TOO_LONG)
+        report.add_complaint(Complaint.TOO_LONG)
     #
     # Only match beginning!
-    if re.match(r"abstract\b", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "abstract")
+    add_complaints_matching(r"^abstract\b", v, Complaint.BEGINS_WITH_ABSTRACT, report)
     #
     # ARXIVCE-812
     # Don't warn about "\\" in abstracts - too common (about 50/month)
@@ -727,98 +818,84 @@ def check_abstract(v: str) -> MetadataCheckReport:
     # QA-70 do warn about paragraphs which end in newlines
     # " \n" or "\n\s+\n".
     # But allow \n\n (and \n-----\n)"
-    if (
-        re.search(r"\s+\n", v) # includes \n\s+\n
-        # or re.search(r"\s+$", v) # covered above
-    ):
-        report.add_complaint(CONTAINS_BAD_STRING, "whitespace at end of paragraph")
-    #
+    # Now in check_bad_whitespace shared code
     if looks_like_all_caps(v):
-        report.add_complaint(CONTAINS_BAD_STRING, "(capitalization)")
+        report.add_complaint(Complaint.EXCESSIVE_CAPITALIZATION) # TODO
     #
-    if starts_with_lowercase(v):
-        report.add_complaint(
-            CONTAINS_BAD_STRING, f"starts with a lower case letter ({v[0]})"
-        )
+    check_starts_with_lowercase(v, report)
     #
-    if re.search(r"\\href{", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\href")
+    add_complaints_matching(r"\\#", v, Complaint.UNNECESSARY_ESCAPE, report)
+    add_complaints_matching(r"\\%", v, Complaint.UNNECESSARY_ESCAPE, report)
+    add_complaints_matching(r"\\href{", v, Complaint.CONTAINS_TEX, report)
+    add_complaints_matching(r"\\url{", v, Complaint.CONTAINS_TEX, report)
+    # JHY: \begin{equation}, etc are permitted , but not "\begin" ...
+    add_complaints_matching(r"\\begin[^{]", v, Complaint.CONTAINS_TEX, report)
     #
-    if re.search(r"\\url{", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\url")
+    # for pat in [
+    #         r"\\emph",
+    #         r"\\uline",
+    #         r"\\textbf",
+    #         r"\\texttt",
+    #         r"\\textsc",
+    # ]:
+    #     if contains_outside_math(pat, v):
+    #         # Marginal...
+    #         # add_complaints_matching(pat, v, Complaint.CONTAINS_BAD_STRING, report)
+    #         # TODO: ?
+    #         pass
+    #     #
     #
-    for pat in [
-            r"\\emph",
-            r"\\uline",
-            r"\\textbf",
-            r"\\texttt",
-            r"\\textsc",
-            r"\\#",
-            r"\\%"]:
-        if contains_outside_math(pat, v):
-            # report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
-            add_complaints_matching(pat, v, CONTAINS_BAD_STRING, report)
-        #
+    check_bad_whitespace_for_abs(v, report)
     #
-    check_bad_whitespace(v, report)
-    #
-    if contains_html_elements(v):
-        report.add_complaint(CONTAINS_BAD_STRING, "(HTML)")
+    check_html_elements(v, report)
     #
     if not all_brackets_balanced(v):
-        report.add_complaint(UNBALANCED_BRACKETS)
+        report.add_complaint(Complaint.UNBALANCED_BRACKETS)
     #
-    # JHY: \begin{equation}, etc are permitted ...
-    if re.search(r"\\begin[^{]", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\begin")
     #
-    if language_is_not_english(v):
-        report.add_complaint(MUST_BE_ENGLISH)
+    check_language_is_not_english(v, report)
     #
-    # SUBTLE: don't complain about \n newlins in abstracts!
-    add_complaints_matching(control_chars_for_abs_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
+    # SUBTLE: don't complain about \n newlines in abstracts!
+    add_complaints_matching(control_chars_for_abs_re, v, Complaint.CONTAINS_CONTROL_CHARS_ABS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
-    # not implemented: abstract MAY end in punctuation
+    # note: abstracts MAY end in punctuation
     # not implemented: check for arXiv or arXiv:ID
     return report
 
 
 def check_comments(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
-    # Empty comments are ok!
-    if re.search(r"\\\\", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\\\ (TeX line break) ")
+    # No check for too short (Empty comments are ok)
+    # No check for too long (!?)
+    add_complaints_matching(r"\\\\", v, Complaint.CONTAINS_TEX, report)
     #
     if looks_like_all_caps(v):
-        report.add_complaint(CONTAINS_BAD_STRING, v)
+        report.add_complaint(Complaint.EXCESSIVE_CAPITALIZATION)
     #
-    if re.search(r"\\href{", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\href")
+    add_complaints_matching(r"\\#", v, Complaint.UNNECESSARY_ESCAPE, report)
+    add_complaints_matching(r"\\%", v, Complaint.UNNECESSARY_ESCAPE, report)
+    add_complaints_matching(r"\\href{", v, Complaint.CONTAINS_TEX, report)
+    add_complaints_matching(r"\\url{", v, Complaint.CONTAINS_TEX, report)
     #
-    if re.search(r"\\url{", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "\\url")
-    #
-    for pat in [
-            r"\\emph",
-            r"\\uline",
-            r"\\textbf",
-            r"\\texttt",
-            r"\\textsc",
-            r"\\#",
-            r"\\%"]:
-        if contains_outside_math(pat, v):
-            # report.add_complaint(CONTAINS_BAD_STRING, "\\emph")
-            add_complaints_matching(pat, v, CONTAINS_BAD_STRING, report)
-        #
+    # for pat in [
+    #         r"\\emph",
+    #         r"\\uline",
+    #         r"\\textbf",
+    #         r"\\texttt",
+    #         r"\\textsc",
+    # ]:
+    #     if contains_outside_math(pat, v):
+    #         add_complaints_matching(pat, v, Complaint.CONTAINS_TEX, report)
+    #     #
     #
     check_bad_whitespace(v, report)
     #
     if not all_brackets_balanced(v):
-        report.add_complaint(UNBALANCED_BRACKETS)
+        report.add_complaint(Complaint.UNBALANCED_BRACKETS)
     #
-    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
     # TODO: check that language is English?
 
@@ -828,21 +905,25 @@ def check_comments(v: str) -> MetadataCheckReport:
 def check_report_num(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
     if len(v) < MIN_REPORT_NUM_LEN:
-        report.add_complaint(TOO_SHORT)
+        report.add_complaint(Complaint.TOO_SHORT)
         return report
     elif len(v) > MAX_REPORT_NUM_LEN:
-        report.add_complaint(TOO_LONG)
+        report.add_complaint(Complaint.TOO_LONG)
     #
-    if re.match(r"^[0-9]*$", v):
-        report.add_complaint(MUST_CONTAIN_LETTERS)
-    if re.match(r"^[A-Za-z-]*$", v):
-        report.add_complaint(MUST_CONTAIN_DIGITS)
-    # TODO: URLs?
+    add_complaints_matching(r"http:", v, Complaint.CONTAINS_URL, report)
+    add_complaints_matching(r"https:", v, Complaint.CONTAINS_URL, report)    
+    # add_complaints_matching(r"doi", v, Complaint.CONTAINS_DOI, report) #
+    #
+    # was not match r"^[0-9]*$"
+    if not re.search(r"[A-Z]", v):
+        report.add_complaint(Complaint.MUST_CONTAIN_LETTERS)
+    if not re.search(r"[0-9]", v):
+        report.add_complaint(Complaint.MUST_CONTAIN_DIGITS)
     #
     check_bad_whitespace(v, report)
     #
-    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
     return report
 
@@ -850,40 +931,32 @@ def check_report_num(v: str) -> MetadataCheckReport:
 def check_journal_ref(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
     if len(v) < MIN_JOURNAL_REF_LEN:
-        report.add_complaint(TOO_SHORT)
+        report.add_complaint(Complaint.TOO_SHORT)
     elif len(v) > MAX_JOURNAL_REF_LEN:
-        report.add_complaint(TOO_LONG)
+        report.add_complaint(Complaint.TOO_LONG)
     #
     # TODO: check for author name(s) in jref
     # TODO: check for paper title in jref
-    if re.search("http:", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "http:")
-    elif re.search("https:", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "https:")
-    #
-    if re.search("doi", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "DOI")
-    #
-    if re.search("accepted", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "accepted")
-    #
-    if re.search("submitted", v, re.IGNORECASE):
-        report.add_complaint(CONTAINS_BAD_STRING, "submitted")
+    add_complaints_matching(r"http:", v, Complaint.CONTAINS_URL, report)
+    add_complaints_matching(r"https:", v, Complaint.CONTAINS_URL, report)    
+    add_complaints_matching(r"doi", v, Complaint.CONTAINS_DOI, report) # ?
+    # Interesting:
+    add_complaints_matching(r"^[0-9][0-9].[0-9]+/[^ ]*$", v, Complaint.CONTAINS_DOI, report) # 
+    add_complaints_matching(r"accepted", v, Complaint.CONTAINS_ACCEPTED, report)
+    add_complaints_matching(r"submitted", v, Complaint.CONTAINS_SUBMITTED, report)
     #
     check_bad_whitespace(v, report)
     #
     # Removed Oct 2025
     # if not re.search("[12][90][0-9][0-9]", v):
-    #     report.add_complaint(MUST_CONTAIN_YEAR)
+    #     report.add_complaint(Complaint.MUST_CONTAIN_YEAR)
     #
     for s in ("title", "booktitle", "inproceedings"):
-        if re.search(f"{s}=", v, re.IGNORECASE):
-            report.add_complaint(CONTAINS_BAD_STRING, f"{s} (bibtex?)")
-            break
+        add_complaints_matching(f"{s}=", v, Complaint.CONTAINS_BIBTEX, report)
         #
     #
-    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
     return report
 
@@ -891,56 +964,51 @@ def check_journal_ref(v: str) -> MetadataCheckReport:
 def check_doi(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
     if len(v) < MIN_DOI_LEN:
-        print( "DOI TOO SHORT ???" )
-        report.add_complaint(TOO_SHORT)
+        report.add_complaint(Complaint.TOO_SHORT)
+        return report
     elif len(v) > MAX_DOI_LEN:
-        report.add_complaint(TOO_LONG)
+        report.add_complaint(Complaint.TOO_LONG)
+        # Don't return
     #
-    # if re.search("http:", v):
-    #     report.add_complaint(CONTAINS_BAD_STRING, "http:")
-    # if re.search("https:", v):
-    #     report.add_complaint(CONTAINS_BAD_STRING, "https:")
-    # TODO: should we look for "doi:"?
+    # Validate the DOI(s) found in this field (first!)
+    # TODO: how many submissions contain multiple dois?
+    start = 0
+    for doi in v.split():
+        start = v.index(doi, start) # should never fail
+        end = start + len(doi)
+        if not re.match(r"^[0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$", doi):
+            report.add_complaint(Complaint.INVALID_DOI, (start, end))
+        #
+    #
+    add_complaints_matching(r"http:", v, Complaint.CONTAINS_URL, report)
+    add_complaints_matching(r"https:", v, Complaint.CONTAINS_URL, report)
+    add_complaints_matching(r"doi", v, Complaint.CONTAINS_DOI2, report)
+    #
+    # If it contains "doi", it also contains "arxiv-doi" !
     # if re.search("arxiv-doi", v):
     #     report.add_complaint(CONTAINS_BAD_STRING, "arxiv-doi")
     #
-    print( "DOI: check whitespace ???" )
-
     check_bad_whitespace(v, report)
 
-    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
-    
-    # Consider separating this out?
-    for doi in v.split():
-        if not re.match("^[0-9][0-9]*.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$", doi):
-            report.add_complaint(CONTAINS_BAD_STRING, v)
-        #
-    #
-    print( "REPORT", report.offsets )
-           
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
+
     return report
 
 
 def check_msc_class(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
-    if re.search("http:", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "http:")
-    if re.search("https:", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "https:")
-    # TODO: should we look for "doi:"?
-    if re.search("arxiv-doi", v):
-        report.add_complaint(CONTAINS_BAD_STRING, "arxiv-doi")
+    add_complaints_matching(r"http:", v, Complaint.CONTAINS_URL, report)
+    add_complaints_matching(r"https:", v, Complaint.CONTAINS_URL, report)
+    #
+    add_complaints_matching(r"arxiv-doi", v, Complaint.CONTAINS_ARXIV_DOI, report)    
     #
     check_bad_whitespace(v, report)
     #
-    add_complaints_matching(control_chars_re, v, CONTAINS_BAD_STRING, report)
-    add_complaints_matching(utf8_in_latin1_re, v, BAD_UNICODE, report)
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
-    if re.search(r";", v):
-        report.add_complaint(
-            CONTAINS_BAD_STRING, "use commas, not ';' to separate MSC classes"
-        )
+    add_complaints_matching(r";", v, Complaint.CONTAINS_SEMICOLON, report)
     #
     # TODO: don't show these to editors?
     # for s in ("MSC *class", "MSC number"):
@@ -950,13 +1018,25 @@ def check_msc_class(v: str) -> MetadataCheckReport:
     #     #
     # #
 
-    print( "REPORT", report.offsets )
-           
     return report
 
 
-# Is minlen <= 4 for authors field too strict?
-#
+def check_acm_class(v: str) -> MetadataCheckReport:
+    report = MetadataCheckReport()
+    add_complaints_matching(r"http:", v, Complaint.CONTAINS_URL, report)
+    add_complaints_matching(r"https:", v, Complaint.CONTAINS_URL, report)
+    #
+    add_complaints_matching(r"doi", v, Complaint.CONTAINS_DOI2, report)    
+    #
+    check_bad_whitespace(v, report)
+    #
+    add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
+    add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
+    #
+    add_complaints_matching(r";", v, Complaint.CONTAINS_SEMICOLON, report)
+    #
+    return report
+
 # Check for \n but not \n<space><space> (a paragraph break) in abstract?
-# Note: no checks for other fields.
+# \n is not allowed in fields other than the abstract, right?
 
