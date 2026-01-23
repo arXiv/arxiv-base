@@ -20,6 +20,7 @@ class FieldName(StrEnum):
     JOURNAL_REF = "journal_ref"
     DOI = "doi"
     MSC_CLASS = "msc_class"
+    ACM_CLASS = "acm_class"
 
 
 class Disposition(StrEnum):
