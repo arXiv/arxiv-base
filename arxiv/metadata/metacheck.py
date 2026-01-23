@@ -74,7 +74,7 @@ def complaint2str(complaint: Complaint) -> str:
     elif complaint == Complaint.WHITESPACE_BEFORE_COMMA:
         return "Whitespace before a comma."
     elif complaint == Complaint.CONTAINS_ANONYMOUS:
-        return "Contains anonymous or missing author name." # ???
+        return "Anonymous author(ship) detected."
     elif complaint == Complaint.CONTAINS_CORRESPONDING:
         return "Contains 'corresponding'."
     elif complaint == Complaint.CONTAINS_DAGGER:
@@ -136,7 +136,7 @@ def complaint2str(complaint: Complaint) -> str:
     elif complaint == Complaint.INSUFFICIENT_ALPHA:
         return "Insufficient text."
     elif complaint == Complaint.LLM_AUTHOR_DETECTED:
-        return "LLM author detected."
+        return "Potential LLM author detected."
     elif complaint == Complaint.INVALID_DOI:
         return "Invalid DOI."
     else:
