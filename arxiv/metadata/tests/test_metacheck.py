@@ -407,7 +407,9 @@ ABSTRACT_TESTS = [
      (WARN, [Complaint.EXTRA_WHITESPACE])),
     ("Abstractive summarization is ok", None),
     # ['  abstract : here  ',"Abstract: starts with the word Abstract, remove"],
+
     ("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>", None),
+    ("We also should not flag $p_1<p_2$", None),
     # ['Factor Ratio to Q<sup>2</sup> = 8.5 GeV<sup>2</sup>','Abstract: HTML elements: <sup> </sup> <sup> </sup>'],
     # ['With HTML<br/>linebreaks<br />there','Abstract: HTML elements: <br/> <br />'],
     # 30 Apr 2025: line breaks in abstracts really aren't that bad.

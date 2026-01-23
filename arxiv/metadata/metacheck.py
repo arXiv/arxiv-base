@@ -452,8 +452,10 @@ def check_starts_with_lowercase(v: str, report: MetadataCheckReport):
     
 
 HTML_ELEMENTS = [
-    "<p[^a-z]",
-    "</p><div[^a-z]",
+    # "<p[^a-z]",
+    "<p>", "<p ",
+    "</p>",
+    "<div[^a-z]",
     "</div>",
     "<br[^a-z]",
     "</br>",
