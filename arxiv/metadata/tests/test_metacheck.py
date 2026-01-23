@@ -26,6 +26,7 @@ from arxiv.metadata.metacheck import MetadataCheckReport
 
 from arxiv.metadata.metacheck import combine_dispositions
 from arxiv.metadata.metacheck import long_word_caps
+from arxiv.metadata.metacheck import complaint2str
 
 ############################################################
 TITLE = FieldName.TITLE
@@ -751,3 +752,5 @@ def test_offsets():
 
     #
 
+def test_complaint2str():
+    assert(complaint2str(-1) == "(Unknown issue)")

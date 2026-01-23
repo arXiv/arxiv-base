@@ -55,7 +55,7 @@ def complaint2str(complaint: Complaint) -> str:
         return "Likely excessive capitalization"
     elif complaint == Complaint.BEGINS_WITH_LOWERCASE:
         return "Begins with a lower case letter."
-    elif complaint == Complaint.CONAINS_TEX:
+    elif complaint == Complaint.CONTAINS_TEX:
         return "Contains TeX."
     elif complaint == Complaint.UNNECESSARY_ESCAPE:
         return "Contains unnecessary escape."
