@@ -1,7 +1,7 @@
 """Tests for arXiv taxonomy module."""
 
 from unittest import TestCase
-from . import LICENSES, CURRENT_LICENSE_URIS, ASSUMED_LICENSE_URI
+from .  import License, LICENSES, CURRENT_LICENSE_URIS, ASSUMED_LICENSE_URI
 
 
 class TestLicense(TestCase):
@@ -39,3 +39,20 @@ class TestLicense(TestCase):
     def test_assumed_license_is_valid(self):
         """Test assumed license is defined in licenses."""
         self.assertIn(ASSUMED_LICENSE_URI, LICENSES)
+
+    def test_get_short_label(self):
+        """Test the short label getter works as expected."""
+        bad_license = License('http://example.com')
+        self.assertEqual(bad_license.get_short_label(), "No License")
+
+        cc_license = License('http://arxiv.org/licenses/nonexclusive-distrib/1.0/')
+        self.assertEqual(cc_license.get_short_label(), "arXiv.org perpetual non-exclusive license")
+
+        cc_license = License('http://creativecommons.org/licenses/by/4.0/')
+        self.assertEqual(cc_license.get_short_label(), "CC BY 4.0")
+
+    def test_short_labels_coverage(self):
+        """Test short labels are defined for all licenses."""
+        for uri, license in LICENSES.items():
+            self.assertIn('short_label', license)
+            self.assertTrue(license['short_label'])
