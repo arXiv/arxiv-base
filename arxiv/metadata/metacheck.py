@@ -33,6 +33,7 @@ REPORT_NUM = FieldName.REPORT_NUM
 JOURNAL_REF = FieldName.JOURNAL_REF
 DOI = FieldName.DOI
 MSC_CLASS = FieldName.MSC_CLASS
+ACM_CLASS = FieldName.ACM_CLASS
 
 OK = Disposition.OK
 WARN = Disposition.WARN
@@ -42,7 +43,7 @@ def complaint2str(complaint: Complaint) -> str:
     if complaint == Complaint.CANNOT_BE_EMPTY:
         return "Cannot be empty."
     elif complaint == Complaint.TOO_SHORT:
-        return "Text likely too short"
+        return "Text likely too short."
     elif complaint == Complaint.BEGINS_WITH_TITLE:
         return "Begins with 'title'."
     elif complaint == Complaint.BEGINS_WITH_AUTHOR:

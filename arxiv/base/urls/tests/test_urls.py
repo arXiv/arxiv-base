@@ -1,5 +1,7 @@
 """Tests for :mod:`arxiv.base.urls`."""
 
+import os
+
 from unittest import TestCase, mock
 from flask import Flask, url_for, Blueprint
 from arxiv.base import urls, Base
@@ -73,10 +75,15 @@ class TestGetURLMap(TestCase):
                 ]))
     def test_base_urls(self):
         """Only URLs are defined in base; the current app has none."""
-        app = mock.MagicMock(config={'URLS': []})
-        adapter = urls.build_adapter(app)
-        self.assertEqual(len(adapter.map._rules), 2,
-                         "Only base URLs are loaded")
+        try:
+            os.environ["ARXIV_TEST_URL"] = "https://example.com"
+            app = mock.MagicMock(config={'URLS': []})
+            adapter = urls.build_adapter(app)
+            self.assertEqual(len(adapter.map._rules), 2,
+                             "Only base URLs are loaded")
+        finally:
+            # Clean up!
+            del os.environ["ARXIV_TEST_URL"]
 
     @mock.patch('arxiv.base.urls.base_config',
                 mock.MagicMock(URLS=[

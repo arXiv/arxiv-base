@@ -34,7 +34,10 @@ jobs:
           cd arxiv && poetry run pytest auth/legacy/tests --db=mysql
 
       - name: Run arxiv-base tests with coverage
-        run: poetry run pytest --cov=arxiv.base fourohfour --cov-fail-under=75 arxiv/base fourohfour
+      # First, run the base tests (they have high coverage)
+        run: poetry run pytest --cov=arxiv.base --cov-fail-under=85 arxiv
+        run: poetry run pytest --cov=fourohfour --cov-fail-under=74 fourohfour
+        run: poetry run pytest --cov=arxiv --cov-fail-under=82 --cov-report html arxiv
       # - name: Check Types
       # TODO The types are in bad shape and need to be fixed
       #   run: poetry run mypy --exclude "test*" -p arxiv

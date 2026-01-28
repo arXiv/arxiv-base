@@ -38,6 +38,7 @@ REPORT_NUM = FieldName.REPORT_NUM
 JOURNAL_REF = FieldName.JOURNAL_REF
 DOI = FieldName.DOI
 MSC_CLASS = FieldName.MSC_CLASS
+ACM_CLASS = FieldName.ACM_CLASS
 
 OK = Disposition.OK
 WARN = Disposition.WARN
@@ -84,9 +85,9 @@ def test_combine_dispositions():
 ##### TITLE field checks
 
 TITLE_TESTS = [
+    # ("", (HOLD, [CANNOT_BE_EMPTY])),
     ("A fine title", None),
     ("Another title about CERN and ALPEH where z~1/2", None),
-    # ("", (HOLD, [CANNOT_BE_EMPTY])),
     ("Tiny", (WARN, [Complaint.TOO_SHORT])),
     ("a title with lowercase",
      (WARN, [Complaint.BEGINS_WITH_LOWERCASE])),
@@ -165,9 +166,8 @@ def test_titles(test):
     # result = metacheck.check({TITLE: title})
     metadata = Metadata()
     metadata.title = title
-    print( "JHY", metadata )
     result = metacheck.check(metadata)
-    print(test, result, expected_result)
+    # print(test, result, expected_result)
     check_result(result[TITLE], expected_result)
 
 
@@ -175,8 +175,8 @@ def test_titles(test):
 ##### Detailed tests for AUTHORS field
 
 AUTHORS_TESTS = [
-    # ('',
-    #  (HOLD, [CANNOT_BE_EMPTY])),
+    # ("",
+    #  (HOLD, [Complaint.CANNOT_BE_EMPTY])),
     ("C Li", None),
     ("Li C", None),
     ("C C", (WARN, [Complaint.TOO_SHORT])),
@@ -386,9 +386,8 @@ def test_authors(test):
     metadata = Metadata()
     metadata.authors = authors
     result = metacheck.check(metadata)
-    print( authors, result )
+    # print( authors, result )
     check_result(result[AUTHORS], expected_result)
-
 
 ############################################################
 ##### Detailed tests for ABSTRACT field
@@ -496,7 +495,7 @@ def test_abstracts(test):
     metadata = Metadata()
     metadata.abstract = abstract
     result = metacheck.check(metadata)
-    print(abstract, result, expected_result)
+    # print(abstract, result, expected_result)
     check_result(result[ABSTRACT], expected_result)
 
 
@@ -643,7 +642,7 @@ def test_doi(test):
     metadata = Metadata()
     metadata.doi = doi
     result = metacheck.check(metadata)
-    print( doi, result )
+    # print( doi, result )
     check_result(result[DOI], expected_result)
 
 
@@ -673,6 +672,33 @@ def test_msc_class(test):
     result = metacheck.check(metadata)
     # print( msc_class, result )
     check_result(result[MSC_CLASS], expected_result)
+
+############################################################
+# (Very simple tests, for now.)
+
+ACM_CLASS_TESTS = [
+    ["", None],
+    ["abc", None],    
+    ["abc def", None],
+    ["  abc",
+     (WARN, [Complaint.LEADING_WHITESPACE])],
+    ["abc  def",
+     (WARN, [Complaint.EXTRA_WHITESPACE])],
+    ["abcdef  ",
+     (WARN, [Complaint.TRAILING_WHITESPACE])],
+    ["abc\ndef",
+     (WARN, [Complaint.CONTAINS_CONTROL_CHARS])],
+]
+
+
+@pytest.mark.parametrize("test", ACM_CLASS_TESTS)
+def test_acm_class(test):
+    (acm_class, expected_result) = test
+    metadata = Metadata()
+    metadata.acm_class = acm_class
+    result = metacheck.check(metadata)
+    # print( acm_class, result )
+    check_result(result[ACM_CLASS], expected_result)
 
 ############################################################
 # TODO: no tests for the ACM CLASS field
@@ -753,4 +779,7 @@ def test_offsets():
     #
 
 def test_complaint2str():
-    assert(complaint2str(-1) == "(Unknown issue)")
+    assert complaint2str(-1) == "(Unknown issue)"
+    for complaint in Complaint:
+        assert complaint2str(complaint) != "(Unknown issue)"
+    #
