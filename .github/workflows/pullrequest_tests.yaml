@@ -34,7 +34,12 @@ jobs:
           cd arxiv && poetry run pytest auth/legacy/tests --db=mysql
 
       - name: Run arxiv-base tests with coverage
-        run: poetry run pytest --cov=arxiv.base fourohfour --cov-fail-under=75 arxiv/base fourohfour
+      # Run tests with high coverage first
+        run: |
+          poetry run pytest --cov=arxiv.base --cov=arxiv.metadata --cov-fail-under=85 arxiv
+          poetry run pytest --cov=fourohfour --cov-fail-under=74 fourohfour --cov-append
+          poetry run pytest --cov=arxiv --cov-fail-under=82 arxiv --cov-append
+
       # - name: Check Types
       # TODO The types are in bad shape and need to be fixed
       #   run: poetry run mypy --exclude "test*" -p arxiv
@@ -53,10 +58,18 @@ jobs:
 
       - name: Run other tests
         # These tests are split out because their coverage is low
-        run: poetry run pytest --cov=arxiv --cov-fail-under=40 arxiv --ignore=arxiv/base --ignore=arxiv/auth/legacy --db=sqlite
+        run: poetry run pytest --cov=arxiv --cov-fail-under=40 arxiv --ignore=arxiv/base --ignore=arxiv/auth/legacy --db=sqlite --cov-append --cov-report=html
       #- name: Check Doc Style
       #  run: poetry run pydocstyle --convention=numpy --add-ignore=D401 arxiv
 
       - name: Run App Tests
         run: poetry run python tests/run_app_tests.py
+
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: coverage-report
+          path: htmlcov/
+          retention-days: 30
 

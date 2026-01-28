@@ -40,9 +40,9 @@ SAMPLE_DOCMETA=DocMetadata(
             VersionEntry(
                 version=1,
                 raw="",
-                submitted_date=None, # type: ignore
-                size_kilobytes=30, # type: ignore
-                source_flag=SourceFlag("D"), # type: ignore
+                submitted_date=datetime.now(),
+                size_kilobytes=30,
+                source_flag=SourceFlag("D"),
             )
         ],
         modified=datetime(year=2011, month=3, day=7)
@@ -103,7 +103,7 @@ class DocMetadataTest(TestCase):
         self.assertTrue('version_history' not in str(ctx.exception))
         self.assertTrue('private' not in str(ctx.exception))
 
-    def test_get_seconaries(self):
+    def test_get_secondaries(self):
         #get secondaries should only return cannonical instance of each secondary category with no duplicates
 
         self.assertEqual(
@@ -118,3 +118,15 @@ class DocMetadataTest(TestCase):
             "secondary display string must match"
         )
         
+    def test_misc(self):
+        self.assertTrue(len(SAMPLE_DOCMETA.get_browse_context_list()) == 6)
+        self.assertTrue(SAMPLE_DOCMETA.highest_version() == 1)
+        self.assertTrue(SAMPLE_DOCMETA.get_datetime_of_version() < datetime.now())
+        # Throws an error:
+        # print( "canonical url", SAMPLE_DOCMETA.canonical_url() )
+        # self.assertFalse(SAMPLE_DOCMETA.canonical_url() > 0)
+        
+    def test_get_raw(self):
+        # These may be fragile if the data in SAMPLE_DOCMETA changes...
+        self.assertTrue(len(SAMPLE_DOCMETA.raw()) == 373)
+        self.assertTrue(len(SAMPLE_DOCMETA.raw().split('\n')) == 15)

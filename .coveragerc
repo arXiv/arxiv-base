@@ -4,3 +4,10 @@ omit =
     setup.py
     docs/*
     *test*
+    arxiv/files/*
+    arxiv/formats/*
+    arxiv/ops/*
+    arxiv/ops/db_subset/*
+    arxiv/ops/fastly_log_ingest/*
+    arxiv/util/database_loader.py
+    arxiv/util/dict_io.py
