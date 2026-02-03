@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: arxiv-test-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: arXiv
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpassword
+    ports:
+      - "13306:3306"
+    volumes:
+      - ../arxiv/db/arxiv_db_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./init_db/02_test_user.sql:/docker-entrypoint-initdb.d/02_test_user.sql:ro
+    command:
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+      - --character-set-server=latin1
+      - --collation-server=latin1_swedish_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

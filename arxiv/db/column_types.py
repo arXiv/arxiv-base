@@ -181,7 +181,8 @@ class BinaryStringType(TypeDecorator):
         This ensures MySQL returns the raw bytes without latin-1 interpretation,
         so we can decode them as UTF-8 in process_result_value.
         """
-        return func.cast(col, LargeBinary)
+        from sqlalchemy import type_coerce
+        return type_coerce(func.cast(col, LargeBinary), self)
 
 
 class TranscodedText(TypeDecorator):
@@ -300,7 +301,8 @@ class TranscodedText(TypeDecorator):
         This ensures MySQL returns the raw bytes without latin-1 interpretation,
         so we can decode them as UTF-8 in process_result_value.
         """
-        return func.cast(col, LargeBinary)
+        from sqlalchemy import type_coerce
+        return type_coerce(func.cast(col, LargeBinary), self)
 
 
 # Convenience type for common cases
