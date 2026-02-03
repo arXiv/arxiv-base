@@ -1,6 +1,5 @@
-
 from typing import Any, Dict
-from unittest import TestCase,mock
+from unittest import TestCase, mock
 from datetime import datetime
 
 from arxiv.document.metadata import DocMetadata, AuthorList, Submitter
@@ -9,44 +8,45 @@ from arxiv.identifier import Identifier
 from arxiv.license import License
 from arxiv.document.version import VersionEntry, SourceFlag
 
-SAMPLE_DOCMETA=DocMetadata(
-        raw_safe="abs text here",
-        arxiv_id='1204.5678',
-        arxiv_id_v="1204.5678v1",
-        arxiv_identifier=Identifier("1204.5678v1"),
-        title="title of paper",
-        abstract="also abs text here",
-        authors=AuthorList("First Name, Second, Name"),
-        submitter=Submitter(name="a submitter", email="fakeemail@arxiv.org"),
-        categories="hep-th cs.NA math-ph math.MP",
-        primary_category=CATEGORIES['hep-th'],
-        primary_archive=CATEGORIES['hep-th'].get_archive(),
-        primary_group=CATEGORIES['hep-th'].get_archive().get_group(),
-        secondary_categories=[
-            CATEGORIES["math-ph"],
-            CATEGORIES["math.MP"],
-            CATEGORIES["cs.NA"]
-        ],
-        journal_ref="journal of mystical knowledge",
-        report_num=None,
-        doi=None,
-        acm_class=None,
-        msc_class=None,
-        proxy=None,
-        comments="very insightful comments",
-        version=1,
-        license=License(),
-        version_history=[
-            VersionEntry(
-                version=1,
-                raw="",
-                submitted_date=datetime.now(),
-                size_kilobytes=30,
-                source_flag=SourceFlag("D"),
-            )
-        ],
-        modified=datetime(year=2011, month=3, day=7)
-    )
+SAMPLE_DOCMETA = DocMetadata(
+    raw_safe="abs text here",
+    arxiv_id='1204.5678',
+    arxiv_id_v="1204.5678v1",
+    arxiv_identifier=Identifier("1204.5678v1"),
+    title="title of paper",
+    abstract="also abs text here",
+    authors=AuthorList("First Name, Second, Name"),
+    submitter=Submitter(name="a submitter", email="fakeemail@arxiv.org"),
+    categories="hep-th cs.NA math-ph math.MP",
+    primary_category=CATEGORIES['hep-th'],
+    primary_archive=CATEGORIES['hep-th'].get_archive(),
+    primary_group=CATEGORIES['hep-th'].get_archive().get_group(),
+    secondary_categories=[
+        CATEGORIES["math-ph"],
+        CATEGORIES["math.MP"],
+        CATEGORIES["cs.NA"]
+    ],
+    journal_ref="journal of mystical knowledge",
+    report_num=None,
+    doi=None,
+    acm_class=None,
+    msc_class=None,
+    proxy=None,
+    comments="very insightful comments",
+    version=1,
+    license=License(),
+    version_history=[
+        VersionEntry(
+            version=1,
+            raw="",
+            submitted_date=datetime.now(),
+            size_kilobytes=30,
+            source_flag=SourceFlag("D"),
+        )
+    ],
+    modified=datetime(year=2011, month=3, day=7)
+)
+
 
 class DocMetadataTest(TestCase):
     fields: Dict[str, Any]
@@ -104,20 +104,20 @@ class DocMetadataTest(TestCase):
         self.assertTrue('private' not in str(ctx.exception))
 
     def test_get_secondaries(self):
-        #get secondaries should only return cannonical instance of each secondary category with no duplicates
+        # get secondaries should only return cannonical instance of each secondary category with no duplicates
 
         self.assertEqual(
-            SAMPLE_DOCMETA.get_secondaries(), 
-            set([CATEGORIES["math-ph"], CATEGORIES["math.NA"]]), 
+            SAMPLE_DOCMETA.get_secondaries(),
+            set([CATEGORIES["math-ph"], CATEGORIES["math.NA"]]),
             "only retrieves canonical version of each secondary"
         )
 
         self.assertEqual(
-            SAMPLE_DOCMETA.display_secondaries(), 
-            ['Mathematical Physics (math-ph)', 'Numerical Analysis (math.NA)'], 
+            SAMPLE_DOCMETA.display_secondaries(),
+            ['Mathematical Physics (math-ph)', 'Numerical Analysis (math.NA)'],
             "secondary display string must match"
         )
-        
+
     def test_misc(self):
         self.assertTrue(len(SAMPLE_DOCMETA.get_browse_context_list()) == 6)
         self.assertTrue(SAMPLE_DOCMETA.highest_version() == 1)
@@ -125,8 +125,29 @@ class DocMetadataTest(TestCase):
         # Throws an error:
         # print( "canonical url", SAMPLE_DOCMETA.canonical_url() )
         # self.assertFalse(SAMPLE_DOCMETA.canonical_url() > 0)
-        
+
     def test_get_raw(self):
         # These may be fragile if the data in SAMPLE_DOCMETA changes...
-        self.assertTrue(len(SAMPLE_DOCMETA.raw()) == 373)
-        self.assertTrue(len(SAMPLE_DOCMETA.raw().split('\n')) == 15)
+        output = SAMPLE_DOCMETA.raw()
+        expected = ('------------------------------------------------------------------------------\n'
+                    '\\\n'
+                    'arXiv:1204.5678\n'
+                    'From: a submitter\n'
+                    'Date: Tue, 3 Feb 2026 10:40:58    (30kb,D)\n'
+                    '\n'
+                    'Title: title of paper\n'
+                    'Authors: First Name, Second, Name\n'
+                    'Categories: hep-th cs.NA math-ph math.MP\n'
+                    'Comments: very insightful comments\n'
+                    'Journal-ref: journal of mystical knowledge\n'
+                    'License: None\n'
+                    '\\\n'
+                    '  also abs text here\n'
+                    '\\')
+        self.assertTrue(isinstance(output, str))
+        for a, b in zip(output.splitlines(), expected.splitlines()):
+            # Date changes every run, and as long as both start with "Date: ", good enough
+            if a.startswith('Date: ') and b.startswith('Date: '):
+                continue
+            self.assertEqual(a, b)
+        # removed number of lines test since the expected implies the n-lines, and tests line by line
