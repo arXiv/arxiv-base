@@ -3,13 +3,14 @@ import logging
 import json
 from datetime import date, timedelta
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, select
 
 import fastly 
 from fastly.api.purge_api import PurgeApi
 
 from arxiv.config import settings
 from arxiv.db import Session
+from sqlalchemy import orm
 from arxiv.db.models import Metadata, Updates
 from arxiv.identifier import Identifier, IdentifierException
 from arxiv.taxonomy.definitions import GROUPS
@@ -21,38 +22,38 @@ logger = logging.getLogger(__name__)
 SERVICE_IDS=json.loads(settings.FASTLY_SERVICE_IDS)
 MAX_PURGE_KEYS=256
 
-def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None):
+def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None, session:Optional[orm.Session]=None):
     """purges all keys needed for an unspecified change to a paper
     clears everything related to the paper, as well as any list and year pages it is on
     old_cats: include this string if the paper undergoes a category change to also purge pages the paper may have been removed from (or new year pages it is added to)
     raises an IdentifierException if the paper_id is invalid, and KeyError if the category string contains invalid categories, and a fastly.ApiException if the purge request fails
     """
     arxiv_id = Identifier(paper_id)
-    keys=_purge_category_change(arxiv_id, old_cats)
+    keys=_purge_category_change(arxiv_id, old_cats, session)
     keys.append(f'paper-id-{arxiv_id.id}')
     purge_fastly_keys(keys)
     return
 
-def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
+def _get_category_and_date(arxiv_id:Identifier, session:Optional[orm.Session]=None)-> Tuple[str, Optional[date]]:
     """fetches the current categories for a paper as well as the last date it had announced changes to determine if it belongs in recent or new page
         extra days were added to accomidate for weekends and holidays, 
         these will occasionally purge new and recent papers more than is needed, but better to over clear than underclear
     """
     meta=aliased(Metadata)
     up=aliased(Updates)
+    stmt=select(
+        meta.abs_categories,
+        func.max(up.date)
+    ).outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly"))\
+    .filter(meta.paper_id==arxiv_id.id)\
+    .filter(meta.is_current==1)
 
-    with Session() as session:
-        result=(
-            session.query(
-            meta.abs_categories, 
-            func.max(up.date)
-            )
-            .outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly")) #left join
-            .filter(meta.paper_id==arxiv_id.id)
-            .filter(meta.is_current==1)
-            .first()
-        )
-        
+    if session:
+        result = session.execute(stmt).first()
+    else:
+        with Session() as session:
+            result= session.execute(stmt).first()
+
     new_cats: str=result[0]
     recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
 
@@ -61,14 +62,14 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
 
     return new_cats, recent_date
 
-def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> List[str]:
+def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None, session:Optional[orm.Session]=None )-> List[str]:
     """determines all list and year pages required for a category change to a paper
         returns list of all keys to purge
         does not include paths for the paper itself
         assumes categories will be provided as string like from abs_categories feild, but could be improved if categories could be specified in a list
     """
     grp_physics=GROUPS['grp_physics']
-    new_cats, recent_date= _get_category_and_date(arxiv_id)
+    new_cats, recent_date= _get_category_and_date(arxiv_id, session)
 
     #get time period affected
     today=date.today()

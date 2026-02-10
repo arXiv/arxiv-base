@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from datetime import date
 from fastly.api.purge_api import PurgeApi
+from sqlalchemy.orm import Session
 
 from arxiv.identifier import Identifier, IdentifierException
 from arxiv.integration.fastly.purge import purge_fastly_keys, _purge_category_change, purge_cache_for_paper, _get_category_and_date
@@ -221,4 +222,11 @@ def test_get_category_and_date_nonexstant_ids(db_configed):
     bad_id=Identifier("0807.9999")
     with pytest.raises(IdentifierException):
         _get_category_and_date(bad_id)
-   
+
+def test_get_category_and_date_nonexstant_ids_withdb(db_with_user):
+    #there is no paper with this id
+    #also base has no test db so any paper would return none, but this will work even if it gets data
+    bad_id=Identifier("0807.9999")
+    with pytest.raises(IdentifierException):
+        with Session(db_with_user) as session:
+            _get_category_and_date(bad_id, session)
