@@ -67,7 +67,8 @@ jobs:
 
       - name: Upload coverage HTML report
         uses: actions/upload-artifact@v4
-        if: success()
+        # when running "gh act", this step cannot be executed as this is running locally
+        if: success() && !env.ACT
         with:
           name: coverage-report
           path: htmlcov/
