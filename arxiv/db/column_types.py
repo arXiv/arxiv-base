@@ -314,6 +314,11 @@ class Utf8String(BinaryStringType):
     def __init__(self, length: Optional[int] = None, **kwargs):
         super().__init__(length=length, charset='utf-8', **kwargs)
 
+    @classmethod
+    def class_factory(cls, length: Optional[int] = None, **kwargs):
+        """Return Utf8String with a plain String fallback for SQLite."""
+        return cls(length=length, **kwargs).with_variant(String(length=length), "sqlite")
+
 
 class Utf8Text(TranscodedText):
     """TEXT column with utf8mb3 encoding."""
@@ -321,4 +326,9 @@ class Utf8Text(TranscodedText):
 
     def __init__(self, **kwargs):
         super().__init__(charset='utf-8', **kwargs)
+
+    @classmethod
+    def class_factory(cls, **kwargs):
+        """Return Utf8Text with a plain Text fallback for SQLite."""
+        return cls(**kwargs).with_variant(Text, "sqlite")
 
