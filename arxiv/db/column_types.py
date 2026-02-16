@@ -3,8 +3,10 @@
 These TypeDecorators handle transcoding from bytes to strings based on the column's character set.
 """
 
-from typing import Optional, Any
+from typing import Optional, Any, Type
 from sqlalchemy import TypeDecorator, String, Text, LargeBinary, func
+from sqlalchemy.sql.type_api import _CT, ColumnElement, TypeEngine
+from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.dialects import mysql
 from sqlalchemy.types import UserDefinedType
 from logging import getLogger
@@ -19,11 +21,11 @@ class BinaryStringComparator(UserDefinedType.Comparator):
     by encoding the comparison value as bytes and using binary comparison.
     """
 
-    def __clause_element__(self):
+    def __clause_element__(self) -> ColumnElement[_CT]:
         """Return the column without BINARY cast for comparisons."""
         return self.expr
 
-    def _binary_compare(self, other, operator):
+    def _binary_compare(self, other: Any, operator: Any) -> Any:
         """Helper to encode the comparison value and use binary comparison."""
         if isinstance(other, str):
             # Encode the string to bytes using UTF-8
@@ -31,7 +33,7 @@ class BinaryStringComparator(UserDefinedType.Comparator):
         # Compare using BINARY cast on both sides
         return operator(func.binary(self.expr), func.binary(other))
 
-    def contains(self, other, **kwargs):
+    def contains(self, other: Any, **kwargs: Any) -> Any:
         """Override contains to work with binary data."""
         if isinstance(other, str):
             other = other.encode('utf-8')
@@ -39,14 +41,14 @@ class BinaryStringComparator(UserDefinedType.Comparator):
         pattern = b'%' + other + b'%'
         return func.binary(self.expr).like(func.binary(pattern))
 
-    def startswith(self, other, **kwargs):
+    def startswith(self, other: Any, escape: Optional[str] = None, autoescape: bool = False) -> Any:
         """Override startswith to work with binary data."""
         if isinstance(other, str):
             other = other.encode('utf-8')
         pattern = other + b'%'
         return func.binary(self.expr).like(func.binary(pattern))
 
-    def endswith(self, other, **kwargs):
+    def endswith(self, other: Any, escape: Optional[str] = None, autoescape: bool = False) -> Any:
         """Override endswith to work with binary data."""
         if isinstance(other, str):
             other = other.encode('utf-8')
@@ -70,10 +72,12 @@ class BinaryStringType(TypeDecorator):
     impl = String
     cache_ok = False  # column_expression/bind_expression modify SQL generation
 
+    comparator_factory: Type[BinaryStringComparator] = BinaryStringComparator
+
     def __init__(self, length: Optional[int] = None,
                  charset: Optional[str] = None,
                  fallback_charset: str = 'utf-8',
-                 **kwargs):
+                 **kwargs: Any) -> None:
         """
         Args:
             length: Maximum string length (for VARCHAR)
@@ -86,18 +90,13 @@ class BinaryStringType(TypeDecorator):
         self.charset = charset
         self.fallback_charset = fallback_charset
 
-    @property
-    def comparator_factory(self):
-        """Use custom comparator for binary string operations."""
-        return BinaryStringComparator
-
-    def load_dialect_impl(self, dialect):
+    def load_dialect_impl(self, dialect: Dialect) -> TypeEngine[Any]:
         """Use MySQL-specific VARCHAR type."""
         if dialect.name == 'mysql':
             return dialect.type_descriptor(mysql.VARCHAR(length=self.length))
         return dialect.type_descriptor(String(length=self.length))
 
-    def process_result_value(self, value: Any, dialect) -> Optional[str]:
+    def process_result_value(self, value: Any, dialect: Dialect) -> Optional[str]:
         """Convert bytes from database to string.
 
         When use_unicode=False, MySQL connector returns bytes.
@@ -112,7 +111,7 @@ class BinaryStringType(TypeDecorator):
 
         # Not bytes, return as-is
         if not isinstance(value, bytes):
-            return value
+            return str(value)
 
         # Transcode bytes to string
         if self.charset:
@@ -129,7 +128,7 @@ class BinaryStringType(TypeDecorator):
             except UnicodeDecodeError:
                 return value.decode(self.fallback_charset, errors='replace')
 
-    def process_bind_param(self, value: Any, dialect) -> Optional[bytes]:
+    def process_bind_param(self, value: Any, dialect: Dialect) -> Optional[bytes]:
         """Handle encoding for INSERT/UPDATE.
 
         When use_unicode=False, we encode strings to bytes using the target charset.
@@ -146,18 +145,17 @@ class BinaryStringType(TypeDecorator):
             return value
 
         # Convert to string first if needed
-        if not isinstance(value, str):
-            value = str(value)
+        str_value: str = value if isinstance(value, str) else str(value)
 
         # Encode to bytes using the target charset
         target_charset = self.charset or 'utf8'
         try:
-            return value.encode(target_charset)
+            return str_value.encode(target_charset)
         except UnicodeEncodeError as e:
             logger.warning(f"Failed to encode with {target_charset}, using utf8 with replace: {e}")
-            return value.encode('utf8', errors='replace')
+            return str_value.encode('utf8', errors='replace')
 
-    def bind_expression(self, bindvalue):
+    def bind_expression(self, bindvalue: Any) -> Any:
         """Wrap bind parameters with MySQL's BINARY() function.
 
         This makes SQLAlchemy generate SQL like:
@@ -170,7 +168,7 @@ class BinaryStringType(TypeDecorator):
         """
         return func.binary(bindvalue)
 
-    def column_expression(self, col):
+    def column_expression(self, col: Any) -> Any:
         """Wrap column in BINARY cast for SELECT queries.
 
         This makes SQLAlchemy generate SQL like:
@@ -199,9 +197,11 @@ class TranscodedText(TypeDecorator):
     impl = Text
     cache_ok = False  # column_expression/bind_expression modify SQL generation
 
+    comparator_factory: Type[BinaryStringComparator] = BinaryStringComparator
+
     def __init__(self, charset: Optional[str] = None,
                  fallback_charset: str = 'latin1',
-                 **kwargs):
+                 **kwargs: Any) -> None:
         """
         Args:
             charset: Expected character set ('utf8mb3', 'utf8mb4', 'latin1', etc.)
@@ -213,18 +213,13 @@ class TranscodedText(TypeDecorator):
         self.charset = charset
         self.fallback_charset = fallback_charset
 
-    @property
-    def comparator_factory(self):
-        """Use custom comparator for binary string operations."""
-        return BinaryStringComparator
-
-    def load_dialect_impl(self, dialect):
+    def load_dialect_impl(self, dialect: Dialect) -> TypeEngine[Any]:
         """Use MySQL-specific TEXT type."""
         if dialect.name == 'mysql':
             return dialect.type_descriptor(mysql.TEXT())
         return dialect.type_descriptor(Text())
 
-    def process_result_value(self, value: Any, dialect) -> Optional[str]:
+    def process_result_value(self, value: Any, dialect: Dialect) -> Optional[str]:
         """Convert bytes from database to string."""
         if value is None:
             return None
@@ -233,7 +228,7 @@ class TranscodedText(TypeDecorator):
             return value
 
         if not isinstance(value, bytes):
-            return value
+            return str(value)
 
         # Transcode bytes to string
         if self.charset:
@@ -249,7 +244,7 @@ class TranscodedText(TypeDecorator):
             except UnicodeDecodeError:
                 return value.decode(self.fallback_charset, errors='replace')
 
-    def process_bind_param(self, value: Any, dialect) -> Optional[bytes]:
+    def process_bind_param(self, value: Any, dialect: Dialect) -> Optional[bytes]:
         """Handle encoding for INSERT/UPDATE.
 
         When use_unicode=False, we encode strings to bytes using the target charset.
@@ -266,18 +261,17 @@ class TranscodedText(TypeDecorator):
             return value
 
         # Convert to string first if needed
-        if not isinstance(value, str):
-            value = str(value)
+        str_value: str = value if isinstance(value, str) else str(value)
 
         # Encode to bytes using the target charset
         target_charset = self.charset or 'utf8'
         try:
-            return value.encode(target_charset)
+            return str_value.encode(target_charset)
         except UnicodeEncodeError as e:
             logger.warning(f"Failed to encode with {target_charset}, using utf8 with replace: {e}")
-            return value.encode('utf8', errors='replace')
+            return str_value.encode('utf8', errors='replace')
 
-    def bind_expression(self, bindvalue):
+    def bind_expression(self, bindvalue: Any) -> Any:
         """Wrap bind parameters with MySQL's BINARY() function.
 
         This makes SQLAlchemy generate SQL like:
@@ -290,7 +284,7 @@ class TranscodedText(TypeDecorator):
         """
         return func.binary(bindvalue)
 
-    def column_expression(self, col):
+    def column_expression(self, col: Any) -> Any:
         """Wrap column in BINARY cast for SELECT queries.
 
         This makes SQLAlchemy generate SQL like:
@@ -311,12 +305,12 @@ class Utf8String(BinaryStringType):
     """VARCHAR column with utf8mb3 encoding."""
     cache_ok = False
 
-    def __init__(self, length: Optional[int] = None, **kwargs):
+    def __init__(self, length: Optional[int] = None, **kwargs: Any) -> None:
         super().__init__(length=length, charset='utf-8', **kwargs)
 
     @classmethod
-    def class_factory(cls, length: Optional[int] = None, **kwargs):
-        """Return Utf8String with a plain String fallback for SQLite."""
+    def column_factory(cls, length: Optional[int] = None, **kwargs: Any) -> "Utf8String":
+        """Return Utf8String for MySQL with a plain String fallback for SQLite."""
         return cls(length=length, **kwargs).with_variant(String(length=length), "sqlite")
 
 
@@ -324,11 +318,10 @@ class Utf8Text(TranscodedText):
     """TEXT column with utf8mb3 encoding."""
     cache_ok = False
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(charset='utf-8', **kwargs)
 
     @classmethod
-    def class_factory(cls, **kwargs):
-        """Return Utf8Text with a plain Text fallback for SQLite."""
+    def column_factory(cls, **kwargs: Any) -> "Utf8Text":
+        """Return Utf8Text for MySQL with a plain Text fallback for SQLite."""
         return cls(**kwargs).with_variant(Text, "sqlite")
-
