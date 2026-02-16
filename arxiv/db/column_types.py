@@ -5,10 +5,11 @@ These TypeDecorators handle transcoding from bytes to strings based on the colum
 
 from typing import Optional, Any, Type
 from sqlalchemy import TypeDecorator, String, Text, LargeBinary, func
-from sqlalchemy.sql.type_api import _CT, ColumnElement, TypeEngine
+from sqlalchemy.sql.type_api import TypeEngine, _CT
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.dialects import mysql
 from sqlalchemy.types import UserDefinedType
+from sqlalchemy.sql.elements import ColumnElement
 from logging import getLogger
 
 logger = getLogger(__name__)
