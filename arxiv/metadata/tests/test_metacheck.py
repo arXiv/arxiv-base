@@ -575,6 +575,7 @@ REPORT_NO_TESTS = [
      (HOLD, [Complaint.MUST_CONTAIN_LETTERS])],
     ["12345",
      (HOLD, [Complaint.MUST_CONTAIN_LETTERS])],
+    ["ECTP-2024-05; WLCAPP-2024-05; FUE-2024-05", None],
 ]
 
 
@@ -677,6 +678,7 @@ MSC_CLASS_TESTS = [
      (WARN, [Complaint.TRAILING_WHITESPACE])],
     ["abc\ndef",
      (WARN, [Complaint.CONTAINS_CONTROL_CHARS])],
+    ["14J60 (Primary) 14F05, 14J26 (Secondary)", None],
 ]
 
 
@@ -704,6 +706,7 @@ ACM_CLASS_TESTS = [
      (WARN, [Complaint.TRAILING_WHITESPACE])],
     ["abc\ndef",
      (WARN, [Complaint.CONTAINS_CONTROL_CHARS])],
+    ["F.2.2; I.2.7", None],
 ]
 
 

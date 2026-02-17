@@ -1034,7 +1034,7 @@ def check_acm_class(v: str) -> MetadataCheckReport:
     add_complaints_matching(control_chars_re, v, Complaint.CONTAINS_CONTROL_CHARS, report)
     add_complaints_matching(utf8_in_latin1_re, v, Complaint.BAD_UNICODE_ENCODING, report)
     #
-    add_complaints_matching(r";", v, Complaint.CONTAINS_SEMICOLON, report)
+    # "separate multiple classifications with a semicolon and a space"
     #
     return report
 
