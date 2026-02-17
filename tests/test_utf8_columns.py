@@ -8,6 +8,7 @@ The test fixture automatically manages the Docker MySQL container.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import os
 import socket
 import subprocess
@@ -18,7 +19,7 @@ import pytest
 from sqlalchemy import Engine, create_engine, NullPool
 from sqlalchemy.orm import Session
 
-from arxiv.db.models import TapirEmailTemplate
+from arxiv.db.models import TapirEmailTemplate, AdminLog
 
 
 # Test database connection parameters
@@ -91,7 +92,7 @@ def db_engine() -> Generator[Engine, None, None]:
         pytest.fail(f"Failed to start MySQL container: {result.stderr}")
 
     # Wait for MySQL to be ready
-    if not wait_for_mysql(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, timeout=60):
+    if not wait_for_mysql(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, timeout=120):
         # Clean up on failure
         subprocess.run(
             ["docker", "compose", "-f", DOCKER_COMPOSE_FILE, "down", "-v"],
@@ -209,6 +210,45 @@ class TestTapirEmailTemplateUtf8:
 
         assert fetched is not None
         assert fetched.data == boundary_data
+
+        # Clean up
+        db_session.delete(fetched)
+        db_session.commit()
+
+
+class TestAdminLogUtf8:
+
+    def test_insert_and_read_utf8_data(self, db_session: Session) -> None:
+        """Test that UTF-8 characters can be stored and retrieved correctly."""
+        log_text = "ASCII: Hello 2-byte: é ñ ü ß 3-byte: 日本語"
+
+        # Create the template using the test_user (user_id=1)
+        timestamp = datetime.now(tz=timezone.utc)
+        log_entry = AdminLog(
+            logtime=timestamp.isoformat()[:24],
+            created=timestamp,
+            logtext=log_text,
+            old_created = timestamp,
+            updated=timestamp,
+        )
+
+        db_session.add(log_entry)
+        db_session.commit()
+
+        # Refresh to get the auto-generated template_id
+        db_session.refresh(log_entry)
+        log_id = log_entry.id
+
+        # Clear the session cache and re-fetch from database
+        db_session.expire_all()
+
+        # Query the template back
+        fetched = db_session.get(AdminLog, log_id)
+
+        # Verify the UTF-8 data was stored and retrieved correctly
+        assert fetched is not None
+        assert isinstance(fetched.logtext, str)
+        assert fetched.logtext == log_text
 
         # Clean up
         db_session.delete(fetched)

@@ -27,13 +27,26 @@ except ImportError:
     pgvector = None
 
 if sys.version_info < (3, 10):
-    from importlib_metadata import entry_points, version
+    from importlib_metadata import version
 else:
-    from importlib.metadata import entry_points, version
+    from importlib.metadata import version
+
+
+def _discover_generators() -> dict[str, type]:
+    """Discover generator classes by introspecting the generators module."""
+    from . import generators as gen_module
+    from .generators import CodeGenerator
+    return {
+        cls.__name__.removesuffix("Generator").lower(): cls
+        for name in dir(gen_module)
+        if isinstance(cls := getattr(gen_module, name), type)
+        and issubclass(cls, CodeGenerator)
+        and cls is not CodeGenerator
+    }
 
 
 def main() -> None:
-    generators = {ep.name: ep for ep in entry_points(group="sqlacodegen.generators")}
+    generators = _discover_generators()
     parser = argparse.ArgumentParser(
         description="Generates SQLAlchemy model code from an existing database."
     )
@@ -111,7 +124,7 @@ def main() -> None:
                 raise Exception("not supported")
 
     # Instantiate the generator
-    generator_class = generators[args.generator].load()
+    generator_class = generators[args.generator]
 
     generator = generator_class(metadata, engine, options, **kwargs)
 

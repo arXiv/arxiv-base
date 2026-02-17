@@ -124,7 +124,7 @@ class AdminLog(Base):
     host: Mapped[Optional[str]] = mapped_column(String(64))
     program: Mapped[Optional[str]] = mapped_column(String(20))
     command: Mapped[Optional[str]] = mapped_column(String(20), index=True)
-    logtext: Mapped[Optional[str]] = mapped_column(Text)
+    logtext: Mapped[Optional[str]] = mapped_column(Utf8Text.column_factory())
     document_id: Mapped[Optional[int]] = mapped_column(Integer)
     submission_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     notify: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -1625,10 +1625,10 @@ class TapirEmailTemplate(Base):
     __table_args__ = (Index("short_name", "short_name", "lang", unique=True), {"mysql_charset": "latin1"})
 
     template_id: Mapped[intpk]
-    short_name: Mapped[str] = mapped_column(Utf8String(32), nullable=False, server_default=FetchedValue())
+    short_name: Mapped[str] = mapped_column(Utf8String.column_factory(32), nullable=False, server_default=FetchedValue())
     lang: Mapped[str] = mapped_column(String(2), nullable=False, server_default=FetchedValue())
-    long_name: Mapped[str] = mapped_column(Utf8String(255), nullable=False, server_default=FetchedValue())
-    data: Mapped[str] = mapped_column(Utf8Text, nullable=False)
+    long_name: Mapped[str] = mapped_column(Utf8String.column_factory(255), nullable=False, server_default=FetchedValue())
+    data: Mapped[str] = mapped_column(Utf8Text.column_factory(), nullable=False)
     sql_statement: Mapped[str] = mapped_column(Text, nullable=False)
     update_date: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=FetchedValue())
     created_by: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True, server_default=FetchedValue())

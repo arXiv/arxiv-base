@@ -498,12 +498,15 @@ def is_port_open(host: str, port: int):
 def run_mysql_container(port: int):
     """Start a mysql docker"""
     mysql_image = "mysql:8.4.5"
+    codegen_db_container_name = "mysql-codegen-db"
     try:
+        subprocess.run(["docker", "rm", "-f", codegen_db_container_name],
+                       capture_output=True)
         subprocess.run(["docker", "pull", mysql_image], check=True)
 
         subprocess.run(
             [
-                "docker", "run", "-d", "--name", "mysql-test",
+                "docker", "run", "-d", "--name", codegen_db_container_name,
                 "-e", "MYSQL_ROOT_PASSWORD=testpassword",
                 "-e", "MYSQL_USER=testuser",
                 "-e", "MYSQL_PASSWORD=testpassword",
@@ -579,7 +582,9 @@ def main() -> None:
     p_outfile = os.path.join(arxiv_dir, "db/autogen_models.py")
     db_metadata = os.path.join(arxiv_dir, "db/arxiv-db-metadata.yaml")
 
-    codegen_dir = os.path.join(arxiv_base_dir, "development/sqlacodegen")
+    dev_dir = os.path.join(arxiv_base_dir, "development")
+    codegen_dir = os.path.join(dev_dir, "sqlacodegen")
+    logging.info(f"codegen_dir - {codegen_dir}")
 
     # If there is no MySQL up and running, start a container
     if not is_port_open("127.0.0.1", mysql_port):
@@ -589,7 +594,6 @@ def main() -> None:
                 break
             time.sleep(1)
 
-
     # Load the arxiv_db_schema.sql to the database.
     load_sql_file(os.path.join(arxiv_dir, "db/arxiv_db_schema.sql"), mysql_port, ssl_enabled)
 
@@ -597,9 +601,13 @@ def main() -> None:
     ssl_flags = "" if ssl_enabled else "?ssl=false&ssl_mode=DISABLED"
     p_url = f"mysql://testuser:testpassword@127.0.0.1:{mysql_port}/testdb" + ssl_flags
 
-    sys.path.append(os.path.join(codegen_dir, "src"))
+    env = os.environ.copy()
+    pythonpath = os.path.join(codegen_dir, "src")
+    if env.get("PYTHONPATH"):
+        pythonpath = pythonpath + os.pathsep + env["PYTHONPATH"]
+    env["PYTHONPATH"] = pythonpath
     subprocess.run(['venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile,
-                    '--model-metadata', db_metadata], check=True, cwd=arxiv_base_dir)
+                    '--model-metadata', db_metadata], check=True, cwd=arxiv_base_dir, env=env)
 
     # autogen_models.py
     with open(p_outfile, 'r') as src:

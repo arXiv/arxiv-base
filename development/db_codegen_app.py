@@ -4,7 +4,7 @@ Interactive Database Code Generator Application
 
 A multi-stage TUI application for generating code from database schemas.
 """
-
+import os
 import sys
 import subprocess
 import socket
@@ -685,7 +685,9 @@ class Stage5Screen(Container):
             self.show_status(f"[red]Error: Invalid port number: {mysql_port}[/red]")
             return
 
-        script_path = Path(codegen_script)
+        dev_dir_path = Path(os.path.abspath(__file__)).parent
+        arxiv_base_dir_path = dev_dir_path.parent
+        script_path = arxiv_base_dir_path / codegen_script
         if not script_path.exists():
             self.show_status(f"[red]Error: Script '{codegen_script}' does not exist[/red]")
             return
@@ -710,12 +712,13 @@ class Stage5Screen(Container):
 
         try:
             # Run the code generation script with arguments
+            # db_codegen.py is designed to run in the arxiv-base directory.
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 check=True,
-                cwd=Path.cwd()
+                cwd=arxiv_base_dir_path.as_posix()
             )
 
             # Display and save stdout

@@ -42,8 +42,9 @@ Subscription_UniversalInstitutionIP:
 arXiv_admin_log:
   class_name: AdminLog
   columns:
+    logtext: "mapped_column(Utf8Text.column_factory())"
     updated: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))"
-  
+
 arXiv_admin_metadata:
   class_name: AdminMetadata
   table_args:
@@ -428,9 +429,9 @@ tapir_email_mailings:
 tapir_email_templates:
   class_name: TapirEmailTemplate
   columns:
-    short_name: "mapped_column(Utf8String(32), nullable=False, server_default=FetchedValue())"
-    long_name: "mapped_column(Utf8String(255), nullable=False, server_default=FetchedValue())"
-    data: "mapped_column(Utf8Text, nullable=False)"
+    short_name: "mapped_column(Utf8String.column_factory(32), nullable=False, server_default=FetchedValue())"
+    long_name: "mapped_column(Utf8String.column_factory(255), nullable=False, server_default=FetchedValue())"
+    data: "mapped_column(Utf8Text.column_factory(), nullable=False)"
 
 tapir_email_tokens:
   class_name: TapirEmailToken
