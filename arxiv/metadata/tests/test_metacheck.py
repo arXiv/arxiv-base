@@ -1,3 +1,6 @@
+
+# This file contains Unicode!
+
 import pytest
 
 from typing import Dict
@@ -10,7 +13,7 @@ try:
     from arxiv.metadata.metacheck import combine_dispositions, Metadata
 except ModuleNotFoundError:
     pytest.skip(
-        """"gcld3 and/or protobuf-compile are not installed.
+        """gcld3 and/or protobuf-compile are not installed.
             To run these tests, install with:
             sudo apt install -y protobuf-compiler
             poetry install --extras qa""",
@@ -85,7 +88,8 @@ def test_combine_dispositions():
 ##### TITLE field checks
 
 TITLE_TESTS = [
-    # ("", (HOLD, [CANNOT_BE_EMPTY])),
+    ("",
+     (HOLD, [Complaint.CANNOT_BE_EMPTY])),
     ("A fine title", None),
     ("Another title about CERN and ALPEH where z~1/2", None),
     ("Tiny", (WARN, [Complaint.TOO_SHORT])),
@@ -157,8 +161,20 @@ TITLE_TESTS = [
     # 'Title: contains \\texttt',
     # 'Title: contains unnecessary escape: \\#',
     # 'Title: contains unnecessary escape: \\%',
+    # Something in Greek (!)
+    ("Αν Ήταν Εφικτό Να Συμπτυχθεί Ολόκληρη Η Γη Σε Μια Ακτίνα 0,9 Εκατοστών, Δηλαδή Στο Μέγεθος Ενός Κερασιού, Θα Είχε Μετατραπεί Σε Μαύρη Τρύπα. Η C Είναι Μια Σχετικά Μινιμαλιστική Γλώσσα Προγραμματισμού. Η Μνήμη Ενός Κλασικού Ψηφιακού Υπολογισ", None),
+    ("Προγραμματισμού", None),
+    # But we might complain about capitalized Greek (!)
+    ("ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΎ",
+     (WARN, [Complaint.EXCESSIVE_CAPITALIZATION])),
 ]
 
+# for i in range(len("Προγραμματισμού")):
+#     print( i, "Προγραμματισμού"[i], ord("Προγραμματισμού"[i]) )
+
+# for i in range(len("Προγραμματισμού".encode("utf-8"))):
+#     print( i, "Προγραμματισμού".encode("utf-8")[i], ("Προγραμματισμού".encode("utf-8")[i]) )
+    
 
 @pytest.mark.parametrize("test", TITLE_TESTS)
 def test_titles(test):
@@ -175,8 +191,8 @@ def test_titles(test):
 ##### Detailed tests for AUTHORS field
 
 AUTHORS_TESTS = [
-    # ("",
-    #  (HOLD, [Complaint.CANNOT_BE_EMPTY])),
+    ("",
+     (HOLD, [Complaint.CANNOT_BE_EMPTY])),
     ("C Li", None),
     ("Li C", None),
     ("C C", (WARN, [Complaint.TOO_SHORT])),
