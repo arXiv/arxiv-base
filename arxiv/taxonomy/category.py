@@ -57,6 +57,12 @@ class BaseTaxonomy(BaseModel):
     def __hash__(self):
         return hash((self.__class__, self.id))
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.id})"
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}({self.id})"
+
 class Group(BaseTaxonomy):
     """Represents an arXiv group--the highest (most general) taxonomy level."""
     start_year: int

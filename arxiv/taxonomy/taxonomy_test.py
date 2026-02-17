@@ -230,3 +230,17 @@ class TestTaxonomy(TestCase):
         self.assertCountEqual(archs, [ARCHIVES["solv-int"], ARCHIVES["nlin"]], "include subsumed archive")
         expected_cats=[CATEGORIES["nlin.SI"], CATEGORIES["solv-int"]]
         self.assertCountEqual(cats, expected_cats, "all versions present")
+
+    def test_print_tax_nicely(self):
+        cat=CATEGORIES["cs.AI"]
+        assert repr(cat) == "Category(cs.AI)"
+        assert str(cat) == "Category(cs.AI)"
+
+        arch=ARCHIVES["hep-lat"]
+        assert repr(arch)=="Archive(hep-lat)"
+        assert str(arch)=="Archive(hep-lat)"
+
+        group=GROUPS["grp_physics"]
+        assert repr(group)== "Group(grp_physics)"
+        assert str(group)== "Group(grp_physics)"
+
