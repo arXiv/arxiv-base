@@ -1,0 +1,7 @@
+<div id="infobox" class="infobox">
+  <a id="license-tr" href="https://info.arxiv.org/help/license/index.html#licenses-available">{{ 
+    abs_meta.license and abs_meta.license.short_label }}</a>
+  <div id="watermark-tr">arXiv:{{ abs_meta.arxiv_id_v }} {#
+    #}[{{ abs_meta.primary_category and abs_meta.primary_category.id }}] {#
+    #}{{ abs_meta.modified and abs_meta.get_datetime_of_version(None).strftime("%d %b %Y") }}</div>
+</div>
