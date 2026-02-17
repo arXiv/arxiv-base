@@ -32,7 +32,7 @@ class BinaryStringComparator(UserDefinedType.Comparator):
             # Encode the string to bytes using UTF-8
             other = other.encode('utf-8')
         # Compare using BINARY cast on both sides
-        return operator(func.binary(self.expr), func.binary(other))
+        return operator(func.cast(self.expr, LargeBinary), func.cast(other, LargeBinary))
 
     def contains(self, other: Any, **kwargs: Any) -> Any:
         """Override contains to work with binary data."""
@@ -40,21 +40,21 @@ class BinaryStringComparator(UserDefinedType.Comparator):
             other = other.encode('utf-8')
         # Use LIKE with BINARY
         pattern = b'%' + other + b'%'
-        return func.binary(self.expr).like(func.binary(pattern))
+        return func.cast(self.expr, LargeBinary).like(func.cast(pattern, LargeBinary))
 
     def startswith(self, other: Any, escape: Optional[str] = None, autoescape: bool = False) -> Any:
         """Override startswith to work with binary data."""
         if isinstance(other, str):
             other = other.encode('utf-8')
         pattern = other + b'%'
-        return func.binary(self.expr).like(func.binary(pattern))
+        return func.cast(self.expr, LargeBinary).like(func.cast(pattern, LargeBinary))
 
     def endswith(self, other: Any, escape: Optional[str] = None, autoescape: bool = False) -> Any:
         """Override endswith to work with binary data."""
         if isinstance(other, str):
             other = other.encode('utf-8')
         pattern = b'%' + other
-        return func.binary(self.expr).like(func.binary(pattern))
+        return func.cast(self.expr, LargeBinary).like(func.cast(pattern, LargeBinary))
 
 
 class BinaryStringType(TypeDecorator):
@@ -167,7 +167,7 @@ class BinaryStringType(TypeDecorator):
         The BINARY() cast bypasses MySQL's character set validation,
         allowing UTF-8 bytes to be stored in latin-1 columns.
         """
-        return func.binary(bindvalue)
+        return func.cast(bindvalue, LargeBinary)
 
     def column_expression(self, col: Any) -> Any:
         """Wrap column in BINARY cast for SELECT queries.
@@ -283,7 +283,7 @@ class TranscodedText(TypeDecorator):
         The BINARY() cast bypasses MySQL's character set validation,
         allowing UTF-8 bytes to be stored in latin-1 columns.
         """
-        return func.binary(bindvalue)
+        return func.cast(bindvalue, LargeBinary)
 
     def column_expression(self, col: Any) -> Any:
         """Wrap column in BINARY cast for SELECT queries.
