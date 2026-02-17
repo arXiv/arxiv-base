@@ -197,8 +197,8 @@ def contains_outside_math(s1: str, s2: str) -> bool:
     Not perfect: fails to find xyzzy in $math$ xyzzy $$more math$$.
     """
     return (
-        re.search(s1, s2, re.IGNORECASE)
-        and not re.search("[$].*" + s1 + ".*[$]", s2, re.IGNORECASE)
+        re.search(s1, s2)
+        and not re.search("[$].*" + s1 + ".*[$]", s2)
     )
 
 
@@ -215,8 +215,6 @@ def contains_outside_math(s1: str, s2: str) -> bool:
 # We "detect" UTF-8 which has been decoded (e.g. as Latin-1)
 # by looking for two high-bit bytes which match this pattern
 # NOTE that this may incorrectly match some real Unicode.
-
-# NOTE: we can't use re.compile here because we use the re.IGNORECASE flags in add_complaints_matching
 
 # CAREFUL: don't be case insensitive here
 # utf8_in_latin1_re = re.compile("[\u00c0-\u00ff][\u0080-\u00bf]+")
@@ -668,13 +666,12 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
         name = keyname
     #
     if firstname == "":
-        if (
-            re.search(r"(?i)collaboration", name, re.IGNORECASE)
-            or re.search(r"(?i)collaborative", name, re.IGNORECASE)
-            or re.search(r"(?i)project", name, re.IGNORECASE)
-            or re.search(r"(?i)group", name, re.IGNORECASE)
-            or re.search(r"(?i)team", name, re.IGNORECASE)
-            or re.search(r"(?i)belle", name, re.IGNORECASE)
+        if (re.search(r"(?i)collaboration", name) # (?i) = re.IGNORECASE
+            or re.search(r"(?i)collaborative", name)
+            or re.search(r"(?i)project", name)
+            or re.search(r"(?i)group", name)
+            or re.search(r"(?i)team", name)
+            or re.search(r"(?i)belle", name)
         ):
             pass
         else:
@@ -760,9 +757,9 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
             ("University", r"(?i)\bUniversity\b"),
     ):
         if (
-            re.search(badpattern, keyname, re.IGNORECASE)
-            or re.search(badpattern, firstname, re.IGNORECASE)
-            or re.search(badpattern, suffix, re.IGNORECASE)
+            re.search(badpattern, keyname)
+            or re.search(badpattern, firstname)
+            or re.search(badpattern, suffix)
         ):
             # TODO: offsets
             report.add_complaint(Complaint.CONTAINS_AFFILIATION)
@@ -784,7 +781,7 @@ def check_one_author(report, keyname, firstname, suffix) -> None:
             ("Gemini", r"(?i)\bGemini\b"),
     ):
         if (
-            re.search(badpattern, name, re.IGNORECASE)
+            re.search(badpattern, name)
         ):
             # TODO: offsets
             report.add_complaint(Complaint.LLM_AUTHOR_DETECTED)
@@ -967,10 +964,10 @@ def check_doi(v: str) -> MetadataCheckReport:
     if v.lower().startswith("doi:"):
         add_complaints_matching(r"(?i)^doi:", v, Complaint.BAD_DOI_PREFIX, report)
         return report
-    elif re.match(BAD_DOI_PREFIX_RE, v, re.IGNORECASE):
+    elif re.match(BAD_DOI_PREFIX_RE, v):
         add_complaints_matching(BAD_DOI_PREFIX_RE, v, Complaint.BAD_DOI_PREFIX, report)
         return report
-    elif re.match(BAD_DOI_PREFIX_RE2, v, re.IGNORECASE):
+    elif re.match(BAD_DOI_PREFIX_RE2, v):
         add_complaints_matching(BAD_DOI_PREFIX_RE2, v, Complaint.BAD_DOI_PREFIX, report)
         return report
     #
@@ -1013,7 +1010,7 @@ def check_msc_class(v: str) -> MetadataCheckReport:
     #
     # TODO: don't show these to editors?
     # for s in ("MSC *class", "MSC number"(?i)):
-    #     if re.search(f"{s}=", v, re.IGNORECASE):
+    #     if re.search(f"{s}=", v):
     #         report.add_complaint(CONTAINS_BAD_STRING, s)
     #         break
     #     #

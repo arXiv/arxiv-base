@@ -169,13 +169,6 @@ TITLE_TESTS = [
      (WARN, [Complaint.EXCESSIVE_CAPITALIZATION])),
 ]
 
-# for i in range(len("Προγραμματισμού")):
-#     print( i, "Προγραμματισμού"[i], ord("Προγραμματισμού"[i]) )
-
-# for i in range(len("Προγραμματισμού".encode("utf-8"))):
-#     print( i, "Προγραμματισμού".encode("utf-8")[i], ("Προγραμματισμού".encode("utf-8")[i]) )
-    
-
 @pytest.mark.parametrize("test", TITLE_TESTS)
 def test_titles(test):
     title, expected_result = test
