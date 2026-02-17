@@ -27,6 +27,10 @@ jobs:
           # Install with QA/gcld3
           poetry install --with=dev --no-ansi --extras qa
 
+      - name: Run /tests
+        run: |
+          poetry run pytest tests
+
       - name: Run db/test with MySQL docker
         run: |
           sudo apt update
