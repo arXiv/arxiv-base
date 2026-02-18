@@ -254,7 +254,7 @@ class SessionStore(object):
         db = int(config.get('REDIS_DATABASE', '0'))
         token = config.get('REDIS_TOKEN', None)
         cluster = config.get('REDIS_CLUSTER', '1') == '1'
-        secret = config['JWT_SECRET']
+        secret = config.get('JWT_SECRET', 'foosecret')
         duration = int(config.get('SESSION_DURATION', '7200'))
         fake = config.get('REDIS_FAKE', False)
         return cls(host, port, db, secret, duration, token=token,
