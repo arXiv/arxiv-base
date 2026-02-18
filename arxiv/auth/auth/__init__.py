@@ -11,6 +11,7 @@ from retry import retry
 
 from ...db import transaction
 from ..legacy.cookies import parse_cookie
+from ..legacy.sessions import load as legacy_sessions_load
 from .. import domain, legacy
 
 import logging
@@ -83,7 +84,7 @@ class Auth(object):
             return None
         try:
             with transaction():
-                return legacy.sessions.load(cookie_value)
+                return legacy_sessions_load(cookie_value)
         except legacy.exceptions.UnknownSession as e:
             logger.debug('No legacy session available: %s', e)
         except legacy.exceptions.InvalidCookie as e:
