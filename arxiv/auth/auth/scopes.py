@@ -44,6 +44,8 @@ class domains:
         """Fulltext extraction."""
         PREVIEW = 'preview'
         """Submission previews."""
+        SWORD = 'sword'
+        """Use and submit via SWORD."""
 
 class actions:
         """Known authorization actions."""
@@ -149,6 +151,9 @@ READ_PREVIEW = _scope_str(domains.PREVIEW, actions.READ)
 
 CREATE_PREVIEW = _scope_str(domains.PREVIEW, actions.CREATE)
 """Can create a new submission preview."""
+
+SWORD = _scope_str(domains.SWORD, actions.CREATE)
+"""Can create SWORD submissions."""
 
 GENERAL_USER = [
     READ_PUBLIC,    # Access to public APIs.
