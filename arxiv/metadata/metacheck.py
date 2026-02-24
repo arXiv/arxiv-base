@@ -1,27 +1,17 @@
-
 import re
-
+from collections import defaultdict
+from dataclasses import dataclass
 from typing import (
     Dict,
     Optional,
-    Protocol,
     Set,
     Tuple,
-    TypedDict,
-    runtime_checkable,
 )
-
-from dataclasses import dataclass
-
-from collections import defaultdict
 
 import gcld3
 
 from arxiv.authors import parse_author_affil
-
-from arxiv.metadata import FieldName
-from arxiv.metadata import Disposition
-from arxiv.metadata import Complaint
+from arxiv.metadata import Complaint, Disposition, FieldName, MetadataProtocol
 from arxiv.metadata.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
 ############################################################
@@ -271,18 +261,6 @@ class MetadataCheckReport:
 
 
 ############################################################
-
-@runtime_checkable
-class MetadataProtocol(Protocol):
-    title: str
-    authors: str
-    abstract: str
-    comments: str
-    report_num: str
-    journal_ref: str
-    doi: str
-    msc_class: str
-    acm_class: str
 
 @dataclass
 class Metadata:      # implements MetadataProtocol
