@@ -402,6 +402,8 @@ def test_authors(test):
 ##### Detailed tests for ABSTRACT field
 
 ABSTRACT_TESTS = [
+    ("",
+     (HOLD, [Complaint.CANNOT_BE_EMPTY])),
     ("In this work, we study aaa, bbb, and ccc and conclude ddd.", None),
     ("About YBa$_{2}$Cu$_{3}$O$_{6.95}$", None),
     ("Both \\phi and \\varphi may be used", None),
@@ -556,6 +558,7 @@ def test_comments(test):
 ##### Detailed tests for REPORT-NO field
 
 REPORT_NO_TESTS = [
+    ["", None],
     ["LANL-UR/2001-01", None],
     ["ITP 09 #1", None],
     ["NO-NUM",
@@ -587,6 +590,7 @@ def test_report_num(test):
 
 JREF_TESTS = [
     # ['ibid',"Journal-ref: inappropriate word: ibid"],
+    ("", None),
     ("jref",
      (WARN, [Complaint.TOO_SHORT])),
     ("1975",
@@ -791,7 +795,8 @@ def test_offsets():
     #
 
 def test_complaint2str():
-    assert complaint2str(-1) == "(Unknown issue)"
+    # This does not typecheck
+    # assert complaint2str(-1) == "(Unknown issue)"
     for complaint in Complaint:
         assert complaint2str(complaint) != "(Unknown issue)"
     #
