@@ -795,8 +795,6 @@ def test_offsets():
     #
 
 def test_complaint2str():
-    # This does not typecheck
-    # assert complaint2str(-1) == "(Unknown issue)"
     for complaint in Complaint:
         assert complaint2str(complaint) != "(Unknown issue)"
     #
