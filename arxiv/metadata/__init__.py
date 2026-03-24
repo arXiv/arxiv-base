@@ -1,7 +1,20 @@
 # placeholder
 
-from enum import StrEnum
-from enum import IntEnum
+from enum import IntEnum, StrEnum
+from typing import Protocol, runtime_checkable
+
+
+@runtime_checkable
+class MetadataProtocol(Protocol):
+    title: str
+    authors: str
+    abstract: str
+    comments: str
+    report_num: str
+    journal_ref: str
+    doi: str
+    msc_class: str
+    acm_class: str
 
 
 class Color(StrEnum):
