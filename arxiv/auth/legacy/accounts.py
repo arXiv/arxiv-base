@@ -121,6 +121,26 @@ def get_user_by_id(user_id: str) -> domain.User:
     return user
 
 
+def get_user_by_id_with_auths(user_id: str) -> Tuple[domain.User, domain.Authorizations]:
+    db_user, db_nick, db_profile = _get_user_data(user_id)
+    user = domain.User(
+        user_id=str(db_user.user_id),
+        username=db_nick.nickname,
+        email=db_user.email,
+        name=domain.UserFullName(
+            forename=db_user.first_name,
+            surname=db_user.last_name,
+            suffix=db_user.suffix_name
+        ),
+        profile=domain.UserProfile.from_orm(db_profile) if db_profile is not None else None
+    )
+    auths = domain.Authorizations(
+        classic=util.compute_capabilities(db_user),
+        scopes=util.get_scopes(db_user),
+    )
+    return user, auths
+
+
 def update(user: domain.User) -> Tuple[domain.User, domain.Authorizations]:
     """Update a user in the database."""
     if user.user_id is None:

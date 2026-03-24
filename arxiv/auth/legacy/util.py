@@ -107,11 +107,17 @@ def _compute_capabilities(is_admin: int | bool, email_verified: int | bool, is_g
 
 def get_scopes(db_user: TapirUser) -> List[domain.Scope]:
     """Generate a list of authz scopes for a legacy user based on class."""
+    scps = []
     if db_user.policy_class == TapirPolicyClass.PUBLIC_USER:
-        return scopes.GENERAL_USER
-    if db_user.policy_class == TapirPolicyClass.ADMIN:
-        return scopes.ADMIN_USER
-    return []
+        scps.extend(scopes.GENERAL_USER)
+    elif db_user.policy_class == TapirPolicyClass.ADMIN:
+        scps.extend(scopes.ADMIN_USER)
+    if db_user.demographics:
+        if db_user.demographics.flag_proxy:
+            scps.append(scopes.PROXY_SUBMISSION)
+        if db_user.demographics.flag_xml:
+            scps.append(scopes.SWORD)
+    return scps
 
 
 def is_configured() -> bool:

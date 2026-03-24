@@ -1,17 +1,27 @@
+
 import re
-from collections import defaultdict
-from dataclasses import dataclass
+
 from typing import (
     Dict,
     Optional,
+    Protocol,
     Set,
     Tuple,
+    TypedDict,
+    runtime_checkable,
 )
+
+from dataclasses import dataclass
+
+from collections import defaultdict
 
 import gcld3
 
 from arxiv.authors import parse_author_affil
-from arxiv.metadata import Complaint, Disposition, FieldName, MetadataProtocol
+
+from arxiv.metadata import FieldName
+from arxiv.metadata import Disposition
+from arxiv.metadata import Complaint
 from arxiv.metadata.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
 ############################################################
@@ -151,20 +161,22 @@ def complaint2disposition(complaint: Complaint) -> Disposition:
 MIN_TITLE_LEN = 5
 MIN_AUTHORS_LEN = 4  # C LI is possible but not C L ?
 MIN_ABSTRACT_LEN = 5
-# No MIN_COMMENTS_LEN
+MIN_COMMENTS_LEN = -1           # not required
 MIN_REPORT_NUM_LEN = 4
 MIN_JOURNAL_REF_LEN = 5
 MIN_DOI_LEN = 10
-# No MIN_MSC_CLASS_LEN
+MIN_MSC_CLASS_LEN = -1          # not required
+MIN_ACM_CLASS_LEN = -1          # not required
 
 MAX_TITLE_LEN = 2000
-# No MAX_AUTHORS_LEN?
+MAX_AUTHORS_LEN = 10000
 MAX_ABSTRACT_LEN = 2000
-# No MAX_COMMENTS_LEN
+MAX_COMMENTS_LEN = 10000
 MAX_REPORT_NUM_LEN = 2000
 MAX_JOURNAL_REF_LEN = 2000
 MAX_DOI_LEN = 2000
-# No MAX_MSC_CLASS_LEN
+MAX_MSC_CLASS_LEN = 1000
+MAX_ACM_CLASS_LEN = 1000
 
 # Language identification is pretty fragile, particularly on short
 # abstracts and text with a lot of formulas.
@@ -187,8 +199,8 @@ def contains_outside_math(s1: str, s2: str) -> bool:
     Not perfect: fails to find xyzzy in $math$ xyzzy $$more math$$.
     """
     return (
-        re.search(s1, s2)
-        and not re.search("[$].*" + s1 + ".*[$]", s2)
+        (re.search(s1, s2) is not None)
+        and (re.search("[$].*" + s1 + ".*[$]", s2) is None)
     )
 
 
@@ -262,17 +274,29 @@ class MetadataCheckReport:
 
 ############################################################
 
+@runtime_checkable
+class MetadataProtocol(Protocol):
+    title: str | None
+    authors: str | None
+    abstract: str | None
+    comments: str | None
+    report_num: str | None
+    journal_ref: str | None
+    doi: str | None
+    msc_class: str | None
+    acm_class: str | None
+
 @dataclass
 class Metadata:      # implements MetadataProtocol
-    title: str
-    authors: str
-    abstract: str
-    comments: str
-    report_num: str
-    journal_ref: str
-    doi: str
-    msc_class: str
-    acm_class: str
+    title: str | None
+    authors: str | None
+    abstract: str | None
+    comments: str | None
+    report_num: str | None
+    journal_ref: str | None
+    doi: str | None
+    msc_class: str | None
+    acm_class: str | None
     
     def __init__(self):
         self.title = None
@@ -541,14 +565,13 @@ def check_title(v: str) -> MetadataCheckReport:
 
 def check_authors(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
-    # (Field must not be blank)
+    # (Authors field must not be blank)
     if v is None or v == "":
         report.add_complaint(Complaint.CANNOT_BE_EMPTY)
     elif len(v) < MIN_AUTHORS_LEN:
         report.add_complaint(Complaint.TOO_SHORT)
-    # NO max authors len!
-    # elif len(v) > MAX_AUTHORS_LEN:
-    #     report.add_complaint(TOO_LONG)
+    elif len(v) > MAX_AUTHORS_LEN:
+        report.add_complaint(Complaint.TOO_LONG)
     #
     add_complaints_matching(r"(?i)\\\\", v, Complaint.CONTAINS_TEX, report)
     add_complaints_matching(r"(?i)\*", v, Complaint.BAD_CHARACTER, report)
@@ -833,8 +856,14 @@ def check_abstract(v: str) -> MetadataCheckReport:
 
 def check_comments(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
-    # No check for too short (Empty comments are ok)
-    # No check for too long (!?)
+    # (Empty comments are ok)
+    if v is None or v == "":
+        pass
+    elif len(v) < MIN_COMMENTS_LEN:
+        report.add_complaint(Complaint.TOO_SHORT)
+    elif len(v) > MAX_COMMENTS_LEN:
+        report.add_complaint(Complaint.TOO_LONG)
+    #
     add_complaints_matching(r"(?i)\\\\", v, Complaint.CONTAINS_TEX, report)
     #
     if looks_like_all_caps(v):
@@ -871,7 +900,10 @@ def check_comments(v: str) -> MetadataCheckReport:
 
 def check_report_num(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
-    if len(v) < MIN_REPORT_NUM_LEN:
+    # Empty report_num is OK
+    if v is None or v == "":
+        return report           # !
+    elif len(v) < MIN_REPORT_NUM_LEN:
         report.add_complaint(Complaint.TOO_SHORT)
         return report
     elif len(v) > MAX_REPORT_NUM_LEN:
@@ -897,7 +929,10 @@ def check_report_num(v: str) -> MetadataCheckReport:
 
 def check_journal_ref(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
-    if len(v) < MIN_JOURNAL_REF_LEN:
+    # Empty journal ref is OK
+    if v is None or v == "":
+        pass
+    elif len(v) < MIN_JOURNAL_REF_LEN:
         report.add_complaint(Complaint.TOO_SHORT)
     elif len(v) > MAX_JOURNAL_REF_LEN:
         report.add_complaint(Complaint.TOO_LONG)
@@ -932,7 +967,10 @@ BAD_DOI_PREFIX_RE2 = r"(?i)^https?://.*\.doi\.org/"
 
 def check_doi(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
-    if len(v) < MIN_DOI_LEN:
+    # Empty DOI is OK 
+    if v is None or v == "":
+        pass
+    elif len(v) < MIN_DOI_LEN:
         report.add_complaint(Complaint.TOO_SHORT)
         return report
     elif len(v) > MAX_DOI_LEN:
@@ -974,6 +1012,14 @@ def check_doi(v: str) -> MetadataCheckReport:
 
 def check_msc_class(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
+    # (Empty msc class is ok)
+    if v is None or v == "":
+        pass
+    elif len(v) < MIN_MSC_CLASS_LEN:
+        report.add_complaint(Complaint.TOO_SHORT)
+    elif len(v) > MAX_MSC_CLASS_LEN:
+        report.add_complaint(Complaint.TOO_LONG)
+    #
     add_complaints_matching(r"(?i)http:", v, Complaint.CONTAINS_URL, report)
     add_complaints_matching(r"(?i)https:", v, Complaint.CONTAINS_URL, report)
     add_complaints_matching(r"(?i)doi", v, Complaint.CONTAINS_DOI2, report)
@@ -999,6 +1045,13 @@ def check_msc_class(v: str) -> MetadataCheckReport:
 
 def check_acm_class(v: str) -> MetadataCheckReport:
     report = MetadataCheckReport()
+    # (Empty acm class is ok)
+    if v is None or v == "":
+        pass
+    elif len(v) < MIN_ACM_CLASS_LEN:
+        report.add_complaint(Complaint.TOO_SHORT)
+    elif len(v) > MAX_ACM_CLASS_LEN:
+        report.add_complaint(Complaint.TOO_LONG)
     #
     add_complaints_matching(r"(?i)http:", v, Complaint.CONTAINS_URL, report)
     add_complaints_matching(r"(?i)https:", v, Complaint.CONTAINS_URL, report)
