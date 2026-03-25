@@ -74,13 +74,12 @@ LICENSES = {
         'is_current': True,
     },
     'http://creativecommons.org/publicdomain/zero/1.0/': {
-        'label': 'CC Zero: No Rights Reserved',
+        'label': 'CC0 1.0: CC0 1.0 Universal',
         "short_label": "CC Zero",
-        'note': 'CC Zero is a public dedication tool, which allows creators '
-                'to give up their copyright and put their works into the '
-                'worldwide public domain. CC0 allows reusers to distribute, '
-                'remix, adapt, and build upon the material in any medium or '
-                'format, with no conditions.',
+        'note': 'You dedicate your article to the public domain by waiving any '
+                'rights worldwide under copyright law. Anyone can copy, modify, '
+                'and distribute your article, even for commercial purposes, '
+                'all without asking permission or attribution.',
         'order': 7,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/zero-1.0.png'
