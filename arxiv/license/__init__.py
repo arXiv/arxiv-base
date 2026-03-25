@@ -9,10 +9,10 @@ LICENSES = {
     'http://creativecommons.org/licenses/by/4.0/': {
         'label': 'CC BY 4.0: Attribution 4.0 International',
         "short_label": "CC BY 4.0",
-        'note': 'This license allows reusers to distribute, remix, adapt, and '
-                'build upon the material in any medium or format, so long as '
-                'attribution is given to the creator. The license allows for '
-                'commercial use.',
+        'note': 'This is the least restrictive license. By selecting this '
+                'license, you will have given permission to anyone to '
+                'share, reuse, remix, or adapt your article as long as '
+                'they formally attribute it to you.',
         'order': 1,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
@@ -20,12 +20,11 @@ LICENSES = {
         'order': 2,
         'label': 'CC BY-SA 4.0: Attribution-ShareAlike 4.0 International',
         "short_label": "CC BY-SA 4.0",
-        'note': 'This license allows reusers to distribute, remix, adapt, and '
-                'build upon the material in any medium or format, so long as '
-                'attribution is given to the creator. The license allows for '
-                'commercial use. If you remix, adapt, or build upon the '
-                'material, you must license the modified material under '
-                'identical terms.',
+        'note': 'By selecting this license, you will have given permission '
+                'to anyone to share, reuse, remix, or adapt your article as '
+                'long as they formally attribute it to you and they distribute '
+                'any remixed or adapted version of it under the same license. '
+                'Exceptions for different licenses can be made with your permission.',
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-sa-4.0.png'},
     'http://creativecommons.org/licenses/by-nc-sa/4.0/': {
@@ -51,15 +50,17 @@ LICENSES = {
                 'attribute* it to you. Exceptions for commercial use can be '
                 'made with your permission.',
         'is_current': True,
-        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-nd-4.0.png'},
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-4.0.png'},
     'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
         'order': 5,
         'label': 'CC BY-NC-ND 4.0: Attribution-NonCommercial-NoDerivatives 4.0 International',
         "short_label": "CC BY-NC-ND 4.0",
-        'note': 'This license allows reusers to copy and distribute the '
-                'material in any medium or format in unadapted form only, for '
-                'noncommercial purposes only, and only so long as attribution '
-                'is given to the creator.',
+        'note': 'By selecting this license, you will have given permission to '
+                'anyone to share or reuse your article as long as it is not '
+                'for commercial purposes, and they formally attribute the '
+                'article to you and do not distribute any remixed or adapted '
+                'version of it. Exceptions for remixing, adapting, or '
+                'commercial use can be made with your permission.',
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-nd-4.0.png'},
     'http://arxiv.org/licenses/nonexclusive-distrib/1.0/': {
