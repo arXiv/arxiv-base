@@ -7,7 +7,7 @@ LICENSE_ICON_BASE_URI = '/icons/licenses'
 LICENSES = {
     # key is the license URI
     'http://creativecommons.org/licenses/by/4.0/': {
-        'label': 'CC BY: Creative Commons Attribution',
+        'label': 'CC BY 4.0: Attribution 4.0 International',
         "short_label": "CC BY 4.0",
         'note': 'This license allows reusers to distribute, remix, adapt, and '
                 'build upon the material in any medium or format, so long as '
@@ -18,7 +18,7 @@ LICENSES = {
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
     'http://creativecommons.org/licenses/by-sa/4.0/': {
         'order': 2,
-        'label': 'CC BY-SA: Creative Commons Attribution-ShareAlike',
+        'label': 'CC BY-SA 4.0: Attribution-ShareAlike 4.0 International',
         "short_label": "CC BY-SA 4.0",
         'note': 'This license allows reusers to distribute, remix, adapt, and '
                 'build upon the material in any medium or format, so long as '
@@ -41,10 +41,20 @@ LICENSES = {
                 'identical terms.',
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
-    'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
+    'http://creativecommons.org/licenses/by-nc/4.0/': {
         'order': 4,
-        'label': 'CC BY-NC-ND: Creative Commons '
-                 'Attribution-Noncommercial-NoDerivatives',
+        'label': 'CC BY-NC 4.0: Attribution-NonCommercial 4.0 International',
+        "short_label": "CC BY-NC 4.0",
+        'note': 'By selecting this license, you will have given permission to '
+                'anyone to share, reuse, remix, or adapt your article as long '
+                'as it is not for commercial purposes and they formally '
+                'attribute* it to you. Exceptions for commercial use can be '
+                'made with your permission.',
+        'is_current': True,
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-nd-4.0.png'},
+    'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
+        'order': 5,
+        'label': 'CC BY-NC-ND 4.0: Attribution-NonCommercial-NoDerivatives 4.0 International',
         "short_label": "CC BY-NC-ND 4.0",
         'note': 'This license allows reusers to copy and distribute the '
                 'material in any medium or format in unadapted form only, for '
@@ -59,7 +69,7 @@ LICENSES = {
         'note': 'This license gives limited rights to arXiv to distribute the '
                 'article, and limits re-use of any type from other entities '
                 'or individuals.',
-        'order': 5,
+        'order': 6,
         'is_current': True,
     },
     'http://creativecommons.org/publicdomain/zero/1.0/': {
@@ -70,7 +80,7 @@ LICENSES = {
                 'worldwide public domain. CC0 allows reusers to distribute, '
                 'remix, adapt, and build upon the material in any medium or '
                 'format, with no conditions.',
-        'order': 6,
+        'order': 7,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/zero-1.0.png'
     },
@@ -106,7 +116,7 @@ LICENSES = {
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/publicdomain.png'
     },
     'http://arxiv.org/licenses/us-public-domain/': {
-        'label': '(U.S. Government) U. S. Public Domain',
+        'label': 'U. S. Public Domain',
         'short_label': 'US-PD',
         'note': (
             'The article is a work of the U.S. government created by government'
