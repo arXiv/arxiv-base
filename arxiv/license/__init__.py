@@ -3,7 +3,6 @@ from typing import Optional
 
 """arXiv license definitions."""
 
-
 LICENSE_ICON_BASE_URI = '/icons/licenses'
 LICENSES = {
     # key is the license URI
@@ -40,7 +39,7 @@ LICENSES = {
                 'is given to the creator. If you remix, adapt, or build upon '
                 'the material, you must license the modified material under '
                 'identical terms.',
-        'is_current': True,
+        'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
     'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
         'order': 4,
@@ -105,7 +104,29 @@ LICENSES = {
         'order': 12,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/publicdomain.png'
+    },
+    'http://arxiv.org/licenses/us-public-domain/': {
+        'label': '(U.S. Government) U. S. Public Domain',
+        'short_label': 'US-PD',
+        'note': (
+            'The article is a work of the U.S. government created by government'
+            ' employees within the scope of their employment or under a contract '
+            'assigning rights to the U.S. government. Government works are by '
+            'default in the U.S. Public Domain and not subject to domestic '
+            'copyright protection under 17 U.S.C. § 105. Within the U.S., '
+            'anyone can copy, modify, and distribute the article, even for '
+            'commercial purposes, all without asking permission. The U.S. '
+            'government reserves the right to enforce its copyright elsewhere. '
+            'The default U.S. Public Domain status of U.S. Government Works is '
+            'limited to the jurisdiction of the United States. If an agency is '
+            'able to expand the public domain status to apply internationally '
+            'for works that they have produced, they can use the Creative Commons '
+            'Zero worldwide public domain dedication, by making the CC0 selection above.'
+        ),
+        'order': 13,
+        'is_current': True,
     }
+
 }
 NO_LICENSE_TEXT = 'I do not certify that any of the above licenses apply'
 
@@ -113,11 +134,11 @@ ASSUMED_LICENSE_URI = 'http://arxiv.org/licenses/assumed-1991-2003/'
 
 TRANSLATED_LICENSES = {
     'http://creativecommons.org/licenses/by/3.0/':
-    'http://creativecommons.org/licenses/by/4.0/',
+        'http://creativecommons.org/licenses/by/4.0/',
     'http://creativecommons.org/licenses/by-nc-sa/3.0/':
-    'http://creativecommons.org/licenses/by-nc-sa/4.0/',
+        'http://creativecommons.org/licenses/by-nc-sa/4.0/',
     'http://creativecommons.org/licenses/publicdomain/':
-    'http://creativecommons.org/publicdomain/zero/1.0/'
+        'http://creativecommons.org/publicdomain/zero/1.0/'
 }
 """Historical license to updated/current license (old URI: new URI)."""
 
@@ -207,7 +228,7 @@ class License:
         """Get the short label for the license."""
         if self.effective_uri in LICENSES:
             return LICENSES[self.effective_uri].get("short_label",
-                        LICENSES[self.effective_uri].get("label", "No License")
-            )
+                                                    LICENSES[self.effective_uri].get("label", "No License")
+                                                    )
         else:
             return "No License"
