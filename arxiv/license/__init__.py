@@ -135,6 +135,17 @@ LICENSES = {
         ),
         'order': 13,
         'is_current': True,
+    },
+    'none': {
+        'label': 'I do not wish to add any of these licenses.',
+        'short_label': 'None',
+        'note': (
+            'You do not wish to assign any additional reuse license beyond the standard '
+            'arXiv submission license. Others may view your article, but reuse rights '
+            'are limited unless allowed by other applicable copyright law.'
+        ),
+        'order': 999,  # placed at bottom
+        'is_current': True,
     }
 
 }
