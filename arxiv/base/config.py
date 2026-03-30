@@ -42,49 +42,49 @@ Usually the same as BASE_SERVER but can be configured.
 HELP_SERVER = os.environ.get("HELP_SERVER", "info.arxiv.org")
 
 URLS = [
-    ("a11y", "/help/web_accessibility.html", HELP_SERVER),
-    ("about", "/about", HELP_SERVER),
-    ("about_give", "/about/give.html", HELP_SERVER),
-    ("about_people", "/about/people/index.html", HELP_SERVER),
-    ("acknowledgment", "/about/ourmembers.html", HELP_SERVER),
-    ("contact", "/help/contact.html", HELP_SERVER),
-    ("copyright", "/help/license/index.html", HELP_SERVER),
-    ("faq", "/help/faq/index.html", HELP_SERVER),
-    ("help", "/help", HELP_SERVER),
-    ("help_archive_description", "/help/<archive>/index.html", HELP_SERVER),
-    ("help_identifier", "/help/arxiv_identifier.html", HELP_SERVER),
-    ("help_mathjax", "/help/mathjax.html", HELP_SERVER),
-    ("help_social_bookmarking", "/help/social_bookmarking", HELP_SERVER), # Does not resolve
-    ("help_submit", "/help/submit/index.html", HELP_SERVER),
-    ("help_trackback", "/help/trackback.html", HELP_SERVER),
-    ("new", "/", HELP_SERVER),    # this help page might be gone, use to go to very old news
-    ("privacy_policy", "/help/policies/privacy_policy.html", HELP_SERVER),
-    ("subscribe", "/help/subscribe", HELP_SERVER),
-    ("team", "/about/people/leadership_team.html", HELP_SERVER),
+    ("a11y", "/help/web_accessibility.html", "HELP_SERVER"),
+    ("about", "/about", "HELP_SERVER"),
+    ("about_give", "/about/give.html", "HELP_SERVER"),
+    ("about_people", "/about/people/index.html", "HELP_SERVER"),
+    ("acknowledgment", "/about/ourmembers.html", "HELP_SERVER"),
+    ("contact", "/help/contact.html", "HELP_SERVER"),
+    ("copyright", "/help/license/index.html", "HELP_SERVER"),
+    ("faq", "/help/faq/index.html", "HELP_SERVER"),
+    ("help", "/help", "HELP_SERVER"),
+    ("help_archive_description", "/help/<archive>/index.html", "HELP_SERVER"),
+    ("help_identifier", "/help/arxiv_identifier.html", "HELP_SERVER"),
+    ("help_mathjax", "/help/mathjax.html", "HELP_SERVER"),
+    ("help_social_bookmarking", "/help/social_bookmarking", "HELP_SERVER"), # Does not resolve
+    ("help_submit", "/help/submit/index.html", "HELP_SERVER"),
+    ("help_trackback", "/help/trackback.html", "HELP_SERVER"),
+    ("new", "/", "HELP_SERVER"),    # this help page might be gone, use to go to very old news
+    ("privacy_policy", "/help/policies/privacy_policy.html", "HELP_SERVER"),
+    ("subscribe", "/help/subscribe", "HELP_SERVER"),
+    ("team", "/about/people/leadership_team.html", "HELP_SERVER"),
 
-    ("abs", "/abs/<arxiv:paper_id>v<string:version>", BASE_SERVER),
-    ("abs_by_id", "/abs/<arxiv:paper_id>", BASE_SERVER),
-    ("pdf", "/pdf/<arxiv:paper_id>", BASE_SERVER),
+    ("abs", "/abs/<arxiv:paper_id>v<string:version>", "BASE_SERVER"),
+    ("abs_by_id", "/abs/<arxiv:paper_id>", "BASE_SERVER"),
+    ("pdf", "/pdf/<arxiv:paper_id>", "BASE_SERVER"),
 
-    ("canonical_pdf", "/pdf/<arxiv:paper_id>v<string:version>", CANONICAL_SERVER),
-    ("canonical_pdf_by_id", "/pdf/<arxiv:paper_id>", CANONICAL_SERVER),
-    ("canonical_abs", "/abs/<arxiv:paper_id>v<string:version>", CANONICAL_SERVER),
-    ("canonical_abs_by_id", "/abs/<arxiv:paper_id>", CANONICAL_SERVER),
+    ("canonical_pdf", "/pdf/<arxiv:paper_id>v<string:version>", "CANONICAL_SERVER"),
+    ("canonical_pdf_by_id", "/pdf/<arxiv:paper_id>", "CANONICAL_SERVER"),
+    ("canonical_abs", "/abs/<arxiv:paper_id>v<string:version>", "CANONICAL_SERVER"),
+    ("canonical_abs_by_id", "/abs/<arxiv:paper_id>", "CANONICAL_SERVER"),
 
-    ("clickthrough", "/ct", BASE_SERVER),
-    ("home", "/", BASE_SERVER),
-    ("ignore_me", "/IgnoreMe", BASE_SERVER),  # Anti-robot honneypot.
+    ("clickthrough", "/ct", "BASE_SERVER"),
+    ("home", "/", "BASE_SERVER"),
+    ("ignore_me", "/IgnoreMe", "BASE_SERVER"),  # Anti-robot honneypot.
 
-    ("account", "/user", AUTH_SERVER),
-    ("login", "/login", AUTH_SERVER),
-    ("logout", "/logout", AUTH_SERVER),
+    ("account", "/user", "AUTH_SERVER"),
+    ("login", "/login", "AUTH_SERVER"),
+    ("logout", "/logout", "AUTH_SERVER"),
 
-    ("create", "/user/create", SUBMIT_SERVER),
-    ("submit", "/submit", SUBMIT_SERVER),
+    ("create", "/user/create", "SUBMIT_SERVER"),
+    ("submit", "/submit", "SUBMIT_SERVER"),
 
-    ("search_advanced", "/search/advanced", SEARCH_SERVER),
-    ("search_archive", "/search/<archive>", SEARCH_SERVER),
-    ("search_box", "/search", SEARCH_SERVER),
+    ("search_advanced", "/search/advanced", "SEARCH_SERVER"),
+    ("search_archive", "/search/<archive>", "SEARCH_SERVER"),
+    ("search_box", "/search", "SEARCH_SERVER"),
 
     ("blog", "/arxiv", "blogs.cornell.edu"),
     ("library", "/", "library.cornell.edu"),
@@ -95,6 +95,10 @@ URLS = [
 """URLs for external services, for use with :func:`flask.url_for`.
 
 For details, see :mod:`arxiv.base.urls`.
+
+Note that the third item in the tuple is either a host name or a config var
+ending with _SERVER. To avoid having static values from import time, ones ending
+with _SERVER will be evaulated to values when the URL map is built.
 """
 
 # In order to provide something close to the config_url behavior, this will
