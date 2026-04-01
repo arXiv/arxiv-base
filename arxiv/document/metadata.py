@@ -213,7 +213,7 @@ class DocMetadata:
             return versions[0]
 
     def get_datetime_of_version(
-            self, version: Optional[int]) -> Optional[datetime]:
+            self, version: Optional[int] = None) -> Optional[datetime]:
         """Returns python datetime of version.
 
         version: Version to get datetime of. Must be in range

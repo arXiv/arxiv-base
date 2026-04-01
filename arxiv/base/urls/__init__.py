@@ -57,27 +57,34 @@ See ARXIVNG-2085.
 """
 import os
 import sys
-from typing import Dict, Any, List, Optional
-from urllib.parse import parse_qs, urlparse
+from typing import Dict, Optional
+from urllib.parse import urlparse
 from werkzeug.routing import Map, Rule, BuildError, MapAdapter
-from flask import current_app, g, Flask
+from flask import current_app, Flask
 
-from arxiv.base.exceptions import ConfigurationError
 from arxiv.base.converter import ArXivConverter
 from arxiv.base import logging
 from arxiv.base import config as base_config
+from arxiv.config import settings
 
 from .clickthrough import clickthrough_url
 from .links import urlize, urlizer, url_for_doi
 
 logger = logging.getLogger(__name__)
 
+def _server_name(app: Flask, host: str)-> str:
+    """Gets `host` with from `app.config[host]`.
+
+    Used to avoid static host values from import time."""
+    if host.endswith("_SERVER"):
+        return app.config.get(host, getattr(settings, host))
+    else:
+        return host
+
 
 def build_adapter(app: Flask) -> MapAdapter:
-    """Build a :class:`.MapAdapter` from configured URLs."""
-    # Get the base URLs (configured in this package).
+    """Build a :class:`werkzeug.routing.MapAdapter` from configured URLs."""
     configured_urls = {url[0]: url for url in base_config.URLS}
-
 
     # In order to provide something close to the config_url behavior, this will
     # look for ARXIV_{endpoint}_URL variables in the environ, and update `URLS`
@@ -85,8 +92,8 @@ def build_adapter(app: Flask) -> MapAdapter:
     for key, value in os.environ.items():
         if key.startswith("ARXIV_") and key.endswith("_URL"):
             endpoint = "_".join(key.split("_")[1:-1]).lower()
-            o = urlparse(value)
-            if not o.netloc:  # Doesn't raise an exception.
+            url = urlparse(value)
+            if not url.netloc:  # Doesn't raise an exception.
                 continue
             i: Optional[int]
             try:
@@ -96,15 +103,13 @@ def build_adapter(app: Flask) -> MapAdapter:
             if i is not None:
                 configured_urls[i] = (endpoint, o.path, o.netloc)
 
-    # Privilege ARXIV_URLs set on the application config.
-    current_urls = app.config.get('URLS', [])
-    if current_urls:
-        configured_urls.update({url[0]: url for url in current_urls})
+    # Privilege URLs already set on the app config
+    configured_urls.update({url[0]: url for url in app.config.get('URLS', [])})
+
     url_map = Map([
-        Rule(pattern, endpoint=name, host=host, build_only=True)
+        Rule(pattern, endpoint=name, host=_server_name(app, host), build_only=True)
         for name, pattern, host in configured_urls.values()
     ], converters={'arxiv': ArXivConverter}, host_matching=True)
-
     scheme = app.config.get('EXTERNAL_URL_SCHEME', 'https')
     base_host = app.config.get('BASE_SERVER', 'arxiv.org')
     adapter: MapAdapter = url_map.bind(base_host, url_scheme=scheme)

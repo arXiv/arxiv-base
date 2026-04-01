@@ -8,7 +8,7 @@ from arxiv.db import models
 from .. import authenticate, exceptions
 from .. import accounts
 from ... import domain
-
+from ...auth import scopes
 
 def get_user(session, user_id):
     """Helper to get user database objects by user id."""
@@ -242,3 +242,35 @@ def test_update_profile(app):
             assert db_profile.flag_group_physics == 1
             assert db_profile.archive == 'cs'
             assert db_profile.subject_class == 'IR'
+
+
+
+def test_proxy_and_xml(app):
+    profile = domain.UserProfile(
+        affiliation='Liar',
+        country='de',
+        rank=1,
+        submission_groups=['grp_cs', 'grp_q-bio'],
+        default_category=definitions.CATEGORIES['cs.DL'],
+        homepage_url='https://example.com'
+    )
+    name = domain.UserFullName(forename='J', surname='Lizard', suffix='i')
+    user = domain.User(username='goat', email='JL@example.edu',
+                       name=name, profile=profile)
+    ip = '1.2.3.4'
+    with app.app_context():
+        user, _ = accounts.register(user, 'apassword1', ip=ip, remote_host=ip)
+        _, auths = accounts.get_user_by_id_with_auths(user.user_id)
+        assert scopes.PROXY_SUBMISSION not in auths.scopes
+        assert scopes.SWORD not in auths.scopes
+        with transaction() as session:
+            _, _, db_profile = get_user(session, user.user_id)
+            assert db_profile
+            assert db_profile.flag_proxy==0
+            db_profile.flag_proxy=1
+            db_profile.flag_xml=1
+            session.commit()
+
+        _, auths = accounts.get_user_by_id_with_auths(user.user_id)
+        assert scopes.PROXY_SUBMISSION in auths.scopes
+        #assert scopes.SWORD in auths.scopes

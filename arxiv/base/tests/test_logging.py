@@ -2,7 +2,9 @@ from unittest import TestCase
 from io import StringIO
 
 import logging as pyLogging
-from arxiv.base import logging
+# CAREFUL: This does not do what you think it does:
+# from arxiv.base import logging
+import arxiv.base.logging
 
 
 class TestGetLogger(TestCase):
@@ -12,10 +14,10 @@ class TestGetLogger(TestCase):
         """There is no application nor request context."""
         stream = StringIO()
 
-        logger = logging.getLogger('foologger')
-        handler = logging.StreamHandler(stream)
+        logger = arxiv.base.logging.getLogger('foologger')
+        handler = pyLogging.StreamHandler(stream)
         handler.setFormatter(
-            logging.Formatter(
+            pyLogging.Formatter(
                 '%(levelname)s: "%(message)s"'
             )
         )

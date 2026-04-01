@@ -1,4 +1,3 @@
-
 # Copied from package arXiv::Submit::MetaCheck_CAPS;
 
 """DESCRIPTION
@@ -803,4 +802,3 @@ ZHIROV
 
 KNOWN_WORDS_IN_ALL_CAPS = set(known_words_in_all_caps_str.split())
 
-print( len( KNOWN_WORDS_IN_ALL_CAPS ) )

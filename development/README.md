@@ -16,11 +16,11 @@ This will generate arxiv/db/models.py
                                        > sqlacodegen --> arxiv/db/autogen_models.py  
     arxiv/db/arxiv-db-metadata.yaml --/
 
-    arxiv/db/orig_models.py -----\
+    arxiv/db/models.py-orig -----\
                                   + merge --> arxiv/db//models.py
     arxiv/db/autogen_models.py --/
 
-TL;DR - If you need to add to db/models.py, you either add it to db/orig_models.py or to db/arxiv-db-metadata.yaml.
+TL;DR - If you need to add to db/models.py, you either add it to db/models.py-orig or to db/arxiv-db-metadata.yaml.
 
 **DO NOT EDIT db/models.py.**
 
@@ -71,7 +71,7 @@ does following steps.
 1. start mysql docker if no MySQL running
 2. load arxiv/db/arxiv_db_schema.sql to the local mysql
 3. runs the modified development/sqlacodegen with the codegen metadata. This generates arxiv/db/autogen_models.py
-4. merges arxiv/db/autogen_models.py and arxiv/db/orig_models.py and creates arxiv/db/models.py
+4. merges arxiv/db/autogen_models.py and arxiv/db/models.py-orig and creates arxiv/db/models.py
 
 ### Modified sqlacodegen
 
@@ -96,14 +96,14 @@ For more details of sqlacodegen changes from the original, see
 [development/sqlacodegen/ARXIV-README.md](sqlacodegen/ARXIV-README.md).
 
 
-### Merge autogen_models.py and orig_models.py
+### Merge autogen_models.py and models.py-orig
 
-In order to maintain the hand-edited portion of arxiv/db/models.py, it is renamed as `orig_models.py`, and used
+In order to maintain the hand-edited portion of arxiv/db/models.py, it is renamed as `models.py-orig`, and used
 as an input of merge source. 
 
 This is how merge works:
 
-1. Parse orig_models.py. This is usually named `existing_` in the code
+1. Parse models.py-orig. This is usually named `existing_` in the code
 2. Parse autogen_models.py. This is usually prefixed with `latest_` in the code
 3. Catalogs the classes in "latest". 
 4. Traverse the parse tree of "existing"
@@ -117,9 +117,9 @@ Parsing, traversing and updating the Python code uses [CST](https://github.com/I
 **IMPORTANT**
 
 Because of this, if you add a new table, **it does not show up in the db/models.py. You need to manually add the 
-class to arxiv/db/orig_models.py**.
+class to arxiv/db/models.py-orig**.
 
-When you run the db_models.py, it leaves the db/autogen_models.py. You copy&paste to db/orig_models.py and run
+When you run the db_models.py, it leaves the db/autogen_models.py. You copy&paste to db/models.py-orig and run
 the db_codegen.py again. It will show up.
 
 ### Merging rules of SchemaTransformer
@@ -127,7 +127,7 @@ the db_codegen.py again. It will show up.
 CST provides a tree traversing method that takes an object of Transformer (cst.CSTTransformer).
 
 The tree traversing invokes the member functions prefixed by "enter" and "leave". Using this, the transformer 
-visits the classes and assignments in the `orig_models.py` and replaces the class members with the latest
+visits the classes and assignments in the `models.py-orig` and replaces the class members with the latest
 members.
 
 #### leave_ClassDef
