@@ -1,11 +1,13 @@
 """ Test the ArxivOidcIdpClient """
 
+import base64
+import hashlib
 from datetime import datetime, timezone
 import traceback
 import pytest
 from pydantic_core._pydantic_core import ValidationError
 
-from arxiv.auth.openid.oidc_idp import ArxivOidcIdpClient
+from arxiv.auth.openid.oidc_idp import ArxivOidcIdpClient, generate_pkce_pair
 
 from ..user_claims import ArxivUserClaims, ArxivUserClaimsModel
 
@@ -126,8 +128,15 @@ def test_arxiv_oidc_idp_client():
     refresh_token = "abcd"
     assert client.refresh_access_token(refresh_token) is None
 
-    
-    
-    
 
-    
+def test_pkce():
+    verifier, challenge = generate_pkce_pair()
+    assert len(verifier) == 43
+    expected = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+    assert challenge == expected
+
+    client = ArxivOidcIdpClient("https://example.com/callback")
+    url = client.login_url_with_pkce(challenge, state="random-state")
+    assert "code_challenge=" in url
+    assert "code_challenge_method=S256" in url
+    assert "state=random-state" in url
