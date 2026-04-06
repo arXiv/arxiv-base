@@ -1,0 +1,22 @@
+[project]
+name = "qa-models"
+version = "0.1.0"
+description = "Models for QA reports"
+requires-python = "~=3.13.0"
+dependencies = [
+    "pydantic>=2.12.5",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+    "ty",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
