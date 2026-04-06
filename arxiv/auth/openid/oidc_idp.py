@@ -1,6 +1,9 @@
 """
 OpenID connect IdP client
 """
+import base64
+import hashlib
+import secrets
 import urllib.parse
 from typing import List, Optional
 import requests
@@ -12,6 +15,20 @@ import logging
 from arxiv.base import logging as arxiv_logging
 
 from ..user_claims import ArxivUserClaims, ArxivUserClaimsModel
+
+
+def generate_pkce_pair() -> tuple[str, str]:
+    """Generate a PKCE code_verifier and code_challenge (S256).
+
+    Returns
+    -------
+    tuple[str, str]
+        (code_verifier, code_challenge)
+    """
+    code_verifier = base64.urlsafe_b64encode(secrets.token_bytes(32)).rstrip(b'=').decode()
+    digest = hashlib.sha256(code_verifier.encode()).digest()
+    code_challenge = base64.urlsafe_b64encode(digest).rstrip(b'=').decode()
+    return code_verifier, code_challenge
 
 
 class ArxivOidcIdpClient:
@@ -133,6 +150,32 @@ class ArxivOidcIdpClient:
         self._logger.debug(f'login_url: {url}')
         return url
 
+    def login_url_with_pkce(self, code_challenge: str, state: str | None = None) -> str:
+        """Build the authorization URL with PKCE S256 parameters.
+
+        Parameters
+        ----------
+        code_challenge : str
+            The S256 code challenge derived from code_verifier via generate_pkce_pair().
+        state : str | None
+            Optional state parameter (recommended for CSRF protection).
+
+        Returns
+        -------
+        str
+            Authorization URL with PKCE parameters included.
+        """
+        scope = "&scope=" + "%20".join(self.scope) if self.scope else ""
+        state_param = f"&state={urllib.parse.quote(state)}" if state else ""
+        url = (f'{self.authn_url}?client_id={self.client_id}'
+               f'&redirect_uri={self.redirect_uri}'
+               f'&response_type=code'
+               f'&code_challenge={code_challenge}'
+               f'&code_challenge_method=S256'
+               f'{scope}{state_param}')
+        self._logger.debug('login_url_with_pkce: %s', url)
+        return url
+
     @property
     def server_certs(self) -> dict:
         """Get IdP server's SSL certificates""""openid"
@@ -154,46 +197,50 @@ class ArxivOidcIdpClient:
                     return pkey
         return None
 
-    def acquire_idp_token(self, code: str) -> Optional[dict]:
+    def acquire_idp_token(self, code: str, code_verifier: str | None = None) -> Optional[dict]:
         """With the callback's code, go get the access token from IdP.
 
         Parameters
         ----------
         code : str
             When IdP calls back, it comes with the authentication code as a query parameter.
+        code_verifier : str | None
+            PKCE code verifier. Required when the authorization request used PKCE S256.
 
         Returns
         -------
         dict | None
             IDP token when this is a success
         """
-        auth = None
+        payload = {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': self.redirect_uri,
+            'client_id': self.client_id,
+        }
         if self.client_secret:
-            try:
-                auth = HTTPBasicAuth(self.client_id, self.client_secret)
-                self._logger.debug(f'client auth success')
-            except requests.exceptions.RequestException:
-                self._logger.debug(f'client auth failed')
-                return None
-            except Exception as exc:
-                self._logger.warning(f'client auth failed', exc_info=True)
-                raise
+            payload['client_secret'] = self.client_secret
+        if code_verifier:
+            payload['code_verifier'] = code_verifier
 
         try:
             # Exchange the authorization code for an access token
             token_response = requests.post(
                 self.token_url,
-                data={
-                    'grant_type': 'authorization_code',
-                    'code': code,
-                    'redirect_uri': self.redirect_uri,
-                    'client_id': self.client_id,
-                },
-                auth=auth,
+                data=payload,
                 verify=self._ssl_cert_verify,
             )
             if token_response.status_code != 200:
-                self._logger.warning(f'idp %s', token_response.status_code)
+                # The IdP token error response body (RFC 6749 section 5.2)
+                try:
+                    err = token_response.json()
+                    self._logger.warning('idp token error: status=%s error=%s description=%s',
+                                         token_response.status_code,
+                                         err.get('error', '?'),
+                                         err.get('error_description', ''))
+                except Exception:
+                    self._logger.warning('idp token error: status=%s body=%s',
+                                         token_response.status_code, token_response.text[:200])
                 return None
             # returned data should be
             # https://openid.net/specs/openid-connect-core-1_0.html#TokenResponse
@@ -286,7 +333,7 @@ class ArxivOidcIdpClient:
         claims = ArxivUserClaims.from_keycloak_claims(idp_token=idp_token, kc_claims=kc_cliams, client_ipv4=client_ipv4)
         return claims
 
-    def from_code_to_user_claims(self, code: str, client_ipv4: Optional[str] = None) -> ArxivUserClaims | None:
+    def from_code_to_user_claims(self, code: str, client_ipv4: Optional[str] = None, code_verifier: str | None = None) -> ArxivUserClaims | None:
         """
         Put it all together
 
@@ -314,7 +361,7 @@ class ArxivOidcIdpClient:
         Generally speaking, when /callback gets the auth code, the rest should work. Only time this
         isn't the case is something is wrong with IdP server, network issue, or bug in the code.
         """
-        idp_token = self.acquire_idp_token(code)
+        idp_token = self.acquire_idp_token(code, code_verifier)
         if not idp_token:
             return None
         access_token = idp_token.get('access_token')  # oauth 2 access token
