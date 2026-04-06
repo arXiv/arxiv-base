@@ -1,0 +1,22 @@
+name: QA models triggers
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "qa-models/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "qa-models/**"
+
+jobs:
+  call-lint-test:
+    name: Lint and test qa-models
+    uses: ./.github/workflows/lint-test-package.yml
+    with:
+      package_name: qa-models
