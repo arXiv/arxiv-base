@@ -1,12 +1,6 @@
 name: QA models triggers
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths:
-      - "qa-models/**"
   pull_request:
     branches:
       - main
