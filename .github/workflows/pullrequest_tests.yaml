@@ -1,6 +1,8 @@
 name: Run Python Tests
 on:
-  pull_request
+  pull_request:
+    paths-ignore:
+      - "qa-models/**"
 
 jobs:
   build:
