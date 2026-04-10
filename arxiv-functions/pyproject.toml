@@ -1,10 +1,16 @@
 [project]
-name = "qa-models"
+name = "arxiv-functions"
 version = "0.1.0"
-description = "Models for QA reports"
+description = "Shared code for cloud functions"
+readme = "README.md"
 requires-python = "~=3.13.0"
 dependencies = [
+    "cloudevents==1.12.0",
+    "google-cloud-logging>=3.13.0",
     "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "python-dateutil>=2.9.0.post0",
+    "sqlalchemy>=2.0.46",
 ]
 
 [dependency-groups]

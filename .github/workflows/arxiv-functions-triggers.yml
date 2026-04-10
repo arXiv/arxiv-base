@@ -1,4 +1,4 @@
-name: qa-models triggers
+name: arxiv-functions triggers
 
 on:
   pull_request:
@@ -6,11 +6,11 @@ on:
       - main
       - develop
     paths:
-      - "qa-models/**"
+      - "arxiv-functions/**"
 
 jobs:
   call-lint-test:
-    name: Lint and test qa-models
+    name: Lint and test arxiv-functions
     uses: ./.github/workflows/lint-test-package.yml
     with:
-      package_name: qa-models
+      package_name: arxiv-functions
