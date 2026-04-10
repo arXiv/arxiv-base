@@ -4,9 +4,9 @@ from datetime import datetime, timedelta, timezone
 
 from cloudevents.http import CloudEvent
 
-from stats_functions.config import FunctionConfig, DatabaseConfig, Query
+from arxiv_functions.config import FunctionConfig, DatabaseConfig, Query
 
-from stats_functions.utils import (
+from arxiv_functions.utils import (
     set_up_cloud_logging,
     event_time_exceeds_retry_window,
     parse_cloud_event_time,
