@@ -1,0 +1,16 @@
+name: arXiv functions triggers
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "arxiv-functions/**"
+
+jobs:
+  call-lint-test:
+    name: Lint and test arxiv-functions
+    uses: ./.github/workflows/lint-test-package.yml
+    with:
+      package_name: arxiv-functions

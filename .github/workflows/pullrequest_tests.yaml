@@ -3,7 +3,8 @@ on:
   pull_request:
     paths-ignore:
       - "qa-models/**"
-
+      - "arxiv-functions/**"
+      
 jobs:
   build:
     runs-on: ubuntu-latest

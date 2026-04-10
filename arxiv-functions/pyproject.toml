@@ -1,0 +1,28 @@
+[project]
+name = "arxiv-functions"
+version = "0.1.0"
+description = "Shared code for cloud functions"
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+    "cloudevents==1.12.0",
+    "google-cloud-logging>=3.13.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "python-dateutil>=2.9.0.post0",
+    "sqlalchemy>=2.0.46",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+    "ty",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
