@@ -24,7 +24,7 @@ def mock_config():
             password="mock-password",
             database="mock-db",
             query=Query(unix_socket="/cloudsql/mock:instance:name"),
-        ),
+        ),  # type: ignore[unexpected-keyword-arg]
     )
 
 
