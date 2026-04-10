@@ -29,7 +29,7 @@ def mock_config():
 
 
 def test_set_up_cloud_logging_remote(mock_config):
-    with patch("stats_functions.utils.Client") as MockCloudLoggingClient:
+    with patch("arxiv_functions.utils.Client") as MockCloudLoggingClient:
         mock_cloud_logging_client = MockCloudLoggingClient.return_value
         set_up_cloud_logging(mock_config)
 
@@ -39,7 +39,7 @@ def test_set_up_cloud_logging_remote(mock_config):
 def test_set_up_cloud_logging_local(mock_config):
     mock_config.log_locally = True
 
-    with patch("stats_functions.utils.Client") as MockCloudLoggingClient:
+    with patch("arxiv_functions.utils.Client") as MockCloudLoggingClient:
         set_up_cloud_logging(mock_config)
         MockCloudLoggingClient.assert_not_called()
 
