@@ -1,4 +1,4 @@
-name: QA models triggers
+name: qa-models triggers
 
 on:
   pull_request:

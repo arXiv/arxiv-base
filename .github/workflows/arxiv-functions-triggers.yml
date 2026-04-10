@@ -1,4 +1,4 @@
-name: arXiv functions triggers
+name: arxiv-functions triggers
 
 on:
   pull_request:
