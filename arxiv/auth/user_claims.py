@@ -51,10 +51,10 @@ from datetime import datetime, timezone
 from typing import Any, Optional, List, Tuple
 from pydantic import BaseModel
 import jwt
-from wsproto.utilities import generate_nonce
 
 from . import domain
 from .auth.sessions.ng_session_types import NGSessionPayload
+from .auth.sessions.store import _generate_nonce
 from ..db.models import TapirPolicyClass
 from .auth import scopes, tokens
 from .auth.tokens import encode as ng_encode, decode as ng_decode
@@ -332,7 +332,7 @@ class ArxivUserClaims:
             user_id=str(self.user_id),
             session_id=str(self.tapir_session_id),
             expires=self.expires_at.isoformat(),
-            nonce=generate_nonce(),
+            nonce=_generate_nonce(),
             **payload_ce
         )
         payload_ng = ng_session.model_dump()
