@@ -6,6 +6,7 @@ def test_ng_session_payload():
         user_id="userid",
         session_id="sessionid",
         expires="expires",
+        nonce="yay",
     )
     assert ngsp
 
