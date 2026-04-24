@@ -4,10 +4,14 @@ import base64
 import hashlib
 from datetime import datetime, timezone
 import traceback
+
+import jwt
 import pytest
+from pydantic import BaseModel
 from pydantic_core._pydantic_core import ValidationError
 
 from arxiv.auth.openid.oidc_idp import ArxivOidcIdpClient, generate_pkce_pair
+from ..auth.sessions.ng_session_types import NGSessionPayload
 
 from ..user_claims import ArxivUserClaims, ArxivUserClaimsModel
 
@@ -75,13 +79,19 @@ def test_arxiv_user_claims():
     assert userClaims.is_expired()
     assert userClaims.is_expired(datetime.now(timezone.utc))
     userClaims.update_claims("last_name", "NewLastName")
-    assert userClaims.encode_jwt_token("secret").startswith("eyJhb")
-    assert len(userClaims.encode_jwt_token("secret")) < 4096
-    # ArxivUserClaims.decode_jwt_payload({tokens}, jwt_payload, secret, [algorithm])
+    encoded: str = userClaims.encode_jwt_token("secret")
+    assert encoded.startswith("eyJhb")
+    assert len(encoded) < 4096
     userClaims.update_keycloak_access_token({'acc': 12345})
     assert userClaims.domain_session # a complicated object
     # I need a session (using None fails) here
     # userClaims.set_tapir_session(arxivSession)
+    # ArxivUserClaims.decode_jwt_payload({tokens}, jwt_payload, secret, [algorithm])
+    tokens = {}
+    decoded = ArxivUserClaims.decode_jwt_payload(tokens, encoded, 'secret')
+    assert decoded
+    payload_ng = jwt.decode(encoded, 'secret', algorithms = ['HS256'])
+    assert NGSessionPayload.model_validate(payload_ng)
 
 
 def test_arxiv_oidc_idp_client():
