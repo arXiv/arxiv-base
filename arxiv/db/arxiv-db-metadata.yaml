@@ -43,12 +43,17 @@ arXiv_admin_log:
   class_name: AdminLog
   columns:
     logtext: "mapped_column(Utf8Text.column_factory())"
-    updated: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))"
+    created: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), default=utc_now)"
+    updated: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'), default=utc_now, onupdate=utc_now)"
 
 arXiv_admin_metadata:
   class_name: AdminMetadata
+  columns:
+    created: "mapped_column(DateTime, default=utc_now)"
+    updated: "mapped_column(DateTime, default=utc_now, onupdate=utc_now)"
   table_args:
     - replace: ["Index('pidv', 'paper_id', 'version', unique=True)", "Index('arxiv_admin_pidv', 'paper_id', 'version', unique=True)"]
+
 arXiv_archive_category:
   class_name: ArchiveCategory
 arXiv_archive_def:
@@ -70,6 +75,9 @@ arXiv_bib_feeds:
   class_name: BibFeed
 arXiv_bib_updates:
   class_name: BibUpdate
+  columns:
+    updated: "mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'), default=utc_now, onupdate=utc_now)"
+
 arXiv_bogus_countries:
   class_name: BogusCountries
 
@@ -119,6 +127,8 @@ arXiv_document_category:
 
 arXiv_documents:
   class_name: Document
+  columns:
+    created: "mapped_column(DateTime, default=utc_now)"
   relationships:
     arXiv_dblp_document_authors: ""
     arXiv_paper_owners: ""
@@ -201,6 +211,8 @@ arXiv_metadata:
   class_name: Metadata
   columns:
     source_format: ": Mapped[Optional[SOURCE_FORMAT]] = mapped_column(String(12))"
+    created: "mapped_column(DateTime, default=utc_now)"
+    updated: "mapped_column(DateTime, default=utc_now, onupdate=utc_now)"
   relationships:
     arXiv_licenses: ""
     document: "relationship('Document', primaryjoin='Metadata.document_id == Document.document_id', back_populates='arXiv_metadata')"
@@ -209,6 +221,9 @@ arXiv_metadata:
 
 arXiv_mirror_list:
   class_name: MirrorList
+  columns:
+    created: "mapped_column(DateTime, default=utc_now)"
+    updated: "mapped_column(DateTime, default=utc_now, onupdate=utc_now)"
 
 arXiv_moderator_api_key:
   class_name: ModeratorApiKey
@@ -331,10 +346,16 @@ arXiv_submission_near_duplicates:
   class_name: SubmissionNearDuplicate
 arXiv_submission_qa_reports:
   class_name: SubmissionQaReport
+  columns:
+    created: "mapped_column(DateTime, server_default=text('CURRENT_TIMESTAMP'), default=utc_now)"
+
 arXiv_submission_view_flag:
   class_name: SubmissionViewFlag
 arXiv_submissions:
   class_name: Submission
+  columns:
+    created: "mapped_column(DateTime, default=utc_now)"
+    updated: "mapped_column(DateTime, default=utc_now, onupdate=utc_now)"
   relationships:
     agreement: "relationship('SubmissionAgreement', primaryjoin='Submission.agreement_id == SubmissionAgreement.agreement_id', back_populates='arXiv_submissions')"
     document: "relationship('Document', primaryjoin='Submission.document_id == Document.document_id', back_populates='arXiv_submissions')"
@@ -490,6 +511,9 @@ tapir_users:
 
 arXiv_author_ids:
   class_name: AuthorIds
+  column:
+    updated: "Mapped[datetime.datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'), default=utc_now, onupdate=utc_now)"
+
 arXiv_demographics:
   class_name: Demographic
   relationships:
@@ -498,6 +522,9 @@ arXiv_demographics:
 
 arXiv_orcid_ids:
   class_name: OrcidIds
+  column:
+    updated: "mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'), default=utc_now, onupdate=utc_now)"
+
 arXiv_queue_view:
   class_name: QueueView
 arXiv_suspicious_names:
@@ -585,4 +612,4 @@ flagged_user_detail:
   columns:
     # updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
     # the server default does not work with sqlite3 and breaks tests
-    updated: "mapped_column(DateTime, nullable=False)"
+    updated: "mapped_column(DateTime, nullable=False, default=utc_now, onupdate=utc_now)"
