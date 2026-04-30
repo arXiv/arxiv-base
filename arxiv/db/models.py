@@ -1157,6 +1157,8 @@ class Submission(Base):
     must_process: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     submit_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     release_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    publish_anchor_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    publish_order: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     source_size: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     source_format: Mapped[Optional[str]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
