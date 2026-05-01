@@ -1,6 +1,8 @@
 
 import re
 
+from pydantic import BaseModel
+
 from typing import (
     Dict,
     Optional,
@@ -237,18 +239,11 @@ control_chars_for_abs_re = r"[\u0000-\u0009\u000b-\u001f]+"
 # and a list of complaints
 # Each complaint is a string and a list of contexts.
 
-# TODO: use BaseObject 
-class MetadataCheckReport:
+class MetadataCheckReport(BaseModel):
     disposition: Disposition = OK
     complaints: Set[Complaint] = set()
     offsets: Dict[Complaint, list[Tuple[int,int]]] = defaultdict(list)
     
-    def __init__(self):
-        self.disposition: Disposition = OK
-        self.complaints: Set[Complaint] = set()
-        # map from complaint to offsets, if available
-        self.offsets: Dict[Complaint, list[Tuple[int,int]]] = defaultdict(list)
-
     def __repr__(self):
         if self.disposition == OK:
             return f"<MetadataCheckReport OK>"
