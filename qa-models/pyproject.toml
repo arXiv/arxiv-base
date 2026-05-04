@@ -9,6 +9,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "arxiv-base",
     "pytest",
     "pytest-cov>=7.1.0",
     "ruff",
@@ -17,6 +18,9 @@ dev = [
 
 [tool.uv]
 default-groups = ["dev"]
+
+[tool.uv.sources]
+arxiv-base = { git = "https://github.com/arXiv/arxiv-base" }
 
 [build-system]
 requires = ["hatchling"]
