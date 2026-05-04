@@ -24,7 +24,7 @@ class Check(Enum):
     LOW_PERCENT_ENGLISH = 17
     MISSING_REFERENCES = 18
     MISSING_BIBLIOGRAPHY = 19
-    TO_MANY_PAGES = 20
+    TOO_MANY_PAGES = 20
     FLAGGED_PUBLISHED_ONLY = 21
     FLAGGED_PREVIOUS_OUT_OF_SCOPE = 22
     FLAGGED_PREVIOUS_LOW_QUALITY = 23
@@ -57,7 +57,7 @@ class Check(Enum):
     HTML_SUBMISSION = 50
     GENERAL_CATEGORY = 51       # from non-flagged submitter
     GENERAL_CATEGORY_AS_CROSS = 52
-    NONSTANDARD_ARTICLE_TYPE = 52
+    NONSTANDARD_ARTICLE_TYPE = 53
 
     # Checks >= 100, < 1000 are metadata checks
     # There is room here for (field x complaint) if we want to get more granular
