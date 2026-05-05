@@ -113,10 +113,10 @@ class Settings(BaseSettings):
     For details, see :mod:`arxiv.base.urls`.
     """
 
-    ARXIV_BUSINESS_TZ: str = "US/Eastern"
+    ARXIV_BUSINESS_TZ: str = "America/New_York"
     """Timezone of the arxiv business offices."""
 
-    FS_TZ: str = "US/Eastern"
+    FS_TZ: str = "America/New_York"
 
     BASE_VERSION: str = importlib.metadata.version('arxiv-base')
     """The version of the arxiv-base package."""
