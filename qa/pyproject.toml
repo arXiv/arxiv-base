@@ -25,6 +25,9 @@ arxiv-base = { git = "https://github.com/arXiv/arxiv-base", branch = "master" }
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.coverage.report]
+omit = ["*/__init__.py"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
