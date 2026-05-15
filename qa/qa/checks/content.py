@@ -11,7 +11,7 @@ class AlwaysPassContentCheck(BaseCheck):
     description = "Placeholder content check that always passes."
 
     required_data = {"fulltext"}
-    results_model = models.AlwaysPassContentCheckReport
+    results_model = models.AlwaysPassContentCheckData
 
     def _run(self, data: models.CheckData) -> models.CheckResult:
         _ = len(data.fulltext)  # type: ignore  # validated by BaseCheck.run
@@ -20,5 +20,5 @@ class AlwaysPassContentCheck(BaseCheck):
             check_name="always_pass_content",
             ok=True,
             message="OK (placeholder)",
-            data=models.AlwaysPassContentCheckReport(info="it passed"),
+            data=models.AlwaysPassContentCheckData(info="it passed"),
         )

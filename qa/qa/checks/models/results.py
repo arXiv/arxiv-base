@@ -1,4 +1,4 @@
-"""Result models returned by checks, including per-check report schemas."""
+"""Result models returned by checks, including per-check data schemas."""
 
 from typing import Optional
 from pydantic import BaseModel
@@ -12,10 +12,10 @@ class CheckResult(BaseModel):
 
 
 # TODO remove
-class AlwaysPassContentCheckReport(BaseModel):
+class AlwaysPassContentCheckData(BaseModel):
     info: str
 
 
 # TODO remove
-class AlwaysPassMetadataValidationReport(BaseModel):
+class AlwaysPassMetadataValidationData(BaseModel):
     info: str
