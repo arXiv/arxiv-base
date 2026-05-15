@@ -1,4 +1,4 @@
-from arxiv.metadata.checksum import checksum_metadata
+from qa.checks.utils.checksum import checksum_metadata
 
 
 def test_checksum_metadata():
