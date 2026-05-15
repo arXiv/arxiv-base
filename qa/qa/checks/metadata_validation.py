@@ -1,7 +1,7 @@
 """Placeholder metadata validation check that always passes."""
 
-from qa_checks.checks.base import BaseCheck
-from qa_checks.checks import models
+from qa.checks.base import BaseCheck
+from qa.checks import models
 
 
 # TODO remove
@@ -14,7 +14,7 @@ class AlwaysPassMetadataValidationCheck(BaseCheck):
     results_model = models.AlwaysPassMetadataValidationReport
 
     def _run(self, data: models.CheckData) -> models.CheckResult:
-        _ = data.metadata.title  # type: ignore[union-attr]  # validated by BaseCheck.run
+        _ = data.metadata.title  # type: ignore  # validated by BaseCheck.run
 
         return models.CheckResult(
             check_name="always_pass_metadata_validation",

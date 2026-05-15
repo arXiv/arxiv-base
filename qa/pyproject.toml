@@ -1,7 +1,7 @@
 [project]
-name = "qa-models"
+name = "qa"
 version = "0.1.0"
-description = "Models for QA reports"
+description = "QA checks and reports"
 requires-python = "~=3.13.0"
 dependencies = [
     "pydantic>=2.12.5",
@@ -20,7 +20,10 @@ dev = [
 default-groups = ["dev"]
 
 [tool.uv.sources]
-arxiv-base = { git = "https://github.com/arXiv/arxiv-base" }
+arxiv-base = { git = "https://github.com/arXiv/arxiv-base", branch = "master" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["hatchling"]

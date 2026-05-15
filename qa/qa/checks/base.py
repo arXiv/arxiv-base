@@ -5,7 +5,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel
 
-from qa_checks.checks import models
+from qa.checks import models
 
 
 class MissingDataError(Exception):
