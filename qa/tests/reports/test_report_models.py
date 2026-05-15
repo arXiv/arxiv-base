@@ -14,7 +14,13 @@ def base_report(
     submission_id: int = 1,
     data: dict = {},  # noqa: B006
 ) -> BaseReport:
-    return BaseReport(name=name, key_name=key_name, version=version, submission_id=submission_id, data=data)
+    return BaseReport(
+        name=name,
+        key_name=key_name,
+        version=version,
+        submission_id=submission_id,
+        data=data,
+    )
 
 
 class TestBaseReport(TestCase):
