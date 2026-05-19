@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 SERVICE_IDS=json.loads(settings.FASTLY_SERVICE_IDS)
 MAX_PURGE_KEYS=256
 
-def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None):
+def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None) -> None:
     """purges all keys needed for an unspecified change to a paper
     clears everything related to the paper, as well as any list and year pages it is on
     old_cats: include this string if the paper undergoes a category change to also purge pages the paper may have been removed from (or new year pages it is added to)
@@ -44,20 +44,23 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
     with Session() as session:
         result=(
             session.query(
-            meta.abs_categories, 
-            func.max(up.date)
+                meta.abs_categories,
+                session.query(func.max(up.date))
+                    .filter(up.document_id == meta.document_id)
+                    .filter(up.action != "absonly")
+                    .correlate(meta)
+                    .scalar_subquery()
             )
-            .outerjoin(up, (up.document_id == meta.document_id)  & (up.action != "absonly")) #left join
             .filter(meta.paper_id==arxiv_id.id)
             .filter(meta.is_current==1)
             .first()
         )
-        
+
+    if not result or not result[0]:
+        raise IdentifierException(f'paper id not found: {arxiv_id.id}')
+
     new_cats: str=result[0]
     recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
-
-    if not new_cats:
-        raise IdentifierException(f'paper id not found: {arxiv_id.id}')
 
     return new_cats, recent_date
 
