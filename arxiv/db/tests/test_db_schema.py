@@ -58,6 +58,7 @@ from arxiv.db.models import (
     PaperOwner,
     PaperSession,
     PilotFile,
+    PublishHoliday,
     PublishLog,
     RejectSessionUsername,
     SciencewisePing,
@@ -181,8 +182,8 @@ def test_db_schema_sqlite3():
         # print(row[0])
         n_tables += 1
     conn.close()
-    # There are 151 tables in production
-    assert n_tables == (145 + 3 + 3)
+    # There are 152 tables in production
+    assert n_tables == (146 + 3 + 3)
     os.unlink(filename)
 
 def test_models():
@@ -236,6 +237,7 @@ def test_models():
     assert PaperOwner()
     assert PaperSession()
     assert PilotFile()
+    assert PublishHoliday()
     assert PublishLog()
     assert RejectSessionUsername()
     assert SciencewisePing()
