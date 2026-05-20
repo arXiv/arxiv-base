@@ -914,11 +914,11 @@ class PilotFile(Base):
 # KEEP: holiday calendar table consumed by arxiv-publish-control-api's
 # scheduler gate. Schema lives in arxiv_db_schema.sql; preserved here
 # across sqlacodegen regenerations.
-class PublishHoliday(Base):
-    __tablename__ = "arXiv_publish_holidays"
+class Holiday(Base):
+    __tablename__ = "arXiv_holidays"
     __table_args__ = {"mysql_charset": "latin1"}
 
-    holiday_date: Mapped[dt.date] = mapped_column(Date, primary_key=True)
+    freeze_skip_date: Mapped[dt.date] = mapped_column(Date, primary_key=True)
     description: Mapped[Optional[str]] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=FetchedValue())
     created_by: Mapped[Optional[str]] = mapped_column(String(64))

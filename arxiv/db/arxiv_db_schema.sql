@@ -1071,18 +1071,18 @@ CREATE TABLE `arXiv_pilot_files` (
   CONSTRAINT `arXiv_pilot_files_cdfk3` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `arXiv_publish_holidays`;
+DROP TABLE IF EXISTS `arXiv_holidays`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 -- Holiday calendar consumed by arxiv-publish-control-api's scheduler
 -- gate. Each row marks one date (America/New_York) on which no freeze
 -- and no announcement run. See publish git repo for the consumer.
-CREATE TABLE `arXiv_publish_holidays` (
-  `holiday_date` date NOT NULL,
+CREATE TABLE `arXiv_holidays` (
+  `freeze_skip_date` date NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by` varchar(64) DEFAULT NULL,
-  PRIMARY KEY (`holiday_date`)
+  PRIMARY KEY (`freeze_skip_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `arXiv_publish_log`;
