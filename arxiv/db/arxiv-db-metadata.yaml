@@ -292,8 +292,8 @@ arXiv_paper_sessions:
   class_name: PaperSession
 arXiv_pilot_files:
   class_name: PilotFile
-arXiv_publish_holidays:
-  class_name: PublishHoliday
+arXiv_holidays:
+  class_name: Holiday
 arXiv_publish_log:
   class_name: PublishLog
 arXiv_reject_session_usernames:

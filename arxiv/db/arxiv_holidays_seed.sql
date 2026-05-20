@@ -1,4 +1,4 @@
--- Seed for arXiv_publish_holidays.
+-- Seed for arXiv_holidays.
 --
 -- Source: arxiv-lib.git/lib/arXiv/Config/Holidays.pm (@HOLIDAYS array,
 -- lines 38-95 as of 2026-05). One row per ISO date. The `description`
@@ -8,7 +8,7 @@
 -- this table in sync (dual-write) until the perl side migrates onto
 -- the DB. See the operational rule in publish.git CLAUDE.md.
 
-INSERT INTO `arXiv_publish_holidays` (`holiday_date`, `description`, `created_by`) VALUES
+INSERT INTO `arXiv_holidays` (`freeze_skip_date`, `description`, `created_by`) VALUES
   ('2020-01-01', '2020 new year wed', 'seed'),
   ('2020-01-20', '2020 MLK mon', 'seed'),
   ('2020-06-09', '2020 strike tue', 'seed'),
