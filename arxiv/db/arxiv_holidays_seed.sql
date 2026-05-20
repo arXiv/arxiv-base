@@ -9,6 +9,114 @@
 -- the DB. See the operational rule in publish.git CLAUDE.md.
 
 INSERT INTO `arXiv_holidays` (`freeze_skip_date`, `description`, `created_by`) VALUES
+  -- Pre-2020 entries: removed from the perl @HOLIDAYS array in
+  -- arxiv-lib commit 1f5b17cd (2026-01-08 "hotfix for holiday schedule
+  -- of 2026"). Preserved here as the DB historical record.
+  ('2003-12-25', '2003 thu', 'seed'),
+  ('2003-12-26', '2003 fri', 'seed'),
+  ('2004-01-01', '2004 new year thu', 'seed'),
+  ('2004-01-02', '2004 new year fri', 'seed'),
+
+  ('2004-11-25', '2004 thanksgiving thu', 'seed'),
+  ('2004-12-24', '2004 fri', 'seed'),
+  ('2004-12-28', '2004 tue', 'seed'),
+  ('2004-12-30', '2004 thu', 'seed'),
+
+  ('2005-11-24', '2005 thanksgiving thu', 'seed'),
+  ('2005-12-27', '2005 tue', 'seed'),
+  ('2005-12-29', '2005 thu', 'seed'),
+
+  ('2006-11-23', '2006 thanksgiving thu', 'seed'),
+  ('2006-12-25', '2006 mon', 'seed'),
+  ('2006-12-26', '2006 tue', 'seed'),
+  ('2007-01-01', '2007 new year mon', 'seed'),
+
+  ('2007-11-22', '2007 thanksgiving thu', 'seed'),
+  ('2007-12-24', '2007 mon', 'seed'),
+  ('2007-12-25', '2007 tue', 'seed'),
+  ('2007-12-31', '2007 new year mon', 'seed'),
+  ('2008-01-01', '2008 new year tue', 'seed'),
+
+  ('2008-07-04', '2008 July 4th', 'seed'),
+  ('2008-11-27', '2008 thanksgiving thu', 'seed'),
+  ('2008-12-25', '2008 thu', 'seed'),
+  ('2008-12-26', '2008 fri', 'seed'),
+  ('2008-12-29', '2008 mon', 'seed'),
+  ('2008-12-31', '2008 new year wed', 'seed'),
+  ('2009-01-01', '2009 new year thu', 'seed'),
+
+  ('2009-07-08', '2009 data recovery after bad rsync', 'seed'),
+  ('2009-11-26', '2009 thanksgiving thu', 'seed'),
+  ('2009-12-25', '2009 fri', 'seed'),
+  ('2009-12-28', '2009 mon', 'seed'),
+  ('2009-12-29', '2009 tue', 'seed'),
+  ('2009-12-31', '2009 new year thu', 'seed'),
+  ('2010-01-01', '2010 new year fri', 'seed'),
+
+  ('2010-11-25', '2010 thanksgiving thu', 'seed'),
+  ('2010-12-27', '2010 mon', 'seed'),
+  ('2010-12-28', '2010 tue', 'seed'),
+  ('2010-12-30', '2010 thu', 'seed'),
+  ('2010-12-31', '2010 fri before new year sat', 'seed'),
+
+  ('2011-11-24', '2011 thanksgiving thu', 'seed'),
+  ('2011-12-26', '2011 mon', 'seed'),
+  ('2011-12-27', '2011 tue', 'seed'),
+  ('2011-12-28', '2011 wed', 'seed'),
+  ('2011-12-30', '2011 fri before new year', 'seed'),
+  ('2012-01-02', '2012 mon after new year', 'seed'),
+
+  ('2012-11-22', '2012 thanksgiving thu', 'seed'),
+  ('2012-12-24', '2012 mon', 'seed'),
+  ('2012-12-25', '2012 tue', 'seed'),
+  ('2012-12-27', '2012 thu', 'seed'),
+  ('2012-12-28', '2012 fri before new year', 'seed'),
+  ('2013-01-01', '2013 new year tue', 'seed'),
+
+  ('2013-11-28', '2013 Thanksgiving thu', 'seed'),
+  ('2013-12-25', '2013 winter holiday break wed', 'seed'),
+  ('2013-12-26', '2013 winter holiday break thu', 'seed'),
+  ('2013-12-31', '2013 tue', 'seed'),
+  ('2014-01-01', '2014 new year wed', 'seed'),
+
+  ('2014-11-27', '2014 Thanksgiving thu', 'seed'),
+  ('2014-12-25', '2014 winter holiday break thu', 'seed'),
+  ('2014-12-26', '2014 winter holiday break fri', 'seed'),
+  ('2014-12-31', '2014 wed', 'seed'),
+  ('2015-01-01', '2015 new year thu', 'seed'),
+
+  ('2015-11-26', '2015 Thanksgiving thu', 'seed'),
+  ('2015-12-25', '2015 winter holiday break fri', 'seed'),
+  ('2015-12-29', '2015 winter holiday break tue', 'seed'),
+  ('2016-01-01', '2016 new year fri', 'seed'),
+
+  ('2016-11-24', '2016 Thanksgiving', 'seed'),
+  ('2016-12-26', '2016 Winter Holiday', 'seed'),
+  ('2016-12-28', '2016 Winter Holiday', 'seed'),
+
+  ('2017-03-14', '/data/new/upload glitch', 'seed'),
+  ('2017-11-13', 'CIT outage/unscheduled reboots', 'seed'),
+  ('2017-11-23', '2017 Thanksgiving', 'seed'),
+  ('2017-12-25', '2017 winter holiday break mon', 'seed'),
+  ('2017-12-27', '2017 winter holiday break wed', 'seed'),
+  ('2018-01-01', '2018 new year mon', 'seed'),
+
+  ('2018-03-26', 'CIT outage', 'seed'),
+  ('2018-09-03', '2018 Labor Day', 'seed'),
+  ('2018-11-22', '2018 Thanksgiving', 'seed'),
+  ('2018-12-24', '2018 winter holiday break mon', 'seed'),
+  ('2018-12-25', '2018 winter holiday break tue', 'seed'),
+  ('2018-12-27', '2018 winter holiday break thu', 'seed'),
+  ('2019-01-01', '2019 new year tue', 'seed'),
+
+  ('2019-01-21', '2019 MLK mon', 'seed'),
+  ('2019-09-02', '2019 Labor Day', 'seed'),
+  ('2019-11-07', 'CIT outage', 'seed'),
+  ('2019-11-28', '2019 Thanksgiving', 'seed'),
+  ('2019-12-25', '2019 winter holiday break wed', 'seed'),
+  ('2019-12-26', '2019 winter holiday break thu', 'seed'),
+  ('2019-12-30', '2019 winter holiday break mon', 'seed'),
+
   ('2020-01-01', '2020 new year wed', 'seed'),
   ('2020-01-20', '2020 MLK mon', 'seed'),
   ('2020-06-09', '2020 strike tue', 'seed'),
