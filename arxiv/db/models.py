@@ -916,7 +916,7 @@ class PilotFile(Base):
 # across sqlacodegen regenerations.
 class Holiday(Base):
     __tablename__ = "arXiv_holidays"
-    __table_args__ = {"mysql_charset": "latin1"}
+    __table_args__ = {"mysql_charset": "utf8mb4"}
 
     freeze_skip_date: Mapped[dt.date] = mapped_column(Date, primary_key=True)
     description: Mapped[Optional[str]] = mapped_column(String(255))
