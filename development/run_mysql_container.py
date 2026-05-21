@@ -23,26 +23,23 @@ def is_port_open(host: str, port: int) -> bool:
 def run_mysql_container(port: int, container_name: str ="mysql-test", db_name: str ="testdb",
                         root_password: str = "rootpassword") -> None:
     """Start a mysql docker"""
-    # mysql_image = "mysql:8.0.40"
-    mysql_image = "mysql:5.7.20"
+    mysql_image = "mysql:8.4"
 
     subprocess.run(["docker", "pull", mysql_image], check=True)
-    # subprocess.run(["docker", "kill", container_name], check=False)
     subprocess.run(["docker", "rm", container_name], check=False)
 
-    # for mysql mode, don't use ONLY_FULL_GROUP_BY
     argv = [
         "docker", "run", "-d", "--name", container_name,
         "-e", f"MYSQL_ROOT_PASSWORD={root_password}",
         "-e", "MYSQL_USER=testuser",
         "-e", "MYSQL_PASSWORD=testpassword",
         "-e", "MYSQL_DATABASE=" + db_name,
-        "-e", "MYSQL_SQL_MODE=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO",
         "-p", f"{port}:3306",
         mysql_image,
-        # Add this for mysql 8 and up to turn off SSL connection
-        # "--require_secure_transport=OFF"
-        "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO"
+        "--require_secure_transport=OFF",
+        "--mysql-native-password=ON",
+        "--authentication_policy=mysql_native_password",
+        "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,ONLY_FULL_GROUP_BY"
     ]
 
     try:
