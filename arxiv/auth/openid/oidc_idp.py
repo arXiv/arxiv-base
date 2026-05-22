@@ -411,7 +411,7 @@ class ArxivOidcIdpClient:
 
         try:
             response = requests.post(url, headers=header, data=data, timeout=30, verify=self._ssl_cert_verify)
-            if response.status_code == 200:
+            if response.status_code in [200, 204]:
                 self._logger.info("User %s tokens revoked.", user.user_id)
                 return True
             self._logger.warning(f"User %s tokens is not revoked. {response!r}", user.user_id)
