@@ -139,3 +139,5 @@ arxiv/db/.autogen_models.py
 
 # Claude Code
 .claude/
+
+.ruff_cache
