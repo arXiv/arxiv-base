@@ -20,8 +20,6 @@ class BaseCheck(ABC):
     required_data: ClassVar[set[str]] = set()
     results_model: ClassVar[type[BaseModel]]
 
-    enabled: ClassVar[bool] = True
-
     def run(self, data: models.CheckData) -> models.CheckResult:
         """Validate required data fields are present, then execute the check."""
         for field in self.required_data:
