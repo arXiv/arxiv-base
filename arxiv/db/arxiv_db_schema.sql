@@ -1081,7 +1081,7 @@ CREATE TABLE `arXiv_holidays` (
   `freeze_skip_date` date NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `created_by` int unsigned NOT NULL DEFAULT '0',
+  `created_by` int unsigned NOT NULL,
   PRIMARY KEY (`freeze_skip_date`),
   CONSTRAINT `arxiv_holidays_createdby_fk` FOREIGN KEY (`created_by`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
