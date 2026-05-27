@@ -42,6 +42,7 @@ from arxiv.db.models import (
     FreezeLog,
     GroupDef,
     Group,
+    Holiday,
     JrefControl,
     License,
     LogPosition,
@@ -58,7 +59,6 @@ from arxiv.db.models import (
     PaperOwner,
     PaperSession,
     PilotFile,
-    PublishHoliday,
     PublishLog,
     RejectSessionUsername,
     SciencewisePing,
@@ -221,6 +221,7 @@ def test_models():
     assert FreezeLog()
     assert GroupDef()
     assert Group()
+    assert Holiday()
     assert JrefControl()
     assert License()
     assert LogPosition()
@@ -237,7 +238,6 @@ def test_models():
     assert PaperOwner()
     assert PaperSession()
     assert PilotFile()
-    assert PublishHoliday()
     assert PublishLog()
     assert RejectSessionUsername()
     assert SciencewisePing()
