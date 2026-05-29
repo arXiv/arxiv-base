@@ -29,7 +29,7 @@ class DoesNotStartWithLowercase(BaseGenericCheck):
             return self._result(
                 passed=False,
                 message=self.failure_message,
-                offsets=[Offset(start=0, end=min(1, len(v)), excerpt=v[:1])],
+                offsets=[Offset(start=0, end=min(1, len(v)))],
             )
 
 
@@ -112,9 +112,7 @@ class NoRedundantOrSpacedCommas(BaseGenericPatternCheck):
     name = "no_redundant_or_spaced_commas"
     id = 25
     version = "1.0.0"
-    description = (
-        "The value does not contain consecutive commas, or whitespace preceding commas."
-    )
+    description = "The value does not contain consecutive commas, or whitespace preceding commas."
 
     failure_message = "Redundant or spaced commas."
 
@@ -126,11 +124,11 @@ class NoExtraInternalOrTrailingSpaces(BaseGenericPatternCheck):
     name = "no_extra_internal_or_trailing_spaces"
     id = 35
     version = "1.0.0"
-    description = "The value does not contain trailing spaces before a newline or multiple consecutive spaces between words."
-
-    failure_message = (
-        "Unnecessary consecutive spaces or trailing spaces before a newline."
+    description = (
+        "The value does not contain trailing spaces before a newline or multiple consecutive spaces between words."
     )
+
+    failure_message = "Unnecessary consecutive spaces or trailing spaces before a newline."
 
     _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]"
 
@@ -180,9 +178,7 @@ class AllBracketsBalanced(BaseGenericCheck):
     name = "all_brackets_balanced"
     id = 13
     version = "1.0.0"
-    description = (
-        "All parentheses, square brackets, and curly braces are properly closed."
-    )
+    description = "All parentheses, square brackets, and curly braces are properly closed."
 
     failure_message = "Unbalanced brackets."
 

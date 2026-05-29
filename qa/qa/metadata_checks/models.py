@@ -23,15 +23,20 @@ class Disposition(StrEnum):
     REJECT = "reject"
 
 
-class Offset(BaseModel):  # TODO
+class Offset(BaseModel):
     """A character-level span within a string."""
 
     start: int
     end: int
-    excerpt: str = ""
 
 
 class Result(BaseModel):
+    """
+    An internal (domain) model representing a check result, both passing and non-passing.
+    Every failure (non-passing result) will include offsets.
+    Every aggregate check result will include a list of results from sub-checks.
+    """
+
     check_name: str
     check_id: int
     check_version: str

@@ -82,9 +82,7 @@ class BaseGenericCheck(BaseCheck):
         v = getattr(inputs[self.data], self.field, None)
 
         if not v:
-            raise MissingDataError(
-                f"Required field '{self.data}' '{self.field}' is missing."
-            )
+            raise MissingDataError(f"Required field '{self.data}' '{self.field}' is missing.")
 
         return self._run(inputs)
 
@@ -137,10 +135,7 @@ class BaseAggregateCheck(BaseCheck):
     def config(self) -> dict:
         """Return sub-checks and their configurations for the registry endpoint."""
         return {
-            "checks": [
-                {"name": c.name, "id": c.id, "version": c.version, "config": c.config}
-                for c in self._checks
-            ]
+            "checks": [{"name": c.name, "id": c.id, "version": c.version, "config": c.config} for c in self._checks]
         }
 
     def run(self, inputs: dict[str, Any]) -> models.Result:
