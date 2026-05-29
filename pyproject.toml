@@ -62,31 +62,6 @@ sphinx = [ "sphinx", "sphinxcontrib-websupport", "sphinx-autodoc-typehints" ]
 postgres = ["psycopg2-binary"]
 qa = [ "gcld3", "wheel"]
 
-[tool.poetry.group.dev.dependencies]
-autopep8 = "^2.3.1"
-black = "^24.10.0"
-click = "*"
-fakeredis = "*"
-functions-framework = "^3.8.1"
-geoalchemy2 = "^0.15.2"
-google-cloud-bigquery = "^3.26.0"
-hypothesis = "*"
-inflect = "^7.4.0"
-libcst = "^1.5.0"
-mimesis = "*"
-mypy = "*"
-pgvector = "^0.3.5"
-pydocstyle = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-mock = "^3.8.2"
-selenium = "^4.23.0"
-sqlalchemy-citext = "*"
-sqlmodel = "^0.0.22"
-types-requests = "^2.32.0.20240712"
-textual = "^6.2.1"
-
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
