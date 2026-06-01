@@ -318,7 +318,7 @@ class DoesNotContainUnnecessaryEscape(BaseGenericPatternCheck):
 
     failure_message = "Contains unnecessary escape."
 
-    _pattern = r"(?i)\\#|(?i)\\%"
+    _pattern = r"\\#|\\%"
 
 
 class DoesNotContainTex(BaseGenericPatternCheck):
@@ -329,7 +329,7 @@ class DoesNotContainTex(BaseGenericPatternCheck):
 
     failure_message = "Contains TeX."
 
-    _pattern = r"(?i)\\href\{|(?i)\\url\{"
+    _pattern = r"(?i)\\href\{|\\url\{"
 
 
 class DoesNotContainControlChars(BaseGenericPatternCheck):
