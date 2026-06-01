@@ -12,7 +12,6 @@ class DoesNotStartWithLowercase(BaseGenericPatternCheck):
     id = 8
     version = "1.0.0"
     description = "The value does not start with a lowercase letter."
-
     failure_message = "Begins with a lowercase letter."
 
     _pattern = r"^[a-z]"
@@ -23,7 +22,6 @@ class NoExcessiveCapitals(BaseGenericCheck):
     id = 7
     version = "1.0.0"
     description = "The value does not contain excessive capitals."
-
     failure_message = "Likely excessive capitalization."
 
     def _run(self, inputs: Inputs) -> Result:
@@ -32,7 +30,7 @@ class NoExcessiveCapitals(BaseGenericCheck):
         num_caps = sum([c.isupper() for c in v])
         num_lower = sum([c.islower() for c in v])
 
-        if v and num_caps <= num_lower * 2 + 7:
+        if num_caps <= num_lower * 2 + 7:
             return self._result(passed=True)
         else:
             return self._result(passed=False, message=self.failure_message)
@@ -43,7 +41,6 @@ class NoUnapprovedLongCapsWords(BaseGenericCheck):
     id = 12  # NOTE: new
     version = "1.0.0"
     description = "The value does not contain two or more unapproved all caps words that are 6 or more characters long."
-
     failure_message = "Contains unapproved long caps words."
 
     def _run(self, inputs: Inputs) -> Result:
@@ -71,52 +68,24 @@ class NoUnapprovedLongCapsWords(BaseGenericCheck):
             )
 
 
-class NoTrailingWhitespace(BaseGenericPatternCheck):
-    name = "no_trailing_whitespace"
-    id = 17
-    version = "1.0.0"
-    description = "The value does not contain trailing whitespace."
-
-    failure_message = "Trailing whitespace."
-
-    _pattern = r"\s$"
-
-
-class NoLeadingWhitespace(BaseGenericPatternCheck):
-    name = "no_leading_whitespace"
+class NoBoundaryWhitespace(BaseGenericPatternCheck):
+    name = "no_boundary_whitespace"
     id = 16
     version = "1.0.0"
-    description = "The value does not contain leading whitespace."
+    description = "The value does not begin or end with whitespace."
+    failure_message = "Leading or trailing whitespace."
 
-    failure_message = "Leading whitespace."
-
-    _pattern = r"^\s"
+    _pattern = r"^\s|\s$"
 
 
-# was EXTRA_WHITESPACE
-class NoRedundantOrSpacedCommas(BaseGenericPatternCheck):
-    name = "no_redundant_or_spaced_commas"
+class NoExtraWhitespace(BaseGenericPatternCheck):
+    name = "no_extra_whitespace"
     id = 25
     version = "1.0.0"
-    description = "The value does not contain consecutive commas, or whitespace preceding commas."
+    description = "The value does not contain multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
+    failure_message = "Excessive or irregular whitespace."
 
-    failure_message = "Redundant or spaced commas."
-
-    _pattern = r"(?i)\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+"
-
-
-# was EXTRA_WHITESPACE_ABS
-class NoExtraInternalOrTrailingSpaces(BaseGenericPatternCheck):
-    name = "no_extra_internal_or_trailing_spaces"
-    id = 35
-    version = "1.0.0"
-    description = (
-        "The value does not contain trailing spaces before a newline or multiple consecutive spaces between words."
-    )
-
-    failure_message = "Unnecessary consecutive spaces or trailing spaces before a newline."
-
-    _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]"
+    _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]|\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+"
 
 
 class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
@@ -124,7 +93,6 @@ class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
     id = 33
     version = "1.0.0"
     description = "The value does not contain leading or trailing spaces immediately inside parentheses."
-
     failure_message = "Unnecessary space inside parentheses."
 
     _pattern = r"\(\s|\s\)"
@@ -135,7 +103,6 @@ class NoHtmlElements(BaseGenericPatternCheck):
     id = 11
     version = "1.0.0"
     description = "The value does not contain raw HTML elements."
-
     failure_message = "Contains HTML."
 
     HTML_ELEMENTS = [
@@ -165,7 +132,6 @@ class AllBracketsBalanced(BaseGenericCheck):
     id = 13
     version = "1.0.0"
     description = "All parentheses, square brackets, and curly braces are properly closed."
-
     failure_message = "Unbalanced brackets."
 
     def _run(self, inputs: Inputs) -> Result:
@@ -204,7 +170,6 @@ class NotTooLong(BaseGenericCheck):
     id = 36
     version = "1.0.0"
     description = "The value does not exceed the maximum character length."
-
     failure_message = "Too long."
 
     def __init__(
@@ -240,7 +205,6 @@ class NotTooShort(BaseGenericCheck):
     id = 2
     version = "1.0.0"
     description = "The value meets or exceeds the minimum character length."
-
     failure_message = "Too short."
 
     def __init__(
@@ -276,7 +240,6 @@ class NotEmpty(BaseGenericCheck):
     id = 1
     version = "1.0.0"
     description = "The value is not an empty string."
-
     failure_message = "Cannot be empty."
 
     def _run(self, inputs: Inputs) -> Result:
@@ -293,7 +256,6 @@ class DoesNotBeginWithTitle(BaseGenericPatternCheck):
     id = 3
     version = "1.0.0"
     description = "The value does not begin with the literal prefix 'title:'."
-
     failure_message = "Begins with 'title'."
 
     _pattern = r"(?i)^title:?\b"
@@ -304,7 +266,6 @@ class DoesNotContainLinebreak(BaseGenericPatternCheck):
     id = 6
     version = "1.0.0"
     description = "The value does not contain LaTeX-style or escaped linebreaks."
-
     failure_message = "Contains a line break."
 
     _pattern = r"(?i)\\\\"
@@ -315,7 +276,6 @@ class DoesNotContainUnnecessaryEscape(BaseGenericPatternCheck):
     id = 10
     version = "1.0.0"
     description = "The value does not contain unnecessary escape characters preceding hash or percent symbols."
-
     failure_message = "Contains unnecessary escape."
 
     _pattern = r"\\#|\\%"
@@ -326,7 +286,6 @@ class DoesNotContainTex(BaseGenericPatternCheck):
     id = 9
     version = "1.0.0"
     description = "The value does not contain href or url raw TeX commands."
-
     failure_message = "Contains TeX."
 
     _pattern = r"(?i)\\href\{|\\url\{"
@@ -337,7 +296,6 @@ class DoesNotContainControlChars(BaseGenericPatternCheck):
     id = 26
     version = "1.0.0"
     description = "The value does not contain control characters including newlines, tabs, and backspaces."
-
     failure_message = "Contains control characters: newlines, tabs, or backspaces."
 
     _pattern = r"[\u0000-\u001f]+"
@@ -348,7 +306,6 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     id = 14
     version = "1.0.0"
     description = "The value does not contain malformed Unicode sequences."
-
     failure_message = "Bad Unicode encoding."
 
     _pattern = r"[\u00c0-\u00ff][\u0080-\u00bf]+"

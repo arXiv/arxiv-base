@@ -16,11 +16,10 @@ class BaseCheck(ABC):
     id: int
     version: str
     description: str
-
-    required_inputs: set[str] = set()
     failure_message: str
 
     disposition: Disposition
+    required_inputs: set[str] = set()
 
     def _validate_inputs(self, inputs: Inputs) -> None:
         for data in self.required_inputs:

@@ -11,9 +11,8 @@ from qa.checks.generic.text import (
     DoesNotStartWithLowercase,
     DoesNotContainUnnecessaryEscape,
     DoesNotContainTex,
-    NoLeadingWhitespace,
-    NoTrailingWhitespace,
-    NoRedundantOrSpacedCommas,
+    NoBoundaryWhitespace,
+    NoExtraWhitespace,
     NoUnnecessarySpaceInParens,
     NoHtmlElements,
     AllBracketsBalanced,
@@ -33,7 +32,7 @@ class ValidTitleCheck(BaseAggregateCheck):
     required_inputs = {"metadata"}
 
     @classmethod
-    def check(cls, title: str) -> Result:
+    def check(cls, title: str | None) -> Result:
         return cls().run(Inputs(metadata=Metadata(title=title)))
 
     _checks = (
@@ -47,9 +46,8 @@ class ValidTitleCheck(BaseAggregateCheck):
         DoesNotStartWithLowercase(disposition=Disposition.WARN, data="metadata", field="title"),
         DoesNotContainUnnecessaryEscape(disposition=Disposition.WARN, data="metadata", field="title"),
         DoesNotContainTex(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoLeadingWhitespace(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoTrailingWhitespace(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoRedundantOrSpacedCommas(disposition=Disposition.WARN, data="metadata", field="title"),
+        NoBoundaryWhitespace(disposition=Disposition.WARN, data="metadata", field="title"),
+        NoExtraWhitespace(disposition=Disposition.WARN, data="metadata", field="title"),
         NoUnnecessarySpaceInParens(disposition=Disposition.WARN, data="metadata", field="title"),
         NoHtmlElements(disposition=Disposition.WARN, data="metadata", field="title"),
         AllBracketsBalanced(disposition=Disposition.WARN, data="metadata", field="title"),

@@ -10,5 +10,4 @@ format:
 	uv run ruff format
 
 test:
-	uv run pytest --cov=qa
-# 	uv run pytest --cov=qa --cov-report=term --cov-fail-under=80 tests
+	uv run pytest --cov=qa --cov-report=term --cov-fail-under=80 tests
