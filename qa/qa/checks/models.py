@@ -1,9 +1,6 @@
-"""Shared data models for the QA check system."""
-
-from typing import Optional
-from enum import StrEnum
-
 from pydantic import BaseModel
+from typing import Optional, Protocol, runtime_checkable
+from enum import StrEnum
 
 
 class Disposition(StrEnum):
@@ -32,7 +29,7 @@ class Offset(BaseModel):
 
 class Result(BaseModel):
     """
-    An internal (domain) model representing a check result, both passing and non-passing.
+    A domain model representing a check result.
     Every failure (non-passing result) will include offsets.
     Every aggregate check result will include a list of results from sub-checks.
     """
@@ -44,3 +41,22 @@ class Result(BaseModel):
     message: str
     offsets: Optional[list[Offset]] = None
     results: Optional[list["Result"]] = None
+
+
+@runtime_checkable
+class MetadataProtocol(Protocol):
+    """
+    A protocol representing the shape of submission metadata.
+    Only enforces attribute presence.
+    Can be used with any object.
+    """
+
+    title: str | None
+    authors: str | None
+    abstract: str | None
+    comments: str | None
+    report_num: str | None
+    journal_ref: str | None
+    doi: str | None
+    msc_class: str | None
+    acm_class: str | None

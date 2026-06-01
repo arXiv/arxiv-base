@@ -3,10 +3,9 @@
 import re
 from typing import Any
 
-from qa.metadata_checks import models
-from qa.metadata_checks.base import BaseCheck, BaseGenericCheck, BaseGenericPatternCheck
-
-from qa.checks.constants.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
+from qa.checks.models import Result, Offset, Disposition
+from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
+from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
 
 class DoesNotStartWithLowercase(BaseGenericPatternCheck):
@@ -28,7 +27,7 @@ class NoExcessiveCapitals(BaseGenericCheck):
 
     failure_message = "Likely excessive capitalization."
 
-    def _run(self, data: dict[str, Any]) -> models.Result:
+    def _run(self, data: dict[str, Any]) -> Result:
         v = getattr(data[self.data], self.field, None)
 
         num_caps = sum([c.isupper() for c in v])
@@ -48,7 +47,7 @@ class NoUnapprovedLongCapsWords(BaseGenericCheck):
 
     failure_message = "Contains unapproved long caps words."
 
-    def _run(self, data: dict[str, Any]) -> models.Result:
+    def _run(self, data: dict[str, Any]) -> Result:
         v = getattr(data[self.data], self.field, None)
 
         violating_words = []
@@ -61,7 +60,7 @@ class NoUnapprovedLongCapsWords(BaseGenericCheck):
 
             if len(word) >= 6 and word not in KNOWN_WORDS_IN_ALL_CAPS:
                 violating_words.append(word)
-                offsets.append(models.Offset(start=match.start(), end=match.end()))
+                offsets.append(Offset(start=match.start(), end=match.end()))
 
         if len(violating_words) < 2:
             return self._result(passed=True)
@@ -124,7 +123,7 @@ class NoExtraInternalOrTrailingSpaces(BaseGenericPatternCheck):
 class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
     name = "no_unnecessary_space_in_parens"
     id = 33
-    version = "1.0"
+    version = "1.0.0"
     description = "The value does not contain leading or trailing spaces immediately inside parentheses."
 
     failure_message = "Unnecessary space inside parentheses."
@@ -135,7 +134,7 @@ class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
 class NoHtmlElements(BaseGenericPatternCheck):
     name = "no_html_elements"
     id = 11
-    version = "1.0"
+    version = "1.0.0"
     description = "The value does not contain raw HTML elements."
 
     failure_message = "Contains HTML."
@@ -170,7 +169,7 @@ class AllBracketsBalanced(BaseGenericCheck):
 
     failure_message = "Unbalanced brackets."
 
-    def _run(self, data: dict[str, Any]) -> models.Result:
+    def _run(self, data: dict[str, Any]) -> Result:
         v = getattr(data[self.data], self.field, None)
 
         bracket_pairs = {"(": ")", "[": "]", "{": "}"}
@@ -197,7 +196,7 @@ class AllBracketsBalanced(BaseGenericCheck):
             return self._result(
                 passed=False,
                 message=self.failure_message,
-                offsets=[models.Offset(start=error_index, end=error_index + 1)],
+                offsets=[Offset(start=error_index, end=error_index + 1)],
             )
 
 
@@ -213,7 +212,7 @@ class NotTooLong(BaseGenericCheck):
         self,
         max_chars: int,
         *,
-        disposition: models.Disposition,
+        disposition: Disposition,
         data: str,
         field: str,
     ) -> None:
@@ -224,7 +223,7 @@ class NotTooLong(BaseGenericCheck):
     def config(self) -> dict:
         return {**super().config, "max_chars": self.max_chars}
 
-    def _run(self, data: dict[str, Any]) -> models.Result:
+    def _run(self, data: dict[str, Any]) -> Result:
         v = getattr(data[self.data], self.field, None)
 
         if len(v) <= self.max_chars:
@@ -233,7 +232,7 @@ class NotTooLong(BaseGenericCheck):
         return self._result(
             passed=False,
             message=self.failure_message,
-            offsets=[models.Offset(start=self.max_chars, end=len(v))],
+            offsets=[Offset(start=self.max_chars, end=len(v))],
         )
 
 
@@ -249,7 +248,7 @@ class NotTooShort(BaseGenericCheck):
         self,
         min_chars: int,
         *,
-        disposition: models.Disposition,
+        disposition: Disposition,
         data: str,
         field: str,
     ) -> None:
@@ -260,7 +259,7 @@ class NotTooShort(BaseGenericCheck):
     def config(self) -> dict:
         return {**super().config, "min_chars": self.min_chars}
 
-    def _run(self, data: dict[str, Any]) -> models.Result:
+    def _run(self, data: dict[str, Any]) -> Result:
         v = getattr(data[self.data], self.field, None)
 
         if len(v) >= self.min_chars:
@@ -269,7 +268,7 @@ class NotTooShort(BaseGenericCheck):
         return self._result(
             passed=False,
             message=self.failure_message,
-            offsets=[models.Offset(start=0, end=len(v))],
+            offsets=[Offset(start=0, end=len(v))],
         )
 
 
@@ -281,14 +280,10 @@ class NotEmpty(BaseGenericCheck):
 
     failure_message = "Cannot be empty."
 
-    def _validate_inputs(self, inputs: dict[str, Any]) -> None:
-        # skip BaseGenericCheck's _validate_inputs so that empty fields can be detected heres
-        BaseCheck._validate_inputs(self, inputs)
-
-    def _run(self, data: dict[str, Any]) -> models.Result:
+    def _run(self, data: dict[str, Any]) -> Result:
         v = getattr(data[self.data], self.field, None)
 
-        if v is not None and v != "":
+        if v != "":
             return self._result(passed=True)
 
         return self._result(passed=False, message=self.failure_message)

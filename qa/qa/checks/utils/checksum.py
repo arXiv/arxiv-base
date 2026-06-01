@@ -2,17 +2,13 @@
 
 import zlib
 
-from arxiv.metadata import MetadataProtocol
+from qa.checks.models import MetadataProtocol
 
 _DIVIDER = "𒑰"
 
 
 def checksum_metadata(submission: MetadataProtocol) -> int:
-    """Make a checksum using the fields of `MetadataProtocol`.
-
-    If this is the only function used from arxiv-base it can be installed
-    without other dependenices.
-    """
+    """Make a checksum using the fields of `MetadataProtocol`."""
     value = (
         f"{submission.title}{_DIVIDER}"
         f"{submission.authors}{_DIVIDER}"

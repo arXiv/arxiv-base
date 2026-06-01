@@ -1,6 +1,6 @@
-from qa.metadata_checks.base import BaseAggregateCheck
-from qa.metadata_checks.models import Disposition
-from qa.metadata_checks.generic import (
+from qa.checks.base import BaseAggregateCheck
+from qa.checks.models import Disposition
+from qa.checks.generic.text import (
     NotEmpty,
     NotTooShort,
     NotTooLong,
@@ -26,6 +26,7 @@ class ValidTitleCheck(BaseAggregateCheck):
     """Aggregated check for the metadata title field."""
 
     name = "valid_title_check"
+    id = 0
     version = "1.0.0"
     description = "The metadata title field is valid."
 

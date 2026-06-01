@@ -27,7 +27,7 @@ class BaseReport(BaseModel):
     submission_id: int = Field(gt=0)
     created: str = Field(
         description="The timestamp representing when the report was created.",
-        default_factory=datetime.now(timezone.utc).isoformat,
+        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
     )
     flags: List[Flag] = []
     qa_exec_time_sec: Optional[int] = Field(
