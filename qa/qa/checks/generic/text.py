@@ -1,9 +1,8 @@
 """Generic text checks."""
 
 import re
-from typing import Any
 
-from qa.checks.models import Result, Offset, Disposition
+from qa.checks.models import Result, Offset, Disposition, CheckData
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
@@ -27,8 +26,8 @@ class NoExcessiveCapitals(BaseGenericCheck):
 
     failure_message = "Likely excessive capitalization."
 
-    def _run(self, data: dict[str, Any]) -> Result:
-        v = getattr(data[self.data], self.field, None)
+    def _run(self, data: CheckData) -> Result:
+        v = getattr(getattr(data, self.data), self.field, None)
 
         num_caps = sum([c.isupper() for c in v])
         num_lower = sum([c.islower() for c in v])
@@ -47,8 +46,8 @@ class NoUnapprovedLongCapsWords(BaseGenericCheck):
 
     failure_message = "Contains unapproved long caps words."
 
-    def _run(self, data: dict[str, Any]) -> Result:
-        v = getattr(data[self.data], self.field, None)
+    def _run(self, data: CheckData) -> Result:
+        v = getattr(getattr(data, self.data), self.field, None)
 
         violating_words = []
         offsets = []
@@ -169,8 +168,8 @@ class AllBracketsBalanced(BaseGenericCheck):
 
     failure_message = "Unbalanced brackets."
 
-    def _run(self, data: dict[str, Any]) -> Result:
-        v = getattr(data[self.data], self.field, None)
+    def _run(self, data: CheckData) -> Result:
+        v = getattr(getattr(data, self.data), self.field, None)
 
         bracket_pairs = {"(": ")", "[": "]", "{": "}"}
 
@@ -223,8 +222,8 @@ class NotTooLong(BaseGenericCheck):
     def config(self) -> dict:
         return {**super().config, "max_chars": self.max_chars}
 
-    def _run(self, data: dict[str, Any]) -> Result:
-        v = getattr(data[self.data], self.field, None)
+    def _run(self, data: CheckData) -> Result:
+        v = getattr(getattr(data, self.data), self.field, None)
 
         if len(v) <= self.max_chars:
             return self._result(passed=True)
@@ -259,8 +258,8 @@ class NotTooShort(BaseGenericCheck):
     def config(self) -> dict:
         return {**super().config, "min_chars": self.min_chars}
 
-    def _run(self, data: dict[str, Any]) -> Result:
-        v = getattr(data[self.data], self.field, None)
+    def _run(self, data: CheckData) -> Result:
+        v = getattr(getattr(data, self.data), self.field, None)
 
         if len(v) >= self.min_chars:
             return self._result(passed=True)
@@ -280,8 +279,8 @@ class NotEmpty(BaseGenericCheck):
 
     failure_message = "Cannot be empty."
 
-    def _run(self, data: dict[str, Any]) -> Result:
-        v = getattr(data[self.data], self.field, None)
+    def _run(self, data: CheckData) -> Result:
+        v = getattr(getattr(data, self.data), self.field, None)
 
         if v != "":
             return self._result(passed=True)

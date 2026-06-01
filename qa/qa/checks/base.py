@@ -3,9 +3,8 @@
 from abc import ABC, abstractmethod
 import re
 
-from typing import Optional, Any
 
-from qa.checks.models import Result, Offset, Disposition
+from qa.checks.models import Result, Offset, Disposition, CheckData
 
 
 class MissingDataError(Exception):
@@ -23,21 +22,20 @@ class BaseCheck(ABC):
 
     disposition: Disposition
 
-    def _validate_inputs(self, inputs: dict[str, Any]) -> None:
-        """Validate required data are present."""
+    def _validate_inputs(self, inputs: CheckData) -> None:
         for data in self.required_inputs:
-            if data not in inputs or not inputs[data]:
+            if getattr(inputs, data) is None:
                 raise MissingDataError(f"Required data '{data}' is missing.")
 
     @abstractmethod
-    def _run(self, inputs: dict[str, Any]) -> Result:
+    def _run(self, inputs: CheckData) -> Result:
         pass
 
     def _result(
         self,
         passed: bool,
         message: str = "",
-        offsets: Optional[list[Offset]] = None,
+        offsets: list[Offset] | None = None,
     ) -> Result:
         return Result(
             check_name=self.name,
@@ -48,7 +46,7 @@ class BaseCheck(ABC):
             offsets=offsets,
         )
 
-    def run(self, inputs: dict[str, Any]) -> Result:
+    def run(self, inputs: CheckData) -> Result:
         self._validate_inputs(inputs)
         return self._run(inputs)
 
@@ -80,17 +78,17 @@ class BaseGenericCheck(BaseCheck):
             "field": self.field,
         }
 
-    def _validate_inputs(self, inputs: dict[str, Any]) -> None:
+    def _validate_inputs(self, inputs: CheckData) -> None:
         super()._validate_inputs(inputs)
-        if self.data not in inputs or not inputs[self.data]:
+        if getattr(inputs, self.data) is None:
             raise MissingDataError(f"Required data '{self.data}' is missing.")
 
-        v = getattr(inputs[self.data], self.field, None)
+        v = getattr(getattr(inputs, self.data), self.field, None)
         if v is None:
             raise MissingDataError(f"Required field '{self.data}' '{self.field}' is missing.")
 
     @abstractmethod
-    def _run(self, inputs: dict[str, Any]) -> Result:
+    def _run(self, inputs: CheckData) -> Result:
         pass
 
 
@@ -116,9 +114,9 @@ class BaseGenericPatternCheck(BaseGenericCheck):
             "pattern": self._pattern,
         }
 
-    def _run(self, inputs: dict[str, Any]) -> Result:
+    def _run(self, inputs: CheckData) -> Result:
         """The pattern applied to the configured field should not return any matches."""
-        v = getattr(inputs[self.data], self.field, None)
+        v = getattr(getattr(inputs, self.data), self.field, None)
 
         offsets = []
 
@@ -145,7 +143,7 @@ class BaseAggregateCheck(BaseCheck):
             "checks": [{"name": c.name, "id": c.id, "version": c.version, "config": c.config} for c in self._checks]
         }
 
-    def _run(self, inputs: dict[str, Any]) -> Result:
+    def _run(self, inputs: CheckData) -> Result:
         """Run all sub-checks and return results. If any sub-check fails and has a REJECT disposition, fail the aggregate check."""
 
         results: list[Result] = []

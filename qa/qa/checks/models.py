@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 from enum import StrEnum
 
 
@@ -39,8 +39,22 @@ class Result(BaseModel):
     check_version: str
     passed: bool
     message: str
-    offsets: Optional[list[Offset]] = None
-    results: Optional[list["Result"]] = None
+    offsets: list[Offset] | None = None
+    results: list["Result"] | None = None
+
+
+class Metadata(BaseModel):
+    """A concrete implementation of MetadataProtocol for use in checks."""
+
+    title: str | None = None
+    authors: str | None = None
+    abstract: str | None = None
+    comments: str | None = None
+    report_num: str | None = None
+    journal_ref: str | None = None
+    doi: str | None = None
+    msc_class: str | None = None
+    acm_class: str | None = None
 
 
 @runtime_checkable
@@ -60,3 +74,14 @@ class MetadataProtocol(Protocol):
     doi: str | None
     msc_class: str | None
     acm_class: str | None
+
+
+class CheckData(BaseModel):
+    """Data dependencies for checks."""
+
+    fulltext: str | None = None
+    fulltext_report: str | None = None
+    author_report: str | None = None
+    flagged_terms_report: str | None = None
+    tex_report: str | None = None
+    metadata: Metadata | None = None

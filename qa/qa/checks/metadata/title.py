@@ -1,5 +1,5 @@
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import Disposition
+from qa.checks.models import CheckData, Disposition, Metadata, Result
 from qa.checks.generic.text import (
     NotEmpty,
     NotTooShort,
@@ -23,7 +23,7 @@ from qa.checks.generic.text import (
 
 
 class ValidTitleCheck(BaseAggregateCheck):
-    """Aggregated check for the metadata title field."""
+    """Aggregate check for the metadata title field."""
 
     name = "valid_title_check"
     id = 0
@@ -31,6 +31,10 @@ class ValidTitleCheck(BaseAggregateCheck):
     description = "The metadata title field is valid."
 
     required_inputs = {"metadata"}
+
+    @classmethod
+    def check(cls, title: str) -> Result:
+        return cls().run(CheckData(metadata=Metadata(title=title)))
 
     _checks = (
         NotEmpty(disposition=Disposition.REJECT, data="metadata", field="title"),
