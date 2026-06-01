@@ -4,7 +4,7 @@ import re
 from typing import Any
 
 from qa.metadata_checks import models
-from qa.metadata_checks.base import BaseGenericCheck, BaseGenericPatternCheck, MissingDataError
+from qa.metadata_checks.base import BaseCheck, BaseGenericCheck, BaseGenericPatternCheck
 
 from qa.checks.constants.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
@@ -281,12 +281,9 @@ class NotEmpty(BaseGenericCheck):
 
     failure_message = "Cannot be empty."
 
-    def run(self, inputs: dict[str, Any]) -> models.Result:
-        # skip empty field validation in the base class
-        for key in self.required_inputs:
-            if key not in inputs or not inputs[key]:
-                raise MissingDataError(f"Required data '{key}' is missing.")
-        return self._run(inputs)
+    def _validate_inputs(self, inputs: dict[str, Any]) -> None:
+        # skip BaseGenericCheck's _validate_inputs so that empty fields can be detected heres
+        BaseCheck._validate_inputs(self, inputs)
 
     def _run(self, data: dict[str, Any]) -> models.Result:
         v = getattr(data[self.data], self.field, None)

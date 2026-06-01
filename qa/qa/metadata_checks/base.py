@@ -23,12 +23,11 @@ class BaseCheck(ABC):
 
     disposition: models.Disposition
 
-    def run(self, inputs: dict[str, Any]) -> models.Result:
-        """Validate required data are present, then execute."""
+    def _validate_inputs(self, inputs: dict[str, Any]) -> None:
+        """Validate required data are present."""
         for data in self.required_inputs:
             if data not in inputs or not inputs[data]:
                 raise MissingDataError(f"Required data '{data}' is missing.")
-        return self._run(inputs)
 
     @abstractmethod
     def _run(self, inputs: dict[str, Any]) -> models.Result:
@@ -48,6 +47,10 @@ class BaseCheck(ABC):
             message=message,
             offsets=offsets,
         )
+
+    def run(self, inputs: dict[str, Any]) -> models.Result:
+        self._validate_inputs(inputs)
+        return self._run(inputs)
 
 
 class BaseGenericCheck(BaseCheck):
@@ -77,15 +80,18 @@ class BaseGenericCheck(BaseCheck):
             "field": self.field,
         }
 
-    def run(self, inputs: dict[str, Any]) -> models.Result:
-        super().run(inputs)
+    def _validate_inputs(self, inputs: dict[str, Any]) -> None:
+        super()._validate_inputs(inputs)
+        if self.data not in inputs or not inputs[self.data]:
+            raise MissingDataError(f"Required data '{self.data}' is missing.")
 
         v = getattr(inputs[self.data], self.field, None)
-
         if not v:
             raise MissingDataError(f"Required field '{self.data}' '{self.field}' is missing.")
 
-        return self._run(inputs)
+    @abstractmethod
+    def _run(self, inputs: dict[str, Any]) -> models.Result:
+        pass
 
 
 class BaseGenericPatternCheck(BaseGenericCheck):
@@ -139,11 +145,8 @@ class BaseAggregateCheck(BaseCheck):
             "checks": [{"name": c.name, "id": c.id, "version": c.version, "config": c.config} for c in self._checks]
         }
 
-    def run(self, inputs: dict[str, Any]) -> models.Result:
+    def _run(self, inputs: dict[str, Any]) -> models.Result:
         """Run all sub-checks and return results. If any sub-check fails and has a REJECT disposition, fail the aggregate check."""
-        for data in self.required_inputs:
-            if data not in inputs or not inputs[data]:
-                raise MissingDataError(f"Required data '{data}' is missing.")
 
         results: list[models.Result] = []
         passed = True
