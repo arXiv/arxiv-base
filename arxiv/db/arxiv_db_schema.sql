@@ -2364,6 +2364,139 @@ CREATE TABLE `tapir_users_password` (
   CONSTRAINT `0_512` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `publish_outbox`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `publish_outbox` (
+  `outbox_id` int NOT NULL AUTO_INCREMENT,
+  `submission_id` int DEFAULT NULL,
+  `document_id` int DEFAULT NULL,
+  `paper_id` varchar(20) DEFAULT NULL,
+  `message_type` enum('file_ops','html_conversion','batch_complete','paper_changed') NOT NULL,
+  `message_json` text NOT NULL,
+  `topic` varchar(100) NOT NULL,
+  `status` enum('pending','published','failed') NOT NULL DEFAULT 'pending',
+  `batch_id` varchar(40) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `published_at` datetime DEFAULT NULL,
+  `error_message` varchar(500) DEFAULT NULL,
+  `retry_count` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`outbox_id`),
+  UNIQUE KEY `uq_batch_complete` (`batch_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_status_retry` (`status`,`retry_count`),
+  KEY `idx_submission` (`submission_id`),
+  KEY `idx_document` (`document_id`),
+  KEY `idx_paper_id` (`paper_id`),
+  KEY `idx_created_at` (`created_at`),
+  KEY `idx_batch` (`batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Transactional outbox for reliable Pub/Sub message delivery';
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `publish_run_lock`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `publish_run_lock` (
+  `lock_name` varchar(32) NOT NULL,
+  `holder` varchar(64) NOT NULL,
+  `acquired_at` datetime NOT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`lock_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `publish_manifest_entries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `publish_manifest_entries` (
+  `entry_id` int NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(40) NOT NULL,
+  `submission_id` int NOT NULL,
+  `paper_id` varchar(20) NOT NULL,
+  `metadata_json` mediumtext NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`entry_id`),
+  UNIQUE KEY `uq_batch_paper` (`batch_id`,`paper_id`),
+  KEY `idx_batch` (`batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `publish_batches`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `publish_batches` (
+  `batch_id` varchar(40) NOT NULL,
+  `total_processed` int NOT NULL DEFAULT '0',
+  `new_count` int NOT NULL DEFAULT '0',
+  `rep_count` int NOT NULL DEFAULT '0',
+  `cross_count` int NOT NULL DEFAULT '0',
+  `wdr_count` int NOT NULL DEFAULT '0',
+  `jref_count` int NOT NULL DEFAULT '0',
+  `meta_count` int NOT NULL DEFAULT '0',
+  `data_count` int NOT NULL DEFAULT '0',
+  `error_count` int NOT NULL DEFAULT '0',
+  `invalid_count` int NOT NULL DEFAULT '0',
+  `test_count` int NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP VIEW IF EXISTS `publish_outbox_failed`;
+CREATE OR REPLACE VIEW `publish_outbox_failed` AS
+SELECT
+    `outbox_id`,
+    `submission_id`,
+    `paper_id`,
+    `message_type`,
+    `topic`,
+    `created_at`,
+    `error_message`,
+    `retry_count`
+FROM `publish_outbox`
+WHERE `status` = 'failed'
+ORDER BY `created_at` DESC;
+DROP VIEW IF EXISTS `publish_outbox_stuck`;
+CREATE OR REPLACE VIEW `publish_outbox_stuck` AS
+SELECT
+    `outbox_id`,
+    `submission_id`,
+    `paper_id`,
+    `message_type`,
+    `topic`,
+    `created_at`,
+    TIMESTAMPDIFF(MINUTE, `created_at`, NOW()) AS `minutes_pending`
+FROM `publish_outbox`
+WHERE `status` = 'pending'
+  AND `created_at` < DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+ORDER BY `created_at`;
+DROP VIEW IF EXISTS `publish_outbox_dead`;
+CREATE OR REPLACE VIEW `publish_outbox_dead` AS
+SELECT
+    `outbox_id`,
+    `submission_id`,
+    `paper_id`,
+    `message_type`,
+    `topic`,
+    `created_at`,
+    `error_message`,
+    `retry_count`
+FROM `publish_outbox`
+WHERE `status` = 'failed'
+  AND `retry_count` >= 5
+ORDER BY `created_at`;
+DROP VIEW IF EXISTS `publish_orphan_batches`;
+CREATE OR REPLACE VIEW `publish_orphan_batches` AS
+SELECT b.`batch_id`,
+       b.`created_at`,
+       b.`total_processed`,
+       b.`error_count`,
+       b.`invalid_count`,
+       b.`test_count`,
+       (SELECT COUNT(*) FROM `publish_manifest_entries` m WHERE m.`batch_id` = b.`batch_id`) AS `paper_count`,
+       TIMESTAMPDIFF(MINUTE, b.`created_at`, NOW()) AS `minutes_orphaned`
+  FROM `publish_batches` b
+  LEFT JOIN `publish_outbox` o
+    ON o.`batch_id` = b.`batch_id` AND o.`message_type` = 'batch_complete'
+ WHERE o.`outbox_id` IS NULL
+ ORDER BY b.`created_at`;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
