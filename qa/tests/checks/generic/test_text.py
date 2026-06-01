@@ -314,6 +314,9 @@ class TestAllBracketsBalanced:
     def test_pass_nested(self):
         assert self.check.run(inputs("A (nested [bracket {set}] here)")).passed
 
+    def test_fail_nested(self):
+        assert not self.check.run(inputs("[{}])}")).passed
+
     def test_fail_unclosed_paren(self):
         result = self.check.run(inputs("Unclosed (paren"))
         assert not result.passed
