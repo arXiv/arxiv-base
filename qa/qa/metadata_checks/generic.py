@@ -4,13 +4,12 @@ import re
 from typing import Any
 
 from qa.metadata_checks import models
-from qa.metadata_checks.base import BaseGenericCheck, BaseGenericPatternCheck
-from qa.metadata_checks.models import Offset
+from qa.metadata_checks.base import BaseGenericCheck, BaseGenericPatternCheck, MissingDataError
 
 from qa.checks.constants.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
 
-class DoesNotStartWithLowercase(BaseGenericCheck):
+class DoesNotStartWithLowercase(BaseGenericPatternCheck):
     name = "does_not_start_with_lowercase"
     id = 8
     version = "1.0.0"
@@ -18,19 +17,7 @@ class DoesNotStartWithLowercase(BaseGenericCheck):
 
     failure_message = "Begins with a lowercase letter."
 
-    def _run(self, data: dict[str, Any]) -> models.Result:
-        v = getattr(data[self.data_key], self.field, None)
-
-        if v and v[0].isupper():
-            return self._result(
-                passed=True,
-            )
-        else:
-            return self._result(
-                passed=False,
-                message=self.failure_message,
-                offsets=[Offset(start=0, end=min(1, len(v)))],
-            )
+    _pattern = r"^[a-z]"
 
 
 class NoExcessiveCapitals(BaseGenericCheck):
@@ -42,7 +29,7 @@ class NoExcessiveCapitals(BaseGenericCheck):
     failure_message = "Likely excessive capitalization."
 
     def _run(self, data: dict[str, Any]) -> models.Result:
-        v = getattr(data[self.data_key], self.field, None)
+        v = getattr(data[self.data], self.field, None)
 
         num_caps = sum([c.isupper() for c in v])
         num_lower = sum([c.islower() for c in v])
@@ -62,7 +49,8 @@ class NoUnapprovedLongCapsWords(BaseGenericCheck):
     failure_message = "Contains unapproved long caps words."
 
     def _run(self, data: dict[str, Any]) -> models.Result:
-        v = getattr(data[self.data_key], self.field, None)
+        v = getattr(data[self.data], self.field, None)
+
         violating_words = []
         offsets = []
 
@@ -183,7 +171,7 @@ class AllBracketsBalanced(BaseGenericCheck):
     failure_message = "Unbalanced brackets."
 
     def _run(self, data: dict[str, Any]) -> models.Result:
-        v = getattr(data[self.data_key], self.field, "")
+        v = getattr(data[self.data], self.field, None)
 
         bracket_pairs = {"(": ")", "[": "]", "{": "}"}
 
@@ -203,7 +191,7 @@ class AllBracketsBalanced(BaseGenericCheck):
             if stack:  # if the stack still has items, the last bracket is unclosed
                 error_index = stack[-1][1]
 
-        if not error_index:
+        if error_index is None:
             return self._result(passed=True)
         else:
             return self._result(
@@ -226,10 +214,10 @@ class NotTooLong(BaseGenericCheck):
         max_chars: int,
         *,
         disposition: models.Disposition,
-        data_key: str,
+        data: str,
         field: str,
     ) -> None:
-        super().__init__(disposition=disposition, data_key=data_key, field=field)
+        super().__init__(disposition=disposition, data=data, field=field)
         self.max_chars = max_chars
 
     @property
@@ -237,7 +225,7 @@ class NotTooLong(BaseGenericCheck):
         return {**super().config, "max_chars": self.max_chars}
 
     def _run(self, data: dict[str, Any]) -> models.Result:
-        v = getattr(data[self.data_key], self.field, None)
+        v = getattr(data[self.data], self.field, None)
 
         if len(v) <= self.max_chars:
             return self._result(passed=True)
@@ -262,10 +250,10 @@ class NotTooShort(BaseGenericCheck):
         min_chars: int,
         *,
         disposition: models.Disposition,
-        data_key: str,
+        data: str,
         field: str,
     ) -> None:
-        super().__init__(disposition=disposition, data_key=data_key, field=field)
+        super().__init__(disposition=disposition, data=data, field=field)
         self.min_chars = min_chars
 
     @property
@@ -273,7 +261,7 @@ class NotTooShort(BaseGenericCheck):
         return {**super().config, "min_chars": self.min_chars}
 
     def _run(self, data: dict[str, Any]) -> models.Result:
-        v = getattr(data[self.data_key], self.field, None)
+        v = getattr(data[self.data], self.field, None)
 
         if len(v) >= self.min_chars:
             return self._result(passed=True)
@@ -293,8 +281,15 @@ class NotEmpty(BaseGenericCheck):
 
     failure_message = "Cannot be empty."
 
+    def run(self, inputs: dict[str, Any]) -> models.Result:
+        # skip empty field validation in the base class
+        for key in self.required_inputs:
+            if key not in inputs or not inputs[key]:
+                raise MissingDataError(f"Required data '{key}' is missing.")
+        return self._run(inputs)
+
     def _run(self, data: dict[str, Any]) -> models.Result:
-        v = getattr(data[self.data_key], self.field, None)
+        v = getattr(data[self.data], self.field, None)
 
         if v is not None and v != "":
             return self._result(passed=True)

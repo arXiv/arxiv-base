@@ -29,12 +29,12 @@ class ValidTitleCheck(BaseAggregateCheck):
     version = "1.0.0"
     description = "The metadata title field is valid."
 
-    required_data = {"metadata"}
+    required_inputs = {"metadata"}
 
     _checks = (
         NotEmpty(disposition=Disposition.REJECT, data="metadata", field="title"),
-        NotTooShort(disposition=Disposition.WARN, data="metadata", field="title"),
-        NotTooLong(disposition=Disposition.WARN, data="metadata", field="title"),
+        NotTooShort(5, disposition=Disposition.WARN, data="metadata", field="title"),
+        NotTooLong(2000, disposition=Disposition.WARN, data="metadata", field="title"),
         DoesNotBeginWithTitle(disposition=Disposition.WARN, data="metadata", field="title"),
         DoesNotContainLinebreak(disposition=Disposition.WARN, data="metadata", field="title"),
         NoExcessiveCapitals(disposition=Disposition.WARN, data="metadata", field="title"),

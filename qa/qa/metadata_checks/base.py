@@ -24,7 +24,7 @@ class BaseCheck(ABC):
     disposition: models.Disposition
 
     def run(self, inputs: dict[str, Any]) -> models.Result:
-        """Validate required data keys are present, then execute."""
+        """Validate required data are present, then execute."""
         for data in self.required_inputs:
             if data not in inputs or not inputs[data]:
                 raise MissingDataError(f"Required data '{data}' is missing.")
@@ -79,6 +79,7 @@ class BaseGenericCheck(BaseCheck):
 
     def run(self, inputs: dict[str, Any]) -> models.Result:
         super().run(inputs)
+
         v = getattr(inputs[self.data], self.field, None)
 
         if not v:
@@ -87,7 +88,6 @@ class BaseGenericCheck(BaseCheck):
         return self._run(inputs)
 
 
-# add_complaints_matching
 class BaseGenericPatternCheck(BaseGenericCheck):
     _pattern: str
 
@@ -113,6 +113,7 @@ class BaseGenericPatternCheck(BaseGenericCheck):
     def _run(self, inputs: dict[str, Any]) -> models.Result:
         """The pattern applied to the configured field should not return any matches."""
         v = getattr(inputs[self.data], self.field, None)
+
         offsets = []
 
         for match in self._compiled_pattern.finditer(v):
@@ -139,23 +140,36 @@ class BaseAggregateCheck(BaseCheck):
         }
 
     def run(self, inputs: dict[str, Any]) -> models.Result:
+        """Run all sub-checks and return results. If any sub-check fails and has a REJECT disposition, fail the aggregate check."""
+        for data in self.required_inputs:
+            if data not in inputs or not inputs[data]:
+                raise MissingDataError(f"Required data '{data}' is missing.")
+
         results: list[models.Result] = []
         passed = True
 
         for check in self._checks:
-            results.append(check.run(inputs))
+            result = check.run(inputs)
+            results.append(result)
 
-            # TODO: review
-            if check.disposition == models.Disposition.REJECT:
+            if not result.passed and check.disposition == models.Disposition.REJECT:
                 passed = False
 
-        message = ""  # TODO
-
-        return models.Result(
-            check_name=self.name,
-            check_id=self.id,
-            check_version=self.version,
-            passed=passed,
-            message=message,
-            results=results,
-        )
+        if passed:
+            return models.Result(
+                check_name=self.name,
+                check_id=self.id,
+                check_version=self.version,
+                passed=True,
+                message="",
+                results=results,
+            )
+        else:
+            return models.Result(
+                check_name=self.name,
+                check_id=self.id,
+                check_version=self.version,
+                passed=False,
+                message="",  # TODO
+                results=results,
+            )
