@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import re
 
 
-from qa.checks.models import Result, Offset, Disposition, CheckData
+from qa.checks.models import Result, Offset, Disposition, Inputs
 
 
 class MissingDataError(Exception):
@@ -22,13 +22,13 @@ class BaseCheck(ABC):
 
     disposition: Disposition
 
-    def _validate_inputs(self, inputs: CheckData) -> None:
+    def _validate_inputs(self, inputs: Inputs) -> None:
         for data in self.required_inputs:
             if getattr(inputs, data) is None:
                 raise MissingDataError(f"Required data '{data}' is missing.")
 
     @abstractmethod
-    def _run(self, inputs: CheckData) -> Result:
+    def _run(self, inputs: Inputs) -> Result:
         pass
 
     def _result(
@@ -46,7 +46,7 @@ class BaseCheck(ABC):
             offsets=offsets,
         )
 
-    def run(self, inputs: CheckData) -> Result:
+    def run(self, inputs: Inputs) -> Result:
         self._validate_inputs(inputs)
         return self._run(inputs)
 
@@ -78,17 +78,16 @@ class BaseGenericCheck(BaseCheck):
             "field": self.field,
         }
 
-    def _validate_inputs(self, inputs: CheckData) -> None:
+    def _validate_inputs(self, inputs: Inputs) -> None:
         super()._validate_inputs(inputs)
         if getattr(inputs, self.data) is None:
             raise MissingDataError(f"Required data '{self.data}' is missing.")
 
-        v = getattr(getattr(inputs, self.data), self.field, None)
-        if v is None:
+        if getattr(getattr(inputs, self.data), self.field, None) is None:
             raise MissingDataError(f"Required field '{self.data}' '{self.field}' is missing.")
 
     @abstractmethod
-    def _run(self, inputs: CheckData) -> Result:
+    def _run(self, inputs: Inputs) -> Result:
         pass
 
 
@@ -114,9 +113,9 @@ class BaseGenericPatternCheck(BaseGenericCheck):
             "pattern": self._pattern,
         }
 
-    def _run(self, inputs: CheckData) -> Result:
+    def _run(self, inputs: Inputs) -> Result:
         """The pattern applied to the configured field should not return any matches."""
-        v = getattr(getattr(inputs, self.data), self.field, None)
+        v = getattr(getattr(inputs, self.data), self.field)
 
         offsets = []
 
@@ -143,7 +142,7 @@ class BaseAggregateCheck(BaseCheck):
             "checks": [{"name": c.name, "id": c.id, "version": c.version, "config": c.config} for c in self._checks]
         }
 
-    def _run(self, inputs: CheckData) -> Result:
+    def _run(self, inputs: Inputs) -> Result:
         """Run all sub-checks and return results. If any sub-check fails and has a REJECT disposition, fail the aggregate check."""
 
         results: list[Result] = []

@@ -1,5 +1,5 @@
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import CheckData, Disposition, Metadata, Result
+from qa.checks.models import Inputs, Disposition, Metadata, Result
 from qa.checks.generic.text import (
     NotEmpty,
     NotTooShort,
@@ -34,7 +34,7 @@ class ValidTitleCheck(BaseAggregateCheck):
 
     @classmethod
     def check(cls, title: str) -> Result:
-        return cls().run(CheckData(metadata=Metadata(title=title)))
+        return cls().run(Inputs(metadata=Metadata(title=title)))
 
     _checks = (
         NotEmpty(disposition=Disposition.REJECT, data="metadata", field="title"),

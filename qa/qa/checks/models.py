@@ -76,7 +76,7 @@ class MetadataProtocol(Protocol):
     acm_class: str | None
 
 
-class CheckData(BaseModel):
+class Inputs(BaseModel):
     """Data dependencies for checks."""
 
     fulltext: str | None = None
