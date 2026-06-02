@@ -718,6 +718,7 @@ class Metadata(Base):
     modtime: Mapped[Optional[int]] = mapped_column(Integer)
     is_current: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     is_withdrawn: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
+    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
     document: Mapped["Document"] = relationship("Document", primaryjoin="Metadata.document_id == Document.document_id", back_populates="arXiv_metadata")
     submitter: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Metadata.submitter_id == TapirUser.user_id", back_populates="arXiv_metadata")
@@ -1172,7 +1173,7 @@ class Submission(Base):
     release_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     publish_anchor_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     publish_order: Mapped[Optional[int]] = mapped_column(Integer, index=True)
-    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    batch_id: Mapped[Optional[str]] = mapped_column(String(40))
     source_size: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     source_format: Mapped[Optional[str]] = mapped_column(String(12))
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
