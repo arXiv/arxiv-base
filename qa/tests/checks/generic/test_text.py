@@ -39,10 +39,16 @@ class TestNotEmpty:
     def test_pass(self):
         assert self.check.run(inputs("hello")).passed
 
+    def test_pass_disposition_warn(self):
+        assert self.check.run(inputs("hello")).disposition == Disposition.WARN
+
     def test_fail_empty(self):
         result = self.check.run(inputs(""))
         assert not result.passed
         assert result.message
+
+    def test_fail_disposition_warn(self):
+        assert self.check.run(inputs("")).disposition == Disposition.WARN
 
     def test_fail_missing_field(self):
         with pytest.raises(MissingDataError):

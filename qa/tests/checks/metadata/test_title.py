@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import Inputs, Metadata, Result
+from qa.checks.models import Disposition, Inputs, Metadata, Result
 from qa.checks.metadata.title import TitleIsValid
 
 
@@ -172,6 +172,10 @@ class TestTitleIsValid:
         assert result.check_name == "title_is_valid"
         assert result.check_id == 0
         assert result.check_version == "1.0.0"
+        assert result.disposition == Disposition.REJECT
+
+    def test_fail_disposition_reject(self):
+        assert TitleIsValid.check("").disposition == Disposition.REJECT
 
     def test_warn_double_comma(self):
         result = TitleIsValid.check("This is a title, , bad title")

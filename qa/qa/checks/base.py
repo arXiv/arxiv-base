@@ -41,6 +41,7 @@ class BaseCheck(ABC):
             check_id=self.id,
             check_version=self.version,
             passed=passed,
+            disposition=self.disposition,
             message=message,
             offsets=offsets,
         )
@@ -139,6 +140,7 @@ class BaseAggregateCheck(BaseCheck):
     """A check that comprises many generic sub-checks."""
 
     _checks: tuple[BaseGenericCheck, ...]
+    disposition: Disposition = Disposition.REJECT
 
     @property
     def config(self) -> dict:
@@ -160,21 +162,12 @@ class BaseAggregateCheck(BaseCheck):
             if not result.passed and check.disposition == Disposition.REJECT:
                 passed = False
 
-        if passed:
-            return Result(
-                check_name=self.name,
-                check_id=self.id,
-                check_version=self.version,
-                passed=True,
-                message="",
-                results=results,
-            )
-        else:
-            return Result(
-                check_name=self.name,
-                check_id=self.id,
-                check_version=self.version,
-                passed=False,
-                message="",  # TODO
-                results=results,
-            )
+        return Result(
+            check_name=self.name,
+            check_id=self.id,
+            check_version=self.version,
+            passed=passed,
+            disposition=self.disposition,
+            message="",
+            results=results,
+        )

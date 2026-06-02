@@ -5,14 +5,12 @@ from enum import StrEnum
 
 class Disposition(StrEnum):
     """
-    The disposition for a check indicates how a failure (non-passing result) should be treated.
+    The disposition describes the policy for handling a failure (non-passing result) from a particular check.
     Each instance of a check should be configured with only one disposition.
 
-    OK - failure is ignored, treated as OK
-    WARN - failure is a non-blocking warning
-    REJECT - failure is a blocking error
-
-    Success (a passing result) always produces OK regardless of that check's configured disposition.
+    OK - failure should be ignored
+    WARN - failure should elicit a non-blocking warning
+    REJECT - failure should be a blocking error
     """
 
     OK = "ok"
@@ -38,6 +36,7 @@ class Result(BaseModel):
     check_id: int
     check_version: str
     passed: bool
+    disposition: Disposition
     message: str
     offsets: list[Offset] | None = None
     results: list["Result"] | None = None
