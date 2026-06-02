@@ -2384,6 +2384,59 @@ CREATE TABLE `tapir_users_password` (
   CONSTRAINT `0_512` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `publish_batches`
+--
+-- Processor-owned (arxiv-publish-processor): one row per publish run.
+-- Holds the per-type counts that feed the batch_complete summary and
+-- batch_complete_sent_at, the batch-level dispatch marker (NULL until the
+-- batch_complete message is published).
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `publish_batches` (
+  `batch_id` varchar(40) NOT NULL,
+  `total_processed` int NOT NULL DEFAULT '0',
+  `new_count` int NOT NULL DEFAULT '0',
+  `rep_count` int NOT NULL DEFAULT '0',
+  `cross_count` int NOT NULL DEFAULT '0',
+  `wdr_count` int NOT NULL DEFAULT '0',
+  `jref_count` int NOT NULL DEFAULT '0',
+  `meta_count` int NOT NULL DEFAULT '0',
+  `data_count` int NOT NULL DEFAULT '0',
+  `error_count` int NOT NULL DEFAULT '0',
+  `invalid_count` int NOT NULL DEFAULT '0',
+  `test_count` int NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `batch_complete_sent_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- View: `publish_incomplete_batches`
+--
+-- Operator-facing: batches whose batch_complete message was never sent
+-- (batch_complete_sent_at IS NULL) -- a prior run crashed (or its
+-- batch_complete publish failed) before the mailing was triggered. The
+-- recovery sweep resends these.
+--
+
+/*!50001 CREATE VIEW `publish_incomplete_batches` AS
+SELECT
+  `batch_id` AS `batch_id`,
+  `created_at` AS `created_at`,
+  `total_processed` AS `total_processed`,
+  `error_count` AS `error_count`,
+  `invalid_count` AS `invalid_count`,
+  `test_count` AS `test_count`,
+  TIMESTAMPDIFF(MINUTE, `created_at`, NOW()) AS `minutes_incomplete`
+FROM `publish_batches`
+WHERE `batch_complete_sent_at` IS NULL
+ORDER BY `created_at` */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
