@@ -49,12 +49,12 @@ class TestValidAuthorsCheck:
     def test_warn_bad_characters(self):
         result = ValidAuthorsCheck.check("Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon")
         assert result.passed
-        assert not sub_result(result, "no_bad_characters").passed
+        assert not sub_result(result, "no_annotation_symbols").passed
 
     def test_warn_asterisk(self):
         result = ValidAuthorsCheck.check("Hsi-Sheng Goan*, Chung-Chin Jian, Po-Wen Chen")
         assert result.passed
-        assert not sub_result(result, "no_bad_characters").passed
+        assert not sub_result(result, "no_annotation_symbols").passed
 
     def test_warn_leading_whitespace(self):
         result = ValidAuthorsCheck.check(" Leading Whitespace")

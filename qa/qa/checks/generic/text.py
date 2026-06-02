@@ -301,6 +301,16 @@ class DoesNotContainControlChars(BaseGenericPatternCheck):
     _pattern = r"[\u0000-\u001f]+"
 
 
+class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
+    name = "does_not_contain_control_chars_allow_newlines"
+    id = 18
+    version = "1.0.0"
+    description = "The value does not contain control characters, but newlines (\\n) are permitted."
+    failure_message = "Contains control characters."
+
+    _pattern = r"[\u0000-\u0009\u000b-\u001f]+"
+
+
 class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     name = "no_utf8_decoding_errors"
     id = 14
@@ -311,8 +321,9 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     _pattern = r"[\u00c0-\u00ff][\u0080-\u00bf]+"
 
 
-class NoBadCharacters(BaseGenericPatternCheck):  # TODO more informative name
-    name = "no_bad_characters"
+# was BAD_CHARACTERS
+class NoAnnotationSymbols(BaseGenericPatternCheck):
+    name = "no_annotation_symbols"
     id = 15
     version = "1.0.0"
     description = "The value does not contain invalid characters such as *, #, ^, or @."
@@ -326,7 +337,7 @@ class DoesNotContainAnonymous(BaseGenericPatternCheck):
     id = 19
     version = "1.0.0"
     description = "The value does not contain the word 'anonymous'."
-    failure_message = "Anonymous author(ship) detected."
+    failure_message = "Contains 'anonymous'."
 
     _pattern = r"(?i)anonymous"
 
@@ -371,23 +382,31 @@ class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
     _pattern = r"[^\\]~"
 
 
-class DoesNotEndWithPunctuation(BaseGenericCheck):  # TODO return pattern as string in config
+class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
+    name = "does_not_begin_with_abstract"
+    id = 5
+    version = "1.0.0"
+    description = "The value does not begin with the literal prefix 'abstract'."
+    failure_message = "Begins with 'abstract'."
+
+    _pattern = r"(?i)^abstract\b"
+
+
+class DoesNotContainTexBeginEnv(BaseGenericPatternCheck):
+    name = "does_not_contain_tex_begin_env"
+    id = 17
+    version = "1.0.0"
+    description = "The value does not contain a tex begin command that is not followed by a curly brace."
+    failure_message = "Contains TeX."
+
+    _pattern = r"(?i)\\begin[^{]"
+
+
+class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
     name = "does_not_end_with_punctuation"
     id = 29
     version = "1.0.0"
     description = "The value does not end with punctuation (trailing 'et al.' is permitted)."
     failure_message = "Ends with punctuation."
 
-    _pattern = re.compile(r"(?i)^.*[!$%^&(_=`:;,.?-]$")
-
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
-        if v.endswith("et al."):
-            return self._result(passed=True)
-        if self._pattern.search(v):
-            return self._result(
-                passed=False,
-                message=self.failure_message,
-                offsets=[Offset(start=len(v) - 1, end=len(v))],
-            )
-        return self._result(passed=True)
+    _pattern = r"(?i)(?<!et al)[!$%^&(_=`:;,.?-]$"
