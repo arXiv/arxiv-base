@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel, Field
 from datetime import datetime, timezone
-from typing import List, Optional
 
 kebab_case = "^[a-z0-9]+(-[a-z0-9]+)*$"
 
@@ -13,7 +12,7 @@ class Flag(BaseModel):
         examples=["tex-created-flag"],
         pattern=kebab_case,
     )
-    description: Optional[str]
+    description: str | None
 
 
 class BaseReport(BaseModel):
@@ -27,10 +26,10 @@ class BaseReport(BaseModel):
     submission_id: int = Field(gt=0)
     created: str = Field(
         description="The timestamp representing when the report was created.",
-        default_factory=datetime.now(timezone.utc).isoformat,
+        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
     )
-    flags: List[Flag] = []
-    qa_exec_time_sec: Optional[int] = Field(
+    flags: list[Flag] = []
+    qa_exec_time_sec: int | None = Field(
         default=None,
         description="Time it took to process and generate the report, in seconds.",
         ge=0,

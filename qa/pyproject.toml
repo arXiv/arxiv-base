@@ -22,6 +22,9 @@ default-groups = ["dev"]
 [tool.uv.sources]
 arxiv-base = { git = "https://github.com/arXiv/arxiv-base", branch = "master" }
 
+[tool.ruff]
+line-length = 120
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

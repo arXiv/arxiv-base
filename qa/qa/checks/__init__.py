@@ -1,11 +1,8 @@
-"""QA checks package: exposes all checks and their input/output models."""
+"""QA checks package: exposes all checks."""
 
 from qa.checks.base import BaseCheck  # noqa
-
-import qa.checks.models  # noqa
-
-from qa.checks.content import AlwaysPassContentCheck  # noqa
+from qa.checks.metadata.title import ValidTitleCheck  # noqa
 
 checks: list[BaseCheck] = [
-    AlwaysPassContentCheck(),
+    ValidTitleCheck(),
 ]
