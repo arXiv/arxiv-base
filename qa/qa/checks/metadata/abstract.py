@@ -23,10 +23,10 @@ from qa.checks.generic.text import (
 # TODO: add an English language check (requires gcld3, which has no macOS arm64 wheel)
 
 
-class ValidAbstractCheck(BaseAggregateCheck):
+class AbstractIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata abstract field."""
 
-    name = "valid_abstract_check"
+    name = "abstract_is_valid"
     id = 2
     version = "1.0.0"
     description = "The metadata abstract field is valid."

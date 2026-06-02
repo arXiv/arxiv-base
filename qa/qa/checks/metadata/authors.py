@@ -32,10 +32,10 @@ from qa.checks.generic.author_name import (
 )
 
 
-class ValidAuthorsCheck(BaseAggregateCheck):
+class AuthorsAreValid(BaseAggregateCheck):
     """Aggregate check for the metadata authors field."""
 
-    name = "valid_authors_check"
+    name = "authors_are_valid"
     id = 4
     version = "1.0.0"
     description = "The metadata authors field is valid."

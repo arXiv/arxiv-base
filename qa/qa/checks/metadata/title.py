@@ -21,10 +21,10 @@ from qa.checks.generic.text import (
 )
 
 
-class ValidTitleCheck(BaseAggregateCheck):
+class TitleIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata title field."""
 
-    name = "valid_title_check"
+    name = "title_is_valid"
     id = 0
     version = "1.0.0"
     description = "The metadata title field is valid."
