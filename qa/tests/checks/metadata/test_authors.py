@@ -47,9 +47,7 @@ class TestValidAuthorsCheck:
         assert result.passed
 
     def test_warn_bad_characters(self):
-        result = ValidAuthorsCheck.check(
-            "Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon"
-        )
+        result = ValidAuthorsCheck.check("Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon")
         assert result.passed
         assert not sub_result(result, "no_bad_characters").passed
 
@@ -319,9 +317,7 @@ class TestValidAuthorsCheck:
         assert ValidAuthorsCheck.check("Fred S, Joe B").passed
 
     def test_pass_long_author_list(self):
-        assert ValidAuthorsCheck.check(
-            "R. T. Wicks, T. S. Horbury, C. H. K. Chen, and A. A. Schekochihin"
-        ).passed
+        assert ValidAuthorsCheck.check("R. T. Wicks, T. S. Horbury, C. H. K. Chen, and A. A. Schekochihin").passed
 
     def test_pass_and_separated(self):
         assert ValidAuthorsCheck.check(

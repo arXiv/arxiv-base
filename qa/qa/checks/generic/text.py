@@ -311,7 +311,7 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     _pattern = r"[\u00c0-\u00ff][\u0080-\u00bf]+"
 
 
-class NoBadCharacters(BaseGenericPatternCheck): # TODO more informative name
+class NoBadCharacters(BaseGenericPatternCheck):  # TODO more informative name
     name = "no_bad_characters"
     id = 15
     version = "1.0.0"
@@ -371,7 +371,7 @@ class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
     _pattern = r"[^\\]~"
 
 
-class DoesNotEndWithPunctuation(BaseGenericCheck): # TODO return pattern as string in config
+class DoesNotEndWithPunctuation(BaseGenericCheck):  # TODO return pattern as string in config
     name = "does_not_end_with_punctuation"
     id = 29
     version = "1.0.0"

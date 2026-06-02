@@ -10,8 +10,21 @@ from qa.checks.models import Inputs, Disposition, Result
 
 
 _LLM_NAMES = {
-    "llama", "olamma", "gemini", "claude", "bert", "bart", "grok",
-    "chatgpt", "gpt-3", "gpt-3.", "gpt-4", "gpt-4.", "gpt-5", "gpt-5.", "palm2",
+    "llama",
+    "olamma",
+    "gemini",
+    "claude",
+    "bert",
+    "bart",
+    "grok",
+    "chatgpt",
+    "gpt-3",
+    "gpt-3.",
+    "gpt-4",
+    "gpt-4.",
+    "gpt-5",
+    "gpt-5.",
+    "palm2",
 }
 
 
