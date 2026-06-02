@@ -2,7 +2,7 @@ name: Run Python Tests
 on:
   pull_request:
     paths-ignore:
-      - "qa-models/**"
+      - "qa/**"
       - "arxiv-functions/**"
       
 jobs:
