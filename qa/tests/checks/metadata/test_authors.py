@@ -243,6 +243,17 @@ class TestValidAuthorsCheck:
         assert result.passed
         assert sub_result(result, "authors_do_not_contain_llm_author").passed
 
+    def test_pass_claude_with_last_name(self):
+        result = ValidAuthorsCheck.check("Claude Smith")
+        assert result.passed
+        assert sub_result(result, "authors_do_not_contain_llm_author").passed
+
+    def test_warn_claude_standalone(self):
+        result = ValidAuthorsCheck.check("Claude")
+        assert result.passed
+        assert not sub_result(result, "authors_do_not_contain_llm_author").passed
+        assert sub_result(result, "authors_do_not_contain_lone_surname").passed
+
     def test_warn_llm_gemini_with_version(self):
         result = ValidAuthorsCheck.check("Gemini 2.5 Pro")
         assert result.passed

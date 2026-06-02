@@ -9,10 +9,10 @@ from qa.checks.base import BaseGenericCheck
 from qa.checks.models import Inputs, Disposition, Result
 
 
-_LLM_STANDALONE_NAMES = frozenset([
+_LLM_NAMES = {
     "llama", "olamma", "gemini", "claude", "bert", "bart", "grok",
     "chatgpt", "gpt-3", "gpt-3.", "gpt-4", "gpt-4.", "gpt-5", "gpt-5.", "palm2",
-])
+}
 
 
 def _build_name(keyname: str, firstname: str, suffix: str) -> str:
@@ -90,7 +90,7 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
             return True
         if self._compiled_pattern.search(keyname):
             return True
-        if keyname.lower() in _LLM_STANDALONE_NAMES:
+        if keyname.lower() in _LLM_NAMES:
             return True
         return False
 
@@ -125,7 +125,7 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
         return {**super().config, "pattern": self._pattern}
 
     def _check_author(self, keyname: str, firstname: str, suffix: str) -> bool:
-        if firstname == "" and keyname.lower() in _LLM_STANDALONE_NAMES:
+        if firstname == "" and keyname.lower() in _LLM_NAMES:
             return False
         return not self._compiled_pattern.search(_build_name(keyname, firstname, suffix))
 
