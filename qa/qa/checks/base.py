@@ -51,6 +51,8 @@ class BaseCheck(ABC):
 
 
 class BaseGenericCheck(BaseCheck):
+    """A check that can be instantiated to run on different fields with different dispositions."""
+
     def __init__(
         self,
         *,
@@ -91,6 +93,8 @@ class BaseGenericCheck(BaseCheck):
 
 
 class BaseGenericPatternCheck(BaseGenericCheck):
+    """A generic check that applies a regex pattern (matches are failing)."""
+
     _pattern: str
 
     def __init__(
@@ -132,6 +136,8 @@ class BaseGenericPatternCheck(BaseGenericCheck):
 
 
 class BaseAggregateCheck(BaseCheck):
+    """A check that comprises many generic sub-checks."""
+
     _checks: tuple[BaseGenericCheck, ...]
 
     @property
