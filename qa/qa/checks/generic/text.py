@@ -309,3 +309,85 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     failure_message = "Bad Unicode encoding."
 
     _pattern = r"[\u00c0-\u00ff][\u0080-\u00bf]+"
+
+
+class NoBadCharacters(BaseGenericPatternCheck): # TODO more informative name
+    name = "no_bad_characters"
+    id = 15
+    version = "1.0.0"
+    description = "The value does not contain invalid characters such as *, #, ^, or @."
+    failure_message = "Unusual character detected."
+
+    _pattern = r"\*|#|[^\\]\^|@"
+
+
+class DoesNotContainAnonymous(BaseGenericPatternCheck):
+    name = "does_not_contain_anonymous"
+    id = 19
+    version = "1.0.0"
+    description = "The value does not contain the word 'anonymous'."
+    failure_message = "Anonymous author(ship) detected."
+
+    _pattern = r"(?i)anonymous"
+
+
+class DoesNotContainCorresponding(BaseGenericPatternCheck):
+    name = "does_not_contain_corresponding"
+    id = 20
+    version = "1.0.0"
+    description = "The value does not contain the word 'corresponding'."
+    failure_message = "Contains 'corresponding'."
+
+    _pattern = r"(?i)corresponding"
+
+
+class DoesNotContainTexDagger(BaseGenericPatternCheck):
+    name = "does_not_contain_tex_dagger"
+    id = 21
+    version = "1.0.0"
+    description = "The value does not contain TeX dagger symbols (\\dag, \\ddag, etc.)."
+    failure_message = "Contains a dagger symbol."
+
+    _pattern = r"\\dag|\\ddag|\\textdag|\\textddag"
+
+
+class DoesNotBeginWithAuthor(BaseGenericPatternCheck):
+    name = "does_not_begin_with_author"
+    id = 4
+    version = "1.0.0"
+    description = "The value does not begin with the prefix 'author' or 'authors'."
+    failure_message = "Begins with 'author'."
+
+    _pattern = r"(?i)^authors?:?\b"
+
+
+class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
+    name = "does_not_contain_tilde_as_hard_space"
+    id = 32
+    version = "1.0.0"
+    description = "The value does not contain an unescaped tilde used as a hard space."
+    failure_message = "Tilde as hard space."
+
+    _pattern = r"[^\\]~"
+
+
+class DoesNotEndWithPunctuation(BaseGenericCheck): # TODO return pattern as string in config
+    name = "does_not_end_with_punctuation"
+    id = 29
+    version = "1.0.0"
+    description = "The value does not end with punctuation (trailing 'et al.' is permitted)."
+    failure_message = "Ends with punctuation."
+
+    _pattern = re.compile(r"(?i)^.*[!$%^&(_=`:;,.?-]$")
+
+    def _run(self, inputs: Inputs) -> Result:
+        v = getattr(getattr(inputs, self.data), self.field)
+        if v.endswith("et al."):
+            return self._result(passed=True)
+        if self._pattern.search(v):
+            return self._result(
+                passed=False,
+                message=self.failure_message,
+                offsets=[Offset(start=len(v) - 1, end=len(v))],
+            )
+        return self._result(passed=True)
