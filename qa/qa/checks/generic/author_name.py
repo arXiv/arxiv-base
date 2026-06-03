@@ -6,7 +6,7 @@ from abc import abstractmethod
 from arxiv.authors import parse_author_affil
 
 from qa.checks.base import BaseGenericCheck
-from qa.checks.models import Inputs, Disposition, Result
+from qa.checks.models import Inputs, OnFailurePolicy, Result
 
 
 _LLM_NAMES = {
@@ -56,8 +56,8 @@ class BaseAuthorPatternCheck(BaseAuthorCheck):
 
     _pattern: str
 
-    def __init__(self, *, disposition: Disposition, data: str, field: str) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self._compiled_pattern = re.compile(self._pattern)
 
     @property
@@ -90,8 +90,8 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
 
     _pattern = "|".join(_collaboration_patterns)
 
-    def __init__(self, *, disposition: Disposition, data: str, field: str) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
 
     @property
@@ -129,8 +129,8 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
 
     _pattern = "|".join(_llm_name_patterns)
 
-    def __init__(self, *, disposition: Disposition, data: str, field: str) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
 
     @property
@@ -197,6 +197,6 @@ class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
 
     _pattern = "|".join(_affiliation_patterns)
 
-    def __init__(self, *, disposition: Disposition, data: str, field: str) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)

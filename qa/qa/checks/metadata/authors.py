@@ -1,7 +1,7 @@
 """Author metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import Inputs, Disposition, Metadata, Result
+from qa.checks.models import Inputs, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     AllBracketsBalanced,
     DoesNotBeginWithAuthor,
@@ -47,28 +47,28 @@ class AuthorsAreValid(BaseAggregateCheck):
         return cls().run(Inputs(metadata=Metadata(authors=authors)))
 
     _checks = (
-        NotEmpty(disposition=Disposition.REJECT, data="metadata", field="authors"),
-        NotTooShort(4, disposition=Disposition.WARN, data="metadata", field="authors"),
-        NotTooLong(10000, disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotContainLinebreak(disposition=Disposition.WARN, data="metadata", field="authors"),
-        NoAnnotationSymbols(disposition=Disposition.WARN, data="metadata", field="authors"),
-        NoBoundaryWhitespace(disposition=Disposition.WARN, data="metadata", field="authors"),
-        NoExtraWhitespace(disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotContainAnonymous(disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotContainCorresponding(disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotContainTexDagger(disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotBeginWithAuthor(disposition=Disposition.WARN, data="metadata", field="authors"),
-        NoHtmlElements(disposition=Disposition.WARN, data="metadata", field="authors"),
-        AllBracketsBalanced(disposition=Disposition.WARN, data="metadata", field="authors"),
-        NoUnnecessarySpaceInParens(disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotContainTildeAsHardSpace(disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotEndWithPunctuation(disposition=Disposition.WARN, data="metadata", field="authors"),
-        DoesNotContainControlChars(disposition=Disposition.WARN, data="metadata", field="authors"),
-        NoUtf8DecodingErrors(disposition=Disposition.WARN, data="metadata", field="authors"),
-        AuthorsDoNotContainLoneSurname(disposition=Disposition.WARN, data="metadata", field="authors"),
-        AuthorsDoNotContainLlmAuthor(disposition=Disposition.WARN, data="metadata", field="authors"),
-        AuthorNamesDoNotContainSemicolon(disposition=Disposition.WARN, data="metadata", field="authors"),
-        AuthorNamesDoNotContainBrackets(disposition=Disposition.WARN, data="metadata", field="authors"),
-        AuthorNamesDoNotContainNumbers(disposition=Disposition.WARN, data="metadata", field="authors"),
-        AuthorNamesDoNotContainAffiliation(disposition=Disposition.WARN, data="metadata", field="authors"),
+        NotEmpty(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
+        NotTooShort(4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        NotTooLong(10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        NoAnnotationSymbols(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotContainAnonymous(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotContainCorresponding(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotContainTexDagger(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotBeginWithAuthor(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotContainTildeAsHardSpace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotEndWithPunctuation(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        AuthorsDoNotContainLoneSurname(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        AuthorsDoNotContainLlmAuthor(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        AuthorNamesDoNotContainSemicolon(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        AuthorNamesDoNotContainBrackets(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        AuthorNamesDoNotContainNumbers(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        AuthorNamesDoNotContainAffiliation(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
     )

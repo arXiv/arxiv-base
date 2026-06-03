@@ -1,5 +1,5 @@
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import Inputs, Disposition, Metadata, Result
+from qa.checks.models import Inputs, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     NotEmpty,
     NotTooShort,
@@ -36,21 +36,21 @@ class TitleIsValid(BaseAggregateCheck):
         return cls().run(Inputs(metadata=Metadata(title=title)))
 
     _checks = (
-        NotEmpty(disposition=Disposition.REJECT, data="metadata", field="title"),
-        NotTooShort(5, disposition=Disposition.WARN, data="metadata", field="title"),
-        NotTooLong(2000, disposition=Disposition.WARN, data="metadata", field="title"),
-        DoesNotBeginWithTitle(disposition=Disposition.WARN, data="metadata", field="title"),
-        DoesNotContainLinebreak(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoExcessiveCapitals(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoUnapprovedLongCapsWords(disposition=Disposition.WARN, data="metadata", field="title"),
-        DoesNotStartWithLowercase(disposition=Disposition.WARN, data="metadata", field="title"),
-        DoesNotContainUnnecessaryEscape(disposition=Disposition.WARN, data="metadata", field="title"),
-        DoesNotContainTex(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoBoundaryWhitespace(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoExtraWhitespace(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoUnnecessarySpaceInParens(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoHtmlElements(disposition=Disposition.WARN, data="metadata", field="title"),
-        AllBracketsBalanced(disposition=Disposition.WARN, data="metadata", field="title"),
-        DoesNotContainControlChars(disposition=Disposition.WARN, data="metadata", field="title"),
-        NoUtf8DecodingErrors(disposition=Disposition.WARN, data="metadata", field="title"),
+        NotEmpty(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NoUnapprovedLongCapsWords(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
     )

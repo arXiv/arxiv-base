@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import Disposition, Inputs, Metadata, Result
+from qa.checks.models import OnFailurePolicy, Inputs, Metadata, Result
 from qa.checks.metadata.authors import AuthorsAreValid
 
 
@@ -342,7 +342,7 @@ class TestAuthorsAreValid:
         assert result.check_name == "authors_are_valid"
         assert result.check_id == 4
         assert result.check_version == "1.0.0"
-        assert result.disposition == Disposition.REJECT
+        assert result.on_failure_policy == OnFailurePolicy.REJECT
 
-    def test_fail_disposition_reject(self):
-        assert AuthorsAreValid.check("").disposition == Disposition.REJECT
+    def test_fail_on_failure_policy_reject(self):
+        assert AuthorsAreValid.check("").on_failure_policy == OnFailurePolicy.REJECT

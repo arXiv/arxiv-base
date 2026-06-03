@@ -2,7 +2,7 @@
 
 import re
 
-from qa.checks.models import Result, Offset, Disposition, Inputs
+from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
@@ -176,11 +176,11 @@ class NotTooLong(BaseGenericCheck):
         self,
         max_chars: int,
         *,
-        disposition: Disposition,
+        on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
     ) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self.max_chars = max_chars
 
     @property
@@ -211,11 +211,11 @@ class NotTooShort(BaseGenericCheck):
         self,
         min_chars: int,
         *,
-        disposition: Disposition,
+        on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
     ) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self.min_chars = min_chars
 
     @property
