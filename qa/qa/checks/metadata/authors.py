@@ -39,6 +39,8 @@ class AuthorsAreValid(BaseAggregateCheck):
     id = 4
     version = "1.0.0"
     description = "The metadata authors field is valid."
+    on_failure_policy = OnFailurePolicy.REJECT
+    failure_message = "Authors are invalid."
 
     required_inputs = {"metadata"}
 

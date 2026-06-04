@@ -16,9 +16,9 @@ class BaseCheck(ABC):
     id: int
     version: str
     description: str
+    on_failure_policy: OnFailurePolicy
     failure_message: str
 
-    on_failure_policy: OnFailurePolicy
     required_inputs: set[str] = set()
 
     def _validate_inputs(self, inputs: Inputs) -> None:
@@ -148,7 +148,6 @@ class BaseAggregateCheck(BaseCheck):
     """A check that comprises many generic sub-checks."""
 
     _checks: tuple[BaseGenericCheck, ...]
-    on_failure_policy: OnFailurePolicy = OnFailurePolicy.REJECT
 
     @property
     def config(self) -> dict:

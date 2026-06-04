@@ -28,6 +28,8 @@ class TitleIsValid(BaseAggregateCheck):
     id = 0
     version = "1.0.0"
     description = "The metadata title field is valid."
+    on_failure_policy = OnFailurePolicy.REJECT
+    failure_message = "Title is invalid."
 
     required_inputs = {"metadata"}
 

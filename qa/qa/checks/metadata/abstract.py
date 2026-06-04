@@ -30,6 +30,8 @@ class AbstractIsValid(BaseAggregateCheck):
     id = 2
     version = "1.0.0"
     description = "The metadata abstract field is valid."
+    on_failure_policy = OnFailurePolicy.REJECT
+    failure_message = "Abstract is invalid."
 
     required_inputs = {"metadata"}
 
