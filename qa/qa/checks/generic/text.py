@@ -1,6 +1,5 @@
 """Generic text checks."""
 
-
 from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
@@ -455,6 +454,16 @@ class ContainsDigits(BaseGenericPatternCheck):
     failure_message = "No digits found."
 
     _pattern = r"^[^0-9]*$"
+
+
+class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
+    name = "does_not_contain_semicolon"
+    id = 22
+    version = "1.0.0"
+    description = "The value does not contain a semicolon."
+    failure_message = "Contains semicolon(s) - use ',' or 'and' to separate authors."
+
+    _pattern = r";"
 
 
 class DoesNotContainAccepted(BaseGenericPatternCheck):
