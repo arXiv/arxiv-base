@@ -1,5 +1,6 @@
 """Generic text checks."""
 
+
 from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
@@ -420,8 +421,8 @@ class DoesNotContainDoi(BaseGenericPatternCheck):
     name = "does_not_contain_doi"
     id = 45
     version = "1.0.0"
-    description = "The value does not contain a DOI."
-    failure_message = "Contains a DOI."
+    description = "The value does not contain the word 'DOI'."
+    failure_message = "Contains 'DOI'."
 
     _pattern = r"(?i)doi"
 
@@ -484,3 +485,37 @@ class DoesNotContainBibtex(BaseGenericPatternCheck):
     failure_message = "Contains bibtex."
 
     _pattern = r"(?i)(title|booktitle|inproceedings)="
+
+
+class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
+    name = "does_not_contain_bad_doi_prefix"
+    id = 47
+    version = "1.0.0"
+    description = "The value does not begin with 'doi:', 'https://doi.org/', or similar URL prefixes."
+    failure_message = "Contains unnecessary prefix."
+
+    _pattern = r"(?i)^doi:|^https?://doi\.org/|^https?://.*\.doi\.org/"
+
+
+class DoiHasValidFormat(BaseGenericPatternCheck):
+    name = "doi_has_valid_format"
+    id = 50
+    version = "1.0.0"
+    description = "Each space-separated DOI in the value matches the expected DOI format."
+    failure_message = "Invalid DOI."
+
+    _pattern = r"(?i)^(?![0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$)"
+
+    def _run(self, inputs: Inputs) -> Result:
+        v = getattr(getattr(inputs, self.data), self.field)
+        offsets = []
+        start = 0
+        for doi in v.split():
+            idx = v.index(doi, start)
+            end = idx + len(doi)
+            if self._compiled_pattern.match(doi):
+                offsets.append(Offset(start=idx, end=end))
+            start = end
+        if offsets:
+            return self._result(passed=False, message=self.failure_message, offsets=offsets)
+        return self._result(passed=True)
