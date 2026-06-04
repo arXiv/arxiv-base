@@ -410,3 +410,43 @@ class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
     failure_message = "Ends with punctuation."
 
     _pattern = r"(?i)(?<!et al)[!$%^&(_=`:;,.?-]$"
+
+
+class DoesNotContainUrl(BaseGenericPatternCheck):
+    name = "does_not_contain_url"
+    id = 50
+    version = "1.0.0"
+    description = "The value does not contain a URL."
+    failure_message = "Contains a URL."
+
+    _pattern = r"(?i)https?:"
+
+
+class DoesNotContainDoi(BaseGenericPatternCheck):
+    name = "does_not_contain_doi"
+    id = 51
+    version = "1.0.0"
+    description = "The value does not contain a DOI."
+    failure_message = "Contains a DOI."
+
+    _pattern = r"(?i)doi"
+
+
+class ContainsLetters(BaseGenericPatternCheck):
+    name = "contains_letters"
+    id = 52
+    version = "1.0.0"
+    description = "The value contains at least one letter."
+    failure_message = "Must contain at least one letter."
+
+    _pattern = r"^[^A-Za-z]*$"
+
+
+class ContainsDigits(BaseGenericPatternCheck):
+    name = "contains_digits"
+    id = 53
+    version = "1.0.0"
+    description = "The value contains at least one digit."
+    failure_message = "Must contain at least one digit."
+
+    _pattern = r"^[^0-9]*$"
