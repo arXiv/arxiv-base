@@ -1,6 +1,5 @@
 """Generic text checks."""
 
-
 from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
@@ -409,7 +408,7 @@ class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
 
 class DoesNotContainUrl(BaseGenericPatternCheck):
     name = "does_not_contain_url"
-    id = 50
+    id = 39
     version = "1.0.0"
     description = "The value does not contain a URL."
     failure_message = "Contains a URL."
@@ -419,7 +418,7 @@ class DoesNotContainUrl(BaseGenericPatternCheck):
 
 class DoesNotContainDoi(BaseGenericPatternCheck):
     name = "does_not_contain_doi"
-    id = 51
+    id = 45
     version = "1.0.0"
     description = "The value does not contain a DOI."
     failure_message = "Contains a DOI."
@@ -427,21 +426,61 @@ class DoesNotContainDoi(BaseGenericPatternCheck):
     _pattern = r"(?i)doi"
 
 
+class DoesNotContainBareDoi(BaseGenericPatternCheck):
+    name = "does_not_contain_bare_doi"
+    id = 40
+    version = "1.0.0"
+    description = "The value does not contain a bare DOI number (e.g. 10.1234/abc)."
+    failure_message = "Contains a DOI."
+
+    _pattern = r"(?i)^[0-9][0-9].[0-9]+/[^ ]*$"
+
+
 class ContainsLetters(BaseGenericPatternCheck):
     name = "contains_letters"
-    id = 52
+    id = 38
     version = "1.0.0"
     description = "The value contains at least one letter."
-    failure_message = "Must contain at least one letter."
+    failure_message = "No letters found."
 
     _pattern = r"^[^A-Za-z]*$"
 
 
 class ContainsDigits(BaseGenericPatternCheck):
     name = "contains_digits"
-    id = 53
+    id = 37
     version = "1.0.0"
     description = "The value contains at least one digit."
-    failure_message = "Must contain at least one digit."
+    failure_message = "No digits found."
 
     _pattern = r"^[^0-9]*$"
+
+
+class DoesNotContainAccepted(BaseGenericPatternCheck):
+    name = "does_not_contain_accepted"
+    id = 41
+    version = "1.0.0"
+    description = "The value does not contain the word 'accepted'."
+    failure_message = "Contains 'accepted'."
+
+    _pattern = r"(?i)accepted"
+
+
+class DoesNotContainSubmitted(BaseGenericPatternCheck):
+    name = "does_not_contain_submitted"
+    id = 42
+    version = "1.0.0"
+    description = "The value does not contain the word 'submitted'."
+    failure_message = "Contains 'submitted'."
+
+    _pattern = r"(?i)submitted"
+
+
+class DoesNotContainBibtex(BaseGenericPatternCheck):
+    name = "does_not_contain_bibtex"
+    id = 44
+    version = "1.0.0"
+    description = "The value does not contain BibTeX field assignments."
+    failure_message = "Contains bibtex."
+
+    _pattern = r"(?i)(title|booktitle|inproceedings)="

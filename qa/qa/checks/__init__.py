@@ -4,6 +4,7 @@ from qa.checks.base import BaseCheck  # noqa
 from qa.checks.metadata.abstract import AbstractIsValid  # noqa
 from qa.checks.metadata.authors import AuthorsAreValid  # noqa
 from qa.checks.metadata.comments import CommentsAreValid  # noqa
+from qa.checks.metadata.journal_ref import JournalRefIsValid  # noqa
 from qa.checks.metadata.report_num import ReportNumIsValid  # noqa
 from qa.checks.metadata.title import TitleIsValid  # noqa
 
@@ -13,4 +14,5 @@ checks: list[BaseCheck] = [
     AbstractIsValid(),
     CommentsAreValid(),
     ReportNumIsValid(),
+    JournalRefIsValid(),
 ]
