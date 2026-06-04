@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Metadata, Result
+from qa.checks.models import OnFailurePolicy, Inputs, Result
 from qa.checks.metadata.report_num import ReportNumIsValid
 
 

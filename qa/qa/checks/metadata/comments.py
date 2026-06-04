@@ -35,7 +35,7 @@ class CommentsAreValid(BaseAggregateCheck):
 
     def _run(self, inputs: Inputs) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""
-        if not inputs.metadata.comments:
+        if not inputs.metadata.comments:  # type: ignore
             return self._result(passed=True, results=[])
         return super()._run(inputs)
 

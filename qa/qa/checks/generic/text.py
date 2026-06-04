@@ -1,6 +1,5 @@
 """Generic text checks."""
 
-import re
 
 from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
@@ -36,36 +35,32 @@ class NoExcessiveCapitals(BaseGenericCheck):
             return self._result(passed=False, message=self.failure_message)
 
 
-class NoUnapprovedLongCapsWords(BaseGenericCheck):
+class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
     name = "no_unapproved_long_caps_words"
     id = 12  # NOTE: new
     version = "1.0.0"
     description = "The value does not contain two or more unapproved all caps words that are 6 or more characters long."
     failure_message = "Contains unapproved long caps words."
 
+    _pattern = r"\b[A-Z][A-Z-]*[A-Z]\b"
+
     def _run(self, inputs: Inputs) -> Result:
         v = getattr(getattr(inputs, self.data), self.field)
 
-        violating_words = []
         offsets = []
 
-        pattern = re.compile(r"\b[A-Z][A-Z-]*[A-Z]\b")
-
-        for match in pattern.finditer(v):
+        for match in self._compiled_pattern.finditer(v):
             word = match.group()
-
             if len(word) >= 6 and word not in KNOWN_WORDS_IN_ALL_CAPS:
-                violating_words.append(word)
                 offsets.append(Offset(start=match.start(), end=match.end()))
 
-        if len(violating_words) < 2:
+        if len(offsets) < 2:
             return self._result(passed=True)
-        else:
-            return self._result(
-                passed=False,
-                message=self.failure_message,
-                offsets=offsets,
-            )
+        return self._result(
+            passed=False,
+            message=self.failure_message,
+            offsets=offsets,
+        )
 
 
 class NoBoundaryWhitespace(BaseGenericPatternCheck):

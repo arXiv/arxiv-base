@@ -35,7 +35,7 @@ class ReportNumIsValid(BaseAggregateCheck):
 
     def _run(self, inputs: Inputs) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""
-        if not inputs.metadata.report_num:
+        if not inputs.metadata.report_num:  # type: ignore
             return self._result(passed=True, results=[])
         return super()._run(inputs)
 
