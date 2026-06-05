@@ -46,8 +46,22 @@ class TestDoiIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_bad_doi_prefix").passed
 
+    def test_pass_non_ten_prefix(self):
+        assert DoiIsValid.check("22.48550/arXiv.2501.18183").passed
+
     def test_warn_invalid_doi(self):
         result = DoiIsValid.check("not-a-doi")
+        assert result.passed
+        assert not sub_result(result, "doi_has_valid_format").passed
+
+    def test_warn_invalid_doi_no_scheme(self):
+        result = DoiIsValid.check("doi.org/10.48550/arXiv.2501.18183")
+        assert result.passed
+        assert not sub_result(result, "doi_has_valid_format").passed
+        assert not sub_result(result, "does_not_contain_doi").passed
+
+    def test_warn_invalid_doi_with_preceding_text(self):
+        result = DoiIsValid.check("I like 10.48550/arXiv.2501.18183")
         assert result.passed
         assert not sub_result(result, "doi_has_valid_format").passed
 

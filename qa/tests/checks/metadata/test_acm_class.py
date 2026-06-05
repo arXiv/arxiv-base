@@ -56,6 +56,19 @@ class TestAcmClassIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_control_chars").passed
 
+    def test_pass_space_separated(self):
+        assert AcmClassIsValid.check("abc def").passed
+
+    def test_warn_trailing_whitespace(self):
+        result = AcmClassIsValid.check("abcdef  ")
+        assert result.passed
+        assert not sub_result(result, "no_boundary_whitespace").passed
+
+    def test_warn_newline(self):
+        result = AcmClassIsValid.check("abc\ndef")
+        assert result.passed
+        assert not sub_result(result, "does_not_contain_control_chars").passed
+
     def test_all_sub_checks_run_on_valid(self):
         result = AcmClassIsValid.check("F.2.2")
         assert result.results is not None

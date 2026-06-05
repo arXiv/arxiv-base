@@ -31,6 +31,29 @@ class TestReportNumIsValid:
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
+    def test_warn_too_short_two_digits(self):
+        result = ReportNumIsValid.check("12")
+        assert result.passed
+        assert not sub_result(result, "not_too_short").passed
+
+    def test_warn_too_short_three_digits(self):
+        result = ReportNumIsValid.check("123")
+        assert result.passed
+        assert not sub_result(result, "not_too_short").passed
+
+    def test_warn_no_letters_four_digits(self):
+        result = ReportNumIsValid.check("1234")
+        assert result.passed
+        assert not sub_result(result, "contains_letters").passed
+
+    def test_warn_no_letters_five_digits(self):
+        result = ReportNumIsValid.check("12345")
+        assert result.passed
+        assert not sub_result(result, "contains_letters").passed
+
+    def test_pass_multiple_report_nums(self):
+        assert ReportNumIsValid.check("ECTP-2024-05; WLCAPP-2024-05; FUE-2024-05").passed
+
     def test_warn_too_long(self):
         result = ReportNumIsValid.check("X" * 2001)
         assert result.passed

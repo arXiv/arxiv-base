@@ -81,6 +81,16 @@ class TestCommentsAreValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_control_chars").passed
 
+    def test_warn_utf8_decoding_error_accents(self):
+        result = CommentsAreValid.check("A comment with èéêëìíîï accents".encode("UTF-8").decode("LATIN-1"))
+        assert result.passed
+        assert not sub_result(result, "no_utf8_decoding_errors").passed
+
+    def test_warn_utf8_decoding_error_chinese(self):
+        result = CommentsAreValid.check("A comment with 普通话 Chinese".encode("UTF-8").decode("LATIN-1"))
+        assert result.passed
+        assert not sub_result(result, "no_utf8_decoding_errors").passed
+
     def test_all_sub_checks_run_on_valid(self):
         result = CommentsAreValid.check("12 pages, 3 figures")
         assert result.results is not None
