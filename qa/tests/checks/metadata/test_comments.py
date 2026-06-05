@@ -93,6 +93,6 @@ class TestCommentsAreValid:
     def test_result_has_check_metadata(self):
         result = CommentsAreValid.check("12 pages, 3 figures")
         assert result.check_name == "comments_are_valid"
-        assert result.check_id == 6
+        assert result.check_id == 530
         assert result.check_version == "1.0.0"
         assert result.on_failure_policy == OnFailurePolicy.REJECT

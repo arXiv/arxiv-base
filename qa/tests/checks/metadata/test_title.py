@@ -170,7 +170,7 @@ class TestTitleIsValid:
     def test_result_has_check_metadata(self):
         result = TitleIsValid.check("A fine title")
         assert result.check_name == "title_is_valid"
-        assert result.check_id == 0
+        assert result.check_id == 500
         assert result.check_version == "1.0.0"
         assert result.on_failure_policy == OnFailurePolicy.REJECT
 

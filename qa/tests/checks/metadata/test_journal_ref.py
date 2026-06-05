@@ -93,6 +93,6 @@ class TestJournalRefIsValid:
     def test_result_has_check_metadata(self):
         result = JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001 (2024)")
         assert result.check_name == "journal_ref_is_valid"
-        assert result.check_id == 10
+        assert result.check_id == 560
         assert result.check_version == "1.0.0"
         assert result.on_failure_policy == OnFailurePolicy.REJECT

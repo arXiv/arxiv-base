@@ -25,7 +25,7 @@ class TitleIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata title field."""
 
     name = "title_is_valid"
-    id = 0
+    id = 500
     version = "1.0.0"
     description = "The metadata title field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

@@ -21,7 +21,7 @@ class DoiIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata doi field."""
 
     name = "doi_is_valid"
-    id = 12
+    id = 570
     version = "1.0.0"
     description = "The metadata doi field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

@@ -36,7 +36,7 @@ class AuthorsAreValid(BaseAggregateCheck):
     """Aggregate check for the metadata authors field."""
 
     name = "authors_are_valid"
-    id = 4
+    id = 510
     version = "1.0.0"
     description = "The metadata authors field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

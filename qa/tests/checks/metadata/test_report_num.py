@@ -88,6 +88,6 @@ class TestReportNumIsValid:
     def test_result_has_check_metadata(self):
         result = ReportNumIsValid.check("CERN-EP-2024-001")
         assert result.check_name == "report_num_is_valid"
-        assert result.check_id == 8
+        assert result.check_id == 550
         assert result.check_version == "1.0.0"
         assert result.on_failure_policy == OnFailurePolicy.REJECT

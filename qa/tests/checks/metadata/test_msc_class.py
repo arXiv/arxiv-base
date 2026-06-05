@@ -73,6 +73,6 @@ class TestMscClassIsValid:
     def test_result_has_check_metadata(self):
         result = MscClassIsValid.check("35K55")
         assert result.check_name == "msc_class_is_valid"
-        assert result.check_id == 14
+        assert result.check_id == 580
         assert result.check_version == "1.0.0"
         assert result.on_failure_policy == OnFailurePolicy.REJECT

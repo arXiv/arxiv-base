@@ -23,7 +23,7 @@ class JournalRefIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata journal_ref field."""
 
     name = "journal_ref_is_valid"
-    id = 10
+    id = 560
     version = "1.0.0"
     description = "The metadata journal_ref field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

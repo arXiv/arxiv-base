@@ -27,7 +27,7 @@ class AbstractIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata abstract field."""
 
     name = "abstract_is_valid"
-    id = 2
+    id = 520
     version = "1.0.0"
     description = "The metadata abstract field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
@@ -54,6 +54,8 @@ class AbstractIsValid(BaseAggregateCheck):
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        DoesNotContainControlCharsAllowNewlines(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        DoesNotContainControlCharsAllowNewlines(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
+        ),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
     )

@@ -150,7 +150,7 @@ class TestAbstractIsValid:
     def test_result_has_check_metadata(self):
         result = AbstractIsValid.check("A fine abstract with enough text.")
         assert result.check_name == "abstract_is_valid"
-        assert result.check_id == 2
+        assert result.check_id == 520
         assert result.check_version == "1.0.0"
         assert result.on_failure_policy == OnFailurePolicy.REJECT
 

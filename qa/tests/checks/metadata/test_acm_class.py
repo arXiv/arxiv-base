@@ -68,6 +68,6 @@ class TestAcmClassIsValid:
     def test_result_has_check_metadata(self):
         result = AcmClassIsValid.check("F.2.2")
         assert result.check_name == "acm_class_is_valid"
-        assert result.check_id == 16
+        assert result.check_id == 590
         assert result.check_version == "1.0.0"
         assert result.on_failure_policy == OnFailurePolicy.REJECT

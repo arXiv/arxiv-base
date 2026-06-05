@@ -21,7 +21,7 @@ class CommentsAreValid(BaseAggregateCheck):
     """Aggregate check for the metadata comments field."""
 
     name = "comments_are_valid"
-    id = 6
+    id = 530
     version = "1.0.0"
     description = "The metadata comments field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
