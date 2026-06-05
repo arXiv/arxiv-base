@@ -199,7 +199,7 @@ class NotTooShort(BaseGenericCheck):
     id = 2
     version = "1.0.0"
     description = "The value meets or exceeds the minimum character length."
-    failure_message = "Too short."
+    failure_message = "Text likely too short."
 
     def __init__(
         self,

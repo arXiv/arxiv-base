@@ -77,7 +77,7 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
     id = 23
     version = "1.0.0"
     description = "No author has only a surname without a given name, unless it is a known collaboration or LLM name."
-    failure_message = "Contains lone surname"
+    failure_message = "Contains lone surname."
 
     _collaboration_patterns = [
         r"collaboration",
