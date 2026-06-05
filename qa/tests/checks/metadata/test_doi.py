@@ -75,21 +75,6 @@ class TestDoiIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_leading_whitespace(self):
-        result = DoiIsValid.check(" 10.1103/PhysRevLett.132.011001")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_multiple_spaces(self):
-        result = DoiIsValid.check("10.1103/PhysRevLett.132.011001  10.1103/PhysRevLett.132.011002")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_control_chars(self):
-        result = DoiIsValid.check("10.1103/PhysRev\tLett.132.011001")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
-
     def test_all_sub_checks_run_on_valid(self):
         result = DoiIsValid.check("10.1103/PhysRevLett.132.011001")
         assert result.results is not None

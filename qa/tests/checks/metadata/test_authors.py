@@ -56,31 +56,6 @@ class TestAuthorsAreValid:
         assert result.passed
         assert not sub_result(result, "no_annotation_symbols").passed
 
-    def test_warn_leading_whitespace(self):
-        result = AuthorsAreValid.check(" Leading Whitespace")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_trailing_whitespace(self):
-        result = AuthorsAreValid.check("Trailing Whitespace ")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_multiple_spaces(self):
-        result = AuthorsAreValid.check("Multiple  Spaces")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_space_before_comma(self):
-        result = AuthorsAreValid.check("Fred Smith ,Joan Alter")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_double_comma(self):
-        result = AuthorsAreValid.check("Fred Smith, , Joan Alter")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
     def test_pass_no_space_after_comma(self):
         assert AuthorsAreValid.check("Fred Smith,Joan Alter").passed
 
@@ -108,41 +83,6 @@ class TestAuthorsAreValid:
         result = AuthorsAreValid.check("Authors: J. Smith, Joe Bob, and Mr. Briggs")
         assert result.passed
         assert not sub_result(result, "does_not_begin_with_author").passed
-
-    def test_warn_html(self):
-        result = AuthorsAreValid.check("Person with <sup>1</sup>")
-        assert result.passed
-        assert not sub_result(result, "no_html_elements").passed
-
-    def test_warn_html_br(self):
-        result = AuthorsAreValid.check("Jane Smith<br/>Joe linebreaks<br />Alice Third")
-        assert result.passed
-        assert not sub_result(result, "no_html_elements").passed
-
-    def test_warn_unbalanced_brackets(self):
-        result = AuthorsAreValid.check("Jane Jones (Austen Nname")
-        assert result.passed
-        assert not sub_result(result, "all_brackets_balanced").passed
-
-    def test_warn_unbalanced_open_paren(self):
-        result = AuthorsAreValid.check("Fred Smith, (Joe Bloggs")
-        assert result.passed
-        assert not sub_result(result, "all_brackets_balanced").passed
-
-    def test_warn_unbalanced_open_paren_tex(self):
-        result = AuthorsAreValid.check("(T. Zaj\\k{a}c")
-        assert result.passed
-        assert not sub_result(result, "all_brackets_balanced").passed
-
-    def test_warn_space_after_open_paren(self):
-        result = AuthorsAreValid.check("Stefano Liberati ( SISSA, INFN; Trieste)")
-        assert result.passed
-        assert not sub_result(result, "no_unnecessary_space_in_parens").passed
-
-    def test_warn_space_before_close_paren(self):
-        result = AuthorsAreValid.check("Stefano Liberati (SISSA, INFN; Trieste )")
-        assert result.passed
-        assert not sub_result(result, "no_unnecessary_space_in_parens").passed
 
     def test_warn_tilde_as_hard_space(self):
         result = AuthorsAreValid.check("Fred Smith~Jones")

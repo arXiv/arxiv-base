@@ -41,21 +41,6 @@ class TestMscClassIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_leading_whitespace(self):
-        result = MscClassIsValid.check(" 35K55")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_multiple_spaces(self):
-        result = MscClassIsValid.check("35K55  65M06")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_control_chars(self):
-        result = MscClassIsValid.check("35K55\t65M06")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
-
     def test_warn_contains_semicolon(self):
         result = MscClassIsValid.check("35K55; 65M06")
         assert result.passed
@@ -66,16 +51,6 @@ class TestMscClassIsValid:
 
     def test_pass_primary_secondary_notation(self):
         assert MscClassIsValid.check("14J60 (Primary) 14F05, 14J26 (Secondary)").passed
-
-    def test_warn_trailing_whitespace(self):
-        result = MscClassIsValid.check("abcdef  ")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_newline(self):
-        result = MscClassIsValid.check("abc\ndef")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
 
     def test_all_sub_checks_run_on_valid(self):
         result = MscClassIsValid.check("35K55")

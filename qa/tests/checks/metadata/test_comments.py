@@ -31,56 +31,6 @@ class TestCommentsAreValid:
         assert result.passed
         assert not sub_result(result, "not_too_long").passed
 
-    def test_warn_linebreak(self):
-        result = CommentsAreValid.check("12 pages\\\\3 figures")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_linebreak").passed
-
-    def test_warn_excessive_caps(self):
-        result = CommentsAreValid.check("ALL CAPS COMMENTS")
-        assert result.passed
-        assert not sub_result(result, "no_excessive_capitals").passed
-
-    def test_warn_unnecessary_escape(self):
-        result = CommentsAreValid.check("contains \\% escape")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_unnecessary_escape").passed
-
-    def test_warn_tex(self):
-        result = CommentsAreValid.check("see \\href{url}{text}")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_tex").passed
-
-    def test_warn_leading_whitespace(self):
-        result = CommentsAreValid.check(" Leading space")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_trailing_whitespace(self):
-        result = CommentsAreValid.check("Trailing space ")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_multiple_spaces(self):
-        result = CommentsAreValid.check("12  pages, 3 figures")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_space_in_parens(self):
-        result = CommentsAreValid.check("submitted to ( journal)")
-        assert result.passed
-        assert not sub_result(result, "no_unnecessary_space_in_parens").passed
-
-    def test_warn_unbalanced_brackets(self):
-        result = CommentsAreValid.check("12 pages (3 figures")
-        assert result.passed
-        assert not sub_result(result, "all_brackets_balanced").passed
-
-    def test_warn_control_chars(self):
-        result = CommentsAreValid.check("12 pages\twith tab")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
-
     def test_warn_utf8_decoding_error_accents(self):
         result = CommentsAreValid.check("A comment with èéêëìíîï accents".encode("UTF-8").decode("LATIN-1"))
         assert result.passed

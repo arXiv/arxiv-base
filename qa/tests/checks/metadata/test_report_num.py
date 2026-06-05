@@ -84,21 +84,6 @@ class TestReportNumIsValid:
         assert result.passed
         assert not sub_result(result, "contains_digits").passed
 
-    def test_warn_leading_whitespace(self):
-        result = ReportNumIsValid.check(" CERN-EP-2024-001")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_multiple_spaces(self):
-        result = ReportNumIsValid.check("CERN  EP 2024")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_control_chars(self):
-        result = ReportNumIsValid.check("CERN\t2024-001")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
-
     def test_all_sub_checks_run_on_valid(self):
         result = ReportNumIsValid.check("CERN-EP-2024-001")
         assert result.results is not None

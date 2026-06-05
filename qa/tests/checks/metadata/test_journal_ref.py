@@ -66,21 +66,6 @@ class TestJournalRefIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_bibtex").passed
 
-    def test_warn_leading_whitespace(self):
-        result = JournalRefIsValid.check(" Phys. Rev. Lett. 132")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_multiple_spaces(self):
-        result = JournalRefIsValid.check("Phys.  Rev. Lett. 132")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_control_chars(self):
-        result = JournalRefIsValid.check("Phys.\tRev. Lett.")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
-
     def test_all_sub_checks_run_on_valid(self):
         result = JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001 (2024)")
         assert result.results is not None

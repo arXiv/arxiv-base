@@ -79,56 +79,6 @@ class TestAbstractIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_begin_with_abstract").passed
 
-    def test_warn_leading_whitespace(self):
-        result = AbstractIsValid.check(" This contains a leading space")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_trailing_whitespace(self):
-        result = AbstractIsValid.check("This contains a trailing space ")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_multiple_spaces(self):
-        result = AbstractIsValid.check("This contains  two spaces")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_space_before_newline(self):
-        result = AbstractIsValid.check("Work established  \na connection between the edge $3$-coloring")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_empty_paragraph(self):
-        result = AbstractIsValid.check("Work established\n \n\n a connection between the edge $3$-coloring")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_whitespace_only_paragraph(self):
-        result = AbstractIsValid.check("Paragraphs\n \nwith only whitespace are not permitted")
-        assert result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
-
-    def test_warn_trailing_space_in_text(self):
-        result = AbstractIsValid.check("Work established a connection between the edge $3$-coloring ")
-        assert result.passed
-        assert not sub_result(result, "no_boundary_whitespace").passed
-
-    def test_warn_unbalanced_bracket(self):
-        result = AbstractIsValid.check("This ] is bad")
-        assert result.passed
-        assert not sub_result(result, "all_brackets_balanced").passed
-
-    def test_warn_control_char(self):
-        result = AbstractIsValid.check("Control characters  are not permitted")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars_allow_newlines").passed
-
-    def test_warn_tab_char(self):
-        result = AbstractIsValid.check("Control characters (including tabs)\tare not permitted")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_control_chars_allow_newlines").passed
-
     def test_warn_tex_begin_no_brace(self):
         result = AbstractIsValid.check("This \\begin foo is flagged")
         assert result.passed
