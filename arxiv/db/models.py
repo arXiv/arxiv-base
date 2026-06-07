@@ -921,7 +921,7 @@ class Holiday(Base):
     freeze_skip_date: Mapped[dt.date] = mapped_column(Date, primary_key=True)
     description: Mapped[Optional[str]] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, server_default=FetchedValue())
-    created_by: Mapped[Optional[str]] = mapped_column(String(64))
+    created_by: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False)
 
 
 class PublishLog(Base):
