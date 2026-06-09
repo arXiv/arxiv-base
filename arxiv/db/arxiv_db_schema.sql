@@ -1,4 +1,3 @@
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -730,6 +729,19 @@ CREATE TABLE `arXiv_groups` (
   PRIMARY KEY (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `arXiv_holidays`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `arXiv_holidays` (
+  `freeze_skip_date` date NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` int unsigned NOT NULL,
+  PRIMARY KEY (`freeze_skip_date`),
+  KEY `arxiv_holidays_createdby_fk` (`created_by`),
+  CONSTRAINT `arxiv_holidays_createdby_fk` FOREIGN KEY (`created_by`) REFERENCES `tapir_users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `arXiv_in_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -1071,21 +1083,6 @@ CREATE TABLE `arXiv_pilot_files` (
   KEY `arXiv_pilot_files_cdfk3` (`submission_id`),
   CONSTRAINT `arXiv_pilot_files_cdfk3` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `arXiv_holidays`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
--- Holiday calendar consumed by arxiv-publish-control-api's scheduler
--- gate. Each row marks one date (America/New_York) on which no freeze
--- and no announcement run. See publish git repo for the consumer.
-CREATE TABLE `arXiv_holidays` (
-  `freeze_skip_date` date NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `created_by` int unsigned NOT NULL,
-  PRIMARY KEY (`freeze_skip_date`),
-  CONSTRAINT `arxiv_holidays_createdby_fk` FOREIGN KEY (`created_by`) REFERENCES `tapir_users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `arXiv_publish_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1499,8 +1496,8 @@ CREATE TABLE `arXiv_submissions` (
   KEY `arXiv_submissions_idx_doc_paper_id` (`doc_paper_id`),
   KEY `arXiv_submissions_idx_rt_ticket_id` (`rt_ticket_id`),
   KEY `arXiv_submissions_idx_is_locked` (`is_locked`),
-  KEY `arXiv_submissions_idx_publish_order` (`publish_order`),
   KEY `agreement_fk` (`agreement_id`),
+  KEY `arXiv_submissions_idx_publish_order` (`publish_order`),
   CONSTRAINT `agreement_fk` FOREIGN KEY (`agreement_id`) REFERENCES `arXiv_submission_agreements` (`agreement_id`),
   CONSTRAINT `arXiv_submissions_fk_document_id` FOREIGN KEY (`document_id`) REFERENCES `arXiv_documents` (`document_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `arXiv_submissions_fk_license` FOREIGN KEY (`license`) REFERENCES `arXiv_licenses` (`name`) ON UPDATE CASCADE,
@@ -1822,6 +1819,41 @@ CREATE TABLE `membership_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `publish_batches`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `publish_batches` (
+  `batch_id` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `total_processed` int NOT NULL DEFAULT '0',
+  `new_count` int NOT NULL DEFAULT '0',
+  `rep_count` int NOT NULL DEFAULT '0',
+  `cross_count` int NOT NULL DEFAULT '0',
+  `wdr_count` int NOT NULL DEFAULT '0',
+  `jref_count` int NOT NULL DEFAULT '0',
+  `meta_count` int NOT NULL DEFAULT '0',
+  `data_count` int NOT NULL DEFAULT '0',
+  `error_count` int NOT NULL DEFAULT '0',
+  `invalid_count` int NOT NULL DEFAULT '0',
+  `test_count` int NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `batch_complete_sent_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `publish_incomplete_batches`;
+/*!50001 DROP VIEW IF EXISTS `publish_incomplete_batches`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `publish_incomplete_batches` AS SELECT 
+ 1 AS `batch_id`,
+ 1 AS `created_at`,
+ 1 AS `total_processed`,
+ 1 AS `error_count`,
+ 1 AS `invalid_count`,
+ 1 AS `test_count`,
+ 1 AS `minutes_incomplete`*/;
+SET character_set_client = @saved_cs_client;
 DROP TABLE IF EXISTS `sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -2384,59 +2416,19 @@ CREATE TABLE `tapir_users_password` (
   CONSTRAINT `0_512` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `publish_batches`
---
--- Processor-owned (arxiv-publish-processor): one row per publish run.
--- Holds the per-type counts that feed the batch_complete summary and
--- batch_complete_sent_at, the batch-level dispatch marker (NULL until the
--- batch_complete message is published).
---
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `publish_batches` (
-  `batch_id` varchar(40) NOT NULL,
-  `total_processed` int NOT NULL DEFAULT '0',
-  `new_count` int NOT NULL DEFAULT '0',
-  `rep_count` int NOT NULL DEFAULT '0',
-  `cross_count` int NOT NULL DEFAULT '0',
-  `wdr_count` int NOT NULL DEFAULT '0',
-  `jref_count` int NOT NULL DEFAULT '0',
-  `meta_count` int NOT NULL DEFAULT '0',
-  `data_count` int NOT NULL DEFAULT '0',
-  `error_count` int NOT NULL DEFAULT '0',
-  `invalid_count` int NOT NULL DEFAULT '0',
-  `test_count` int NOT NULL DEFAULT '0',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  `batch_complete_sent_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`batch_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- View: `publish_incomplete_batches`
---
--- Operator-facing: batches whose batch_complete message was never sent
--- (batch_complete_sent_at IS NULL) -- a prior run crashed (or its
--- batch_complete publish failed) before the mailing was triggered. The
--- recovery sweep resends these.
---
-
-/*!50001 CREATE VIEW `publish_incomplete_batches` AS
-SELECT
-  `batch_id` AS `batch_id`,
-  `created_at` AS `created_at`,
-  `total_processed` AS `total_processed`,
-  `error_count` AS `error_count`,
-  `invalid_count` AS `invalid_count`,
-  `test_count` AS `test_count`,
-  TIMESTAMPDIFF(MINUTE, `created_at`, NOW()) AS `minutes_incomplete`
-FROM `publish_batches`
-WHERE `batch_complete_sent_at` IS NULL
-ORDER BY `created_at` */;
+/*!50001 DROP VIEW IF EXISTS `publish_incomplete_batches`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`128.84.4.39` SQL SECURITY DEFINER */
+/*!50001 VIEW `publish_incomplete_batches` AS select `publish_batches`.`batch_id` AS `batch_id`,`publish_batches`.`created_at` AS `created_at`,`publish_batches`.`total_processed` AS `total_processed`,`publish_batches`.`error_count` AS `error_count`,`publish_batches`.`invalid_count` AS `invalid_count`,`publish_batches`.`test_count` AS `test_count`,timestampdiff(MINUTE,`publish_batches`.`created_at`,now()) AS `minutes_incomplete` from `publish_batches` where (`publish_batches`.`batch_complete_sent_at` is null) order by `publish_batches`.`created_at` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
