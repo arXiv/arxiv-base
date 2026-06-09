@@ -633,6 +633,18 @@ class Group(Base):
     arXiv_archives: Mapped[List["Archive"]] = relationship("Archive", back_populates="arXiv_group")
 
 
+class Holiday(Base):
+    __tablename__ = "arXiv_holidays"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    freeze_skip_date: Mapped[dt.date] = mapped_column(Date, primary_key=True)
+    description: Mapped[Optional[str]] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
+    created_by: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
+
+    tapir_users: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_holidays")
+
+
 t_arXiv_in_category = Table(
     "arXiv_in_category",
     metadata,
@@ -721,6 +733,7 @@ class Metadata(Base):
 
     document: Mapped["Document"] = relationship("Document", primaryjoin="Metadata.document_id == Document.document_id", back_populates="arXiv_metadata")
     submitter: Mapped["TapirUser"] = relationship("TapirUser", primaryjoin="Metadata.submitter_id == TapirUser.user_id", back_populates="arXiv_metadata")
+    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     arXiv_datacite_dois: Mapped[List["DataciteDois"]] = relationship("DataciteDois", back_populates="metadata_")
     # Link to the license
     arXiv_license = relationship("License", primaryjoin="Metadata.license == License.name", backref="arXiv_metadata")
@@ -1203,6 +1216,9 @@ class Submission(Base):
     data_version_queued: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
     metadata_version_queued: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=text("'0'"))
     preflight: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    publish_anchor_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    publish_order: Mapped[Optional[int]] = mapped_column(Integer, index=True)
+    batch_id: Mapped[Optional[str]] = mapped_column(String(40))
     data_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     metadata_queued_time: Mapped[Optional[datetime]] = mapped_column(DateTime)
     arXiv_pilot_files: Mapped[List["PilotFile"]] = relationship("PilotFile", back_populates="submission")
@@ -1973,6 +1989,7 @@ class TapirUser(Base):
     arXiv_check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="user")
     owned_papers: Mapped[List["PaperOwner"]] = relationship("PaperOwner", foreign_keys="[PaperOwner.user_id]", back_populates="owner")
     demographics = relationship("Demographic", foreign_keys="[Demographic.user_id]", uselist=False, back_populates="user")
+    arXiv_holidays: Mapped[List["Holiday"]] = relationship("Holiday", back_populates="tapir_users")
     flagged_user_detail: Mapped[List["flagged_user_detail"]] = relationship("flagged_user_detail", foreign_keys="[flagged_user_detail.creator_user_id]", back_populates="creator_user")
     flagged_user_detail_: Mapped[List["flagged_user_detail"]] = relationship("flagged_user_detail", foreign_keys="[flagged_user_detail.flagged_user_id]", back_populates="flagged_user")
 
