@@ -21,6 +21,23 @@ class BaseCheck(ABC):
 
     required_inputs: set[str] = set()
 
+    @property
+    def config(self) -> dict:
+        return {
+            "name": self.name,
+            "id": self.id,
+            "version": self.version,
+            "on_failure_policy": self.on_failure_policy,
+            "failure_message": self.failure_message,
+        }
+
+    def _describe(self) -> dict:
+        return {
+            **self.config,
+            "description": self.description,
+            "required_inputs": self.required_inputs,
+        }
+
     def _validate_inputs(self, inputs: Inputs) -> None:
         for data in self.required_inputs:
             if getattr(inputs, data) is None:
@@ -44,11 +61,8 @@ class BaseCheck(ABC):
         offsets: list[Offset] | None = None,
     ) -> Result:
         return Result(
-            check_name=self.name,
-            check_id=self.id,
-            check_version=self.version,
+            check_config=self.config,
             passed=passed,
-            on_failure_policy=self.on_failure_policy,
             disposition=self._disposition(passed),
             message=message,
             offsets=offsets,
@@ -83,7 +97,7 @@ class BaseGenericCheck(BaseCheck):
         Return instance-level configuration.
         """
         return {
-            "on_failure_policy": self.on_failure_policy,
+            **super().config,
             "data": self.data,
             "field": self.field,
         }
@@ -119,9 +133,7 @@ class BaseGenericPatternCheck(BaseGenericCheck):
     @property
     def config(self) -> dict:
         return {
-            "on_failure_policy": self.on_failure_policy,
-            "data": self.data,
-            "field": self.field,
+            **super().config,
             "pattern": self._pattern,
         }
 
@@ -149,11 +161,10 @@ class BaseAggregateCheck(BaseCheck):
 
     _checks: tuple[BaseGenericCheck, ...]
 
-    @property
-    def config(self) -> dict:
-        """Return sub-checks and their configurations for the registry endpoint."""
+    def _describe(self) -> dict:
         return {
-            "checks": [{"name": c.name, "id": c.id, "version": c.version, "config": c.config} for c in self._checks]
+            **super()._describe(),
+            "checks": [c._describe() for c in self._checks],
         }
 
     def _run(self, inputs: Inputs) -> Result:
@@ -170,13 +181,13 @@ class BaseAggregateCheck(BaseCheck):
 
     def _passed(self, results: list[Result]) -> bool:
         """The aggregate passes unless a sub-check with REJECT policy has failed."""
-        return not any(not r.passed and r.on_failure_policy == OnFailurePolicy.REJECT for r in results)
+        return not any(not r.passed and r.check_config["on_failure_policy"] == OnFailurePolicy.REJECT for r in results)
 
     def _disposition(self, passed: bool, results: list[Result]) -> Disposition:  # type: ignore
         if passed:
             return Disposition.OK
 
-        failed_policies = {r.on_failure_policy for r in results if not r.passed}
+        failed_policies = {r.check_config["on_failure_policy"] for r in results if not r.passed}
         if OnFailurePolicy.REJECT in failed_policies:
             return Disposition.REJECT
         if OnFailurePolicy.WARN in failed_policies:
@@ -190,11 +201,8 @@ class BaseAggregateCheck(BaseCheck):
         message: str = "",
     ) -> Result:
         return Result(
-            check_name=self.name,
-            check_id=self.id,
-            check_version=self.version,
+            check_config=self.config,
             passed=passed,
-            on_failure_policy=self.on_failure_policy,
             disposition=self._disposition(passed, results),
             message=message,
             results=results,

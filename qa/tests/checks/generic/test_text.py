@@ -40,7 +40,7 @@ class TestNotEmpty:
         assert self.check.run(inputs("hello")).passed
 
     def test_pass_on_failure_policy_warn(self):
-        assert self.check.run(inputs("hello")).on_failure_policy == OnFailurePolicy.WARN
+        assert self.check.run(inputs("hello")).check_config["on_failure_policy"] == OnFailurePolicy.WARN
 
     def test_fail_empty(self):
         result = self.check.run(inputs(""))
@@ -48,7 +48,7 @@ class TestNotEmpty:
         assert result.message
 
     def test_fail_on_failure_policy_warn(self):
-        assert self.check.run(inputs("")).on_failure_policy == OnFailurePolicy.WARN
+        assert self.check.run(inputs("")).check_config["on_failure_policy"] == OnFailurePolicy.WARN
 
     def test_fail_missing_field(self):
         with pytest.raises(MissingDataError):

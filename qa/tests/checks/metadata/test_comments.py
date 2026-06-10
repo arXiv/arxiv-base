@@ -9,7 +9,7 @@ from qa.checks.metadata.comments import CommentsAreValid
 
 def sub_result(result: Result, name: str) -> Result:
     assert result.results is not None
-    return next(r for r in result.results if r.check_name == name)
+    return next(r for r in result.results if r.check_config["name"] == name)
 
 
 class TestCommentsAreValid:
@@ -52,7 +52,7 @@ class TestCommentsAreValid:
 
     def test_result_has_check_metadata(self):
         result = CommentsAreValid.check("12 pages, 3 figures")
-        assert result.check_name == "comments_are_valid"
-        assert result.check_id == 530
-        assert result.check_version == "1.0.0"
-        assert result.on_failure_policy == OnFailurePolicy.REJECT
+        assert result.check_config["name"] == "comments_are_valid"
+        assert result.check_config["id"] == 530
+        assert result.check_config["version"] == "1.0.0"
+        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT

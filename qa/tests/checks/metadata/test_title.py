@@ -9,7 +9,7 @@ from qa.checks.metadata.title import TitleIsValid
 
 def sub_result(result: Result, name: str) -> Result:
     assert result.results is not None
-    return next(r for r in result.results if r.check_name == name)
+    return next(r for r in result.results if r.check_config["name"] == name)
 
 
 class TestTitleIsValid:
@@ -84,11 +84,11 @@ class TestTitleIsValid:
 
     def test_result_has_check_metadata(self):
         result = TitleIsValid.check("A fine title")
-        assert result.check_name == "title_is_valid"
-        assert result.check_id == 500
-        assert result.check_version == "1.0.0"
-        assert result.on_failure_policy == OnFailurePolicy.REJECT
+        assert result.check_config["name"] == "title_is_valid"
+        assert result.check_config["id"] == 500
+        assert result.check_config["version"] == "1.0.0"
+        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
     def test_fail_on_failure_policy_reject(self):
-        assert TitleIsValid.check("").on_failure_policy == OnFailurePolicy.REJECT
+        assert TitleIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 

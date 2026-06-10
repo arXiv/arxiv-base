@@ -44,11 +44,12 @@ class Result(BaseModel):
     Every aggregate check result will include a list of results from sub-checks.
     """
 
-    check_name: str
-    check_id: int
-    check_version: str
+    # check_name: str
+    # check_id: int
+    # check_version: str
+    # on_failure_policy: OnFailurePolicy
+    check_config: dict
     passed: bool
-    on_failure_policy: OnFailurePolicy
     disposition: Disposition
     message: str
     offsets: list[Offset] | None = None

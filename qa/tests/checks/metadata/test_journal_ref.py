@@ -9,7 +9,7 @@ from qa.checks.metadata.journal_ref import JournalRefIsValid
 
 def sub_result(result: Result, name: str) -> Result:
     assert result.results is not None
-    return next(r for r in result.results if r.check_name == name)
+    return next(r for r in result.results if r.check_config["name"] == name)
 
 
 class TestJournalRefIsValid:
@@ -77,7 +77,7 @@ class TestJournalRefIsValid:
 
     def test_result_has_check_metadata(self):
         result = JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001 (2024)")
-        assert result.check_name == "journal_ref_is_valid"
-        assert result.check_id == 560
-        assert result.check_version == "1.0.0"
-        assert result.on_failure_policy == OnFailurePolicy.REJECT
+        assert result.check_config["name"] == "journal_ref_is_valid"
+        assert result.check_config["id"] == 560
+        assert result.check_config["version"] == "1.0.0"
+        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT

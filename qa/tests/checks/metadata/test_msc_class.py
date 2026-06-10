@@ -9,7 +9,7 @@ from qa.checks.metadata.msc_class import MscClassIsValid
 
 def sub_result(result: Result, name: str) -> Result:
     assert result.results is not None
-    return next(r for r in result.results if r.check_name == name)
+    return next(r for r in result.results if r.check_config["name"] == name)
 
 
 class TestMscClassIsValid:
@@ -63,7 +63,7 @@ class TestMscClassIsValid:
 
     def test_result_has_check_metadata(self):
         result = MscClassIsValid.check("35K55")
-        assert result.check_name == "msc_class_is_valid"
-        assert result.check_id == 580
-        assert result.check_version == "1.0.0"
-        assert result.on_failure_policy == OnFailurePolicy.REJECT
+        assert result.check_config["name"] == "msc_class_is_valid"
+        assert result.check_config["id"] == 580
+        assert result.check_config["version"] == "1.0.0"
+        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT

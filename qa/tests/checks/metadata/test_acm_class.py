@@ -9,7 +9,7 @@ from qa.checks.metadata.acm_class import AcmClassIsValid
 
 def sub_result(result: Result, name: str) -> Result:
     assert result.results is not None
-    return next(r for r in result.results if r.check_name == name)
+    return next(r for r in result.results if r.check_config["name"] == name)
 
 
 class TestAcmClassIsValid:
@@ -55,7 +55,7 @@ class TestAcmClassIsValid:
 
     def test_result_has_check_metadata(self):
         result = AcmClassIsValid.check("F.2.2")
-        assert result.check_name == "acm_class_is_valid"
-        assert result.check_id == 590
-        assert result.check_version == "1.0.0"
-        assert result.on_failure_policy == OnFailurePolicy.REJECT
+        assert result.check_config["name"] == "acm_class_is_valid"
+        assert result.check_config["id"] == 590
+        assert result.check_config["version"] == "1.0.0"
+        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT

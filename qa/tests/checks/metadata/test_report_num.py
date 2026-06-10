@@ -9,7 +9,7 @@ from qa.checks.metadata.report_num import ReportNumIsValid
 
 def sub_result(result: Result, name: str) -> Result:
     assert result.results is not None
-    return next(r for r in result.results if r.check_name == name)
+    return next(r for r in result.results if r.check_config["name"] == name)
 
 
 class TestReportNumIsValid:
@@ -95,7 +95,7 @@ class TestReportNumIsValid:
 
     def test_result_has_check_metadata(self):
         result = ReportNumIsValid.check("CERN-EP-2024-001")
-        assert result.check_name == "report_num_is_valid"
-        assert result.check_id == 550
-        assert result.check_version == "1.0.0"
-        assert result.on_failure_policy == OnFailurePolicy.REJECT
+        assert result.check_config["name"] == "report_num_is_valid"
+        assert result.check_config["id"] == 550
+        assert result.check_config["version"] == "1.0.0"
+        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT

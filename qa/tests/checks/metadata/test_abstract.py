@@ -9,7 +9,7 @@ from qa.checks.metadata.abstract import AbstractIsValid
 
 def sub_result(result: Result, name: str) -> Result:
     assert result.results is not None
-    return next(r for r in result.results if r.check_name == name)
+    return next(r for r in result.results if r.check_config["name"] == name)
 
 
 class TestAbstractIsValid:
@@ -99,10 +99,10 @@ class TestAbstractIsValid:
 
     def test_result_has_check_metadata(self):
         result = AbstractIsValid.check("A fine abstract with enough text.")
-        assert result.check_name == "abstract_is_valid"
-        assert result.check_id == 520
-        assert result.check_version == "1.0.0"
-        assert result.on_failure_policy == OnFailurePolicy.REJECT
+        assert result.check_config["name"] == "abstract_is_valid"
+        assert result.check_config["id"] == 520
+        assert result.check_config["version"] == "1.0.0"
+        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
     def test_fail_on_failure_policy_reject(self):
-        assert AbstractIsValid.check("").on_failure_policy == OnFailurePolicy.REJECT
+        assert AbstractIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
