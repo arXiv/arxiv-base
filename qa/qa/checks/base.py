@@ -183,17 +183,6 @@ class BaseAggregateCheck(BaseCheck):
         """The aggregate passes unless a sub-check with REJECT policy has failed."""
         return not any(not r.passed and r.check_config["on_failure_policy"] == OnFailurePolicy.REJECT for r in results)
 
-    def _disposition(self, passed: bool, results: list[Result]) -> Disposition:  # type: ignore
-        if passed:
-            return Disposition.OK
-
-        failed_policies = {r.check_config["on_failure_policy"] for r in results if not r.passed}
-        if OnFailurePolicy.REJECT in failed_policies:
-            return Disposition.REJECT
-        if OnFailurePolicy.WARN in failed_policies:
-            return Disposition.WARN
-        return Disposition.OK
-
     def _result(  # type: ignore
         self,
         passed: bool,
@@ -203,7 +192,7 @@ class BaseAggregateCheck(BaseCheck):
         return Result(
             check_config=self.config,
             passed=passed,
-            disposition=self._disposition(passed, results),
+            disposition=self._disposition(passed),
             message=message,
             results=results,
         )
