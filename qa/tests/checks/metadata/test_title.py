@@ -91,4 +91,3 @@ class TestTitleIsValid:
 
     def test_fail_on_failure_policy_reject(self):
         assert TitleIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
-
