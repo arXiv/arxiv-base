@@ -74,7 +74,7 @@ class BaseAuthorPatternCheck(BaseAuthorCheck):
 
 class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
     name = "authors_do_not_contain_lone_surname"
-    id = 23
+    id = 51
     version = "1.0.0"
     description = "No author has only a surname without a given name, unless it is a known collaboration or LLM name."
     failure_message = "Contains lone surname."
@@ -110,7 +110,7 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
 
 class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
     name = "authors_do_not_contain_llm_author"
-    id = 49
+    id = 52
     version = "1.0.0"
     description = "No author's name appears to be an AI language model."
     failure_message = "Potential LLM author detected."
@@ -145,7 +145,7 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
 
 class AuthorNamesDoNotContainSemicolon(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_semicolon"
-    id = 22
+    id = 53
     version = "1.0.0"
     description = "No parsed author name contains a semicolon."
     failure_message = "Contains semicolon(s) - use ',' or 'and' to separate authors."
@@ -155,7 +155,7 @@ class AuthorNamesDoNotContainSemicolon(BaseAuthorPatternCheck):
 
 class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_brackets"
-    id = 15
+    id = 54
     version = "1.0.0"
     description = "No parsed author name contains square bracket characters."
     failure_message = "Unusual character detected."
@@ -165,7 +165,7 @@ class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
 
 class AuthorNamesDoNotContainNumbers(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_numbers"
-    id = 30
+    id = 55
     version = "1.0.0"
     description = "No parsed author name contains numeric digits."
     failure_message = "Contains a number."
@@ -175,7 +175,7 @@ class AuthorNamesDoNotContainNumbers(BaseAuthorPatternCheck):
 
 class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_affiliation"
-    id = 24
+    id = 56
     version = "1.0.0"
     description = "No parsed author name contains institution or affiliation keywords."
     failure_message = "Contains a suffix that may be university affiliation or degree related."
