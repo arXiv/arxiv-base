@@ -20,7 +20,7 @@ from typing import Optional, Literal, Any, Tuple, List
 import re
 import hashlib
 import datetime as dt
-from datetime import datetime, date, UTC
+from datetime import datetime, date
 from dateutil.tz import gettz, tzutc
 from sqlalchemy.dialects.mysql import VARCHAR
 from validators import url as is_valid_url
@@ -67,12 +67,6 @@ from .column_types import Utf8Text, Utf8String
 
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
-
-def utc_now() -> datetime:
-    return datetime.now(tz=UTC)
-
-def epoch_now() -> int:
-    return datetime.now(tz=UTC).timestamp()
 
 
 class MemberInstitution(Base):

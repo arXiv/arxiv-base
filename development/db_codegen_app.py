@@ -5,17 +5,20 @@ Interactive Database Code Generator Application
 A multi-stage TUI application for generating code from database schemas.
 """
 import os
+import sys
 import subprocess
 import socket
+import time
 import threading
 from pathlib import Path
 from typing import Optional
 
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal
-from textual.widgets import Header, Footer, Static, Input, Button, Label, RichLog, Checkbox, LoadingIndicator
+from textual.containers import Container, Vertical, Horizontal
+from textual.widgets import Header, Footer, Static, Input, Button, Label, RichLog, Checkbox
 from textual.binding import Binding
 from textual.validation import ValidationResult, Validator
+from textual.worker import Worker, WorkerState
 
 
 class ReplicaNameValidator(Validator):
@@ -87,6 +90,7 @@ class Stage1Screen(Container):
             validators=[ReplicaNameValidator()]
         )
 
+        # Check if schema file exists to show skip button
         schema_file = Path("arxiv/db/arxiv_db_schema.sql")
         buttons = [Button("Continue", variant="primary", id="continue")]
         if schema_file.exists():
@@ -101,6 +105,7 @@ class Stage1Screen(Container):
         if event.button.id == "quit":
             self.app.exit()
         elif event.button.id == "skip_to_5":
+            # Store the schema file path
             self.app_instance.schema_file = Path("arxiv/db/arxiv_db_schema.sql")
             self.app_instance.move_to_stage_5()
         elif event.button.id == "continue":
@@ -111,8 +116,11 @@ class Stage1Screen(Container):
                 self.show_error("Please enter a replica name")
                 return
 
+            # Store the replica name
             self.app_instance.replica_name = replica_name
             self.show_error(f"[green]✓ Replica name set: {replica_name}[/green]")
+
+            # Move to next stage
             self.app_instance.move_to_stage_2()
 
     def show_error(self, message: str):
@@ -175,12 +183,14 @@ class Stage2Screen(Container):
             self.show_status("[red]Error: Proxy port and replica name are required[/red]")
             return
 
+        # Disable start button during execution
         self.query_one("#start_proxy", Button).disabled = True
         self.show_status("[yellow]Checking proxy status...[/yellow]")
 
         log = self.query_one("#output_log", RichLog)
         log.clear()
 
+        # Check if port is already in use
         try:
             port_num = int(proxy_port)
         except ValueError:
@@ -191,18 +201,21 @@ class Stage2Screen(Container):
 
         if self.is_port_in_use(port_num):
             log.write(f"[yellow]Port {proxy_port} is already in use[/yellow]")
-            log.write("[green]✓ Assuming Cloud SQL Proxy is already running[/green]")
+            log.write(f"[green]✓ Assuming Cloud SQL Proxy is already running[/green]")
             log.write(f"[green]Proxy appears to be running on 0.0.0.0:{proxy_port}[/green]")
-            self.show_status("[green]✓ Proxy already running! Click Continue to proceed.[/green]")
+            self.show_status(f"[green]✓ Proxy already running! Click Continue to proceed.[/green]")
 
+            # Store the proxy port
             self.app_instance.proxy_port = proxy_port
 
+            # Replace Start button with Continue button
             button_container = self.query_one(Horizontal)
             start_btn = self.query_one("#start_proxy", Button)
             start_btn.remove()
             button_container.mount(Button("Continue", variant="success", id="continue"), before=0)
             return
 
+        # Build the cloud-sql-proxy command
         proxy_cmd = [
             "/usr/local/bin/cloud-sql-proxy",
             "--address", "0.0.0.0",
@@ -215,6 +228,7 @@ class Stage2Screen(Container):
         log.write(f"[cyan]Port:[/cyan] {proxy_port}")
 
         try:
+            # Start the proxy in the background
             self.app_instance.proxy_process = subprocess.Popen(
                 proxy_cmd,
                 stdout=subprocess.DEVNULL,
@@ -222,28 +236,32 @@ class Stage2Screen(Container):
                 start_new_session=True
             )
 
+            # Store the proxy port
             self.app_instance.proxy_port = proxy_port
 
+            # Give it a moment to start
             import time
             time.sleep(2)
 
+            # Check if process is still running
             if self.app_instance.proxy_process.poll() is None:
                 log.write(f"[green]✓ Cloud SQL Proxy started successfully (PID: {self.app_instance.proxy_process.pid})[/green]")
                 log.write(f"[green]Proxy is running on 0.0.0.0:{proxy_port}[/green]")
-                self.show_status("[green]✓ Proxy running! Click Continue to proceed.[/green]")
+                self.show_status(f"[green]✓ Proxy running! Click Continue to proceed.[/green]")
 
+                # Replace Start button with Continue button
                 button_container = self.query_one(Horizontal)
                 start_btn = self.query_one("#start_proxy", Button)
                 start_btn.remove()
                 button_container.mount(Button("Continue", variant="success", id="continue"), before=0)
             else:
-                log.write("[red]✗ Proxy process terminated unexpectedly[/red]")
+                log.write(f"[red]✗ Proxy process terminated unexpectedly[/red]")
                 self.show_status("[red]Failed to start proxy. Check if cloud-sql-proxy is installed.[/red]")
                 self.query_one("#start_proxy", Button).disabled = False
 
         except FileNotFoundError:
-            log.write("[red]✗ Error: /usr/local/bin/cloud-sql-proxy not found[/red]")
-            log.write("[yellow]Please install cloud-sql-proxy first[/yellow]")
+            log.write(f"[red]✗ Error: /usr/local/bin/cloud-sql-proxy not found[/red]")
+            log.write(f"[yellow]Please install cloud-sql-proxy first[/yellow]")
             self.show_status("[red]cloud-sql-proxy not found. Please install it first.[/red]")
             self.query_one("#start_proxy", Button).disabled = False
         except Exception as e:
@@ -308,9 +326,12 @@ class Stage3Screen(Container):
                 self.show_error("Please enter a password")
                 return
 
+            # Store the credentials
             self.app_instance.db_username = username
             self.app_instance.db_password = password
             self.show_error(f"[green]✓ Credentials set for user: {username}[/green]")
+
+            # Move to next stage
             self.app_instance.move_to_stage_4()
 
     def show_error(self, message: str):
@@ -326,6 +347,8 @@ class Stage4Screen(Container):
         super().__init__()
         self.app_instance = app_instance
         self.last_error_message = ""
+        self.monitor_thread = None
+        self.monitoring_active = False
 
     def compose(self) -> ComposeResult:
         """Create child widgets."""
@@ -350,18 +373,12 @@ class Stage4Screen(Container):
 
         yield Horizontal(
             Button("Extract Schema", variant="primary", id="extract"),
-            Button("Next", variant="success", id="continue", disabled=True),
             Button("Back", variant="default", id="back"),
             Button("Quit", variant="error", id="quit"),
             id="main_buttons"
         )
-        yield LoadingIndicator()
         yield Static(id="status_message")
         yield RichLog(id="output_log", wrap=True, highlight=True, markup=True)
-
-    def on_mount(self) -> None:
-        """Called when the widget is mounted."""
-        self.query_one(LoadingIndicator).display = False
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
@@ -378,13 +395,29 @@ class Stage4Screen(Container):
 
     def format_file_size(self, size_bytes: int) -> str:
         """Format file size in human-readable format."""
-        if size_bytes < 1024:
-            return f"{size_bytes} B"
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        for unit in ['B', 'KB', 'MB', 'GB']:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
-        return f"{size_bytes:.2f} PB"
+        return f"{size_bytes:.2f} TB"
+
+    def monitor_file_progress(self, output_path: Path, log: RichLog):
+        """Monitor file size in a separate thread."""
+        last_size = 0
+        while self.monitoring_active:
+            try:
+                if output_path.exists():
+                    current_size = output_path.stat().st_size
+                    if current_size != last_size:
+                        size_str = self.format_file_size(current_size)
+                        self.app.call_from_thread(
+                            log.write,
+                            f"[yellow]Writing... {size_str}[/yellow]"
+                        )
+                        last_size = current_size
+            except Exception:
+                pass
+            time.sleep(1)  # Check every second
 
     def run_schema_extraction(self):
         """Execute mysqldump to extract schema."""
@@ -400,16 +433,24 @@ class Stage4Screen(Container):
             self.show_status("[red]Error: All fields are required[/red]")
             return
 
-        # Disable navigation while extraction is running.
+        # Disable extract button during execution
         self.query_one("#extract", Button).disabled = True
-        self.query_one("#continue", Button).disabled = True
         self.show_status("[yellow]Running mysqldump...[/yellow]")
-        self.query_one(LoadingIndicator).display = True
 
+        # Build the mysqldump command
         mysqldump_cmd = [
-            "mysqldump", "-h", host, "--port", port, "-u", username, f"-p{password}",
-            "--no-data", "--set-gtid-purged=OFF", "--skip-comments", db_name
+            "mysqldump",
+            "-h", host,
+            "--port", port,
+            "-u", username,
+            f"-p{password}",
+            "--no-data",
+            "--set-gtid-purged=OFF",
+            "--skip-comments",
+            db_name
         ]
+
+        # Build the sed command to normalize AUTO_INCREMENT
         sed_cmd = ["sed", "s/ AUTO_INCREMENT=[0-9]*\\b/ AUTO_INCREMENT=1/"]
 
         output_path = Path(output_file)
@@ -417,83 +458,120 @@ class Stage4Screen(Container):
 
         log = self.query_one("#output_log", RichLog)
         log.clear()
-        log.write(f"[cyan]Executing:[/cyan] mysqldump -h {host} --port {port} -u {username} -p*** ... | {' '.join(sed_cmd)}")
+        log.write(f"[cyan]Executing:[/cyan] mysqldump -h {host} --port {port} -u {username} -p*** --no-data --set-gtid-purged=OFF --skip-comments {db_name}")
         log.write(f"[cyan]Output file:[/cyan] {output_file}")
 
-        threading.Thread(
-            target=self.extract_schema_worker,
-            args=(mysqldump_cmd, sed_cmd, output_path, log),
-            daemon=True,
-        ).start()
-
-    def on_extraction_success(self, output_path: Path):
-        """Callback for successful schema extraction."""
-        self.query_one(LoadingIndicator).display = False
-        log = self.query_one("#output_log", RichLog)
-
-        final_size = self.format_file_size(output_path.stat().st_size)
-        log.write(f"[green]✓ Schema extracted successfully to {output_path}[/green]")
-        log.write(f"[green]Final size: {final_size}[/green]")
-        self.show_status("[green]✓ Schema extraction complete! Click Next to proceed, or re-run extraction.[/green]")
-
-        self.app_instance.schema_file = output_path
-
-        self.query_one("#extract", Button).disabled = False
-        self.query_one("#continue", Button).disabled = False
-
-    def on_extraction_failure(self, error_msg: str):
-        """Callback for failed schema extraction."""
-        self.query_one(LoadingIndicator).display = False
-        log = self.query_one("#output_log", RichLog)
-
-        log.write(f"[red]✗ Error: {error_msg}[/red]")
-        self.last_error_message = f"mysqldump error:\n{error_msg}"
-        self.show_status("[red]Schema extraction failed. Check the log above.[/red]")
-        self.query_one("#extract", Button).disabled = False
-        self.query_one("#continue", Button).disabled = True
-        self.add_copy_error_button()
-
-    def extract_schema_worker(self, mysqldump_cmd: list[str], sed_cmd: list[str], output_path: Path, log: RichLog):
-        """Worker to extract database schema using mysqldump and sed."""
+        # Create a temporary file for monitoring
         temp_output = output_path.with_suffix('.tmp')
 
+        # Start file monitoring in background thread
+        self.monitoring_active = True
+        self.monitor_thread = threading.Thread(
+            target=self.monitor_file_progress,
+            args=(temp_output, log),
+            daemon=True
+        )
+        self.monitor_thread.start()
+
         try:
-            p_mysqldump = subprocess.Popen(mysqldump_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            p_sed = subprocess.Popen(sed_cmd, stdin=p_mysqldump.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            p_mysqldump.stdout.close()
+            # Run mysqldump and write to temp file immediately
+            log.write(f"[yellow]Starting extraction...[/yellow]")
 
-            table_count = 0
-            with temp_output.open('w') as f:
-                for line in p_sed.stdout:
-                    f.write(line)
-                    if line.startswith("CREATE TABLE"):
-                        table_count += 1
-                        if table_count % 10 == 0:
-                            size_str = self.format_file_size(f.tell())
-                            self.app.call_from_thread(
-                                log.write,
-                                f"[yellow]Extracting... {table_count} tables found ({size_str})[/yellow]"
-                            )
+            with open(temp_output, 'w') as temp_f:
+                # Run mysqldump
+                result1 = subprocess.run(
+                    mysqldump_cmd,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
 
-            p_sed.wait()
-            p_mysqldump.wait()
+                # Run sed to normalize AUTO_INCREMENT
+                result2 = subprocess.run(
+                    sed_cmd,
+                    input=result1.stdout,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
 
-            if p_mysqldump.returncode != 0 or p_sed.returncode != 0:
-                error = p_mysqldump.stderr.read() + p_sed.stderr.read()
-                raise RuntimeError(error)
+                # Write to temp file
+                temp_f.write(result2.stdout)
 
+            # Stop monitoring
+            self.monitoring_active = False
+            if self.monitor_thread:
+                self.monitor_thread.join(timeout=2)
+
+            # Move temp file to final location
             temp_output.replace(output_path)
-            self.app.call_from_thread(self.on_extraction_success, output_path)
 
-        except Exception as e:
+            final_size = self.format_file_size(output_path.stat().st_size)
+            log.write(f"[green]✓ Schema extracted successfully to {output_file}[/green]")
+            log.write(f"[green]Final size: {final_size}[/green]")
+            self.show_status(f"[green]✓ Schema extraction complete! Click Continue to proceed.[/green]")
+
+            # Store the output file path
+            self.app_instance.schema_file = output_path
+
+            # Replace Extract button with Continue button
+            button_container = self.query_one("#main_buttons", Horizontal)
+            extract_btn = self.query_one("#extract", Button)
+            extract_btn.remove()
+            button_container.mount(Button("Continue", variant="success", id="continue"), before=0)
+
+        except subprocess.CalledProcessError as e:
+            # Stop monitoring
+            self.monitoring_active = False
+            if self.monitor_thread:
+                self.monitor_thread.join(timeout=2)
+
+            # Clean up temp file
             if temp_output.exists():
                 temp_output.unlink()
-            self.app.call_from_thread(self.on_extraction_failure, str(e))
+
+            error_msg = e.stderr if e.stderr else str(e)
+            log.write(f"[red]✗ Error: {error_msg}[/red]")
+
+            # Store error message for copying
+            self.last_error_message = f"mysqldump error:\n{error_msg}"
+
+            self.show_status("[red]Schema extraction failed. Check the log above.[/red]")
+            self.query_one("#extract", Button).disabled = False
+
+            # Add copy error button
+            self.add_copy_error_button()
+
+        except Exception as e:
+            # Stop monitoring
+            self.monitoring_active = False
+            if self.monitor_thread:
+                self.monitor_thread.join(timeout=2)
+
+            # Clean up temp file
+            if temp_output.exists():
+                temp_output.unlink()
+
+            error_msg = str(e)
+            log.write(f"[red]✗ Unexpected error: {error_msg}[/red]")
+
+            # Store error message for copying
+            self.last_error_message = f"Unexpected error:\n{error_msg}"
+
+            self.show_status("[red]An unexpected error occurred.[/red]")
+            self.query_one("#extract", Button).disabled = False
+
+            # Add copy error button
+            self.add_copy_error_button()
 
     def add_copy_error_button(self):
         """Add a copy error button if it doesn't exist."""
         button_container = self.query_one("#main_buttons", Horizontal)
-        if not self.query_one_or_none("#copy_error"):
+        # Check if copy button already exists
+        try:
+            self.query_one("#copy_error", Button)
+        except:
+            # Button doesn't exist, add it
             button_container.mount(Button("Copy Error", variant="warning", id="copy_error"))
 
     def copy_error_to_clipboard(self):
@@ -502,19 +580,34 @@ class Stage4Screen(Container):
             return
 
         try:
+            # Try using pyperclip if available
             import pyperclip
             pyperclip.copy(self.last_error_message)
             self.show_status("[green]✓ Error message copied to clipboard![/green]")
         except ImportError:
+            # Fall back to xclip/pbcopy
             try:
-                subprocess.run(["xclip", "-selection", "clipboard"], input=self.last_error_message, text=True, check=True)
+                # Try xclip (Linux)
+                subprocess.run(
+                    ["xclip", "-selection", "clipboard"],
+                    input=self.last_error_message,
+                    text=True,
+                    check=True
+                )
                 self.show_status("[green]✓ Error message copied to clipboard![/green]")
             except (FileNotFoundError, subprocess.CalledProcessError):
                 try:
-                    subprocess.run(["pbcopy"], input=self.last_error_message, text=True, check=True)
+                    # Try pbcopy (macOS)
+                    subprocess.run(
+                        ["pbcopy"],
+                        input=self.last_error_message,
+                        text=True,
+                        check=True
+                    )
                     self.show_status("[green]✓ Error message copied to clipboard![/green]")
                 except (FileNotFoundError, subprocess.CalledProcessError):
-                    self.show_status("[yellow]Install pyperclip, xclip, or pbcopy to copy to clipboard[/yellow]")
+                    # If all else fails, just show the message
+                    self.show_status("[yellow]Install pyperclip, xclip, or use pbcopy to copy to clipboard[/yellow]")
 
     def show_status(self, message: str):
         """Display a status message."""
@@ -544,8 +637,8 @@ class Stage5Screen(Container):
 
         yield Label("MySQL Port:")
         yield Input(
-            value="33602",
-            placeholder="MySQL port (default: 33602)",
+            value="13306",
+            placeholder="MySQL port (default: 13306)",
             id="mysql_port"
         )
 
@@ -557,13 +650,8 @@ class Stage5Screen(Container):
             Button("Quit", variant="error", id="quit"),
             id="main_buttons"
         )
-        yield LoadingIndicator()
         yield Static(id="status_message")
         yield RichLog(id="output_log", wrap=True, highlight=True, markup=True)
-
-    def on_mount(self) -> None:
-        """Called when the widget is mounted."""
-        self.query_one(LoadingIndicator).display = False
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
@@ -582,12 +670,17 @@ class Stage5Screen(Container):
         mysql_port = self.query_one("#mysql_port", Input).value
         ssl_enabled = self.query_one("#ssl_enabled", Checkbox).value
 
-        if not all([codegen_script, mysql_port]):
-            self.show_status("[red]Error: All fields are required[/red]")
+        if not codegen_script:
+            self.show_status("[red]Error: Code generator script path is required[/red]")
             return
 
+        if not mysql_port:
+            self.show_status("[red]Error: MySQL port is required[/red]")
+            return
+
+        # Validate port is a number
         try:
-            int(mysql_port)
+            port_num = int(mysql_port)
         except ValueError:
             self.show_status(f"[red]Error: Invalid port number: {mysql_port}[/red]")
             return
@@ -599,112 +692,127 @@ class Stage5Screen(Container):
             self.show_status(f"[red]Error: Script '{codegen_script}' does not exist[/red]")
             return
 
+        # Disable generate button during execution
         self.query_one("#generate", Button).disabled = True
         self.show_status("[yellow]Running code generation...[/yellow]")
-        self.query_one(LoadingIndicator).display = True
 
         log = self.query_one("#output_log", RichLog)
         log.clear()
 
+        # Build command with optional --no-ssl flag
         cmd = ["python", str(script_path), "--mysql-port", mysql_port]
         if not ssl_enabled:
             cmd.append("--no-ssl")
 
-        log.write(f"[cyan]Executing:[/cyan] {' '.join(cmd)}")
-        self.output_log_content = f"Command: {' '.join(cmd)}\n\n"
+        cmd_str = ' '.join(cmd)
+        log.write(f"[cyan]Executing:[/cyan] {cmd_str}")
 
-        threading.Thread(
-            target=self.code_generation_worker,
-            args=(cmd, arxiv_base_dir_path, log),
-            daemon=True,
-        ).start()
+        # Initialize log content with command
+        self.output_log_content = f"Command: {cmd_str}\n\n"
 
-    def on_codegen_success(self, stdout: str, stderr: str):
-        """Callback for successful code generation."""
-        self.query_one(LoadingIndicator).display = False
-        log = self.query_one("#output_log", RichLog)
-
-        if stdout:
-            self.output_log_content += "=== Output ===\n" + stdout + "\n"
-        if stderr:
-            log.write("[yellow]Warnings/Info:[/yellow]")
-            log.write(stderr)
-            self.output_log_content += "=== Warnings/Info ===\n" + stderr + "\n"
-
-        success_msg = "✓ Code generation completed successfully"
-        log.write(f"[green]{success_msg}[/green]")
-        self.output_log_content += success_msg + "\n"
-
-        log_file = Path("development/db_codegen_log.txt")
-        log_file.write_text(self.output_log_content)
-        log.write(f"[cyan]Log saved to: {log_file}[/cyan]")
-
-        self.show_status(f"[green]✓ Code generation complete! Log saved to {log_file}[/green]")
-        self.query_one("#generate", Button).disabled = False
-        self.add_copy_output_button()
-
-    def on_codegen_failure(self, returncode: int, stdout: str, stderr: str):
-        """Callback for failed code generation."""
-        self.query_one(LoadingIndicator).display = False
-        log = self.query_one("#output_log", RichLog)
-
-        error_msg = f"✗ Error (exit code {returncode})"
-        log.write(f"[red]{error_msg}[/red]")
-        self.output_log_content += f"{error_msg}\n\n"
-
-        if stdout:
-            self.output_log_content += "=== Output ===\n" + stdout + "\n"
-        if stderr:
-            log.write("[red]Error output:[/red]")
-            log.write(stderr)
-            self.output_log_content += "=== Error Output ===\n" + stderr + "\n"
-
-        log_file = Path("development/db_codegen_log.txt")
-        log_file.write_text(self.output_log_content)
-        log.write(f"[cyan]Error log saved to: {log_file}[/cyan]")
-
-        self.show_status(f"[red]Code generation failed. Log saved to {log_file}[/red]")
-        self.query_one("#generate", Button).disabled = False
-        self.add_copy_output_button()
-
-    def code_generation_worker(self, cmd: list[str], cwd: Path, log: RichLog):
-        """Worker to run the code generation script."""
         try:
-            process = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                text=True, cwd=cwd.as_posix()
+            # Run the code generation script with arguments
+            # db_codegen.py is designed to run in the arxiv-base directory.
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True,
+                cwd=arxiv_base_dir_path.as_posix()
             )
 
-            stdout_lines = []
-            with process.stdout:
-                for line in iter(process.stdout.readline, ''):
-                    self.app.call_from_thread(log.write, line.rstrip())
-                    stdout_lines.append(line)
+            # Display and save stdout
+            if result.stdout:
+                log.write("[green]Output:[/green]")
+                self.output_log_content += "=== Output ===\n"
+                for line in result.stdout.splitlines():
+                    log.write(line)
+                    self.output_log_content += line + "\n"
+                self.output_log_content += "\n"
 
-            stderr_output = process.stderr.read()
-            return_code = process.wait()
-            stdout_output = "".join(stdout_lines)
+            # Display and save stderr if any (warnings, etc.)
+            if result.stderr:
+                log.write("[yellow]Warnings/Info:[/yellow]")
+                self.output_log_content += "=== Warnings/Info ===\n"
+                for line in result.stderr.splitlines():
+                    log.write(line)
+                    self.output_log_content += line + "\n"
+                self.output_log_content += "\n"
 
-            if return_code != 0:
-                self.app.call_from_thread(self.on_codegen_failure, return_code, stdout_output, stderr_output)
-            else:
-                self.app.call_from_thread(self.on_codegen_success, stdout_output, stderr_output)
+            success_msg = "✓ Code generation completed successfully"
+            log.write(f"[green]{success_msg}[/green]")
+            self.output_log_content += success_msg + "\n"
+
+            # Save log to file
+            log_file = Path("development/db_codegen_log.txt")
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(log_file, 'w') as f:
+                f.write(self.output_log_content)
+
+            log.write(f"[cyan]Log saved to: {log_file}[/cyan]")
+            self.show_status(f"[green]✓ Code generation complete! Log saved to {log_file}[/green]")
+
+            # Enable button and add copy button
+            self.query_one("#generate", Button).disabled = False
+            self.add_copy_output_button()
+
+        except subprocess.CalledProcessError as e:
+            error_msg = f"✗ Error (exit code {e.returncode})"
+            log.write(f"[red]{error_msg}[/red]")
+            self.output_log_content += f"{error_msg}\n\n"
+
+            if e.stdout:
+                log.write("[yellow]Output:[/yellow]")
+                self.output_log_content += "=== Output ===\n"
+                for line in e.stdout.splitlines():
+                    log.write(line)
+                    self.output_log_content += line + "\n"
+                self.output_log_content += "\n"
+
+            if e.stderr:
+                log.write("[red]Error output:[/red]")
+                self.output_log_content += "=== Error Output ===\n"
+                for line in e.stderr.splitlines():
+                    log.write(line)
+                    self.output_log_content += line + "\n"
+                self.output_log_content += "\n"
+
+            # Save error log to file
+            log_file = Path("development/db_codegen_log.txt")
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(log_file, 'w') as f:
+                f.write(self.output_log_content)
+
+            log.write(f"[cyan]Error log saved to: {log_file}[/cyan]")
+            self.show_status(f"[red]Code generation failed. Log saved to {log_file}[/red]")
+            self.query_one("#generate", Button).disabled = False
+            self.add_copy_output_button()
 
         except Exception as e:
-            self.app.call_from_thread(self.on_codegen_failure, -1, "", str(e))
+            error_msg = f"✗ Unexpected error: {str(e)}"
+            log.write(f"[red]{error_msg}[/red]")
+            self.output_log_content += f"{error_msg}\n"
+
+            # Save error log to file
+            log_file = Path("development/db_codegen_log.txt")
+            log_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(log_file, 'w') as f:
+                f.write(self.output_log_content)
+
+            log.write(f"[cyan]Error log saved to: {log_file}[/cyan]")
+            self.show_status(f"[red]An unexpected error occurred. Log saved to {log_file}[/red]")
+            self.query_one("#generate", Button).disabled = False
+            self.add_copy_output_button()
 
     def add_copy_output_button(self):
         """Add a copy output button if it doesn't exist."""
         button_container = self.query_one("#main_buttons", Horizontal)
-        if self.query_optional("#copy_output") is None:
-            button_container.mount(Button("Copy Output", variant="warning", id="copy_output"))
-
-    def query_optional(self, selector: str):
-        """Return a widget matching selector, or None if it does not exist."""
+        # Check if copy button already exists
         try:
-            return self.query_one(selector)
-        except Exception:
-            return None
+            self.query_one("#copy_output", Button)
+        except:
+            # Button doesn't exist, add it
+            button_container.mount(Button("Copy Output", variant="warning", id="copy_output"))
 
     def copy_output_to_clipboard(self):
         """Copy the output log to clipboard."""
@@ -713,19 +821,34 @@ class Stage5Screen(Container):
             return
 
         try:
+            # Try using pyperclip if available
             import pyperclip
             pyperclip.copy(self.output_log_content)
             self.show_status("[green]✓ Output copied to clipboard![/green]")
         except ImportError:
+            # Fall back to xclip/pbcopy
             try:
-                subprocess.run(["xclip", "-selection", "clipboard"], input=self.output_log_content, text=True, check=True)
+                # Try xclip (Linux)
+                subprocess.run(
+                    ["xclip", "-selection", "clipboard"],
+                    input=self.output_log_content,
+                    text=True,
+                    check=True
+                )
                 self.show_status("[green]✓ Output copied to clipboard![/green]")
             except (FileNotFoundError, subprocess.CalledProcessError):
                 try:
-                    subprocess.run(["pbcopy"], input=self.output_log_content, text=True, check=True)
+                    # Try pbcopy (macOS)
+                    subprocess.run(
+                        ["pbcopy"],
+                        input=self.output_log_content,
+                        text=True,
+                        check=True
+                    )
                     self.show_status("[green]✓ Output copied to clipboard![/green]")
                 except (FileNotFoundError, subprocess.CalledProcessError):
-                    self.show_status("[yellow]Install pyperclip, xclip, or pbcopy to copy to clipboard[/yellow]")
+                    # If all else fails, just show the message
+                    self.show_status("[yellow]Install pyperclip, xclip, or use pbcopy to copy to clipboard[/yellow]")
 
     def show_status(self, message: str):
         """Display a status message."""
@@ -781,12 +904,6 @@ class DatabaseCodegenApp(App):
         border: solid $primary;
         background: $surface;
     }
-
-    LoadingIndicator {
-        display: none;
-        margin-top: 1;
-        height: 1;
-    }
     """
 
     BINDINGS = [
@@ -827,7 +944,7 @@ class DatabaseCodegenApp(App):
             except subprocess.TimeoutExpired:
                 self.proxy_process.kill()
             except Exception:
-                pass
+                pass  # Best effort cleanup
 
     def on_unmount(self):
         """Cleanup when app is unmounted."""

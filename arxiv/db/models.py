@@ -20,7 +20,7 @@ from typing import Optional, Literal, Any, Tuple, List
 import re
 import hashlib
 import datetime as dt
-from datetime import datetime, date, UTC
+from datetime import datetime, date
 from dateutil.tz import gettz, tzutc
 from sqlalchemy.dialects.mysql import VARCHAR
 from validators import url as is_valid_url
@@ -62,14 +62,6 @@ from .column_types import Utf8Text, Utf8String
 
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
-
-
-def utc_now() -> datetime:
-    return datetime.now(tz=UTC)
-
-
-def epoch_now() -> int:
-    return datetime.now(tz=UTC).timestamp()
 
 
 class MemberInstitution(Base):
@@ -126,7 +118,7 @@ class AdminLog(Base):
 
     id: Mapped[intpk]
     logtime: Mapped[Optional[str]] = mapped_column(String(24))
-    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"), default=utc_now)
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     paper_id: Mapped[Optional[str]] = mapped_column(String(20), index=True)
     username: Mapped[Optional[str]] = mapped_column(String(20), index=True)
     host: Mapped[Optional[str]] = mapped_column(String(64))
@@ -137,7 +129,7 @@ class AdminLog(Base):
     submission_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     notify: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     old_created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"), server_onupdate=text("CURRENT_TIMESTAMP"), default=utc_now, onupdate=utc_now)
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"), server_onupdate=text("CURRENT_TIMESTAMP"))
 
     arXiv_submission_category_proposal: Mapped[List["SubmissionCategoryProposal"]] = relationship(
         "SubmissionCategoryProposal", foreign_keys="[SubmissionCategoryProposal.proposal_comment_id]", back_populates="proposal_comment"
@@ -155,8 +147,8 @@ class AdminMetadata(Base):
     metadata_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
     document_id: Mapped[Optional[int]] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE"), index=True)
     paper_id: Mapped[Optional[str]] = mapped_column(String(64))
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
+    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
     submitter_name: Mapped[Optional[str]] = mapped_column(String(64))
     submitter_email: Mapped[Optional[str]] = mapped_column(String(64))
     history: Mapped[Optional[str]] = mapped_column(Text)
@@ -290,7 +282,7 @@ class BibUpdate(Base):
     update_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     bib_id: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
-    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue(), default=utc_now, onupdate=utc_now)
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=FetchedValue())
     journal_ref: Mapped[Optional[str]] = mapped_column(Text)
     doi: Mapped[Optional[str]] = mapped_column(Text)
 
@@ -474,7 +466,7 @@ class Document(Base):
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
     dated: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     primary_subject_class: Mapped[Optional[str]] = mapped_column(String(16))
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now)
+    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
     # join it with user to get the user info
     submitter = relationship("TapirUser", primaryjoin="Document.submitter_id == TapirUser.user_id", back_populates="arXiv_documents")
@@ -706,8 +698,8 @@ class Metadata(Base):
     metadata_id: Mapped[intpk]
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False, index=True, server_default=FetchedValue())
     paper_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
+    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id"), index=True)
     submitter_name: Mapped[str] = mapped_column(String(64), nullable=False)
     submitter_email: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -744,8 +736,8 @@ class MirrorList(Base):
     __table_args__ = {"mysql_charset": "latin1"}
 
     mirror_list_id: Mapped[intpk]
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
+    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
     document_id: Mapped[int] = mapped_column(ForeignKey("arXiv_documents.document_id"), nullable=False, index=True, server_default=FetchedValue())
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
     write_source: Mapped[int] = mapped_column(Integer, nullable=False, server_default=FetchedValue())
@@ -1126,7 +1118,7 @@ class SubmissionQaReport(Base):
     id: Mapped[intpk]
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     report_key_name: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue(), default=utc_now)
+    created: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=FetchedValue())
     num_flags: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default=FetchedValue())
     report: Mapped[dict] = mapped_column(JSON, nullable=False)
     report_uri: Mapped[Optional[str]] = mapped_column(String(256))
@@ -1163,8 +1155,8 @@ class Submission(Base):
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE", onupdate="CASCADE"), index=True)
     submitter_name: Mapped[Optional[str]] = mapped_column(String(64))
     submitter_email: Mapped[Optional[str]] = mapped_column(String(64))
-    created: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now)
-    updated: Mapped[Optional[datetime]] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
+    created: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
     status: Mapped[int] = mapped_column(Integer, nullable=False, index=True, server_default=text("'0'"))
     sticky_status: Mapped[Optional[int]] = mapped_column(Integer)
     must_process: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
@@ -2362,7 +2354,7 @@ class flagged_user_detail(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
-    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now, onupdate=utc_now)
+    updated: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     creator_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     flagged_user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     active: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("'1'"))
