@@ -3,16 +3,26 @@ from typing import Protocol, runtime_checkable
 from enum import StrEnum
 
 
+class OnFailurePolicy(StrEnum):
+    """
+    The on failure policy describes how to handle a failure (non-passing result) from a particular check.
+    Each instance of a check should be configured with only one on failure policy.
+
+    IGNORE - failure should be ignored
+    WARN - failure should elicit a non-blocking warning
+    REJECT - failure should be a blocking error
+    """
+
+    IGNORE = "ignore"
+    WARN = "warn"
+    REJECT = "reject"
+
+
 class Disposition(StrEnum):
     """
-    The disposition for a check indicates how a failure (non-passing result) should be treated.
-    Each instance of a check should be configured with only one disposition.
-
-    OK - failure is ignored, treated as OK
-    WARN - failure is a non-blocking warning
-    REJECT - failure is a blocking error
-
-    Success (a passing result) always produces OK regardless of that check's configured disposition.
+    The disposition represents the end state of running a check.
+    It rationalizes a passing/non-passing result against that check's on failure policy.
+    All passing check results will provide a disposition of "ok".
     """
 
     OK = "ok"
@@ -34,10 +44,13 @@ class Result(BaseModel):
     Every aggregate check result will include a list of results from sub-checks.
     """
 
-    check_name: str
-    check_id: int
-    check_version: str
+    # check_name: str
+    # check_id: int
+    # check_version: str
+    # on_failure_policy: OnFailurePolicy
+    check_config: dict
     passed: bool
+    disposition: Disposition
     message: str
     offsets: list[Offset] | None = None
     results: list["Result"] | None = None

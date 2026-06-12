@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import re
 
 
-from qa.checks.models import Result, Offset, Disposition, Inputs
+from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs, Disposition
 
 
 class MissingDataError(Exception):
@@ -16,10 +16,27 @@ class BaseCheck(ABC):
     id: int
     version: str
     description: str
+    on_failure_policy: OnFailurePolicy
     failure_message: str
 
-    disposition: Disposition
     required_inputs: set[str] = set()
+
+    @property
+    def config(self) -> dict:
+        return {
+            "name": self.name,
+            "id": self.id,
+            "version": self.version,
+            "on_failure_policy": self.on_failure_policy,
+            "failure_message": self.failure_message,
+        }
+
+    def _describe(self) -> dict:
+        return {
+            **self.config,
+            "description": self.description,
+            "required_inputs": self.required_inputs,
+        }
 
     def _validate_inputs(self, inputs: Inputs) -> None:
         for data in self.required_inputs:
@@ -30,6 +47,13 @@ class BaseCheck(ABC):
     def _run(self, inputs: Inputs) -> Result:
         pass
 
+    def _disposition(self, passed: bool) -> Disposition:
+        if passed or self.on_failure_policy == OnFailurePolicy.IGNORE:
+            return Disposition.OK
+        if self.on_failure_policy == OnFailurePolicy.WARN:
+            return Disposition.WARN
+        return Disposition.REJECT
+
     def _result(
         self,
         passed: bool,
@@ -37,10 +61,9 @@ class BaseCheck(ABC):
         offsets: list[Offset] | None = None,
     ) -> Result:
         return Result(
-            check_name=self.name,
-            check_id=self.id,
-            check_version=self.version,
+            check_config=self.config,
             passed=passed,
+            disposition=self._disposition(passed),
             message=message,
             offsets=offsets,
         )
@@ -51,12 +74,12 @@ class BaseCheck(ABC):
 
 
 class BaseGenericCheck(BaseCheck):
-    """A check that can be instantiated to run on different fields with different dispositions."""
+    """A check that can be instantiated to run on different fields with different on failure policies."""
 
     def __init__(
         self,
         *,
-        disposition: Disposition,
+        on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
     ) -> None:
@@ -64,7 +87,7 @@ class BaseGenericCheck(BaseCheck):
         Set instance-level attributes.
         """
         super().__init__()
-        self.disposition = disposition
+        self.on_failure_policy = on_failure_policy
         self.data = data
         self.field = field
 
@@ -74,7 +97,7 @@ class BaseGenericCheck(BaseCheck):
         Return instance-level configuration.
         """
         return {
-            "disposition": self.disposition,
+            **super().config,
             "data": self.data,
             "field": self.field,
         }
@@ -100,19 +123,17 @@ class BaseGenericPatternCheck(BaseGenericCheck):
     def __init__(
         self,
         *,
-        disposition: Disposition,
+        on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
     ) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self._compiled_pattern: re.Pattern = re.compile(self._pattern)
 
     @property
     def config(self) -> dict:
         return {
-            "disposition": self.disposition,
-            "data": self.data,
-            "field": self.field,
+            **super().config,
             "pattern": self._pattern,
         }
 
@@ -140,41 +161,38 @@ class BaseAggregateCheck(BaseCheck):
 
     _checks: tuple[BaseGenericCheck, ...]
 
-    @property
-    def config(self) -> dict:
-        """Return sub-checks and their configurations for the registry endpoint."""
+    def _describe(self) -> dict:
         return {
-            "checks": [{"name": c.name, "id": c.id, "version": c.version, "config": c.config} for c in self._checks]
+            **super()._describe(),
+            "checks": [c._describe() for c in self._checks],
         }
 
     def _run(self, inputs: Inputs) -> Result:
-        """Run all sub-checks and return results. If any sub-check fails and has a REJECT disposition, fail the aggregate check."""
+        """Run all sub-checks and return results."""
 
         results: list[Result] = []
-        passed = True
 
         for check in self._checks:
             result = check.run(inputs)
             results.append(result)
 
-            if not result.passed and check.disposition == Disposition.REJECT:
-                passed = False
+        passed = self._passed(results)
+        return self._result(passed=passed, results=results)
 
-        if passed:
-            return Result(
-                check_name=self.name,
-                check_id=self.id,
-                check_version=self.version,
-                passed=True,
-                message="",
-                results=results,
-            )
-        else:
-            return Result(
-                check_name=self.name,
-                check_id=self.id,
-                check_version=self.version,
-                passed=False,
-                message="",  # TODO
-                results=results,
-            )
+    def _passed(self, results: list[Result]) -> bool:
+        """The aggregate passes unless a sub-check with REJECT policy has failed."""
+        return not any(not r.passed and r.check_config["on_failure_policy"] == OnFailurePolicy.REJECT for r in results)
+
+    def _result(  # type: ignore
+        self,
+        passed: bool,
+        results: list[Result],
+        message: str = "",
+    ) -> Result:
+        return Result(
+            check_config=self.config,
+            passed=passed,
+            disposition=self._disposition(passed),
+            message=message,
+            results=results,
+        )

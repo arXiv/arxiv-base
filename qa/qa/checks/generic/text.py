@@ -1,8 +1,6 @@
 """Generic text checks."""
 
-import re
-
-from qa.checks.models import Result, Offset, Disposition, Inputs
+from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
@@ -36,36 +34,32 @@ class NoExcessiveCapitals(BaseGenericCheck):
             return self._result(passed=False, message=self.failure_message)
 
 
-class NoUnapprovedLongCapsWords(BaseGenericCheck):
+class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
     name = "no_unapproved_long_caps_words"
     id = 12  # NOTE: new
     version = "1.0.0"
     description = "The value does not contain two or more unapproved all caps words that are 6 or more characters long."
     failure_message = "Contains unapproved long caps words."
 
+    _pattern = r"\b[A-Z][A-Z-]*[A-Z]\b"
+
     def _run(self, inputs: Inputs) -> Result:
         v = getattr(getattr(inputs, self.data), self.field)
 
-        violating_words = []
         offsets = []
 
-        pattern = re.compile(r"\b[A-Z][A-Z-]*[A-Z]\b")
-
-        for match in pattern.finditer(v):
+        for match in self._compiled_pattern.finditer(v):
             word = match.group()
-
             if len(word) >= 6 and word not in KNOWN_WORDS_IN_ALL_CAPS:
-                violating_words.append(word)
                 offsets.append(Offset(start=match.start(), end=match.end()))
 
-        if len(violating_words) < 2:
+        if len(offsets) < 2:
             return self._result(passed=True)
-        else:
-            return self._result(
-                passed=False,
-                message=self.failure_message,
-                offsets=offsets,
-            )
+        return self._result(
+            passed=False,
+            message=self.failure_message,
+            offsets=offsets,
+        )
 
 
 class NoBoundaryWhitespace(BaseGenericPatternCheck):
@@ -176,11 +170,11 @@ class NotTooLong(BaseGenericCheck):
         self,
         max_chars: int,
         *,
-        disposition: Disposition,
+        on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
     ) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self.max_chars = max_chars
 
     @property
@@ -205,17 +199,17 @@ class NotTooShort(BaseGenericCheck):
     id = 2
     version = "1.0.0"
     description = "The value meets or exceeds the minimum character length."
-    failure_message = "Too short."
+    failure_message = "Text likely too short."
 
     def __init__(
         self,
         min_chars: int,
         *,
-        disposition: Disposition,
+        on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
     ) -> None:
-        super().__init__(disposition=disposition, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self.min_chars = min_chars
 
     @property
@@ -301,6 +295,16 @@ class DoesNotContainControlChars(BaseGenericPatternCheck):
     _pattern = r"[\u0000-\u001f]+"
 
 
+class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
+    name = "does_not_contain_control_chars_allow_newlines"
+    id = 18
+    version = "1.0.0"
+    description = "The value does not contain control characters, but newlines (\\n) are permitted."
+    failure_message = "Contains control characters."
+
+    _pattern = r"[\u0000-\u0009\u000b-\u001f]+"
+
+
 class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     name = "no_utf8_decoding_errors"
     id = 14
@@ -309,3 +313,218 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     failure_message = "Bad Unicode encoding."
 
     _pattern = r"[\u00c0-\u00ff][\u0080-\u00bf]+"
+
+
+# was BAD_CHARACTERS
+class NoAnnotationSymbols(BaseGenericPatternCheck):
+    name = "no_annotation_symbols"
+    id = 15
+    version = "1.0.0"
+    description = "The value does not contain invalid characters such as *, #, ^, or @."
+    failure_message = "Unusual character detected."
+
+    _pattern = r"\*|#|[^\\]\^|@"
+
+
+class DoesNotContainAnonymous(BaseGenericPatternCheck):
+    name = "does_not_contain_anonymous"
+    id = 19
+    version = "1.0.0"
+    description = "The value does not contain the word 'anonymous'."
+    failure_message = "Contains 'anonymous'."
+
+    _pattern = r"(?i)anonymous"
+
+
+class DoesNotContainCorresponding(BaseGenericPatternCheck):
+    name = "does_not_contain_corresponding"
+    id = 20
+    version = "1.0.0"
+    description = "The value does not contain the word 'corresponding'."
+    failure_message = "Contains 'corresponding'."
+
+    _pattern = r"(?i)corresponding"
+
+
+class DoesNotContainTexDagger(BaseGenericPatternCheck):
+    name = "does_not_contain_tex_dagger"
+    id = 21
+    version = "1.0.0"
+    description = "The value does not contain TeX dagger symbols (\\dag, \\ddag, etc.)."
+    failure_message = "Contains a dagger symbol."
+
+    _pattern = r"\\dag|\\ddag|\\textdag|\\textddag"
+
+
+class DoesNotBeginWithAuthor(BaseGenericPatternCheck):
+    name = "does_not_begin_with_author"
+    id = 4
+    version = "1.0.0"
+    description = "The value does not begin with the prefix 'author' or 'authors'."
+    failure_message = "Begins with 'author'."
+
+    _pattern = r"(?i)^authors?:?\b"
+
+
+class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
+    name = "does_not_contain_tilde_as_hard_space"
+    id = 32
+    version = "1.0.0"
+    description = "The value does not contain an unescaped tilde used as a hard space."
+    failure_message = "Tilde as hard space."
+
+    _pattern = r"[^\\]~"
+
+
+class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
+    name = "does_not_begin_with_abstract"
+    id = 5
+    version = "1.0.0"
+    description = "The value does not begin with the literal prefix 'abstract'."
+    failure_message = "Begins with 'abstract'."
+
+    _pattern = r"(?i)^abstract\b"
+
+
+class DoesNotContainTexBeginEnv(BaseGenericPatternCheck):
+    name = "does_not_contain_tex_begin_env"
+    id = 17
+    version = "1.0.0"
+    description = "The value does not contain a tex begin command that is not followed by a curly brace."
+    failure_message = "Contains TeX."
+
+    _pattern = r"(?i)\\begin[^{]"
+
+
+class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
+    name = "does_not_end_with_punctuation"
+    id = 29
+    version = "1.0.0"
+    description = "The value does not end with punctuation (trailing 'et al.' is permitted)."
+    failure_message = "Ends with punctuation."
+
+    _pattern = r"(?i)(?<!et al)[!$%^&(_=`:;,.?-]$"
+
+
+class DoesNotContainUrl(BaseGenericPatternCheck):
+    name = "does_not_contain_url"
+    id = 39
+    version = "1.0.0"
+    description = "The value does not contain a URL."
+    failure_message = "Contains a URL."
+
+    _pattern = r"(?i)https?:"
+
+
+class DoesNotContainDoi(BaseGenericPatternCheck):
+    name = "does_not_contain_doi"
+    id = 45
+    version = "1.0.0"
+    description = "The value does not contain the word 'DOI'."
+    failure_message = "Contains 'DOI'."
+
+    _pattern = r"(?i)doi"
+
+
+class DoesNotContainBareDoi(BaseGenericPatternCheck):
+    name = "does_not_contain_bare_doi"
+    id = 40
+    version = "1.0.0"
+    description = "The value does not contain a bare DOI number (e.g. 10.1234/abc)."
+    failure_message = "Contains a DOI."
+
+    _pattern = r"(?i)^[0-9][0-9].[0-9]+/[^ ]*$"
+
+
+class ContainsLetters(BaseGenericPatternCheck):
+    name = "contains_letters"
+    id = 38
+    version = "1.0.0"
+    description = "The value contains at least one letter."
+    failure_message = "No letters found."
+
+    _pattern = r"^[^A-Za-z]*$"
+
+
+class ContainsDigits(BaseGenericPatternCheck):
+    name = "contains_digits"
+    id = 37
+    version = "1.0.0"
+    description = "The value contains at least one digit."
+    failure_message = "No digits found."
+
+    _pattern = r"^[^0-9]*$"
+
+
+class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
+    name = "does_not_contain_semicolon"
+    id = 22
+    version = "1.0.0"
+    description = "The value does not contain a semicolon."
+    failure_message = "Contains semicolon(s) - use ',' or 'and' to separate authors."
+
+    _pattern = r";"
+
+
+class DoesNotContainAccepted(BaseGenericPatternCheck):
+    name = "does_not_contain_accepted"
+    id = 41
+    version = "1.0.0"
+    description = "The value does not contain the word 'accepted'."
+    failure_message = "Contains 'accepted'."
+
+    _pattern = r"(?i)accepted"
+
+
+class DoesNotContainSubmitted(BaseGenericPatternCheck):
+    name = "does_not_contain_submitted"
+    id = 42
+    version = "1.0.0"
+    description = "The value does not contain the word 'submitted'."
+    failure_message = "Contains 'submitted'."
+
+    _pattern = r"(?i)submitted"
+
+
+class DoesNotContainBibtex(BaseGenericPatternCheck):
+    name = "does_not_contain_bibtex"
+    id = 44
+    version = "1.0.0"
+    description = "The value does not contain BibTeX field assignments."
+    failure_message = "Contains bibtex."
+
+    _pattern = r"(?i)(title|booktitle|inproceedings)="
+
+
+class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
+    name = "does_not_contain_bad_doi_prefix"
+    id = 47
+    version = "1.0.0"
+    description = "The value does not begin with 'doi:', 'https://doi.org/', or similar URL prefixes."
+    failure_message = "Contains unnecessary prefix."
+
+    _pattern = r"(?i)^doi:|^https?://doi\.org/|^https?://.*\.doi\.org/"
+
+
+class DoiHasValidFormat(BaseGenericPatternCheck):
+    name = "doi_has_valid_format"
+    id = 50
+    version = "1.0.0"
+    description = "Each space-separated DOI in the value matches the expected DOI format."
+    failure_message = "Invalid DOI."
+
+    _pattern = r"(?i)^(?![0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$)"
+
+    def _run(self, inputs: Inputs) -> Result:
+        v = getattr(getattr(inputs, self.data), self.field)
+        offsets = []
+        start = 0
+        for doi in v.split():
+            idx = v.index(doi, start)
+            end = idx + len(doi)
+            if self._compiled_pattern.match(doi):
+                offsets.append(Offset(start=idx, end=end))
+            start = end
+        if offsets:
+            return self._result(passed=False, message=self.failure_message, offsets=offsets)
+        return self._result(passed=True)
