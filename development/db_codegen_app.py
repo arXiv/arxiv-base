@@ -349,6 +349,7 @@ class Stage4Screen(Container):
         self.last_error_message = ""
         self.monitor_thread = None
         self.monitoring_active = False
+        self.estimated_size = 0
 
     def compose(self) -> ComposeResult:
         """Create child widgets."""
@@ -402,22 +403,28 @@ class Stage4Screen(Container):
         return f"{size_bytes:.2f} TB"
 
     def monitor_file_progress(self, output_path: Path, log: RichLog):
-        """Monitor file size in a separate thread."""
-        last_size = 0
+        """Monitor file size in a separate thread.
+
+        Emits a heartbeat every ~2s showing extracted size and elapsed time so
+        the user has feedback during the long mysqldump run.
+        """
+        start = time.monotonic()
         while self.monitoring_active:
             try:
-                if output_path.exists():
-                    current_size = output_path.stat().st_size
-                    if current_size != last_size:
-                        size_str = self.format_file_size(current_size)
-                        self.app.call_from_thread(
-                            log.write,
-                            f"[yellow]Writing... {size_str}[/yellow]"
-                        )
-                        last_size = current_size
+                current_size = output_path.stat().st_size if output_path.exists() else 0
+                size_str = self.format_file_size(current_size)
+                elapsed = int(time.monotonic() - start)
+                if self.estimated_size > 0:
+                    pct = min(100, int(current_size * 100 / self.estimated_size))
+                    est_str = self.format_file_size(self.estimated_size)
+                    msg = (f"[yellow]Extracting schema... {size_str} of ~{est_str} "
+                           f"({pct}%, {elapsed}s elapsed)[/yellow]")
+                else:
+                    msg = f"[yellow]Extracting schema... {size_str} written ({elapsed}s elapsed)[/yellow]"
+                self.app.call_from_thread(self.show_status, msg)
             except Exception:
                 pass
-            time.sleep(1)  # Check every second
+            time.sleep(2)  # Heartbeat every 2 seconds
 
     def run_schema_extraction(self):
         """Execute mysqldump to extract schema."""
@@ -433,8 +440,10 @@ class Stage4Screen(Container):
             self.show_status("[red]Error: All fields are required[/red]")
             return
 
-        # Disable extract button during execution
+        # Disable extract + back buttons so the user can't re-run or navigate
+        # away while the (long) extraction is in flight.
         self.query_one("#extract", Button).disabled = True
+        self.query_one("#back", Button).disabled = True
         self.show_status("[yellow]Running mysqldump...[/yellow]")
 
         # Build the mysqldump command
@@ -456,6 +465,11 @@ class Stage4Screen(Container):
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
+        # Use any existing schema file as a size estimate. Schema changes are
+        # always small, so the prior file size approximates the final size and
+        # lets the monitor show a rough percentage.
+        self.estimated_size = output_path.stat().st_size if output_path.exists() else 0
+
         log = self.query_one("#output_log", RichLog)
         log.clear()
         log.write(f"[cyan]Executing:[/cyan] mysqldump -h {host} --port {port} -u {username} -p*** --no-data --set-gtid-purged=OFF --skip-comments {db_name}")
@@ -473,96 +487,115 @@ class Stage4Screen(Container):
         )
         self.monitor_thread.start()
 
-        try:
-            # Run mysqldump and write to temp file immediately
-            log.write(f"[yellow]Starting extraction...[/yellow]")
+        # Run the blocking extraction in a worker thread so the UI event loop
+        # stays responsive (button states render, progress heartbeat paints).
+        self.run_worker(
+            lambda: self._extract_worker(
+                mysqldump_cmd, sed_cmd, temp_output, output_path, output_file, log
+            ),
+            thread=True,
+            exclusive=True,
+            group="extraction",
+        )
 
-            with open(temp_output, 'w') as temp_f:
-                # Run mysqldump
-                result1 = subprocess.run(
-                    mysqldump_cmd,
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
+    def _extract_worker(self, mysqldump_cmd, sed_cmd, temp_output, output_path,
+                        output_file, log: RichLog):
+        """Run mysqldump | sed > temp_output, streaming so file size grows live.
 
-                # Run sed to normalize AUTO_INCREMENT
-                result2 = subprocess.run(
-                    sed_cmd,
-                    input=result1.stdout,
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
+        Runs in a worker thread. All UI mutations go through call_from_thread.
+        """
+        from_thread = self.app.call_from_thread
 
-                # Write to temp file
-                temp_f.write(result2.stdout)
-
-            # Stop monitoring
+        def stop_monitor():
             self.monitoring_active = False
             if self.monitor_thread:
-                self.monitor_thread.join(timeout=2)
+                self.monitor_thread.join(timeout=3)
+
+        try:
+            from_thread(log.write, "[yellow]Starting extraction...[/yellow]")
+
+            # Pipe mysqldump -> sed -> temp file. Streaming to disk means the
+            # monitor thread sees the file grow in real time.
+            with open(temp_output, 'w') as temp_f:
+                dump_proc = subprocess.Popen(
+                    mysqldump_cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                sed_proc = subprocess.Popen(
+                    sed_cmd,
+                    stdin=dump_proc.stdout,
+                    stdout=temp_f,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                # Let dump_proc receive SIGPIPE if sed exits.
+                if dump_proc.stdout:
+                    dump_proc.stdout.close()
+                _, sed_err = sed_proc.communicate()
+                _, dump_err = dump_proc.communicate()
+
+            if dump_proc.returncode != 0:
+                raise subprocess.CalledProcessError(
+                    dump_proc.returncode, mysqldump_cmd, stderr=dump_err
+                )
+            if sed_proc.returncode != 0:
+                raise subprocess.CalledProcessError(
+                    sed_proc.returncode, sed_cmd, stderr=sed_err
+                )
+
+            stop_monitor()
 
             # Move temp file to final location
             temp_output.replace(output_path)
 
             final_size = self.format_file_size(output_path.stat().st_size)
-            log.write(f"[green]✓ Schema extracted successfully to {output_file}[/green]")
-            log.write(f"[green]Final size: {final_size}[/green]")
-            self.show_status(f"[green]✓ Schema extraction complete! Click Continue to proceed.[/green]")
+            from_thread(log.write, f"[green]✓ Schema extracted successfully to {output_file}[/green]")
+            from_thread(log.write, f"[green]Final size: {final_size}[/green]")
+            from_thread(self.show_status, "[green]✓ Schema extraction complete! Click Continue to proceed.[/green]")
 
             # Store the output file path
             self.app_instance.schema_file = output_path
 
-            # Replace Extract button with Continue button
-            button_container = self.query_one("#main_buttons", Horizontal)
-            extract_btn = self.query_one("#extract", Button)
-            extract_btn.remove()
-            button_container.mount(Button("Continue", variant="success", id="continue"), before=0)
+            # Replace Extract button with Continue button (re-enable Back too)
+            from_thread(self._finish_extraction_ui)
 
         except subprocess.CalledProcessError as e:
-            # Stop monitoring
-            self.monitoring_active = False
-            if self.monitor_thread:
-                self.monitor_thread.join(timeout=2)
-
-            # Clean up temp file
+            stop_monitor()
             if temp_output.exists():
                 temp_output.unlink()
 
             error_msg = e.stderr if e.stderr else str(e)
-            log.write(f"[red]✗ Error: {error_msg}[/red]")
-
-            # Store error message for copying
+            from_thread(log.write, f"[red]✗ Error: {error_msg}[/red]")
             self.last_error_message = f"mysqldump error:\n{error_msg}"
-
-            self.show_status("[red]Schema extraction failed. Check the log above.[/red]")
-            self.query_one("#extract", Button).disabled = False
-
-            # Add copy error button
-            self.add_copy_error_button()
+            from_thread(self.show_status, "[red]Schema extraction failed. Check the log above.[/red]")
+            from_thread(self._reset_extraction_ui)
+            from_thread(self.add_copy_error_button)
 
         except Exception as e:
-            # Stop monitoring
-            self.monitoring_active = False
-            if self.monitor_thread:
-                self.monitor_thread.join(timeout=2)
-
-            # Clean up temp file
+            stop_monitor()
             if temp_output.exists():
                 temp_output.unlink()
 
             error_msg = str(e)
-            log.write(f"[red]✗ Unexpected error: {error_msg}[/red]")
-
-            # Store error message for copying
+            from_thread(log.write, f"[red]✗ Unexpected error: {error_msg}[/red]")
             self.last_error_message = f"Unexpected error:\n{error_msg}"
+            from_thread(self.show_status, "[red]An unexpected error occurred.[/red]")
+            from_thread(self._reset_extraction_ui)
+            from_thread(self.add_copy_error_button)
 
-            self.show_status("[red]An unexpected error occurred.[/red]")
-            self.query_one("#extract", Button).disabled = False
+    def _finish_extraction_ui(self):
+        """On success: swap Extract for Continue, re-enable Back."""
+        button_container = self.query_one("#main_buttons", Horizontal)
+        self.query_one("#extract", Button).remove()
+        self.query_one("#back", Button).disabled = False
+        button_container.mount(Button("Continue", variant="success", id="continue"), before=0)
 
-            # Add copy error button
-            self.add_copy_error_button()
+    def _reset_extraction_ui(self):
+        """On failure: re-enable Extract + Back so the user can retry."""
+        self.query_one("#extract", Button).disabled = False
+        self.query_one("#back", Button).disabled = False
 
     def add_copy_error_button(self):
         """Add a copy error button if it doesn't exist."""
