@@ -21,6 +21,7 @@ class ReportNumIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata report_num field."""
 
     name = "report_num_is_valid"
+    display_name = "Report Number Is Valid"
     id = 550
     version = "1.0.0"
     description = "The metadata report_num field is valid."

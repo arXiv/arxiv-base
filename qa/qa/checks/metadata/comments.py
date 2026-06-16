@@ -21,6 +21,7 @@ class CommentsAreValid(BaseAggregateCheck):
     """Aggregate check for the metadata comments field."""
 
     name = "comments_are_valid"
+    display_name = "Comments Are Valid"
     id = 530
     version = "1.0.0"
     description = "The metadata comments field is valid."

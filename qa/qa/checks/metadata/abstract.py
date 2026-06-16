@@ -27,6 +27,7 @@ class AbstractIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata abstract field."""
 
     name = "abstract_is_valid"
+    display_name = "Abstract Is Valid"
     id = 520
     version = "1.0.0"
     description = "The metadata abstract field is valid."

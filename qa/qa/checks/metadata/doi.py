@@ -21,6 +21,7 @@ class DoiIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata doi field."""
 
     name = "doi_is_valid"
+    display_name = "DOI Is Valid"
     id = 570
     version = "1.0.0"
     description = "The metadata doi field is valid."

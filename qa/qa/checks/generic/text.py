@@ -7,6 +7,7 @@ from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
 class DoesNotStartWithLowercase(BaseGenericPatternCheck):
     name = "does_not_start_with_lowercase"
+    display_name = "Does Not Start With Lowercase"
     id = 8
     version = "1.0.0"
     description = "The value does not start with a lowercase letter."
@@ -17,6 +18,7 @@ class DoesNotStartWithLowercase(BaseGenericPatternCheck):
 
 class NoExcessiveCapitals(BaseGenericCheck):
     name = "no_excessive_capitals"
+    display_name = "No Excessive Capitals"
     id = 7
     version = "1.0.0"
     description = "The value does not contain excessive capitals."
@@ -36,6 +38,7 @@ class NoExcessiveCapitals(BaseGenericCheck):
 
 class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
     name = "no_unapproved_long_caps_words"
+    display_name = "No Unapproved Long Caps Words"
     id = 12  # NOTE: new
     version = "1.0.0"
     description = "The value does not contain two or more unapproved all caps words that are 6 or more characters long."
@@ -64,6 +67,7 @@ class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
 
 class NoBoundaryWhitespace(BaseGenericPatternCheck):
     name = "no_boundary_whitespace"
+    display_name = "No Boundary Whitespace"
     id = 16
     version = "1.0.0"
     description = "The value does not begin or end with whitespace."
@@ -74,6 +78,7 @@ class NoBoundaryWhitespace(BaseGenericPatternCheck):
 
 class NoExtraWhitespace(BaseGenericPatternCheck):
     name = "no_extra_whitespace"
+    display_name = "No Extra Whitespace"
     id = 25
     version = "1.0.0"
     description = "The value does not contain multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
@@ -84,6 +89,7 @@ class NoExtraWhitespace(BaseGenericPatternCheck):
 
 class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
     name = "no_unnecessary_space_in_parens"
+    display_name = "No Unnecessary Space in Parens"
     id = 33
     version = "1.0.0"
     description = "The value does not contain leading or trailing spaces immediately inside parentheses."
@@ -94,6 +100,7 @@ class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
 
 class NoHtmlElements(BaseGenericPatternCheck):
     name = "no_html_elements"
+    display_name = "No HTML Elements"
     id = 11
     version = "1.0.0"
     description = "The value does not contain raw HTML elements."
@@ -123,6 +130,7 @@ class NoHtmlElements(BaseGenericPatternCheck):
 
 class AllBracketsBalanced(BaseGenericCheck):
     name = "all_brackets_balanced"
+    display_name = "All Brackets Balanced"
     id = 13
     version = "1.0.0"
     description = "All parentheses, square brackets, and curly braces are properly closed."
@@ -161,6 +169,7 @@ class AllBracketsBalanced(BaseGenericCheck):
 
 class NotTooLong(BaseGenericCheck):
     name = "not_too_long"
+    display_name = "Not Too Long"
     id = 36
     version = "1.0.0"
     description = "The value does not exceed the maximum character length."
@@ -196,6 +205,7 @@ class NotTooLong(BaseGenericCheck):
 
 class NotTooShort(BaseGenericCheck):
     name = "not_too_short"
+    display_name = "Not Too Short"
     id = 2
     version = "1.0.0"
     description = "The value meets or exceeds the minimum character length."
@@ -231,6 +241,7 @@ class NotTooShort(BaseGenericCheck):
 
 class NotEmpty(BaseGenericCheck):
     name = "not_empty"
+    display_name = "Not Empty"
     id = 1
     version = "1.0.0"
     description = "The value is not an empty string."
@@ -247,6 +258,7 @@ class NotEmpty(BaseGenericCheck):
 
 class DoesNotBeginWithTitle(BaseGenericPatternCheck):
     name = "does_not_begin_with_title"
+    display_name = "Does Not Begin With Title"
     id = 3
     version = "1.0.0"
     description = "The value does not begin with the literal prefix 'title:'."
@@ -257,6 +269,7 @@ class DoesNotBeginWithTitle(BaseGenericPatternCheck):
 
 class DoesNotContainLinebreak(BaseGenericPatternCheck):
     name = "does_not_contain_linebreak"
+    display_name = "Does Not Contain Linebreak"
     id = 6
     version = "1.0.0"
     description = "The value does not contain LaTeX-style or escaped linebreaks."
@@ -267,6 +280,7 @@ class DoesNotContainLinebreak(BaseGenericPatternCheck):
 
 class DoesNotContainUnnecessaryEscape(BaseGenericPatternCheck):
     name = "does_not_contain_unnecessary_escape"
+    display_name = "Does Not Contain Unnecessary Escape"
     id = 10
     version = "1.0.0"
     description = "The value does not contain unnecessary escape characters preceding hash or percent symbols."
@@ -277,6 +291,7 @@ class DoesNotContainUnnecessaryEscape(BaseGenericPatternCheck):
 
 class DoesNotContainTex(BaseGenericPatternCheck):
     name = "does_not_contain_tex"
+    display_name = "Does Not Contain TeX"
     id = 9
     version = "1.0.0"
     description = "The value does not contain href or url raw TeX commands."
@@ -287,6 +302,7 @@ class DoesNotContainTex(BaseGenericPatternCheck):
 
 class DoesNotContainControlChars(BaseGenericPatternCheck):
     name = "does_not_contain_control_chars"
+    display_name = "Does Not Contain Control Chars"
     id = 26
     version = "1.0.0"
     description = "The value does not contain control characters including newlines, tabs, and backspaces."
@@ -297,6 +313,7 @@ class DoesNotContainControlChars(BaseGenericPatternCheck):
 
 class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
     name = "does_not_contain_control_chars_allow_newlines"
+    display_name = "Does Not Contain Control Chars (Allow Newlines)"
     id = 18
     version = "1.0.0"
     description = "The value does not contain control characters, but newlines (\\n) are permitted."
@@ -307,6 +324,7 @@ class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
 
 class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     name = "no_utf8_decoding_errors"
+    display_name = "No UTF-8 Decoding Errors"
     id = 14
     version = "1.0.0"
     description = "The value does not contain malformed Unicode sequences."
@@ -318,6 +336,7 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
 # was BAD_CHARACTERS
 class NoAnnotationSymbols(BaseGenericPatternCheck):
     name = "no_annotation_symbols"
+    display_name = "No Annotation Symbols"
     id = 15
     version = "1.0.0"
     description = "The value does not contain invalid characters such as *, #, ^, or @."
@@ -328,6 +347,7 @@ class NoAnnotationSymbols(BaseGenericPatternCheck):
 
 class DoesNotContainAnonymous(BaseGenericPatternCheck):
     name = "does_not_contain_anonymous"
+    display_name = "Does Not Contain Anonymous"
     id = 19
     version = "1.0.0"
     description = "The value does not contain the word 'anonymous'."
@@ -338,6 +358,7 @@ class DoesNotContainAnonymous(BaseGenericPatternCheck):
 
 class DoesNotContainCorresponding(BaseGenericPatternCheck):
     name = "does_not_contain_corresponding"
+    display_name = "Does Not Contain Corresponding"
     id = 20
     version = "1.0.0"
     description = "The value does not contain the word 'corresponding'."
@@ -348,6 +369,7 @@ class DoesNotContainCorresponding(BaseGenericPatternCheck):
 
 class DoesNotContainTexDagger(BaseGenericPatternCheck):
     name = "does_not_contain_tex_dagger"
+    display_name = "Does Not Contain TeX Dagger"
     id = 21
     version = "1.0.0"
     description = "The value does not contain TeX dagger symbols (\\dag, \\ddag, etc.)."
@@ -358,6 +380,7 @@ class DoesNotContainTexDagger(BaseGenericPatternCheck):
 
 class DoesNotBeginWithAuthor(BaseGenericPatternCheck):
     name = "does_not_begin_with_author"
+    display_name = "Does Not Begin With Author"
     id = 4
     version = "1.0.0"
     description = "The value does not begin with the prefix 'author' or 'authors'."
@@ -368,6 +391,7 @@ class DoesNotBeginWithAuthor(BaseGenericPatternCheck):
 
 class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
     name = "does_not_contain_tilde_as_hard_space"
+    display_name = "Does Not Contain Tilde As Hard Space"
     id = 32
     version = "1.0.0"
     description = "The value does not contain an unescaped tilde used as a hard space."
@@ -378,6 +402,7 @@ class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
 
 class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
     name = "does_not_begin_with_abstract"
+    display_name = "Does Not Begin With Abstract"
     id = 5
     version = "1.0.0"
     description = "The value does not begin with the literal prefix 'abstract'."
@@ -388,6 +413,7 @@ class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
 
 class DoesNotContainTexBeginEnv(BaseGenericPatternCheck):
     name = "does_not_contain_tex_begin_env"
+    display_name = "Does Not Contain TeX Begin Env"
     id = 17
     version = "1.0.0"
     description = "The value does not contain a tex begin command that is not followed by a curly brace."
@@ -398,6 +424,7 @@ class DoesNotContainTexBeginEnv(BaseGenericPatternCheck):
 
 class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
     name = "does_not_end_with_punctuation"
+    display_name = "Does Not End With Punctuation"
     id = 29
     version = "1.0.0"
     description = "The value does not end with punctuation (trailing 'et al.' is permitted)."
@@ -408,6 +435,7 @@ class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
 
 class DoesNotContainUrl(BaseGenericPatternCheck):
     name = "does_not_contain_url"
+    display_name = "Does Not Contain URL"
     id = 39
     version = "1.0.0"
     description = "The value does not contain a URL."
@@ -418,6 +446,7 @@ class DoesNotContainUrl(BaseGenericPatternCheck):
 
 class DoesNotContainDoi(BaseGenericPatternCheck):
     name = "does_not_contain_doi"
+    display_name = "Does Not Contain DOI"
     id = 45
     version = "1.0.0"
     description = "The value does not contain the word 'DOI'."
@@ -428,6 +457,7 @@ class DoesNotContainDoi(BaseGenericPatternCheck):
 
 class DoesNotContainBareDoi(BaseGenericPatternCheck):
     name = "does_not_contain_bare_doi"
+    display_name = "Does Not Contain Bare DOI"
     id = 40
     version = "1.0.0"
     description = "The value does not contain a bare DOI number (e.g. 10.1234/abc)."
@@ -438,6 +468,7 @@ class DoesNotContainBareDoi(BaseGenericPatternCheck):
 
 class ContainsLetters(BaseGenericPatternCheck):
     name = "contains_letters"
+    display_name = "Contains Letters"
     id = 38
     version = "1.0.0"
     description = "The value contains at least one letter."
@@ -448,6 +479,7 @@ class ContainsLetters(BaseGenericPatternCheck):
 
 class ContainsDigits(BaseGenericPatternCheck):
     name = "contains_digits"
+    display_name = "Contains Digits"
     id = 37
     version = "1.0.0"
     description = "The value contains at least one digit."
@@ -458,6 +490,7 @@ class ContainsDigits(BaseGenericPatternCheck):
 
 class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
     name = "does_not_contain_semicolon"
+    display_name = "Does Not Contain Semicolon"
     id = 22
     version = "1.0.0"
     description = "The value does not contain a semicolon."
@@ -468,6 +501,7 @@ class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
 
 class DoesNotContainAccepted(BaseGenericPatternCheck):
     name = "does_not_contain_accepted"
+    display_name = "Does Not Contain Accepted"
     id = 41
     version = "1.0.0"
     description = "The value does not contain the word 'accepted'."
@@ -478,6 +512,7 @@ class DoesNotContainAccepted(BaseGenericPatternCheck):
 
 class DoesNotContainSubmitted(BaseGenericPatternCheck):
     name = "does_not_contain_submitted"
+    display_name = "Does Not Contain Submitted"
     id = 42
     version = "1.0.0"
     description = "The value does not contain the word 'submitted'."
@@ -488,6 +523,7 @@ class DoesNotContainSubmitted(BaseGenericPatternCheck):
 
 class DoesNotContainBibtex(BaseGenericPatternCheck):
     name = "does_not_contain_bibtex"
+    display_name = "Does Not Contain BibTeX"
     id = 44
     version = "1.0.0"
     description = "The value does not contain BibTeX field assignments."
@@ -498,6 +534,7 @@ class DoesNotContainBibtex(BaseGenericPatternCheck):
 
 class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
     name = "does_not_contain_bad_doi_prefix"
+    display_name = "Does Not Contain Bad DOI Prefix"
     id = 47
     version = "1.0.0"
     description = "The value does not begin with 'doi:', 'https://doi.org/', or similar URL prefixes."
@@ -508,6 +545,7 @@ class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
 
 class DoiHasValidFormat(BaseGenericPatternCheck):
     name = "doi_has_valid_format"
+    display_name = "DOI Has Valid Format"
     id = 50
     version = "1.0.0"
     description = "Each space-separated DOI in the value matches the expected DOI format."

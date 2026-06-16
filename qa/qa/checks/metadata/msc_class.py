@@ -19,6 +19,7 @@ class MscClassIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata msc_class field."""
 
     name = "msc_class_is_valid"
+    display_name = "MSC Class Is Valid"
     id = 580
     version = "1.0.0"
     description = "The metadata msc_class field is valid."

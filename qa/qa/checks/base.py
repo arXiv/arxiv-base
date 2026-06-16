@@ -13,6 +13,7 @@ class MissingDataError(Exception):
 
 class BaseCheck(ABC):
     name: str
+    display_name: str
     id: int
     version: str
     description: str
@@ -25,6 +26,7 @@ class BaseCheck(ABC):
     def config(self) -> dict:
         return {
             "name": self.name,
+            "display_name": self.display_name,
             "id": self.id,
             "version": self.version,
             "on_failure_policy": self.on_failure_policy,
