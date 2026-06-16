@@ -2,6 +2,11 @@ version = 1
 revision = 3
 requires-python = "==3.13.*"
 
+[manifest]
+
+[[manifest.dependency-metadata]]
+name = "arxiv-base"
+
 [[package]]
 name = "annotated-types"
 version = "0.7.0"
@@ -14,7 +19,7 @@ wheels = [
 [[package]]
 name = "arxiv-base"
 version = "1.0.1"
-source = { git = "https://github.com/arXiv/arxiv-base?branch=master#8135d213c8409297e807f1d9a73709799b9750ef" }
+source = { git = "https://github.com/arXiv/arxiv-base?rev=8135d213c8409297e807f1d9a73709799b9750ef#8135d213c8409297e807f1d9a73709799b9750ef" }
 dependencies = [
     { name = "bleach" },
     { name = "fastly" },
@@ -944,12 +949,12 @@ name = "qa"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "arxiv-base" },
     { name = "pydantic" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "arxiv-base" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
@@ -957,11 +962,13 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.12.5" }]
+requires-dist = [
+    { name = "arxiv-base", git = "https://github.com/arXiv/arxiv-base?rev=8135d213c8409297e807f1d9a73709799b9750ef" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "arxiv-base", git = "https://github.com/arXiv/arxiv-base?branch=master" },
     { name = "pytest" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
     { name = "ruff" },

@@ -5,11 +5,11 @@ description = "QA checks and reports"
 requires-python = "~=3.13.0"
 dependencies = [
     "pydantic>=2.12.5",
+    "arxiv-base",
 ]
 
 [dependency-groups]
 dev = [
-    "arxiv-base",
     "pytest",
     "pytest-cov>=7.1.0",
     "ruff",
@@ -20,7 +20,12 @@ dev = [
 default-groups = ["dev"]
 
 [tool.uv.sources]
-arxiv-base = { git = "https://github.com/arXiv/arxiv-base", branch = "master" }
+arxiv-base = { git = "https://github.com/arXiv/arxiv-base", rev = "8135d213c8409297e807f1d9a73709799b9750ef" }
+
+# do not install arxiv-base deps
+[[tool.uv.dependency-metadata]]
+name = "arxiv-base"
+requires-dist = []
 
 [tool.ruff]
 line-length = 120
