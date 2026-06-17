@@ -36,6 +36,7 @@ class AuthorsAreValid(BaseAggregateCheck):
     """Aggregate check for the metadata authors field."""
 
     name = "authors_are_valid"
+    display_name = "Authors Are Valid"
     id = 510
     version = "1.0.0"
     description = "The metadata authors field is valid."

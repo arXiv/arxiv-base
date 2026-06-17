@@ -74,6 +74,7 @@ class BaseAuthorPatternCheck(BaseAuthorCheck):
 
 class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
     name = "authors_do_not_contain_lone_surname"
+    display_name = "Authors Do Not Contain Lone Surname"
     id = 51
     version = "1.0.0"
     description = "No author has only a surname without a given name, unless it is a known collaboration or LLM name."
@@ -110,6 +111,7 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
 
 class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
     name = "authors_do_not_contain_llm_author"
+    display_name = "Authors Do Not Contain LLM Author"
     id = 52
     version = "1.0.0"
     description = "No author's name appears to be an AI language model."
@@ -145,6 +147,7 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
 
 class AuthorNamesDoNotContainSemicolon(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_semicolon"
+    display_name = "Author Names Do Not Contain Semicolon"
     id = 53
     version = "1.0.0"
     description = "No parsed author name contains a semicolon."
@@ -155,6 +158,7 @@ class AuthorNamesDoNotContainSemicolon(BaseAuthorPatternCheck):
 
 class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_brackets"
+    display_name = "Author Names Do Not Contain Brackets"
     id = 54
     version = "1.0.0"
     description = "No parsed author name contains square bracket characters."
@@ -165,6 +169,7 @@ class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
 
 class AuthorNamesDoNotContainNumbers(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_numbers"
+    display_name = "Author Names Do Not Contain Numbers"
     id = 55
     version = "1.0.0"
     description = "No parsed author name contains numeric digits."
@@ -175,6 +180,7 @@ class AuthorNamesDoNotContainNumbers(BaseAuthorPatternCheck):
 
 class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_affiliation"
+    display_name = "Author Names Do Not Contain Affiliation"
     id = 56
     version = "1.0.0"
     description = "No parsed author name contains institution or affiliation keywords."

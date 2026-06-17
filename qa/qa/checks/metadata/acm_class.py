@@ -18,6 +18,7 @@ class AcmClassIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata acm_class field."""
 
     name = "acm_class_is_valid"
+    display_name = "ACM Class Is Valid"
     id = 590
     version = "1.0.0"
     description = "The metadata acm_class field is valid."
