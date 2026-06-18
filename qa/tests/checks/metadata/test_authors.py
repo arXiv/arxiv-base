@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Metadata, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.authors import AuthorsAreValid
 
 
@@ -28,9 +28,11 @@ class TestAuthorsAreValid:
     def test_fail_empty(self):
         assert not AuthorsAreValid.check("").passed
 
-    def test_fail_empty_has_sub_results(self):
+    def test_fail_empty_short_circuits(self):
         result = AuthorsAreValid.check("")
-        assert not sub_result(result, "not_empty").passed
+        assert not result.passed
+        assert result.results == []
+        assert result.message == "Authors are invalid or empty."
 
     def test_warn_too_short(self):
         result = AuthorsAreValid.check("C C")
@@ -264,18 +266,15 @@ class TestAuthorsAreValid:
             "Thomas Brettschneider and Giovanni Volpe and Laurent Helden and Jan Wehr and Clemens Bechinger"
         ).passed
 
-    def test_all_sub_checks_run_on_empty(self):
-        result = AuthorsAreValid.check("")
-        assert result.results is not None
-        assert len(result.results) == len(AuthorsAreValid._checks)
+    def test_none_field_short_circuits(self):
+        result = AuthorsAreValid().run(QaDataRegistry(metadata=Metadata(authors=None)))
+        assert not result.passed
+        assert result.results == []
+        assert result.message == "Authors are invalid or empty."
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            AuthorsAreValid().run(Inputs())
-
-    def test_none_authors_raises(self):
-        with pytest.raises(MissingDataError):
-            AuthorsAreValid().run(Inputs(metadata=Metadata(authors=None)))
+            AuthorsAreValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = AuthorsAreValid.check("Fred Smith")

@@ -6,7 +6,7 @@ from abc import abstractmethod
 from arxiv.authors import parse_author_affil
 
 from qa.checks.base import BaseGenericCheck
-from qa.checks.models import Inputs, OnFailurePolicy, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 
 
 _LLM_NAMES = {
@@ -42,8 +42,8 @@ class BaseAuthorCheck(BaseGenericCheck):
         """Return True if the author passes, False if it fails."""
         ...
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
         for author in parse_author_affil(v):
             keyname, firstname, suffix, *_ = author
             if not self._check_author(keyname, firstname, suffix):

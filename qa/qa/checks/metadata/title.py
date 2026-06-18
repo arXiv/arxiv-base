@@ -1,7 +1,6 @@
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import Inputs, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
-    NotEmpty,
     NotTooShort,
     NotTooLong,
     DoesNotBeginWithTitle,
@@ -30,16 +29,15 @@ class TitleIsValid(BaseAggregateCheck):
     version = "1.0.0"
     description = "The metadata title field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
-    failure_message = "Title is invalid."
+    failure_message = "Title is invalid or empty."
 
-    required_inputs = {"metadata"}
+    required_data = {"metadata"}
 
     @classmethod
     def check(cls, title: str | None) -> Result:
-        return cls().run(Inputs(metadata=Metadata(title=title)))
+        return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
 
     _checks = (
-        NotEmpty(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
         NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),

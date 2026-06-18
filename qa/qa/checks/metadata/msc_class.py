@@ -1,7 +1,7 @@
 """MSC class metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import Inputs, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     NotTooLong,
     DoesNotContainUrl,
@@ -26,17 +26,17 @@ class MscClassIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "MSC class is invalid."
 
-    required_inputs = {"metadata"}
+    required_data = {"metadata"}
 
     @classmethod
     def check(cls, msc_class: str | None) -> Result:
-        return cls().run(Inputs(metadata=Metadata(msc_class=msc_class)))
+        return cls().run(QaDataRegistry(metadata=Metadata(msc_class=msc_class)))
 
-    def _run(self, inputs: Inputs) -> Result:
+    def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""
-        if not inputs.metadata.msc_class:  # type: ignore
+        if data_registry.metadata.msc_class in (None, ""):  # type: ignore
             return self._result(passed=True, results=[])
-        return super()._run(inputs)
+        return super()._run(data_registry)
 
     _checks = (
         NotTooLong(1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),

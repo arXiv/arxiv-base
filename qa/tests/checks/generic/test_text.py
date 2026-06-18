@@ -2,8 +2,8 @@
 
 import pytest
 
-from qa.checks.base import MissingDataError
-from qa.checks.models import Inputs, Metadata, OnFailurePolicy
+from qa.checks.base import EmptyFieldError, MissingDataError
+from qa.checks.models import QaDataRegistry, Metadata, OnFailurePolicy
 from qa.checks.generic.text import (
     AllBracketsBalanced,
     DoesNotBeginWithTitle,
@@ -19,44 +19,49 @@ from qa.checks.generic.text import (
     NoUnapprovedLongCapsWords,
     NoUnnecessarySpaceInParens,
     NoUtf8DecodingErrors,
-    NotEmpty,
     NotTooLong,
     NotTooShort,
 )
 
 
-def inputs(title: str) -> Inputs:
-    return Inputs(metadata=Metadata(title=title))
+def inputs(title: str | None) -> QaDataRegistry:
+    return QaDataRegistry(metadata=Metadata(title=title))
 
 
 def make(cls, **kwargs):
     return cls(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title", **kwargs)
 
 
-class TestNotEmpty:
-    check = make(NotEmpty)
+class TestBaseGenericCheckValidation:
+    check = make(NotTooShort, min_chars=5)
 
-    def test_pass(self):
-        assert self.check.run(inputs("hello")).passed
-
-    def test_pass_on_failure_policy_warn(self):
-        assert self.check.run(inputs("hello")).check_config["on_failure_policy"] == OnFailurePolicy.WARN
-
-    def test_fail_empty(self):
-        result = self.check.run(inputs(""))
-        assert not result.passed
-        assert result.message
-
-    def test_fail_on_failure_policy_warn(self):
-        assert self.check.run(inputs("")).check_config["on_failure_policy"] == OnFailurePolicy.WARN
-
-    def test_fail_missing_field(self):
+    def test_missing_data_raises(self):
         with pytest.raises(MissingDataError):
-            self.check.run(Inputs(metadata=Metadata(title=None)))
+            self.check.run(QaDataRegistry())
 
-    def test_fail_missing_data(self):
+    def test_none_field_raises(self):
+        with pytest.raises(EmptyFieldError):
+            self.check.run(inputs(None))
+
+    def test_empty_field_raises(self):
+        with pytest.raises(EmptyFieldError):
+            self.check.run(inputs(""))
+
+
+class TestBaseGenericPatternCheckValidation:
+    check = make(DoesNotBeginWithTitle)
+
+    def test_missing_data_raises(self):
         with pytest.raises(MissingDataError):
-            self.check.run(Inputs())
+            self.check.run(QaDataRegistry())
+
+    def test_none_field_raises(self):
+        with pytest.raises(EmptyFieldError):
+            self.check.run(inputs(None))
+
+    def test_empty_field_raises(self):
+        with pytest.raises(EmptyFieldError):
+            self.check.run(inputs(""))
 
 
 class TestNotTooShort:
@@ -146,9 +151,6 @@ class TestNoExcessiveCapitals:
 
     def test_fail_greek_caps(self):
         assert not self.check.run(inputs("ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΎ")).passed
-
-    def test_pass_empty(self):
-        assert self.check.run(inputs("")).passed
 
 
 class TestNoUnapprovedLongCapsWords:

@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 from qa.checks.metadata.journal_ref import JournalRefIsValid
 
 
@@ -17,13 +17,13 @@ class TestJournalRefIsValid:
         assert JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001 (2024)").passed
 
     def test_pass_none(self):
-        assert JournalRefIsValid.check(None).passed
+        result = JournalRefIsValid.check(None)
+        assert result.passed
+        assert result.results == []
 
     def test_pass_empty(self):
-        assert JournalRefIsValid.check("").passed
-
-    def test_pass_none_has_no_sub_results(self):
-        result = JournalRefIsValid.check(None)
+        result = JournalRefIsValid.check("")
+        assert result.passed
         assert result.results == []
 
     def test_warn_too_short(self):
@@ -73,7 +73,7 @@ class TestJournalRefIsValid:
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            JournalRefIsValid().run(Inputs())
+            JournalRefIsValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001 (2024)")

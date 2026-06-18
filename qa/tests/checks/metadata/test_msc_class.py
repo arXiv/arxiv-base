@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 from qa.checks.metadata.msc_class import MscClassIsValid
 
 
@@ -17,13 +17,13 @@ class TestMscClassIsValid:
         assert MscClassIsValid.check("35K55; 65M06").passed
 
     def test_pass_none(self):
-        assert MscClassIsValid.check(None).passed
+        result = MscClassIsValid.check(None)
+        assert result.passed
+        assert result.results == []
 
     def test_pass_empty(self):
-        assert MscClassIsValid.check("").passed
-
-    def test_pass_none_has_no_sub_results(self):
-        result = MscClassIsValid.check(None)
+        result = MscClassIsValid.check("")
+        assert result.passed
         assert result.results == []
 
     def test_warn_too_long(self):
@@ -59,7 +59,7 @@ class TestMscClassIsValid:
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            MscClassIsValid().run(Inputs())
+            MscClassIsValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = MscClassIsValid.check("35K55")

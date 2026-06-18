@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 from qa.checks.metadata.acm_class import AcmClassIsValid
 
 
@@ -17,13 +17,13 @@ class TestAcmClassIsValid:
         assert AcmClassIsValid.check("F.2.2; I.2.7").passed
 
     def test_pass_none(self):
-        assert AcmClassIsValid.check(None).passed
+        result = AcmClassIsValid.check(None)
+        assert result.passed
+        assert result.results == []
 
     def test_pass_empty(self):
-        assert AcmClassIsValid.check("").passed
-
-    def test_pass_none_has_no_sub_results(self):
-        result = AcmClassIsValid.check(None)
+        result = AcmClassIsValid.check("")
+        assert result.passed
         assert result.results == []
 
     def test_warn_too_long(self):
@@ -51,7 +51,7 @@ class TestAcmClassIsValid:
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            AcmClassIsValid().run(Inputs())
+            AcmClassIsValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = AcmClassIsValid.check("F.2.2")

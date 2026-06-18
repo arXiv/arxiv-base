@@ -1,7 +1,7 @@
 """Report number metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import Inputs, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     NotTooShort,
     NotTooLong,
@@ -28,17 +28,17 @@ class ReportNumIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Report number is invalid."
 
-    required_inputs = {"metadata"}
+    required_data = {"metadata"}
 
     @classmethod
     def check(cls, report_num: str | None) -> Result:
-        return cls().run(Inputs(metadata=Metadata(report_num=report_num)))
+        return cls().run(QaDataRegistry(metadata=Metadata(report_num=report_num)))
 
-    def _run(self, inputs: Inputs) -> Result:
+    def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""
-        if not inputs.metadata.report_num:  # type: ignore
+        if data_registry.metadata.report_num in (None, ""):  # type: ignore
             return self._result(passed=True, results=[])
-        return super()._run(inputs)
+        return super()._run(data_registry)
 
     _checks = (
         NotTooShort(4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
