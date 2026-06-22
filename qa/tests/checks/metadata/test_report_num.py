@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 from qa.checks.metadata.report_num import ReportNumIsValid
 
 
@@ -17,13 +17,13 @@ class TestReportNumIsValid:
         assert ReportNumIsValid.check("CERN-EP-2024-001").passed
 
     def test_pass_none(self):
-        assert ReportNumIsValid.check(None).passed
+        result = ReportNumIsValid.check(None)
+        assert result.passed
+        assert result.results == []
 
     def test_pass_empty(self):
-        assert ReportNumIsValid.check("").passed
-
-    def test_pass_none_has_no_sub_results(self):
-        result = ReportNumIsValid.check(None)
+        result = ReportNumIsValid.check("")
+        assert result.passed
         assert result.results == []
 
     def test_warn_too_short(self):
@@ -91,7 +91,7 @@ class TestReportNumIsValid:
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            ReportNumIsValid().run(Inputs())
+            ReportNumIsValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = ReportNumIsValid.check("CERN-EP-2024-001")

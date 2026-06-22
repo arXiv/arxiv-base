@@ -127,7 +127,6 @@ class FooIsValid(BaseAggregateCheck):
         return cls().run(Inputs(metadata=Metadata(foo=foo)))
 
     _checks = (
-        NotEmpty(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="foo"),
         NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="foo"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="foo"),
     )

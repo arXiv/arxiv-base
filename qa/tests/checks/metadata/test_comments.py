@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 from qa.checks.metadata.comments import CommentsAreValid
 
 
@@ -17,13 +17,13 @@ class TestCommentsAreValid:
         assert CommentsAreValid.check("12 pages, 3 figures").passed
 
     def test_pass_none(self):
-        assert CommentsAreValid.check(None).passed
+        result = CommentsAreValid.check(None)
+        assert result.passed
+        assert result.results == []
 
     def test_pass_empty(self):
-        assert CommentsAreValid.check("").passed
-
-    def test_pass_none_has_no_sub_results(self):
-        result = CommentsAreValid.check(None)
+        result = CommentsAreValid.check("")
+        assert result.passed
         assert result.results == []
 
     def test_warn_too_long(self):
@@ -48,7 +48,7 @@ class TestCommentsAreValid:
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            CommentsAreValid().run(Inputs())
+            CommentsAreValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = CommentsAreValid.check("12 pages, 3 figures")

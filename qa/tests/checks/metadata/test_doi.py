@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 from qa.checks.metadata.doi import DoiIsValid
 
 
@@ -17,13 +17,13 @@ class TestDoiIsValid:
         assert DoiIsValid.check("10.1103/PhysRevLett.132.011001").passed
 
     def test_pass_none(self):
-        assert DoiIsValid.check(None).passed
+        result = DoiIsValid.check(None)
+        assert result.passed
+        assert result.results == []
 
     def test_pass_empty(self):
-        assert DoiIsValid.check("").passed
-
-    def test_pass_none_has_no_sub_results(self):
-        result = DoiIsValid.check(None)
+        result = DoiIsValid.check("")
+        assert result.passed
         assert result.results == []
 
     def test_warn_too_short(self):
@@ -82,7 +82,7 @@ class TestDoiIsValid:
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            DoiIsValid().run(Inputs())
+            DoiIsValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = DoiIsValid.check("10.1103/PhysRevLett.132.011001")

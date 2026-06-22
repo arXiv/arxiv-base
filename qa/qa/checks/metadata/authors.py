@@ -1,7 +1,7 @@
 """Author metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import Inputs, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     AllBracketsBalanced,
     DoesNotBeginWithAuthor,
@@ -18,7 +18,6 @@ from qa.checks.generic.text import (
     NoHtmlElements,
     NoUnnecessarySpaceInParens,
     NoUtf8DecodingErrors,
-    NotEmpty,
     NotTooLong,
     NotTooShort,
 )
@@ -41,16 +40,15 @@ class AuthorsAreValid(BaseAggregateCheck):
     version = "1.0.0"
     description = "The metadata authors field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
-    failure_message = "Authors are invalid."
+    failure_message = "Authors are invalid or empty."
 
-    required_inputs = {"metadata"}
+    required_data = {"metadata"}
 
     @classmethod
     def check(cls, authors: str | None) -> Result:
-        return cls().run(Inputs(metadata=Metadata(authors=authors)))
+        return cls().run(QaDataRegistry(metadata=Metadata(authors=authors)))
 
     _checks = (
-        NotEmpty(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         NotTooShort(4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         NotTooLong(10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),

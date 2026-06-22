@@ -1,6 +1,6 @@
 """Generic text checks."""
 
-from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs
+from qa.checks.models import Result, Offset, OnFailurePolicy, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
@@ -24,8 +24,8 @@ class NoExcessiveCapitals(BaseGenericCheck):
     description = "The value does not contain excessive capitals."
     failure_message = "Likely excessive capitalization."
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
 
         num_caps = sum([c.isupper() for c in v])
         num_lower = sum([c.islower() for c in v])
@@ -46,8 +46,8 @@ class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
 
     _pattern = r"\b[A-Z][A-Z-]*[A-Z]\b"
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
 
         offsets = []
 
@@ -136,8 +136,8 @@ class AllBracketsBalanced(BaseGenericCheck):
     description = "All parentheses, square brackets, and curly braces are properly closed."
     failure_message = "Unbalanced brackets."
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
 
         bracket_pairs = {"(": ")", "[": "]", "{": "}"}
 
@@ -190,8 +190,8 @@ class NotTooLong(BaseGenericCheck):
     def config(self) -> dict:
         return {**super().config, "max_chars": self.max_chars}
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
 
         if len(v) <= self.max_chars:
             return self._result(passed=True)
@@ -226,8 +226,8 @@ class NotTooShort(BaseGenericCheck):
     def config(self) -> dict:
         return {**super().config, "min_chars": self.min_chars}
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
 
         if len(v) >= self.min_chars:
             return self._result(passed=True)
@@ -237,23 +237,6 @@ class NotTooShort(BaseGenericCheck):
             message=self.failure_message,
             offsets=[Offset(start=0, end=len(v))],
         )
-
-
-class NotEmpty(BaseGenericCheck):
-    name = "not_empty"
-    display_name = "Not Empty"
-    id = 1
-    version = "1.0.0"
-    description = "The value is not an empty string."
-    failure_message = "Cannot be empty."
-
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
-
-        if v != "":
-            return self._result(passed=True)
-
-        return self._result(passed=False, message=self.failure_message)
 
 
 class DoesNotBeginWithTitle(BaseGenericPatternCheck):
@@ -553,8 +536,8 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
 
     _pattern = r"(?i)^(?![0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$)"
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
         offsets = []
         start = 0
         for doi in v.split():

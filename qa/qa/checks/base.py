@@ -4,14 +4,22 @@ from abc import ABC, abstractmethod
 import re
 
 
-from qa.checks.models import Result, Offset, OnFailurePolicy, Inputs, Disposition
+from qa.checks.models import Result, Offset, OnFailurePolicy, Disposition, QaDataRegistry
 
 
 class MissingDataError(Exception):
     pass
 
 
+class EmptyFieldError(Exception):
+    pass
+
+
 class BaseCheck(ABC):
+    """
+    Raises a MissingDataError if any of the required data are missing.
+    """
+
     name: str
     display_name: str
     id: int
@@ -20,7 +28,7 @@ class BaseCheck(ABC):
     on_failure_policy: OnFailurePolicy
     failure_message: str
 
-    required_inputs: set[str] = set()
+    required_data: set[str] = set()
 
     @property
     def config(self) -> dict:
@@ -29,6 +37,7 @@ class BaseCheck(ABC):
             "display_name": self.display_name,
             "id": self.id,
             "version": self.version,
+            "required_data": self.required_data,
             "on_failure_policy": self.on_failure_policy,
             "failure_message": self.failure_message,
         }
@@ -37,16 +46,15 @@ class BaseCheck(ABC):
         return {
             **self.config,
             "description": self.description,
-            "required_inputs": self.required_inputs,
         }
 
-    def _validate_inputs(self, inputs: Inputs) -> None:
-        for data in self.required_inputs:
-            if getattr(inputs, data) is None:
-                raise MissingDataError(f"Required data '{data}' is missing.")
+    def _validate_data(self, data_registry: QaDataRegistry) -> None:
+        for d in self.required_data:
+            if getattr(data_registry, d) is None:
+                raise MissingDataError(f"Required data '{d}' is missing.")
 
     @abstractmethod
-    def _run(self, inputs: Inputs) -> Result:
+    def _run(self, data_registry: QaDataRegistry) -> Result:
         pass
 
     def _disposition(self, passed: bool) -> Disposition:
@@ -70,13 +78,16 @@ class BaseCheck(ABC):
             offsets=offsets,
         )
 
-    def run(self, inputs: Inputs) -> Result:
-        self._validate_inputs(inputs)
-        return self._run(inputs)
+    def run(self, data_registry: QaDataRegistry) -> Result:
+        self._validate_data(data_registry)
+        return self._run(data_registry)
 
 
 class BaseGenericCheck(BaseCheck):
-    """A check that can be instantiated to run on different fields with different on failure policies."""
+    """
+    An extension of BaseCheck that can be instantiated to run on different fields with different on failure policies.
+    Raises a MissingDataError if either the required data is missing or the field is empty.
+    """
 
     def __init__(
         self,
@@ -90,6 +101,7 @@ class BaseGenericCheck(BaseCheck):
         """
         super().__init__()
         self.on_failure_policy = on_failure_policy
+        self.required_data = {data}
         self.data = data
         self.field = field
 
@@ -100,25 +112,23 @@ class BaseGenericCheck(BaseCheck):
         """
         return {
             **super().config,
-            "data": self.data,
             "field": self.field,
         }
 
-    def _validate_inputs(self, inputs: Inputs) -> None:
-        super()._validate_inputs(inputs)
-        if getattr(inputs, self.data) is None:
-            raise MissingDataError(f"Required data '{self.data}' is missing.")
+    def _validate_data(self, data_registry: QaDataRegistry) -> None:
+        """Validate that the data and field are not missing or empty."""
+        super()._validate_data(data_registry)
 
-        if getattr(getattr(inputs, self.data), self.field, None) is None:
-            raise MissingDataError(f"Required field '{self.data}' '{self.field}' is missing.")
+        if getattr(getattr(data_registry, self.data), self.field) in (None, ""):
+            raise EmptyFieldError(f"Field {self.field} in required data '{self.data}' is empty.")
 
     @abstractmethod
-    def _run(self, inputs: Inputs) -> Result:
+    def _run(self, data_registry: QaDataRegistry) -> Result:
         pass
 
 
 class BaseGenericPatternCheck(BaseGenericCheck):
-    """A generic check that applies a regex pattern (matches are failing)."""
+    """An extension of BaseGenericCheck that applies a regex pattern (matches are failing)."""
 
     _pattern: str
 
@@ -139,9 +149,9 @@ class BaseGenericPatternCheck(BaseGenericCheck):
             "pattern": self._pattern,
         }
 
-    def _run(self, inputs: Inputs) -> Result:
+    def _run(self, data_registry: QaDataRegistry) -> Result:
         """The pattern applied to the configured field should not return any matches."""
-        v = getattr(getattr(inputs, self.data), self.field)
+        v = getattr(getattr(data_registry, self.data), self.field)
 
         offsets = []
 
@@ -159,7 +169,11 @@ class BaseGenericPatternCheck(BaseGenericCheck):
 
 
 class BaseAggregateCheck(BaseCheck):
-    """A check that comprises many generic sub-checks."""
+    """
+    An extension of BaseCheck that runs many generic sub-checks.
+    Raises a MissingDataError if any of the required data is missing.
+    Returns a failure if a field required by a sub-check is empty.
+    """
 
     _checks: tuple[BaseGenericCheck, ...]
 
@@ -169,17 +183,22 @@ class BaseAggregateCheck(BaseCheck):
             "checks": [c._describe() for c in self._checks],
         }
 
-    def _run(self, inputs: Inputs) -> Result:
+    def _run(self, data_registry: QaDataRegistry) -> Result:
         """Run all sub-checks and return results."""
 
         results: list[Result] = []
 
         for check in self._checks:
-            result = check.run(inputs)
-            results.append(result)
+            try:
+                result = check.run(data_registry)
+                results.append(result)
+            except EmptyFieldError:
+                return self._result(passed=False, results=[], message=self.failure_message)
 
-        passed = self._passed(results)
-        return self._result(passed=passed, results=results)
+        if self._passed(results):
+            return self._result(passed=True, results=results)
+        else:
+            return self._result(passed=False, results=results, message=self.failure_message)
 
     def _passed(self, results: list[Result]) -> bool:
         """The aggregate passes unless a sub-check with REJECT policy has failed."""

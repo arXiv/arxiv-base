@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Metadata, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.abstract import AbstractIsValid
 
 
@@ -65,9 +65,11 @@ class TestAbstractIsValid:
         result = AbstractIsValid.check("")
         assert not result.passed
 
-    def test_fail_empty_has_sub_results(self):
+    def test_fail_empty_short_circuits(self):
         result = AbstractIsValid.check("")
-        assert not sub_result(result, "not_empty").passed
+        assert not result.passed
+        assert result.results == []
+        assert result.message == "Abstract is invalid or empty."
 
     def test_warn_too_short(self):
         result = AbstractIsValid.check("Hi")
@@ -84,18 +86,15 @@ class TestAbstractIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_tex_begin_env").passed
 
-    def test_all_sub_checks_run_on_empty(self):
-        result = AbstractIsValid.check("")
-        assert result.results is not None
-        assert len(result.results) == len(AbstractIsValid._checks)
+    def test_none_field_short_circuits(self):
+        result = AbstractIsValid().run(QaDataRegistry(metadata=Metadata(abstract=None)))
+        assert not result.passed
+        assert result.results == []
+        assert result.message == "Abstract is invalid or empty."
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            AbstractIsValid().run(Inputs())
-
-    def test_none_abstract_raises(self):
-        with pytest.raises(MissingDataError):
-            AbstractIsValid().run(Inputs(metadata=Metadata(abstract=None)))
+            AbstractIsValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = AbstractIsValid.check("A fine abstract with enough text.")

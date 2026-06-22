@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, Inputs, Metadata, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.title import TitleIsValid
 
 
@@ -25,10 +25,11 @@ class TestTitleIsValid:
         result = TitleIsValid.check("")
         assert not result.passed
 
-    def test_fail_empty_has_sub_results(self):
+    def test_fail_empty_short_circuits(self):
         result = TitleIsValid.check("")
-        not_empty = sub_result(result, "not_empty")
-        assert not not_empty.passed
+        assert not result.passed
+        assert result.results == []
+        assert result.message == "Title is invalid or empty."
 
     def test_warn_too_short(self):
         result = TitleIsValid.check("Tiny")
@@ -69,18 +70,15 @@ class TestTitleIsValid:
         result = TitleIsValid.check(title)
         assert result.passed
 
-    def test_all_sub_checks_run_on_empty(self):
-        result = TitleIsValid.check("")
-        assert result.results is not None
-        assert len(result.results) == len(TitleIsValid._checks)
+    def test_none_field_short_circuits(self):
+        result = TitleIsValid().run(QaDataRegistry(metadata=Metadata(title=None)))
+        assert not result.passed
+        assert result.results == []
+        assert result.message == "Title is invalid or empty."
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
-            TitleIsValid().run(Inputs())
-
-    def test_none_title_raises(self):
-        with pytest.raises(MissingDataError):
-            TitleIsValid().run(Inputs(metadata=Metadata(title=None)))
+            TitleIsValid().run(QaDataRegistry())
 
     def test_result_has_check_metadata(self):
         result = TitleIsValid.check("A fine title")

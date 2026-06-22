@@ -85,7 +85,7 @@ class MetadataProtocol(Protocol):
     acm_class: str | None
 
 
-class Inputs(BaseModel):
+class QaDataRegistry(BaseModel):
     """Data dependencies for checks."""
 
     fulltext: str | None = None
