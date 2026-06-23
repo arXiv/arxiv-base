@@ -42,7 +42,7 @@ class VeryShortTextCheck(BaseCheck):
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         fulltext = data_registry.fulltext
-        if fulltext is None or fulltext is "":
+        if fulltext is None or fulltext == "":
             # Problem: we should only report the problem with missing texts
             passed = True
             return self._result(passed)
