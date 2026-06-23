@@ -42,7 +42,11 @@ class VeryShortTextCheck(BaseCheck):
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         fulltext = data_registry.fulltext
-        if len(fulltext) < 10000 and len(fulltext.split()) < 1400 :
+        if fulltext is None or fulltext is "":
+            # Problem: we should only report the problem with missing texts
+            passed = True
+            return self._result(passed)
+        elif len(fulltext) < 10000 and len(fulltext.split()) < 1400 :
             passed = False
             return self._result(passed, message = self.failure_message)
         else:
