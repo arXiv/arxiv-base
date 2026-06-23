@@ -1,7 +1,7 @@
 
 from qa.checks.base import BaseCheck
 
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 
 
 class MissingTextCheck(BaseCheck):
@@ -37,6 +37,7 @@ class VeryShortTextCheck(BaseCheck):
     description = "The full text extracted is too short."
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Very short text (< 1400 words). Check full text."
+    
     required_inputs = {"fulltext"}
 
     def _run(self, data_registry: QaDataRegistry) -> Result:

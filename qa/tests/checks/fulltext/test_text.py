@@ -1,9 +1,6 @@
 """Tests for AbstractIsValid."""
 
-import pytest
-
-from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import QaDataRegistry
 from qa.checks.fulltext.text_checks import (
     MissingTextCheck,
     VeryShortTextCheck,
