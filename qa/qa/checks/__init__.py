@@ -11,7 +11,7 @@ from qa.checks.metadata.msc_class import MscClassIsValid  # noqa
 from qa.checks.metadata.report_num import ReportNumIsValid  # noqa
 from qa.checks.metadata.title import TitleIsValid  # noqa
 
-from qa.checks.fulltext.text_checks import MissingTextCheck, VeryShortTextCheck  # noqa
+from qa.checks.fulltext.text_checks import MissingTextCheck, VeryShortTextCheck # noqa
 
 checks: list[BaseCheck] = [
     TitleIsValid(),
