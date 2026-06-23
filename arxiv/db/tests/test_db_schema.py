@@ -42,6 +42,7 @@ from arxiv.db.models import (
     FreezeLog,
     GroupDef,
     Group,
+    Holiday,
     JrefControl,
     License,
     LogPosition,
@@ -181,8 +182,8 @@ def test_db_schema_sqlite3():
         # print(row[0])
         n_tables += 1
     conn.close()
-    # There are 151 tables in production
-    assert n_tables == (145 + 3 + 3)
+    # There are 152 tables in production
+    assert n_tables == (146 + 3 + 3)
     os.unlink(filename)
 
 def test_models():
@@ -220,6 +221,7 @@ def test_models():
     assert FreezeLog()
     assert GroupDef()
     assert Group()
+    assert Holiday()
     assert JrefControl()
     assert License()
     assert LogPosition()

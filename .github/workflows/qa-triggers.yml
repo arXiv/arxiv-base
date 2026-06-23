@@ -1,0 +1,16 @@
+name: qa triggers
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "qa/**"
+
+jobs:
+  call-lint-test:
+    name: Lint and test qa
+    uses: ./.github/workflows/lint-test-package.yml
+    with:
+      package_name: qa

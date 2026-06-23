@@ -5,7 +5,7 @@
 ## Ingredients
 
 * MySQL database access in order to get the database schema from
-* The original arxiv-base's arxiv/db/orig_models.py.
+* The original arxiv-base's arxiv/db/models.py-orig 
 * arxiv/db/arxiv-db-metadata.yaml
 * Modified version of sqlacodegen in arxiv-base/development/sqlacodegen
 * The steps are driven by development/db_codegen.py which does the merge.

@@ -7,6 +7,8 @@ from fastly.api.purge_api import PurgeApi
 from arxiv.identifier import Identifier, IdentifierException
 from arxiv.integration.fastly.purge import purge_fastly_keys, _purge_category_change, purge_cache_for_paper, _get_category_and_date
 from arxiv.integration.fastly.headers import add_surrogate_key
+from arxiv.db import Session
+from arxiv.db.models import Document, Metadata, Updates
 
 #tests for the purge keys utility function
 class TestPurgeFastlyKeys(unittest.TestCase):
@@ -216,9 +218,59 @@ def test_purge_cache_for_paper(mockToday,mockPurge, mockDBQuery):
     assert sorted(actual_keys) == sorted (expected_keys)
 
 def test_get_category_and_date_nonexstant_ids(db_configed):
-    #there is no paper with this id 
+    #there is no paper with this id
     #also base has no test db so any paper would return none, but this will work even if it gets data
     bad_id=Identifier("0807.9999")
     with pytest.raises(IdentifierException):
         _get_category_and_date(bad_id)
+
+def test_get_category_and_date_with_data(db_configed):
+    """Verifies query works on MySQL (GROUP BY required for ONLY_FULL_GROUP_BY mode)."""
+    paper_id = "0807.1234"
+    update_date = date(2008, 7, 15)
+
+    with Session() as session:
+        doc = Document(
+            paper_id=paper_id,
+            title="Test Paper",
+            submitter_email="test@arxiv.org",
+            dated=0,
+        )
+        session.add(doc)
+        session.flush()
+
+        meta = Metadata(
+            document_id=doc.document_id,
+            paper_id=paper_id,
+            submitter_name="Test User",
+            submitter_email="test@arxiv.org",
+            abs_categories="cs.LG",
+            is_current=1,
+            is_withdrawn=0,
+            version=1,
+        )
+        session.add(meta)
+
+        upd = Updates(
+            document_id=doc.document_id,
+            version=1,
+            date=update_date,
+            action="new",
+            archive="cs",
+            category="cs.LG",
+        )
+        session.add(upd)
+        session.commit()
+        doc_id = doc.document_id
+
+    try:
+        cats, recent_date = _get_category_and_date(Identifier(paper_id))
+        assert cats == "cs.LG"
+        assert recent_date == update_date
+    finally:
+        with Session() as session:
+            session.query(Updates).filter(Updates.document_id == doc_id).delete()
+            session.query(Metadata).filter(Metadata.paper_id == paper_id).delete()
+            session.query(Document).filter(Document.paper_id == paper_id).delete()
+            session.commit()
    
