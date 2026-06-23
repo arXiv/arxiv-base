@@ -1,7 +1,7 @@
 """ACM class metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, SubmissionMetadata, Result
 from qa.checks.generic.text import (
     NotTooLong,
     DoesNotContainUrl,
@@ -19,7 +19,7 @@ class AcmClassIsValid(BaseAggregateCheck):
 
     name = "acm_class_is_valid"
     display_name = "ACM Class Is Valid"
-    id = 590
+    id = 900
     version = "1.0.0"
     description = "The metadata acm_class field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
@@ -29,7 +29,7 @@ class AcmClassIsValid(BaseAggregateCheck):
 
     @classmethod
     def check(cls, acm_class: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(acm_class=acm_class)))
+        return cls().run(QaDataRegistry(metadata=SubmissionMetadata(acm_class=acm_class)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""

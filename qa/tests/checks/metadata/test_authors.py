@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, SubmissionMetadata, Result
 from qa.checks.metadata.authors import AuthorsAreValid
 
 
@@ -267,7 +267,7 @@ class TestAuthorsAreValid:
         ).passed
 
     def test_none_field_short_circuits(self):
-        result = AuthorsAreValid().run(QaDataRegistry(metadata=Metadata(authors=None)))
+        result = AuthorsAreValid().run(QaDataRegistry(metadata=SubmissionMetadata(authors=None)))
         assert not result.passed
         assert result.results == []
         assert result.message == "Authors are invalid or empty."
@@ -279,7 +279,7 @@ class TestAuthorsAreValid:
     def test_result_has_check_metadata(self):
         result = AuthorsAreValid.check("Fred Smith")
         assert result.check_config["name"] == "authors_are_valid"
-        assert result.check_config["id"] == 510
+        assert result.check_config["id"] == 200
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
