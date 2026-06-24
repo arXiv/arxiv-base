@@ -1,92 +1,41 @@
-<div class="columns is-desktop" role="navigation" aria-label="Secondary">
-    <!-- MetaColumn 1 -->
-    <div class="column">
-        <div class="columns">
-            <div class="column">
-                <ul class="nav-spaced">
-                    <li><a href="{{ url_for('about')}}">About</a></li>
-                    <li><a href="{{ url_for('help') }}">Help</a></li>
-                </ul>
-            </div>
-            <div class="column">
-                <ul class="nav-spaced">
-                    <li>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 512 512"
-                            class="icon filter-black"
-                            role="presentation"
-                        >
-                            <title>contact arXiv</title>
-                            <desc>Click here to contact arXiv</desc>
-                            <path
-                                d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"
-                            />
-                        </svg>
-                        <a href="{{ url_for('contact') }}"> Contact</a>
-                    </li>
-                    <li>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 512 512"
-                            class="icon filter-black"
-                            role="presentation"
-                        >
-                            <title>subscribe to arXiv mailings</title>
-                            <desc>Click here to subscribe</desc>
-                            <path
-                                d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"
-                            />
-                        </svg>
-                        <a href="{{ url_for('subscribe') }}"> Subscribe</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+{#- Spinout site footer (shared .ds-* chrome). Pairs with
+    static/css/arxiv-header-footer.css. The member-institution name in
+    .ack-member-inline is filled by static/js/arxiv-header.js from
+    /institutional_banner (omitted when there is no IP match). -#}
+<footer class="ds-site-footer">
+  <div class="ds-site-footer-grid">
+    <div class="ds-site-footer-main">
+      <div class="ds-site-footer-ack">
+        We gratefully acknowledge support from
+        our <strong>major funders</strong>,
+        <a href="{{ url_for('acknowledgment') }}"><strong>member institutions</strong></a><span class="ack-member-inline" hidden>, <strong></strong></span>,
+        and all contributors.
+      </div>
+      <nav class="ds-site-footer-links" aria-label="Site navigation">
+        <a href="{{ url_for('about') }}">About</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">&middot;</span>
+        <a href="{{ url_for('help') }}">Help</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">&middot;</span>
+        <a href="{{ url_for('contact') }}">Contact</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">&middot;</span>
+        <a href="{{ url_for('subscribe') }}">Subscribe</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">&middot;</span>
+        <a href="{{ url_for('copyright') }}">Copyright</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">&middot;</span>
+        <a href="{{ url_for('privacy_policy') }}">Privacy</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">&middot;</span>
+        <a href="{{ url_for('a11y') }}">Accessibility</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">&middot;</span>
+        <a href="https://status.arxiv.org" target="_blank" rel="noopener noreferrer">Operational Status<span class="is-sr-only"> (opens in new tab)</span></a>
+      </nav>
     </div>
-    <!-- end MetaColumn 1 -->
-    <!-- MetaColumn 2 -->
-    <div class="column">
-        <div class="columns">
-            <div class="column">
-                <ul class="nav-spaced">
-                    <li><a href="{{ url_for('copyright') }}">Copyright</a></li>
-                    <li>
-                        <a href="{{ url_for('privacy_policy') }}"
-                            >Privacy Policy</a
-                        >
-                    </li>
-                </ul>
-            </div>
-            <div class="column sorry-app-links">
-                <ul class="nav-spaced">
-                    <li>
-                        <a href="{{ url_for('a11y') }}"
-                            >Web Accessibility Assistance</a
-                        >
-                    </li>
-                    <li>
-                        <p class="help">
-                            <a
-                                class="a11y-main-link"
-                                href="https://status.arxiv.org"
-                                target="_blank"
-                                >arXiv Operational Status
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 256 512"
-                                    class="icon filter-dark_grey"
-                                    role="presentation"
-                                >
-                                    <path
-                                        d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"
-                                    /></svg></a
-                            ><br />
-                        </p>
-                    </li>
-                </ul>
-            </div>
-        </div>
+
+    <div class="ds-site-footer-funders" aria-label="Major funders">
+      <div class="ds-site-footer-funders-label">Major funding support from</div>
+      <div class="ds-site-footer-funders-logos">
+        <img class="ds-funder-logo" src="{{ url_for('base.static', filename='images/funders/simons-foundation.png') }}" alt="Simons Foundation">
+        <img class="ds-funder-logo" src="{{ url_for('base.static', filename='images/funders/schmidt-sciences.png') }}" alt="Schmidt Sciences">
+      </div>
     </div>
-    <!-- end MetaColumn 2 -->
-</div>
+  </div>
+</footer>

@@ -154,6 +154,11 @@ AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 RELATIVE_STATIC_PATHS = bool(int(os.environ.get("RELATIVE_STATIC_PATHS", "0")))
 RELATIVE_STATIC_PREFIX = os.environ.get("RELATIVE_STATIC_PREFIX", "")
 
+# Site-wide spinout announcement band ("arXiv is now an independent nonprofit!").
+# Rendered by base/base.html via the .ds-announcement macro when truthy; opt-in
+# per app/env so the temporal banner can be switched off without a base release.
+SPINOUT_BANNER_ENABLED = bool(int(os.environ.get("SPINOUT_BANNER_ENABLED", "0")))
+
 ANALYTICS_ENABLED = bool(int(os.environ.get("ANALYTICS_ENABLED", "0")))
 """Enable/disable Matomo web analytics."""
 ANALYTICS_BASE_URL = os.environ.get("ANALYTICS_BASE_URL", "https://webstats.arxiv.org/")

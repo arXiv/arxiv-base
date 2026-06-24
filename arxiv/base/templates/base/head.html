@@ -1,3 +1,7 @@
+{#- Progressive enhancement: flag the document as JS-capable up front so the
+    chrome's JS-only controls (search overlay, phone hamburger) stay
+    server-rendered-usable when JS is absent. -#}
+<script>document.documentElement.classList.add('js');</script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <!-- new favicon config and versions by realfavicongenerator.net -->
@@ -14,6 +18,7 @@
 <title>{{ pagetitle }} | arXiv e-print repository</title>
 <script defer src="{{ url_for('base.static', filename='fontawesome-free-5.11.2-web/js/all.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('base.static', filename='css/arxivstyle.css')}}" />
+<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('base.static', filename='css/arxiv-header-footer.css') }}?v=20260624c" />
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     messageStyle: "none",
