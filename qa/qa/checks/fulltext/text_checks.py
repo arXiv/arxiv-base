@@ -4,14 +4,14 @@ from qa.checks.base import BaseCheck
 from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 
 
-class MissingTextCheck(BaseCheck):
+class FulltextExtractedCheck(BaseCheck):
     """Check for missing text (probably PDF invalid or password protected)."""
 
-    name = "missing_text"
-    display_name = "Missing Text"
+    name = "text_extraction_successful"
+    display_name = "Text Extraction Successful"
     id = 14
     version = "1.0.0"
-    description = "Failed to extract text."
+    description = "Text extraction was successful."
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Missing text (check PDF?)"
 
@@ -19,6 +19,7 @@ class MissingTextCheck(BaseCheck):
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         fulltext = data_registry.fulltext
+        # fulltext should never be None here
         if fulltext is not None and fulltext != "":
             passed = True
             return self._result(passed)
@@ -27,14 +28,14 @@ class MissingTextCheck(BaseCheck):
             return self._result(passed, message = self.failure_message)
         
 
-class VeryShortTextCheck(BaseCheck):
+class FulltextNotTooShortCheck(BaseCheck):
     """Check for very short text."""
 
-    name = "short_text"
-    display_name = "Short Text"
+    name = "fulltext_not_too_short"
+    display_name = "Fulltext Not Too Short"
     id = 15
     version = "1.0.0"
-    description = "The full text extracted is too short."
+    description = "The full text extracted is not too short."
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Very short text (< 1400 words). Check full text."
     
