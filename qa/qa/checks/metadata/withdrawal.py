@@ -18,6 +18,7 @@ class WithdrawalCheck(BaseCheck):
     required_inputs = {"metadata"}
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
+        assert data_registry.metadata is not None
         _type = data_registry.metadata.type
 
         if _type == "wdr":

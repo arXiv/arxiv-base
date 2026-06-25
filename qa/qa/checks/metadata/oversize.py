@@ -15,6 +15,7 @@ class OversizeCheck(BaseCheck):
     required_inputs = {"metadata"}
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
+        assert data_registry.metadata is not None
         if data_registry.metadata.is_oversize:
             passed = False
             message = self.failure_message
