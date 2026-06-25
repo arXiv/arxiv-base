@@ -84,12 +84,31 @@ def test_arxiv_user_claims():
     assert len(encoded) < 4096
     userClaims.update_keycloak_access_token({'acc': 12345})
     assert userClaims.domain_session # a complicated object
+
+    # Round-trip encode/decode. The fixture above is intentionally expired (for the
+    # is_expired asserts), but decode now enforces the JWT `exp`, so use a fresh token
+    # with a future exp here.
+    now = int(datetime.now(timezone.utc).timestamp())
+    freshClaims = ArxivUserClaims(ArxivUserClaimsModel(
+        sub = "0cf6ee46-2186-45e0-a960-2012c12d3738",
+        exp = now + 3600,
+        iat = now,
+        sid = "7985f0a7-fd8c-4dc5-9261-44fd403a9edb",
+        email_verified = True,
+        email = "testuser@example.com",
+        first_name = "Test",
+        last_name = "User",
+        username = "TestUser",
+    ))
+    encoded = freshClaims.encode_jwt_token("secret")
     # I need a session (using None fails) here
     # userClaims.set_tapir_session(arxivSession)
     # ArxivUserClaims.decode_jwt_payload({tokens}, jwt_payload, secret, [algorithm])
     tokens = {}
     decoded = ArxivUserClaims.decode_jwt_payload(tokens, encoded, 'secret')
     assert decoded
+    assert decoded.user_id == "0cf6ee46-2186-45e0-a960-2012c12d3738"
+    assert decoded.email == "testuser@example.com"
     payload_ng = jwt.decode(encoded, 'secret', algorithms = ['HS256'])
     assert NGSessionPayload.model_validate(payload_ng)
 
