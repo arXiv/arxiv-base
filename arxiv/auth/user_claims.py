@@ -207,25 +207,25 @@ class ArxivUserClaims:
         return self._claims.roles if self._claims.roles else []
 
     @property
-    def id_token(self) -> str:
+    def id_token(self) -> Optional[str]:
         """
         Keycloak id_token
         """
-        return self._claims.idt or ""
+        return self._claims.idt
 
     @property
-    def access_token(self) -> str:
+    def access_token(self) -> Optional[str]:
         """
         Keycloak access (bearer) token
         """
-        return self._claims.acc or ""
+        return self._claims.acc
 
     @property
-    def refresh_token(self) -> str:
+    def refresh_token(self) -> Optional[str]:
         """
         Keycloak refresh token
         """
-        return self._claims.refresh or ""
+        return self._claims.refresh
 
     @property
     def email(self) -> str:
