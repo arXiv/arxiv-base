@@ -52,9 +52,13 @@ class Result(BaseModel):
     results: list["Result"] | None = None
 
 
-class Metadata(BaseModel):
-    """A concrete implementation of MetadataProtocol for use in checks."""
+class SubmissionMetadata(BaseModel):
+    """
+    Information about a submission.
+    This should be a concrete implementation of MetadataProtocol for use in checks.
+    """
 
+     # MetadataProtocol fields     
     title: str | None = None
     authors: str | None = None
     abstract: str | None = None
@@ -64,7 +68,11 @@ class Metadata(BaseModel):
     doi: str | None = None
     msc_class: str | None = None
     acm_class: str | None = None
-
+    # End MetadataProtocol fields
+    type: str | None = None # one of: "new", "rep", "wdr", "jref", or "cross"
+    is_oversize: bool = False
+    data_version: int = 0
+    metadata_version: int = 0
 
 @runtime_checkable
 class MetadataProtocol(Protocol):
@@ -93,4 +101,4 @@ class QaDataRegistry(BaseModel):
     author_report: str | None = None
     flagged_terms_report: str | None = None
     tex_report: str | None = None
-    metadata: Metadata | None = None
+    metadata: SubmissionMetadata | None = None

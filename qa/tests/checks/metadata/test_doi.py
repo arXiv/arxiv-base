@@ -87,6 +87,6 @@ class TestDoiIsValid:
     def test_result_has_check_metadata(self):
         result = DoiIsValid.check("10.1103/PhysRevLett.132.011001")
         assert result.check_config["name"] == "doi_is_valid"
-        assert result.check_config["id"] == 570
+        assert result.check_config["id"] == 700
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT

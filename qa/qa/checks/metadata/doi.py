@@ -1,7 +1,7 @@
 """DOI metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, SubmissionMetadata, Result
 from qa.checks.generic.text import (
     NotTooShort,
     NotTooLong,
@@ -22,7 +22,7 @@ class DoiIsValid(BaseAggregateCheck):
 
     name = "doi_is_valid"
     display_name = "DOI Is Valid"
-    id = 570
+    id = 700
     version = "1.0.0"
     description = "The metadata doi field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
@@ -32,7 +32,7 @@ class DoiIsValid(BaseAggregateCheck):
 
     @classmethod
     def check(cls, doi: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(doi=doi)))
+        return cls().run(QaDataRegistry(metadata=SubmissionMetadata(doi=doi)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""

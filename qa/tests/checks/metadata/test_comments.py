@@ -53,6 +53,6 @@ class TestCommentsAreValid:
     def test_result_has_check_metadata(self):
         result = CommentsAreValid.check("12 pages, 3 figures")
         assert result.check_config["name"] == "comments_are_valid"
-        assert result.check_config["id"] == 530
+        assert result.check_config["id"] == 400
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
