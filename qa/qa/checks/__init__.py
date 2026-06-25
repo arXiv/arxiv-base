@@ -11,6 +11,9 @@ from qa.checks.metadata.msc_class import MscClassIsValid  # noqa
 from qa.checks.metadata.report_num import ReportNumIsValid  # noqa
 from qa.checks.metadata.title import TitleIsValid  # noqa
 
+from qa.checks.metadata.oversize import OversizeCheck  # noqa
+from qa.checks.metadata.withdrawal import WithdrawalCheck  # noqa
+
 from qa.checks.fulltext.text_checks import (
     FulltextExtractedCheck, FulltextNotTooShortCheck
 ) # noqa
@@ -25,6 +28,8 @@ checks: list[BaseCheck] = [
     DoiIsValid(),
     MscClassIsValid(),
     AcmClassIsValid(),
+    OversizeCheck(),
+    WithdrawalCheck(),
     FulltextExtractedCheck(),
     FulltextNotTooShortCheck(),
 ]

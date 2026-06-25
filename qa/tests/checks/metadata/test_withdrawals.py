@@ -1,9 +1,6 @@
 """Tests for AbstractIsValid."""
 
-import pytest
-
-from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, SubmissionMetadata, Result
+from qa.checks.models import QaDataRegistry, SubmissionMetadata
 from qa.checks.metadata.withdrawal import WithdrawalCheck
 
 

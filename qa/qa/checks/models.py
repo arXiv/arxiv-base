@@ -70,7 +70,7 @@ class SubmissionMetadata(BaseModel):
     acm_class: str | None = None
     # End MetadataProtocol fields
     type: str | None = None # one of: "new", "rep", "wdr", "jref", or "cross"
-    is_overlap: bool = False
+    is_oversize: bool = False
     data_version: int = 0
     metadata_version: int = 0
 
