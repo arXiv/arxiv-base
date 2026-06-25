@@ -113,6 +113,25 @@ def test_arxiv_user_claims():
     assert NGSessionPayload.model_validate(payload_ng)
 
 
+def test_decode_jwt_payload_expired():
+    """A token whose `exp` is in the past must raise PyJWT's ExpiredSignatureError on decode."""
+    now = int(datetime.now(timezone.utc).timestamp())
+    expiredClaims = ArxivUserClaims(ArxivUserClaimsModel(
+        sub = "0cf6ee46-2186-45e0-a960-2012c12d3738",
+        exp = now - 3600,   # expired one hour ago
+        iat = now - 7200,
+        sid = "7985f0a7-fd8c-4dc5-9261-44fd403a9edb",
+        email_verified = True,
+        email = "testuser@example.com",
+        first_name = "Test",
+        last_name = "User",
+        username = "TestUser",
+    ))
+    encoded = expiredClaims.encode_jwt_token("secret")
+    with pytest.raises(jwt.ExpiredSignatureError):
+        ArxivUserClaims.decode_jwt_payload({}, encoded, 'secret')
+
+
 def test_arxiv_oidc_idp_client():
     redirect_uri = "https://example.com"
     client = ArxivOidcIdpClient(redirect_uri)
