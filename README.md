@@ -116,31 +116,58 @@ blueprint
 [``static_url_path``](http://flask.pocoo.org/docs/1.0/api/#flask.Blueprint.static_url_path)
 to ``/static/[app name]/[ app version ]/[ blueprint name]``.
 
-### Serving static files on S3
-We use [Flask-S3](https://flask-s3.readthedocs.io/en/latest/) to serve static
-files via S3. To deploy the assets for the current version:
+### Publishing static files to GCS
 
-  pip install ./
-  AWS_ACCESS_KEY_ID=x \
-  AWS_SECRET_ACCESS_KEY=x+3RcGf1Oul66cwSJbZZcdZdEv0ZC9ax2 \
-  AWS_REGION=us-east-1 FLASKS3_BUCKET_NAME=arxiv-web-static1 \
-  python upload_static_assets.py
+`arxiv/base/static` is the single source of truth for the shared chrome
+(`css/arxiv-header-footer.css`, `js/arxiv-header.js`, the IBM Plex fonts, the
+arXiv logo + funder images) and the rest of base's assets. **Every app consumes
+these instead of vendoring a copy** — Flask apps via `url_for('base.static', …)`,
+non-Flask apps via the absolute `/static/base/<BASE_VERSION>/…` URL.
 
-Be sure to initialize the integration after instantiating ``Base`` and
-registering your blueprints. For example:
+| Env  | Bucket                      | Served at                       |
+|------|-----------------------------|---------------------------------|
+| prod | `gs://arxiv-web-static`     | `https://static.arxiv.org/`     |
+| dev  | `gs://arxiv-dev-web-static` | `https://static.dev.arxiv.org/` |
 
-```python
-# TODO just have a s3 script
-# def create_web_app() -> Flask:
-#     """Initialize and configure the application."""
-# 
-#     app = Flask('cool_app')
-#     app.config.from_object(config)
-#     Base(app)    # Gives us access to the base UI templates and resources.
-#     app.register_blueprint(routes.blueprint)
-#     s3.init_app(app)    # <- Down here!
-#     return app
+Assets land at `/static/base/<BASE_VERSION>/…` — the same versioned path the base
+blueprint serves (`arxiv/base/__init__.py`), so the URL resolves 1:1 with
+`base.static`. Versioned paths are immutable: **bump the package version to roll a
+new release.**
+
+**Publish** — out-of-band (not CI), once per released `BASE_VERSION`. Test on dev
+first, then prod at release:
+
+```bash
+pip install ./
+gcloud auth login   # or a service account with roles/storage.objectAdmin on the bucket
+
+python upload_static_assets.py --bucket gs://arxiv-dev-web-static   # dev  — test here first
+python upload_static_assets.py --bucket gs://arxiv-web-static       # prod — at release
 ```
+
+`--dry-run` previews. The script `rsync`s `arxiv/base/static/` →
+`<bucket>/static/base/<BASE_VERSION>/` and pins `font/woff2` on the IBM Plex files.
+
+**One-time bucket setup** — already done for both buckets; needed only to add a new one:
+
+```bash
+gcloud storage buckets create gs://<bucket> --location=us-central1 --uniform-bucket-level-access
+gcloud storage buckets add-iam-policy-binding gs://<bucket> \
+  --member=allUsers --role=roles/storage.objectViewer          # public read
+gcloud storage buckets update gs://<bucket> --cors-file=cors.json   # cross-origin @font-face
+```
+
+**How apps resolve it** — same bytes everywhere; only the host differs per env:
+
+- **Flask** (browse, auth, search): set `FLASKS3_ACTIVE=1` and `FLASKS3_CDN_DOMAIN`
+  (`static.arxiv.org` prod / `static.dev.arxiv.org` dev) and keep using
+  `url_for('base.static', …)`. No hardcoded host.
+- **Non-Flask** (submit, docs, status): reference
+  `https://<static-host>/static/base/<BASE_VERSION>/…`, where `<static-host>` is a
+  configurable root (mkdocs `!ENV`, Catalyst config, …) — prod default, dev override.
+
+> Migrated 2026-06 from the legacy AWS / Flask-S3 upload (boto + the old
+> `arxiv-web-static1` bucket); the embedded AWS key went with it.
 
 ## App tests
 
