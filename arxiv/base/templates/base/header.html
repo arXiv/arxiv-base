@@ -31,7 +31,7 @@
       Search
     </a>
     <a href="{{ url_for('create') }}">Submit</a>
-    <a href="https://info.arxiv.org/about/donate.html">Donate</a>
+    <a href="{{ url_for('donate') }}">Donate</a>
     <span class="ds-site-header-divider" aria-hidden="true"></span>
     {% if request.session and request.session.user and request.session.user.name %}
       <a href="{{ url_for('account') }}" class="ds-site-header-login">My Account</a>

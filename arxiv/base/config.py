@@ -49,6 +49,7 @@ URLS = [
     ("acknowledgment", "/about/ourmembers.html", "HELP_SERVER"),
     ("contact", "/help/contact.html", "HELP_SERVER"),
     ("copyright", "/help/license/index.html", "HELP_SERVER"),
+    ("donate", "/about/donate.html", "HELP_SERVER"),
     ("faq", "/help/faq/index.html", "HELP_SERVER"),
     ("help", "/help", "HELP_SERVER"),
     ("help_archive_description", "/help/<archive>/index.html", "HELP_SERVER"),
