@@ -74,7 +74,7 @@ URLS = [
 
     ("clickthrough", "/ct", "BASE_SERVER"),
     ("home", "/", "BASE_SERVER"),
-    ("ignore_me", "/IgnoreMe", "BASE_SERVER"),  # Anti-robot honneypot.
+    ("ignore_me", "/IgnoreMe", "BASE_SERVER"),
 
     ("account", "/user", "AUTH_SERVER"),
     ("login", "/login", "AUTH_SERVER"),

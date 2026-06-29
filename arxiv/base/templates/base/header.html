@@ -3,7 +3,6 @@
     links use base's url_for() URL registry (config.URLS) so they resolve in
     every app that extends base/base.html. -#}
 <header class="ds-site-header">
-  {#- IgnoreMe honeypot: hidden link to catch robots that ignore robots.txt. -#}
   <a aria-hidden="true" tabindex="-1" href="{{ url_for('ignore_me') }}" class="is-sr-only"></a>
 
   <a href="{{ url_for('home') }}" class="ds-site-header-logo" aria-label="archive home">
