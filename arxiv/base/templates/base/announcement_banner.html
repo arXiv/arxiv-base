@@ -1,0 +1,17 @@
+{#- Reusable spinout announcement band (shared .ds-* chrome). Dismissal is
+    handled by static/js/arxiv-header.js — a localStorage flag keyed by
+    data-banner-name — so no jQuery / slider is required.
+
+    The caller decides WHEN to show it (e.g. a config flag / date window) and
+    passes the copy:
+      {%- import 'base/announcement_banner.html' as announcement -%}
+      {{ announcement.announcement_banner(text, link_text, link, name) }} -#}
+{%- macro announcement_banner(text, link_text, link, name) -%}
+  <div class="ds-announcement" id="announcement-banner" role="region" aria-label="Announcement"
+    data-banner-name="{{ name }}">
+    <img class="ds-announcement-glyph" src="{{ url_for('base.static', filename='images/icons/smileybones-small.svg') }}" alt="" aria-hidden="true">
+    <span class="ds-announcement-text">{{ text }}</span>
+    <a class="ds-announcement-link" href="{{ link }}">{{ link_text }}</a>
+    <button type="button" class="ds-announcement-close" aria-label="Dismiss announcement">&times;</button>
+  </div>
+{%- endmacro -%}
