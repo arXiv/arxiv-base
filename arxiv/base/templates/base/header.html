@@ -1,69 +1,57 @@
-<!-- contains Cornell logo and sponsor statement -->
-<div class="attribution level is-marginless" role="banner">
-    <div class="level-left">
-        <a class="level-item" href="{{ url_for('university') }}"
-            ><img
-                src="{{ url_for('base.static', filename='images/cornell-reduced-white-SMALL.svg') }}"
-                alt="Cornell University"
-                width="200"
-                aria-label="logo"
-        /></a>
-    </div>
-    <div class="level-right is-marginless">
-        <p class="sponsors level-item is-marginless">
-            <span id="support-ack-url"
-                >We gratefully acknowledge support from<br />
-                the Simons Foundation, Schmidt Sciences,
-                <a href="https://info.arxiv.org/about/ourmembers.html"
-                    >member institutions</a
-                >, and all contributors.
-                <a href="https://info.arxiv.org/about/donate.html"
-                    >Donate</a
-                ></span
-            >
-        </p>
-    </div>
-</div>
-<!-- contains arXiv identity and search bar -->
-<div class="identity level is-marginless">
-    <div class="level-left">
-        <div class="level-item">
-            <a
-                class="arxiv"
-                href="{{ url_for('home') }}"
-                aria-label="arxiv-logo"
-            >
-                <img
-                    src="{{ url_for('base.static', filename='images/arxiv-logo-one-color-white.svg') }}"
-                    aria-label="logo"
-                    alt="arxiv logo"
-                    width="85"
-                    style="width: 85px"
-                />
-            </a>
-        </div>
-    </div>
-    {{ macros.compactsearch('level-right') }}
-</div>
-<!-- closes identity -->
+{#- Spinout site header + search overlay (shared .ds-* chrome). Pairs with
+    static/css/arxiv-header-footer.css and static/js/arxiv-header.js. Cross-app
+    links use base's url_for() URL registry (config.URLS) so they resolve in
+    every app that extends base/base.html. -#}
+<header class="ds-site-header">
+  <a aria-hidden="true" tabindex="-1" href="{{ url_for('ignore_me') }}" class="is-sr-only"></a>
 
-<div class="container">
-    <div
-        class="user-tools is-size-7 has-text-right has-text-weight-bold"
-        role="navigation"
-        aria-label="User menu"
-    >
-        {% if request.session and request.session.user and
-        request.session.user.name %}Logged in as
-        <span class="has-text-weight-bold"
-            >{{ request.session.user.name.forename }} {{
-            request.session.user.name.surname }} {{
-            request.session.user.name.suffix }}</span
-        >
-        | <a href="{{ url_for('account') }}">My Account</a> |
-        <a href="{{ url_for('logout') }}">Logout</a>{% else %}<a
-            href="{{ url_for('login') }}"
-            >Login</a
-        >{% endif %}
+  <a href="{{ url_for('home') }}" class="ds-site-header-logo" aria-label="archive home">
+    <img src="{{ url_for('base.static', filename='images/arxiv-logo-primary-light.svg') }}" alt="archive">
+  </a>
+
+  <button type="button" id="ds-nav-toggle" class="ds-site-header-nav-toggle"
+    aria-label="Open menu" aria-controls="ds-site-header-nav" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <nav class="ds-site-header-nav" id="ds-site-header-nav" aria-label="Main navigation">
+    {#- Search is a real <a href="/search">: no-JS navigates to the search page;
+        arxiv-header.js intercepts the click and opens the in-page overlay. -#}
+    <a id="arxiv-search-toggle" href="{{ url_for('search_box') }}"
+      aria-controls="arxiv-search-overlay" aria-expanded="false">
+      <svg class="ds-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      Search
+    </a>
+    <a href="{{ url_for('create') }}">Submit</a>
+    <a href="{{ url_for('donate') }}">Donate</a>
+    <span class="ds-site-header-divider" aria-hidden="true"></span>
+    {% if request.session and request.session.user and request.session.user.name %}
+      <a href="{{ url_for('account') }}" class="ds-site-header-login">My Account</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="ds-site-header-login">Log in</a>
+    {% endif %}
+  </nav>
+</header>
+
+<div class="arxiv-search-overlay" id="arxiv-search-overlay" hidden>
+  <div class="arxiv-search-panel" role="search">
+    <form method="GET" action="{{ url_for('search_box') }}">
+      <label for="arxiv-search-input" class="is-sr-only">Search arXiv</label>
+      <input type="text" name="query" id="arxiv-search-input" autocomplete="off"
+        placeholder="Search papers by title, author, abstract, or ID...">
+      <input type="hidden" name="searchtype" value="all">
+      <input type="hidden" name="source" value="header">
+    </form>
+    <div class="arxiv-search-hint">
+      Press Enter to search &middot; <a href="{{ url_for('search_advanced') }}">Advanced search</a>
     </div>
+  </div>
 </div>

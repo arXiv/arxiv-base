@@ -49,6 +49,7 @@ URLS = [
     ("acknowledgment", "/about/ourmembers.html", "HELP_SERVER"),
     ("contact", "/help/contact.html", "HELP_SERVER"),
     ("copyright", "/help/license/index.html", "HELP_SERVER"),
+    ("donate", "/about/donate.html", "HELP_SERVER"),
     ("faq", "/help/faq/index.html", "HELP_SERVER"),
     ("help", "/help", "HELP_SERVER"),
     ("help_archive_description", "/help/<archive>/index.html", "HELP_SERVER"),
@@ -73,7 +74,7 @@ URLS = [
 
     ("clickthrough", "/ct", "BASE_SERVER"),
     ("home", "/", "BASE_SERVER"),
-    ("ignore_me", "/IgnoreMe", "BASE_SERVER"),  # Anti-robot honneypot.
+    ("ignore_me", "/IgnoreMe", "BASE_SERVER"),
 
     ("account", "/user", "AUTH_SERVER"),
     ("login", "/login", "AUTH_SERVER"),
@@ -153,6 +154,11 @@ AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 # static paths for blueprints.
 RELATIVE_STATIC_PATHS = bool(int(os.environ.get("RELATIVE_STATIC_PATHS", "0")))
 RELATIVE_STATIC_PREFIX = os.environ.get("RELATIVE_STATIC_PREFIX", "")
+
+# Site-wide spinout announcement band ("arXiv is now an independent nonprofit!").
+# Rendered by base/base.html via the .ds-announcement macro when truthy; opt-in
+# per app/env so the temporal banner can be switched off without a base release.
+SPINOUT_BANNER_ENABLED = bool(int(os.environ.get("SPINOUT_BANNER_ENABLED", "0")))
 
 ANALYTICS_ENABLED = bool(int(os.environ.get("ANALYTICS_ENABLED", "0")))
 """Enable/disable Matomo web analytics."""

@@ -7,7 +7,7 @@ In other words, the user claims is a Python object from the identity cookie.
 
 Keycloak:
 
-    unpacked access token looks like this
+    unpacked access token looks like this (RFC 7519 jwt)
     {
         'exp': 1722520674,
         'iat': 1722484674,
@@ -53,7 +53,7 @@ from pydantic import BaseModel
 import jwt
 
 from . import domain
-from .auth.sessions.ng_session_types import NGSessionPayload
+from .auth.sessions.ng_session_types import NGSessionPayload, RFC7519RegisteredJwtClaims
 from .auth.sessions.store import _generate_nonce
 from ..db.models import TapirPolicyClass
 from .auth import scopes, tokens
@@ -199,7 +199,7 @@ class ArxivUserClaims:
         roles = self._claims.roles if self._claims.roles else []
         for policy_class in TapirPolicyClass.POLICY_CLASSES:
             if policy_class["name"] in roles:
-                return policy_class["class_id"]
+                return policy_class["class_id"]  # type: ignore[return-value]
         return 0
 
     @property
@@ -207,21 +207,21 @@ class ArxivUserClaims:
         return self._claims.roles if self._claims.roles else []
 
     @property
-    def id_token(self) -> str:
+    def id_token(self) -> Optional[str]:
         """
         Keycloak id_token
         """
         return self._claims.idt
 
     @property
-    def access_token(self) -> str:
+    def access_token(self) -> Optional[str]:
         """
         Keycloak access (bearer) token
         """
         return self._claims.acc
 
     @property
-    def refresh_token(self) -> str:
+    def refresh_token(self) -> Optional[str]:
         """
         Keycloak refresh token
         """
@@ -324,18 +324,25 @@ class ArxivUserClaims:
         # create a NG compatible payload
         # FixMe?: This is "randomly created" in arxiv.auth.sessions.store without the shape. I gave it a shape.
         # modapi has the same shape as Auth. It would
+        rfc_7519_jwt = RFC7519RegisteredJwtClaims.model_validate(claims)
+        for key in RFC7519RegisteredJwtClaims.model_fields.keys():
+            claims.pop(key, None)
+
         payload_ce = {
             NG_COOKIE_HITCHHIKER_NAME: json.dumps(claims),
         }
 
-        ng_session = NGSessionPayload(
-            user_id=str(self.user_id),
-            session_id=str(self.tapir_session_id),
-            expires=self.expires_at.isoformat(),
-            nonce=_generate_nonce(),
-            **payload_ce
-        )
-        payload_ng = ng_session.model_dump()
+        ng_session = NGSessionPayload.model_validate({
+            "user_id": str(self.user_id),
+            "session_id": str(self.tapir_session_id),
+            "expires": self.expires_at.isoformat(),
+            "nonce": _generate_nonce(),
+            **rfc_7519_jwt.model_dump(),
+            **payload_ce,
+        })
+        # exclude_none so absent registered claims (nbf/iss/aud/jti) are not emitted as
+        # null, which would make PyJWT's int(None) validation blow up on decode.
+        payload_ng = ng_session.model_dump(exclude_none=True)
 
         token = jwt.encode(payload_ng, secret, algorithm=algorithm)
         if len(token) > 4096:
@@ -350,12 +357,17 @@ class ArxivUserClaims:
         """
         payload_ng = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
         try:
-            payload = json.loads(payload_ng.get(NG_COOKIE_HITCHHIKER_NAME))
+            payload = json.loads(payload_ng.get(NG_COOKIE_HITCHHIKER_NAME) or '{}')
         except Exception as e:
             payload = {}
             pass
         if isinstance(payload, dict):
             try:
+                # registered claims (sub/exp/iat/...) live at the JWT top level, not in
+                # the hitchhiker blob; rehydrate them before the custom claims.
+                for key in RFC7519RegisteredJwtClaims.model_fields.keys():
+                    if payload_ng.get(key) is not None:
+                        tokens.setdefault(key, payload_ng[key])
                 tokens.update(payload)
                 return cls(ArxivUserClaimsModel.model_validate(tokens))
             except Exception as e:
@@ -385,11 +397,11 @@ class ArxivUserClaims:
             user_scopes = scopes.GENERAL_USER
             if self.is_admin:
                 user_scopes = scopes.ADMIN_USER
+            authorizations: Optional[domain.Authorizations]
             authorizations = domain.Authorizations(
                 classic = self.classic_capability_code,
                 scopes = user_scopes,
             )
-            authorizations = None
 
             session_id = str(self.tapir_session_id) if self.tapir_session_id else "no-session-id"
             self._domain_session = domain.Session(
@@ -407,6 +419,6 @@ class ArxivUserClaims:
 
 
     def set_tapir_session(self, _tapir_cookie: str, tapir_session: ArxivSession) -> None:
-        self.tapir_session_id = int(tapir_session.session_id) if tapir_session.session_id else None
+        self.tapir_session_id = tapir_session.session_id if tapir_session.session_id else None  # type: ignore[assignment]
 
     pass
