@@ -66,8 +66,10 @@ Three pieces:
    institutional mention (IP-matched) follows "member institutions".
 2. **Footer nav** — About · Help · Contact · Subscribe · Copyright · Privacy ·
    Accessibility · Operational Status, dot-separated.
-3. **Funders column** — "Major funding support from" + Simons + Schmidt wordmark
-   logos, right-aligned; drops below the main column at narrow widths.
+3. **Funders column** — "Major funding support from" + Simons Foundation, Simons
+   Foundation International, and Schmidt Sciences logos (in that order of support),
+   each linked to the funder's own site; right-aligned, drops below the main column
+   at narrow widths.
 
 Markup contract:
 
@@ -85,26 +87,48 @@ Markup contract:
     <div class="ds-site-footer-funders">
       <div class="ds-site-footer-funders-label">Major funding support from</div>
       <div class="ds-site-footer-funders-logos">
-        <img class="ds-funder-logo" src="…" alt="Simons Foundation">
-        <img class="ds-funder-logo" src="…" alt="Schmidt Sciences">
+        <a class="ds-funder-link" href="https://www.simonsfoundation.org/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="…" alt="Simons Foundation"></a>
+        <a class="ds-funder-link" href="https://www.sfi.org.bm/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="…" alt="Simons Foundation International"></a>
+        <a class="ds-funder-link" href="https://www.schmidtsciences.org/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="…" alt="Schmidt Sciences"></a>
       </div>
     </div>
   </div>
 </footer>
 ```
 
+**Asset SSOT / single consistent approach.** The funder images live in **only one
+place** — arxiv-base `static/images/funders/*.png` — and every consumer references
+them through the base-static root, never a local copy:
+
+- Apps that run the base blueprint (**browse**, **auth**) `{% include "base/footer.html" %}`
+  and get the logos via `url_for('base.static', …)`. They hold no funder markup and no
+  funder asset, so a change here (e.g. adding a third funder) reaches them with **zero
+  per-app edits**.
+- Vendored consumers that can't inherit (**search**, **submit**, **docs**, **status**)
+  copy this markup but point every logo at their configured base-static root
+  (`config.BASE_STATIC` / `c.config.base_static` / `config.extra.base_static`) — the only
+  per-repo difference is that root value. Prefer the config root over a hard-coded
+  `static.arxiv.org/static/base/<v>/…` path so a version bump is a one-line change.
+
 Accessibility notes (the behavior contract travels with the pattern):
 
 - Real `<footer>` landmark; nav has `aria-label="Site navigation"`.
 - Dot separators carry `aria-hidden="true"` (screen readers otherwise announce
   "middot" between every link).
-- Funder logos carry real alt text (organization names).
+- Funder logos carry real alt text (organization names) and each is wrapped in a
+  link to the funder's site (`target="_blank"` + `rel="noopener noreferrer"`) with a
+  visible keyboard-focus outline; the hover lift is disabled under
+  `prefers-reduced-motion`.
 - External links (Operational Status) need `target="_blank"` +
   `rel="noopener noreferrer"` + sr-only "(opens in new tab)".
 - Type sizes in `rem` so user font-size overrides propagate.
-- `.ds-funder-logo` uses `box-sizing: content-box` so `height: 40px` describes the
+- `.ds-funder-logo` uses `box-sizing: content-box` so `height: 48px` describes the
   image content height — with the global `border-box`, padding + border would
-  shrink the logo to ~30px (visibly small vs the approved layout).
+  shrink the logo (visibly small vs the approved layout). The row is 48px (not 40px)
+  so the text-dense three-line SFI lockup stays legible alongside the other two.
 
 ## Site header unit (`.ds-announcement` + `.ds-site-header`)
 
