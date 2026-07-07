@@ -53,6 +53,10 @@
   margin: 0;
   font-family: var(--arxiv-font-sans);
 }
+/* Neutralise host-page footer-link underline styling (e.g. browse arXiv.css's
+   `footer a:hover { border-bottom: 1px dotted }`) on all footer links. The funder
+   logo cards re-assert their own border at a higher specificity (below), so this
+   reset does not strip their bottom edge. */
 .ds-site-footer a,
 .ds-site-footer a:hover,
 .ds-site-footer a:active {
@@ -125,19 +129,41 @@
   justify-content: center;
   flex-wrap: wrap;
 }
-.ds-funder-logo {
-  box-sizing: content-box;
-  display: block;
-  height: 40px;
-  width: auto;
-  flex-shrink: 0;
+/* The white card lives on the link wrapper (one place), identical whether the logo is
+   content-sized (desktop) or fixed-width (mobile, below). Scoped to `.ds-site-footer a`
+   (specificity 0-2-1) so the full four-side border out-specifies the footer-link
+   underline reset above and any host-page `footer a` border styling — otherwise those
+   win on the bottom edge only, leaving a stray dotted/absent bottom border. */
+.ds-site-footer a.ds-funder-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px 8px;
   border: 1px solid var(--arxiv-pill-border);
   border-radius: 3px;
   background: #fff;
+  transition: border-color 0.15s ease;
+}
+.ds-site-footer a.ds-funder-link:hover { border-color: var(--arxiv-link-blue); }
+.ds-site-footer a.ds-funder-link:focus-visible {
+  outline: 2px solid var(--arxiv-link-blue);
+  outline-offset: 2px;
+}
+.ds-funder-logo {
+  display: block;
+  height: 48px;
+  width: auto;
+  flex-shrink: 0;
 }
 @media (max-width: 720px) {
+  /* Mobile/tablet: fixed-width cards so the wrapped logos align into a tidy centred
+     column (phones) / even row (tablets) instead of a ragged stack of different-width
+     boxes. Card styling is inherited from .ds-funder-link; only the width and logo
+     height change here. */
   .ds-site-footer-funders { width: 100%; margin-top: 8px; }
+  .ds-site-footer-funders-logos { gap: 10px; }
+  .ds-site-footer a.ds-funder-link { width: 220px; max-width: 100%; padding: 10px 14px; }
+  .ds-funder-logo { height: 44px; max-width: 100%; }
 }
 @media print {
   .ds-site-footer { display: none !important; }
