@@ -1,7 +1,7 @@
 """Abstract metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, SubmissionMetadata, Result
 from qa.checks.generic.text import (
     AllBracketsBalanced,
     DoesNotBeginWithAbstract,
@@ -27,7 +27,7 @@ class AbstractIsValid(BaseAggregateCheck):
 
     name = "abstract_is_valid"
     display_name = "Abstract Is Valid"
-    id = 520
+    id = 300
     version = "1.0.0"
     description = "The metadata abstract field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
@@ -37,7 +37,7 @@ class AbstractIsValid(BaseAggregateCheck):
 
     @classmethod
     def check(cls, abstract: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(abstract=abstract)))
+        return cls().run(QaDataRegistry(metadata=SubmissionMetadata(abstract=abstract)))
 
     _checks = (
         NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),

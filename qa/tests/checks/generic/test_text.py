@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import EmptyFieldError, MissingDataError
-from qa.checks.models import QaDataRegistry, Metadata, OnFailurePolicy
+from qa.checks.models import QaDataRegistry, SubmissionMetadata, OnFailurePolicy
 from qa.checks.generic.text import (
     AllBracketsBalanced,
     DoesNotBeginWithTitle,
@@ -25,7 +25,7 @@ from qa.checks.generic.text import (
 
 
 def inputs(title: str | None) -> QaDataRegistry:
-    return QaDataRegistry(metadata=Metadata(title=title))
+    return QaDataRegistry(metadata=SubmissionMetadata(title=title))
 
 
 def make(cls, **kwargs):

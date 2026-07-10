@@ -1,7 +1,7 @@
 """Report number metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, SubmissionMetadata, Result
 from qa.checks.generic.text import (
     NotTooShort,
     NotTooLong,
@@ -22,7 +22,7 @@ class ReportNumIsValid(BaseAggregateCheck):
 
     name = "report_num_is_valid"
     display_name = "Report Number Is Valid"
-    id = 550
+    id = 500
     version = "1.0.0"
     description = "The metadata report_num field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
@@ -32,7 +32,7 @@ class ReportNumIsValid(BaseAggregateCheck):
 
     @classmethod
     def check(cls, report_num: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(report_num=report_num)))
+        return cls().run(QaDataRegistry(metadata=SubmissionMetadata(report_num=report_num)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""

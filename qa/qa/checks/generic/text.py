@@ -4,11 +4,13 @@ from qa.checks.models import Result, Offset, OnFailurePolicy, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 
+# Note: the ids in this file should be the metadata check id + 10000,
+# to avoid collision with the check_ids previously used in the arxiv_checks table.
 
 class DoesNotStartWithLowercase(BaseGenericPatternCheck):
     name = "does_not_start_with_lowercase"
     display_name = "Does Not Start With Lowercase"
-    id = 8
+    id = 10008
     version = "1.0.0"
     description = "The value does not start with a lowercase letter."
     failure_message = "Begins with a lowercase letter."
@@ -19,7 +21,7 @@ class DoesNotStartWithLowercase(BaseGenericPatternCheck):
 class NoExcessiveCapitals(BaseGenericCheck):
     name = "no_excessive_capitals"
     display_name = "No Excessive Capitals"
-    id = 7
+    id = 10007
     version = "1.0.0"
     description = "The value does not contain excessive capitals."
     failure_message = "Likely excessive capitalization."
@@ -39,7 +41,7 @@ class NoExcessiveCapitals(BaseGenericCheck):
 class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
     name = "no_unapproved_long_caps_words"
     display_name = "No Unapproved Long Caps Words"
-    id = 12  # NOTE: new
+    id = 10012  # NOTE: new
     version = "1.0.0"
     description = "The value does not contain two or more unapproved all caps words that are 6 or more characters long."
     failure_message = "Contains unapproved long caps words."
@@ -68,7 +70,7 @@ class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
 class NoBoundaryWhitespace(BaseGenericPatternCheck):
     name = "no_boundary_whitespace"
     display_name = "No Boundary Whitespace"
-    id = 16
+    id = 10016
     version = "1.0.0"
     description = "The value does not begin or end with whitespace."
     failure_message = "Leading or trailing whitespace."
@@ -79,7 +81,7 @@ class NoBoundaryWhitespace(BaseGenericPatternCheck):
 class NoExtraWhitespace(BaseGenericPatternCheck):
     name = "no_extra_whitespace"
     display_name = "No Extra Whitespace"
-    id = 25
+    id = 10025
     version = "1.0.0"
     description = "The value does not contain multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
     failure_message = "Excessive or irregular whitespace."
@@ -90,7 +92,7 @@ class NoExtraWhitespace(BaseGenericPatternCheck):
 class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
     name = "no_unnecessary_space_in_parens"
     display_name = "No Unnecessary Space in Parens"
-    id = 33
+    id = 10033
     version = "1.0.0"
     description = "The value does not contain leading or trailing spaces immediately inside parentheses."
     failure_message = "Unnecessary space inside parentheses."
@@ -101,7 +103,7 @@ class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
 class NoHtmlElements(BaseGenericPatternCheck):
     name = "no_html_elements"
     display_name = "No HTML Elements"
-    id = 11
+    id = 10011
     version = "1.0.0"
     description = "The value does not contain raw HTML elements."
     failure_message = "Contains HTML."
@@ -131,7 +133,7 @@ class NoHtmlElements(BaseGenericPatternCheck):
 class AllBracketsBalanced(BaseGenericCheck):
     name = "all_brackets_balanced"
     display_name = "All Brackets Balanced"
-    id = 13
+    id = 10013
     version = "1.0.0"
     description = "All parentheses, square brackets, and curly braces are properly closed."
     failure_message = "Unbalanced brackets."
@@ -170,7 +172,7 @@ class AllBracketsBalanced(BaseGenericCheck):
 class NotTooLong(BaseGenericCheck):
     name = "not_too_long"
     display_name = "Not Too Long"
-    id = 36
+    id = 10036
     version = "1.0.0"
     description = "The value does not exceed the maximum character length."
     failure_message = "Too long."
@@ -206,7 +208,7 @@ class NotTooLong(BaseGenericCheck):
 class NotTooShort(BaseGenericCheck):
     name = "not_too_short"
     display_name = "Not Too Short"
-    id = 2
+    id = 10002
     version = "1.0.0"
     description = "The value meets or exceeds the minimum character length."
     failure_message = "Text likely too short."
@@ -242,7 +244,7 @@ class NotTooShort(BaseGenericCheck):
 class DoesNotBeginWithTitle(BaseGenericPatternCheck):
     name = "does_not_begin_with_title"
     display_name = "Does Not Begin With Title"
-    id = 3
+    id = 10003
     version = "1.0.0"
     description = "The value does not begin with the literal prefix 'title:'."
     failure_message = "Begins with 'title'."
@@ -253,7 +255,7 @@ class DoesNotBeginWithTitle(BaseGenericPatternCheck):
 class DoesNotContainLinebreak(BaseGenericPatternCheck):
     name = "does_not_contain_linebreak"
     display_name = "Does Not Contain Linebreak"
-    id = 6
+    id = 10006
     version = "1.0.0"
     description = "The value does not contain LaTeX-style or escaped linebreaks."
     failure_message = "Contains a line break."
@@ -264,7 +266,7 @@ class DoesNotContainLinebreak(BaseGenericPatternCheck):
 class DoesNotContainUnnecessaryEscape(BaseGenericPatternCheck):
     name = "does_not_contain_unnecessary_escape"
     display_name = "Does Not Contain Unnecessary Escape"
-    id = 10
+    id = 10010
     version = "1.0.0"
     description = "The value does not contain unnecessary escape characters preceding hash or percent symbols."
     failure_message = "Contains unnecessary escape."
@@ -275,7 +277,7 @@ class DoesNotContainUnnecessaryEscape(BaseGenericPatternCheck):
 class DoesNotContainTex(BaseGenericPatternCheck):
     name = "does_not_contain_tex"
     display_name = "Does Not Contain TeX"
-    id = 9
+    id = 10009
     version = "1.0.0"
     description = "The value does not contain href or url raw TeX commands."
     failure_message = "Contains TeX."
@@ -286,7 +288,7 @@ class DoesNotContainTex(BaseGenericPatternCheck):
 class DoesNotContainControlChars(BaseGenericPatternCheck):
     name = "does_not_contain_control_chars"
     display_name = "Does Not Contain Control Chars"
-    id = 26
+    id = 10026
     version = "1.0.0"
     description = "The value does not contain control characters including newlines, tabs, and backspaces."
     failure_message = "Contains control characters: newlines, tabs, or backspaces."
@@ -297,7 +299,7 @@ class DoesNotContainControlChars(BaseGenericPatternCheck):
 class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
     name = "does_not_contain_control_chars_allow_newlines"
     display_name = "Does Not Contain Control Chars (Allow Newlines)"
-    id = 18
+    id = 10018
     version = "1.0.0"
     description = "The value does not contain control characters, but newlines (\\n) are permitted."
     failure_message = "Contains control characters."
@@ -308,7 +310,7 @@ class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
 class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     name = "no_utf8_decoding_errors"
     display_name = "No UTF-8 Decoding Errors"
-    id = 14
+    id = 10014
     version = "1.0.0"
     description = "The value does not contain malformed Unicode sequences."
     failure_message = "Bad Unicode encoding."
@@ -320,7 +322,7 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
 class NoAnnotationSymbols(BaseGenericPatternCheck):
     name = "no_annotation_symbols"
     display_name = "No Annotation Symbols"
-    id = 15
+    id = 10015
     version = "1.0.0"
     description = "The value does not contain invalid characters such as *, #, ^, or @."
     failure_message = "Unusual character detected."
@@ -331,7 +333,7 @@ class NoAnnotationSymbols(BaseGenericPatternCheck):
 class DoesNotContainAnonymous(BaseGenericPatternCheck):
     name = "does_not_contain_anonymous"
     display_name = "Does Not Contain Anonymous"
-    id = 19
+    id = 10019
     version = "1.0.0"
     description = "The value does not contain the word 'anonymous'."
     failure_message = "Contains 'anonymous'."
@@ -342,7 +344,7 @@ class DoesNotContainAnonymous(BaseGenericPatternCheck):
 class DoesNotContainCorresponding(BaseGenericPatternCheck):
     name = "does_not_contain_corresponding"
     display_name = "Does Not Contain Corresponding"
-    id = 20
+    id = 10020
     version = "1.0.0"
     description = "The value does not contain the word 'corresponding'."
     failure_message = "Contains 'corresponding'."
@@ -353,7 +355,7 @@ class DoesNotContainCorresponding(BaseGenericPatternCheck):
 class DoesNotContainTexDagger(BaseGenericPatternCheck):
     name = "does_not_contain_tex_dagger"
     display_name = "Does Not Contain TeX Dagger"
-    id = 21
+    id = 10021
     version = "1.0.0"
     description = "The value does not contain TeX dagger symbols (\\dag, \\ddag, etc.)."
     failure_message = "Contains a dagger symbol."
@@ -364,7 +366,7 @@ class DoesNotContainTexDagger(BaseGenericPatternCheck):
 class DoesNotBeginWithAuthor(BaseGenericPatternCheck):
     name = "does_not_begin_with_author"
     display_name = "Does Not Begin With Author"
-    id = 4
+    id = 10004
     version = "1.0.0"
     description = "The value does not begin with the prefix 'author' or 'authors'."
     failure_message = "Begins with 'author'."
@@ -375,7 +377,7 @@ class DoesNotBeginWithAuthor(BaseGenericPatternCheck):
 class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
     name = "does_not_contain_tilde_as_hard_space"
     display_name = "Does Not Contain Tilde As Hard Space"
-    id = 32
+    id = 10032
     version = "1.0.0"
     description = "The value does not contain an unescaped tilde used as a hard space."
     failure_message = "Tilde as hard space."
@@ -386,7 +388,7 @@ class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
 class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
     name = "does_not_begin_with_abstract"
     display_name = "Does Not Begin With Abstract"
-    id = 5
+    id = 10005
     version = "1.0.0"
     description = "The value does not begin with the literal prefix 'abstract'."
     failure_message = "Begins with 'abstract'."
@@ -397,7 +399,7 @@ class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
 class DoesNotContainTexBeginEnv(BaseGenericPatternCheck):
     name = "does_not_contain_tex_begin_env"
     display_name = "Does Not Contain TeX Begin Env"
-    id = 17
+    id = 10017
     version = "1.0.0"
     description = "The value does not contain a tex begin command that is not followed by a curly brace."
     failure_message = "Contains TeX."
@@ -408,7 +410,7 @@ class DoesNotContainTexBeginEnv(BaseGenericPatternCheck):
 class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
     name = "does_not_end_with_punctuation"
     display_name = "Does Not End With Punctuation"
-    id = 29
+    id = 10029
     version = "1.0.0"
     description = "The value does not end with punctuation (trailing 'et al.' is permitted)."
     failure_message = "Ends with punctuation."
@@ -419,7 +421,7 @@ class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
 class DoesNotContainUrl(BaseGenericPatternCheck):
     name = "does_not_contain_url"
     display_name = "Does Not Contain URL"
-    id = 39
+    id = 10039
     version = "1.0.0"
     description = "The value does not contain a URL."
     failure_message = "Contains a URL."
@@ -430,7 +432,7 @@ class DoesNotContainUrl(BaseGenericPatternCheck):
 class DoesNotContainDoi(BaseGenericPatternCheck):
     name = "does_not_contain_doi"
     display_name = "Does Not Contain DOI"
-    id = 45
+    id = 10045
     version = "1.0.0"
     description = "The value does not contain the word 'DOI'."
     failure_message = "Contains 'DOI'."
@@ -441,7 +443,7 @@ class DoesNotContainDoi(BaseGenericPatternCheck):
 class DoesNotContainBareDoi(BaseGenericPatternCheck):
     name = "does_not_contain_bare_doi"
     display_name = "Does Not Contain Bare DOI"
-    id = 40
+    id = 10040
     version = "1.0.0"
     description = "The value does not contain a bare DOI number (e.g. 10.1234/abc)."
     failure_message = "Contains a DOI."
@@ -452,7 +454,7 @@ class DoesNotContainBareDoi(BaseGenericPatternCheck):
 class ContainsLetters(BaseGenericPatternCheck):
     name = "contains_letters"
     display_name = "Contains Letters"
-    id = 38
+    id = 10038
     version = "1.0.0"
     description = "The value contains at least one letter."
     failure_message = "No letters found."
@@ -463,7 +465,7 @@ class ContainsLetters(BaseGenericPatternCheck):
 class ContainsDigits(BaseGenericPatternCheck):
     name = "contains_digits"
     display_name = "Contains Digits"
-    id = 37
+    id = 10037
     version = "1.0.0"
     description = "The value contains at least one digit."
     failure_message = "No digits found."
@@ -474,7 +476,7 @@ class ContainsDigits(BaseGenericPatternCheck):
 class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
     name = "does_not_contain_semicolon"
     display_name = "Does Not Contain Semicolon"
-    id = 22
+    id = 10022
     version = "1.0.0"
     description = "The value does not contain a semicolon."
     failure_message = "Contains semicolon(s) - use ',' or 'and' to separate authors."
@@ -485,7 +487,7 @@ class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
 class DoesNotContainAccepted(BaseGenericPatternCheck):
     name = "does_not_contain_accepted"
     display_name = "Does Not Contain Accepted"
-    id = 41
+    id = 10041
     version = "1.0.0"
     description = "The value does not contain the word 'accepted'."
     failure_message = "Contains 'accepted'."
@@ -496,7 +498,7 @@ class DoesNotContainAccepted(BaseGenericPatternCheck):
 class DoesNotContainSubmitted(BaseGenericPatternCheck):
     name = "does_not_contain_submitted"
     display_name = "Does Not Contain Submitted"
-    id = 42
+    id = 10042
     version = "1.0.0"
     description = "The value does not contain the word 'submitted'."
     failure_message = "Contains 'submitted'."
@@ -507,7 +509,7 @@ class DoesNotContainSubmitted(BaseGenericPatternCheck):
 class DoesNotContainBibtex(BaseGenericPatternCheck):
     name = "does_not_contain_bibtex"
     display_name = "Does Not Contain BibTeX"
-    id = 44
+    id = 10044
     version = "1.0.0"
     description = "The value does not contain BibTeX field assignments."
     failure_message = "Contains bibtex."
@@ -518,7 +520,7 @@ class DoesNotContainBibtex(BaseGenericPatternCheck):
 class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
     name = "does_not_contain_bad_doi_prefix"
     display_name = "Does Not Contain Bad DOI Prefix"
-    id = 47
+    id = 10047
     version = "1.0.0"
     description = "The value does not begin with 'doi:', 'https://doi.org/', or similar URL prefixes."
     failure_message = "Contains unnecessary prefix."
@@ -529,10 +531,10 @@ class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
 class DoiHasValidFormat(BaseGenericPatternCheck):
     name = "doi_has_valid_format"
     display_name = "DOI Has Valid Format"
-    id = 50
+    id = 10050
     version = "1.0.0"
     description = "Each space-separated DOI in the value matches the expected DOI format."
-    failure_message = "Invalid DOI."
+    failure_message = "Invaleeid DOI."
 
     _pattern = r"(?i)^(?![0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$)"
 
