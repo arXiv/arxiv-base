@@ -2261,7 +2261,7 @@ class CheckTargets(Base):
     def __repr__(self):
         return f"{ type(self).__name__ }/{ self.check_target_id }:{self.name}"
 
-
+# This class is no longer used
 class Checks(Base):
     __tablename__ = "arXiv_checks"
     __table_args__ = {"mysql_charset": "latin1"}
@@ -2305,7 +2305,6 @@ class CheckResults(Base):
     data: Mapped[Optional[str]] = mapped_column(Text)
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
 
-    check: Mapped["Checks"] = relationship("Checks", back_populates="arXiv_check_results")
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_check_results")
     check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="check_result")
     """ 
