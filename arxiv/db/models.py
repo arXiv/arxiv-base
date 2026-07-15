@@ -2283,7 +2283,6 @@ class Checks(Base):
     role: Mapped["CheckRoles"] = relationship("CheckRoles")
 
     view: Mapped["CheckResultViews"] = relationship("CheckResultViews")
-    arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="check")
 
     def __repr__(self):
         return f"{ type(self).__name__ }/{ self.check_id }:{self.name};{'enabled' if self.enable_check else ''}"
