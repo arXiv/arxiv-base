@@ -2304,7 +2304,6 @@ class CheckResults(Base):
     data: Mapped[Optional[str]] = mapped_column(Text)
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
 
-    check: Mapped["Checks"] = relationship("Checks", back_populates="arXiv_check_results")
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_check_results")
     check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="check_result")
     """ 
