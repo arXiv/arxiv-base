@@ -2297,7 +2297,6 @@ class CheckResults(Base):
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     data_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     metadata_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    check_id: Mapped[int] = mapped_column(ForeignKey("arXiv_checks.check_id"), nullable=False, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     ok: Mapped[int] = mapped_column(Integer, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
