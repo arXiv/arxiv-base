@@ -154,13 +154,19 @@ def create(authorizations: domain.Authorizations,
     if db is None:
         db =  ScopedSession
     logger.debug('create session for user %s', user.user_id)
-    start = datetime.now(tz=UTC)
+    # iat - "Issued at" - the time at which the token was issued.
+    # util.epoch() rounds, which can land ~0.5s in the future. start_time later becomes a token's iat
+    # (via generate_cookie -> util.epoch), and a future iat trips PyJWT's not-yet-valid check (ImmatureSignatureError).
+    # Floor start to whole seconds so epoch() is exact and the issued time never leads the clock;
+    # start_epoch and end both derive from this same floored instant.
+    start = datetime.now(tz=UTC).replace(microsecond=0)
     end = start + timedelta(seconds=util.get_session_duration())
+    start_epoch = int((start - datetime.fromtimestamp(0, tz=util.EASTERN)).total_seconds())
     try:
         tapir_session = TapirSession(
             user_id=int(user.user_id),
-            last_reissue=util.epoch(start),
-            start_time=util.epoch(start),
+            last_reissue=start_epoch,
+            start_time=start_epoch,
             end_time=0
         )
         db.add(tapir_session)
