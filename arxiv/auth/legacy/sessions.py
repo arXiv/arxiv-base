@@ -1,5 +1,5 @@
 """Provides API for legacy user sessions."""
-from datetime import datetime, timedelta
+from datetime import datetime
 from pytz import timezone, UTC
 
 import logging
@@ -160,8 +160,10 @@ def create(authorizations: domain.Authorizations,
     # Floor start to whole seconds so epoch() is exact and the issued time never leads the clock;
     # start_epoch and end both derive from this same floored instant.
     start = datetime.now(tz=UTC).replace(microsecond=0)
-    end = start + timedelta(seconds=util.get_session_duration())
     start_epoch = int((start - datetime.fromtimestamp(0, tz=util.EASTERN)).total_seconds())
+    # Derive end from start_epoch (not start) so the session window is anchored
+    # to the exact whole-second instant that is persisted and issued as iat.
+    end = datetime.fromtimestamp(start_epoch + util.get_session_duration(), tz=UTC)
     try:
         tapir_session = TapirSession(
             user_id=int(user.user_id),
