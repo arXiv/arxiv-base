@@ -18,7 +18,7 @@ from qa.checks.fulltext.text_checks import (
     FulltextExtractedCheck, FulltextNotTooShortCheck
 ) # noqa
 
-checks: list[BaseCheck] = [
+metadata_checks: list[BaseCheck] = [
     TitleIsValid(),
     AuthorsAreValid(),
     AbstractIsValid(),
@@ -30,6 +30,11 @@ checks: list[BaseCheck] = [
     AcmClassIsValid(),
     OversizeCheck(),
     WithdrawalCheck(),
+]
+
+fulltext_checks: list[BaseCheck] = [
     FulltextExtractedCheck(),
     FulltextNotTooShortCheck(),
 ]
+
+all_checks = set(metadata_checks).union(set(fulltext_checks))
