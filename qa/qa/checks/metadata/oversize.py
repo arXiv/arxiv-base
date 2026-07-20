@@ -1,6 +1,5 @@
-
 from qa.checks.base import BaseCheck
-from qa.checks. models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 
 
 class OversizeCheck(BaseCheck):
@@ -22,5 +21,3 @@ class OversizeCheck(BaseCheck):
             return self._result(passed=passed, message=message)
         else:
             return self._result(passed=True, message="")
-
-        
