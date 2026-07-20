@@ -7,6 +7,7 @@ from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
 # Note: the ids in this file should be the metadata check id + 10000,
 # to avoid collision with the check_ids previously used in the arxiv_checks table.
 
+
 class DoesNotStartWithLowercase(BaseGenericPatternCheck):
     name = "does_not_start_with_lowercase"
     display_name = "Does Not Start With Lowercase"

@@ -58,7 +58,7 @@ class SubmissionMetadata(BaseModel):
     This should be a concrete implementation of MetadataProtocol for use in checks.
     """
 
-     # MetadataProtocol fields     
+    # MetadataProtocol fields
     title: str | None = None
     authors: str | None = None
     abstract: str | None = None
@@ -69,10 +69,11 @@ class SubmissionMetadata(BaseModel):
     msc_class: str | None = None
     acm_class: str | None = None
     # End MetadataProtocol fields
-    type: str | None = None # one of: "new", "rep", "wdr", "jref", or "cross"
+    type: str | None = None  # one of: "new", "rep", "wdr", "jref", or "cross"
     is_oversize: bool = False
     data_version: int = 0
     metadata_version: int = 0
+
 
 @runtime_checkable
 class MetadataProtocol(Protocol):

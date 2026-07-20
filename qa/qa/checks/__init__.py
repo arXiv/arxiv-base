@@ -14,9 +14,7 @@ from qa.checks.metadata.title import TitleIsValid  # noqa
 from qa.checks.metadata.oversize import OversizeCheck  # noqa
 from qa.checks.metadata.withdrawal import WithdrawalCheck  # noqa
 
-from qa.checks.fulltext.text_checks import (
-    FulltextExtractedCheck, FulltextNotTooShortCheck
-) # noqa
+from qa.checks.fulltext.text_checks import FulltextExtractedCheck, FulltextNotTooShortCheck  # noqa
 
 checks: list[BaseCheck] = [
     TitleIsValid(),

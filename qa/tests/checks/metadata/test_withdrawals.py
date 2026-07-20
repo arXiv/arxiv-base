@@ -18,11 +18,10 @@ class TestWithdrawalCheck:
         registry = QaDataRegistry(metadata=metadata)
         result = check._run(registry)
         assert result.passed
-        
+
     def test_wdr_fail(self):
         check = WithdrawalCheck()
         metadata = SubmissionMetadata(type="wdr", title="Test Title")
         registry = QaDataRegistry(metadata=metadata)
         result = check._run(registry)
         assert not result.passed
-        
