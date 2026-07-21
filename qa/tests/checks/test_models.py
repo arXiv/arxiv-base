@@ -3,8 +3,7 @@
 from pydantic import ValidationError
 from unittest import TestCase
 
-from qa.reports.models.base import BaseReport, Flag
-from qa.reports.models.fulltext import FulltextReport
+from qa.checks.models import BaseReport, Flag, FulltextReport
 
 
 def base_report(
