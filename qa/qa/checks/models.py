@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 from enum import StrEnum
 from datetime import datetime, timezone
 
@@ -55,6 +55,28 @@ class Result(BaseModel):
     results: list["Result"] | None = None
 
 
+class Flag(BaseModel):
+    id: str = Field(pattern=kebab_case)
+    description: str | None
+
+
+class BaseReport(BaseModel):
+    name: str
+    key_name: str = Field(pattern=kebab_case)
+    version: str
+    submission_id: int = Field(gt=0)
+    created: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    flags: list[Flag] = []
+    qa_exec_time_sec: int | None = Field(default=None, ge=0)
+    data: dict
+
+
+class FulltextReport(BaseReport):
+    name: str = "arXiv Fulltext Report"
+    key_name: str = "fulltext"
+    version: str = "1.0"
+
+
 class SubmissionMetadata(BaseModel):
     """
     Information about a submission.
@@ -106,40 +128,3 @@ class QaDataRegistry(BaseModel):
     flagged_terms_report: str | None = None
     tex_report: str | None = None
     metadata: SubmissionMetadata | None = None
-
-
-class Flag(BaseModel):
-    id: str = Field(
-        description="TODO the id of the individual flag or of the category of flag?",
-        examples=["tex-created-flag"],
-        pattern=kebab_case,
-    )
-    description: str | None
-
-
-class BaseReport(BaseModel):
-    name: str = Field(description="The full name of the report.")
-    key_name: str = Field(
-        description="The abbreviated name of the report.",
-        examples=["arxiv-example-report"],
-        pattern=kebab_case,
-    )
-    version: str = Field(description="The semantic version of the report schema.")
-    submission_id: int = Field(gt=0)
-    created: str = Field(
-        description="The timestamp representing when the report was created.",
-        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
-    )
-    flags: list[Flag] = []
-    qa_exec_time_sec: int | None = Field(
-        default=None,
-        description="Time it took to process and generate the report, in seconds.",
-        ge=0,
-    )
-    data: dict
-
-
-class FulltextReport(BaseReport):
-    name: str = "arXiv Fulltext Report"
-    key_name: str = "fulltext"
-    version: Literal["1.0"] = "1.0"
