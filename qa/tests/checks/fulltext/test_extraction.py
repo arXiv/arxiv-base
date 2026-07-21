@@ -1,7 +1,9 @@
 """Tests for TextExtractionSuccessful."""
 
+import pytest
+
 from qa.checks.fulltext.extraction import TextExtractionSuccessful
-from qa.checks.models import Flag, FulltextReport
+from qa.checks.models import Flag, FulltextReport, QaDataRegistry
 
 
 def fulltext_report(flags: list[Flag] | None = None) -> FulltextReport:
@@ -30,3 +32,7 @@ class TestTextExtractionSuccessful:
         report = fulltext_report(flags=[Flag(id="some-other-flag", description="unrelated")])
         result = TextExtractionSuccessful.check(report)
         assert result.passed
+
+    def test_none_fulltext_report_raises(self):
+        with pytest.raises(AssertionError):
+            TextExtractionSuccessful()._run(QaDataRegistry(fulltext_report=None))
