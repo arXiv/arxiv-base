@@ -83,7 +83,6 @@ class SubmissionMetadata(BaseModel):
     This should be a concrete implementation of MetadataProtocol for use in checks.
     """
 
-    # MetadataProtocol fields
     title: str | None = None
     authors: str | None = None
     abstract: str | None = None
@@ -93,7 +92,6 @@ class SubmissionMetadata(BaseModel):
     doi: str | None = None
     msc_class: str | None = None
     acm_class: str | None = None
-    # End MetadataProtocol fields
     type: str | None = None  # one of: "new", "rep", "wdr", "jref", or "cross"
     is_oversize: bool = False
     data_version: int = 0
@@ -123,7 +121,7 @@ class QaDataRegistry(BaseModel):
     """Data dependencies for checks."""
 
     fulltext: str | None = None
-    fulltext_report: str | None = None
+    fulltext_report: FulltextReport | None = None
     author_report: str | None = None
     flagged_terms_report: str | None = None
     tex_report: str | None = None
