@@ -9,13 +9,17 @@ class FulltextNotTooShort(BaseCheck):
     id = 15
     version = "1.0.0"
     description = "The full text extracted is not too short."
-    on_failure_policy = OnFailurePolicy.REJECT
+    on_failure_policy = OnFailurePolicy.WARN
     failure_message = "Text too short."
 
     required_inputs = {"fulltext"}
 
     min_chars = 10000
     min_words = 1400
+
+    @classmethod
+    def check(cls, fulltext: str) -> Result:
+        return cls().run(QaDataRegistry(fulltext=fulltext))
 
     @property
     def config(self) -> dict:
@@ -27,12 +31,9 @@ class FulltextNotTooShort(BaseCheck):
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         fulltext = data_registry.fulltext
-        if fulltext is None or fulltext == "":
-            passed = True
-            return self._result(passed)
-        elif len(fulltext) < self.min_chars and len(fulltext.split()) < self.min_words:
-            passed = False
-            return self._result(passed, message=self.failure_message)
+        assert fulltext is not None
+
+        if len(fulltext) < self.min_chars and len(fulltext.split()) < self.min_words:
+            return self._result(passed=False, message=self.failure_message)
         else:
-            passed = True
-            return self._result(passed)
+            return self._result(passed=True)

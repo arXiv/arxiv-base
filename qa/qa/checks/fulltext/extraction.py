@@ -1,6 +1,6 @@
 from qa.checks.base import BaseCheck
 
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import FulltextReport, OnFailurePolicy, QaDataRegistry, Result
 
 
 class TextExtractionSuccessful(BaseCheck):
@@ -9,12 +9,16 @@ class TextExtractionSuccessful(BaseCheck):
     id = 14
     version = "1.0.0"
     description = "Text extraction was successful."
-    on_failure_policy = OnFailurePolicy.REJECT
+    on_failure_policy = OnFailurePolicy.WARN
     failure_message = "Text extraction failed."
 
     required_data = {"fulltext_report"}
 
     failure_flag_id = "text-extraction-failed"
+
+    @classmethod
+    def check(cls, fulltext_report: FulltextReport) -> Result:
+        return cls().run(QaDataRegistry(fulltext_report=fulltext_report))
 
     @property
     def config(self) -> dict:
