@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, SubmissionMetadata, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.title import TitleIsValid
 
 
@@ -71,7 +71,7 @@ class TestTitleIsValid:
         assert result.passed
 
     def test_none_field_short_circuits(self):
-        result = TitleIsValid().run(QaDataRegistry(metadata=SubmissionMetadata(title=None)))
+        result = TitleIsValid().run(QaDataRegistry(metadata=Metadata(title=None)))
         assert not result.passed
         assert result.results == []
         assert result.message == "Title is invalid or empty."

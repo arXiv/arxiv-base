@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, SubmissionMetadata, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.abstract import AbstractIsValid
 
 
@@ -87,7 +87,7 @@ class TestAbstractIsValid:
         assert not sub_result(result, "does_not_contain_tex_begin_env").passed
 
     def test_none_field_short_circuits(self):
-        result = AbstractIsValid().run(QaDataRegistry(metadata=SubmissionMetadata(abstract=None)))
+        result = AbstractIsValid().run(QaDataRegistry(metadata=Metadata(abstract=None)))
         assert not result.passed
         assert result.results == []
         assert result.message == "Abstract is invalid or empty."
