@@ -82,15 +82,6 @@ class FulltextReport(BaseReport):
 class SubmitEventInfo(BaseModel):  # check which fields are always provided by the snapshot and which are optional
     """Information about the submission provided by the submit event."""
 
-    title: str | None = None
-    authors: str | None = None
-    abstract: str | None = None
-    comments: str | None = None
-    report_num: str | None = None
-    journal_ref: str | None = None
-    doi: str | None = None
-    msc_class: str | None = None
-    acm_class: str | None = None
     type: Literal["new", "rep", "wdr", "jref", "cross"]
     is_oversize: bool
     data_version: int
