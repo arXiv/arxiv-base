@@ -3,8 +3,7 @@
 from pydantic import ValidationError
 from unittest import TestCase
 
-from qa.reports.models.base import BaseReport, Flag
-from qa.reports.models.fulltext import FulltextReport
+from qa.checks.models import BaseReport, Flag
 
 
 def base_report(
@@ -47,15 +46,3 @@ class TestFlag(TestCase):
 
     def test_id_accepts_kebab(self):
         Flag(id="tex-created-flag", description="a flag")
-
-
-class TestFulltextReport(TestCase):
-    def test_defaults(self):
-        r = FulltextReport(submission_id=1, data={})
-        self.assertEqual(r.name, "arXiv Fulltext Report")
-        self.assertEqual(r.key_name, "fulltext")
-        self.assertEqual(r.version, "1.0")
-
-    def test_version_is_pinned(self):
-        with self.assertRaises(ValidationError):
-            FulltextReport(submission_id=1, data={}, version="2.0")  # type: ignore

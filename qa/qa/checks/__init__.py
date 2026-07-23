@@ -14,7 +14,8 @@ from qa.checks.metadata.title import TitleIsValid  # noqa
 from qa.checks.submission.files import DoesNotExceedTheFileSizeLimit  # noqa
 from qa.checks.submission.type import IsNotAWithdrawal  # noqa
 
-from qa.checks.fulltext.text_checks import FulltextExtractedCheck, FulltextNotTooShortCheck  # noqa
+from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
+from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 
 checks: list[BaseCheck] = [
     TitleIsValid(),
@@ -28,6 +29,6 @@ checks: list[BaseCheck] = [
     AcmClassIsValid(),
     DoesNotExceedTheFileSizeLimit(),
     IsNotAWithdrawal(),
-    FulltextExtractedCheck(),
-    FulltextNotTooShortCheck(),
+    TextExtractionSuccessful(),
+    FulltextNotTooShort(),
 ]
