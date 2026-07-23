@@ -79,7 +79,7 @@ class FulltextReport(BaseReport):
     version: str = "1.0"
 
 
-class SubmitEventInfo(BaseModel):  # check which fields are always provided by the snapshot and which are optional
+class SubmitEventInfo(BaseModel):  # TODO: check which fields are always provided by the snapshot and which are optional
     """Information about the submission provided by the submit event."""
 
     type: Literal["new", "rep", "wdr", "jref", "cross"]
