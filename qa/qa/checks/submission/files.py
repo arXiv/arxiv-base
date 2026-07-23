@@ -13,12 +13,12 @@ class DoesNotExceedTheFileSizeLimit(BaseCheck):
     on_failure_policy = OnFailurePolicy.WARN
     failure_message = "Submission exceeds the file size limit."
 
-    required_data = {"submission_pubsub_info"}
+    required_data = {"submit_event_info"}
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
-        assert data_registry.submission_pubsub_info is not None
+        assert data_registry.submit_event_info is not None
 
-        if data_registry.submission_pubsub_info.is_oversize:
+        if data_registry.submit_event_info.is_oversize:
             return self._result(passed=False, message=self.failure_message)
         else:
             return self._result(passed=True)

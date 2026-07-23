@@ -13,12 +13,12 @@ class IsNotAWithdrawal(BaseCheck):
     on_failure_policy = OnFailurePolicy.WARN
     failure_message = "The submission is a withdrawal which requires staff approval."
 
-    required_data = {"submission_pubsub_info"}
+    required_data = {"submit_event_info"}
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
-        assert data_registry.submission_pubsub_info is not None
+        assert data_registry.submit_event_info is not None
 
-        _type = data_registry.submission_pubsub_info.type
+        _type = data_registry.submit_event_info.type
 
         if _type == "wdr":
             return self._result(passed=False, message=self.failure_message)

@@ -54,7 +54,7 @@ class Result(BaseModel):
     results: list["Result"] | None = None
 
 
-class SubmissionPubsubInfo(BaseModel):  # check which fields are always provided by the snapshot and which are optional
+class SubmitEventInfo(BaseModel):  # check which fields are always provided by the snapshot and which are optional
     """Metadata about a submission."""
 
     type: Literal["new", "rep", "wdr", "jref", "cross"]
@@ -107,4 +107,4 @@ class QaDataRegistry(BaseModel):
     flagged_terms_report: str | None = None
     tex_report: str | None = None
     metadata: Metadata | None = None
-    submission_pubsub_info: SubmissionPubsubInfo | None = None
+    submit_event_info: SubmitEventInfo | None = None
