@@ -1,6 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Protocol, runtime_checkable
 from enum import StrEnum
+from datetime import datetime, timezone
+
+kebab_case = "^[a-z0-9]+(-[a-z0-9]+)*$"
 
 
 class OnFailurePolicy(StrEnum):
@@ -52,13 +55,34 @@ class Result(BaseModel):
     results: list["Result"] | None = None
 
 
+class Flag(BaseModel):
+    id: str = Field(pattern=kebab_case)
+    description: str | None
+
+
+class BaseReport(BaseModel):
+    name: str
+    key_name: str = Field(pattern=kebab_case)
+    version: str
+    submission_id: int = Field(gt=0)
+    created: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    flags: list[Flag] = []
+    qa_exec_time_sec: int | None = Field(default=None, ge=0)
+    data: dict
+
+
+class FulltextReport(BaseReport):
+    name: str = "arXiv Fulltext Report"
+    key_name: str = "fulltext"
+    version: str = "1.0"
+
+
 class SubmissionMetadata(BaseModel):
     """
     Information about a submission.
     This should be a concrete implementation of MetadataProtocol for use in checks.
     """
 
-    # MetadataProtocol fields
     title: str | None = None
     authors: str | None = None
     abstract: str | None = None
@@ -68,7 +92,6 @@ class SubmissionMetadata(BaseModel):
     doi: str | None = None
     msc_class: str | None = None
     acm_class: str | None = None
-    # End MetadataProtocol fields
     type: str | None = None  # one of: "new", "rep", "wdr", "jref", or "cross"
     is_oversize: bool = False
     data_version: int = 0
@@ -98,7 +121,7 @@ class QaDataRegistry(BaseModel):
     """Data dependencies for checks."""
 
     fulltext: str | None = None
-    fulltext_report: str | None = None
+    fulltext_report: FulltextReport | None = None
     author_report: str | None = None
     flagged_terms_report: str | None = None
     tex_report: str | None = None
