@@ -1,7 +1,6 @@
-
 from qa.checks.base import BaseCheck
 
-from qa.checks. models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 
 
 class WithdrawalCheck(BaseCheck):
@@ -23,9 +22,7 @@ class WithdrawalCheck(BaseCheck):
 
         if _type == "wdr":
             passed = False
-            return self._result(passed, message = self.failure_message)
+            return self._result(passed, message=self.failure_message)
         else:
             passed = True
             return self._result(passed)
-        
-        
