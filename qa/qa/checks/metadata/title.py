@@ -1,7 +1,7 @@
 """Title metadata checks."""
 
 from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, SubmissionMetadata, Result
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     NotTooShort,
     NotTooLong,
@@ -37,7 +37,7 @@ class TitleIsValid(BaseAggregateCheck):
 
     @classmethod
     def check(cls, title: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=SubmissionMetadata(title=title)))
+        return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
 
     _checks = (
         NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Protocol, runtime_checkable
+from typing import Literal, Protocol, runtime_checkable
 from enum import StrEnum
 from datetime import datetime, timezone
 
@@ -8,12 +8,13 @@ kebab_case = "^[a-z0-9]+(-[a-z0-9]+)*$"
 
 class OnFailurePolicy(StrEnum):
     """
-    The on failure policy describes how to handle a failure (non-passing result) from a particular check.
+    The on failure policy is an attribute of a check. It is part of that check's configuration.
+    It describes how to handle a failure (non-passing result) from that check.
     Each instance of a check should be configured with only one on failure policy.
 
     IGNORE - failure should be ignored
-    WARN - failure should elicit a non-blocking warning
-    REJECT - failure should be a blocking error
+    WARN - failure should not block but prompt a warning or review
+    REJECT - failure should block further progression
     """
 
     IGNORE = "ignore"
@@ -23,9 +24,10 @@ class OnFailurePolicy(StrEnum):
 
 class Disposition(StrEnum):
     """
-    The disposition represents the end state of running a check.
-    It rationalizes a passing/non-passing result against that check's on failure policy.
+    A disposition is an attribute of a check result. It represents the end state of running a check on a particular input.
+    It is the rationalization of the result (passing/non-passing) against that check's on failure policy.
     All passing check results will provide a disposition of "ok".
+    The disposition should be used by consumers of check results to guide next steps.
     """
 
     OK = "ok"
@@ -77,10 +79,18 @@ class FulltextReport(BaseReport):
     version: str = "1.0"
 
 
-class SubmissionMetadata(BaseModel):
+class SubmitEventInfo(BaseModel):  # TODO: check which fields are always provided by the snapshot and which are optional
+    """Information about the submission provided by the submit event."""
+
+    type: Literal["new", "rep", "wdr", "jref", "cross"]
+    is_oversize: bool
+    data_version: int
+    metadata_version: int
+
+
+class Metadata(BaseModel):
     """
-    Information about a submission.
-    This should be a concrete implementation of MetadataProtocol for use in checks.
+    Paper metadata.
     """
 
     title: str | None = None
@@ -92,10 +102,6 @@ class SubmissionMetadata(BaseModel):
     doi: str | None = None
     msc_class: str | None = None
     acm_class: str | None = None
-    type: str | None = None  # one of: "new", "rep", "wdr", "jref", or "cross"
-    is_oversize: bool = False
-    data_version: int = 0
-    metadata_version: int = 0
 
 
 @runtime_checkable
@@ -125,4 +131,5 @@ class QaDataRegistry(BaseModel):
     author_report: str | None = None
     flagged_terms_report: str | None = None
     tex_report: str | None = None
-    metadata: SubmissionMetadata | None = None
+    metadata: Metadata | None = None
+    submit_event_info: SubmitEventInfo | None = None
