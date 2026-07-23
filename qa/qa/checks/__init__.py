@@ -17,7 +17,7 @@ from qa.checks.metadata.withdrawal import WithdrawalCheck  # noqa
 from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
 from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 
-metadata_checks: list[BaseCheck] = [
+submission_checks: list[BaseCheck] = [
     TitleIsValid(),
     AuthorsAreValid(),
     AbstractIsValid(),
@@ -36,4 +36,4 @@ fulltext_checks: list[BaseCheck] = [
     FulltextNotTooShort(),
 ]
 
-all_checks = set(metadata_checks).union(set(fulltext_checks))
+checks: list[BaseCheck] = submission_checks + fulltext_checks

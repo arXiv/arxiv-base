@@ -1,6 +1,6 @@
 """Some consistency checks on all_checks."""
 
-from qa.checks import all_checks
+from qa.checks import checks as all_checks
 
 
 class TestCheckIds:
