@@ -17,7 +17,7 @@ from qa.checks.submission.type import IsNotAWithdrawal  # noqa
 from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
 from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 
-checks: list[BaseCheck] = [
+submit_event_checks: list[BaseCheck] = [
     TitleIsValid(),
     AuthorsAreValid(),
     AbstractIsValid(),
@@ -29,6 +29,11 @@ checks: list[BaseCheck] = [
     AcmClassIsValid(),
     DoesNotExceedTheFileSizeLimit(),
     IsNotAWithdrawal(),
+]
+
+fulltext_checks: list[BaseCheck] = [
     TextExtractionSuccessful(),
     FulltextNotTooShort(),
 ]
+
+checks: list[BaseCheck] = submit_event_checks + fulltext_checks
