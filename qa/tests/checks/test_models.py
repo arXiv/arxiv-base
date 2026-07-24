@@ -71,9 +71,7 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
             ],
         )
-        self.assertEqual(
-            result.failure_messages(Disposition.WARN, Disposition.REJECT), "warn message\nreject message"
-        )
+        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "warn message\nreject message")
 
     def test_filters_to_a_single_disposition(self):
         result = Result(
