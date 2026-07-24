@@ -17,7 +17,7 @@ from qa.checks.submission.type import IsNotAWithdrawal  # noqa
 from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
 from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 
-submission_checks: list[BaseCheck] = [
+submit_event_checks: list[BaseCheck] = [
     TitleIsValid(),
     AuthorsAreValid(),
     AbstractIsValid(),
@@ -36,4 +36,4 @@ fulltext_checks: list[BaseCheck] = [
     FulltextNotTooShort(),
 ]
 
-all_checks = set(submission_checks).union(set(fulltext_checks))
+checks = submit_event_checks + fulltext_checks
