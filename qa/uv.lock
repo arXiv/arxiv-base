@@ -24,7 +24,7 @@ wheels = [
 [[package]]
 name = "arxiv-base"
 version = "1.0.1"
-source = { git = "https://github.com/arXiv/arxiv-base?rev=8135d213c8409297e807f1d9a73709799b9750ef#8135d213c8409297e807f1d9a73709799b9750ef" }
+source = { git = "https://github.com/arXiv/arxiv-base?branch=master#e899328ba62399b4ac5ac0624bed91f3b6ab5ffd" }
 
 [[package]]
 name = "colorama"
@@ -278,7 +278,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "arxiv-base", git = "https://github.com/arXiv/arxiv-base?rev=8135d213c8409297e807f1d9a73709799b9750ef" },
+    { name = "arxiv-base", git = "https://github.com/arXiv/arxiv-base?branch=master" },
     { name = "pydantic", specifier = ">=2.12.5" },
 ]
 
