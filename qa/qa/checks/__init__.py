@@ -11,7 +11,13 @@ from qa.checks.metadata.msc_class import MscClassIsValid  # noqa
 from qa.checks.metadata.report_num import ReportNumIsValid  # noqa
 from qa.checks.metadata.title import TitleIsValid  # noqa
 
-checks: list[BaseCheck] = [
+from qa.checks.submission.files import DoesNotExceedTheFileSizeLimit  # noqa
+from qa.checks.submission.type import IsNotAWithdrawal  # noqa
+
+from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
+from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
+
+submit_event_checks: list[BaseCheck] = [
     TitleIsValid(),
     AuthorsAreValid(),
     AbstractIsValid(),
@@ -21,4 +27,13 @@ checks: list[BaseCheck] = [
     DoiIsValid(),
     MscClassIsValid(),
     AcmClassIsValid(),
+    DoesNotExceedTheFileSizeLimit(),
+    IsNotAWithdrawal(),
 ]
+
+fulltext_checks: list[BaseCheck] = [
+    TextExtractionSuccessful(),
+    FulltextNotTooShort(),
+]
+
+checks: list[BaseCheck] = submit_event_checks + fulltext_checks

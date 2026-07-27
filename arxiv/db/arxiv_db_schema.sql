@@ -365,7 +365,6 @@ CREATE TABLE `arXiv_check_results` (
   KEY `check_results_submission_index` (`submission_id`),
   KEY `check_results_check_index` (`check_id`),
   KEY `check_results_user_index` (`user_id`),
-  CONSTRAINT `check_results_checks_fk` FOREIGN KEY (`check_id`) REFERENCES `arXiv_checks` (`check_id`),
   CONSTRAINT `check_results_sub_fk` FOREIGN KEY (`submission_id`) REFERENCES `arXiv_submissions` (`submission_id`),
   CONSTRAINT `check_results_user_fk` FOREIGN KEY (`user_id`) REFERENCES `tapir_users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;

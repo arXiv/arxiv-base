@@ -22,7 +22,7 @@ class ReportNumIsValid(BaseAggregateCheck):
 
     name = "report_num_is_valid"
     display_name = "Report Number Is Valid"
-    id = 550
+    id = 500
     version = "1.0.0"
     description = "The metadata report_num field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

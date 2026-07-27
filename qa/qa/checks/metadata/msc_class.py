@@ -20,7 +20,7 @@ class MscClassIsValid(BaseAggregateCheck):
 
     name = "msc_class_is_valid"
     display_name = "MSC Class Is Valid"
-    id = 580
+    id = 800
     version = "1.0.0"
     description = "The metadata msc_class field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

@@ -22,7 +22,7 @@ class CommentsAreValid(BaseAggregateCheck):
 
     name = "comments_are_valid"
     display_name = "Comments Are Valid"
-    id = 530
+    id = 400
     version = "1.0.0"
     description = "The metadata comments field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

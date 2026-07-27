@@ -1,16 +1,20 @@
-from pydantic import BaseModel
-from typing import Protocol, runtime_checkable
+from pydantic import BaseModel, Field
+from typing import Literal, Protocol, runtime_checkable
 from enum import StrEnum
+from datetime import datetime, timezone
+
+kebab_case = "^[a-z0-9]+(-[a-z0-9]+)*$"
 
 
 class OnFailurePolicy(StrEnum):
     """
-    The on failure policy describes how to handle a failure (non-passing result) from a particular check.
+    The on failure policy is an attribute of a check. It is part of that check's configuration.
+    It describes how to handle a failure (non-passing result) from that check.
     Each instance of a check should be configured with only one on failure policy.
 
     IGNORE - failure should be ignored
-    WARN - failure should elicit a non-blocking warning
-    REJECT - failure should be a blocking error
+    WARN - failure should not block but prompt a warning or review
+    REJECT - failure should block further progression
     """
 
     IGNORE = "ignore"
@@ -20,9 +24,10 @@ class OnFailurePolicy(StrEnum):
 
 class Disposition(StrEnum):
     """
-    The disposition represents the end state of running a check.
-    It rationalizes a passing/non-passing result against that check's on failure policy.
+    A disposition is an attribute of a check result. It represents the end state of running a check on a particular input.
+    It is the rationalization of the result (passing/non-passing) against that check's on failure policy.
     All passing check results will provide a disposition of "ok".
+    The disposition should be used by consumers of check results to guide next steps.
     """
 
     OK = "ok"
@@ -52,8 +57,41 @@ class Result(BaseModel):
     results: list["Result"] | None = None
 
 
+class Flag(BaseModel):
+    id: str = Field(pattern=kebab_case)
+    description: str | None
+
+
+class BaseReport(BaseModel):
+    name: str
+    key_name: str = Field(pattern=kebab_case)
+    version: str
+    submission_id: int = Field(gt=0)
+    created: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    flags: list[Flag] = []
+    qa_exec_time_sec: int | None = Field(default=None, ge=0)
+    data: dict
+
+
+class FulltextReport(BaseReport):
+    name: str = "arXiv Fulltext Report"
+    key_name: str = "fulltext"
+    version: str = "1.0"
+
+
+class SubmitEventInfo(BaseModel):  # TODO: check which fields are always provided by the snapshot and which are optional
+    """Information about the submission provided by the submit event."""
+
+    type: Literal["new", "rep", "wdr", "jref", "cross"]
+    is_oversize: bool
+    data_version: int
+    metadata_version: int
+
+
 class Metadata(BaseModel):
-    """A concrete implementation of MetadataProtocol for use in checks."""
+    """
+    Paper metadata.
+    """
 
     title: str | None = None
     authors: str | None = None
@@ -89,8 +127,9 @@ class QaDataRegistry(BaseModel):
     """Data dependencies for checks."""
 
     fulltext: str | None = None
-    fulltext_report: str | None = None
+    fulltext_report: FulltextReport | None = None
     author_report: str | None = None
     flagged_terms_report: str | None = None
     tex_report: str | None = None
     metadata: Metadata | None = None
+    submit_event_info: SubmitEventInfo | None = None

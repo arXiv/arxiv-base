@@ -83,7 +83,7 @@ class TestTitleIsValid:
     def test_result_has_check_metadata(self):
         result = TitleIsValid.check("A fine title")
         assert result.check_config["name"] == "title_is_valid"
-        assert result.check_config["id"] == 500
+        assert result.check_config["id"] == 100
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 

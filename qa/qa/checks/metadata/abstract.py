@@ -27,7 +27,7 @@ class AbstractIsValid(BaseAggregateCheck):
 
     name = "abstract_is_valid"
     display_name = "Abstract Is Valid"
-    id = 520
+    id = 300
     version = "1.0.0"
     description = "The metadata abstract field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

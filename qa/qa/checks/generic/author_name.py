@@ -8,6 +8,8 @@ from arxiv.authors import parse_author_affil
 from qa.checks.base import BaseGenericCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 
+# Note: the ids in this file should be the metadata check id + 10000,
+# to avoid collision with the check_ids previously used in the arxiv_checks table.
 
 _LLM_NAMES = {
     "llama",
@@ -75,7 +77,7 @@ class BaseAuthorPatternCheck(BaseAuthorCheck):
 class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
     name = "authors_do_not_contain_lone_surname"
     display_name = "Authors Do Not Contain Lone Surname"
-    id = 51
+    id = 10051
     version = "1.0.0"
     description = "No author has only a surname without a given name, unless it is a known collaboration or LLM name."
     failure_message = "Contains lone surname."
@@ -112,7 +114,7 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
 class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
     name = "authors_do_not_contain_llm_author"
     display_name = "Authors Do Not Contain LLM Author"
-    id = 52
+    id = 10052
     version = "1.0.0"
     description = "No author's name appears to be an AI language model."
     failure_message = "Potential LLM author detected."
@@ -148,7 +150,7 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
 class AuthorNamesDoNotContainSemicolon(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_semicolon"
     display_name = "Author Names Do Not Contain Semicolon"
-    id = 53
+    id = 10053
     version = "1.0.0"
     description = "No parsed author name contains a semicolon."
     failure_message = "Contains semicolon(s) - use ',' or 'and' to separate authors."
@@ -159,7 +161,7 @@ class AuthorNamesDoNotContainSemicolon(BaseAuthorPatternCheck):
 class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_brackets"
     display_name = "Author Names Do Not Contain Brackets"
-    id = 54
+    id = 10054
     version = "1.0.0"
     description = "No parsed author name contains square bracket characters."
     failure_message = "Unusual character detected."
@@ -170,7 +172,7 @@ class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
 class AuthorNamesDoNotContainNumbers(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_numbers"
     display_name = "Author Names Do Not Contain Numbers"
-    id = 55
+    id = 10055
     version = "1.0.0"
     description = "No parsed author name contains numeric digits."
     failure_message = "Contains a number."
@@ -181,7 +183,7 @@ class AuthorNamesDoNotContainNumbers(BaseAuthorPatternCheck):
 class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
     name = "author_names_do_not_contain_affiliation"
     display_name = "Author Names Do Not Contain Affiliation"
-    id = 56
+    id = 10056
     version = "1.0.0"
     description = "No parsed author name contains institution or affiliation keywords."
     failure_message = "Contains a suffix that may be university affiliation or degree related."

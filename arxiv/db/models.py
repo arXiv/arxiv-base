@@ -2261,7 +2261,7 @@ class CheckTargets(Base):
     def __repr__(self):
         return f"{ type(self).__name__ }/{ self.check_target_id }:{self.name}"
 
-
+# This class is no longer used
 class Checks(Base):
     __tablename__ = "arXiv_checks"
     __table_args__ = {"mysql_charset": "latin1"}
@@ -2283,7 +2283,6 @@ class Checks(Base):
     role: Mapped["CheckRoles"] = relationship("CheckRoles")
 
     view: Mapped["CheckResultViews"] = relationship("CheckResultViews")
-    arXiv_check_results: Mapped[List["CheckResults"]] = relationship("CheckResults", back_populates="check")
 
     def __repr__(self):
         return f"{ type(self).__name__ }/{ self.check_id }:{self.name};{'enabled' if self.enable_check else ''}"
@@ -2297,7 +2296,7 @@ class CheckResults(Base):
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
     data_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     metadata_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    check_id: Mapped[int] = mapped_column(ForeignKey("arXiv_checks.check_id"), nullable=False, index=True)
+    check_id: Mapped[int] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     ok: Mapped[int] = mapped_column(Integer, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
@@ -2305,7 +2304,6 @@ class CheckResults(Base):
     data: Mapped[Optional[str]] = mapped_column(Text)
     submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
 
-    check: Mapped["Checks"] = relationship("Checks", back_populates="arXiv_check_results")
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_check_results")
     check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="check_result")
     """ 

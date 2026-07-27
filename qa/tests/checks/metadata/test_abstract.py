@@ -99,7 +99,7 @@ class TestAbstractIsValid:
     def test_result_has_check_metadata(self):
         result = AbstractIsValid.check("A fine abstract with enough text.")
         assert result.check_config["name"] == "abstract_is_valid"
-        assert result.check_config["id"] == 520
+        assert result.check_config["id"] == 300
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 

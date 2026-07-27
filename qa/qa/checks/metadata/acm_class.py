@@ -19,7 +19,7 @@ class AcmClassIsValid(BaseAggregateCheck):
 
     name = "acm_class_is_valid"
     display_name = "ACM Class Is Valid"
-    id = 590
+    id = 900
     version = "1.0.0"
     description = "The metadata acm_class field is valid."
     on_failure_policy = OnFailurePolicy.REJECT

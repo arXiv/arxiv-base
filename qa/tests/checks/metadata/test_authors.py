@@ -279,7 +279,7 @@ class TestAuthorsAreValid:
     def test_result_has_check_metadata(self):
         result = AuthorsAreValid.check("Fred Smith")
         assert result.check_config["name"] == "authors_are_valid"
-        assert result.check_config["id"] == 510
+        assert result.check_config["id"] == 200
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 

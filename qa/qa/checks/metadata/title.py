@@ -1,3 +1,5 @@
+"""Title metadata checks."""
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
@@ -25,7 +27,7 @@ class TitleIsValid(BaseAggregateCheck):
 
     name = "title_is_valid"
     display_name = "Title Is Valid"
-    id = 500
+    id = 100
     version = "1.0.0"
     description = "The metadata title field is valid."
     on_failure_policy = OnFailurePolicy.REJECT
