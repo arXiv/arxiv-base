@@ -20,7 +20,7 @@ dev = [
 default-groups = ["dev"]
 
 [tool.uv.sources]
-arxiv-base = { git = "https://github.com/arXiv/arxiv-base", rev = "8135d213c8409297e807f1d9a73709799b9750ef" }
+arxiv-base = { git = "https://github.com/arXiv/arxiv-base", branch = "master" }
 
 # do not install arxiv-base deps
 [[tool.uv.dependency-metadata]]
