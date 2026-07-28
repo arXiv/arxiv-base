@@ -101,16 +101,6 @@ class TestAbstractIsValid:
         assert not result.passed
         assert not sub_result(result, "url_does_not_end_with_period").passed
 
-    def test_fail_not_english(self):
-        result = AbstractIsValid.check(
-            "Ceci est un texte en français qui ne contient aucun mot anglais du tout, vraiment aucun"
-        )
-        assert not result.passed
-        assert not sub_result(result, "abstract_appears_to_be_english").passed
-
-    def test_pass_short_non_english_not_checked(self):
-        assert AbstractIsValid.check("Ceci n'est pas anglais").passed
-
     def test_fail_too_many_lines(self):
         abstract = "\n".join(f"Line {i} of the abstract text" for i in range(25))
         result = AbstractIsValid.check(abstract)

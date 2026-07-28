@@ -4,7 +4,6 @@ from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     AllBracketsBalanced,
-    AbstractAppearsToBeEnglish,
     DoesNotBeginWithAbstract,
     DoesNotContainControlCharsAllowNewlines,
     DoesNotContainRightarrowMacro,
@@ -66,6 +65,5 @@ class AbstractIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
         ),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        AbstractAppearsToBeEnglish(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
         NotTooManyLines(24, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
     )

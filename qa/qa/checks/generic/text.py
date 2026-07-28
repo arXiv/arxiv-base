@@ -1,7 +1,5 @@
 """Generic text checks."""
 
-import re
-
 from qa.checks.models import Result, Offset, OnFailurePolicy, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
@@ -661,30 +659,6 @@ class JournalRefContainsValidYear(BaseGenericPatternCheck):
     failure_message = "Does not contain a valid year (19xx or 20xx)."
 
     _pattern = r"^(?!.*(?:\A|\D)(?:19|20)\d\d(?:\D|\Z)).*$"
-
-
-class AbstractAppearsToBeEnglish(BaseGenericCheck):
-    name = "abstract_appears_to_be_english"
-    display_name = "Abstract Appears To Be English"
-    id = 10068
-    version = "1.0.0"
-    description = "Abstracts longer than 80 characters contain at least one common English word."
-    failure_message = "Abstract does not appear to be in English."
-
-    _min_length_to_check = 80
-    _english_pattern = re.compile(
-        r"\b(?:we|the|of|this|and|that|are|or|is|for|with|some|to|talk|review|report|"
-        r"lectures?|comments?\s+on|remarks?|revised|from|see|at|they|may|have|theory|by)\b",
-        re.IGNORECASE,
-    )
-
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        v = getattr(getattr(data_registry, self.data), self.field)
-
-        if len(v) <= self._min_length_to_check or self._english_pattern.search(v):
-            return self._result(passed=True)
-
-        return self._result(passed=False, message=self.failure_message)
 
 
 class DoesNotContainMscPrefix(BaseGenericPatternCheck):
