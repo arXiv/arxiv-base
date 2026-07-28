@@ -12,13 +12,17 @@ from qa.checks.generic.text import (
     DoesNotStartWithLowercase,
     DoesNotContainUnnecessaryEscape,
     DoesNotContainTex,
+    DoesNotContainRightarrowMacro,
+    DoesNotContainTexHardSpaceAfterPeriod,
+    UrlDoesNotEndWithPeriod,
     NoBoundaryWhitespace,
     NoExtraWhitespace,
     NoUnnecessarySpaceInParens,
     NoHtmlElements,
     AllBracketsBalanced,
-    DoesNotContainControlChars,
+    DoesNotContainControlCharsAllowNewlines,
     NoUtf8DecodingErrors,
+    NotTooManyLines,
 )
 
 
@@ -40,8 +44,8 @@ class TitleIsValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
 
     _checks = (
-        NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NotTooShort(5, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        NotTooLong(240, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
         DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
@@ -49,11 +53,19 @@ class TitleIsValid(BaseAggregateCheck):
         DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotContainRightarrowMacro(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        DoesNotContainTexHardSpaceAfterPeriod(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"
+        ),
+        UrlDoesNotEndWithPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        DoesNotContainControlCharsAllowNewlines(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"
+        ),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        NotTooManyLines(3, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
     )

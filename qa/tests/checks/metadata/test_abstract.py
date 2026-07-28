@@ -71,15 +71,51 @@ class TestAbstractIsValid:
         assert result.results == []
         assert result.message == "Abstract is invalid or empty."
 
-    def test_warn_too_short(self):
+    def test_fail_too_short(self):
         result = AbstractIsValid.check("Hi")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
+    def test_fail_too_long(self):
+        result = AbstractIsValid.check("In this work, we study aaa. " * 100)
+        assert not result.passed
+        assert not sub_result(result, "not_too_long").passed
+
     def test_warn_begins_with_abstract(self):
-        result = AbstractIsValid.check("Abstract: some text")
+        result = AbstractIsValid.check("Abstract: some text that is long enough to pass other checks")
         assert result.passed
         assert not sub_result(result, "does_not_begin_with_abstract").passed
+
+    def test_fail_rightarrow_macro(self):
+        result = AbstractIsValid.check("In this work we show A \\rightarrow B instead of using \\to")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_rightarrow_macro").passed
+
+    def test_fail_tex_hard_space_after_period(self):
+        result = AbstractIsValid.check("In this work we cite R.~Smith and colleagues")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_tex_hard_space_after_period").passed
+
+    def test_fail_url_ends_with_period(self):
+        result = AbstractIsValid.check("In this work see http://example.com/paper.")
+        assert not result.passed
+        assert not sub_result(result, "url_does_not_end_with_period").passed
+
+    def test_fail_not_english(self):
+        result = AbstractIsValid.check(
+            "Ceci est un texte en français qui ne contient aucun mot anglais du tout, vraiment aucun"
+        )
+        assert not result.passed
+        assert not sub_result(result, "abstract_appears_to_be_english").passed
+
+    def test_pass_short_non_english_not_checked(self):
+        assert AbstractIsValid.check("Ceci n'est pas anglais").passed
+
+    def test_fail_too_many_lines(self):
+        abstract = "\n".join(f"Line {i} of the abstract text" for i in range(25))
+        result = AbstractIsValid.check(abstract)
+        assert not result.passed
+        assert not sub_result(result, "not_too_many_lines").passed
 
     def test_warn_tex_begin_no_brace(self):
         result = AbstractIsValid.check("This \\begin foo is flagged")

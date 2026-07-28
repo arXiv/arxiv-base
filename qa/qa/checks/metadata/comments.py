@@ -5,15 +5,20 @@ from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     NotTooLong,
     DoesNotContainLinebreak,
+    DoesNotContainRightarrowMacro,
+    DoesNotContainTexHardSpaceAfterPeriod,
+    DoesNotEndWithTrailingPeriod,
     NoExcessiveCapitals,
     DoesNotContainUnnecessaryEscape,
     DoesNotContainTex,
     NoBoundaryWhitespace,
     NoExtraWhitespace,
+    NotTooManyLines,
     NoUnnecessarySpaceInParens,
     AllBracketsBalanced,
     DoesNotContainControlChars,
     NoUtf8DecodingErrors,
+    UrlDoesNotEndWithPeriod,
 )
 
 
@@ -41,15 +46,22 @@ class CommentsAreValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        NotTooLong(10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        NotTooLong(400, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        DoesNotContainRightarrowMacro(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
+        DoesNotContainTexHardSpaceAfterPeriod(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"
+        ),
+        UrlDoesNotEndWithPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
+        DoesNotEndWithTrailingPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        NotTooManyLines(5, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
     )

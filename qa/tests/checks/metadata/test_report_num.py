@@ -27,45 +27,25 @@ class TestReportNumIsValid:
         assert result.results == []
 
     def test_warn_too_short(self):
-        result = ReportNumIsValid.check("A1")
+        result = ReportNumIsValid.check("A11")
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
-
-    def test_warn_too_short_two_digits(self):
-        result = ReportNumIsValid.check("12")
-        assert result.passed
-        assert not sub_result(result, "not_too_short").passed
-
-    def test_warn_too_short_three_digits(self):
-        result = ReportNumIsValid.check("123")
-        assert result.passed
-        assert not sub_result(result, "not_too_short").passed
-
-    def test_warn_no_letters_four_digits(self):
-        result = ReportNumIsValid.check("1234")
-        assert result.passed
-        assert not sub_result(result, "contains_letters").passed
-
-    def test_warn_no_letters_five_digits(self):
-        result = ReportNumIsValid.check("12345")
-        assert result.passed
-        assert not sub_result(result, "contains_letters").passed
 
     def test_pass_multiple_report_nums(self):
         assert ReportNumIsValid.check("ECTP-2024-05; WLCAPP-2024-05; FUE-2024-05").passed
 
     def test_warn_too_long(self):
-        result = ReportNumIsValid.check("X" * 2001)
+        result = ReportNumIsValid.check("A11" + "x" * 2001)
         assert result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_warn_contains_url(self):
-        result = ReportNumIsValid.check("https://example.com/report")
+        result = ReportNumIsValid.check("https://example.com/report12")
         assert result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
     def test_warn_contains_http_url(self):
-        result = ReportNumIsValid.check("http://example.com/report")
+        result = ReportNumIsValid.check("http://example.com/report12")
         assert result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
@@ -74,15 +54,43 @@ class TestReportNumIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_no_letters(self):
+    def test_fail_no_letters(self):
         result = ReportNumIsValid.check("1234567")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "contains_letters").passed
 
-    def test_warn_no_digits(self):
+    def test_fail_no_consecutive_digits(self):
         result = ReportNumIsValid.check("ABCDEFG")
-        assert result.passed
-        assert not sub_result(result, "contains_digits").passed
+        assert not result.passed
+        assert not sub_result(result, "contains_consecutive_digits").passed
+
+    def test_fail_single_digit_not_consecutive(self):
+        result = ReportNumIsValid.check("CERN-A-1-B-2-C")
+        assert not result.passed
+        assert not sub_result(result, "contains_consecutive_digits").passed
+
+    def test_fail_ends_with_trailing_period(self):
+        result = ReportNumIsValid.check("CERN-EP-2024-001.")
+        assert not result.passed
+        assert not sub_result(result, "does_not_end_with_trailing_period").passed
+
+    def test_pass_ellipsis_not_flagged(self):
+        assert ReportNumIsValid.check("CERN-EP-2024-001...").passed
+
+    def test_fail_rightarrow_macro(self):
+        result = ReportNumIsValid.check("CERN-EP-2024 \\rightarrow 001")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_rightarrow_macro").passed
+
+    def test_fail_tex_hard_space_after_period(self):
+        result = ReportNumIsValid.check("CERN-EP.~2024-001")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_tex_hard_space_after_period").passed
+
+    def test_fail_url_ends_with_period(self):
+        result = ReportNumIsValid.check("See http://example.com/report12.")
+        assert not result.passed
+        assert not sub_result(result, "url_does_not_end_with_period").passed
 
     def test_all_sub_checks_run_on_valid(self):
         result = ReportNumIsValid.check("CERN-EP-2024-001")

@@ -6,9 +6,11 @@ from qa.checks.generic.text import (
     NotTooLong,
     DoesNotContainUrl,
     DoesNotContainDoi,
-    DoesNotContainSemicolon,
+    DoesNotContainMscPrefix,
+    DoesNotEndWithTrailingPeriod,
     NoBoundaryWhitespace,
     NoExtraWhitespace,
+    NotTooManyLines,
     NoUnnecessarySpaceInParens,
     DoesNotContainControlChars,
     NoUtf8DecodingErrors,
@@ -39,15 +41,15 @@ class MscClassIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        NotTooLong(1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
+        NotTooLong(160, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
         DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
+        DoesNotContainMscPrefix(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
+        DoesNotEndWithTrailingPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        DoesNotContainSemicolon(
-            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"
-        ),  # TODO remove?
+        NotTooManyLines(2, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
     )

@@ -26,10 +26,39 @@ class TestCommentsAreValid:
         assert result.passed
         assert result.results == []
 
-    def test_warn_too_long(self):
-        result = CommentsAreValid.check("x" * 10001)
-        assert result.passed
+    def test_fail_too_long(self):
+        result = CommentsAreValid.check("x" * 401)
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
+
+    def test_pass_at_length_limit(self):
+        assert CommentsAreValid.check("x" * 400).passed
+
+    def test_fail_trailing_period(self):
+        result = CommentsAreValid.check("12 pages, 3 figures.")
+        assert not result.passed
+        assert not sub_result(result, "does_not_end_with_trailing_period").passed
+
+    def test_fail_rightarrow_macro(self):
+        result = CommentsAreValid.check("Fixes A \\rightarrow B, should be \\to")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_rightarrow_macro").passed
+
+    def test_fail_tex_hard_space_after_period(self):
+        result = CommentsAreValid.check("See Fig.~2 for details")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_tex_hard_space_after_period").passed
+
+    def test_fail_url_ends_with_period(self):
+        result = CommentsAreValid.check("Code at http://example.com/repo.")
+        assert not result.passed
+        assert not sub_result(result, "url_does_not_end_with_period").passed
+
+    def test_fail_too_many_lines(self):
+        comments = "\n".join(f"Line {i}" for i in range(6))
+        result = CommentsAreValid.check(comments)
+        assert not result.passed
+        assert not sub_result(result, "not_too_many_lines").passed
 
     def test_warn_utf8_decoding_error_accents(self):
         result = CommentsAreValid.check("A comment with èéêëìíîï accents".encode("UTF-8").decode("LATIN-1"))

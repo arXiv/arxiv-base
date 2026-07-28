@@ -5,15 +5,19 @@ from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks.generic.text import (
     NotTooShort,
     NotTooLong,
-    DoesNotContainUrl,
-    DoesNotContainDoi,
+    ContainsConsecutiveDigits,
     ContainsLetters,
-    ContainsDigits,
+    DoesNotContainDoi,
+    DoesNotContainRightarrowMacro,
+    DoesNotContainTexHardSpaceAfterPeriod,
+    DoesNotContainUrl,
+    DoesNotEndWithTrailingPeriod,
     NoBoundaryWhitespace,
     NoExtraWhitespace,
     NoUnnecessarySpaceInParens,
     DoesNotContainControlChars,
     NoUtf8DecodingErrors,
+    UrlDoesNotEndWithPeriod,
 )
 
 
@@ -45,8 +49,14 @@ class ReportNumIsValid(BaseAggregateCheck):
         NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        ContainsLetters(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        ContainsDigits(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        ContainsLetters(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
+        ContainsConsecutiveDigits(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
+        DoesNotContainRightarrowMacro(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
+        DoesNotContainTexHardSpaceAfterPeriod(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"
+        ),
+        UrlDoesNotEndWithPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
+        DoesNotEndWithTrailingPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),

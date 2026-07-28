@@ -6,6 +6,7 @@ from qa.checks.metadata.acm_class import AcmClassIsValid  # noqa
 from qa.checks.metadata.authors import AuthorsAreValid  # noqa
 from qa.checks.metadata.comments import CommentsAreValid  # noqa
 from qa.checks.metadata.doi import DoiIsValid  # noqa
+from qa.checks.metadata.field_line_totals import MetadataFieldsTotalLinesNotExceeded  # noqa
 from qa.checks.metadata.journal_ref import JournalRefIsValid  # noqa
 from qa.checks.metadata.msc_class import MscClassIsValid  # noqa
 from qa.checks.metadata.report_num import ReportNumIsValid  # noqa
@@ -27,6 +28,7 @@ submit_event_checks: list[BaseCheck] = [
     DoiIsValid(),
     MscClassIsValid(),
     AcmClassIsValid(),
+    MetadataFieldsTotalLinesNotExceeded(),
     DoesNotExceedTheFileSizeLimit(),
     IsNotAWithdrawal(),
 ]

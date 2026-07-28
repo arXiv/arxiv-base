@@ -31,10 +31,51 @@ class TestTitleIsValid:
         assert result.results == []
         assert result.message == "Title is invalid or empty."
 
-    def test_warn_too_short(self):
+    def test_fail_too_short(self):
         result = TitleIsValid.check("Tiny")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
+
+    def test_fail_too_long(self):
+        result = TitleIsValid.check("x" * 241)
+        assert not result.passed
+        assert not sub_result(result, "not_too_long").passed
+
+    def test_pass_at_length_limit(self):
+        title = "x" * 240
+        result = TitleIsValid.check(title)
+        assert result.passed
+
+    def test_fail_rightarrow_macro(self):
+        result = TitleIsValid.check("A title with \\rightarrow instead of \\to")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_rightarrow_macro").passed
+
+    def test_fail_tex_hard_space_after_period(self):
+        result = TitleIsValid.check("A title with R.~Smith notation")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_tex_hard_space_after_period").passed
+
+    def test_fail_url_ends_with_period(self):
+        result = TitleIsValid.check("See http://example.com/paper.")
+        assert not result.passed
+        assert not sub_result(result, "url_does_not_end_with_period").passed
+
+    def test_fail_too_many_lines(self):
+        result = TitleIsValid.check("Line one\nLine two\nLine three\nLine four")
+        assert not result.passed
+        assert not sub_result(result, "not_too_many_lines").passed
+
+    def test_pass_at_line_limit(self):
+        assert TitleIsValid.check("Line one\nLine two\nLine three").passed
+
+    def test_fail_control_chars(self):
+        result = TitleIsValid.check("A title with a\tcontrol char")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_control_chars_allow_newlines").passed
+
+    def test_pass_newline_permitted(self):
+        assert TitleIsValid.check("A title that\nwraps a line").passed
 
     def test_pass_ends_with_punctuation(self):
         result = TitleIsValid.check("A title with period.")

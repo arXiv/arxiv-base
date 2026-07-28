@@ -11,6 +11,7 @@ from qa.checks.generic.text import (
     DoesNotContainDoi,
     NoBoundaryWhitespace,
     NoExtraWhitespace,
+    NotTooManyLines,
     NoUnnecessarySpaceInParens,
     DoesNotContainControlChars,
     NoUtf8DecodingErrors,
@@ -42,9 +43,9 @@ class DoiIsValid(BaseAggregateCheck):
 
     _checks = (
         NotTooShort(10, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        DoesNotContainBadDoiPrefix(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        DoiHasValidFormat(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
+        NotTooLong(160, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        DoesNotContainBadDoiPrefix(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        DoiHasValidFormat(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
@@ -52,4 +53,5 @@ class DoiIsValid(BaseAggregateCheck):
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
+        NotTooManyLines(2, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
     )

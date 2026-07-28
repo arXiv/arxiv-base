@@ -26,10 +26,23 @@ class TestAcmClassIsValid:
         assert result.passed
         assert result.results == []
 
-    def test_warn_too_long(self):
-        result = AcmClassIsValid.check("x" * 1001)
-        assert result.passed
+    def test_fail_too_long(self):
+        result = AcmClassIsValid.check("x" * 161)
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
+
+    def test_pass_at_length_limit(self):
+        assert AcmClassIsValid.check("x" * 160).passed
+
+    def test_fail_trailing_period(self):
+        result = AcmClassIsValid.check("F.2.2.")
+        assert not result.passed
+        assert not sub_result(result, "does_not_end_with_trailing_period").passed
+
+    def test_fail_too_many_lines(self):
+        result = AcmClassIsValid.check("F.2.2\nI.2.7\nH.5.1")
+        assert not result.passed
+        assert not sub_result(result, "not_too_many_lines").passed
 
     def test_warn_contains_url(self):
         result = AcmClassIsValid.check("https://example.com/F.2.2")

@@ -99,24 +99,24 @@ class TestAuthorsAreValid:
     def test_pass_escaped_tilde_accent(self):
         assert AuthorsAreValid.check("Jean Nu\\~nos").passed
 
-    def test_warn_trailing_punctuation(self):
+    def test_fail_trailing_punctuation(self):
         result = AuthorsAreValid.check("Fred Smith,")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_end_with_punctuation").passed
 
-    def test_warn_trailing_punctuation_period(self):
+    def test_fail_trailing_punctuation_period(self):
         result = AuthorsAreValid.check("Barney Smity.")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_end_with_punctuation").passed
 
-    def test_warn_trailing_punctuation_suffix(self):
+    def test_fail_trailing_punctuation_suffix(self):
         result = AuthorsAreValid.check("Barney Smity III.")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_end_with_punctuation").passed
 
-    def test_warn_trailing_punctuation_comma(self):
+    def test_fail_trailing_punctuation_comma(self):
         result = AuthorsAreValid.check("Guillermo A. Lemarchand,")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_end_with_punctuation").passed
 
     def test_pass_et_al(self):
@@ -265,6 +265,27 @@ class TestAuthorsAreValid:
         assert AuthorsAreValid.check(
             "Thomas Brettschneider and Giovanni Volpe and Laurent Helden and Jan Wehr and Clemens Bechinger"
         ).passed
+
+    def test_fail_excessive_capitals(self):
+        result = AuthorsAreValid.check("JOHN SMITH AND JANE DOE")
+        assert not result.passed
+        assert not sub_result(result, "no_excessive_capitals").passed
+
+    def test_fail_missing_space_before_paren(self):
+        result = AuthorsAreValid.check("Fred Smith(Cornell)")
+        assert not result.passed
+        assert not sub_result(result, "requires_space_around_parens").passed
+
+    def test_fail_missing_space_after_paren(self):
+        result = AuthorsAreValid.check("Fred Smith (Cornell)Joe Bloggs")
+        assert not result.passed
+        assert not sub_result(result, "requires_space_around_parens").passed
+
+    def test_fail_too_many_lines(self):
+        authors = "\n".join(f"Author {i}" for i in range(21))
+        result = AuthorsAreValid.check(authors)
+        assert not result.passed
+        assert not sub_result(result, "not_too_many_lines").passed
 
     def test_none_field_short_circuits(self):
         result = AuthorsAreValid().run(QaDataRegistry(metadata=Metadata(authors=None)))

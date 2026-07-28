@@ -6,8 +6,10 @@ from qa.checks.generic.text import (
     NotTooLong,
     DoesNotContainUrl,
     DoesNotContainDoi,
+    DoesNotEndWithTrailingPeriod,
     NoBoundaryWhitespace,
     NoExtraWhitespace,
+    NotTooManyLines,
     NoUnnecessarySpaceInParens,
     DoesNotContainControlChars,
     NoUtf8DecodingErrors,
@@ -38,12 +40,14 @@ class AcmClassIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        NotTooLong(1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        NotTooLong(160, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
         DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        DoesNotEndWithTrailingPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        NotTooManyLines(2, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
     )

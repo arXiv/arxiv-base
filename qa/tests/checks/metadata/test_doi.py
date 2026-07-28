@@ -31,49 +31,57 @@ class TestDoiIsValid:
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
-    def test_warn_too_long(self):
-        result = DoiIsValid.check("10.1103/" + "a" * 1993)
-        assert result.passed
+    def test_fail_too_long(self):
+        result = DoiIsValid.check("10.1103/" + "a" * 153)
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
-    def test_warn_bad_doi_prefix_doi_colon(self):
+    def test_pass_at_length_limit(self):
+        assert DoiIsValid.check("10.1103/" + "a" * 152).passed
+
+    def test_fail_bad_doi_prefix_doi_colon(self):
         result = DoiIsValid.check("doi:10.1103/PhysRevLett.132.011001")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_bad_doi_prefix").passed
 
-    def test_warn_bad_doi_prefix_https(self):
+    def test_fail_bad_doi_prefix_https(self):
         result = DoiIsValid.check("https://doi.org/10.1103/PhysRevLett.132.011001")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_bad_doi_prefix").passed
 
     def test_pass_non_ten_prefix(self):
         assert DoiIsValid.check("22.48550/arXiv.2501.18183").passed
 
-    def test_warn_invalid_doi(self):
+    def test_fail_invalid_doi(self):
         result = DoiIsValid.check("not-a-doi")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "doi_has_valid_format").passed
 
-    def test_warn_invalid_doi_no_scheme(self):
+    def test_fail_invalid_doi_no_scheme(self):
         result = DoiIsValid.check("doi.org/10.48550/arXiv.2501.18183")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "doi_has_valid_format").passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_invalid_doi_with_preceding_text(self):
+    def test_fail_invalid_doi_with_preceding_text(self):
         result = DoiIsValid.check("I like 10.48550/arXiv.2501.18183")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "doi_has_valid_format").passed
 
-    def test_warn_contains_url(self):
+    def test_fail_contains_url(self):
         result = DoiIsValid.check("https://example.com/10.1103/something")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
-    def test_warn_contains_doi_text(self):
+    def test_fail_contains_doi_text(self):
         result = DoiIsValid.check("doi:10.1103/PhysRevLett.132.011001")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
+
+    def test_fail_too_many_lines(self):
+        result = DoiIsValid.check("10.1103/a\n10.1103/b\n10.1103/c")
+        assert not result.passed
+        assert not sub_result(result, "not_too_many_lines").passed
 
     def test_all_sub_checks_run_on_valid(self):
         result = DoiIsValid.check("10.1103/PhysRevLett.132.011001")

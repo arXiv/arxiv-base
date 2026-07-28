@@ -26,10 +26,13 @@ class TestMscClassIsValid:
         assert result.passed
         assert result.results == []
 
-    def test_warn_too_long(self):
-        result = MscClassIsValid.check("x" * 1001)
-        assert result.passed
+    def test_fail_too_long(self):
+        result = MscClassIsValid.check("x" * 161)
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
+
+    def test_pass_at_length_limit(self):
+        assert MscClassIsValid.check("x" * 160).passed
 
     def test_warn_contains_url(self):
         result = MscClassIsValid.check("https://example.com/35K55")
@@ -41,10 +44,28 @@ class TestMscClassIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_contains_semicolon(self):
-        result = MscClassIsValid.check("35K55; 65M06")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_semicolon").passed
+    def test_pass_semicolon_separated(self):
+        assert MscClassIsValid.check("35K55; 65M06").passed
+
+    def test_fail_msc_prefix(self):
+        result = MscClassIsValid.check("MSC classification: 35K55")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_msc_prefix").passed
+
+    def test_fail_msc_prefix_bare(self):
+        result = MscClassIsValid.check("MSC 35K55")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_msc_prefix").passed
+
+    def test_fail_trailing_period(self):
+        result = MscClassIsValid.check("35K55.")
+        assert not result.passed
+        assert not sub_result(result, "does_not_end_with_trailing_period").passed
+
+    def test_fail_too_many_lines(self):
+        result = MscClassIsValid.check("35K55\n65M06\n14J60")
+        assert not result.passed
+        assert not sub_result(result, "not_too_many_lines").passed
 
     def test_pass_space_separated(self):
         assert MscClassIsValid.check("abc def").passed

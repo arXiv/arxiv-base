@@ -1,5 +1,7 @@
 """Generic text checks."""
 
+import re
+
 from qa.checks.models import Result, Offset, OnFailurePolicy, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
@@ -463,26 +465,15 @@ class ContainsLetters(BaseGenericPatternCheck):
     _pattern = r"^[^A-Za-z]*$"
 
 
-class ContainsDigits(BaseGenericPatternCheck):
-    name = "contains_digits"
-    display_name = "Contains Digits"
+class ContainsConsecutiveDigits(BaseGenericPatternCheck):
+    name = "contains_consecutive_digits"
+    display_name = "Contains Consecutive Digits"
     id = 10037
     version = "1.0.0"
-    description = "The value contains at least one digit."
-    failure_message = "No digits found."
+    description = "The value contains at least two consecutive digits."
+    failure_message = "No consecutive digits found."
 
-    _pattern = r"^[^0-9]*$"
-
-
-class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
-    name = "does_not_contain_semicolon"
-    display_name = "Does Not Contain Semicolon"
-    id = 10022
-    version = "1.0.0"
-    description = "The value does not contain a semicolon."
-    failure_message = "Contains semicolon(s) - use ',' or 'and' to separate authors."
-
-    _pattern = r";"
+    _pattern = r"^(?!.*\d\d).*$"
 
 
 class DoesNotContainAccepted(BaseGenericPatternCheck):
@@ -490,10 +481,10 @@ class DoesNotContainAccepted(BaseGenericPatternCheck):
     display_name = "Does Not Contain Accepted"
     id = 10041
     version = "1.0.0"
-    description = "The value does not contain the word 'accepted'."
-    failure_message = "Contains 'accepted'."
+    description = "The value does not contain the word 'accept' (accepted/acceptance/etc.)."
+    failure_message = "Contains 'accept'."
 
-    _pattern = r"(?i)accepted"
+    _pattern = r"(?i)accept"
 
 
 class DoesNotContainSubmitted(BaseGenericPatternCheck):
@@ -501,10 +492,10 @@ class DoesNotContainSubmitted(BaseGenericPatternCheck):
     display_name = "Does Not Contain Submitted"
     id = 10042
     version = "1.0.0"
-    description = "The value does not contain the word 'submitted'."
-    failure_message = "Contains 'submitted'."
+    description = "The value does not contain the word 'submit' (submitted/submission/etc.)."
+    failure_message = "Contains 'submit'."
 
-    _pattern = r"(?i)submitted"
+    _pattern = r"(?i)submit"
 
 
 class DoesNotContainBibtex(BaseGenericPatternCheck):
@@ -552,3 +543,178 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
         if offsets:
             return self._result(passed=False, message=self.failure_message, offsets=offsets)
         return self._result(passed=True)
+
+
+class RequiresSpaceAroundParens(BaseGenericPatternCheck):
+    name = "requires_space_around_parens"
+    display_name = "Requires Space Around Parens"
+    id = 10057
+    version = "1.0.0"
+    description = "A word character does not directly abut an opening or closing parenthesis."
+    failure_message = "Missing space around parenthesis."
+
+    _pattern = r"\w\(|\)\w"
+
+
+class DoesNotContainRightarrowMacro(BaseGenericPatternCheck):
+    name = "does_not_contain_rightarrow_macro"
+    display_name = "Does Not Contain Rightarrow Macro"
+    id = 10058
+    version = "1.0.0"
+    description = "The value does not contain the TeX \\rightarrow macro (use \\to instead)."
+    failure_message = "Contains \\rightarrow; use \\to instead."
+
+    _pattern = r"\\rightarrow"
+
+
+class DoesNotContainTexHardSpaceAfterPeriod(BaseGenericPatternCheck):
+    name = "does_not_contain_tex_hard_space_after_period"
+    display_name = "Does Not Contain TeX Hard Space After Period"
+    id = 10059
+    version = "1.0.0"
+    description = "The value does not contain a TeX hard space (~) immediately after a period."
+    failure_message = "Contains a TeX hard space immediately after a period."
+
+    _pattern = r"\.~"
+
+
+class UrlDoesNotEndWithPeriod(BaseGenericPatternCheck):
+    name = "url_does_not_end_with_period"
+    display_name = "URL Does Not End With Period"
+    id = 10060
+    version = "1.0.0"
+    description = "The value does not end with a URL immediately followed by a trailing period."
+    failure_message = "Ends with a URL followed by a stray period."
+
+    _pattern = r"(?i)(https?|ftp)://\S*\.$"
+
+
+class DoesNotEndWithTrailingPeriod(BaseGenericPatternCheck):
+    name = "does_not_end_with_trailing_period"
+    display_name = "Does Not End With Trailing Period"
+    id = 10061
+    version = "1.0.0"
+    description = "The value does not end with a trailing period (an ellipsis is permitted)."
+    failure_message = "Ends with a trailing period."
+
+    _pattern = r"(?<!\.\.)\.\s*$"
+
+
+class NotTooManyLines(BaseGenericCheck):
+    name = "not_too_many_lines"
+    display_name = "Not Too Many Lines"
+    id = 10062
+    version = "1.0.0"
+    description = "The value does not exceed the maximum number of lines."
+    failure_message = "Too many lines."
+
+    def __init__(
+        self,
+        max_lines: int,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+        self.max_lines = max_lines
+
+    @property
+    def config(self) -> dict:
+        return {**super().config, "max_lines": self.max_lines}
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+        num_lines = v.count("\n") + 1
+
+        if num_lines <= self.max_lines:
+            return self._result(passed=True)
+
+        return self._result(passed=False, message=self.failure_message)
+
+
+class DoesNotContainInPress(BaseGenericPatternCheck):
+    name = "does_not_contain_in_press"
+    display_name = "Does Not Contain In Press"
+    id = 10064
+    version = "1.0.0"
+    description = "The value does not contain the phrase 'in press'."
+    failure_message = "Contains 'in press'."
+
+    _pattern = r"(?i)in press"
+
+
+class DoesNotContainAppear(BaseGenericPatternCheck):
+    name = "does_not_contain_appear"
+    display_name = "Does Not Contain Appear"
+    id = 10065
+    version = "1.0.0"
+    description = "The value does not contain the word 'appear' (appear/appears/appearing/etc.)."
+    failure_message = "Contains 'appear'."
+
+    _pattern = r"(?i)appear"
+
+
+class DoesNotContainToBePublished(BaseGenericPatternCheck):
+    name = "does_not_contain_to_be_published"
+    display_name = "Does Not Contain To Be Published"
+    id = 10066
+    version = "1.0.0"
+    description = "The value does not contain the phrase 'to be publ...' (published/publishing/etc.)."
+    failure_message = "Contains 'to be publ...'."
+
+    _pattern = r"(?i)to be publ"
+
+
+class JournalRefContainsValidYear(BaseGenericCheck):
+    name = "journal_ref_contains_valid_year"
+    display_name = "Journal Ref Contains Valid Year"
+    id = 10067
+    version = "1.0.0"
+    description = "The value contains a valid 19xx or 20xx year, delimited by non-digit characters."
+    failure_message = "Does not contain a valid year (19xx or 20xx)."
+
+    _year_pattern = re.compile(r"(\A|\D)(19|20)\d\d(\D|\Z)")
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        if self._year_pattern.search(v):
+            return self._result(passed=True)
+
+        return self._result(passed=False, message=self.failure_message)
+
+
+class AbstractAppearsToBeEnglish(BaseGenericCheck):
+    name = "abstract_appears_to_be_english"
+    display_name = "Abstract Appears To Be English"
+    id = 10068
+    version = "1.0.0"
+    description = "Abstracts longer than 80 characters contain at least one common English word."
+    failure_message = "Abstract does not appear to be in English."
+
+    _min_length_to_check = 80
+    _english_pattern = re.compile(
+        r"\b(?:we|the|of|this|and|that|are|or|is|for|with|some|to|talk|review|report|"
+        r"lectures?|comments?\s+on|remarks?|revised|from|see|at|they|may|have|theory|by)\b",
+        re.IGNORECASE,
+    )
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        if len(v) <= self._min_length_to_check or self._english_pattern.search(v):
+            return self._result(passed=True)
+
+        return self._result(passed=False, message=self.failure_message)
+
+
+class DoesNotContainMscPrefix(BaseGenericPatternCheck):
+    name = "does_not_contain_msc_prefix"
+    display_name = "Does Not Contain MSC Prefix"
+    id = 10069
+    version = "1.0.0"
+    description = "The value does not begin with an 'MSC classification/class/number (2000)' style label."
+    failure_message = "Contains an unnecessary MSC label prefix."
+
+    _pattern = r"(?i)^MSC([\s:\-]{0,4}(classification|class|number))?([\s:\-]{0,4}\(?2000\)?)?[\s:\-]*"
