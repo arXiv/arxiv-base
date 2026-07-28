@@ -528,21 +528,7 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
     description = "Each space-separated DOI in the value matches the expected DOI format."
     failure_message = "Invaleeid DOI."
 
-    _pattern = r"(?i)^(?![0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$)"
-
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        v = getattr(getattr(data_registry, self.data), self.field)
-        offsets = []
-        start = 0
-        for doi in v.split():
-            idx = v.index(doi, start)
-            end = idx + len(doi)
-            if self._compiled_pattern.match(doi):
-                offsets.append(Offset(start=idx, end=end))
-            start = end
-        if offsets:
-            return self._result(passed=False, message=self.failure_message, offsets=offsets)
-        return self._result(passed=True)
+    _pattern = r"(?i)(?<!\S)(?!(?:[0-9]+\.[0-9]+/[A-Za-z0-9():;._/-]*)(?=\s|$))\S+"
 
 
 class RequiresSpaceAroundParens(BaseGenericPatternCheck):
@@ -666,7 +652,7 @@ class DoesNotContainToBePublished(BaseGenericPatternCheck):
     _pattern = r"(?i)to be publ"
 
 
-class JournalRefContainsValidYear(BaseGenericCheck):
+class JournalRefContainsValidYear(BaseGenericPatternCheck):
     name = "journal_ref_contains_valid_year"
     display_name = "Journal Ref Contains Valid Year"
     id = 10067
@@ -674,15 +660,7 @@ class JournalRefContainsValidYear(BaseGenericCheck):
     description = "The value contains a valid 19xx or 20xx year, delimited by non-digit characters."
     failure_message = "Does not contain a valid year (19xx or 20xx)."
 
-    _year_pattern = re.compile(r"(\A|\D)(19|20)\d\d(\D|\Z)")
-
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        v = getattr(getattr(data_registry, self.data), self.field)
-
-        if self._year_pattern.search(v):
-            return self._result(passed=True)
-
-        return self._result(passed=False, message=self.failure_message)
+    _pattern = r"^(?!.*(?:\A|\D)(?:19|20)\d\d(?:\D|\Z)).*$"
 
 
 class AbstractAppearsToBeEnglish(BaseGenericCheck):
