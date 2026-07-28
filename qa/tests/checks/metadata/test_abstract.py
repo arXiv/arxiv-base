@@ -107,6 +107,32 @@ class TestAbstractIsValid:
         assert not result.passed
         assert not sub_result(result, "not_too_many_lines").passed
 
+    def test_fail_trailing_tex_linebreak_before_newline(self):
+        result = AbstractIsValid.check("In this work we show a result\\\\\nand then continue")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_trailing_tex_linebreak").passed
+
+    def test_fail_trailing_tex_linebreak_at_end(self):
+        result = AbstractIsValid.check("In this work we show a result that ends with a break\\\\")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_trailing_tex_linebreak").passed
+
+    def test_pass_tex_linebreak_mid_line_permitted(self):
+        assert AbstractIsValid.check("This \\\\ is a line break in the middle of text").passed
+
+    def test_fail_lone_period_line_mid_string(self):
+        result = AbstractIsValid.check("In this work we show something\n.\nand then more text follows")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_lone_period_line").passed
+
+    def test_fail_lone_period_line_at_end(self):
+        result = AbstractIsValid.check("In this work we show something interesting\n.")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_lone_period_line").passed
+
+    def test_pass_normal_sentence_period_before_newline(self):
+        assert AbstractIsValid.check("In this work we show something.\nAnd then more text follows here").passed
+
     def test_warn_tex_begin_no_brace(self):
         result = AbstractIsValid.check("This \\begin foo is flagged")
         assert result.passed

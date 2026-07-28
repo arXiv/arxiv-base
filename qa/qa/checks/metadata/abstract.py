@@ -10,6 +10,8 @@ from qa.checks.generic.text import (
     DoesNotContainTex,
     DoesNotContainTexBeginEnv,
     DoesNotContainTexHardSpaceAfterPeriod,
+    DoesNotContainTrailingTexLinebreak,
+    DoesNotContainLonePeriodLine,
     DoesNotContainUnnecessaryEscape,
     DoesNotStartWithLowercase,
     NoBoundaryWhitespace,
@@ -56,6 +58,10 @@ class AbstractIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"
         ),
         UrlDoesNotEndWithPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
+        DoesNotContainTrailingTexLinebreak(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"
+        ),
+        DoesNotContainLonePeriodLine(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
         NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),

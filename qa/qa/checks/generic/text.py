@@ -670,3 +670,25 @@ class DoesNotContainMscPrefix(BaseGenericPatternCheck):
     failure_message = "Contains an unnecessary MSC label prefix."
 
     _pattern = r"(?i)^MSC([\s:\-]{0,4}(classification|class|number))?([\s:\-]{0,4}\(?2000\)?)?[\s:\-]*"
+
+
+class DoesNotContainTrailingTexLinebreak(BaseGenericPatternCheck):
+    name = "does_not_contain_trailing_tex_linebreak"
+    display_name = "Does Not Contain Trailing TeX Linebreak"
+    id = 10070
+    version = "1.0.0"
+    description = "The value does not end a line, or the whole value, with a TeX linebreak macro (\\\\)."
+    failure_message = "Contains a TeX linebreak (\\\\) at the end of a line."
+
+    _pattern = r"\\\\(?=\n|\Z)"
+
+
+class DoesNotContainLonePeriodLine(BaseGenericPatternCheck):
+    name = "does_not_contain_lone_period_line"
+    display_name = "Does Not Contain Lone Period Line"
+    id = 10071
+    version = "1.0.0"
+    description = "The value does not contain a line consisting of only a single period."
+    failure_message = "Contains a line consisting of only a period."
+
+    _pattern = r"\n\.(?=\n|\Z)"
