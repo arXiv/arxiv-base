@@ -3,6 +3,8 @@
 from qa.checks.base import BaseCheck
 from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 
+# TODO: oversize images, too!
+
 
 class DoesNotExceedTheFileSizeLimit(BaseCheck):
     name = "does_not_exceed_the_file_size_limit"
@@ -24,5 +26,29 @@ class DoesNotExceedTheFileSizeLimit(BaseCheck):
             return self._result(passed=True)
 
 
-# TODO: add HTML file type check
+FILE_TYPES_TO_REVIEW = [
+    "html",
+]
+
+
+class FileTypeDoesNotRequireReview(BaseCheck):
+    name = "acceptable_file_type"
+    display_name = "Acceptable File type"
+    id = 13
+    version = "1.0.0"
+    description = "The submission file type does not require manual review."
+    on_failure_policy = OnFailurePolicy.REJECT
+    failure_message = "Submission file type requires manual review."
+
+    required_data = {"submit_event_info"}
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        assert data_registry.submit_event_info is not None
+
+        if data_registry.submit_event_info.source_format in FILE_TYPES_TO_REVIEW:
+            return self._result(passed=False, message=self.failure_message)
+        else:
+            return self._result(passed=True)
+
+
 # TODO: add TeX processing flag checks (post-exCITe)
