@@ -24,6 +24,7 @@ class TestOversizeCheck:
         with pytest.raises(MissingDataError):
             DoesNotExceedTheFileSizeLimit().run(QaDataRegistry())
 
+
 class TestAcceptableFileType:
     def test_filetype_pass(self):
         sub_metadata = make_test_submit_event_info()
@@ -40,4 +41,3 @@ class TestAcceptableFileType:
     def test_missing_submit_event_info_raises(self):
         with pytest.raises(MissingDataError):
             AcceptableFileType().run(QaDataRegistry())
-            

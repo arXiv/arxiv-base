@@ -77,20 +77,22 @@ class AuthorsAreValid(BaseAggregateCheck):
         AuthorNamesDoNotContainAffiliation(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
     )
 
+
 def normalize_author_name(name: str):
-    name = name.replace("\u00a0", " ") # non-breaking space
+    name = name.replace("\u00a0", " ")  # non-breaking space
     name = name.replace(".", " ")
-    name = name.replace(",", " ")        
-    name = name.replace("-", " ")        
-    name = name.replace("\u2010", " ") # "True hyphen"
-    name = name.replace("\u2011", " ") # "Non-breaking hyphen"
+    name = name.replace(",", " ")
+    name = name.replace("-", " ")
+    name = name.replace("\u2010", " ")  # "True hyphen"
+    name = name.replace("\u2011", " ")  # "Non-breaking hyphen"
     name = name.replace("  ", " ")
     return name.lower()
-    
+
+
 def is_name1_contained_in_name2(name1s: list[str], name2s: list[str]):
     # name1 is "conteined" in name2 if any of the names in name1 are
     # found in name2, and either all names are found, or one of the names is long enough
-    
+
     # we assume that name1 and name2 have been normalized and split() here
 
     all_short_name1_names_found = True
@@ -110,8 +112,8 @@ def is_name1_contained_in_name2(name1s: list[str], name2s: list[str]):
                 any_long_name1_found = True
                 break
 
-    return (any_long_name1_found or
-            (all_name1_names_short and all_short_name1_names_found))
+    return any_long_name1_found or (all_name1_names_short and all_short_name1_names_found)
+
 
 known_collaborations = [
     r"ATLAS Collaboration",
@@ -161,9 +163,9 @@ class AuthorsContainsSubmitterName(BaseCheck):
             raise EmptyFieldError("Field metdata is empty.")
         if data_registry.submit_event_info is None:
             raise EmptyFieldError("Field submit_event_info is empty.")
-            
+
         authors = data_registry.metadata.authors
-        
+
         submitter_name = data_registry.submit_event_info.submitter_name
         submitter_names = normalize_author_name(submitter_name).split()
 
@@ -174,12 +176,12 @@ class AuthorsContainsSubmitterName(BaseCheck):
 
         if known_collaboration(authors):
             return self._result(passed=True)
-        
+
         parsed_authors = parse_author_affil(authors)
 
         if len(parsed_authors) > 50:
             return self._result(passed=True)
-        
+
         for author in parsed_authors:
             keyname, firstname, suffix, *_ = author
             author_names = normalize_author_name(f"{firstname} {keyname}").split()

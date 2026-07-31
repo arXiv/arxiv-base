@@ -7,6 +7,7 @@ from qa.checks.models import QaDataRegistry
 from qa.checks.submission.type import IsNotAWithdrawal
 from tests.utils import make_test_submit_event_info
 
+
 class TestWithdrawalCheck:
     def test_wdr_pass(self):
         sub_metadata = make_test_submit_event_info()
