@@ -92,6 +92,9 @@ class SubmitEventInfo(BaseModel):  # TODO: check which fields are always provide
     is_oversize: bool
     data_version: int
     metadata_version: int
+    submitter_name: str
+    user_is_flagged: bool
+    source_format: Literal["pdf", "tex", "pdftex", "withdrawn", "docx", "invalid", "ps", "html"] 
 
 
 class Metadata(BaseModel):
