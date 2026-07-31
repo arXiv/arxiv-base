@@ -27,11 +27,11 @@ class TestCheckIds:
     def test_all_check_ids_unique(self):
         classes = _all_check_classes()
         ids = [cls.id for cls in classes]
-        assert len(classes) == len(set(ids))
+        assert sorted(ids) == sorted(set(ids))
 
 
 class TestCheckNames:
     def test_all_check_names_unique(self):
         classes = _all_check_classes()
         names = [cls.name.lower() for cls in classes]
-        assert len(classes) == len(set(names))
+        assert sorted(names) == sorted(set(names))
