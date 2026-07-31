@@ -34,7 +34,7 @@ FILE_TYPES_TO_REVIEW = [
 class FileTypeDoesNotRequireReview(BaseCheck):
     name = "acceptable_file_type"
     display_name = "Acceptable File type"
-    id = 13
+    id = 50
     version = "1.0.0"
     description = "The submission file type does not require manual review."
     on_failure_policy = OnFailurePolicy.REJECT
