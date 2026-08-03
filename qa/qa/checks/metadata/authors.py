@@ -46,7 +46,7 @@ class AuthorsAreValid(BaseAggregateCheck):
     failure_message = "Authors are invalid or empty."
 
     required_data = {"metadata"}
-    
+
     @classmethod
     def check(cls, authors: str | None) -> Result:
         return cls().run(QaDataRegistry(metadata=Metadata(authors=authors)))
@@ -89,8 +89,6 @@ class AuthorsContainsSubmitterName(BaseCheck):
 
     required_data = {"metadata", "submit_event_info"}
 
-    failure_flag_id = "submitter-name-not-found-in-authors-field"
-
     known_collaborations = [
         r"ATLAS Collaboration",
         r"CMS Collaboration",
@@ -123,7 +121,7 @@ class AuthorsContainsSubmitterName(BaseCheck):
         name = name.replace("\u2011", " ")  # "Non-breaking hyphen"
         name = name.replace("  ", " ")
         return name.lower()
-    
+
     @staticmethod
     def is_name1_contained_in_name2(name1s: list[str], name2s: list[str]):
         """name1 is "contained in" name2 if any of the names in name1
@@ -132,7 +130,7 @@ class AuthorsContainsSubmitterName(BaseCheck):
         have been normalized and split() here.
 
         """
-        
+
         all_short_name1_names_found = True
         all_name1_names_short = True
         any_long_name1_found = False
@@ -149,15 +147,8 @@ class AuthorsContainsSubmitterName(BaseCheck):
                 if name1name in name2s:
                     any_long_name1_found = True
                     break
-                
-        return any_long_name1_found or (all_name1_names_short and all_short_name1_names_found)
 
-    @property
-    def config(self) -> dict:
-        return {
-            **super().config,
-            "failure_flag_id": self.failure_flag_id,
-        }
+        return any_long_name1_found or (all_name1_names_short and all_short_name1_names_found)
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         if data_registry.metadata is None:
