@@ -30,7 +30,7 @@ class AcmClassIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NotTooLong(1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.NotTooLong(max_chars=1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),

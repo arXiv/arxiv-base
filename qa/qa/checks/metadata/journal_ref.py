@@ -30,8 +30,8 @@ class JournalRefIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        generic.NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NotTooShort(min_chars=5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
         generic.DoesNotContainBareDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),

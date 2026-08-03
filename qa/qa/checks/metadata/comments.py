@@ -30,7 +30,7 @@ class CommentsAreValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NotTooLong(10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NotTooLong(max_chars=10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),

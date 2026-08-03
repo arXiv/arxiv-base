@@ -25,8 +25,8 @@ class AbstractIsValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(abstract=abstract)))
 
     _checks = (
-        generic.NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        generic.NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NotTooShort(min_chars=5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotBeginWithAbstract(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),

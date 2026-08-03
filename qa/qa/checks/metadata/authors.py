@@ -24,8 +24,8 @@ class AuthorsAreValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(authors=authors)))
 
     _checks = (
-        generic.NotTooShort(4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.NotTooLong(10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        generic.NotTooLong(max_chars=10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoAnnotationSymbols(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),

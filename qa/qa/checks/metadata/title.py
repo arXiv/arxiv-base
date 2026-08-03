@@ -24,8 +24,8 @@ class TitleIsValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
 
     _checks = (
-        generic.NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NotTooShort(min_chars=5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),

@@ -30,8 +30,8 @@ class DoiIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NotTooShort(10, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
+        generic.NotTooShort(min_chars=10, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
+        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         generic.DoesNotContainBadDoiPrefix(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         generic.DoiHasValidFormat(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),

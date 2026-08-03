@@ -30,8 +30,8 @@ class ReportNumIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NotTooShort(4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        generic.NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.ContainsLetters(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
