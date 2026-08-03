@@ -2,19 +2,7 @@
 
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
-from qa.checks.generic.text import (
-    NotTooLong,
-    DoesNotContainLinebreak,
-    NoExcessiveCapitals,
-    DoesNotContainUnnecessaryEscape,
-    DoesNotContainTex,
-    NoBoundaryWhitespace,
-    NoExtraWhitespace,
-    NoUnnecessarySpaceInParens,
-    AllBracketsBalanced,
-    DoesNotContainControlChars,
-    NoUtf8DecodingErrors,
-)
+from qa.checks import generic
 
 
 class CommentsAreValid(BaseAggregateCheck):
@@ -29,6 +17,7 @@ class CommentsAreValid(BaseAggregateCheck):
     failure_message = "Comments are invalid."
 
     required_data = {"metadata"}
+    field = "comments"
 
     @classmethod
     def check(cls, comments: str | None) -> Result:
@@ -41,15 +30,17 @@ class CommentsAreValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        NotTooLong(10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NotTooLong(max_chars=10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.DoesNotContainUnnecessaryEscape(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"
+        ),
+        generic.DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
     )
