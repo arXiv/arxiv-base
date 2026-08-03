@@ -27,6 +27,7 @@ class MscClassIsValid(BaseAggregateCheck):
     failure_message = "MSC class is invalid."
 
     required_data = {"metadata"}
+    field = "msc_class"
 
     @classmethod
     def check(cls, msc_class: str | None) -> Result:

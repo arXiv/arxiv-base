@@ -26,6 +26,7 @@ class AcmClassIsValid(BaseAggregateCheck):
     failure_message = "ACM class is invalid."
 
     required_data = {"metadata"}
+    field = "acm_class"
 
     @classmethod
     def check(cls, acm_class: str | None) -> Result:

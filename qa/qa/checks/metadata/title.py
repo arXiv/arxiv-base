@@ -34,6 +34,7 @@ class TitleIsValid(BaseAggregateCheck):
     failure_message = "Title is invalid or empty."
 
     required_data = {"metadata"}
+    field = "title"
 
     @classmethod
     def check(cls, title: str | None) -> Result:

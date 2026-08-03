@@ -43,6 +43,7 @@ class AuthorsAreValid(BaseAggregateCheck):
     failure_message = "Authors are invalid or empty."
 
     required_data = {"metadata"}
+    field = "authors"
 
     @classmethod
     def check(cls, authors: str | None) -> Result:

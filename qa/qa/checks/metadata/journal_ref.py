@@ -31,6 +31,7 @@ class JournalRefIsValid(BaseAggregateCheck):
     failure_message = "Journal reference is invalid."
 
     required_data = {"metadata"}
+    field = "journal_ref"
 
     @classmethod
     def check(cls, journal_ref: str | None) -> Result:

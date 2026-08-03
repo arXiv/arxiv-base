@@ -29,6 +29,7 @@ class ReportNumIsValid(BaseAggregateCheck):
     failure_message = "Report number is invalid."
 
     required_data = {"metadata"}
+    field = "report_num"
 
     @classmethod
     def check(cls, report_num: str | None) -> Result:

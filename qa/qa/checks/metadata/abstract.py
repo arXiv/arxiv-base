@@ -34,6 +34,7 @@ class AbstractIsValid(BaseAggregateCheck):
     failure_message = "Abstract is invalid or empty."
 
     required_data = {"metadata"}
+    field = "abstract"
 
     @classmethod
     def check(cls, abstract: str | None) -> Result:

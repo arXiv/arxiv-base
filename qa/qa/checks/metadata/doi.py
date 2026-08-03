@@ -29,6 +29,7 @@ class DoiIsValid(BaseAggregateCheck):
     failure_message = "DOI is invalid."
 
     required_data = {"metadata"}
+    field = "doi"
 
     @classmethod
     def check(cls, doi: str | None) -> Result:

@@ -29,6 +29,7 @@ class CommentsAreValid(BaseAggregateCheck):
     failure_message = "Comments are invalid."
 
     required_data = {"metadata"}
+    field = "comments"
 
     @classmethod
     def check(cls, comments: str | None) -> Result:
