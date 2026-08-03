@@ -175,7 +175,15 @@ class BaseAggregateCheck(BaseCheck):
     Returns a failure if a field required by a sub-check is empty.
     """
 
+    field: str
     _checks: tuple[BaseGenericCheck, ...]
+
+    @property
+    def config(self) -> dict:
+        return {
+            **super().config,
+            "field": self.field,
+        }
 
     def _describe(self) -> dict:
         return {
