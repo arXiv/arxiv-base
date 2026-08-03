@@ -2,21 +2,7 @@
 
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
-from qa.checks.generic.text import (
-    NotTooShort,
-    NotTooLong,
-    DoesNotContainUrl,
-    DoesNotContainDoi,
-    DoesNotContainBareDoi,
-    DoesNotContainAccepted,
-    DoesNotContainSubmitted,
-    DoesNotContainBibtex,
-    NoBoundaryWhitespace,
-    NoExtraWhitespace,
-    NoUnnecessarySpaceInParens,
-    DoesNotContainControlChars,
-    NoUtf8DecodingErrors,
-)
+from qa.checks import generic
 
 
 class JournalRefIsValid(BaseAggregateCheck):
@@ -44,17 +30,17 @@ class JournalRefIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        DoesNotContainBareDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        DoesNotContainAccepted(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        DoesNotContainSubmitted(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        DoesNotContainBibtex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.DoesNotContainBareDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.DoesNotContainAccepted(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.DoesNotContainSubmitted(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.DoesNotContainBibtex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
     )

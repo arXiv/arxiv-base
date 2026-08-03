@@ -2,23 +2,7 @@
 
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
-from qa.checks.generic.text import (
-    AllBracketsBalanced,
-    DoesNotBeginWithAbstract,
-    DoesNotContainControlCharsAllowNewlines,
-    DoesNotContainTex,
-    DoesNotContainTexBeginEnv,
-    DoesNotContainUnnecessaryEscape,
-    DoesNotStartWithLowercase,
-    NoBoundaryWhitespace,
-    NoExcessiveCapitals,
-    NoExtraWhitespace,
-    NoHtmlElements,
-    NoUnnecessarySpaceInParens,
-    NoUtf8DecodingErrors,
-    NotTooLong,
-    NotTooShort,
-)
+from qa.checks import generic
 # TODO: add an English language check (requires gcld3, which has no macOS arm64 wheel)
 
 
@@ -41,21 +25,21 @@ class AbstractIsValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(abstract=abstract)))
 
     _checks = (
-        NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        DoesNotBeginWithAbstract(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        DoesNotContainTexBeginEnv(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        DoesNotContainControlCharsAllowNewlines(
+        generic.NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotBeginWithAbstract(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotContainTexBeginEnv(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotContainControlCharsAllowNewlines(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
         ),
-        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
     )

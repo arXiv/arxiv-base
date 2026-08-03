@@ -2,16 +2,7 @@
 
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
-from qa.checks.generic.text import (
-    NotTooLong,
-    DoesNotContainUrl,
-    DoesNotContainDoi,
-    NoBoundaryWhitespace,
-    NoExtraWhitespace,
-    NoUnnecessarySpaceInParens,
-    DoesNotContainControlChars,
-    NoUtf8DecodingErrors,
-)
+from qa.checks import generic
 
 
 class AcmClassIsValid(BaseAggregateCheck):
@@ -39,12 +30,12 @@ class AcmClassIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        NotTooLong(1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.NotTooLong(1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
     )
