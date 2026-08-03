@@ -26,11 +26,6 @@ class DoesNotExceedTheFileSizeLimit(BaseCheck):
             return self._result(passed=True)
 
 
-FILE_TYPES_TO_REVIEW = [
-    "html",
-]
-
-
 class FileTypeDoesNotRequireReview(BaseCheck):
     name = "acceptable_file_type"
     display_name = "Acceptable File type"
@@ -45,7 +40,9 @@ class FileTypeDoesNotRequireReview(BaseCheck):
     def _run(self, data_registry: QaDataRegistry) -> Result:
         assert data_registry.submit_event_info is not None
 
-        if data_registry.submit_event_info.source_format in FILE_TYPES_TO_REVIEW:
+        file_types_to_review = ["html",]
+
+        if data_registry.submit_event_info.source_format in file_types_to_review:
             return self._result(passed=False, message=self.failure_message)
         else:
             return self._result(passed=True)

@@ -4,7 +4,7 @@ import pytest
 
 from qa.checks.base import MissingDataError
 from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
-from qa.checks.metadata.authors import AuthorsAreValid, is_name1_contained_in_name2, AuthorsContainsSubmitterName
+from qa.checks.metadata.authors import AuthorsAreValid, AuthorsContainsSubmitterName
 from tests.utils import make_test_submit_event_info
 
 
@@ -290,14 +290,14 @@ class TestAuthorsAreValid:
 
 def test_name_contained():
     # Careful: is_name1_contained_in_name2 doesn't normalize!
-    assert is_name1_contained_in_name2(["James", "Harvey"], ["James", "Harvey"])
-    assert is_name1_contained_in_name2(["James", "Harvey"], ["J", "Harvey"])
-    assert is_name1_contained_in_name2(["James", "Harvey"], ["James", "H"])
-    assert not is_name1_contained_in_name2(["James", "Harvey"], ["Barney", "Rubble"])
-    assert is_name1_contained_in_name2(["O", "Henry"], ["O", "Henry"])
-    assert not is_name1_contained_in_name2(["Sandra", "O"], ["O", "Henry"])
-    assert is_name1_contained_in_name2(["ji", "li"], ["ji", "li"])
-    assert is_name1_contained_in_name2(["J", "C", "D"], ["J", "C", "D"])
+    assert AuthorsContainsSubmitterName.is_name1_contained_in_name2(["James", "Harvey"], ["James", "Harvey"])
+    assert AuthorsContainsSubmitterName.is_name1_contained_in_name2(["James", "Harvey"], ["J", "Harvey"])
+    assert AuthorsContainsSubmitterName.is_name1_contained_in_name2(["James", "Harvey"], ["James", "H"])
+    assert not AuthorsContainsSubmitterName.is_name1_contained_in_name2(["James", "Harvey"], ["Barney", "Rubble"])
+    assert AuthorsContainsSubmitterName.is_name1_contained_in_name2(["O", "Henry"], ["O", "Henry"])
+    assert not AuthorsContainsSubmitterName.is_name1_contained_in_name2(["Sandra", "O"], ["O", "Henry"])
+    assert AuthorsContainsSubmitterName.is_name1_contained_in_name2(["ji", "li"], ["ji", "li"])
+    assert AuthorsContainsSubmitterName.is_name1_contained_in_name2(["J", "C", "D"], ["J", "C", "D"])
 
 
 class TestAuthorsContainsSubmitterName:
