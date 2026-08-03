@@ -7,7 +7,7 @@ from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 class IsNotAWithdrawal(BaseCheck):
     name = "is_not_a_withdrawal"
     display_name = "Is Not A Withdrawal"
-    id = 49
+    id = 9
     version = "1.0.0"
     description = "The submission is not a withdrawal."
     on_failure_policy = OnFailurePolicy.WARN
