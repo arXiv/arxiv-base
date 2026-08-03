@@ -37,14 +37,26 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.DoesNotContainTildeAsHardSpace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        generic.DoesNotContainTildeAsHardSpace(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
+        ),
         generic.DoesNotEndWithPunctuation(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.AuthorsDoNotContainLoneSurname(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        generic.AuthorsDoNotContainLoneSurname(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
+        ),
         generic.AuthorsDoNotContainLlmAuthor(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.AuthorNamesDoNotContainSemicolon(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.AuthorNamesDoNotContainBrackets(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.AuthorNamesDoNotContainNumbers(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.AuthorNamesDoNotContainAffiliation(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        generic.AuthorNamesDoNotContainSemicolon(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
+        ),
+        generic.AuthorNamesDoNotContainBrackets(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
+        ),
+        generic.AuthorNamesDoNotContainNumbers(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
+        ),
+        generic.AuthorNamesDoNotContainAffiliation(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
+        ),
     )

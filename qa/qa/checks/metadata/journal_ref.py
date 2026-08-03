@@ -31,7 +31,9 @@ class JournalRefIsValid(BaseAggregateCheck):
 
     _checks = (
         generic.NotTooShort(min_chars=5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NotTooLong(
+            max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"
+        ),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
         generic.DoesNotContainBareDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
@@ -40,7 +42,11 @@ class JournalRefIsValid(BaseAggregateCheck):
         generic.DoesNotContainBibtex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
         generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
+        generic.NoUnnecessarySpaceInParens(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"
+        ),
+        generic.DoesNotContainControlChars(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"
+        ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="journal_ref"),
     )
