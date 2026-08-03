@@ -141,7 +141,15 @@ def ps_cache_html_path(arxiv_id: Identifier, version: int=0) -> str:
     return f"{dir}/{arxiv_id.filename}v{version}/"
 
 def latexml_html_path(arxiv_id: Identifier, version: int=0) -> str:
+    """Key of the latexml-converted HTML for a version, in the conversion bucket.
+
+    Keys are archive-qualified via `Identifier.squashed` (the convention browse's download
+    filenames already use): old-style ids include the archive with the slash dropped, so
+    hep-th/9711200 lives under hep-th9711200v3/ — bare old-style filenames are per-archive
+    sequences and collide across archives (astro-ph/9711200 is a different paper). New-style
+    keys are unchanged: squashed == filename for post-2007 ids.
+    """
     if not version:
         version = arxiv_id.version
-    path=f"{arxiv_id.filename}v{version}"
+    path=f"{arxiv_id.squashed}v{version}"
     return f'{path}{arxiv_id.extra}' if arxiv_id.extra else f'{path}/{path}.html'
