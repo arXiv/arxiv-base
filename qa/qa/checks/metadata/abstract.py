@@ -18,8 +18,8 @@ from qa.checks.generic.text import (
     NoUtf8DecodingErrors,
     NotTooLong,
     NotTooShort,
+    MustBeEnglish,
 )
-# TODO: add an English language check (requires gcld3, which has no macOS arm64 wheel)
 
 
 class AbstractIsValid(BaseAggregateCheck):
@@ -57,4 +57,5 @@ class AbstractIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
         ),
         NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        MustBeEnglish(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
     )

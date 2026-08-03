@@ -1,5 +1,7 @@
 """Generic text checks."""
 
+from ftlangdetect import detect
+
 from qa.checks.models import Result, Offset, OnFailurePolicy, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
@@ -34,6 +36,31 @@ class NoExcessiveCapitals(BaseGenericCheck):
         num_lower = sum([c.islower() for c in v])
 
         if num_caps <= num_lower * 2 + 7:
+            return self._result(passed=True)
+        else:
+            return self._result(passed=False, message=self.failure_message)
+
+
+class MustBeEnglish(BaseGenericCheck):
+    name = "must_be_english"
+    display_name = "Must Be English Capitals"
+    id = 10057
+    version = "1.0.0"
+    description = "The value must contain English text."
+    failure_message = "Likely not in English."
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        if len(v) < 30:
+            # language ID is not accurate below 30 chars.
+            return self._result(passed=True)
+
+        result = detect(v)
+
+        print(result)
+
+        if result and result.get("lang") == "en":
             return self._result(passed=True)
         else:
             return self._result(passed=False, message=self.failure_message)
