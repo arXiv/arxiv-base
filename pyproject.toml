@@ -84,10 +84,6 @@ selenium = "^4.23.0"
 sqlalchemy-citext = "*"
 sqlmodel = "^0.0.22"
 types-requests = "^2.32.0.20240712"
-types-pytz = "*"
-types-python-dateutil = "*"
-types-bleach = "*"
-types-retry = "*"
 textual = "^6.2.1"
 
 
