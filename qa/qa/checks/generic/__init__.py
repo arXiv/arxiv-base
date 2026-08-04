@@ -38,6 +38,7 @@ from qa.checks.generic.text import (  # noqa
     NoUtf8DecodingErrors,
     NotTooLong,
     NotTooShort,
+    MustBeEnglish,
 )
 
 from qa.checks.generic.author_name import (  # noqa
