@@ -207,8 +207,8 @@ class NotTooLong(BaseGenericCheck):
 
     def __init__(
         self,
-        max_chars: int,
         *,
+        max_chars: int,
         on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
@@ -243,8 +243,8 @@ class NotTooShort(BaseGenericCheck):
 
     def __init__(
         self,
-        min_chars: int,
         *,
+        min_chars: int,
         on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,

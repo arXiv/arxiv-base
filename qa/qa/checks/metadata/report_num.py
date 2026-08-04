@@ -2,19 +2,7 @@
 
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
-from qa.checks.generic.text import (
-    NotTooShort,
-    NotTooLong,
-    DoesNotContainUrl,
-    DoesNotContainDoi,
-    ContainsLetters,
-    ContainsDigits,
-    NoBoundaryWhitespace,
-    NoExtraWhitespace,
-    NoUnnecessarySpaceInParens,
-    DoesNotContainControlChars,
-    NoUtf8DecodingErrors,
-)
+from qa.checks import generic
 
 
 class ReportNumIsValid(BaseAggregateCheck):
@@ -29,6 +17,7 @@ class ReportNumIsValid(BaseAggregateCheck):
     failure_message = "Report number is invalid."
 
     required_data = {"metadata"}
+    field = "report_num"
 
     @classmethod
     def check(cls, report_num: str | None) -> Result:
@@ -41,15 +30,15 @@ class ReportNumIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        NotTooShort(4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        ContainsLetters(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        ContainsDigits(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.ContainsLetters(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.ContainsDigits(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
     )

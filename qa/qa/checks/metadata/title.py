@@ -2,24 +2,7 @@
 
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
-from qa.checks.generic.text import (
-    NotTooShort,
-    NotTooLong,
-    DoesNotBeginWithTitle,
-    DoesNotContainLinebreak,
-    NoExcessiveCapitals,
-    NoUnapprovedLongCapsWords,
-    DoesNotStartWithLowercase,
-    DoesNotContainUnnecessaryEscape,
-    DoesNotContainTex,
-    NoBoundaryWhitespace,
-    NoExtraWhitespace,
-    NoUnnecessarySpaceInParens,
-    NoHtmlElements,
-    AllBracketsBalanced,
-    DoesNotContainControlChars,
-    NoUtf8DecodingErrors,
-)
+from qa.checks import generic
 
 
 class TitleIsValid(BaseAggregateCheck):
@@ -34,26 +17,27 @@ class TitleIsValid(BaseAggregateCheck):
     failure_message = "Title is invalid or empty."
 
     required_data = {"metadata"}
+    field = "title"
 
     @classmethod
     def check(cls, title: str | None) -> Result:
         return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
 
     _checks = (
-        NotTooShort(5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NoUnapprovedLongCapsWords(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NotTooShort(min_chars=5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NoUnapprovedLongCapsWords(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
     )
