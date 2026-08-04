@@ -44,5 +44,5 @@ class AbstractIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        generic.MustBeEnglish(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.MustBeEnglish(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
     )

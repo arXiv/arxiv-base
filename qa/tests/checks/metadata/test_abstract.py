@@ -89,19 +89,19 @@ class TestAbstractIsValid:
     def test_fail_on_french(self):
         french_text = "Nous analysons le routage UAS réfléchi pour des files d'attente hétérogènes à serveurs multiples, avec des paramètres fixes et sous charge sous-critique. Le modèle déterministe utilisé est une équation différentielle ordinaire (EDO) réfléchie sur l'orthant non négatif, et non l'équation de dérive non contrainte."
         result = AbstractIsValid.check(french_text)
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "must_be_english").passed
 
     def test_fail_on_russian(self):
         russian_text = "Мы анализируем маршрутизацию с использованием отраженного БПЛА для гетерогенных многосерверных очередей при фиксированных параметрах в условиях субкритической нагрузки. Детерминированным заменителем является отраженное ОДУ на неотрицательном ортанте, а не уравнение дрейфа без ограничений. Это отраженное ОДУ имеет единственное граничное равновесие, характеризуемое скалярным уравнением согласованности и представлением выпуклого потенциала; все траектории сходятся к нему."
         result = AbstractIsValid.check(russian_text)
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "must_be_english").passed
 
     def test_fail_on_chinese(self):
         chinese_text = "我們在亞臨界負載及固定參數條件下，分析了異質多伺服器排隊系統中的「反射式 UAS」（Reflected UAS）路由策略。此系統的確定性替代模型並非無約束漂移方程，而是定義在非負象限上的反射型常微分方程（ODE）。"
         result = AbstractIsValid.check(chinese_text)
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "must_be_english").passed
 
     def test_none_field_short_circuits(self):
