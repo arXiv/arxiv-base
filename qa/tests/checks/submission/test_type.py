@@ -5,7 +5,7 @@ import pytest
 from qa.checks.base import MissingDataError
 from qa.checks.models import QaDataRegistry
 from qa.checks.submission.type import IsNotAWithdrawal
-from tests.utils import make_test_submit_event_info
+from tests.factories import make_test_submit_event_info
 
 
 class TestWithdrawalCheck:

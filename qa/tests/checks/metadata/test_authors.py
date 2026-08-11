@@ -5,7 +5,7 @@ import pytest
 from qa.checks.base import MissingDataError
 from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.authors import AuthorsAreValid, AuthorsContainsSubmitterName
-from tests.utils import make_test_submit_event_info
+from tests.factories import make_test_submit_event_info
 
 
 def sub_result(result: Result, name: str) -> Result:

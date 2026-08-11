@@ -85,15 +85,12 @@ class FulltextReport(BaseReport):
     version: str = "1.0"
 
 
-class SubmitEventInfo(BaseModel):  # TODO: check which fields are always provided by the snapshot and which are optional
-    """Information about the submission provided by the submit event."""
+class SubmitEventInfo(BaseModel):
+    """Information about the submission."""
 
     type: Literal["new", "rep", "wdr", "jref", "cross"]
     is_oversize: bool
-    data_version: int
-    metadata_version: int
     submitter_name: str
-    user_is_flagged: bool
     source_format: Literal["pdf", "tex", "pdftex", "withdrawn", "docx", "invalid", "ps", "html"]
 
 
