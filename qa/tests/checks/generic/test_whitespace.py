@@ -50,4 +50,3 @@ class TestNoUnnecessarySpaceInParens:
 
     def test_pass_complex(self):
         assert self.check.run(inputs("Something about sin(x), H2(SO)4, and (Non-)Commutative operations")).passed
-

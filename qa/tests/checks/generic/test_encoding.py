@@ -40,4 +40,3 @@ class TestNoUtf8DecodingErrors:
     def test_fail_malformed(self):
         result = self.check.run(inputs("Bad \xc0\x80 encoding"))
         assert not result.passed
-

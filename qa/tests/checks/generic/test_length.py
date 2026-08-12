@@ -68,4 +68,3 @@ class TestNotTooLong:
 
     def test_config_includes_max_chars(self):
         assert self.check.config["max_chars"] == 10
-

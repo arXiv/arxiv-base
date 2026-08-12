@@ -72,4 +72,3 @@ class TestDoesNotContainHrefOrUrlTex:
 
     def test_fail_case_insensitive(self):
         assert not self.check.run(inputs("contains \\HREF{url} text")).passed
-

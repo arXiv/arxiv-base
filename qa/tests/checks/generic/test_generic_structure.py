@@ -67,4 +67,3 @@ class TestAllBracketsBalanced:
     def test_fail_mismatched(self):
         result = self.check.run(inputs("Mismatched (bracket]"))
         assert not result.passed
-

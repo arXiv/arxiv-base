@@ -45,4 +45,3 @@ class TestDoesNotBeginWithTitle:
 
     def test_pass_title_mid_string(self):
         assert self.check.run(inputs("My title")).passed
-

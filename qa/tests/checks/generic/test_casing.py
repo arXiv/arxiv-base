@@ -45,4 +45,3 @@ class TestDoesNotStartWithLowercase:
 
     def test_pass_digit_start(self):
         assert self.check.run(inputs("2D materials")).passed
-
