@@ -25,7 +25,8 @@ class AbstractIsValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(abstract=abstract)))
 
     _checks = (
-        generic.NotTooShort(min_chars=5, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
+        generic.NotTooShort(min_chars=150, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotBeginWithAbstract(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
@@ -34,7 +35,7 @@ class AbstractIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
         ),
         generic.DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        generic.DoesNotContainTexBeginEnv(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotContainTexBegin(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
@@ -43,5 +44,4 @@ class AbstractIsValid(BaseAggregateCheck):
         generic.DoesNotContainControlCharsAllowNewlines(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
         ),
-        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
     )

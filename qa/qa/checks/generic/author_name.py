@@ -208,3 +208,25 @@ class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
     def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
         super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
+
+
+class AuthorNamesDoNotContainPrefix(BaseAuthorPatternCheck):
+    name = "author_names_do_not_contain_prefix"
+    display_name = "Author Names Do Not Contain Prefix"
+    id = 10064
+    version = "1.0.0"
+    description = "No parsed author name contains a title prefix such as 'Dr' or 'Prof'."
+    failure_message = "Contains a prefix that may be a title, e.g. 'Dr' or 'Prof'."
+
+    _pattern = r"\b(Dr|DR|Prof|PROF)\.?,?"
+
+
+class AuthorNamesDoNotContainDegreeSuffix(BaseAuthorPatternCheck):
+    name = "author_names_do_not_contain_degree_suffix"
+    display_name = "Author Names Do Not Contain Degree Suffix"
+    id = 10065
+    version = "1.0.0"
+    description = "No parsed author name contains a degree or society suffix such as 'PhD' or 'IEEE'."
+    failure_message = "Contains a suffix that may be a degree or society, e.g. 'PhD' or 'IEEE'."
+
+    _pattern = r"\b(PhD|PHD|IEEE)\b"

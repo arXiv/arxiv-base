@@ -12,9 +12,18 @@ def sub_result(result: Result, name: str) -> Result:
     return next(r for r in result.results if r.check_config["name"] == name)
 
 
+def sub_result_by_max_chars(result: Result, max_chars: int) -> Result:
+    assert result.results is not None
+    return next(
+        r
+        for r in result.results
+        if r.check_config["name"] == "not_too_long" and r.check_config["max_chars"] == max_chars
+    )
+
+
 class TestAcmClassIsValid:
     def test_pass_normal(self):
-        assert AcmClassIsValid.check("F.2.2; I.2.7").passed
+        assert AcmClassIsValid.check("F.2.2").passed
 
     def test_pass_none(self):
         result = AcmClassIsValid.check(None)
@@ -26,19 +35,34 @@ class TestAcmClassIsValid:
         assert result.passed
         assert result.results == []
 
-    def test_warn_too_long(self):
-        result = AcmClassIsValid.check("x" * 1001)
-        assert result.passed
-        assert not sub_result(result, "not_too_long").passed
+    def test_fail_semicolon_separated_list(self):
+        result = AcmClassIsValid.check("F.2.2; I.2.7")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_semicolon").passed
 
-    def test_warn_contains_url(self):
+    def test_fail_too_long_block(self):
+        result = AcmClassIsValid.check("x" * 160)
+        assert not result.passed
+        assert not sub_result_by_max_chars(result, 159).passed
+        assert sub_result_by_max_chars(result, 1000).passed
+
+    def test_pass_at_max_length(self):
+        assert AcmClassIsValid.check("x" * 159).passed
+
+    def test_fail_too_long_block_and_warn(self):
+        result = AcmClassIsValid.check("x" * 1001)
+        assert not result.passed
+        assert not sub_result_by_max_chars(result, 159).passed
+        assert not sub_result_by_max_chars(result, 1000).passed
+
+    def test_fail_contains_url(self):
         result = AcmClassIsValid.check("https://example.com/F.2.2")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
-    def test_warn_contains_doi(self):
+    def test_fail_contains_doi(self):
         result = AcmClassIsValid.check("doi:10.1103/F.2.2")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
     def test_pass_space_separated(self):

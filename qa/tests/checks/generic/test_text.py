@@ -207,8 +207,17 @@ class TestDoesNotContainUnnecessaryEscape:
     def test_fail_percent(self):
         assert not self.check.run(inputs("contains \\% escape")).passed
 
+    def test_fail_dollar(self):
+        assert not self.check.run(inputs("contains \\$ escape")).passed
+
+    def test_fail_underscore(self):
+        assert not self.check.run(inputs("contains \\_ escape")).passed
+
     def test_pass_regular_backslash(self):
         assert self.check.run(inputs("a \\command title")).passed
+
+    def test_pass_unescaped_underscore(self):
+        assert self.check.run(inputs("a title with a_variable name")).passed
 
 
 class TestDoesNotContainTex:

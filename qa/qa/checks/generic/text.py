@@ -1,5 +1,7 @@
 """Generic text checks."""
 
+import re
+
 from qa.checks.models import Result, Offset, OnFailurePolicy, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
@@ -269,21 +271,10 @@ class DoesNotContainUnnecessaryEscape(BaseGenericPatternCheck):
     display_name = "Does Not Contain Unnecessary Escape"
     id = 10010
     version = "1.0.0"
-    description = "The value does not contain unnecessary escape characters preceding hash or percent symbols."
+    description = "The value does not contain unnecessary escape characters preceding #, %, $, or _ symbols."
     failure_message = "Contains unnecessary escape."
 
-    _pattern = r"\\#|\\%"
-
-
-class DoesNotContainTex(BaseGenericPatternCheck):
-    name = "does_not_contain_tex"
-    display_name = "Does Not Contain TeX"
-    id = 10009
-    version = "1.0.0"
-    description = "The value does not contain href or url raw TeX commands."
-    failure_message = "Contains TeX."
-
-    _pattern = r"(?i)\\href\{|\\url\{"
+    _pattern = r"\\#|\\%|\\\$|\\_"
 
 
 class DoesNotContainControlChars(BaseGenericPatternCheck):
@@ -353,17 +344,6 @@ class DoesNotContainCorresponding(BaseGenericPatternCheck):
     _pattern = r"(?i)corresponding"
 
 
-class DoesNotContainTexDagger(BaseGenericPatternCheck):
-    name = "does_not_contain_tex_dagger"
-    display_name = "Does Not Contain TeX Dagger"
-    id = 10021
-    version = "1.0.0"
-    description = "The value does not contain TeX dagger symbols (\\dag, \\ddag, etc.)."
-    failure_message = "Contains a dagger symbol."
-
-    _pattern = r"\\dag|\\ddag|\\textdag|\\textddag"
-
-
 class DoesNotBeginWithAuthor(BaseGenericPatternCheck):
     name = "does_not_begin_with_author"
     display_name = "Does Not Begin With Author"
@@ -391,21 +371,54 @@ class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
     display_name = "Does Not Begin With Abstract"
     id = 10005
     version = "1.0.0"
-    description = "The value does not begin with the literal prefix 'abstract'."
+    description = "The value does not begin with the literal prefix 'abstract' or 'abstract:'."
     failure_message = "Begins with 'abstract'."
 
-    _pattern = r"(?i)^abstract\b"
+    _pattern = r"(?i)^abstract:?\b"
 
 
-class DoesNotContainTexBeginEnv(BaseGenericPatternCheck):
-    name = "does_not_contain_tex_begin_env"
-    display_name = "Does Not Contain TeX Begin Env"
+class DoesNotContainTex(BaseGenericPatternCheck):
+    name = "does_not_contain_tex"
+    display_name = "Does Not Contain TeX"
+    id = 10009
+    version = "1.0.0"
+    description = "The value does not contain href or url raw TeX commands."
+    failure_message = "Contains TeX."
+
+    _pattern = r"(?i)\\href\{|\\url\{"
+
+
+class DoesNotContainBibtex(BaseGenericPatternCheck):
+    name = "does_not_contain_bibtex"
+    display_name = "Does Not Contain BibTeX"
+    id = 10044
+    version = "1.0.0"
+    description = "The value does not contain BibTeX field assignments."
+    failure_message = "Contains bibtex."
+
+    _pattern = r"(?i)(title|booktitle|inproceedings)="
+
+
+class DoesNotContainTexBegin(BaseGenericPatternCheck):
+    name = "does_not_contain_tex_begin"
+    display_name = "Does Not Contain TeX Begin"
     id = 10017
     version = "1.0.0"
     description = "The value does not contain a tex begin command that is not followed by a curly brace."
     failure_message = "Contains TeX."
 
     _pattern = r"(?i)\\begin[^{]"
+
+
+class DoesNotContainTexDagger(BaseGenericPatternCheck):
+    name = "does_not_contain_tex_dagger"
+    display_name = "Does Not Contain TeX Dagger"
+    id = 10021
+    version = "1.0.0"
+    description = "The value does not contain TeX dagger symbols (\\dag, \\ddag, etc.)."
+    failure_message = "Contains a dagger symbol."
+
+    _pattern = r"\\dag|\\ddag|\\textdag|\\textddag"
 
 
 class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
@@ -507,17 +520,6 @@ class DoesNotContainSubmitted(BaseGenericPatternCheck):
     _pattern = r"(?i)submitted"
 
 
-class DoesNotContainBibtex(BaseGenericPatternCheck):
-    name = "does_not_contain_bibtex"
-    display_name = "Does Not Contain BibTeX"
-    id = 10044
-    version = "1.0.0"
-    description = "The value does not contain BibTeX field assignments."
-    failure_message = "Contains bibtex."
-
-    _pattern = r"(?i)(title|booktitle|inproceedings)="
-
-
 class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
     name = "does_not_contain_bad_doi_prefix"
     display_name = "Does Not Contain Bad DOI Prefix"
@@ -549,6 +551,108 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
             if self._compiled_pattern.match(doi):
                 offsets.append(Offset(start=idx, end=end))
             start = end
+        if offsets:
+            return self._result(passed=False, message=self.failure_message, offsets=offsets)
+        return self._result(passed=True)
+
+
+class DoesNotContainRawNewline(BaseGenericPatternCheck):
+    name = "does_not_contain_raw_newline"
+    display_name = "Does Not Contain Raw Newline"
+    id = 10057
+    version = "1.0.0"
+    description = "The value does not contain a raw newline or carriage return character."
+    failure_message = "Contains a line break."
+
+    _pattern = r"[\r\n]"
+
+
+class DoesNotEndWithPeriod(BaseGenericPatternCheck):
+    name = "does_not_end_with_period"
+    display_name = "Does Not End With Period"
+    id = 10058
+    version = "1.0.0"
+    description = "The value does not end with a period."
+    failure_message = "Ends with a period."
+
+    _pattern = r"\.$"
+
+
+class DoesNotContainEtAlWithPeriod(BaseGenericPatternCheck):
+    name = "does_not_contain_et_al_with_period"
+    display_name = "Does Not Contain Et Al With Period"
+    id = 10059
+    version = "1.0.0"
+    description = "The value does not contain the malformed abbreviation 'et. al.' (a period should not follow 'et')."
+    failure_message = "Contains 'et. al.'."
+
+    _pattern = r"(?i)\bet\.\s*al\b"
+
+
+class DoesNotContainSpaceAfterOpenParen(BaseGenericPatternCheck):
+    name = "does_not_contain_space_after_open_paren"
+    display_name = "Does Not Contain Space After Open Paren"
+    id = 10060
+    version = "1.0.0"
+    description = "The value does not contain a space immediately after an opening parenthesis."
+    failure_message = "Space after opening parenthesis."
+
+    _pattern = r"\(\s"
+
+
+class DoesNotContainSpaceBeforeComma(BaseGenericPatternCheck):
+    name = "does_not_contain_space_before_comma"
+    display_name = "Does Not Contain Space Before Comma"
+    id = 10061
+    version = "1.0.0"
+    description = "The value does not contain a space immediately before a comma."
+    failure_message = "Space before comma."
+
+    _pattern = r"\s,"
+
+
+class DoesNotContainUnspacedComma(BaseGenericPatternCheck):
+    name = "does_not_contain_unspaced_comma"
+    display_name = "Does Not Contain Unspaced Comma"
+    id = 10062
+    version = "1.0.0"
+    description = "The value does not contain a comma with no space on either side, e.g. 'Jamie Magyar,Jonathan Young'."
+    failure_message = "Comma has no space on either side."
+
+    _pattern = r"[A-Za-z],[A-Za-z]"
+
+
+class JournalRefIsWellFormed(BaseGenericCheck):
+    name = "journal_ref_is_well_formed"
+    display_name = "Journal Ref Is Well Formed"
+    id = 10063
+    version = "1.0.0"
+    description = (
+        "The value is 240 characters or fewer, does not contain 'submit', 'in press', 'appear', "
+        "'accept', or 'to be publ' (which belong in Comments instead), and contains a valid "
+        "4-digit year (19xx or 20xx)."
+    )
+    failure_message = "Not a well-formed journal reference."
+
+    _max_chars = 240
+    _forbidden_pattern = re.compile(r"(?i)submit|in press|appear|accept|to be publ")
+    _year_pattern = re.compile(r"\b(?:19|20)\d{2}\b")
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        offsets = []
+
+        if len(v) > self._max_chars:
+            offsets.append(Offset(start=self._max_chars, end=len(v)))
+
+        forbidden_match = self._forbidden_pattern.search(v)
+        if forbidden_match:
+            offsets.append(Offset(start=forbidden_match.start(), end=forbidden_match.end()))
+
+        if not self._year_pattern.search(v):
+            offsets.append(Offset(start=0, end=len(v)))
+
         if offsets:
             return self._result(passed=False, message=self.failure_message, offsets=offsets)
         return self._result(passed=True)

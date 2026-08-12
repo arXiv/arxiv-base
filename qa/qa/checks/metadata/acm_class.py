@@ -30,9 +30,13 @@ class AcmClassIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
+        # Block
+        generic.DoesNotContainSemicolon(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
+        generic.NotTooLong(max_chars=159, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
+        generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
+        generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
+        # Warn
         generic.NotTooLong(max_chars=1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),

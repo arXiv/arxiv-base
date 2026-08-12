@@ -30,15 +30,17 @@ class DoiIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NotTooShort(min_chars=10, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.DoesNotContainBadDoiPrefix(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
+        # Block
+        generic.NotTooShort(min_chars=10, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.DoesNotContainBadDoiPrefix(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        # Warn
+        generic.NotTooLong(max_chars=50, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         generic.DoiHasValidFormat(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
         generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
-        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
     )
