@@ -52,7 +52,7 @@ class DoesNotContainUnspacedComma(BaseGenericPatternCheck):
     display_name = "Does Not Contain Unspaced Comma"
     id = 10062
     version = "1.0.0"
-    description = "The value does not contain a comma with no space on either side, e.g. 'Jamie Magyar,Jonathan Young'."
+    description = "The value does not contain a comma with no space on either side."
     failure_message = "Comma has no space on either side."
 
     _pattern = r"[A-Za-z],[A-Za-z]"
