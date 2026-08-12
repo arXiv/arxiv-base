@@ -8,8 +8,6 @@ from arxiv.authors import parse_author_affil
 from qa.checks.base import BaseGenericCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 
-# Note: the ids in this file should be the metadata check id + 10000,
-# to avoid collision with the check_ids previously used in the arxiv_checks table.
 
 _LLM_NAMES = {
     "llama",

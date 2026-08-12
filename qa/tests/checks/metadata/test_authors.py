@@ -125,8 +125,10 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_end_with_punctuation").passed
 
-    def test_pass_et_al(self):
-        assert AuthorsAreValid.check("Fred Smith et al.").passed
+    def test_fail_et_al(self):
+        result = AuthorsAreValid.check("Fred Smith et al.")
+        assert not result.passed
+        assert not sub_result(result, "does_not_end_with_punctuation").passed
 
     def test_pass_complex_tex_names(self):
         assert AuthorsAreValid.check(

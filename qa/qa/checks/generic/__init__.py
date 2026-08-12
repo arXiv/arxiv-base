@@ -1,48 +1,81 @@
 """Generic checks package: exposes all generic checks."""
 
-from qa.checks.generic.text import (  # noqa
-    AllBracketsBalanced,
-    ContainsDigits,
-    ContainsLetters,
-    DoesNotBeginWithAbstract,
-    DoesNotBeginWithAuthor,
-    DoesNotBeginWithTitle,
-    DoesNotContainAccepted,
-    DoesNotContainAnonymous,
-    DoesNotContainBadDoiPrefix,
-    DoesNotContainBareDoi,
-    DoesNotContainBibtex,
-    DoesNotContainControlChars,
-    DoesNotContainControlCharsAllowNewlines,
-    DoesNotContainCorresponding,
-    DoesNotContainDoi,
-    DoesNotContainEtAlWithPeriod,
-    DoesNotContainHrefOrUrlTex,
-    DoesNotContainLinebreak,
-    DoesNotContainRawNewline,
-    DoesNotContainSemicolon,
+from qa.checks.generic.length import (  # noqa
+    NotTooLong,
+    NotTooShort,
+)
+
+from qa.checks.generic.whitespace import (  # noqa
     DoesNotContainSpaceAfterOpenParen,
     DoesNotContainSpaceBeforeComma,
-    DoesNotContainSubmitted,
+    DoesNotContainUnspacedComma,
+    NoExtraWhitespace,
+    NoUnnecessarySpaceInParens,
+)
+
+from qa.checks.generic.casing import (  # noqa
+    DoesNotStartWithLowercase,
+    NoExcessiveCapitals,
+)
+
+from qa.checks.generic.encoding import (  # noqa
+    DoesNotContainControlChars,
+    DoesNotContainControlCharsAllowNewlines,
+    DoesNotContainRawNewline,
+    NoUtf8DecodingErrors,
+)
+
+from qa.checks.generic.structure import (  # noqa
+    AllBracketsBalanced,
+    NoHtmlElements,
+)
+
+from qa.checks.generic.tex import (  # noqa
+    DoesNotContainBibtex,
+    DoesNotContainHrefOrUrlTex,
+    DoesNotContainLinebreak,
     DoesNotContainTexBegin,
     DoesNotContainTexDagger,
     DoesNotContainTildeAsHardSpace,
     DoesNotContainUnnecessaryEscape,
-    DoesNotContainUnspacedComma,
-    DoesNotContainUrl,
+)
+
+from qa.checks.generic.prefixes import (  # noqa
+    DoesNotBeginWithAbstract,
+    DoesNotBeginWithAuthor,
+    DoesNotBeginWithTitle,
+)
+
+from qa.checks.generic.punctuation import (  # noqa
+    DoesNotContainSemicolon,
     DoesNotEndWithPeriod,
     DoesNotEndWithPunctuation,
-    DoesNotStartWithLowercase,
+)
+
+from qa.checks.generic.doi_url import (  # noqa
+    DoesNotContainBadDoiPrefix,
+    DoesNotContainBareDoi,
+    DoesNotContainDoi,
+    DoesNotContainUrl,
     DoiHasValidFormat,
-    JournalRefIsWellFormed,
+)
+
+from qa.checks.generic.alphanumeric import (  # noqa
+    ContainsDigits,
+    ContainsLetters,
+)
+
+from qa.checks.generic.flagged_terms import (  # noqa
+    DoesNotContainAccepted,
+    DoesNotContainAnonymous,
+    DoesNotContainCorresponding,
+    DoesNotContainEtAlWithPeriod,
+    DoesNotContainSubmitted,
     NoAnnotationSymbols,
-    NoExcessiveCapitals,
-    NoExtraWhitespace,
-    NoHtmlElements,
-    NoUnnecessarySpaceInParens,
-    NoUtf8DecodingErrors,
-    NotTooLong,
-    NotTooShort,
+)
+
+from qa.checks.generic.journal_ref import (  # noqa
+    JournalRefIsWellFormed,
 )
 
 from qa.checks.generic.author_name import (  # noqa
