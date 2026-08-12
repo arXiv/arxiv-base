@@ -1,4 +1,4 @@
-"""Generic flagged-word checks."""
+"""Generic forbidden-term checks."""
 
 from qa.checks.base import BaseGenericPatternCheck
 

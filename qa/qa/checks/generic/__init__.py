@@ -65,7 +65,7 @@ from qa.checks.generic.alphanumeric import (  # noqa
     ContainsLetters,
 )
 
-from qa.checks.generic.flagged_terms import (  # noqa
+from qa.checks.generic.forbidden_terms import (  # noqa
     DoesNotContainAccepted,
     DoesNotContainAnonymous,
     DoesNotContainCorresponding,
