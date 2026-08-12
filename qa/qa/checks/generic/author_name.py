@@ -187,10 +187,6 @@ class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
     failure_message = "Contains a suffix that may be university affiliation or degree related."
 
     _affiliation_patterns = [
-        r"\bIEEE\b",
-        r"\bphd\b",
-        r"\bprof\b",
-        r"\bdr\b",
         r"\bPhysics\b",
         r"\bMath\b",
         r"\bInst\b",
