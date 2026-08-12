@@ -9,14 +9,12 @@ from qa.checks.generic.text import (
     DoesNotBeginWithTitle,
     DoesNotContainControlChars,
     DoesNotContainLinebreak,
-    DoesNotContainTex,
+    DoesNotContainHrefOrUrlTex,
     DoesNotContainUnnecessaryEscape,
     DoesNotStartWithLowercase,
-    NoBoundaryWhitespace,
     NoExcessiveCapitals,
     NoExtraWhitespace,
     NoHtmlElements,
-    NoUnapprovedLongCapsWords,
     NoUnnecessarySpaceInParens,
     NoUtf8DecodingErrors,
     NotTooLong,
@@ -153,30 +151,6 @@ class TestNoExcessiveCapitals:
         assert not self.check.run(inputs("ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΎ")).passed
 
 
-class TestNoUnapprovedLongCapsWords:
-    check = make(NoUnapprovedLongCapsWords)
-
-    def test_pass_normal(self):
-        assert self.check.run(inputs("A fine title")).passed
-
-    def test_pass_known_words(self):
-        assert self.check.run(inputs("The is a title with known long words capitalized AMANDA CHANDRA")).passed
-
-    def test_pass_single_unapproved(self):
-        assert self.check.run(inputs("This is a title WITH ONE LONG WORD CAPITALIZED")).passed
-
-    def test_fail_two_unapproved(self):
-        result = self.check.run(inputs("title with unknown long words UNIQUEWORD THISISATEST"))
-        assert not result.passed
-        assert len(result.offsets) == 2
-
-    def test_pass_digit_strings(self):
-        assert self.check.run(inputs("The is a title with 12345678 and 987654321 words not capitalized")).passed
-
-    def test_pass_short_caps(self):
-        assert self.check.run(inputs("The ISBN and DOI are valid")).passed
-
-
 class TestDoesNotStartWithLowercase:
     check = make(DoesNotStartWithLowercase)
 
@@ -220,8 +194,8 @@ class TestDoesNotContainUnnecessaryEscape:
         assert self.check.run(inputs("a title with a_variable name")).passed
 
 
-class TestDoesNotContainTex:
-    check = make(DoesNotContainTex)
+class TestDoesNotContainHrefOrUrlTex:
+    check = make(DoesNotContainHrefOrUrlTex)
 
     def test_pass(self):
         assert self.check.run(inputs("A clean title")).passed
@@ -234,26 +208,6 @@ class TestDoesNotContainTex:
 
     def test_fail_case_insensitive(self):
         assert not self.check.run(inputs("contains \\HREF{url} text")).passed
-
-
-class TestNoBoundaryWhitespace:
-    check = make(NoBoundaryWhitespace)
-
-    def test_pass(self):
-        assert self.check.run(inputs("A title")).passed
-
-    def test_fail_leading_space(self):
-        result = self.check.run(inputs("  A title with leading space"))
-        assert not result.passed
-
-    def test_fail_leading_tab(self):
-        assert not self.check.run(inputs("\tA title")).passed
-
-    def test_fail_trailing_space(self):
-        assert not self.check.run(inputs("A title with trailing space ")).passed
-
-    def test_fail_trailing_tab(self):
-        assert not self.check.run(inputs("A title\t")).passed
 
 
 class TestNoExtraWhitespace:

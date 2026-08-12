@@ -30,22 +30,17 @@ class CommentsAreValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        # Block
         generic.NotTooLong(max_chars=1000, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
-        generic.DoesNotContainControlChars(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"
-        ),
+        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotEndWithPeriod(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
-        # Warn
         generic.DoesNotContainUnnecessaryEscape(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"
         ),
-        generic.DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
     )

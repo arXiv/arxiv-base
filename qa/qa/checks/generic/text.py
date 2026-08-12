@@ -4,10 +4,6 @@ import re
 
 from qa.checks.models import Result, Offset, OnFailurePolicy, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
-from qa.checks.generic.all_caps_words import KNOWN_WORDS_IN_ALL_CAPS
-
-# Note: the ids in this file should be the metadata check id + 10000,
-# to avoid collision with the check_ids previously used in the arxiv_checks table.
 
 
 class DoesNotStartWithLowercase(BaseGenericPatternCheck):
@@ -39,46 +35,6 @@ class NoExcessiveCapitals(BaseGenericCheck):
             return self._result(passed=True)
         else:
             return self._result(passed=False, message=self.failure_message)
-
-
-class NoUnapprovedLongCapsWords(BaseGenericPatternCheck):
-    name = "no_unapproved_long_caps_words"
-    display_name = "No Unapproved Long Caps Words"
-    id = 10012  # NOTE: new
-    version = "1.0.0"
-    description = "The value does not contain two or more unapproved all caps words that are 6 or more characters long."
-    failure_message = "Contains unapproved long caps words."
-
-    _pattern = r"\b[A-Z][A-Z-]*[A-Z]\b"
-
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        v = getattr(getattr(data_registry, self.data), self.field)
-
-        offsets = []
-
-        for match in self._compiled_pattern.finditer(v):
-            word = match.group()
-            if len(word) >= 6 and word not in KNOWN_WORDS_IN_ALL_CAPS:
-                offsets.append(Offset(start=match.start(), end=match.end()))
-
-        if len(offsets) < 2:
-            return self._result(passed=True)
-        return self._result(
-            passed=False,
-            message=self.failure_message,
-            offsets=offsets,
-        )
-
-
-class NoBoundaryWhitespace(BaseGenericPatternCheck):
-    name = "no_boundary_whitespace"
-    display_name = "No Boundary Whitespace"
-    id = 10016
-    version = "1.0.0"
-    description = "The value does not begin or end with whitespace."
-    failure_message = "Leading or trailing whitespace."
-
-    _pattern = r"^\s|\s$"
 
 
 class NoExtraWhitespace(BaseGenericPatternCheck):
@@ -377,13 +333,13 @@ class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
     _pattern = r"(?i)^abstract:?\b"
 
 
-class DoesNotContainTex(BaseGenericPatternCheck):
-    name = "does_not_contain_tex"
-    display_name = "Does Not Contain TeX"
+class DoesNotContainHrefOrUrlTex(BaseGenericPatternCheck):
+    name = "does_not_contain_href_or_url_tex"
+    display_name = "Does Not Contain Href Or Url TeX"
     id = 10009
     version = "1.0.0"
     description = "The value does not contain href or url raw TeX commands."
-    failure_message = "Contains TeX."
+    failure_message = "Contains href or url TeX."
 
     _pattern = r"(?i)\\href\{|\\url\{"
 

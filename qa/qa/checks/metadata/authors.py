@@ -27,16 +27,13 @@ class AuthorsAreValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(authors=authors)))
 
     _checks = (
-        # Block
         generic.DoesNotEndWithPunctuation(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainEtAlWithPeriod(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
         generic.DoesNotContainAnonymous(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
-        generic.DoesNotContainCorresponding(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
-        ),
+        generic.DoesNotContainCorresponding(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.AuthorNamesDoNotContainSemicolon(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
@@ -61,12 +58,10 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.AuthorNamesDoNotContainDegreeSuffix(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
-        # Warn
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NotTooLong(max_chars=10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoAnnotationSymbols(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
@@ -83,9 +78,7 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.AuthorNamesDoNotContainAffiliation(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),
-        generic.DoesNotContainUnspacedComma(
-            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
-        ),
+        generic.DoesNotContainUnspacedComma(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
     )
 
 

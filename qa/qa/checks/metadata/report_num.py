@@ -30,7 +30,6 @@ class ReportNumIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        # Block
         generic.ContainsLetters(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
         generic.ContainsDigits(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
@@ -41,10 +40,8 @@ class ReportNumIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
-        # Warn
         generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
     )

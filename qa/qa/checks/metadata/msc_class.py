@@ -30,7 +30,6 @@ class MscClassIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        # Block
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
         generic.NoUnnecessarySpaceInParens(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
@@ -42,9 +41,7 @@ class MscClassIsValid(BaseAggregateCheck):
         generic.DoesNotContainSemicolon(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
         ),  # TODO remove?
-        # Warn
         generic.NotTooLong(max_chars=160, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
     )
