@@ -61,21 +61,16 @@ from qa.checks.generic.doi_url import (  # noqa
     DoiHasValidFormat,
 )
 
-from qa.checks.generic.alphanumeric import (  # noqa
+from qa.checks.generic.content import (  # noqa
     ContainsALetterAndADigit,
-)
-
-from qa.checks.generic.forbidden_terms import (  # noqa
+    ContainsAValidYear,
     DoesNotContainAccepted,
     DoesNotContainAnonymous,
     DoesNotContainCorresponding,
     DoesNotContainEtAlWithPeriod,
+    DoesNotContainPendingPublicationStatus,
     DoesNotContainSubmitted,
     NoAnnotationSymbols,
-)
-
-from qa.checks.generic.journal_ref import (  # noqa
-    JournalRefIsWellFormed,
 )
 
 from qa.checks.generic.author_name import (  # noqa

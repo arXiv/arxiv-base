@@ -1,6 +1,43 @@
-"""Generic forbidden-term checks."""
+"""Generic content checks: required and forbidden terms."""
 
-from qa.checks.base import BaseGenericPatternCheck
+import re
+
+from qa.checks.base import BaseGenericPatternCheck, BaseGenericCheck
+from qa.checks.models import Result, Offset, QaDataRegistry
+
+
+class ContainsALetterAndADigit(BaseGenericPatternCheck):
+    name = "contains_a_letter_and_a_digit"
+    display_name = "Contains A Letter And A Digit"
+    id = 10067
+    version = "1.0.0"
+    description = "The value contains at least one letter and at least one digit."
+    failure_message = "Missing a letter or a digit."
+
+    _pattern = r"^[^A-Za-z]*$|^[^0-9]*$"
+
+
+class ContainsAValidYear(BaseGenericCheck):
+    name = "contains_a_valid_year"
+    display_name = "Contains A Valid Year"
+    id = 10069
+    version = "1.0.0"
+    description = "The value contains a valid 4-digit year (19xx or 20xx)."
+    failure_message = "Does not contain a valid year."
+
+    _year_pattern = re.compile(r"\b(?:19|20)\d{2}\b")
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        if self._year_pattern.search(v):
+            return self._result(passed=True)
+
+        return self._result(
+            passed=False,
+            message=self.failure_message,
+            offsets=[Offset(start=0, end=len(v))],
+        )
 
 
 class NoAnnotationSymbols(BaseGenericPatternCheck):
@@ -67,3 +104,17 @@ class DoesNotContainEtAlWithPeriod(BaseGenericPatternCheck):
     failure_message = "Contains 'et. al.'."
 
     _pattern = r"(?i)\bet\.\s*al\b"
+
+
+class DoesNotContainPendingPublicationStatus(BaseGenericPatternCheck):
+    name = "does_not_contain_pending_publication_status"
+    display_name = "Does Not Contain Pending Publication Status"
+    id = 10068
+    version = "1.0.0"
+    description = (
+        "The value does not contain 'submit', 'in press', 'appear', 'accept', or 'to be publ' "
+        "(which belong in Comments instead)."
+    )
+    failure_message = "Contains pending-publication language that belongs in Comments instead."
+
+    _pattern = r"(?i)submit|in press|appear|accept|to be publ"
