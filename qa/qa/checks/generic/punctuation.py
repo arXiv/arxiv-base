@@ -25,12 +25,12 @@ class DoesNotEndWithPeriod(BaseGenericPatternCheck):
     _pattern = r"\.$"
 
 
-class DoesNotContainSemicolon(BaseGenericPatternCheck):  # TODO remove?
+class DoesNotContainSemicolon(BaseGenericPatternCheck):
     name = "does_not_contain_semicolon"
     display_name = "Does Not Contain Semicolon"
     id = 10022
     version = "1.0.0"
     description = "The value does not contain a semicolon."
-    failure_message = "Contains semicolon(s) - use ',' or 'and' to separate authors."
+    failure_message = "Contains semicolon(s)."
 
     _pattern = r";"

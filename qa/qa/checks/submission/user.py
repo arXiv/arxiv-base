@@ -26,7 +26,6 @@ class AuthorsContainsSubmitterName(BaseCheck):
         r"CMS Collaboration",
         r"ATLAS and CMS Collaborations",
         r"CMS and TOTEM Collaborations",
-        # "Tracker Group of the CMS Collaboration",
         r"ALICE Collaboration",
         r"STAR Collaboration",
         r"LHCb collaboration"
