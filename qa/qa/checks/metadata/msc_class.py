@@ -38,9 +38,7 @@ class MscClassIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
-        generic.DoesNotContainSemicolon(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
-        ),  # TODO remove?
+        generic.DoesNotContainSemicolon(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
         generic.NotTooLong(max_chars=160, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
