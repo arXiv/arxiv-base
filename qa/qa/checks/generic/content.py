@@ -118,3 +118,36 @@ class DoesNotContainPendingPublicationStatus(BaseGenericPatternCheck):
     failure_message = "Contains pending-publication language that belongs in Comments instead."
 
     _pattern = r"(?i)submit|in press|appear|accept|to be publ"
+
+
+class DoesNotContainUrl(BaseGenericPatternCheck):
+    name = "does_not_contain_url"
+    display_name = "Does Not Contain URL"
+    id = 10039
+    version = "1.0.0"
+    description = "The value does not contain a URL."
+    failure_message = "Contains a URL."
+
+    _pattern = r"(?i)https?:"
+
+
+class DoesNotContainDoi(BaseGenericPatternCheck):
+    name = "does_not_contain_doi"
+    display_name = "Does Not Contain DOI"
+    id = 10045
+    version = "1.0.0"
+    description = "The value does not contain the word 'DOI'."
+    failure_message = "Contains 'DOI'."
+
+    _pattern = r"(?i)doi"
+
+
+class DoesNotContainBareDoi(BaseGenericPatternCheck):
+    name = "does_not_contain_bare_doi"
+    display_name = "Does Not Contain Bare DOI"
+    id = 10040
+    version = "1.0.0"
+    description = "The value does not contain a bare DOI number (e.g. 10.1234/abc)."
+    failure_message = "Contains a DOI."
+
+    _pattern = r"(?i)^[0-9][0-9].[0-9]+/[^ ]*$"

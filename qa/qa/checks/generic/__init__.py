@@ -44,6 +44,7 @@ from qa.checks.generic.tex import (  # noqa
 from qa.checks.generic.prefixes import (  # noqa
     DoesNotBeginWithAbstract,
     DoesNotBeginWithAuthor,
+    DoesNotBeginWithDoiPrefix,
     DoesNotBeginWithTitle,
 )
 
@@ -54,10 +55,6 @@ from qa.checks.generic.punctuation import (  # noqa
 )
 
 from qa.checks.generic.doi_url import (  # noqa
-    DoesNotContainBadDoiPrefix,
-    DoesNotContainBareDoi,
-    DoesNotContainDoi,
-    DoesNotContainUrl,
     DoiHasValidFormat,
 )
 
@@ -66,10 +63,13 @@ from qa.checks.generic.content import (  # noqa
     ContainsAValidYear,
     DoesNotContainAccepted,
     DoesNotContainAnonymous,
+    DoesNotContainBareDoi,
     DoesNotContainCorresponding,
+    DoesNotContainDoi,
     DoesNotContainEtAlWithPeriod,
     DoesNotContainPendingPublicationStatus,
     DoesNotContainSubmitted,
+    DoesNotContainUrl,
     NoAnnotationSymbols,
 )
 

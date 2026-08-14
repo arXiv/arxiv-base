@@ -1,51 +1,7 @@
-"""Generic URL and DOI checks."""
+"""Generic DOI checks."""
 
 from qa.checks.models import Result, Offset, QaDataRegistry
 from qa.checks.base import BaseGenericPatternCheck
-
-
-class DoesNotContainUrl(BaseGenericPatternCheck):
-    name = "does_not_contain_url"
-    display_name = "Does Not Contain URL"
-    id = 10039
-    version = "1.0.0"
-    description = "The value does not contain a URL."
-    failure_message = "Contains a URL."
-
-    _pattern = r"(?i)https?:"
-
-
-class DoesNotContainDoi(BaseGenericPatternCheck):
-    name = "does_not_contain_doi"
-    display_name = "Does Not Contain DOI"
-    id = 10045
-    version = "1.0.0"
-    description = "The value does not contain the word 'DOI'."
-    failure_message = "Contains 'DOI'."
-
-    _pattern = r"(?i)doi"
-
-
-class DoesNotContainBareDoi(BaseGenericPatternCheck):
-    name = "does_not_contain_bare_doi"
-    display_name = "Does Not Contain Bare DOI"
-    id = 10040
-    version = "1.0.0"
-    description = "The value does not contain a bare DOI number (e.g. 10.1234/abc)."
-    failure_message = "Contains a DOI."
-
-    _pattern = r"(?i)^[0-9][0-9].[0-9]+/[^ ]*$"
-
-
-class DoesNotContainBadDoiPrefix(BaseGenericPatternCheck):
-    name = "does_not_contain_bad_doi_prefix"
-    display_name = "Does Not Contain Bad DOI Prefix"
-    id = 10047
-    version = "1.0.0"
-    description = "The value does not begin with 'doi:', 'https://doi.org/', or similar URL prefixes."
-    failure_message = "Contains unnecessary prefix."
-
-    _pattern = r"(?i)^doi:|^https?://doi\.org/|^https?://.*\.doi\.org/"
 
 
 class DoiHasValidFormat(BaseGenericPatternCheck):
@@ -54,7 +10,7 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
     id = 10050
     version = "1.0.0"
     description = "Each space-separated DOI in the value matches the expected DOI format."
-    failure_message = "Invaleeid DOI."
+    failure_message = "Invalid DOI."
 
     _pattern = r"(?i)^(?![0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$)"
 

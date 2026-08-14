@@ -31,7 +31,7 @@ class DoiIsValid(BaseAggregateCheck):
 
     _checks = (
         generic.NotTooShort(min_chars=10, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
-        generic.DoesNotContainBadDoiPrefix(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.DoesNotBeginWithDoiPrefix(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),

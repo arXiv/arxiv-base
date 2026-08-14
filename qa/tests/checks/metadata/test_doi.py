@@ -42,12 +42,12 @@ class TestDoiIsValid:
     def test_fail_bad_doi_prefix_doi_colon(self):
         result = DoiIsValid.check("doi:10.1103/PhysRevLett.132.011001")
         assert not result.passed
-        assert not sub_result(result, "does_not_contain_bad_doi_prefix").passed
+        assert not sub_result(result, "does_not_begin_with_doi_prefix").passed
 
     def test_fail_bad_doi_prefix_https(self):
         result = DoiIsValid.check("https://doi.org/10.1103/PhysRevLett.132.011001")
         assert not result.passed
-        assert not sub_result(result, "does_not_contain_bad_doi_prefix").passed
+        assert not sub_result(result, "does_not_begin_with_doi_prefix").passed
 
     def test_pass_non_ten_prefix(self):
         assert DoiIsValid.check("22.48550/arXiv.2501.18183").passed

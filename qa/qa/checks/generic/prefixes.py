@@ -34,3 +34,14 @@ class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
     failure_message = "Begins with 'abstract'."
 
     _pattern = r"(?i)^abstract:?\b"
+
+
+class DoesNotBeginWithDoiPrefix(BaseGenericPatternCheck):
+    name = "does_not_begin_with_doi_prefix"
+    display_name = "Does Not Begin With DOI Prefix"
+    id = 10047
+    version = "1.0.0"
+    description = "The value does not begin with 'doi:', 'https://doi.org/', or similar URL prefixes."
+    failure_message = "Contains unnecessary prefix."
+
+    _pattern = r"(?i)^doi:|^https?://doi\.org/|^https?://.*\.doi\.org/"
