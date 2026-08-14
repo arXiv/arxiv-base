@@ -49,13 +49,13 @@ class MustBeEnglish(BaseGenericCheck):
     description = "The value must contain English text."
     failure_message = "Likely not in English."
     min_chars = 5
-    
+
     def _run(self, data_registry: QaDataRegistry) -> Result:
         v = getattr(getattr(data_registry, self.data), self.field)
 
         if len(v) < self.min_chars:
             return self._result(passed=True)
-        
+
         result = detect(v)
 
         # TODO: language ID is sometimes not accurate. Use score?
