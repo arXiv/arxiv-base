@@ -3,23 +3,12 @@
 from qa.checks.base import BaseGenericPatternCheck
 
 
-class ContainsLetters(BaseGenericPatternCheck):
-    name = "contains_letters"
-    display_name = "Contains Letters"
-    id = 10038
+class ContainsALetterAndADigit(BaseGenericPatternCheck):
+    name = "contains_a_letter_and_a_digit"
+    display_name = "Contains A Letter And A Digit"
+    id = 10067
     version = "1.0.0"
-    description = "The value contains at least one letter."
-    failure_message = "No letters found."
+    description = "The value contains at least one letter and at least one digit."
+    failure_message = "Missing a letter or a digit."
 
-    _pattern = r"^[^A-Za-z]*$"
-
-
-class ContainsDigits(BaseGenericPatternCheck):
-    name = "contains_digits"
-    display_name = "Contains Digits"
-    id = 10037
-    version = "1.0.0"
-    description = "The value contains at least one digit."
-    failure_message = "No digits found."
-
-    _pattern = r"^[^0-9]*$"
+    _pattern = r"^[^A-Za-z]*$|^[^0-9]*$"

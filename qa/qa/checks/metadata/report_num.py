@@ -30,8 +30,9 @@ class ReportNumIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.ContainsLetters(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
-        generic.ContainsDigits(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
+        generic.ContainsALetterAndADigit(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"
+        ),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
         generic.NoUnnecessarySpaceInParens(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"

@@ -44,12 +44,12 @@ class TestReportNumIsValid:
     def test_fail_no_letters_four_digits(self):
         result = ReportNumIsValid.check("1234")
         assert not result.passed
-        assert not sub_result(result, "contains_letters").passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
     def test_fail_no_letters_five_digits(self):
         result = ReportNumIsValid.check("12345")
         assert not result.passed
-        assert not sub_result(result, "contains_letters").passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
     def test_pass_multiple_report_nums(self):
         assert ReportNumIsValid.check("ECTP-2024-05; WLCAPP-2024-05; FUE-2024-05").passed
@@ -77,12 +77,12 @@ class TestReportNumIsValid:
     def test_fail_no_letters(self):
         result = ReportNumIsValid.check("1234567")
         assert not result.passed
-        assert not sub_result(result, "contains_letters").passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
     def test_fail_no_digits(self):
         result = ReportNumIsValid.check("ABCDEFG")
         assert not result.passed
-        assert not sub_result(result, "contains_digits").passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
     def test_fail_extra_whitespace(self):
         result = ReportNumIsValid.check("CERN  EP-2024-001")

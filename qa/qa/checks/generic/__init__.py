@@ -62,8 +62,7 @@ from qa.checks.generic.doi_url import (  # noqa
 )
 
 from qa.checks.generic.alphanumeric import (  # noqa
-    ContainsDigits,
-    ContainsLetters,
+    ContainsALetterAndADigit,
 )
 
 from qa.checks.generic.forbidden_terms import (  # noqa
