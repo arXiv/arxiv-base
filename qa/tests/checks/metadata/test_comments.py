@@ -42,7 +42,7 @@ class TestCommentsAreValid:
     def test_fail_all_caps(self):
         result = CommentsAreValid.check("TWELVE PAGES AND THREE FIGURES")
         assert not result.passed
-        assert not sub_result(result, "no_excessive_capitals").passed
+        assert not sub_result(result, "not_all_caps").passed
 
     def test_fail_control_chars(self):
         result = CommentsAreValid.check("12 pages\twith tab")

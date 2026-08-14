@@ -29,14 +29,14 @@ class CommentsAreValid(BaseAggregateCheck):
             return self._result(passed=True, results=[])
         return super()._run(data_registry)
 
-    _checks = (  # TODO not all caps, reject
+    _checks = (
         generic.NotTooLong(max_chars=1000, on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotEndWithPeriod(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"
         ),  # TODO is this correct?
-        generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.NotAllCaps(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotContainUnnecessaryEscape(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"
         ),

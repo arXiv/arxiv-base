@@ -55,7 +55,7 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.AuthorNamesDoNotContainDegreeSuffix(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
-        generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        generic.NotAllCaps(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NotTooLong(max_chars=10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.NoAnnotationSymbols(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),

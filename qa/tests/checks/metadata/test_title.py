@@ -48,6 +48,11 @@ class TestTitleIsValid:
         result = TitleIsValid.check("A title with period.")
         assert result.passed
 
+    def test_warn_all_caps(self):
+        result = TitleIsValid.check("A TITLE IN ALL CAPS")
+        assert result.passed
+        assert not sub_result(result, "not_all_caps").passed
+
     def test_pass_digit_strings_not_caps(self):
         result = TitleIsValid.check("The is a title with 12345678 and 987654321 words not capitalized")
         assert result.passed

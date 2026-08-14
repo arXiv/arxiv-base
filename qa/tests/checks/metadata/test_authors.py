@@ -312,7 +312,7 @@ class TestAuthorsAreValid:
     def test_warn_all_caps(self):
         result = AuthorsAreValid.check("FRED SMITH AND JOE BLOGGS")
         assert result.passed
-        assert not sub_result(result, "no_excessive_capitals").passed
+        assert not sub_result(result, "not_all_caps").passed
 
     def test_warn_unspaced_comma(self):
         result = AuthorsAreValid.check("Jamie Magyar,Jonathan Young")

@@ -33,3 +33,19 @@ class NoExcessiveCapitals(BaseGenericCheck):
             return self._result(passed=True)
         else:
             return self._result(passed=False, message=self.failure_message)
+
+
+class NotAllCaps(BaseGenericCheck):
+    name = "not_all_caps"
+    display_name = "Not All Caps"
+    id = 10066
+    version = "1.0.0"
+    description = "The value is not entirely uppercase."
+    failure_message = "Value is all caps."
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        if v.isupper():
+            return self._result(passed=False, message=self.failure_message)
+        return self._result(passed=True)

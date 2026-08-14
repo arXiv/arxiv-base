@@ -1,7 +1,7 @@
 """Tests for generic capitalization checks."""
 
 from qa.checks.models import QaDataRegistry, Metadata, OnFailurePolicy
-from qa.checks.generic.casing import DoesNotStartWithLowercase, NoExcessiveCapitals
+from qa.checks.generic.casing import DoesNotStartWithLowercase, NoExcessiveCapitals, NotAllCaps
 
 
 def inputs(title: str | None) -> QaDataRegistry:
@@ -29,6 +29,28 @@ class TestNoExcessiveCapitals:
 
     def test_fail_greek_caps(self):
         assert not self.check.run(inputs("ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΎ")).passed
+
+
+class TestNotAllCaps:
+    check = make(NotAllCaps)
+
+    def test_pass_normal(self):
+        assert self.check.run(inputs("A fine title")).passed
+
+    def test_pass_mixed_case(self):
+        assert self.check.run(inputs("BORDERLINE All Caps TITLE")).passed
+
+    def test_fail_all_caps(self):
+        assert not self.check.run(inputs("ALL CAPS TITLE")).passed
+
+    def test_pass_no_letters(self):
+        assert self.check.run(inputs("12345")).passed
+
+    def test_pass_all_lowercase(self):
+        assert self.check.run(inputs("all lowercase title")).passed
+
+    def test_fail_single_word_all_caps(self):
+        assert not self.check.run(inputs("TITLE")).passed
 
 
 class TestDoesNotStartWithLowercase:

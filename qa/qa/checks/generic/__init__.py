@@ -16,6 +16,7 @@ from qa.checks.generic.whitespace import (  # noqa
 from qa.checks.generic.casing import (  # noqa
     DoesNotStartWithLowercase,
     NoExcessiveCapitals,
+    NotAllCaps,
 )
 
 from qa.checks.generic.encoding import (  # noqa
