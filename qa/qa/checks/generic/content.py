@@ -1,9 +1,6 @@
 """Generic content checks: required and forbidden terms."""
 
-import re
-
-from qa.checks.base import BaseGenericPatternCheck, BaseGenericCheck
-from qa.checks.models import Result, Offset, QaDataRegistry
+from qa.checks.base import BaseGenericPatternCheck
 
 
 class ContainsALetterAndADigit(BaseGenericPatternCheck):
@@ -17,7 +14,7 @@ class ContainsALetterAndADigit(BaseGenericPatternCheck):
     _pattern = r"^[^A-Za-z]*$|^[^0-9]*$"
 
 
-class ContainsAValidYear(BaseGenericCheck):
+class ContainsAValidYear(BaseGenericPatternCheck):
     name = "contains_a_valid_year"
     display_name = "Contains A Valid Year"
     id = 10069
@@ -25,19 +22,7 @@ class ContainsAValidYear(BaseGenericCheck):
     description = "The value contains a valid 4-digit year (19xx or 20xx)."
     failure_message = "Does not contain a valid year."
 
-    _year_pattern = re.compile(r"\b(?:19|20)\d{2}\b")
-
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        v = getattr(getattr(data_registry, self.data), self.field)
-
-        if self._year_pattern.search(v):
-            return self._result(passed=True)
-
-        return self._result(
-            passed=False,
-            message=self.failure_message,
-            offsets=[Offset(start=0, end=len(v))],
-        )
+    _pattern = r"^(?:(?!\b(?:19|20)\d{2}\b)[\s\S])*$"
 
 
 class NoAnnotationSymbols(BaseGenericPatternCheck):
