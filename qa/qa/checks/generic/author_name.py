@@ -56,8 +56,15 @@ class BaseAuthorPatternCheck(BaseAuthorCheck):
 
     _pattern: str
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern)
 
     @property
@@ -91,8 +98,15 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
 
     _pattern = "|".join(_collaboration_patterns)
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
 
     @property
@@ -131,8 +145,15 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
 
     _pattern = "|".join(_llm_name_patterns)
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
 
     @property
@@ -199,8 +220,15 @@ class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
 
     _pattern = "|".join(_affiliation_patterns)
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
 
 

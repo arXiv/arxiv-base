@@ -45,3 +45,9 @@ class TestDoesNotBeginWithTitle:
 
     def test_pass_title_mid_string(self):
         assert self.check.run(inputs("My title")).passed
+
+    def test_custom_failure_message(self):
+        check = make(DoesNotBeginWithTitle, failure_message="Custom prefix message.")
+        result = check.run(inputs("Title: Something"))
+        assert result.message == "Custom prefix message."
+        assert check.config["failure_message"] == "Custom prefix message."

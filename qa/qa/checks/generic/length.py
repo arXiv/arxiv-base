@@ -19,8 +19,9 @@ class NotTooLong(BaseGenericCheck):
         on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
+        failure_message: str | None = None,
     ) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self.max_chars = max_chars
 
     @property
@@ -55,8 +56,9 @@ class NotTooShort(BaseGenericCheck):
         on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
+        failure_message: str | None = None,
     ) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self.min_chars = min_chars
 
     @property

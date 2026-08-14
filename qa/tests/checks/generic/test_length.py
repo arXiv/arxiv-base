@@ -50,6 +50,16 @@ class TestNotTooShort:
         result = self.check.run(inputs("ab"))
         assert result.offsets[0].end == 2
 
+    def test_default_failure_message(self):
+        result = self.check.run(inputs("ab"))
+        assert result.message == "Text likely too short."
+
+    def test_custom_failure_message(self):
+        check = make(NotTooShort, min_chars=5, failure_message="Custom short message.")
+        result = check.run(inputs("ab"))
+        assert result.message == "Custom short message."
+        assert check.config["failure_message"] == "Custom short message."
+
 
 class TestNotTooLong:
     check = make(NotTooLong, max_chars=10)
@@ -68,3 +78,9 @@ class TestNotTooLong:
 
     def test_config_includes_max_chars(self):
         assert self.check.config["max_chars"] == 10
+
+    def test_custom_failure_message(self):
+        check = make(NotTooLong, max_chars=10, failure_message="Custom long message.")
+        result = check.run(inputs("a" * 11))
+        assert result.message == "Custom long message."
+        assert check.config["failure_message"] == "Custom long message."
