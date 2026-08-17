@@ -27,8 +27,20 @@ class AbstractIsValid(BaseAggregateCheck):
 
     _checks = (
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
-        generic.NotTooShort(min_chars=150, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.NotTooShort(
+            min_chars=150,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="abstract",
+            failure_message="Too short: must be at least 150 characters.",
+        ),
+        generic.NotTooLong(
+            max_chars=2000,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="abstract",
+            failure_message="Too long: must be 2000 characters or fewer.",
+        ),
         generic.DoesNotBeginWithAbstract(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),

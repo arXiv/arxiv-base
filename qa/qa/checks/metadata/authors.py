@@ -51,8 +51,20 @@ class AuthorsAreValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
         generic.NotAllCaps(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.NotTooLong(max_chars=10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
+        generic.NotTooShort(
+            min_chars=4,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="authors",
+            failure_message="Too short: must be at least 4 characters.",
+        ),
+        generic.NotTooLong(
+            max_chars=10000,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="authors",
+            failure_message="Too long: must be 10000 characters or fewer.",
+        ),
         generic.DoesNotContainAnnotationSymbols(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),

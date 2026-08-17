@@ -39,8 +39,20 @@ class ReportNumIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
-        generic.NotTooShort(min_chars=4, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
-        generic.NotTooLong(max_chars=2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
+        generic.NotTooShort(
+            min_chars=4,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="report_num",
+            failure_message="Too short: must be at least 4 characters.",
+        ),
+        generic.NotTooLong(
+            max_chars=2000,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="report_num",
+            failure_message="Too long: must be 2000 characters or fewer.",
+        ),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
     )
