@@ -48,13 +48,6 @@ class JournalRefIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="journal_ref"
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="journal_ref"),
-        generic.NotTooLong(
-            max_chars=1500,
-            on_failure_policy=OnFailurePolicy.REJECT,
-            data="metadata",
-            field="journal_ref",
-            failure_message="Too long: must be 1500 characters or fewer.",
-        ),
         generic.NotTooShort(
             min_chars=5,
             on_failure_policy=OnFailurePolicy.WARN,
