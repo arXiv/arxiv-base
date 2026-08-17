@@ -25,17 +25,6 @@ class ContainsAValidYear(BaseGenericPatternCheck):
     _pattern = r"^(?:(?!\b(?:19|20)\d{2}\b)[\s\S])*$"
 
 
-class NoAnnotationSymbols(BaseGenericPatternCheck):
-    name = "no_annotation_symbols"
-    display_name = "No Annotation Symbols"
-    id = 10015
-    version = "1.0.0"
-    description = "The value does not contain annotation symbols such as *, #, ^, or @."
-    failure_message = "Contains one or more annotation symbols: *, #, ^, or @."
-
-    _pattern = r"\*|#|[^\\]\^|@"
-
-
 class DoesNotContainAnonymous(BaseGenericPatternCheck):
     name = "does_not_contain_anonymous"
     display_name = "Does Not Contain Anonymous"

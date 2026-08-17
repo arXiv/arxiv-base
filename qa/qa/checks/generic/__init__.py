@@ -22,12 +22,13 @@ from qa.checks.generic.casing import (  # noqa
 from qa.checks.generic.encoding import (  # noqa
     DoesNotContainControlChars,
     DoesNotContainControlCharsAllowNewlines,
-    DoesNotContainRawNewline,
     NoUtf8DecodingErrors,
 )
 
 from qa.checks.generic.structure import (  # noqa
     AllBracketsBalanced,
+    DoesNotContainAnnotationSymbols,
+    DoesNotContainRawNewline,
     NoHtmlElements,
 )
 
@@ -70,7 +71,6 @@ from qa.checks.generic.content import (  # noqa
     DoesNotContainPendingPublicationStatus,
     DoesNotContainSubmitted,
     DoesNotContainUrl,
-    NoAnnotationSymbols,
 )
 
 from qa.checks.generic.author_name import (  # noqa

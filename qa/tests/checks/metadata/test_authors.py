@@ -56,12 +56,12 @@ class TestAuthorsAreValid:
     def test_warn_bad_characters(self):
         result = AuthorsAreValid.check("Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon")
         assert result.passed
-        assert not sub_result(result, "no_annotation_symbols").passed
+        assert not sub_result(result, "does_not_contain_annotation_symbols").passed
 
     def test_warn_asterisk(self):
         result = AuthorsAreValid.check("Hsi-Sheng Goan*, Chung-Chin Jian, Po-Wen Chen")
         assert result.passed
-        assert not sub_result(result, "no_annotation_symbols").passed
+        assert not sub_result(result, "does_not_contain_annotation_symbols").passed
 
     def test_pass_no_space_after_comma(self):
         assert AuthorsAreValid.check("Fred Smith,Joan Alter").passed
