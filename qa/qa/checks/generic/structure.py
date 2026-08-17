@@ -40,7 +40,7 @@ class AllBracketsBalanced(BaseGenericCheck):
     id = 10013
     version = "1.0.0"
     description = "All parentheses, square brackets, and curly braces are properly closed."
-    failure_message = "Unbalanced brackets."
+    failure_message = "Contains unbalanced parentheses, brackets, or braces."
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         v = getattr(getattr(data_registry, self.data), self.field)

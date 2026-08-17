@@ -52,7 +52,7 @@ class TestNotTooShort:
 
     def test_default_failure_message(self):
         result = self.check.run(inputs("ab"))
-        assert result.message == "Text likely too short."
+        assert result.message == "Too short."
 
     def test_custom_failure_message(self):
         check = make(NotTooShort, min_chars=5, failure_message="Custom short message.")

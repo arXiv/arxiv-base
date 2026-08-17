@@ -42,6 +42,6 @@ class DoesNotBeginWithDoiPrefix(BaseGenericPatternCheck):
     id = 10047
     version = "1.0.0"
     description = "The value does not begin with 'doi:', 'https://doi.org/', or similar URL prefixes."
-    failure_message = "Contains unnecessary prefix."
+    failure_message = "Begins with an unnecessary DOI prefix: 'doi:' or 'https://doi.org/'."
 
     _pattern = r"(?i)^doi:|^https?://doi\.org/|^https?://.*\.doi\.org/"

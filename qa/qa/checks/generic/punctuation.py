@@ -31,6 +31,6 @@ class DoesNotContainSemicolon(BaseGenericPatternCheck):
     id = 10022
     version = "1.0.0"
     description = "The value does not contain a semicolon."
-    failure_message = "Contains semicolon(s)."
+    failure_message = "Contains one or more semicolons."
 
     _pattern = r";"

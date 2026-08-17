@@ -9,7 +9,7 @@ class NoExtraWhitespace(BaseGenericPatternCheck):
     id = 10025
     version = "1.0.0"
     description = "The value does not contain multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
-    failure_message = "Excessive or irregular whitespace."
+    failure_message = "Excessive whitespace: multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
 
     _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]|\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+"
 
@@ -53,6 +53,6 @@ class DoesNotContainUnspacedComma(BaseGenericPatternCheck):
     id = 10062
     version = "1.0.0"
     description = "The value does not contain a comma with no space on either side."
-    failure_message = "Comma has no space on either side."
+    failure_message = "Missing space after comma."
 
     _pattern = r"[A-Za-z],[A-Za-z]"

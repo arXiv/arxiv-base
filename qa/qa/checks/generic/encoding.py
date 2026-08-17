@@ -31,8 +31,6 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     id = 10014
     version = "1.0.0"
     description = "The value does not contain malformed Unicode sequences."
-    failure_message = (
-        "Contains garbled text, likely caused by UTF-8 content being decoded with the wrong character encoding."
-    )
+    failure_message = "Likely contains UTF-8 content decoded with the wrong character encoding."
 
     _pattern = r"[\u00c0-\u00ff][\u0080-\u00bf]+"
