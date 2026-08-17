@@ -31,7 +31,7 @@ class NoAnnotationSymbols(BaseGenericPatternCheck):
     id = 10015
     version = "1.0.0"
     description = "The value does not contain annotation symbols such as *, #, ^, or @."
-    failure_message = "Contains an annotation symbol: *, #, ^, or @."
+    failure_message = "Contains one or more annotation symbols: *, #, ^, or @."
 
     _pattern = r"\*|#|[^\\]\^|@"
 

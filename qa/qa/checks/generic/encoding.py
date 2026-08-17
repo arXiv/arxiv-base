@@ -9,7 +9,7 @@ class DoesNotContainControlChars(BaseGenericPatternCheck):
     id = 10026
     version = "1.0.0"
     description = "The value does not contain control characters including newlines, tabs, and backspaces."
-    failure_message = "Contains control characters: newlines, tabs, or backspaces."
+    failure_message = "Contains one or more control characters: newlines, tabs, or backspaces."
 
     _pattern = r"[\u0000-\u001f]+"
 
@@ -20,7 +20,7 @@ class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
     id = 10018
     version = "1.0.0"
     description = "The value does not contain control characters, but newlines (\\n) are permitted."
-    failure_message = "Contains control characters."
+    failure_message = "Contains one or more control characters: tabs or backspaces."
 
     _pattern = r"[\u0000-\u0009\u000b-\u001f]+"
 
@@ -31,7 +31,9 @@ class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     id = 10014
     version = "1.0.0"
     description = "The value does not contain malformed Unicode sequences."
-    failure_message = "Bad Unicode encoding."
+    failure_message = (
+        "Contains garbled text, likely caused by UTF-8 content being decoded with the wrong character encoding."
+    )
 
     _pattern = r"[\u00c0-\u00ff][\u0080-\u00bf]+"
 

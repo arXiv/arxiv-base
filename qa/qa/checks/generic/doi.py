@@ -10,9 +10,11 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
     id = 10050
     version = "1.0.0"
     description = "Each space-separated DOI in the value matches the expected DOI format."
-    failure_message = "Invalid DOI."
+    failure_message = failure_message = (
+        "Contains a DOI that doesn't match the expected format: digits, followed by a period, followed by '/' and a suffix (e.g. '10.1234/abc123')."
+    )
 
-    _pattern = r"(?i)^(?![0-9][0-9]*\.[0-9][0-9]*/[A-Za-z0-9():;._/-]*$)"
+    _pattern = r"[0-9]+(\.[0-9]+)/.*"
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         v = getattr(getattr(data_registry, self.data), self.field)

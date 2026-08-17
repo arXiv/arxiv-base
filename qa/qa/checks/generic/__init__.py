@@ -54,7 +54,7 @@ from qa.checks.generic.punctuation import (  # noqa
     DoesNotEndWithPunctuation,
 )
 
-from qa.checks.generic.doi_url import (  # noqa
+from qa.qa.checks.generic.doi import (  # noqa
     DoiHasValidFormat,
 )
 
