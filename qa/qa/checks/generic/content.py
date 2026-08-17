@@ -124,4 +124,4 @@ class DoesNotContainBareDoi(BaseGenericPatternCheck):
     description = "The value does not contain a bare DOI number (e.g. 10.1234/abc)."
     failure_message = "Contains a DOI."
 
-    _pattern = r"(?i)^[0-9][0-9].[0-9]+/[^ ]*$"
+    _pattern = r"[0-9]+(\.[0-9]+)*/.*"

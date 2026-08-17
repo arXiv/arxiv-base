@@ -14,7 +14,7 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
         "Contains a DOI that doesn't match the expected format: digits, followed by a period, followed by '/' and a suffix (e.g. '10.1234/abc123')."
     )
 
-    _pattern = r"[0-9]+(\.[0-9]+)/.*"
+    _pattern = r"[0-9]+(\.[0-9]+)*/.*"
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         v = getattr(getattr(data_registry, self.data), self.field)
