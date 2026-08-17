@@ -21,7 +21,7 @@ class NoExcessiveCapitals(BaseGenericCheck):
     id = 10007
     version = "1.0.0"
     description = "The value does not contain excessive capitals."
-    failure_message = "Likely excessive capitalization."
+    failure_message = "Contains too many capital letters relative to lowercase letters."
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         v = getattr(getattr(data_registry, self.data), self.field)
@@ -41,7 +41,7 @@ class NotAllCaps(BaseGenericCheck):
     id = 10066
     version = "1.0.0"
     description = "The value is not entirely uppercase."
-    failure_message = "Value is all caps."
+    failure_message = "All caps."
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         v = getattr(getattr(data_registry, self.data), self.field)

@@ -9,7 +9,7 @@ class ContainsALetterAndADigit(BaseGenericPatternCheck):
     id = 10067
     version = "1.0.0"
     description = "The value contains at least one letter and at least one digit."
-    failure_message = "Missing a letter or a digit."
+    failure_message = "Missing at least one letter and one digit."
 
     _pattern = r"^[^A-Za-z]*$|^[^0-9]*$"
 
@@ -20,7 +20,7 @@ class ContainsAValidYear(BaseGenericPatternCheck):
     id = 10069
     version = "1.0.0"
     description = "The value contains a valid 4-digit year (19xx or 20xx)."
-    failure_message = "Does not contain a valid year."
+    failure_message = "Missing a valid year."
 
     _pattern = r"^(?:(?!\b(?:19|20)\d{2}\b)[\s\S])*$"
 
@@ -30,8 +30,8 @@ class NoAnnotationSymbols(BaseGenericPatternCheck):
     display_name = "No Annotation Symbols"
     id = 10015
     version = "1.0.0"
-    description = "The value does not contain invalid characters such as *, #, ^, or @."
-    failure_message = "Unusual character detected."
+    description = "The value does not contain annotation symbols such as *, #, ^, or @."
+    failure_message = "Contains an annotation symbol: *, #, ^, or @."
 
     _pattern = r"\*|#|[^\\]\^|@"
 
@@ -80,15 +80,15 @@ class DoesNotContainSubmitted(BaseGenericPatternCheck):
     _pattern = r"(?i)submitted"
 
 
-class DoesNotContainEtAlWithPeriod(BaseGenericPatternCheck):
-    name = "does_not_contain_et_al_with_period"
-    display_name = "Does Not Contain Et Al With Period"
+class DoesNotContainEtAl(BaseGenericPatternCheck):
+    name = "does_not_contain_et_al"
+    display_name = "Does Not Contain Et Al"
     id = 10059
     version = "1.0.0"
-    description = "The value does not contain the malformed abbreviation 'et. al.' (a period should not follow 'et')."
-    failure_message = "Contains 'et. al.'."
+    description = "The value does not contain any form of the abbreviation 'et al.'."
+    failure_message = "Contains 'et al.'."
 
-    _pattern = r"(?i)\bet\.\s*al\b"
+    _pattern = r"(?i)\bet\.?\s*al\.?\b"
 
 
 class DoesNotContainPendingPublicationStatus(BaseGenericPatternCheck):
@@ -122,7 +122,7 @@ class DoesNotContainDoi(BaseGenericPatternCheck):
     id = 10045
     version = "1.0.0"
     description = "The value does not contain the word 'DOI'."
-    failure_message = "Contains 'DOI'."
+    failure_message = "Contains the word 'DOI'."
 
     _pattern = r"(?i)doi"
 
