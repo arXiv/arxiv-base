@@ -183,7 +183,7 @@ class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
     id = 10054
     version = "1.0.0"
     description = "No parsed author name contains square bracket characters."
-    failure_message = "Unusual character detected."
+    failure_message = "Contains square brackets."
 
     _pattern = r"\[|]"
 
@@ -205,7 +205,7 @@ class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
     id = 10056
     version = "1.0.0"
     description = "No parsed author name contains institution or affiliation keywords."
-    failure_message = "Contains a suffix that may be university affiliation or degree related."
+    failure_message = "Contains an keyword that may be affiliation or degree related."
 
     _affiliation_patterns = [
         r"\bPhysics\b",
@@ -240,7 +240,7 @@ class AuthorNamesDoNotContainPrefix(BaseAuthorPatternCheck):
     description = "No parsed author name contains a title prefix such as 'Dr' or 'Prof'."
     failure_message = "Contains a prefix that may be a title, e.g. 'Dr' or 'Prof'."
 
-    _pattern = r"\b(Dr|DR|Prof|PROF)\.?,?"
+    _pattern = r"\b(Dr|DR|Prof|PROF)(\.|,)"
 
 
 class AuthorNamesDoNotContainDegreeSuffix(BaseAuthorPatternCheck):
