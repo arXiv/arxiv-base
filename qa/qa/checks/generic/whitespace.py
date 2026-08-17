@@ -9,7 +9,7 @@ class NoExtraWhitespace(BaseGenericPatternCheck):
     id = 10025
     version = "1.0.0"
     description = "The value does not contain multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
-    failure_message = "Excessive whitespace: multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
+    failure_message = "Contains excessive whitespace: multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
 
     _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]|\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+"
 
@@ -20,7 +20,7 @@ class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
     id = 10033
     version = "1.0.0"
     description = "The value does not contain leading or trailing spaces immediately inside parentheses."
-    failure_message = "Unnecessary space inside parentheses."
+    failure_message = "Contains unnecessary space inside parentheses."
 
     _pattern = r"\(\s|\s\)"
 
@@ -31,7 +31,7 @@ class DoesNotContainSpaceAfterOpenParen(BaseGenericPatternCheck):
     id = 10060
     version = "1.0.0"
     description = "The value does not contain a space immediately after an opening parenthesis."
-    failure_message = "Space after opening parenthesis."
+    failure_message = "Contains space after an opening parenthesis."
 
     _pattern = r"\(\s"
 
@@ -42,7 +42,7 @@ class DoesNotContainSpaceBeforeComma(BaseGenericPatternCheck):
     id = 10061
     version = "1.0.0"
     description = "The value does not contain a space immediately before a comma."
-    failure_message = "Space before comma."
+    failure_message = "Contains space before a comma."
 
     _pattern = r"\s,"
 
@@ -53,6 +53,6 @@ class DoesNotContainUnspacedComma(BaseGenericPatternCheck):
     id = 10062
     version = "1.0.0"
     description = "The value does not contain a comma with no space on either side."
-    failure_message = "Missing space after comma."
+    failure_message = "Missing space after a comma."
 
     _pattern = r"[A-Za-z],[A-Za-z]"

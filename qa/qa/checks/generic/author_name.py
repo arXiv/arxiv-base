@@ -85,7 +85,7 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
     id = 10051
     version = "1.0.0"
     description = "No author has only a surname without a given name, unless it is a known collaboration or LLM name."
-    failure_message = "Contains lone surname."
+    failure_message = "Contains an author surname without a given name."
 
     _collaboration_patterns = [
         r"collaboration",
@@ -129,7 +129,7 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
     id = 10052
     version = "1.0.0"
     description = "No author's name appears to be an AI language model."
-    failure_message = "Potential LLM author detected."
+    failure_message = "Contains an LLM author."
 
     _llm_name_patterns = [
         r"\bchatgpt?\b",
