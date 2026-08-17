@@ -6,7 +6,6 @@ from qa.checks.generic.length import (  # noqa
 )
 
 from qa.checks.generic.whitespace import (  # noqa
-    DoesNotContainSpaceAfterOpenParen,
     DoesNotContainSpaceBeforeComma,
     DoesNotContainUnspacedComma,
     NoExtraWhitespace,

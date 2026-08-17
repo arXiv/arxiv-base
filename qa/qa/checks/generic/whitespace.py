@@ -25,17 +25,6 @@ class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):
     _pattern = r"\(\s|\s\)"
 
 
-class DoesNotContainSpaceAfterOpenParen(BaseGenericPatternCheck):
-    name = "does_not_contain_space_after_open_paren"
-    display_name = "Does Not Contain Space After Open Paren"
-    id = 10060
-    version = "1.0.0"
-    description = "The value does not contain a space immediately after an opening parenthesis."
-    failure_message = "Contains space after an opening parenthesis."
-
-    _pattern = r"\(\s"
-
-
 class DoesNotContainSpaceBeforeComma(BaseGenericPatternCheck):
     name = "does_not_contain_space_before_comma"
     display_name = "Does Not Contain Space Before Comma"

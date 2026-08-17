@@ -32,9 +32,6 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.AuthorNamesDoNotContainSemicolon(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
-        generic.DoesNotContainSpaceAfterOpenParen(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
-        ),
         generic.DoesNotContainSpaceBeforeComma(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),

@@ -30,10 +30,10 @@ class DoesNotBeginWithAbstract(BaseGenericPatternCheck):
     display_name = "Does Not Begin With Abstract"
     id = 10005
     version = "1.0.0"
-    description = "The value does not begin with the literal prefix 'abstract' or 'abstract:'."
-    failure_message = "Begins with 'abstract'."
+    description = "The value does not begin with the literal prefix 'abstract:'."
+    failure_message = "Begins with 'abstract:'."
 
-    _pattern = r"(?i)^abstract:?\b"
+    _pattern = r"(?i)^abstract:"
 
 
 class DoesNotBeginWithDoiPrefix(BaseGenericPatternCheck):

@@ -279,11 +279,6 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_et_al").passed
 
-    def test_fail_space_after_open_paren(self):
-        result = AuthorsAreValid.check("Fred Smith ( Cornell)")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_space_after_open_paren").passed
-
     def test_fail_space_before_comma(self):
         result = AuthorsAreValid.check("Fred Smith , Joe Bloggs")
         assert not result.passed

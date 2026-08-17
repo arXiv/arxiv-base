@@ -81,10 +81,10 @@ class TestAbstractIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_begin_with_abstract").passed
 
-    def test_warn_begins_with_abstract_no_colon(self):
+    def test_pass_begins_with_abstract_no_colon(self):
         result = AbstractIsValid.check("Abstract some text")
         assert result.passed
-        assert not sub_result(result, "does_not_begin_with_abstract").passed
+        assert sub_result(result, "does_not_begin_with_abstract").passed
 
     def test_warn_begins_with_abstract_all_caps(self):
         result = AbstractIsValid.check("ABSTRACT: some text")
