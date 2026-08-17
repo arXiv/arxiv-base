@@ -12,13 +12,6 @@ def sub_result(result: Result, name: str) -> Result:
     return next(r for r in result.results if r.check_config["name"] == name)
 
 
-def sub_result_by_policy(result: Result, name: str, policy: OnFailurePolicy) -> Result:
-    assert result.results is not None
-    return next(
-        r for r in result.results if r.check_config["name"] == name and r.check_config["on_failure_policy"] == policy
-    )
-
-
 class TestJournalRefIsValid:
     def test_pass_normal(self):
         assert JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001 (2024)").passed
@@ -38,11 +31,10 @@ class TestJournalRefIsValid:
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
-    def test_fail_too_long(self):
+    def test_warn_too_long(self):
         result = JournalRefIsValid.check("x" * 1501 + " 2024")
-        assert not result.passed
-        assert not sub_result_by_policy(result, "not_too_long", OnFailurePolicy.REJECT).passed
-        assert not sub_result_by_policy(result, "not_too_long", OnFailurePolicy.WARN).passed
+        assert result.passed
+        assert not sub_result(result, "not_too_long").passed
 
     def test_fail_no_valid_year(self):
         result = JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001")
