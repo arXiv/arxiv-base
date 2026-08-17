@@ -25,9 +25,7 @@ class AuthorsAreValid(BaseAggregateCheck):
 
     _checks = (
         generic.DoesNotEndWithPunctuation(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
-        generic.DoesNotContainEtAlWithPeriod(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
-        ),
+        generic.DoesNotContainEtAl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainAnonymous(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainCorresponding(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),

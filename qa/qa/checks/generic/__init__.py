@@ -54,7 +54,7 @@ from qa.checks.generic.punctuation import (  # noqa
     DoesNotEndWithPunctuation,
 )
 
-from qa.qa.checks.generic.doi import (  # noqa
+from qa.checks.generic.doi import (  # noqa
     DoiHasValidFormat,
 )
 
@@ -66,7 +66,7 @@ from qa.checks.generic.content import (  # noqa
     DoesNotContainBareDoi,
     DoesNotContainCorresponding,
     DoesNotContainDoi,
-    DoesNotContainEtAlWithPeriod,
+    DoesNotContainEtAl,
     DoesNotContainPendingPublicationStatus,
     DoesNotContainSubmitted,
     DoesNotContainUrl,

@@ -277,7 +277,7 @@ class TestAuthorsAreValid:
     def test_fail_et_al_with_period(self):
         result = AuthorsAreValid.check("Fred Smith et. al.")
         assert not result.passed
-        assert not sub_result(result, "does_not_contain_et_al_with_period").passed
+        assert not sub_result(result, "does_not_contain_et_al").passed
 
     def test_fail_space_after_open_paren(self):
         result = AuthorsAreValid.check("Fred Smith ( Cornell)")
@@ -294,10 +294,16 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_prefix").passed
 
+    def test_pass_prefix_dr_without_punctuation(self):
+        assert AuthorsAreValid.check("Dr John Smith").passed
+
     def test_fail_prefix_prof(self):
-        result = AuthorsAreValid.check("Prof Jane Doe")
+        result = AuthorsAreValid.check("Prof. Jane Doe")
         assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_prefix").passed
+
+    def test_pass_prefix_prof_without_punctuation(self):
+        assert AuthorsAreValid.check("Prof Jane Doe").passed
 
     def test_fail_suffix_phd(self):
         result = AuthorsAreValid.check("John Smith, PhD")
