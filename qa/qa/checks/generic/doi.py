@@ -23,7 +23,7 @@ class DoiHasValidFormat(BaseGenericPatternCheck):
         for doi in v.split():
             idx = v.index(doi, start)
             end = idx + len(doi)
-            if self._compiled_pattern.match(doi):
+            if not self._compiled_pattern.match(doi):
                 offsets.append(Offset(start=idx, end=end))
             start = end
         if offsets:
