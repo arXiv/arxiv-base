@@ -30,15 +30,22 @@ class MscClassIsValid(BaseAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NotTooLong(max_chars=1000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
+        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
+        generic.NoUnnecessarySpaceInParens(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
+        ),
+        generic.DoesNotContainControlChars(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
+        ),
+        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
+        generic.DoesNotContainSemicolon(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
+        generic.NotTooLong(
+            max_chars=160,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="msc_class",
+            failure_message="Too long: must be 160 characters or fewer.",
+        ),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
-        generic.DoesNotContainSemicolon(
-            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"
-        ),  # TODO remove?
     )

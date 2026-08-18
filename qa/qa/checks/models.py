@@ -56,11 +56,11 @@ class Result(BaseModel):
     offsets: list[Offset] | None = None
     results: list["Result"] | None = None
 
-    def failure_messages(self, *dispositions: Disposition) -> str:
-        """Return a concatenated string containing all messages for failed results with the given dispositions."""
-        if not self.results:
-            return self.message if not self.passed else ""
-        return "\n".join(r.message for r in self.results if not r.passed and r.disposition in dispositions)
+    def _messages(self, *dispositions: Disposition) -> str:
+        """Return a concatenated string containing all additional messages from results which have the given dispositions."""
+        if self.results is None:
+            return ""
+        return "\n".join(r.message for r in self.results if r.disposition in dispositions)
 
 
 class Flag(BaseModel):

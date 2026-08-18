@@ -39,14 +39,10 @@ class TestBaseReport(TestCase):
             base_report(submission_id=0)
 
 
-class TestResultFailureMessages(TestCase):
-    def test_no_results_and_passed_returns_empty_string(self):
-        result = Result(check_config={}, passed=True, disposition=Disposition.OK, message="")
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "")
-
-    def test_no_results_and_failed_returns_own_message(self):
+class TestResultMessages(TestCase):
+    def test_no_results_returns_empty_string(self):
         result = Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="own message")
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "own message")
+        self.assertEqual(result._messages(Disposition.WARN, Disposition.REJECT), "")
 
     def test_no_dispositions_returns_empty_string(self):
         result = Result(
@@ -58,7 +54,7 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
             ],
         )
-        self.assertEqual(result.failure_messages(), "")
+        self.assertEqual(result._messages(), "")
 
     def test_concatenates_messages_matching_given_dispositions(self):
         result = Result(
@@ -71,7 +67,7 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
             ],
         )
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "warn message\nreject message")
+        self.assertEqual(result._messages(Disposition.WARN, Disposition.REJECT), "warn message\nreject message")
 
     def test_filters_to_a_single_disposition(self):
         result = Result(
@@ -84,9 +80,9 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
             ],
         )
-        self.assertEqual(result.failure_messages(Disposition.REJECT), "reject message")
+        self.assertEqual(result._messages(Disposition.REJECT), "reject message")
 
-    def test_excludes_passed_and_ignored_sub_checks(self):
+    def test_excludes_non_matching_dispositions(self):
         result = Result(
             check_config={},
             passed=True,
@@ -98,9 +94,9 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.WARN, message="warn message"),
             ],
         )
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "warn message")
+        self.assertEqual(result._messages(Disposition.WARN, Disposition.REJECT), "warn message")
 
-    def test_excludes_passed_sub_checks_even_with_matching_disposition(self):
+    def test_includes_passed_sub_checks_with_matching_disposition(self):
         result = Result(
             check_config={},
             passed=True,
@@ -111,7 +107,7 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.OK, message="ignored message"),
             ],
         )
-        self.assertEqual(result.failure_messages(Disposition.OK), "ignored message")
+        self.assertEqual(result._messages(Disposition.OK), "passed message\nignored message")
 
 
 class TestFlag(TestCase):

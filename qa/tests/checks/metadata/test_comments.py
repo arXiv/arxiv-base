@@ -26,10 +26,33 @@ class TestCommentsAreValid:
         assert result.passed
         assert result.results == []
 
-    def test_warn_too_long(self):
-        result = CommentsAreValid.check("x" * 10001)
-        assert result.passed
+    def test_fail_too_long(self):
+        result = CommentsAreValid.check("x" * 1001)
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
+
+    def test_pass_at_max_length(self):
+        assert CommentsAreValid.check("x" * 1000).passed
+
+    def test_fail_linebreak(self):
+        result = CommentsAreValid.check("12 pages, \\\\ 3 figures")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_linebreak").passed
+
+    def test_fail_all_caps(self):
+        result = CommentsAreValid.check("TWELVE PAGES AND THREE FIGURES")
+        assert not result.passed
+        assert not sub_result(result, "not_all_caps").passed
+
+    def test_fail_control_chars(self):
+        result = CommentsAreValid.check("12 pages\twith tab")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_control_chars").passed
+
+    def test_fail_ends_with_period(self):
+        result = CommentsAreValid.check("12 pages, 3 figures.")
+        assert not result.passed
+        assert not sub_result(result, "does_not_end_with_period").passed
 
     def test_warn_utf8_decoding_error_accents(self):
         result = CommentsAreValid.check("A comment with èéêëìíîï accents".encode("UTF-8").decode("LATIN-1"))

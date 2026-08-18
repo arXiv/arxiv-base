@@ -95,6 +95,7 @@ class BaseGenericCheck(BaseCheck):
         on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
+        failure_message: str | None = None,
     ) -> None:
         """
         Set instance-level attributes.
@@ -104,6 +105,8 @@ class BaseGenericCheck(BaseCheck):
         self.required_data = {data}
         self.data = data
         self.field = field
+        if failure_message is not None:
+            self.failure_message = failure_message
 
     @property
     def config(self) -> dict:
@@ -138,8 +141,9 @@ class BaseGenericPatternCheck(BaseGenericCheck):
         on_failure_policy: OnFailurePolicy,
         data: str,
         field: str,
+        failure_message: str | None = None,
     ) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern: re.Pattern = re.compile(self._pattern)
 
     @property

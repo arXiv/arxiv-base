@@ -1,49 +1,83 @@
 """Generic checks package: exposes all generic checks."""
 
-from qa.checks.generic.text import (  # noqa
-    AllBracketsBalanced,
-    ContainsDigits,
-    ContainsLetters,
-    DoesNotBeginWithAbstract,
-    DoesNotBeginWithAuthor,
-    DoesNotBeginWithTitle,
-    DoesNotContainAccepted,
-    DoesNotContainAnonymous,
-    DoesNotContainBadDoiPrefix,
-    DoesNotContainBareDoi,
-    DoesNotContainBibtex,
+from qa.checks.generic.length import (  # noqa
+    NotTooLong,
+    NotTooShort,
+)
+
+from qa.checks.generic.whitespace import (  # noqa
+    DoesNotContainSpaceBeforeComma,
+    DoesNotContainUnspacedComma,
+    NoExtraWhitespace,
+    NoUnnecessarySpaceInParens,
+)
+
+from qa.checks.generic.casing import (  # noqa
+    DoesNotStartWithLowercase,
+    NoExcessiveCapitals,
+    NotAllCaps,
+)
+
+from qa.checks.generic.encoding import (  # noqa
     DoesNotContainControlChars,
     DoesNotContainControlCharsAllowNewlines,
-    DoesNotContainCorresponding,
-    DoesNotContainDoi,
+    NoUtf8DecodingErrors,
+)
+
+from qa.checks.generic.structure import (  # noqa
+    AllBracketsBalanced,
+    DoesNotContainAnnotationSymbols,
+    DoesNotContainRawNewline,
+    NoHtmlElements,
+)
+
+from qa.checks.generic.tex import (  # noqa
+    DoesNotContainBibtex,
+    DoesNotContainHrefOrUrlTex,
     DoesNotContainLinebreak,
-    DoesNotContainSemicolon,
-    DoesNotContainSubmitted,
-    DoesNotContainTex,
-    DoesNotContainTexBeginEnv,
+    DoesNotContainTexBegin,
     DoesNotContainTexDagger,
     DoesNotContainTildeAsHardSpace,
     DoesNotContainUnnecessaryEscape,
-    DoesNotContainUrl,
+)
+
+from qa.checks.generic.prefixes import (  # noqa
+    DoesNotBeginWithAbstract,
+    DoesNotBeginWithAuthor,
+    DoesNotBeginWithDoiPrefix,
+    DoesNotBeginWithTitle,
+)
+
+from qa.checks.generic.punctuation import (  # noqa
+    DoesNotContainSemicolon,
+    DoesNotEndWithPeriod,
     DoesNotEndWithPunctuation,
-    DoesNotStartWithLowercase,
+)
+
+from qa.checks.generic.doi import (  # noqa
     DoiHasValidFormat,
-    NoAnnotationSymbols,
-    NoBoundaryWhitespace,
-    NoExcessiveCapitals,
-    NoExtraWhitespace,
-    NoHtmlElements,
-    NoUnapprovedLongCapsWords,
-    NoUnnecessarySpaceInParens,
-    NoUtf8DecodingErrors,
-    NotTooLong,
-    NotTooShort,
+)
+
+from qa.checks.generic.content import (  # noqa
+    ContainsALetterAndADigit,
+    ContainsAValidYear,
+    DoesNotContainAccepted,
+    DoesNotContainAnonymous,
+    DoesNotContainBareDoi,
+    DoesNotContainCorresponding,
+    DoesNotContainDoi,
+    DoesNotContainEtAl,
+    DoesNotContainPendingPublicationStatus,
+    DoesNotContainSubmitted,
+    DoesNotContainUrl,
 )
 
 from qa.checks.generic.author_name import (  # noqa
     AuthorNamesDoNotContainAffiliation,
     AuthorNamesDoNotContainBrackets,
+    AuthorNamesDoNotContainDegreeSuffix,
     AuthorNamesDoNotContainNumbers,
+    AuthorNamesDoNotContainPrefix,
     AuthorNamesDoNotContainSemicolon,
     AuthorsDoNotContainLlmAuthor,
     AuthorsDoNotContainLoneSurname,
