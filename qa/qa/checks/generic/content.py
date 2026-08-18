@@ -1,8 +1,9 @@
 """Generic content checks: required and forbidden terms."""
 
+from ftlangdetect import detect
+
 from qa.checks.base import BaseGenericPatternCheck, BaseGenericCheck
 from qa.checks.models import QaDataRegistry, Result
-from ftlangdetect import detect
 
 
 class IsEnglish(BaseGenericCheck):
