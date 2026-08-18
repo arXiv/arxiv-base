@@ -4,8 +4,6 @@ from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
 
-# TODO: add an English language check (requires gcld3, which has no macOS arm64 wheel)
-
 
 class AbstractIsValid(BaseAggregateCheck):
     """Aggregate check for the metadata abstract field."""
@@ -26,6 +24,7 @@ class AbstractIsValid(BaseAggregateCheck):
         return cls().run(QaDataRegistry(metadata=Metadata(abstract=abstract)))
 
     _checks = (
+        generic.IsEnglish(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
         generic.NotTooShort(
             min_chars=150,

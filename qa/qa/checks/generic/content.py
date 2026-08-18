@@ -1,6 +1,38 @@
 """Generic content checks: required and forbidden terms."""
 
-from qa.checks.base import BaseGenericPatternCheck
+from ftlangdetect import detect
+
+from qa.checks.base import BaseGenericPatternCheck, BaseGenericCheck
+from qa.checks.models import QaDataRegistry, Result
+
+
+class IsEnglish(BaseGenericCheck):
+    name = "is_english"
+    display_name = "Is English"
+    id = 10070
+    version = "1.0.0"
+    description = "The value must contain English text."
+    failure_message = "Likely not in English."
+
+    min_chars = 5
+
+    @property
+    def config(self) -> dict:
+        return {**super().config, "min_chars": self.min_chars}
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        if len(v) < self.min_chars:
+            return self._result(passed=True)
+
+        result = detect(v)
+
+        # TODO: language ID is sometimes not accurate. Use score?
+        if result and result.get("lang") == "en":
+            return self._result(passed=True)
+        else:
+            return self._result(passed=False, message=self.failure_message)
 
 
 class ContainsALetterAndADigit(BaseGenericPatternCheck):

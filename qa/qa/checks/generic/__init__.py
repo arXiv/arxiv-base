@@ -70,6 +70,7 @@ from qa.checks.generic.content import (  # noqa
     DoesNotContainPendingPublicationStatus,
     DoesNotContainSubmitted,
     DoesNotContainUrl,
+    IsEnglish,
 )
 
 from qa.checks.generic.author_name import (  # noqa
