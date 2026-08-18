@@ -16,6 +16,10 @@ class IsEnglish(BaseGenericCheck):
 
     min_chars = 5
 
+    @property
+    def config(self) -> dict:
+        return {**super().config, "min_chars": self.min_chars}
+
     def _run(self, data_registry: QaDataRegistry) -> Result:
         v = getattr(getattr(data_registry, self.data), self.field)
 
