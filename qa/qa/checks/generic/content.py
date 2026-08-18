@@ -8,7 +8,7 @@ from ftlangdetect import detect
 class IsEnglish(BaseGenericCheck):
     name = "is_english"
     display_name = "Is English"
-    id = 10057
+    id = 10070
     version = "1.0.0"
     description = "The value must contain English text."
     failure_message = "Likely not in English."
