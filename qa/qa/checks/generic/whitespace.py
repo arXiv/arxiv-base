@@ -11,7 +11,7 @@ class NoExtraWhitespace(BaseGenericPatternCheck):
     description = "The value does not contain multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
     failure_message = "Contains excessive whitespace: multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
 
-    _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]|\s+,(\s*,)*[a-zA-Z]?|\s*,(\s*,)+"
+    _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]|\s+,"
 
 
 class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):

@@ -59,11 +59,11 @@ class AuthorsAreValid(BaseAggregateCheck):
             failure_message="Too short: must be at least 4 characters.",
         ),
         generic.NotTooLong(
-            max_chars=1000,
+            max_chars=10000,
             on_failure_policy=OnFailurePolicy.WARN,
             data="metadata",
             field="authors",
-            failure_message="Too long: must be 1000 characters or fewer.",
+            failure_message="Too long: must be 10000 characters or fewer.",
         ),
         generic.DoesNotContainAnnotationSymbols(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
