@@ -32,13 +32,26 @@ class TestTitleIsValid:
         assert result.message == "Title is invalid or empty."
 
     def test_warn_too_short(self):
-        result = TitleIsValid.check("Tiny")
+        result = TitleIsValid.check("Ti")
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
+
+    def test_fail_too_long(self):
+        result = TitleIsValid.check("x" * 301)
+        assert not result.passed
+        assert not sub_result(result, "not_too_long").passed
+
+    def test_pass_at_max_length(self):
+        assert TitleIsValid.check("x" * 300).passed
 
     def test_pass_ends_with_punctuation(self):
         result = TitleIsValid.check("A title with period.")
         assert result.passed
+
+    def test_warn_all_caps(self):
+        result = TitleIsValid.check("A TITLE IN ALL CAPS")
+        assert result.passed
+        assert not sub_result(result, "not_all_caps").passed
 
     def test_pass_digit_strings_not_caps(self):
         result = TitleIsValid.check("The is a title with 12345678 and 987654321 words not capitalized")
@@ -48,14 +61,24 @@ class TestTitleIsValid:
         result = TitleIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>")
         assert result.passed
 
-    def test_warn_begins_with_title(self):
+    def test_fail_begins_with_title(self):
         result = TitleIsValid.check("Title: Something")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_begin_with_title").passed
 
     def test_pass_single_backslash(self):
         result = TitleIsValid.check("This \\ is not a line break")
         assert result.passed
+
+    def test_fail_tex_linebreak(self):
+        result = TitleIsValid.check("Line break at end\\\\")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_linebreak").passed
+
+    def test_fail_raw_newline(self):
+        result = TitleIsValid.check("A title with\na raw newline")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_raw_newline").passed
 
     def test_pass_complex_parens(self):
         result = TitleIsValid.check("Something about sin(x), H2(SO)4, and (Non-)Commutative operations")

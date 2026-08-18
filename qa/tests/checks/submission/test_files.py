@@ -4,7 +4,7 @@ import pytest
 from qa.checks.base import MissingDataError
 from qa.checks.models import QaDataRegistry
 from qa.checks.submission.files import DoesNotExceedTheFileSizeLimit, FileTypeDoesNotRequireReview
-from tests.utils import make_test_submit_event_info
+from tests.factories import make_test_submit_event_info
 
 
 class TestOversizeCheck:

@@ -27,43 +27,63 @@ class TestJournalRefIsValid:
         assert result.results == []
 
     def test_warn_too_short(self):
-        result = JournalRefIsValid.check("PRL")
+        result = JournalRefIsValid.check("2024")
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_warn_too_long(self):
-        result = JournalRefIsValid.check("x" * 2001)
+        result = JournalRefIsValid.check("x" * 1501 + " 2024")
         assert result.passed
         assert not sub_result(result, "not_too_long").passed
 
-    def test_warn_contains_url(self):
+    def test_fail_no_valid_year(self):
+        result = JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001")
+        assert not result.passed
+        assert not sub_result(result, "contains_a_valid_year").passed
+
+    def test_fail_pending_publication_status_appear(self):
+        result = JournalRefIsValid.check("To appear in Phys. Rev. Lett. (2024)")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_pending_publication_status").passed
+
+    def test_fail_pending_publication_status_in_press(self):
+        result = JournalRefIsValid.check("In press, Phys. Rev. Lett. (2024)")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_pending_publication_status").passed
+
+    def test_fail_pending_publication_status_to_be_publ(self):
+        result = JournalRefIsValid.check("To be published in Phys. Rev. Lett. (2024)")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_pending_publication_status").passed
+
+    def test_fail_contains_url(self):
         result = JournalRefIsValid.check("https://journals.aps.org/prl/abstract")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
-    def test_warn_contains_doi(self):
+    def test_fail_contains_doi(self):
         result = JournalRefIsValid.check("doi:10.1103/PhysRevLett.132.011001")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_contains_bare_doi(self):
+    def test_fail_contains_bare_doi(self):
         result = JournalRefIsValid.check("10.1103/PhysRevLett.132.011001")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_bare_doi").passed
 
-    def test_warn_contains_accepted(self):
+    def test_fail_contains_accepted(self):
         result = JournalRefIsValid.check("accepted by Phys. Rev. Lett.")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_accepted").passed
 
-    def test_warn_contains_submitted(self):
+    def test_fail_contains_submitted(self):
         result = JournalRefIsValid.check("submitted to Phys. Rev. Lett.")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_submitted").passed
 
-    def test_warn_contains_bibtex(self):
+    def test_fail_contains_bibtex(self):
         result = JournalRefIsValid.check("title=Some Title, booktitle=Proceedings")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_bibtex").passed
 
     def test_all_sub_checks_run_on_valid(self):

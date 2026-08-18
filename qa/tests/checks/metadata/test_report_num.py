@@ -31,41 +31,41 @@ class TestReportNumIsValid:
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
-    def test_warn_too_short_two_digits(self):
-        result = ReportNumIsValid.check("12")
+    def test_warn_too_short_two_chars(self):
+        result = ReportNumIsValid.check("A2")
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
-    def test_warn_too_short_three_digits(self):
-        result = ReportNumIsValid.check("123")
+    def test_warn_too_short_three_chars(self):
+        result = ReportNumIsValid.check("A23")
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
-    def test_warn_no_letters_four_digits(self):
+    def test_fail_no_letters_four_digits(self):
         result = ReportNumIsValid.check("1234")
-        assert result.passed
-        assert not sub_result(result, "contains_letters").passed
+        assert not result.passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
-    def test_warn_no_letters_five_digits(self):
+    def test_fail_no_letters_five_digits(self):
         result = ReportNumIsValid.check("12345")
-        assert result.passed
-        assert not sub_result(result, "contains_letters").passed
+        assert not result.passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
     def test_pass_multiple_report_nums(self):
         assert ReportNumIsValid.check("ECTP-2024-05; WLCAPP-2024-05; FUE-2024-05").passed
 
     def test_warn_too_long(self):
-        result = ReportNumIsValid.check("X" * 2001)
+        result = ReportNumIsValid.check("X" * 2000 + "1")
         assert result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_warn_contains_url(self):
-        result = ReportNumIsValid.check("https://example.com/report")
+        result = ReportNumIsValid.check("https://example.com/report2024")
         assert result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
     def test_warn_contains_http_url(self):
-        result = ReportNumIsValid.check("http://example.com/report")
+        result = ReportNumIsValid.check("http://example.com/report2024")
         assert result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
@@ -74,15 +74,35 @@ class TestReportNumIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_no_letters(self):
+    def test_fail_no_letters(self):
         result = ReportNumIsValid.check("1234567")
-        assert result.passed
-        assert not sub_result(result, "contains_letters").passed
+        assert not result.passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
-    def test_warn_no_digits(self):
+    def test_fail_no_digits(self):
         result = ReportNumIsValid.check("ABCDEFG")
-        assert result.passed
-        assert not sub_result(result, "contains_digits").passed
+        assert not result.passed
+        assert not sub_result(result, "contains_a_letter_and_a_digit").passed
+
+    def test_fail_extra_whitespace(self):
+        result = ReportNumIsValid.check("CERN  EP-2024-001")
+        assert not result.passed
+        assert not sub_result(result, "no_extra_whitespace").passed
+
+    def test_fail_space_in_parens(self):
+        result = ReportNumIsValid.check("CERN-EP-2024-001 ( draft )")
+        assert not result.passed
+        assert not sub_result(result, "no_unnecessary_space_in_parens").passed
+
+    def test_fail_control_chars(self):
+        result = ReportNumIsValid.check("CERN-EP\t2024-001")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_control_chars").passed
+
+    def test_fail_malformed_unicode(self):
+        result = ReportNumIsValid.check("CERN \xc0\x80 2024-001")
+        assert not result.passed
+        assert not sub_result(result, "no_utf8_decoding_errors").passed
 
     def test_all_sub_checks_run_on_valid(self):
         result = ReportNumIsValid.check("CERN-EP-2024-001")

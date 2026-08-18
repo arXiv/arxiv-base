@@ -60,10 +60,10 @@ class FulltextDoesNotContainFoo(BaseCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Fulltext contains 'foo'."
 
-    required_inputs = {"fulltext"}
+    required_data = {"fulltext"}
 
-    def _run(self, inputs: Inputs) -> Result:
-        passed = "foo" not in inputs.fulltext
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        passed = "foo" not in data_registry.fulltext
         return self._result(passed=passed, message="" if passed else self.failure_message)
 ```
 
@@ -96,8 +96,8 @@ class PassesCustomLogic(BaseGenericCheck):
     description = "..."
     failure_message = "..."
 
-    def _run(self, inputs: Inputs) -> Result:
-        v = getattr(getattr(inputs, self.data), self.field)
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
         passed = ...  # your logic here
         return self._result(passed=passed, message="" if passed else self.failure_message)
 ```
@@ -120,11 +120,11 @@ class FooIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Foo is invalid."
 
-    required_inputs = {"metadata"}
+    required_data = {"metadata"}
 
     @classmethod
     def check(cls, foo: str | None) -> Result:
-        return cls().run(Inputs(metadata=Metadata(foo=foo)))
+        return cls().run(QaDataRegistry(metadata=Metadata(foo=foo)))
 
     _checks = (
         NotTooLong(2000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="foo"),
