@@ -41,15 +41,13 @@ class TestMscClassIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_fail_contains_semicolon(self):
-        result = MscClassIsValid.check("35K55; 65M06")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_semicolon").passed
+    def test_pass_contains_semicolon_without_cleanup(self):
+        """A semicolon is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert MscClassIsValid.check("35K55; 65M06").passed
 
-    def test_fail_extra_whitespace(self):
-        result = MscClassIsValid.check("35K55  65M06")
-        assert not result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
+    def test_pass_extra_whitespace_without_cleanup(self):
+        """Extra whitespace is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert MscClassIsValid.check("35K55  65M06").passed
 
     def test_fail_space_in_parens(self):
         result = MscClassIsValid.check("14J60 ( Primary)")

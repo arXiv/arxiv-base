@@ -27,7 +27,6 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.DoesNotContainSemicolon(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
         generic.NotTooLong(
@@ -37,7 +36,6 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
             field="acm_class",
             failure_message="Too long: must be 160 characters or fewer.",
         ),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),

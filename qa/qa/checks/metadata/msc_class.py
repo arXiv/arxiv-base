@@ -27,7 +27,6 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
         generic.NoUnnecessarySpaceInParens(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
         ),
@@ -35,7 +34,6 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
-        generic.DoesNotContainSemicolon(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
         generic.NotTooLong(
             max_chars=160,
             on_failure_policy=OnFailurePolicy.WARN,

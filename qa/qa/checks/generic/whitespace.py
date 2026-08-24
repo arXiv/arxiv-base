@@ -8,10 +8,12 @@ class NoExtraWhitespace(BaseGenericPatternCheck):
     display_name = "No Extra Whitespace"
     id = 10025
     version = "1.0.0"
-    description = "The value does not contain multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
-    failure_message = "Contains excessive whitespace: multiple consecutive spaces, trailing whitespace before a newline, or irregular comma spacing."
+    description = "The value does not contain multiple consecutive spaces or trailing whitespace before a newline."
+    failure_message = (
+        "Contains excessive whitespace: multiple consecutive spaces or trailing whitespace before a newline."
+    )
 
-    _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]|\s+,"
+    _pattern = r"\s+\n|[^ \t\n,][ \t][ \t]+[^ \t\n,]"
 
 
 class NoUnnecessarySpaceInParens(BaseGenericPatternCheck):

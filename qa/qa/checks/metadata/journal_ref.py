@@ -36,6 +36,9 @@ class JournalRefIsValid(BaseMetadataAggregateCheck):
         generic.DoesNotContainSubmitted(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="journal_ref"),
         generic.DoesNotContainBibtex(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="journal_ref"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="journal_ref"),
+        generic.DoesNotContainSpaceBeforeComma(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="journal_ref"
+        ),
         generic.NoUnnecessarySpaceInParens(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="journal_ref"
         ),

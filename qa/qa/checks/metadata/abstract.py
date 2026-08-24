@@ -46,6 +46,9 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
         generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotContainTexBegin(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
+        generic.DoesNotContainSpaceBeforeComma(
+            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
+        ),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),

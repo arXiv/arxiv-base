@@ -38,6 +38,7 @@ class DoiIsValid(BaseMetadataAggregateCheck):
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
+        generic.DoesNotContainSpaceBeforeComma(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),

@@ -49,10 +49,9 @@ class TestCommentsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_control_chars").passed
 
-    def test_fail_ends_with_period(self):
-        result = CommentsAreValid.check("12 pages, 3 figures.")
-        assert not result.passed
-        assert not sub_result(result, "does_not_end_with_period").passed
+    def test_pass_ends_with_period_without_cleanup(self):
+        """A trailing period is only removed via cleanup(); check() no longer rejects it directly."""
+        assert CommentsAreValid.check("12 pages, 3 figures.").passed
 
     def test_warn_utf8_decoding_error_accents(self):
         result = CommentsAreValid.check("A comment with èéêëìíîï accents".encode("UTF-8").decode("LATIN-1"))

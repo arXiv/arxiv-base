@@ -44,10 +44,9 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_linebreak").passed
 
-    def test_fail_raw_newline(self):
-        result = AuthorsAreValid.check("Fred Smith,\nJoe Bloggs")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_raw_newline").passed
+    def test_pass_raw_newline_without_cleanup(self):
+        """A raw newline is only removed via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Fred Smith,\nJoe Bloggs").passed
 
     def test_pass_single_backslash(self):
         result = AuthorsAreValid.check("Fred Smith, \\ Joe Bloggs")

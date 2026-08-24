@@ -1,7 +1,7 @@
 """Tests for generic whitespace checks."""
 
 from qa.checks.models import QaDataRegistry, Metadata, OnFailurePolicy
-from qa.checks.generic.whitespace import NoExtraWhitespace, NoUnnecessarySpaceInParens
+from qa.checks.generic.whitespace import NoExtraWhitespace, NoUnnecessarySpaceInParens, DoesNotContainSpaceBeforeComma
 
 
 def inputs(title: str | None) -> QaDataRegistry:
@@ -27,6 +27,23 @@ class TestNoExtraWhitespace:
 
     def test_fail_trailing_before_newline(self):
         assert not self.check.run(inputs("A title  \nwith trailing")).passed
+
+    def test_pass_space_before_comma(self):
+        """Space-before-comma is now the responsibility of DoesNotContainSpaceBeforeComma."""
+        assert self.check.run(inputs("This is a title , bad title")).passed
+
+    def test_pass_double_comma(self):
+        assert self.check.run(inputs("This is a title, , bad title")).passed
+
+
+class TestDoesNotContainSpaceBeforeComma:
+    check = make(DoesNotContainSpaceBeforeComma)
+
+    def test_pass(self):
+        assert self.check.run(inputs("A title, with commas, properly spaced")).passed
+
+    def test_pass_no_space_either_side(self):
+        assert self.check.run(inputs("This is a title,bad title")).passed
 
     def test_fail_space_before_comma(self):
         assert not self.check.run(inputs("This is a title , bad title")).passed

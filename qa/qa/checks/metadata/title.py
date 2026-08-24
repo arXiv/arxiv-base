@@ -44,6 +44,7 @@ class TitleIsValid(BaseMetadataAggregateCheck):
         generic.DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
+        generic.DoesNotContainSpaceBeforeComma(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),

@@ -26,10 +26,12 @@ class TestAcmClassIsValid:
         assert result.passed
         assert result.results == []
 
-    def test_fail_semicolon_separated_list(self):
-        result = AcmClassIsValid.check("F.2.2; I.2.7")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_semicolon").passed
+    def test_pass_semicolon_separated_list(self):
+        assert AcmClassIsValid.check("F.2.2; I.2.7").passed
+
+    def test_pass_comma_separated_list_with_cleanup(self):
+        """Cleanup normalizes comma separators to semicolons, which must not then be rejected."""
+        assert AcmClassIsValid.check("F.2.2, I.2.7", cleanup=True).passed
 
     def test_warn_too_long(self):
         result = AcmClassIsValid.check("x" * 161)
