@@ -2,12 +2,12 @@
 
 import re
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 from qa.checks import generic
 
 
-class ReportNumIsValid(BaseAggregateCheck):
+class ReportNumIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata report_num field."""
 
     name = "report_num_is_valid"
@@ -18,14 +18,7 @@ class ReportNumIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Report number is invalid."
 
-    required_data = {"metadata"}
     field = "report_num"
-
-    @classmethod
-    def check(cls, report_num: str | None, cleanup: bool = False) -> Result:
-        if cleanup and report_num is not None:
-            report_num = cls.cleanup(report_num)
-        return cls().run(QaDataRegistry(metadata=Metadata(report_num=report_num)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""

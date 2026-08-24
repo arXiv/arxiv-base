@@ -119,3 +119,8 @@ class TestReportNumIsValid:
         assert result.check_config["id"] == 500
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_strips_and_removes_trailing_period(self):
+        assert ReportNumIsValid.cleanup("  CERN-EP-2024-001.  ") == "CERN-EP-2024-001"

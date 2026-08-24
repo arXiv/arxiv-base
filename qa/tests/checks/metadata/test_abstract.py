@@ -133,3 +133,25 @@ class TestAbstractIsValid:
 
     def test_fail_on_failure_policy_reject(self):
         assert AbstractIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_strips_leading_and_trailing_whitespace(self):
+        assert AbstractIsValid.cleanup("  Leading and trailing spaces  ") == "Leading and trailing spaces"
+
+    def test_collapses_trailing_space_before_newline(self):
+        result = AbstractIsValid.cleanup("Trailing space before newline   \nNext line")
+        assert result == "Trailing space before newline Next line"
+
+    def test_preserves_paragraph_indent(self):
+        text = "First paragraph.\n  Second paragraph."
+        assert AbstractIsValid.cleanup(text) == text
+
+    def test_converts_tabs_to_spaces(self):
+        assert AbstractIsValid.cleanup("A\tB\tC") == "A B C"
+
+    def test_collapses_multiple_spaces(self):
+        assert AbstractIsValid.cleanup("Too    many     spaces") == "Too many spaces"
+
+    def test_removes_trailing_tex_linebreak(self):
+        assert AbstractIsValid.cleanup("This is a line \\\\") == "This is a line"

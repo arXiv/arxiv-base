@@ -2,12 +2,12 @@
 
 import re
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
-class AuthorsAreValid(BaseAggregateCheck):
+class AuthorsAreValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata authors field."""
 
     name = "authors_are_valid"
@@ -18,14 +18,7 @@ class AuthorsAreValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Authors are invalid or empty."
 
-    required_data = {"metadata"}
     field = "authors"
-
-    @classmethod
-    def check(cls, authors: str | None, cleanup: bool = False) -> Result:
-        if cleanup and authors is not None:
-            authors = cls.cleanup(authors)
-        return cls().run(QaDataRegistry(metadata=Metadata(authors=authors)))
 
     _checks = (
         generic.DoesNotEndWithPunctuation(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
@@ -92,14 +85,14 @@ class AuthorsAreValid(BaseAggregateCheck):
     )
 
     @staticmethod
-    def cleanup(s: str) -> str:  # TODO check pre or post parsing
+    def cleanup(value: str) -> str:  # TODO check pre or post parsing
         """Perform some light tidying on the provided author string(s)."""
-        s = re.sub(r"\s+", " ", s)  # Single spaces only.
-        s = re.sub(r",(\s*,)+", ",", s)  # Remove double commas.
+        value = re.sub(r"\s+", " ", value)  # Single spaces only.
+        value = re.sub(r",(\s*,)+", ",", value)  # Remove double commas.
         # Add spaces between word and opening parenthesis.
-        s = re.sub(r"(\w)\(", r"\g<1> (", s)
+        value = re.sub(r"(\w)\(", r"\g<1> (", value)
         # Add spaces between closing parenthesis and word.
-        s = re.sub(r"\)(\w)", r") \g<1>", s)
+        value = re.sub(r"\)(\w)", r") \g<1>", value)
         # Change capitalized or uppercase `And` to `and`.
-        s = re.sub(r"\bA(?i:ND)\b", "and", s)
-        return s.strip()  # Removing leading and trailing whitespace.
+        value = re.sub(r"\bA(?i:ND)\b", "and", value)
+        return value.strip()  # Removing leading and trailing whitespace.

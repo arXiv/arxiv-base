@@ -2,12 +2,12 @@
 
 import re
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 from qa.checks import generic
 
 
-class CommentsAreValid(BaseAggregateCheck):
+class CommentsAreValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata comments field."""
 
     name = "comments_are_valid"
@@ -18,14 +18,7 @@ class CommentsAreValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Comments are invalid."
 
-    required_data = {"metadata"}
     field = "comments"
-
-    @classmethod
-    def check(cls, comments: str | None, cleanup: bool = False) -> Result:
-        if cleanup and comments is not None:
-            comments = cls.cleanup(comments)
-        return cls().run(QaDataRegistry(metadata=Metadata(comments=comments)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""

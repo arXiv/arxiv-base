@@ -2,12 +2,12 @@
 
 import re
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
-class AbstractIsValid(BaseAggregateCheck):
+class AbstractIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata abstract field."""
 
     name = "abstract_is_valid"
@@ -18,14 +18,7 @@ class AbstractIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Abstract is invalid or empty."
 
-    required_data = {"metadata"}
     field = "abstract"
-
-    @classmethod
-    def check(cls, abstract: str | None, cleanup: bool = False) -> Result:
-        if cleanup and abstract is not None:
-            abstract = cls.cleanup(abstract)
-        return cls().run(QaDataRegistry(metadata=Metadata(abstract=abstract)))
 
     _checks = (
         generic.IsEnglish(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),

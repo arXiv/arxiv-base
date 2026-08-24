@@ -2,12 +2,12 @@
 
 import re
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
-class TitleIsValid(BaseAggregateCheck):
+class TitleIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata title field."""
 
     name = "title_is_valid"
@@ -18,14 +18,7 @@ class TitleIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Title is invalid or empty."
 
-    required_data = {"metadata"}
     field = "title"
-
-    @classmethod
-    def check(cls, title: str | None, cleanup: bool = False) -> Result:
-        if cleanup and title is not None:
-            title = cls.cleanup(title)
-        return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
 
     _checks = (
         generic.NotTooShort(

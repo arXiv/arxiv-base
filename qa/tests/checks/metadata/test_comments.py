@@ -79,3 +79,11 @@ class TestCommentsAreValid:
         assert result.check_config["id"] == 400
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_and_strips(self):
+        assert CommentsAreValid.cleanup("  12 pages, 3 figures.  ") == "12 pages, 3 figures"
+
+    def test_removes_trailing_periods(self):
+        assert CommentsAreValid.cleanup("12   pages...") == "12 pages"

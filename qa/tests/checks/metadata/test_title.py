@@ -112,3 +112,8 @@ class TestTitleIsValid:
 
     def test_fail_on_failure_policy_reject(self):
         assert TitleIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_and_strips(self):
+        assert TitleIsValid.cleanup("  A   title  with   spaces  ") == "A title with spaces"

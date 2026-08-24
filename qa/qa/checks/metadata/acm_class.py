@@ -2,12 +2,12 @@
 
 import re
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 from qa.checks import generic
 
 
-class AcmClassIsValid(BaseAggregateCheck):
+class AcmClassIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata acm_class field."""
 
     name = "acm_class_is_valid"
@@ -18,14 +18,7 @@ class AcmClassIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "ACM class is invalid."
 
-    required_data = {"metadata"}
     field = "acm_class"
-
-    @classmethod
-    def check(cls, acm_class: str | None, cleanup: bool = False) -> Result:
-        if cleanup and acm_class is not None:
-            acm_class = cls.cleanup(acm_class)
-        return cls().run(QaDataRegistry(metadata=Metadata(acm_class=acm_class)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""

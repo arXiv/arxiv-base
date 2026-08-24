@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import re
 
 
-from qa.checks.models import Result, Offset, OnFailurePolicy, Disposition, QaDataRegistry
+from qa.checks.models import Result, Offset, OnFailurePolicy, Disposition, QaDataRegistry, Metadata
 
 
 class MissingDataError(Exception):
@@ -229,3 +229,20 @@ class BaseAggregateCheck(BaseCheck):
             message=message,
             results=results,
         )
+
+
+class BaseMetadataAggregateCheck(BaseAggregateCheck):
+    """An extension of BaseAggregateCheck for checks on a single metadata field."""
+
+    required_data = {"metadata"}
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """No-op cleanup. Subclasses may override to perform field-specific tidying."""
+        return value
+
+    @classmethod
+    def check(cls, value: str | None, cleanup: bool = False) -> Result:
+        if cleanup and value is not None:
+            value = cls.cleanup(value)
+        return cls().run(QaDataRegistry(metadata=Metadata(**{cls.field: value})))

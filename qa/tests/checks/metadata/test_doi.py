@@ -103,3 +103,9 @@ class TestDoiIsValid:
         assert result.check_config["id"] == 700
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_and_strips(self):
+        result = DoiIsValid.cleanup("  10.1103/PhysRevLett.132.011001   extra  ")
+        assert result == "10.1103/PhysRevLett.132.011001 extra"

@@ -1,11 +1,11 @@
 """Journal reference metadata checks."""
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 from qa.checks import generic
 
 
-class JournalRefIsValid(BaseAggregateCheck):
+class JournalRefIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata journal_ref field."""
 
     name = "journal_ref_is_valid"
@@ -16,14 +16,7 @@ class JournalRefIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Journal reference is invalid."
 
-    required_data = {"metadata"}
     field = "journal_ref"
-
-    @classmethod
-    def check(cls, journal_ref: str | None, cleanup: bool = False) -> Result:
-        if cleanup and journal_ref is not None:
-            journal_ref = cls.cleanup(journal_ref)
-        return cls().run(QaDataRegistry(metadata=Metadata(journal_ref=journal_ref)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""

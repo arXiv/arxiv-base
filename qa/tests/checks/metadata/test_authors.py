@@ -339,3 +339,17 @@ class TestAuthorsAreValid:
 
     def test_fail_on_failure_policy_reject(self):
         assert AuthorsAreValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_and_double_commas(self):
+        assert AuthorsAreValid.cleanup("Fred  Smith,,  Joe Bloggs") == "Fred Smith, Joe Bloggs"
+
+    def test_adds_space_before_opening_parenthesis(self):
+        assert AuthorsAreValid.cleanup("Fred Smith(Cornell)") == "Fred Smith (Cornell)"
+
+    def test_lowercases_and_after_word(self):
+        assert AuthorsAreValid.cleanup("Fred Smith AND Joe Bloggs") == "Fred Smith and Joe Bloggs"
+
+    def test_strips_leading_and_trailing_whitespace(self):
+        assert AuthorsAreValid.cleanup("  Fred Smith  ") == "Fred Smith"

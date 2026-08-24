@@ -67,3 +67,20 @@ class TestAcmClassIsValid:
         assert result.check_config["id"] == 900
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_strips_and_uppercases(self):
+        assert AcmClassIsValid.cleanup("  f.2.2  ") == "F.2.2"
+
+    def test_strips_acm_class_prefix(self):
+        assert AcmClassIsValid.cleanup("ACM-class: F.2.2") == "F.2.2"
+
+    def test_converts_commas_to_semicolons(self):
+        assert AcmClassIsValid.cleanup("F.2.2, I.2.7") == "F.2.2; I.2.7"
+
+    def test_removes_trailing_period(self):
+        assert AcmClassIsValid.cleanup("F.2.2.") == "F.2.2"
+
+    def test_inserts_missing_period(self):
+        assert AcmClassIsValid.cleanup("F2.2") == "F.2.2"

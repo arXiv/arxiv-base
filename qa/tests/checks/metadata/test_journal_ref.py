@@ -101,3 +101,14 @@ class TestJournalRefIsValid:
         assert result.check_config["id"] == 600
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_normalizes_physical_review_letters(self):
+        assert JournalRefIsValid.cleanup("PHYSICAL REVIEW LETTERS 1") == "Physical Review Letters 1"
+
+    def test_normalizes_physical_review(self):
+        assert JournalRefIsValid.cleanup("PHYSICAL REVIEW A") == "Physical Review A"
+
+    def test_normalizes_optics_letters(self):
+        assert JournalRefIsValid.cleanup("OPTICS LETTERS 5") == "Optics Letters 5"

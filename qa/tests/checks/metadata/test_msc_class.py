@@ -87,3 +87,17 @@ class TestMscClassIsValid:
         assert result.check_config["id"] == 800
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_and_converts_semicolons(self):
+        assert MscClassIsValid.cleanup("  35K55 ; 65M06  ") == "35K55, 65M06"
+
+    def test_strips_msc_classification_prefix(self):
+        assert MscClassIsValid.cleanup("MSC classification: 35K55") == "35K55"
+
+    def test_strips_msc_2000_prefix(self):
+        assert MscClassIsValid.cleanup("MSC 2000: 35K55") == "35K55"
+
+    def test_normalizes_comma_spacing(self):
+        assert MscClassIsValid.cleanup("35K55,65M06") == "35K55, 65M06"

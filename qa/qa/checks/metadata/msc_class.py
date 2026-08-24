@@ -2,12 +2,12 @@
 
 import re
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 from qa.checks import generic
 
 
-class MscClassIsValid(BaseAggregateCheck):
+class MscClassIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata msc_class field."""
 
     name = "msc_class_is_valid"
@@ -18,14 +18,7 @@ class MscClassIsValid(BaseAggregateCheck):
     on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "MSC class is invalid."
 
-    required_data = {"metadata"}
     field = "msc_class"
-
-    @classmethod
-    def check(cls, msc_class: str | None, cleanup: bool = False) -> Result:
-        if cleanup and msc_class is not None:
-            msc_class = cls.cleanup(msc_class)
-        return cls().run(QaDataRegistry(metadata=Metadata(msc_class=msc_class)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         """Both None and empty string are valid and should pass without running sub-checks."""
