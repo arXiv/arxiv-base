@@ -42,29 +42,29 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
             field="acm_class",
             failure_message="Too long: must be 160 characters or fewer.",
         ),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
     )
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """
-        Strip outer whitespace.
-        Collapse whitespace.
-        Strip trailing periods.
-        Strip a leading "ACM-class:" prefix.
-        For each code, uppercase the class code,
-        insert the dot after a leading letter (e.g. "A1" -> "A.1"),
-        and lowercase a trailing "M".
-        """
+        # Strip leading and trailing whitespace.
         value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
         value = re.sub(r"\s+", " ", value)
+        # Strip trailing periods.
         value = re.sub(r"\s*\.[\s.]*$", "", value)
+        # Strip a leading "ACM-class:" prefix.
         value = re.sub(r"^ACM-class:\s+", "", value, flags=re.I)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
 
         _value = []
         for v in value.split(";"):
+            # Uppercase the class code, insert the dot after a leading letter (e.g. "A1" -> "A.1"),
+            # and lowercase a trailing "M".
             v = v.strip().upper().rstrip(".")
             v = re.sub(r"^([A-K])(\d)", "\\g<1>.\\g<2>", v)
             v = re.sub(r"M$", "m", v)

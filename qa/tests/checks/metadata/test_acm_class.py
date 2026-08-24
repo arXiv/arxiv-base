@@ -88,3 +88,9 @@ class TestCleanup:
 
     def test_inserts_missing_period(self):
         assert AcmClassIsValid.cleanup("F2.2") == "F.2.2"
+
+    def test_removes_control_chars(self):
+        assert AcmClassIsValid.cleanup("F.2.2\x00I.2.7") == "F.2.2 I.2.7"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert AcmClassIsValid.cleanup("F.2.2 ( see also )") == "F.2.2 (SEE ALSO)"
