@@ -59,8 +59,15 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """Perform some light tidying on the abstract."""
-        value = value.strip()  # Remove leading or trailing spaces
+        """
+        Strip outer whitespace.
+        Normalize paragraph indentation.
+        Collapse tabs/runs of spaces.
+        Join lines split by stray newlines.
+        Drop trailing TeX line breaks.
+        Remove lone-period lines.
+        """
+        value = value.strip()
         # Tidy paragraphs which should be indicated with "\n  ".
         value = re.sub(r"[ ]+\n", "\n", value)
         value = re.sub(r"\n\s+", "\n  ", value)
@@ -75,4 +82,5 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
         # Remove lone period.
         value = re.sub(r"\n\.\n", "\n", value)
         value = re.sub(r"\n\.$", "", value)
+
         return value

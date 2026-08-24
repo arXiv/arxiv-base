@@ -47,7 +47,12 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """Perform some light fixes on the MSC classification value."""
+        """
+        Collapse whitespace.
+        Strip outer whitespace.
+        Strip trailing periods.
+        Convert semicolons to commas with normalized spacing.
+        Drop a leading "MSC classification" style prefix."""
         value = re.sub(r"\s+", " ", value).strip()
         value = re.sub(r"\s*\.[\s.]*$", "", value)
         value = value.replace(";", ",")  # No semicolons, should be comma.
@@ -59,4 +64,5 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
             value,
             flags=re.I,
         )
+
         return value

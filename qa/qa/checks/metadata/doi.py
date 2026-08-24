@@ -54,6 +54,9 @@ class DoiIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """Perform some light tidying on the title."""
-        value = re.sub(r"\s+", " ", value).strip()  # Single spaces only.
+        """
+        Collapse whitespace.
+        Strip outer whitespace.
+        """
+        value = re.sub(r"\s+", " ", value).strip()
         return value

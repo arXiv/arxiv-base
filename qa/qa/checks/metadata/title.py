@@ -54,6 +54,10 @@ class TitleIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """Perform some light tidying on the title."""
+        """
+        Collapse whitespace.
+        Strip outer whitespace.
+        """
         value = re.sub(r"\s+", " ", value).strip()  # Single spaces only.
+
         return value

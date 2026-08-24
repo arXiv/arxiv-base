@@ -52,7 +52,12 @@ class CommentsAreValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """Light cleanup on comment value."""
+        """
+        Collapse whitespace.
+        Strip outer whitespace.
+        Strip trailing periods.
+        """
         value = re.sub(r"\s+", " ", value).strip()
         value = re.sub(r"\s*\.[\s.]*$", "", value)
+
         return value

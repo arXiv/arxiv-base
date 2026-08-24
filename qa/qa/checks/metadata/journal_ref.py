@@ -61,11 +61,3 @@ class JournalRefIsValid(BaseMetadataAggregateCheck):
             failure_message="Too long: must be 1500 characters or fewer.",
         ),
     )
-
-    @staticmethod
-    def cleanup(value: str) -> str:
-        """Perform light cleanup."""
-        value = value.replace("PHYSICAL REVIEW LETTERS", "Physical Review Letters")
-        value = value.replace("PHYSICAL REVIEW", "Physical Review")
-        value = value.replace("OPTICS LETTERS", "Optics Letters")
-        return value

@@ -43,7 +43,16 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """Perform light cleanup."""
+        """
+        Collapse whitespace.
+        Strip outer whitespace.
+        Strip trailing periods.
+        Strip a leading "ACM-class:" prefix.
+        Treat commas as semicolon separators.
+        For each code, uppercase the class code,
+        insert the dot after a leading letter (e.g. "A1" -> "A.1"),
+        and lowercase a trailing "M".
+        """
         value = re.sub(r"\s+", " ", value).strip()
         value = re.sub(r"\s*\.[\s.]*$", "", value)
         value = re.sub(r"^ACM-class:\s+", "", value, flags=re.I)
@@ -55,4 +64,5 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
             v = re.sub(r"M$", "m", v)
             _value.append(v)
         value = "; ".join(_value)
+
         return value
