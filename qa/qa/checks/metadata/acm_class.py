@@ -47,6 +47,7 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
+        """Normalize acm_class."""
         # Strip leading and trailing whitespace.
         value = value.strip()
         # Convert every control character to a space.
@@ -63,10 +64,13 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
 
         _value = []
         for v in value.split(";"):
-            # Uppercase the class code, insert the dot after a leading letter (e.g. "A1" -> "A.1"),
-            # and lowercase a trailing "M".
+            # Strip whitespace. 
+            # Uppercase the class code.
+            # Strip trailing periods.
             v = v.strip().upper().rstrip(".")
+            # Insert a dot after a leading letter (e.g. "A1" -> "A.1").
             v = re.sub(r"^([A-K])(\d)", "\\g<1>.\\g<2>", v)
+            # Lowercase a trailing "M".
             v = re.sub(r"M$", "m", v)
             _value.append(v)
         value = "; ".join(_value)
