@@ -50,6 +50,8 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
+        """Normalize abstract."""
+        # Strip leading and trailing whitespace.
         value = value.strip()
         # Convert every control character except newline to a space.
         value = "".join(" " if ord(c) < 0x20 and c != "\n" else c for c in value)
