@@ -41,9 +41,10 @@ class TestMscClassIsValid:
         assert result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_pass_contains_semicolon_without_cleanup(self):
-        """A semicolon is only normalized via cleanup(); check() no longer rejects it directly."""
-        assert MscClassIsValid.check("35K55; 65M06").passed
+    def test_fail_contains_semicolon(self):
+        result = MscClassIsValid.check("35K55; 65M06")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_semicolon").passed
 
     def test_pass_extra_whitespace_without_cleanup(self):
         """Extra whitespace is only normalized via cleanup(); check() no longer rejects it directly."""
@@ -88,8 +89,8 @@ class TestMscClassIsValid:
 
 
 class TestCleanup:
-    def test_collapses_whitespace_and_converts_semicolons(self):
-        assert MscClassIsValid.cleanup("  35K55 ; 65M06  ") == "35K55, 65M06"
+    def test_collapses_whitespace_without_converting_semicolons(self):
+        assert MscClassIsValid.cleanup("  35K55 ; 65M06  ") == "35K55 ; 65M06"
 
     def test_strips_msc_classification_prefix(self):
         assert MscClassIsValid.cleanup("MSC classification: 35K55") == "35K55"
@@ -97,5 +98,5 @@ class TestCleanup:
     def test_strips_msc_2000_prefix(self):
         assert MscClassIsValid.cleanup("MSC 2000: 35K55") == "35K55"
 
-    def test_normalizes_comma_spacing(self):
-        assert MscClassIsValid.cleanup("35K55,65M06") == "35K55, 65M06"
+    def test_does_not_normalize_comma_spacing(self):
+        assert MscClassIsValid.cleanup("35K55,65M06") == "35K55,65M06"

@@ -29,6 +29,12 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
     _checks = (
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="acm_class"),
+        generic.DoesNotContainComma(
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="acm_class",
+            failure_message="Separate classes with semicolons.",
+        ),
         generic.NotTooLong(
             max_chars=160,
             on_failure_policy=OnFailurePolicy.WARN,
@@ -48,7 +54,6 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
         Collapse whitespace.
         Strip trailing periods.
         Strip a leading "ACM-class:" prefix.
-        Treat commas as semicolon separators.
         For each code, uppercase the class code,
         insert the dot after a leading letter (e.g. "A1" -> "A.1"),
         and lowercase a trailing "M".
@@ -57,7 +62,7 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
         value = re.sub(r"\s+", " ", value)
         value = re.sub(r"\s*\.[\s.]*$", "", value)
         value = re.sub(r"^ACM-class:\s+", "", value, flags=re.I)
-        value = value.replace(",", ";")
+
         _value = []
         for v in value.split(";"):
             v = v.strip().upper().rstrip(".")

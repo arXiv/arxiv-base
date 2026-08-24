@@ -34,6 +34,12 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
+        generic.DoesNotContainSemicolon(
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="msc_class",
+            failure_message="Separate classification keys with commas.",
+        ),
         generic.NotTooLong(
             max_chars=160,
             on_failure_policy=OnFailurePolicy.WARN,
@@ -51,13 +57,11 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
         Strip outer whitespace.
         Collapse whitespace.
         Strip trailing periods.
-        Convert semicolons to commas with normalized spacing.
-        Drop a leading "MSC classification" style prefix."""
+        Drop a leading "MSC classification" style prefix.
+        """
         value = value.strip()
         value = re.sub(r"\s+", " ", value)
         value = re.sub(r"\s*\.[\s.]*$", "", value)
-        value = value.replace(";", ",")  # No semicolons, should be comma.
-        value = re.sub(r"\s*,\s*", ", ", value)  # Want: comma, space.
         value = re.sub(
             r"^MSC([\s:\-]{0,4}(classification|class|number))?"
             r"([\s:\-]{0,4}\(?2000\)?)?[\s:\-]*",

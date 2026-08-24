@@ -29,9 +29,11 @@ class TestAcmClassIsValid:
     def test_pass_semicolon_separated_list(self):
         assert AcmClassIsValid.check("F.2.2; I.2.7").passed
 
-    def test_pass_comma_separated_list_with_cleanup(self):
-        """Cleanup normalizes comma separators to semicolons, which must not then be rejected."""
-        assert AcmClassIsValid.check("F.2.2, I.2.7", cleanup=True).passed
+    def test_fail_comma_separated_list_even_with_cleanup(self):
+        """cleanup() no longer rewrites commas to semicolons; a comma is rejected outright."""
+        result = AcmClassIsValid.check("F.2.2, I.2.7", cleanup=True)
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_comma").passed
 
     def test_warn_too_long(self):
         result = AcmClassIsValid.check("x" * 161)
@@ -78,8 +80,8 @@ class TestCleanup:
     def test_strips_acm_class_prefix(self):
         assert AcmClassIsValid.cleanup("ACM-class: F.2.2") == "F.2.2"
 
-    def test_converts_commas_to_semicolons(self):
-        assert AcmClassIsValid.cleanup("F.2.2, I.2.7") == "F.2.2; I.2.7"
+    def test_does_not_convert_commas_to_semicolons(self):
+        assert AcmClassIsValid.cleanup("F.2.2, I.2.7") == "F.2.2, I.2.7"
 
     def test_removes_trailing_period(self):
         assert AcmClassIsValid.cleanup("F.2.2.") == "F.2.2"

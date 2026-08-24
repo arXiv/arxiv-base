@@ -76,21 +76,6 @@ class TestAbstractIsValid:
         assert result.passed
         assert not sub_result(result, "not_too_short").passed
 
-    def test_warn_begins_with_abstract_colon(self):
-        result = AbstractIsValid.check("Abstract: some text")
-        assert result.passed
-        assert not sub_result(result, "does_not_begin_with_abstract").passed
-
-    def test_pass_begins_with_abstract_no_colon(self):
-        result = AbstractIsValid.check("Abstract some text")
-        assert result.passed
-        assert sub_result(result, "does_not_begin_with_abstract").passed
-
-    def test_warn_begins_with_abstract_all_caps(self):
-        result = AbstractIsValid.check("ABSTRACT: some text")
-        assert result.passed
-        assert not sub_result(result, "does_not_begin_with_abstract").passed
-
     def test_warn_tex_begin_no_brace(self):
         result = AbstractIsValid.check("This \\begin foo is flagged")
         assert result.passed
@@ -155,3 +140,26 @@ class TestCleanup:
 
     def test_removes_trailing_tex_linebreak(self):
         assert AbstractIsValid.cleanup("This is a line \\\\") == "This is a line"
+
+    def test_removes_non_newline_control_chars(self):
+        assert AbstractIsValid.cleanup("word1\x00word2") == "word1 word2"
+        assert AbstractIsValid.cleanup("word1\x0bword2") == "word1 word2"
+
+    def test_collapses_trailing_tab_before_newline(self):
+        result = AbstractIsValid.cleanup("Trailing tab before newline\t\nNext line")
+        assert result == "Trailing tab before newline Next line"
+
+    def test_strips_leading_abstract_colon_prefix(self):
+        assert AbstractIsValid.cleanup("Abstract: some text") == "some text"
+
+    def test_strips_leading_abstract_colon_prefix_case_insensitive(self):
+        assert AbstractIsValid.cleanup("ABSTRACT: some text") == "some text"
+
+    def test_does_not_strip_abstract_prefix_without_colon(self):
+        assert AbstractIsValid.cleanup("Abstract some text") == "Abstract some text"
+
+    def test_removes_space_before_comma(self):
+        assert AbstractIsValid.cleanup("word , word") == "word, word"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert AbstractIsValid.cleanup("( text )") == "(text)"

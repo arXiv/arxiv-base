@@ -34,3 +34,14 @@ class DoesNotContainSemicolon(BaseGenericPatternCheck):
     failure_message = "Contains one or more semicolons."
 
     _pattern = r";"
+
+
+class DoesNotContainComma(BaseGenericPatternCheck):
+    name = "does_not_contain_comma"
+    display_name = "Does Not Contain Comma"
+    id = 10071
+    version = "1.0.0"
+    description = "The value does not contain a comma."
+    failure_message = "Contains one or more commas."
+
+    _pattern = r","

@@ -49,6 +49,7 @@ from qa.checks.generic.prefixes import (  # noqa
 )
 
 from qa.checks.generic.punctuation import (  # noqa
+    DoesNotContainComma,
     DoesNotContainSemicolon,
     DoesNotEndWithPeriod,
     DoesNotEndWithPunctuation,

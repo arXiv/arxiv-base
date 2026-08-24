@@ -37,7 +37,6 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
             field="abstract",
             failure_message="Too long: must be 2000 characters or fewer.",
         ),
-        generic.DoesNotBeginWithAbstract(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotContainUnnecessaryEscape(
@@ -45,42 +44,31 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
         ),
         generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.DoesNotContainTexBegin(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        generic.DoesNotContainSpaceBeforeComma(
-            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
-        ),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"),
-        generic.DoesNotContainControlCharsAllowNewlines(
-            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
-        ),
     )
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """
-        Strip outer whitespace.
-        Normalize paragraph indentation.
-        Collapse tabs/runs of spaces.
-        Join lines split by stray newlines.
-        Drop trailing TeX line breaks.
-        Remove lone-period lines.
-        """
         value = value.strip()
-        # Tidy paragraphs which should be indicated with "\n  ".
+        # Convert every control character except newline to a space.
+        value = "".join(" " if ord(c) < 0x20 and c != "\n" else c for c in value)
+        # Strip trailing spaces that appear right before a newline.
         value = re.sub(r"[ ]+\n", "\n", value)
+        # Normalize any newline followed by some whitespace into newline + two spaces (paragraph).
         value = re.sub(r"\n\s+", "\n  ", value)
-        # Newline with no following space is removed, so treated as just a
-        # space in paragraph.
+        # Convert any newline between two non-whitespace characters into a space.
         value = re.sub(r"(\S)\n(\S)", "\\g<1> \\g<2>", value)
-        # Tab->space, multiple spaces->space.
-        value = re.sub(r"\t", " ", value)
+        # Convert multiple spaces into a single space.
         value = re.sub(r"(?<!\n)[ ]{2,}", " ", value)
-        # Remove tex return (\\) at end of line or end of abstract.
+        # Remove TeX return (\\) at end of a line or at the end of the abstract.
         value = re.sub(r"\s*\\\\(\n|$)", "\\g<1>", value)
-        # Remove lone period.
-        value = re.sub(r"\n\.\n", "\n", value)
-        value = re.sub(r"\n\.$", "", value)
+        # Strip a leading "abstract:" prefix.
+        value = re.sub(r"(?i)^abstract:\s*", "", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
 
         return value
