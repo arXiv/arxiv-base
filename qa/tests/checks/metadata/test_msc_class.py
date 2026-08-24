@@ -50,15 +50,13 @@ class TestMscClassIsValid:
         """Extra whitespace is only normalized via cleanup(); check() no longer rejects it directly."""
         assert MscClassIsValid.check("35K55  65M06").passed
 
-    def test_fail_space_in_parens(self):
-        result = MscClassIsValid.check("14J60 ( Primary)")
-        assert not result.passed
-        assert not sub_result(result, "no_unnecessary_space_in_parens").passed
+    def test_pass_space_in_parens_without_cleanup(self):
+        """Unnecessary space in parens is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert MscClassIsValid.check("14J60 ( Primary)").passed
 
-    def test_fail_control_chars(self):
-        result = MscClassIsValid.check("35K55\t65M06")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
+    def test_pass_control_chars_without_cleanup(self):
+        """Control characters are only normalized via cleanup(); check() no longer rejects them directly."""
+        assert MscClassIsValid.check("35K55\t65M06").passed
 
     def test_fail_malformed_unicode(self):
         result = MscClassIsValid.check("35K55 \xc0\x80 65M06")
@@ -100,3 +98,9 @@ class TestCleanup:
 
     def test_does_not_normalize_comma_spacing(self):
         assert MscClassIsValid.cleanup("35K55,65M06") == "35K55,65M06"
+
+    def test_removes_control_chars(self):
+        assert MscClassIsValid.cleanup("35K55\x0065M06") == "35K55 65M06"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert MscClassIsValid.cleanup("14J60 ( Primary)") == "14J60 (Primary)"

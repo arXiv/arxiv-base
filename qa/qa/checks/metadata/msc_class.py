@@ -27,12 +27,6 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
         return super()._run(data_registry)
 
     _checks = (
-        generic.NoUnnecessarySpaceInParens(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
-        ),
-        generic.DoesNotContainControlChars(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
-        ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
         generic.DoesNotContainSemicolon(
             on_failure_policy=OnFailurePolicy.REJECT,
@@ -53,15 +47,16 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """
-        Strip outer whitespace.
-        Collapse whitespace.
-        Strip trailing periods.
-        Drop a leading "MSC classification" style prefix.
-        """
+        """Normalize msc_class."""
+        # Strip leading and trailing whitespace.
         value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
         value = re.sub(r"\s+", " ", value)
+        # Strip trailing periods.
         value = re.sub(r"\s*\.[\s.]*$", "", value)
+        # Drop a leading "MSC classification" style prefix.
         value = re.sub(
             r"^MSC([\s:\-]{0,4}(classification|class|number))?"
             r"([\s:\-]{0,4}\(?2000\)?)?[\s:\-]*",
@@ -69,5 +64,8 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
             value,
             flags=re.I,
         )
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
 
         return value
