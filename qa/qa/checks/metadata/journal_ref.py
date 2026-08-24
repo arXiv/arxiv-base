@@ -61,3 +61,12 @@ class JournalRefIsValid(BaseMetadataAggregateCheck):
             failure_message="Too long: must be 1500 characters or fewer.",
         ),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """
+        Strip outer whitespace.
+        """
+        value = value.strip()
+
+        return value

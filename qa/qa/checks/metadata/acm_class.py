@@ -44,8 +44,8 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
     @staticmethod
     def cleanup(value: str) -> str:
         """
-        Collapse whitespace.
         Strip outer whitespace.
+        Collapse whitespace.
         Strip trailing periods.
         Strip a leading "ACM-class:" prefix.
         Treat commas as semicolon separators.
@@ -53,7 +53,8 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
         insert the dot after a leading letter (e.g. "A1" -> "A.1"),
         and lowercase a trailing "M".
         """
-        value = re.sub(r"\s+", " ", value).strip()
+        value = value.strip()
+        value = re.sub(r"\s+", " ", value)
         value = re.sub(r"\s*\.[\s.]*$", "", value)
         value = re.sub(r"^ACM-class:\s+", "", value, flags=re.I)
         value = value.replace(",", ";")

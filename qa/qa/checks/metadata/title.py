@@ -55,9 +55,10 @@ class TitleIsValid(BaseMetadataAggregateCheck):
     @staticmethod
     def cleanup(value: str) -> str:
         """
-        Collapse whitespace.
         Strip outer whitespace.
+        Collapse whitespace.
         """
-        value = re.sub(r"\s+", " ", value).strip()  # Single spaces only.
+        value = value.strip()
+        value = re.sub(r"\s+", " ", value)  # Single spaces only.
 
         return value

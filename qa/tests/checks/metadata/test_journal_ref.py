@@ -101,3 +101,13 @@ class TestJournalRefIsValid:
         assert result.check_config["id"] == 600
         assert result.check_config["version"] == "1.0.0"
         assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_strips_outer_whitespace(self):
+        result = JournalRefIsValid.cleanup("  Phys. Rev. Lett. 132, 011001 (2024)  ")
+        assert result == "Phys. Rev. Lett. 132, 011001 (2024)"
+
+    def test_does_not_collapse_internal_whitespace(self):
+        result = JournalRefIsValid.cleanup("Phys. Rev.  Lett. 132")
+        assert result == "Phys. Rev.  Lett. 132"

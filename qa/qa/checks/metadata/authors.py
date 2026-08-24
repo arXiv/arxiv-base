@@ -86,13 +86,14 @@ class AuthorsAreValid(BaseMetadataAggregateCheck):
     @staticmethod
     def cleanup(value: str) -> str:  # TODO check pre or post parsing
         """
-        Collapse whitespace.
         Strip outer whitespace.
+        Collapse whitespace.
         Remove doubled commas.
         Add missing spaces around parentheses.
         Normalize "AND"/"And" to "and".
         """
-        value = re.sub(r"\s+", " ", value).strip()
+        value = value.strip()
+        value = re.sub(r"\s+", " ", value)
         value = re.sub(r",(\s*,)+", ",", value)  # Remove double commas.
         # Add spaces between word and opening parenthesis.
         value = re.sub(r"(\w)\(", r"\g<1> (", value)

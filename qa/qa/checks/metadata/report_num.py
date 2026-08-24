@@ -60,11 +60,12 @@ class ReportNumIsValid(BaseMetadataAggregateCheck):
     @staticmethod
     def cleanup(value: str) -> str:
         """
-        Collapse whitespace.
         Strip outer whitespace.
+        Collapse whitespace.
         Strip trailing periods.
         """
-        value = re.sub(r"\s+", " ", value).strip()
+        value = value.strip()
+        value = re.sub(r"\s+", " ", value)
         value = re.sub(r"\s*\.[\s.]*$", "", value)
 
         return value

@@ -58,5 +58,7 @@ class DoiIsValid(BaseMetadataAggregateCheck):
         Collapse whitespace.
         Strip outer whitespace.
         """
-        value = re.sub(r"\s+", " ", value).strip()
+        value = value.strip()
+        value = re.sub(r"\s+", " ", value)
+
         return value
