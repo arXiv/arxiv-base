@@ -1,5 +1,7 @@
 """Report number metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class ReportNumIsValid(BaseAggregateCheck):
     field = "report_num"
 
     @classmethod
-    def check(cls, report_num: str | None) -> Result:
+    def check(cls, report_num: str | None, cleanup: bool = False) -> Result:
+        if cleanup and report_num is not None:
+            report_num = cls.cleanup(report_num)
         return cls().run(QaDataRegistry(metadata=Metadata(report_num=report_num)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -56,3 +60,10 @@ class ReportNumIsValid(BaseAggregateCheck):
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="report_num"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Light cleanup on report number value."""
+        value = re.sub(r"\s+", " ", value).strip()
+        value = re.sub(r"\s*\.[\s.]*$", "", value)
+        return value

@@ -1,5 +1,7 @@
 """DOI metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class DoiIsValid(BaseAggregateCheck):
     field = "doi"
 
     @classmethod
-    def check(cls, doi: str | None) -> Result:
+    def check(cls, doi: str | None, cleanup: bool = False) -> Result:
+        if cleanup and doi is not None:
+            doi = cls.cleanup(doi)
         return cls().run(QaDataRegistry(metadata=Metadata(doi=doi)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -53,3 +57,9 @@ class DoiIsValid(BaseAggregateCheck):
         ),
         generic.DoiHasValidFormat(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Perform some light tidying on the title."""
+        value = re.sub(r"\s+", " ", value).strip()  # Single spaces only.
+        return value

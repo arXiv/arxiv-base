@@ -1,5 +1,7 @@
 """Abstract metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class AbstractIsValid(BaseAggregateCheck):
     field = "abstract"
 
     @classmethod
-    def check(cls, abstract: str | None) -> Result:
+    def check(cls, abstract: str | None, cleanup: bool = False) -> Result:
+        if cleanup and abstract is not None:
+            abstract = cls.cleanup(abstract)
         return cls().run(QaDataRegistry(metadata=Metadata(abstract=abstract)))
 
     _checks = (
@@ -56,3 +60,23 @@ class AbstractIsValid(BaseAggregateCheck):
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="abstract"
         ),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Perform some light tidying on the abstract."""
+        value = value.strip()  # Remove leading or trailing spaces
+        # Tidy paragraphs which should be indicated with "\n  ".
+        value = re.sub(r"[ ]+\n", "\n", value)
+        value = re.sub(r"\n\s+", "\n  ", value)
+        # Newline with no following space is removed, so treated as just a
+        # space in paragraph.
+        value = re.sub(r"(\S)\n(\S)", "\\g<1> \\g<2>", value)
+        # Tab->space, multiple spaces->space.
+        value = re.sub(r"\t", " ", value)
+        value = re.sub(r"(?<!\n)[ ]{2,}", " ", value)
+        # Remove tex return (\\) at end of line or end of abstract.
+        value = re.sub(r"\s*\\\\(\n|$)", "\\g<1>", value)
+        # Remove lone period.
+        value = re.sub(r"\n\.\n", "\n", value)
+        value = re.sub(r"\n\.$", "", value)
+        return value

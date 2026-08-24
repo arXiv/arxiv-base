@@ -20,7 +20,9 @@ class JournalRefIsValid(BaseAggregateCheck):
     field = "journal_ref"
 
     @classmethod
-    def check(cls, journal_ref: str | None) -> Result:
+    def check(cls, journal_ref: str | None, cleanup: bool = False) -> Result:
+        if cleanup and journal_ref is not None:
+            journal_ref = cls.cleanup(journal_ref)
         return cls().run(QaDataRegistry(metadata=Metadata(journal_ref=journal_ref)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -63,3 +65,11 @@ class JournalRefIsValid(BaseAggregateCheck):
             failure_message="Too long: must be 1500 characters or fewer.",
         ),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Perform light cleanup."""
+        value = value.replace("PHYSICAL REVIEW LETTERS", "Physical Review Letters")
+        value = value.replace("PHYSICAL REVIEW", "Physical Review")
+        value = value.replace("OPTICS LETTERS", "Optics Letters")
+        return value

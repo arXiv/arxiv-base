@@ -1,5 +1,7 @@
 """ACM class metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class AcmClassIsValid(BaseAggregateCheck):
     field = "acm_class"
 
     @classmethod
-    def check(cls, acm_class: str | None) -> Result:
+    def check(cls, acm_class: str | None, cleanup: bool = False) -> Result:
+        if cleanup and acm_class is not None:
+            acm_class = cls.cleanup(acm_class)
         return cls().run(QaDataRegistry(metadata=Metadata(acm_class=acm_class)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -45,3 +49,19 @@ class AcmClassIsValid(BaseAggregateCheck):
         generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Perform light cleanup."""
+        value = re.sub(r"\s+", " ", value).strip()
+        value = re.sub(r"\s*\.[\s.]*$", "", value)
+        value = re.sub(r"^ACM-class:\s+", "", value, flags=re.I)
+        value = value.replace(",", ";")
+        _value = []
+        for v in value.split(";"):
+            v = v.strip().upper().rstrip(".")
+            v = re.sub(r"^([A-K])(\d)", "\\g<1>.\\g<2>", v)
+            v = re.sub(r"M$", "m", v)
+            _value.append(v)
+        value = "; ".join(_value)
+        return value

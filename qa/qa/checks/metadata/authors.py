@@ -1,5 +1,7 @@
 """Author metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class AuthorsAreValid(BaseAggregateCheck):
     field = "authors"
 
     @classmethod
-    def check(cls, authors: str | None) -> Result:
+    def check(cls, authors: str | None, cleanup: bool = False) -> Result:
+        if cleanup and authors is not None:
+            authors = cls.cleanup(authors)
         return cls().run(QaDataRegistry(metadata=Metadata(authors=authors)))
 
     _checks = (
@@ -86,3 +90,16 @@ class AuthorsAreValid(BaseAggregateCheck):
         ),
         generic.DoesNotContainUnspacedComma(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
     )
+
+    @staticmethod
+    def cleanup(s: str) -> str:  # TODO check pre or post parsing
+        """Perform some light tidying on the provided author string(s)."""
+        s = re.sub(r"\s+", " ", s)  # Single spaces only.
+        s = re.sub(r",(\s*,)+", ",", s)  # Remove double commas.
+        # Add spaces between word and opening parenthesis.
+        s = re.sub(r"(\w)\(", r"\g<1> (", s)
+        # Add spaces between closing parenthesis and word.
+        s = re.sub(r"\)(\w)", r") \g<1>", s)
+        # Change capitalized or uppercase `And` to `and`.
+        s = re.sub(r"\bA(?i:ND)\b", "and", s)
+        return s.strip()  # Removing leading and trailing whitespace.

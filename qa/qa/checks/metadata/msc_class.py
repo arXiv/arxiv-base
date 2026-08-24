@@ -1,5 +1,7 @@
 """MSC class metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class MscClassIsValid(BaseAggregateCheck):
     field = "msc_class"
 
     @classmethod
-    def check(cls, msc_class: str | None) -> Result:
+    def check(cls, msc_class: str | None, cleanup: bool = False) -> Result:
+        if cleanup and msc_class is not None:
+            msc_class = cls.cleanup(msc_class)
         return cls().run(QaDataRegistry(metadata=Metadata(msc_class=msc_class)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -49,3 +53,19 @@ class MscClassIsValid(BaseAggregateCheck):
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Perform some light fixes on the MSC classification value."""
+        value = re.sub(r"\s+", " ", value).strip()
+        value = re.sub(r"\s*\.[\s.]*$", "", value)
+        value = value.replace(";", ",")  # No semicolons, should be comma.
+        value = re.sub(r"\s*,\s*", ", ", value)  # Want: comma, space.
+        value = re.sub(
+            r"^MSC([\s:\-]{0,4}(classification|class|number))?"
+            r"([\s:\-]{0,4}\(?2000\)?)?[\s:\-]*",
+            "",
+            value,
+            flags=re.I,
+        )
+        return value

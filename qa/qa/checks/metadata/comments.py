@@ -1,5 +1,7 @@
 """Comments metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class CommentsAreValid(BaseAggregateCheck):
     field = "comments"
 
     @classmethod
-    def check(cls, comments: str | None) -> Result:
+    def check(cls, comments: str | None, cleanup: bool = False) -> Result:
+        if cleanup and comments is not None:
+            comments = cls.cleanup(comments)
         return cls().run(QaDataRegistry(metadata=Metadata(comments=comments)))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -50,3 +54,10 @@ class CommentsAreValid(BaseAggregateCheck):
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Light cleanup on comment value."""
+        value = re.sub(r"\s+", " ", value).strip()
+        value = re.sub(r"\s*\.[\s.]*$", "", value)
+        return value

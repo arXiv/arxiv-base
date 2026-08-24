@@ -1,5 +1,7 @@
 """Title metadata checks."""
 
+import re
+
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
 from qa.checks import generic
@@ -20,7 +22,9 @@ class TitleIsValid(BaseAggregateCheck):
     field = "title"
 
     @classmethod
-    def check(cls, title: str | None) -> Result:
+    def check(cls, title: str | None, cleanup: bool = False) -> Result:
+        if cleanup and title is not None:
+            title = cls.cleanup(title)
         return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
 
     _checks = (
@@ -53,3 +57,9 @@ class TitleIsValid(BaseAggregateCheck):
         generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Perform some light tidying on the title."""
+        value = re.sub(r"\s+", " ", value).strip()  # Single spaces only.
+        return value
