@@ -35,30 +35,32 @@ class TitleIsValid(BaseMetadataAggregateCheck):
             field="title",
             failure_message="Too long: must be 300 characters or fewer.",
         ),
-        generic.DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
-        generic.DoesNotContainRawNewline(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NotAllCaps(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.DoesNotContainSpaceBeforeComma(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
     )
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """
-        Strip outer whitespace.
-        Collapse whitespace.
-        """
+        """Normalize title."""
+        # Strip leading and trailing whitespace.
         value = value.strip()
-        value = re.sub(r"\s+", " ", value)  # Single spaces only.
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
+        value = re.sub(r"\s+", " ", value)
+        # Strip a leading "title:" prefix.
+        value = re.sub(r"(?i)^title:\s*", "", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
 
         return value

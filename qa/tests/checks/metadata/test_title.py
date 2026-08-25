@@ -61,10 +61,9 @@ class TestTitleIsValid:
         result = TitleIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>")
         assert result.passed
 
-    def test_fail_begins_with_title(self):
-        result = TitleIsValid.check("Title: Something")
-        assert not result.passed
-        assert not sub_result(result, "does_not_begin_with_title").passed
+    def test_pass_begins_with_title_without_cleanup(self):
+        """A leading 'title:' prefix is only stripped via cleanup(); check() no longer rejects it directly."""
+        assert TitleIsValid.check("Title: Something").passed
 
     def test_pass_single_backslash(self):
         result = TitleIsValid.check("This \\ is not a line break")
@@ -75,10 +74,9 @@ class TestTitleIsValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_linebreak").passed
 
-    def test_fail_raw_newline(self):
-        result = TitleIsValid.check("A title with\na raw newline")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_raw_newline").passed
+    def test_pass_raw_newline_without_cleanup(self):
+        """A raw newline is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert TitleIsValid.check("A title with\na raw newline").passed
 
     def test_pass_complex_parens(self):
         result = TitleIsValid.check("Something about sin(x), H2(SO)4, and (Non-)Commutative operations")
@@ -117,3 +115,24 @@ class TestTitleIsValid:
 class TestCleanup:
     def test_collapses_whitespace_and_strips(self):
         assert TitleIsValid.cleanup("  A   title  with   spaces  ") == "A title with spaces"
+
+    def test_strips_leading_title_colon_prefix(self):
+        assert TitleIsValid.cleanup("Title: Something") == "Something"
+
+    def test_does_not_strip_title_prefix_without_colon(self):
+        assert TitleIsValid.cleanup("Title Something") == "Title Something"
+
+    def test_does_not_strip_title_like_word(self):
+        assert TitleIsValid.cleanup("Titleist irons review") == "Titleist irons review"
+
+    def test_converts_raw_newline_to_space(self):
+        assert TitleIsValid.cleanup("A title with\na raw newline") == "A title with a raw newline"
+
+    def test_removes_control_chars(self):
+        assert TitleIsValid.cleanup("A title\x00with control") == "A title with control"
+
+    def test_removes_space_before_comma(self):
+        assert TitleIsValid.cleanup("A title , with comma") == "A title, with comma"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert TitleIsValid.cleanup("A title ( draft )") == "A title (draft)"

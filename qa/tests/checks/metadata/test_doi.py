@@ -40,14 +40,16 @@ class TestDoiIsValid:
         assert DoiIsValid.check("10.1103/" + "a" * 42).passed
 
     def test_fail_bad_doi_prefix_doi_colon(self):
+        """A 'doi:' prefix is only stripped via cleanup(); check() still fails via does_not_contain_doi."""
         result = DoiIsValid.check("doi:10.1103/PhysRevLett.132.011001")
         assert not result.passed
-        assert not sub_result(result, "does_not_begin_with_doi_prefix").passed
+        assert not sub_result(result, "does_not_contain_doi").passed
 
     def test_fail_bad_doi_prefix_https(self):
+        """A doi.org URL prefix is only stripped via cleanup(); check() still fails via does_not_contain_url."""
         result = DoiIsValid.check("https://doi.org/10.1103/PhysRevLett.132.011001")
         assert not result.passed
-        assert not sub_result(result, "does_not_begin_with_doi_prefix").passed
+        assert not sub_result(result, "does_not_contain_url").passed
 
     def test_pass_non_ten_prefix(self):
         assert DoiIsValid.check("22.48550/arXiv.2501.18183").passed
@@ -109,3 +111,19 @@ class TestCleanup:
     def test_collapses_whitespace_and_strips(self):
         result = DoiIsValid.cleanup("  10.1103/PhysRevLett.132.011001   extra  ")
         assert result == "10.1103/PhysRevLett.132.011001 extra"
+
+    def test_strips_doi_colon_prefix(self):
+        assert DoiIsValid.cleanup("doi:10.1103/PhysRevLett.132.011001") == "10.1103/PhysRevLett.132.011001"
+
+    def test_strips_doi_org_url_prefix(self):
+        result = DoiIsValid.cleanup("https://doi.org/10.1103/PhysRevLett.132.011001")
+        assert result == "10.1103/PhysRevLett.132.011001"
+
+    def test_removes_control_chars(self):
+        assert DoiIsValid.cleanup("10.1103/PhysRevLett\x00132") == "10.1103/PhysRevLett 132"
+
+    def test_removes_space_before_comma(self):
+        assert DoiIsValid.cleanup("10.1103 , PhysRevLett") == "10.1103, PhysRevLett"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert DoiIsValid.cleanup("10.1103 ( draft )") == "10.1103 (draft)"

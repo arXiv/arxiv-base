@@ -34,13 +34,8 @@ class DoiIsValid(BaseMetadataAggregateCheck):
             field="doi",
             failure_message="Too short: must be at least 10 characters.",
         ),
-        generic.DoesNotBeginWithDoiPrefix(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
-        generic.DoesNotContainSpaceBeforeComma(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="doi"),
         generic.NotTooLong(
             max_chars=50,
@@ -54,11 +49,19 @@ class DoiIsValid(BaseMetadataAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """
-        Collapse whitespace.
-        Strip outer whitespace.
-        """
+        """Normalize doi."""
+        # Strip leading and trailing whitespace.
         value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
         value = re.sub(r"\s+", " ", value)
+        # Strip a leading "doi:", "https://doi.org/", or similar URL prefix.
+        value = re.sub(r"(?i)^doi:\s*|^https?://doi\.org/|^https?://.*\.doi\.org/", "", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
 
         return value
