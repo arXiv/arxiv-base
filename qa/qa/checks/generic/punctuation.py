@@ -14,17 +14,6 @@ class DoesNotEndWithPunctuation(BaseGenericPatternCheck):
     _pattern = r"(?i)[!$%^&(_=`:;,.?-]$"
 
 
-class DoesNotEndWithPeriod(BaseGenericPatternCheck):
-    name = "does_not_end_with_period"
-    display_name = "Does Not End With Period"
-    id = 10058
-    version = "1.0.0"
-    description = "The value does not end with a period."
-    failure_message = "Ends with a period."
-
-    _pattern = r"\.$"
-
-
 class DoesNotContainSemicolon(BaseGenericPatternCheck):
     name = "does_not_contain_semicolon"
     display_name = "Does Not Contain Semicolon"

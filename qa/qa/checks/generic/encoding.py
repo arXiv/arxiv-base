@@ -14,17 +14,6 @@ class DoesNotContainControlChars(BaseGenericPatternCheck):
     _pattern = r"[\u0000-\u001f]+"
 
 
-class DoesNotContainControlCharsAllowNewlines(BaseGenericPatternCheck):
-    name = "does_not_contain_control_chars_allow_newlines"
-    display_name = "Does Not Contain Control Chars (Allow Newlines)"
-    id = 10018
-    version = "1.0.0"
-    description = "The value does not contain control characters, but newlines (\\n) are permitted."
-    failure_message = "Contains one or more control characters: tabs or backspaces."
-
-    _pattern = r"[\u0000-\u0009\u000b-\u001f]+"
-
-
 class NoUtf8DecodingErrors(BaseGenericPatternCheck):
     name = "no_utf8_decoding_errors"
     display_name = "No UTF-8 Decoding Errors"

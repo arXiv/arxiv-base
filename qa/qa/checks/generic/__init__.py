@@ -7,7 +7,6 @@ from qa.checks.generic.length import (  # noqa
 
 from qa.checks.generic.whitespace import (  # noqa
     DoesNotContainSpaceBeforeComma,
-    DoesNotContainUnspacedComma,
     NoExtraWhitespace,
     NoUnnecessarySpaceInParens,
 )
@@ -20,14 +19,12 @@ from qa.checks.generic.casing import (  # noqa
 
 from qa.checks.generic.encoding import (  # noqa
     DoesNotContainControlChars,
-    DoesNotContainControlCharsAllowNewlines,
     NoUtf8DecodingErrors,
 )
 
 from qa.checks.generic.structure import (  # noqa
     AllBracketsBalanced,
     DoesNotContainAnnotationSymbols,
-    DoesNotContainRawNewline,
     NoHtmlElements,
 )
 
@@ -37,21 +34,12 @@ from qa.checks.generic.tex import (  # noqa
     DoesNotContainLinebreak,
     DoesNotContainTexBegin,
     DoesNotContainTexDagger,
-    DoesNotContainTildeAsHardSpace,
     DoesNotContainUnnecessaryEscape,
-)
-
-from qa.checks.generic.prefixes import (  # noqa
-    DoesNotBeginWithAbstract,
-    DoesNotBeginWithAuthor,
-    DoesNotBeginWithDoiPrefix,
-    DoesNotBeginWithTitle,
 )
 
 from qa.checks.generic.punctuation import (  # noqa
     DoesNotContainComma,
     DoesNotContainSemicolon,
-    DoesNotEndWithPeriod,
     DoesNotEndWithPunctuation,
 )
 

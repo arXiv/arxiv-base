@@ -68,13 +68,3 @@ class DoesNotContainTexDagger(BaseGenericPatternCheck):
 
     _pattern = r"\\dag|\\ddag|\\textdag|\\textddag"
 
-
-class DoesNotContainTildeAsHardSpace(BaseGenericPatternCheck):
-    name = "does_not_contain_tilde_as_hard_space"
-    display_name = "Does Not Contain Tilde As Hard Space"
-    id = 10032
-    version = "1.0.0"
-    description = "The value does not contain an unescaped tilde used as a hard space."
-    failure_message = "Contains a tilde as a hard space."
-
-    _pattern = r"[^\\]~"

@@ -73,17 +73,6 @@ class AllBracketsBalanced(BaseGenericCheck):
             )
 
 
-class DoesNotContainRawNewline(BaseGenericPatternCheck):
-    name = "does_not_contain_raw_newline"
-    display_name = "Does Not Contain Raw Newline"
-    id = 10057
-    version = "1.0.0"
-    description = "The value does not contain a raw newline or carriage return character."
-    failure_message = "Contains a line break."
-
-    _pattern = r"[\r\n]"
-
-
 class DoesNotContainAnnotationSymbols(BaseGenericPatternCheck):
     name = "does_not_contain_annotation_symbols"
     display_name = "Does Not Contain Annotation Symbols"

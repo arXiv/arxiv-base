@@ -37,13 +37,3 @@ class DoesNotContainSpaceBeforeComma(BaseGenericPatternCheck):
 
     _pattern = r"\s,"
 
-
-class DoesNotContainUnspacedComma(BaseGenericPatternCheck):
-    name = "does_not_contain_unspaced_comma"
-    display_name = "Does Not Contain Unspaced Comma"
-    id = 10062
-    version = "1.0.0"
-    description = "The value does not contain a comma with no space on either side."
-    failure_message = "Missing space after a comma."
-
-    _pattern = r"[A-Za-z],[A-Za-z]"
