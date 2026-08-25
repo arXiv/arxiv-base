@@ -44,10 +44,9 @@ class TestCommentsAreValid:
         assert not result.passed
         assert not sub_result(result, "not_all_caps").passed
 
-    def test_fail_control_chars(self):
-        result = CommentsAreValid.check("12 pages\twith tab")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
+    def test_pass_control_chars_without_cleanup(self):
+        """Control characters are only normalized via cleanup(); check() no longer rejects them directly."""
+        assert CommentsAreValid.check("12 pages\twith tab").passed
 
     def test_pass_ends_with_period_without_cleanup(self):
         """A trailing period is only removed via cleanup(); check() no longer rejects it directly."""
@@ -86,3 +85,12 @@ class TestCleanup:
 
     def test_removes_trailing_periods(self):
         assert CommentsAreValid.cleanup("12   pages...") == "12 pages"
+
+    def test_removes_control_chars(self):
+        assert CommentsAreValid.cleanup("12 pages\twith tab") == "12 pages with tab"
+
+    def test_removes_space_before_comma(self):
+        assert CommentsAreValid.cleanup("12 pages , 3 figures") == "12 pages, 3 figures"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert CommentsAreValid.cleanup("12 pages ( draft )") == "12 pages (draft)"

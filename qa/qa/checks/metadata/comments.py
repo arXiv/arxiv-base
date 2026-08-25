@@ -35,30 +35,30 @@ class CommentsAreValid(BaseMetadataAggregateCheck):
             failure_message="Too long: must be 1000 characters or fewer.",
         ),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.NotAllCaps(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotContainUnnecessaryEscape(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"
         ),
         generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.DoesNotContainSpaceBeforeComma(
-            on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"
-        ),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
     )
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """
-        Strip outer whitespace.
-        Collapse whitespace.
-        Strip trailing periods.
-        """
+        """Normalize comments."""
+        # Strip leading and trailing whitespace.
         value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
         value = re.sub(r"\s+", " ", value)
+        # Strip trailing periods.
         value = re.sub(r"\s*\.[\s.]*$", "", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
 
         return value

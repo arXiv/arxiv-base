@@ -84,20 +84,17 @@ class TestReportNumIsValid:
         assert not result.passed
         assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
-    def test_fail_extra_whitespace(self):
-        result = ReportNumIsValid.check("CERN  EP-2024-001")
-        assert not result.passed
-        assert not sub_result(result, "no_extra_whitespace").passed
+    def test_pass_extra_whitespace_without_cleanup(self):
+        """Extra whitespace is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert ReportNumIsValid.check("CERN  EP-2024-001").passed
 
-    def test_fail_space_in_parens(self):
-        result = ReportNumIsValid.check("CERN-EP-2024-001 ( draft )")
-        assert not result.passed
-        assert not sub_result(result, "no_unnecessary_space_in_parens").passed
+    def test_pass_space_in_parens_without_cleanup(self):
+        """Unnecessary space in parens is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert ReportNumIsValid.check("CERN-EP-2024-001 ( draft )").passed
 
-    def test_fail_control_chars(self):
-        result = ReportNumIsValid.check("CERN-EP\t2024-001")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_control_chars").passed
+    def test_pass_control_chars_without_cleanup(self):
+        """Control characters are only normalized via cleanup(); check() no longer rejects them directly."""
+        assert ReportNumIsValid.check("CERN-EP\t2024-001").passed
 
     def test_fail_malformed_unicode(self):
         result = ReportNumIsValid.check("CERN \xc0\x80 2024-001")
@@ -124,3 +121,12 @@ class TestReportNumIsValid:
 class TestCleanup:
     def test_collapses_whitespace_strips_and_removes_trailing_period(self):
         assert ReportNumIsValid.cleanup("  CERN-EP-2024-001.  ") == "CERN-EP-2024-001"
+
+    def test_removes_control_chars(self):
+        assert ReportNumIsValid.cleanup("CERN-EP\t2024-001") == "CERN-EP 2024-001"
+
+    def test_removes_space_before_comma(self):
+        assert ReportNumIsValid.cleanup("CERN-EP-2024-001 , WLCAPP-2024-05") == "CERN-EP-2024-001, WLCAPP-2024-05"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert ReportNumIsValid.cleanup("CERN-EP-2024-001 ( draft )") == "CERN-EP-2024-001 (draft)"
