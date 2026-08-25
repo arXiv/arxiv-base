@@ -29,17 +29,10 @@ class AuthorsAreValid(BaseMetadataAggregateCheck):
         generic.AuthorNamesDoNotContainSemicolon(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
-        generic.DoesNotContainSpaceBeforeComma(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
-        ),
         generic.DoesNotContainTexDagger(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
-        generic.DoesNotContainTildeAsHardSpace(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
-        ),
-        generic.DoesNotBeginWithAuthor(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.AuthorNamesDoNotContainPrefix(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
@@ -64,9 +57,6 @@ class AuthorsAreValid(BaseMetadataAggregateCheck):
         generic.DoesNotContainAnnotationSymbols(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.AuthorsDoNotContainLoneSurname(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),
@@ -80,25 +70,35 @@ class AuthorsAreValid(BaseMetadataAggregateCheck):
         generic.AuthorNamesDoNotContainAffiliation(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),
-        generic.DoesNotContainUnspacedComma(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
     )
 
     @staticmethod
     def cleanup(value: str) -> str:  # TODO check pre or post parsing
-        """
-        Strip outer whitespace.
-        Collapse whitespace.
-        Remove doubled commas.
-        Add missing spaces around parentheses.
-        Normalize "AND"/"And" to "and".
-        """
+        """Normalize authors."""
+        # Strip leading and trailing whitespace.
         value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
         value = re.sub(r"\s+", " ", value)
-        value = re.sub(r",(\s*,)+", ",", value)  # Remove double commas.
+        # Convert a TeX hard-space (an unescaped tilde) to a literal space.
+        value = re.sub(r"(?<!\\)~", " ", value)
+        value = re.sub(r"\s+", " ", value)
+        # Remove doubled commas.
+        value = re.sub(r",(\s*,)+", ",", value)
         # Add spaces between word and opening parenthesis.
         value = re.sub(r"(\w)\(", r"\g<1> (", value)
         # Add spaces between closing parenthesis and word.
         value = re.sub(r"\)(\w)", r") \g<1>", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Add a space after a comma when missing.
+        value = re.sub(r",(?=[A-Za-z])", ", ", value)
+        # Strip a leading "author:" or "authors:" prefix.
+        value = re.sub(r"(?i)^authors?:\s*", "", value)
         # Change capitalized or uppercase `And` to `and`.
         value = re.sub(r"\bA(?i:ND)\b", "and", value)
 

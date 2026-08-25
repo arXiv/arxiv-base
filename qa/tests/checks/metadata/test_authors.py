@@ -80,25 +80,21 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_tex_dagger").passed
 
-    def test_fail_begins_with_author(self):
-        result = AuthorsAreValid.check("Author: Fred Smith")
-        assert not result.passed
-        assert not sub_result(result, "does_not_begin_with_author").passed
+    def test_pass_begins_with_author_without_cleanup(self):
+        """A leading 'author:' prefix is only stripped via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Author: Fred Smith").passed
 
-    def test_fail_begins_with_authors(self):
-        result = AuthorsAreValid.check("Authors: J. Smith, Joe Bob, and Mr. Briggs")
-        assert not result.passed
-        assert not sub_result(result, "does_not_begin_with_author").passed
+    def test_pass_begins_with_authors_without_cleanup(self):
+        """A leading 'authors:' prefix is only stripped via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Authors: J. Smith, Joe Bob, and Mr. Briggs").passed
 
-    def test_fail_tilde_as_hard_space(self):
-        result = AuthorsAreValid.check("Fred Smith~Jones")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_tilde_as_hard_space").passed
+    def test_pass_tilde_as_hard_space_without_cleanup(self):
+        """A tilde hard-space is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Fred Smith~Jones").passed
 
-    def test_fail_tilde_after_period(self):
-        result = AuthorsAreValid.check("Paul R.~Archer")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_tilde_as_hard_space").passed
+    def test_pass_tilde_after_period_without_cleanup(self):
+        """A tilde hard-space is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Paul R.~Archer").passed
 
     def test_pass_escaped_tilde_accent(self):
         assert AuthorsAreValid.check("Jean Nu\\~nos").passed
@@ -278,10 +274,9 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_et_al").passed
 
-    def test_fail_space_before_comma(self):
-        result = AuthorsAreValid.check("Fred Smith , Joe Bloggs")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_space_before_comma").passed
+    def test_pass_space_before_comma_without_cleanup(self):
+        """Space before a comma is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Fred Smith , Joe Bloggs").passed
 
     def test_fail_prefix_dr(self):
         result = AuthorsAreValid.check("Dr. John Smith")
@@ -314,10 +309,9 @@ class TestAuthorsAreValid:
         assert result.passed
         assert not sub_result(result, "not_all_caps").passed
 
-    def test_warn_unspaced_comma(self):
-        result = AuthorsAreValid.check("Jamie Magyar,Jonathan Young")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_unspaced_comma").passed
+    def test_pass_unspaced_comma_without_cleanup(self):
+        """An unspaced comma is only normalized via cleanup(); check() no longer warns on it directly."""
+        assert AuthorsAreValid.check("Jamie Magyar,Jonathan Young").passed
 
     def test_none_field_short_circuits(self):
         result = AuthorsAreValid().run(QaDataRegistry(metadata=Metadata(authors=None)))
@@ -352,3 +346,30 @@ class TestCleanup:
 
     def test_strips_leading_and_trailing_whitespace(self):
         assert AuthorsAreValid.cleanup("  Fred Smith  ") == "Fred Smith"
+
+    def test_removes_control_chars(self):
+        assert AuthorsAreValid.cleanup("Fred Smith\x00Joe Bloggs") == "Fred Smith Joe Bloggs"
+
+    def test_removes_space_before_comma(self):
+        assert AuthorsAreValid.cleanup("Fred Smith , Joe Bloggs") == "Fred Smith, Joe Bloggs"
+
+    def test_adds_space_after_unspaced_comma(self):
+        assert AuthorsAreValid.cleanup("Jamie Magyar,Jonathan Young") == "Jamie Magyar, Jonathan Young"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert AuthorsAreValid.cleanup("Fred Smith ( Cornell )") == "Fred Smith (Cornell)"
+
+    def test_strips_leading_author_colon_prefix(self):
+        assert AuthorsAreValid.cleanup("Author: Fred Smith") == "Fred Smith"
+
+    def test_strips_leading_authors_colon_prefix(self):
+        assert AuthorsAreValid.cleanup("Authors: Fred Smith, Joe Bloggs") == "Fred Smith, Joe Bloggs"
+
+    def test_does_not_strip_author_prefix_without_colon(self):
+        assert AuthorsAreValid.cleanup("Author Fred Smith") == "Author Fred Smith"
+
+    def test_converts_tilde_hard_space_to_space(self):
+        assert AuthorsAreValid.cleanup("Paul R.~Archer") == "Paul R. Archer"
+
+    def test_preserves_escaped_tilde(self):
+        assert AuthorsAreValid.cleanup("Jean Nu\\~nos") == "Jean Nu\\~nos"
