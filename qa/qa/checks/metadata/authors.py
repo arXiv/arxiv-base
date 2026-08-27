@@ -15,7 +15,7 @@ class AuthorsAreValid(BaseMetadataAggregateCheck):
     id = 200
     version = "1.0.0"
     description = "The metadata authors field is valid."
-    failure_message = "Authors are invalid or empty."
+    failure_message = "Authors are invalid."
 
     field = "authors"
 

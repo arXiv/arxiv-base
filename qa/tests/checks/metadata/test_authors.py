@@ -31,8 +31,11 @@ class TestAuthorsAreValid:
     def test_fail_empty_short_circuits(self):
         result = AuthorsAreValid.check("")
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Authors are invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
+        assert result.message == "Authors are invalid."
 
     def test_warn_too_short(self):
         result = AuthorsAreValid.check("C C")
@@ -321,8 +324,11 @@ class TestAuthorsAreValid:
     def test_none_field_short_circuits(self):
         result = AuthorsAreValid().run(QaDataRegistry(metadata=Metadata(authors=None)))
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Authors are invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
+        assert result.message == "Authors are invalid."
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):

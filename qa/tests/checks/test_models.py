@@ -42,32 +42,20 @@ class TestBaseReport(TestCase):
 class TestResultMessages(TestCase):
     def test_no_results_returns_empty_string(self):
         result = Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="own message")
-        self.assertEqual(result._messages(Disposition.WARN, Disposition.REJECT), "")
+        self.assertEqual(result._messages(Disposition.REJECT), "")
 
-    def test_no_dispositions_returns_empty_string(self):
+    def test_concatenates_multiple_messages_at_the_same_disposition(self):
         result = Result(
             check_config={},
             passed=False,
             disposition=Disposition.REJECT,
             message="",
             results=[
-                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
+                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="first reject message"),
+                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="second reject message"),
             ],
         )
-        self.assertEqual(result._messages(), "")
-
-    def test_concatenates_messages_matching_given_dispositions(self):
-        result = Result(
-            check_config={},
-            passed=False,
-            disposition=Disposition.REJECT,
-            message="",
-            results=[
-                Result(check_config={}, passed=False, disposition=Disposition.WARN, message="warn message"),
-                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
-            ],
-        )
-        self.assertEqual(result._messages(Disposition.WARN, Disposition.REJECT), "warn message\nreject message")
+        self.assertEqual(result._messages(Disposition.REJECT), "first reject message\nsecond reject message")
 
     def test_filters_to_a_single_disposition(self):
         result = Result(
@@ -94,7 +82,7 @@ class TestResultMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.WARN, message="warn message"),
             ],
         )
-        self.assertEqual(result._messages(Disposition.WARN, Disposition.REJECT), "warn message")
+        self.assertEqual(result._messages(Disposition.WARN), "warn message")
 
     def test_includes_passed_sub_checks_with_matching_disposition(self):
         result = Result(

@@ -209,13 +209,27 @@ class BaseAggregateCheck(BaseCheck):
             try:
                 result = check.run(data_registry)
                 results.append(result)
-            except EmptyFieldError:
-                return Result(
-                    check_config=self.config,
+            except EmptyFieldError as e:
+                return self._result(
                     passed=False,
-                    disposition=Disposition.REJECT,
+                    results=[
+                        Result(
+                            check_config={
+                                "name": "field_is_not_empty",
+                                "display_name": "Field Is Not Empty",
+                                "id": 0,
+                                "version": "1.0.0",
+                                "required_data": self.required_data,
+                                "on_failure_policy": OnFailurePolicy.REJECT,
+                                "failure_message": str(e),
+                                "field": getattr(self, "field", None),
+                            },
+                            passed=False,
+                            disposition=Disposition.REJECT,
+                            message=str(e),
+                        )
+                    ],
                     message=self.failure_message,
-                    results=[],
                 )
 
         if self._passed(results):

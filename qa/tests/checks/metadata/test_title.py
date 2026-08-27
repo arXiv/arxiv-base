@@ -28,8 +28,11 @@ class TestTitleIsValid:
     def test_fail_empty_short_circuits(self):
         result = TitleIsValid.check("")
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Title is invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
+        assert result.message == "Title is invalid."
 
     def test_warn_too_short(self):
         result = TitleIsValid.check("Ti")
@@ -94,8 +97,11 @@ class TestTitleIsValid:
     def test_none_field_short_circuits(self):
         result = TitleIsValid().run(QaDataRegistry(metadata=Metadata(title=None)))
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Title is invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
+        assert result.message == "Title is invalid."
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
@@ -109,6 +115,10 @@ class TestTitleIsValid:
 
     def test_fail_gives_reject_disposition(self):
         assert TitleIsValid.check("").disposition == Disposition.REJECT
+
+    def test_fail_empty_messages_are_not_empty(self):
+        """_messages() should surface a reason even when the field itself is empty."""
+        assert TitleIsValid.check("")._messages(Disposition.REJECT) != ""
 
 
 class TestCleanup:

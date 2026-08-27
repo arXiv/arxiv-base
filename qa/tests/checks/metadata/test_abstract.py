@@ -77,8 +77,11 @@ class TestAbstractIsValid:
     def test_fail_empty_short_circuits(self):
         result = AbstractIsValid.check("")
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Abstract is invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
+        assert result.message == "Abstract is invalid."
 
     def test_warn_too_short(self):
         result = AbstractIsValid.check("Hi")
@@ -111,8 +114,11 @@ class TestAbstractIsValid:
     def test_none_field_short_circuits(self):
         result = AbstractIsValid().run(QaDataRegistry(metadata=Metadata(abstract=None)))
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Abstract is invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
+        assert result.message == "Abstract is invalid."
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
