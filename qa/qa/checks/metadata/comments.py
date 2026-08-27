@@ -15,7 +15,6 @@ class CommentsAreValid(BaseMetadataAggregateCheck):
     id = 400
     version = "1.0.0"
     description = "The metadata comments field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Comments are invalid."
 
     field = "comments"

@@ -179,14 +179,18 @@ class BaseAggregateCheck(BaseCheck):
     Returns a failure if a field required by a sub-check is empty.
     """
 
-    field: str
     _checks: tuple[BaseGenericCheck, ...]
 
     @property
     def config(self) -> dict:
+        """An aggregate has no on_failure_policy of its own — its disposition is derived from its sub-checks' results."""
         return {
-            **super().config,
-            "field": self.field,
+            "name": self.name,
+            "display_name": self.display_name,
+            "id": self.id,
+            "version": self.version,
+            "required_data": self.required_data,
+            "failure_message": self.failure_message,
         }
 
     def _describe(self) -> dict:
@@ -205,7 +209,9 @@ class BaseAggregateCheck(BaseCheck):
                 result = check.run(data_registry)
                 results.append(result)
             except EmptyFieldError:
-                return self._result(passed=False, results=[], message=self.failure_message)
+                return self._result(
+                    passed=False, results=[], message=self.failure_message, disposition=Disposition.REJECT
+                )
 
         if self._passed(results):
             return self._result(passed=True, results=results)
@@ -213,19 +219,28 @@ class BaseAggregateCheck(BaseCheck):
             return self._result(passed=False, results=results, message=self.failure_message)
 
     def _passed(self, results: list[Result]) -> bool:
-        """The aggregate passes unless a sub-check with REJECT policy has failed."""
-        return not any(not r.passed and r.check_config["on_failure_policy"] == OnFailurePolicy.REJECT for r in results)
+        """The aggregate passes only if every sub-check passed."""
+        return all(r.passed for r in results)
+
+    def _aggregate_disposition(self, results: list[Result]) -> Disposition:
+        """The aggregate disposition is the most severe disposition among its sub-check results."""
+        if any(r.disposition == Disposition.REJECT for r in results):
+            return Disposition.REJECT
+        if any(r.disposition == Disposition.WARN for r in results):
+            return Disposition.WARN
+        return Disposition.OK
 
     def _result(  # type: ignore
         self,
         passed: bool,
         results: list[Result],
         message: str = "",
+        disposition: Disposition | None = None,
     ) -> Result:
         return Result(
             check_config=self.config,
             passed=passed,
-            disposition=self._disposition(passed),
+            disposition=disposition if disposition is not None else self._aggregate_disposition(results),
             message=message,
             results=results,
         )
@@ -234,7 +249,15 @@ class BaseAggregateCheck(BaseCheck):
 class BaseMetadataAggregateCheck(BaseAggregateCheck):
     """An extension of BaseAggregateCheck for checks on a single metadata field."""
 
+    field: str
     required_data = {"metadata"}
+
+    @property
+    def config(self) -> dict:
+        return {
+            **super().config,
+            "field": self.field,
+        }
 
     @staticmethod
     def cleanup(value: str) -> str:
@@ -242,7 +265,5 @@ class BaseMetadataAggregateCheck(BaseAggregateCheck):
         return value
 
     @classmethod
-    def check(cls, value: str | None, cleanup: bool = False) -> Result:
-        if cleanup and value is not None:
-            value = cls.cleanup(value)
+    def check(cls, value: str | None) -> Result:
         return cls().run(QaDataRegistry(metadata=Metadata(**{cls.field: value})))

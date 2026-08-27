@@ -36,4 +36,3 @@ class DoesNotContainSpaceBeforeComma(BaseGenericPatternCheck):
     failure_message = "Contains space before a comma."
 
     _pattern = r"\s,"
-

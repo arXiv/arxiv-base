@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result
 from qa.checks.metadata.report_num import ReportNumIsValid
 
 
@@ -28,17 +28,17 @@ class TestReportNumIsValid:
 
     def test_warn_too_short(self):
         result = ReportNumIsValid.check("A1")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_warn_too_short_two_chars(self):
         result = ReportNumIsValid.check("A2")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_warn_too_short_three_chars(self):
         result = ReportNumIsValid.check("A23")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_fail_no_letters_four_digits(self):
@@ -56,22 +56,22 @@ class TestReportNumIsValid:
 
     def test_warn_too_long(self):
         result = ReportNumIsValid.check("X" * 2000 + "1")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_warn_contains_url(self):
         result = ReportNumIsValid.check("https://example.com/report2024")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
     def test_warn_contains_http_url(self):
         result = ReportNumIsValid.check("http://example.com/report2024")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
     def test_warn_contains_doi(self):
         result = ReportNumIsValid.check("doi:10.1234/abc123")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
     def test_fail_no_letters(self):
@@ -115,7 +115,6 @@ class TestReportNumIsValid:
         assert result.check_config["name"] == "report_num_is_valid"
         assert result.check_config["id"] == 500
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
 
 class TestCleanup:

@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import Disposition, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.authors import AuthorsAreValid
 
 
@@ -36,7 +36,7 @@ class TestAuthorsAreValid:
 
     def test_warn_too_short(self):
         result = AuthorsAreValid.check("C C")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_fail_linebreak(self):
@@ -54,12 +54,12 @@ class TestAuthorsAreValid:
 
     def test_warn_bad_characters(self):
         result = AuthorsAreValid.check("Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_annotation_symbols").passed
 
     def test_warn_asterisk(self):
         result = AuthorsAreValid.check("Hsi-Sheng Goan*, Chung-Chin Jian, Po-Wen Chen")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_annotation_symbols").passed
 
     def test_pass_no_space_after_comma(self):
@@ -81,12 +81,16 @@ class TestAuthorsAreValid:
         assert not sub_result(result, "does_not_contain_tex_dagger").passed
 
     def test_pass_begins_with_author_without_cleanup(self):
-        """A leading 'author:' prefix is only stripped via cleanup(); check() no longer rejects it directly."""
-        assert AuthorsAreValid.check("Author: Fred Smith").passed
+        """A leading 'author:' prefix is only stripped via cleanup(); check() does not reject it outright,
+        though the unstripped prefix confuses the author parser into a spurious lone-surname warning."""
+        result = AuthorsAreValid.check("Author: Fred Smith")
+        assert result.disposition != Disposition.REJECT
 
     def test_pass_begins_with_authors_without_cleanup(self):
-        """A leading 'authors:' prefix is only stripped via cleanup(); check() no longer rejects it directly."""
-        assert AuthorsAreValid.check("Authors: J. Smith, Joe Bob, and Mr. Briggs").passed
+        """A leading 'authors:' prefix is only stripped via cleanup(); check() does not reject it outright,
+        though the unstripped prefix confuses the author parser into a spurious lone-surname warning."""
+        result = AuthorsAreValid.check("Authors: J. Smith, Joe Bob, and Mr. Briggs")
+        assert result.disposition != Disposition.REJECT
 
     def test_pass_tilde_as_hard_space_without_cleanup(self):
         """A tilde hard-space is only normalized via cleanup(); check() no longer rejects it directly."""
@@ -148,7 +152,7 @@ class TestAuthorsAreValid:
 
     def test_warn_lone_surname(self):
         result = AuthorsAreValid.check("Bloss, Adrienne and Cornish, Audie")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_lone_surname").passed
 
     def test_pass_collaboration(self):
@@ -156,32 +160,32 @@ class TestAuthorsAreValid:
 
     def test_warn_llm_standalone(self):
         result = AuthorsAreValid.check("Llama")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_in_author_list(self):
         result = AuthorsAreValid.check("Adrienne Bloss, Audie Cornish, and ChatGPT")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_chatgpt(self):
         result = AuthorsAreValid.check("Jonathan Young and ChatGPT")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_gpt4(self):
         result = AuthorsAreValid.check("GPT-4")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_gpt5(self):
         result = AuthorsAreValid.check("GPT-5")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_pass_llm_as_firstname(self):
-        # "Claude Sonnet 4" — Claude is a common name with a firstname, no LLM pattern fires
-        result = AuthorsAreValid.check("Claude Sonnet 4")
+        # "Claude Sonnet" — Claude is a common name with a firstname, no LLM pattern fires
+        result = AuthorsAreValid.check("Claude Sonnet")
         assert result.passed
         assert sub_result(result, "authors_do_not_contain_llm_author").passed
 
@@ -192,21 +196,22 @@ class TestAuthorsAreValid:
 
     def test_warn_claude_standalone(self):
         result = AuthorsAreValid.check("Claude")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
         assert sub_result(result, "authors_do_not_contain_lone_surname").passed
 
     def test_warn_llm_gemini_with_version(self):
         result = AuthorsAreValid.check("Gemini 2.5 Pro")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_pass_llama_as_firstname(self):
         assert AuthorsAreValid.check("Joe Llama").passed
 
     def test_pass_llamallama_is_lone_surname_not_llm(self):
+        """'Llamallama' is a real lone-surname warning, not an LLM-name match."""
         result = AuthorsAreValid.check("Llamallama")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_lone_surname").passed
         assert sub_result(result, "authors_do_not_contain_llm_author").passed
 
@@ -222,7 +227,7 @@ class TestAuthorsAreValid:
 
     def test_warn_bracket_in_name(self):
         result = AuthorsAreValid.check("Sylvie Roux [MIT]")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_brackets").passed
 
     def test_fail_number_in_html_sup(self):
@@ -233,17 +238,17 @@ class TestAuthorsAreValid:
 
     def test_warn_number_jennifer_8_lee(self):
         result = AuthorsAreValid.check("Jennifer 8 Lee")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_numbers").passed
 
     def test_warn_affiliation_physics(self):
         result = AuthorsAreValid.check("Someone Smith Physics Dept")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_affiliation").passed
 
     def test_warn_affiliation_university(self):
         result = AuthorsAreValid.check("Fred Smith, Joe Bloggs, Univ of Hard Knocks")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_affiliation").passed
 
     def test_pass_astrophys_not_physics(self):
@@ -306,7 +311,7 @@ class TestAuthorsAreValid:
 
     def test_warn_all_caps(self):
         result = AuthorsAreValid.check("FRED SMITH AND JOE BLOGGS")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_all_caps").passed
 
     def test_pass_unspaced_comma_without_cleanup(self):
@@ -328,10 +333,9 @@ class TestAuthorsAreValid:
         assert result.check_config["name"] == "authors_are_valid"
         assert result.check_config["id"] == 200
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
-    def test_fail_on_failure_policy_reject(self):
-        assert AuthorsAreValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+    def test_fail_gives_reject_disposition(self):
+        assert AuthorsAreValid.check("").disposition == Disposition.REJECT
 
 
 class TestCleanup:

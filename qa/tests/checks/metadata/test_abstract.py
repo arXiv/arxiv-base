@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import Disposition, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.abstract import AbstractIsValid
 
 
@@ -13,52 +13,61 @@ def sub_result(result: Result, name: str) -> Result:
 
 
 class TestAbstractIsValid:
+    # Appended to short fixtures below only to clear the 150-char minimum-length WARN,
+    # so each test stays a genuine "nothing about this input fails" check.
+    _filler = (
+        " This additional discussion is included solely to satisfy the minimum length "
+        "requirement for this test case and does not affect the specific behavior under examination."
+    )
+
     def test_pass_normal(self):
-        result = AbstractIsValid.check("In this work, we study aaa, bbb, and ccc and conclude ddd.")
+        result = AbstractIsValid.check("In this work, we study aaa, bbb, and ccc and conclude ddd." + self._filler)
         assert result.passed
 
     def test_pass_with_formula(self):
-        result = AbstractIsValid.check("About YBa$_{2}$Cu$_{3}$O$_{6.95}$")
+        result = AbstractIsValid.check("About YBa$_{2}$Cu$_{3}$O$_{6.95}$" + self._filler)
         assert result.passed
 
     def test_pass_with_phi(self):
-        result = AbstractIsValid.check("Both \\phi and \\varphi may be used")
+        result = AbstractIsValid.check("Both \\phi and \\varphi may be used" + self._filler)
         assert result.passed
 
     def test_pass_abstractive_prefix(self):
-        result = AbstractIsValid.check("Abstractive summarization is ok")
+        result = AbstractIsValid.check("Abstractive summarization is ok" + self._filler)
         assert result.passed
 
     def test_pass_begin_with_brace(self):
-        result = AbstractIsValid.check("\\begin{abstract}This uses some TeX\\end{abstract}")
+        result = AbstractIsValid.check("\\begin{abstract}This uses some TeX\\end{abstract}" + self._filler)
         assert result.passed
 
     def test_pass_cite(self):
-        result = AbstractIsValid.check("Work \\cite{8} established a connection between the edge $3$-coloring")
+        result = AbstractIsValid.check(
+            "Work \\cite{8} established a connection between the edge $3$-coloring" + self._filler
+        )
         assert result.passed
 
     def test_pass_newline_permitted(self):
-        result = AbstractIsValid.check("Newlines\nare permitted")
+        result = AbstractIsValid.check("Newlines\nare permitted" + self._filler)
         assert result.passed
 
     def test_pass_newline_indent_permitted(self):
-        result = AbstractIsValid.check("Work established\n a connection between the edge $3$-coloring")
+        result = AbstractIsValid.check("Work established\n a connection between the edge $3$-coloring" + self._filler)
         assert result.passed
 
     def test_pass_tex_linebreak_permitted(self):
-        result = AbstractIsValid.check("This \\\\ is a line break")
+        result = AbstractIsValid.check("This \\\\ is a line break" + self._filler)
         assert result.passed
 
     def test_pass_single_backslash(self):
-        result = AbstractIsValid.check("This \\ is not a line break")
+        result = AbstractIsValid.check("This \\ is not a line break" + self._filler)
         assert result.passed
 
     def test_pass_short_html_like_tags(self):
-        result = AbstractIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>")
+        result = AbstractIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>" + self._filler)
         assert result.passed
 
     def test_pass_math_lt(self):
-        result = AbstractIsValid.check("We also should not flag $p_1<p_2$")
+        result = AbstractIsValid.check("We also should not flag $p_1<p_2$" + self._filler)
         assert result.passed
 
     def test_fail_empty(self):
@@ -73,12 +82,12 @@ class TestAbstractIsValid:
 
     def test_warn_too_short(self):
         result = AbstractIsValid.check("Hi")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_warn_tex_begin_no_brace(self):
         result = AbstractIsValid.check("This \\begin foo is flagged")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_tex_begin").passed
 
     def test_fail_on_french(self):
@@ -114,10 +123,9 @@ class TestAbstractIsValid:
         assert result.check_config["name"] == "abstract_is_valid"
         assert result.check_config["id"] == 300
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
-    def test_fail_on_failure_policy_reject(self):
-        assert AbstractIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+    def test_fail_gives_reject_disposition(self):
+        assert AbstractIsValid.check("").disposition == Disposition.REJECT
 
 
 class TestCleanup:

@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result
 from qa.checks.metadata.journal_ref import JournalRefIsValid
 
 
@@ -28,12 +28,12 @@ class TestJournalRefIsValid:
 
     def test_warn_too_short(self):
         result = JournalRefIsValid.check("2024")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_warn_too_long(self):
         result = JournalRefIsValid.check("x" * 1501 + " 2024")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_fail_no_valid_year(self):
@@ -100,7 +100,6 @@ class TestJournalRefIsValid:
         assert result.check_config["name"] == "journal_ref_is_valid"
         assert result.check_config["id"] == 600
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
 
 class TestCleanup:

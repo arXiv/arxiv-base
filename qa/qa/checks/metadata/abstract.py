@@ -15,7 +15,6 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
     id = 300
     version = "1.0.0"
     description = "The metadata abstract field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Abstract is invalid or empty."
 
     field = "abstract"

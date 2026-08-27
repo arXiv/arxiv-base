@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result
 from qa.checks.metadata.comments import CommentsAreValid
 
 
@@ -54,12 +54,12 @@ class TestCommentsAreValid:
 
     def test_warn_utf8_decoding_error_accents(self):
         result = CommentsAreValid.check("A comment with èéêëìíîï accents".encode("UTF-8").decode("LATIN-1"))
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "no_utf8_decoding_errors").passed
 
     def test_warn_utf8_decoding_error_chinese(self):
         result = CommentsAreValid.check("A comment with 普通话 Chinese".encode("UTF-8").decode("LATIN-1"))
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "no_utf8_decoding_errors").passed
 
     def test_all_sub_checks_run_on_valid(self):
@@ -76,7 +76,6 @@ class TestCommentsAreValid:
         assert result.check_config["name"] == "comments_are_valid"
         assert result.check_config["id"] == 400
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
 
 class TestCleanup:

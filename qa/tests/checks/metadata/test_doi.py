@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result
 from qa.checks.metadata.doi import DoiIsValid
 
 
@@ -33,7 +33,7 @@ class TestDoiIsValid:
 
     def test_warn_too_long(self):
         result = DoiIsValid.check("10.1103/" + "a" * 43)
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_pass_at_max_length(self):
@@ -56,7 +56,7 @@ class TestDoiIsValid:
 
     def test_warn_invalid_doi(self):
         result = DoiIsValid.check("definitely-invalid")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "doi_has_valid_format").passed
 
     def test_fail_invalid_doi_no_scheme(self):
@@ -77,7 +77,7 @@ class TestDoiIsValid:
 
     def test_warn_invalid_doi_with_preceding_text(self):
         result = DoiIsValid.check("I like 10.48550/arXiv.2501.18183")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "doi_has_valid_format").passed
 
     def test_fail_contains_url(self):
@@ -104,7 +104,6 @@ class TestDoiIsValid:
         assert result.check_config["name"] == "doi_is_valid"
         assert result.check_config["id"] == 700
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
 
 class TestCleanup:

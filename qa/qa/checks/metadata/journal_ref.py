@@ -13,7 +13,6 @@ class JournalRefIsValid(BaseMetadataAggregateCheck):
     id = 600
     version = "1.0.0"
     description = "The metadata journal_ref field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Journal reference is invalid."
 
     field = "journal_ref"

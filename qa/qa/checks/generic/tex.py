@@ -67,4 +67,3 @@ class DoesNotContainTexDagger(BaseGenericPatternCheck):
     failure_message = "Contains a TeX dagger symbol."
 
     _pattern = r"\\dag|\\ddag|\\textdag|\\textddag"
-

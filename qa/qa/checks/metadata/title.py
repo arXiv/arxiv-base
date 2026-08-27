@@ -15,7 +15,6 @@ class TitleIsValid(BaseMetadataAggregateCheck):
     id = 100
     version = "1.0.0"
     description = "The metadata title field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Title is invalid or empty."
 
     field = "title"

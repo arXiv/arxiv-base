@@ -15,7 +15,6 @@ class ReportNumIsValid(BaseMetadataAggregateCheck):
     id = 500
     version = "1.0.0"
     description = "The metadata report_num field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Report number is invalid."
 
     field = "report_num"

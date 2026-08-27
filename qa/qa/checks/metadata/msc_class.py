@@ -15,7 +15,6 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
     id = 800
     version = "1.0.0"
     description = "The metadata msc_class field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "MSC class is invalid."
 
     field = "msc_class"

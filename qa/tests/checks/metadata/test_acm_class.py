@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result
 from qa.checks.metadata.acm_class import AcmClassIsValid
 
 
@@ -29,15 +29,15 @@ class TestAcmClassIsValid:
     def test_pass_semicolon_separated_list(self):
         assert AcmClassIsValid.check("F.2.2; I.2.7").passed
 
-    def test_fail_comma_separated_list_even_with_cleanup(self):
-        """cleanup() no longer rewrites commas to semicolons; a comma is rejected outright."""
-        result = AcmClassIsValid.check("F.2.2, I.2.7", cleanup=True)
+    def test_fail_comma_separated_list(self):
+        """cleanup() does not rewrite commas to semicolons; a comma is rejected outright."""
+        result = AcmClassIsValid.check("F.2.2, I.2.7")
         assert not result.passed
         assert not sub_result(result, "does_not_contain_comma").passed
 
     def test_warn_too_long(self):
         result = AcmClassIsValid.check("x" * 161)
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_pass_at_max_length(self):
@@ -70,7 +70,6 @@ class TestAcmClassIsValid:
         assert result.check_config["name"] == "acm_class_is_valid"
         assert result.check_config["id"] == 900
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
 
 class TestCleanup:

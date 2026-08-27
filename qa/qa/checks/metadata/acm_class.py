@@ -15,7 +15,6 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
     id = 900
     version = "1.0.0"
     description = "The metadata acm_class field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "ACM class is invalid."
 
     field = "acm_class"
@@ -64,7 +63,7 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
 
         _value = []
         for v in value.split(";"):
-            # Strip whitespace. 
+            # Strip whitespace.
             # Uppercase the class code.
             # Strip trailing periods.
             v = v.strip().upper().rstrip(".")

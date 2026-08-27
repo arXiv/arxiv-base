@@ -15,7 +15,6 @@ class DoiIsValid(BaseMetadataAggregateCheck):
     id = 700
     version = "1.0.0"
     description = "The metadata doi field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "DOI is invalid."
 
     field = "doi"

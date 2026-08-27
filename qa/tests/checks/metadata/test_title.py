@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import Disposition, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.title import TitleIsValid
 
 
@@ -33,7 +33,7 @@ class TestTitleIsValid:
 
     def test_warn_too_short(self):
         result = TitleIsValid.check("Ti")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_fail_too_long(self):
@@ -42,7 +42,7 @@ class TestTitleIsValid:
         assert not sub_result(result, "not_too_long").passed
 
     def test_pass_at_max_length(self):
-        assert TitleIsValid.check("x" * 300).passed
+        assert TitleIsValid.check("X" + "x" * 299).passed
 
     def test_pass_ends_with_punctuation(self):
         result = TitleIsValid.check("A title with period.")
@@ -50,7 +50,7 @@ class TestTitleIsValid:
 
     def test_warn_all_caps(self):
         result = TitleIsValid.check("A TITLE IN ALL CAPS")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_all_caps").passed
 
     def test_pass_digit_strings_not_caps(self):
@@ -106,10 +106,9 @@ class TestTitleIsValid:
         assert result.check_config["name"] == "title_is_valid"
         assert result.check_config["id"] == 100
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
-    def test_fail_on_failure_policy_reject(self):
-        assert TitleIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+    def test_fail_gives_reject_disposition(self):
+        assert TitleIsValid.check("").disposition == Disposition.REJECT
 
 
 class TestCleanup:
