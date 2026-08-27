@@ -8,10 +8,14 @@ from qa.checks.models import Result, Offset, OnFailurePolicy, Disposition, QaDat
 
 
 class MissingDataError(Exception):
+    """A required data object in the QaDataRegistry (e.g. Metadata) is None."""
+
     pass
 
 
 class EmptyFieldError(Exception):
+    """A required field (e.g. Metadata.title) is None or an empty string."""
+
     pass
 
 
@@ -86,7 +90,8 @@ class BaseCheck(ABC):
 class BaseGenericCheck(BaseCheck):
     """
     An extension of BaseCheck that can be instantiated to run on different fields with different on failure policies.
-    Raises a MissingDataError if either the required data is missing or the field is empty.
+    Raises a MissingDataError if any of the required data are missing.
+    Raises an EmptyFieldError if the required field is empty.
     """
 
     def __init__(
@@ -173,17 +178,13 @@ class BaseGenericPatternCheck(BaseGenericCheck):
 
 
 class BaseAggregateCheck(BaseCheck):
-    """
-    An extension of BaseCheck that runs many generic sub-checks.
-    Raises a MissingDataError if any of the required data is missing.
-    Returns a failure if a field required by a sub-check is empty.
-    """
+    """An extension of BaseCheck that runs many generic sub-checks."""
 
     _checks: tuple[BaseGenericCheck, ...]
 
     @property
     def config(self) -> dict:
-        """An aggregate has no on_failure_policy of its own — its disposition is derived from its sub-checks' results."""
+        """An aggregate has no on_failure_policy of its own - its disposition is derived from its sub-checks' results."""
         return {
             "name": self.name,
             "display_name": self.display_name,
@@ -209,8 +210,12 @@ class BaseAggregateCheck(BaseCheck):
                 result = check.run(data_registry)
                 results.append(result)
             except EmptyFieldError:
-                return self._result(
-                    passed=False, results=[], message=self.failure_message, disposition=Disposition.REJECT
+                return Result(
+                    check_config=self.config,
+                    passed=False,
+                    disposition=Disposition.REJECT,
+                    message=self.failure_message,
+                    results=[],
                 )
 
         if self._passed(results):
@@ -222,7 +227,7 @@ class BaseAggregateCheck(BaseCheck):
         """The aggregate passes only if every sub-check passed."""
         return all(r.passed for r in results)
 
-    def _aggregate_disposition(self, results: list[Result]) -> Disposition:
+    def _disposition(self, results: list[Result]) -> Disposition:  # type: ignore
         """The aggregate disposition is the most severe disposition among its sub-check results."""
         if any(r.disposition == Disposition.REJECT for r in results):
             return Disposition.REJECT
@@ -235,12 +240,11 @@ class BaseAggregateCheck(BaseCheck):
         passed: bool,
         results: list[Result],
         message: str = "",
-        disposition: Disposition | None = None,
     ) -> Result:
         return Result(
             check_config=self.config,
             passed=passed,
-            disposition=disposition if disposition is not None else self._aggregate_disposition(results),
+            disposition=self._disposition(results),
             message=message,
             results=results,
         )
