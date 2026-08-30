@@ -2,6 +2,46 @@
 
 **DO NOT EDIT db/models.py.**
 
+## How to generate db/models.py from prod
+
+You should unload the latest schema from the production database.
+There is a shell script for this as development/dump-schema.sh
+
+Assuming you have access to the replica with the cloud sql proxy,
+
+    /usr/local/bin/cloud-sql-proxy --address 0.0.0.0 --port 2021 arxiv-production:us-central1:arxiv-production-rep9 > /dev/null 2>&1 &
+    
+Have a read only database password in `~/.arxiv/arxvi-db-read-only-password` so that
+the shell script to unload schema works.Then you run
+
+    ./dump-schema.sh
+
+This creates a SQL schema dump "arxiv_db_schema.sql". Compare this with `arxiv-base/arxiv/db/arxiv_db_schema.sql`.
+It is strongly recmmended to comment out `SET @@GLOBAL.GTID_PURGED=` line in it before checking in.
+It would look like:
+
+    -- SET @@GLOBAL.GTID_PURGED='2d19f914-b050-11e7-95e6-005056a34791:1-572482257';
+
+Once it's done, move the .sql to `arxiv-base/arxiv/db` if the schema is changed.
+If they are the same, you may not need to update the db/models.py.
+Run this in arxiv-base directory.
+
+
+    cd arxiv-base
+    python -v
+    # 3.11
+    python -m venv .venv
+    . .venv/bin/activate
+    pip install poetry
+    poetry install
+    python development/db_codegen.
+
+
+## Overiew
+
+See page 7 of presentation.
+https://docs.google.com/presentation/d/14uWeVSOTUUm186KIyhMi-TiXvDS-KzLza93LJbyv0gc/edit?slide=id.gc6f9e470d_0_24#slide=id.gc6f9e470d_0_24
+
 ## Ingredients
 
 * MySQL database access in order to get the database schema from
@@ -141,6 +181,65 @@ This is where the latest table def is replaced.
 ### Running db_codegen.py under debugger
 
 Generally, you don't need any special set-up other than running MySQL/arxiv database.
+
+
+## FAQ
+
+Q:
+After update, sqlite3 based test failed. And error looks like this.
+
+    self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x7f1708d218d0>, cursor = <sqlite3.Cursor object at 0x7f1708d3e640>
+    statement = '\nCREATE TABLE "arXiv_admin_log" (\n\tid INTEGER NOT NULL, \n\tlogtime VARCHAR(24), \n\tcreated DATETIME DEFAULT CURR...NULL, \n\tupdated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (id)\n)\n\n'
+    parameters = (), context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x7f1708ee8710>
+    
+        def do_execute(self, cursor, statement, parameters, context=None):
+    >       cursor.execute(statement, parameters)
+    E       sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) near "ON": syntax error
+    E       [SQL: 
+    E       CREATE TABLE "arXiv_admin_log" (
+    E               id INTEGER NOT NULL, 
+    E               logtime VARCHAR(24), 
+    E               created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+    E               paper_id VARCHAR(20), 
+    E               username VARCHAR(20), 
+    E               host VARCHAR(64), 
+    E               program VARCHAR(20), 
+    E               command VARCHAR(20), 
+    E               logtext TEXT, 
+    E               document_id INTEGER, 
+    E               submission_id INTEGER, 
+    E               notify INTEGER, 
+    E               old_created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+    E               updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, 
+    E               PRIMARY KEY (id)
+    E       )
+    E       
+    E       ]
+    E       (Background on this error at: https://sqlalche.me/e/20/e3q8)
+    
+    ../../.pyenv/versions/3.11.4/envs/base/lib/python3.11/site-packages/sqlalchemy/engine/default.py:942: OperationalError
+
+
+A: The error indicates (sqlite3.OperationalError) near "ON": syntax error so
+
+    E               updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, 
+
+Failed. Looking at the generated models.py, the offending column definition is
+
+        updated: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+
+which came from the prod db schema. The column definition is specific to MySQL and does not work with sqlite3.
+In other word, you need to override the RHS of updated. in `arxiv/db/arxiv-db-metadata-yaml`, add the RHS of updated. In this case,
+you want to have the default and on-update, set to the current timestamp.
+
+    arXiv_admin_log:
+      class_name: AdminLog
+      columns:
+        updated: "mapped_column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP'), server_onupdate=text('CURRENT_TIMESTAMP'))"
+    
+In short, the sqlacodegen is NOT capable of understanding how to generalize the MySQL construct of setting timestamp to the `updated` column.
+This works fine for MySQL but we never create db schema from Python model, this part is meaningless. It only matters to sqlite3 tests.
+(and therefore, with missing charset of table, sqlite3 tests do not detect charset inconsitent joins, etc.)
 
 
 ## Helpers
