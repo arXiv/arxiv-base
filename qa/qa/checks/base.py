@@ -91,8 +91,8 @@ class BaseGenericCheck(BaseCheck):
     """
     An extension of BaseCheck that can be instantiated to run on different fields with different on failure policies.
     Raises a MissingDataError if any of the required data are missing.
-    Raises an EmptyFieldError if the required field is empty.
     """
+    _short_circuits_on_failure: bool = False
 
     def __init__(
         self,
@@ -122,13 +122,6 @@ class BaseGenericCheck(BaseCheck):
             **super().config,
             "field": self.field,
         }
-
-    def _validate_data(self, data_registry: QaDataRegistry) -> None:
-        """Validate that the data and field are not missing or empty."""
-        super()._validate_data(data_registry)
-
-        if getattr(getattr(data_registry, self.data), self.field) in (None, ""):
-            raise EmptyFieldError(f"Field {self.field} in required data '{self.data}' is empty.")
 
     @abstractmethod
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -201,36 +194,19 @@ class BaseAggregateCheck(BaseCheck):
         }
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
-        """Run all sub-checks and return results."""
+        """
+        Run all sub-checks and return results.
+        Short circuits if a check marked to short circuit (e.g. EmptyFieldCheck) fails.
+        """
 
         results: list[Result] = []
 
         for check in self._checks:
-            try:
-                result = check.run(data_registry)
-                results.append(result)
-            except EmptyFieldError as e:
-                return self._result(
-                    passed=False,
-                    results=[
-                        Result(
-                            check_config={
-                                "name": "field_is_not_empty",
-                                "display_name": "Field Is Not Empty",
-                                "id": 0,
-                                "version": "1.0.0",
-                                "required_data": self.required_data,
-                                "on_failure_policy": OnFailurePolicy.REJECT,
-                                "failure_message": str(e),
-                                "field": getattr(self, "field", None),
-                            },
-                            passed=False,
-                            disposition=Disposition.REJECT,
-                            message=str(e),
-                        )
-                    ],
-                    message=self.failure_message,
-                )
+            result = check.run(data_registry)
+            results.append(result)
+
+            if check._short_circuits_on_failure and not result.passed:
+                break
 
         if self._passed(results):
             return self._result(passed=True, results=results)
@@ -279,7 +255,6 @@ class BaseMetadataAggregateCheck(BaseAggregateCheck):
 
     @staticmethod
     def cleanup(value: str) -> str:
-        """No-op cleanup. Subclasses may override to perform field-specific tidying."""
         return value
 
     @classmethod

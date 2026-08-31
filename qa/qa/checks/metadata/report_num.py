@@ -3,7 +3,7 @@
 import re
 
 from qa.checks.base import BaseMetadataAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
@@ -19,13 +19,8 @@ class ReportNumIsValid(BaseMetadataAggregateCheck):
 
     field = "report_num"
 
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        """Both None and empty string are valid and should pass without running sub-checks."""
-        if data_registry.metadata.report_num in (None, ""):  # type: ignore
-            return self._result(passed=True, results=[])
-        return super()._run(data_registry)
-
     _checks = (
+        generic.EmptyFieldCheck(on_failure_policy=OnFailurePolicy.IGNORE, data="metadata", field="report_num"),
         generic.ContainsALetterAndADigit(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="report_num"),
         generic.NotTooShort(

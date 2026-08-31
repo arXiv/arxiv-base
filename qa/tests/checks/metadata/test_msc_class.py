@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result, Disposition
 from qa.checks.metadata.msc_class import MscClassIsValid
 
 
@@ -18,13 +18,19 @@ class TestMscClassIsValid:
 
     def test_pass_none(self):
         result = MscClassIsValid.check(None)
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
     def test_pass_empty(self):
         result = MscClassIsValid.check("")
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
     def test_warn_too_long(self):
         result = MscClassIsValid.check("x" * 161)

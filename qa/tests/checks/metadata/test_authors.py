@@ -35,7 +35,6 @@ class TestAuthorsAreValid:
         assert len(result.results) == 1
         assert not result.results[0].passed
         assert result.results[0].disposition == Disposition.REJECT
-        assert result.message == "Authors are invalid."
 
     def test_warn_too_short(self):
         result = AuthorsAreValid.check("C C")
@@ -328,7 +327,6 @@ class TestAuthorsAreValid:
         assert len(result.results) == 1
         assert not result.results[0].passed
         assert result.results[0].disposition == Disposition.REJECT
-        assert result.message == "Authors are invalid."
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):

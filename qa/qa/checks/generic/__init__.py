@@ -62,6 +62,10 @@ from qa.checks.generic.content import (  # noqa
     IsEnglish,
 )
 
+from qa.checks.generic.presence import (  # noqa
+    EmptyFieldCheck,
+)
+
 from qa.checks.generic.author_name import (  # noqa
     AuthorNamesDoNotContainAffiliation,
     AuthorNamesDoNotContainBrackets,

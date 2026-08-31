@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result, Disposition
 from qa.checks.metadata.doi import DoiIsValid
 
 
@@ -18,13 +18,19 @@ class TestDoiIsValid:
 
     def test_pass_none(self):
         result = DoiIsValid.check(None)
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
     def test_pass_empty(self):
         result = DoiIsValid.check("")
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
     def test_fail_too_short(self):
         result = DoiIsValid.check("10.1/abc")

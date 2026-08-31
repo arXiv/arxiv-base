@@ -3,7 +3,7 @@
 import re
 
 from qa.checks.base import BaseMetadataAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
@@ -19,13 +19,8 @@ class DoiIsValid(BaseMetadataAggregateCheck):
 
     field = "doi"
 
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        """Both None and empty string are valid and should pass without running sub-checks."""
-        if data_registry.metadata.doi in (None, ""):  # type: ignore
-            return self._result(passed=True, results=[])
-        return super()._run(data_registry)
-
     _checks = (
+        generic.EmptyFieldCheck(on_failure_policy=OnFailurePolicy.IGNORE, data="metadata", field="doi"),
         generic.NotTooShort(
             min_chars=10,
             on_failure_policy=OnFailurePolicy.REJECT,

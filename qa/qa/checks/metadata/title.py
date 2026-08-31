@@ -20,6 +20,12 @@ class TitleIsValid(BaseMetadataAggregateCheck):
     field = "title"
 
     _checks = (
+        generic.EmptyFieldCheck(
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="title",
+            failure_message="Title is required and cannot be empty.",
+        ),
         generic.NotTooShort(
             min_chars=3,
             on_failure_policy=OnFailurePolicy.WARN,

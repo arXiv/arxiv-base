@@ -20,6 +20,12 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
     field = "abstract"
 
     _checks = (
+        generic.EmptyFieldCheck(
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="abstract",
+            failure_message="Abstract is required and cannot be empty.",
+        ),
         generic.IsEnglish(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
         generic.NotTooShort(

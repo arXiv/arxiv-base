@@ -20,6 +20,12 @@ class AuthorsAreValid(BaseMetadataAggregateCheck):
     field = "authors"
 
     _checks = (
+        generic.EmptyFieldCheck(
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="authors",
+            failure_message="Authors are required and cannot be empty.",
+        ),
         generic.DoesNotEndWithPunctuation(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainEtAl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainAnonymous(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
