@@ -25,6 +25,8 @@ from qa.checks.generic.encoding import (  # noqa
 from qa.checks.generic.structure import (  # noqa
     AllBracketsBalanced,
     DoesNotContainAnnotationSymbols,
+    DoesNotContainHtmlEscapes,
+    DoesNotContainUnacceptableHtmlTags,
     NoHtmlElements,
 )
 

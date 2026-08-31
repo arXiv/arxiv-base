@@ -26,13 +26,6 @@ class TitleIsValid(BaseMetadataAggregateCheck):
             field="title",
             failure_message="Title is required and cannot be empty.",
         ),
-        generic.NotTooShort(
-            min_chars=3,
-            on_failure_policy=OnFailurePolicy.WARN,
-            data="metadata",
-            field="title",
-            failure_message="Too short: must be at least 3 characters.",
-        ),
         generic.NotTooLong(
             max_chars=300,
             on_failure_policy=OnFailurePolicy.REJECT,
@@ -40,7 +33,18 @@ class TitleIsValid(BaseMetadataAggregateCheck):
             field="title",
             failure_message="Too long: must be 300 characters or fewer.",
         ),
+        generic.DoesNotContainHtmlEscapes(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        generic.DoesNotContainUnacceptableHtmlTags(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"
+        ),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        generic.NotTooShort(
+            min_chars=3,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="title",
+            failure_message="Too short: must be at least 3 characters.",
+        ),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NotAllCaps(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),

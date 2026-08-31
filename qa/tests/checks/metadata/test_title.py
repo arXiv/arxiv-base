@@ -59,9 +59,32 @@ class TestTitleIsValid:
         result = TitleIsValid.check("The is a title with 12345678 and 987654321 words not capitalized")
         assert result.passed
 
-    def test_pass_short_html_like_tags(self):
+    def test_fail_html_escape(self):
+        result = TitleIsValid.check("Fish &amp; chips")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_html_escapes").passed
+
+    def test_fail_unacceptable_html_tag(self):
+        result = TitleIsValid.check("A title with <p>paragraph</p>")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
+
+    def test_warn_allowed_html_tag(self):
+        """<em> is allowed by does_not_contain_unacceptable_html_tags, but is still in
+        NoHtmlElements' fixed list, so it's a WARN rather than a clean pass."""
+        result = TitleIsValid.check("Title with <em>emphasis</em>")
+        assert not result.passed
+        assert result.disposition == Disposition.WARN
+        assert not sub_result(result, "no_html_elements").passed
+        assert sub_result(result, "does_not_contain_unacceptable_html_tags").passed
+
+    def test_pass_short_html_like_tags_not_flagged_by_no_html_elements(self):
+        """Short tags like <x>/<i>/<b> aren't in NoHtmlElements' fixed list, but are still real
+        tags to a parser, so does_not_contain_unacceptable_html_tags still flags them."""
         result = TitleIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>")
-        assert result.passed
+        assert not result.passed
+        assert sub_result(result, "no_html_elements").passed
+        assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
 
     def test_pass_begins_with_title_without_cleanup(self):
         """A leading 'title:' prefix is only stripped via cleanup(); check() no longer rejects it directly."""

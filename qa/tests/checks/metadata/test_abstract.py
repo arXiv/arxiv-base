@@ -62,9 +62,28 @@ class TestAbstractIsValid:
         result = AbstractIsValid.check("This \\ is not a line break" + self._filler)
         assert result.passed
 
-    def test_pass_short_html_like_tags(self):
+    def test_fail_short_html_like_tags(self):
+        """Short tags like <x>/<i>/<b> aren't in NoHtmlElements' fixed list, but are still real
+        tags to a parser, so does_not_contain_unacceptable_html_tags still flags them."""
         result = AbstractIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>" + self._filler)
-        assert result.passed
+        assert not result.passed
+        assert sub_result(result, "no_html_elements").passed
+        assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
+
+    def test_fail_unacceptable_html_tag(self):
+        result = AbstractIsValid.check("An abstract with <script>alert(1)</script>" + self._filler)
+        assert not result.passed
+        assert result.disposition == Disposition.REJECT
+        assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
+
+    def test_warn_allowed_html_tag(self):
+        """<sup> is allowed by does_not_contain_unacceptable_html_tags, but is still in
+        NoHtmlElements' fixed list, so it's a WARN rather than a clean pass."""
+        result = AbstractIsValid.check("About $10^{-2}$ or Q<sup>2</sup>" + self._filler)
+        assert not result.passed
+        assert result.disposition == Disposition.WARN
+        assert not sub_result(result, "no_html_elements").passed
+        assert sub_result(result, "does_not_contain_unacceptable_html_tags").passed
 
     def test_pass_math_lt(self):
         result = AbstractIsValid.check("We also should not flag $p_1<p_2$" + self._filler)

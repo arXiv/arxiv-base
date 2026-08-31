@@ -28,6 +28,9 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
         ),
         generic.IsEnglish(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"),
+        generic.DoesNotContainUnacceptableHtmlTags(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="abstract"
+        ),
         generic.NotTooShort(
             min_chars=150,
             on_failure_policy=OnFailurePolicy.WARN,
