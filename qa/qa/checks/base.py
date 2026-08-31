@@ -92,6 +92,7 @@ class BaseGenericCheck(BaseCheck):
     An extension of BaseCheck that can be instantiated to run on different fields with different on failure policies.
     Raises a MissingDataError if any of the required data are missing.
     """
+
     _short_circuits_on_failure: bool = False
 
     def __init__(
