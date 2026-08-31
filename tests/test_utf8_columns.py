@@ -19,7 +19,7 @@ import pytest
 from sqlalchemy import Engine, create_engine, NullPool
 from sqlalchemy.orm import Session
 
-from arxiv.db.models import TapirEmailTemplate, AdminLog
+from arxiv.db.models import TapirEmailTemplate, AdminLog, Document, Metadata, Submission
 
 
 # Test database connection parameters
@@ -212,6 +212,93 @@ class TestTapirEmailTemplateUtf8:
         assert fetched.data == boundary_data
 
         # Clean up
+        db_session.delete(fetched)
+        db_session.commit()
+
+
+class TestMetadataUtf8:
+    """arXiv_metadata is mysql_charset=latin1 but actually stores UTF-8 bytes
+    (legacy quirk); title/authors/comments/report_num/journal_ref/abstract
+    must round-trip correctly via Utf8Text."""
+
+    def test_insert_and_read_utf8_abstract(self, db_session: Session) -> None:
+        name = "Bojańczyk"
+        abstract = f"forest algebras (introduced by {name} and Walukiewicz)"
+
+        document = Document(
+            paper_id="2302.99001",
+            title="Test document for utf8 metadata",
+            submitter_email="test_user@example.com",
+            dated=0,
+        )
+        db_session.add(document)
+        db_session.commit()
+        db_session.refresh(document)
+
+        entry = Metadata(
+            document_id=document.document_id,
+            paper_id=document.paper_id,
+            submitter_name="Test User",
+            submitter_email="test_user@example.com",
+            title=f"A paper about {name}",
+            authors=f"A. {name}",
+            comments="10 pages",
+            report_num="TEST-1",
+            journal_ref=f"Journal of {name}",
+            abstract=abstract,
+            version=1,
+            is_withdrawn=0,
+        )
+        db_session.add(entry)
+        db_session.commit()
+        db_session.refresh(entry)
+        metadata_id = entry.metadata_id
+
+        db_session.expire_all()
+        fetched = db_session.get(Metadata, metadata_id)
+
+        assert fetched is not None
+        assert fetched.abstract == abstract
+        assert fetched.title == f"A paper about {name}"
+        assert fetched.authors == f"A. {name}"
+        assert fetched.journal_ref == f"Journal of {name}"
+
+        db_session.delete(fetched)
+        db_session.delete(document)
+        db_session.commit()
+
+
+class TestSubmissionUtf8:
+    """arXiv_submissions feeds arxiv-publish-processor's plain ORM copy into
+    Metadata; its title/authors/comments/report_num/journal_ref/abstract
+    must use the same Utf8Text handling so that copy stays byte-correct."""
+
+    def test_insert_and_read_utf8_abstract(self, db_session: Session) -> None:
+        name = "Bojańczyk"
+        abstract = f"forest algebras (introduced by {name} and Walukiewicz)"
+
+        submission = Submission(
+            title=f"A paper about {name}",
+            authors=f"A. {name}",
+            comments="10 pages",
+            report_num="TEST-1",
+            journal_ref=f"Journal of {name}",
+            abstract=abstract,
+        )
+        db_session.add(submission)
+        db_session.commit()
+        db_session.refresh(submission)
+        submission_id = submission.submission_id
+
+        db_session.expire_all()
+        fetched = db_session.get(Submission, submission_id)
+
+        assert fetched is not None
+        assert fetched.abstract == abstract
+        assert fetched.title == f"A paper about {name}"
+        assert fetched.authors == f"A. {name}"
+        assert fetched.journal_ref == f"Journal of {name}"
+
         db_session.delete(fetched)
         db_session.commit()
 
