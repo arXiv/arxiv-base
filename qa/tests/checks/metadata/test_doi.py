@@ -16,7 +16,7 @@ class TestDoiIsValid:
     def test_pass_normal(self):
         assert DoiIsValid.check("10.1103/PhysRevLett.132.011001").passed
 
-    def test_pass_none(self):
+    def test_none_is_ignored(self):
         result = DoiIsValid.check(None)
         assert not result.passed
         assert result.disposition == Disposition.OK
@@ -24,7 +24,7 @@ class TestDoiIsValid:
         assert len(result.results) == 1
         assert result.results[0].check_config["name"] == "field_is_not_empty"
 
-    def test_pass_empty(self):
+    def test_empty_is_ignored(self):
         result = DoiIsValid.check("")
         assert not result.passed
         assert result.disposition == Disposition.OK

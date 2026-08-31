@@ -16,7 +16,7 @@ class TestCommentsAreValid:
     def test_pass_normal(self):
         assert CommentsAreValid.check("12 pages, 3 figures").passed
 
-    def test_pass_none(self):
+    def test_none_is_ignored(self):
         result = CommentsAreValid.check(None)
         assert not result.passed
         assert result.disposition == Disposition.OK
@@ -24,7 +24,7 @@ class TestCommentsAreValid:
         assert len(result.results) == 1
         assert result.results[0].check_config["name"] == "field_is_not_empty"
 
-    def test_pass_empty(self):
+    def test_empty_is_ignored(self):
         result = CommentsAreValid.check("")
         assert not result.passed
         assert result.disposition == Disposition.OK
