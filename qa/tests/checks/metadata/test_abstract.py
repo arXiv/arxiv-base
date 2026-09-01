@@ -204,3 +204,8 @@ class TestCleanup:
 
     def test_joins_wrap_around_single_char_math_symbol(self):
         assert AbstractIsValid.cleanup("x\n=\ny") == "x = y"
+
+    def test_joins_long_run_of_single_char_wraps(self):
+        text = "One sentence with some math" + "\nu" * 6 + "\nsentence ends."
+        expected = "One sentence with some math" + " u" * 6 + " sentence ends."
+        assert AbstractIsValid.cleanup(text) == expected

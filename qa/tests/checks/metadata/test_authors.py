@@ -348,6 +348,9 @@ class TestCleanup:
     def test_lowercases_and_after_word(self):
         assert AuthorsAreValid.cleanup("Fred Smith AND Joe Bloggs") == "Fred Smith and Joe Bloggs"
 
+    def test_does_not_lowercase_and_inside_surname(self):
+        assert AuthorsAreValid.cleanup("Pablo And'ujar Guerrero") == "Pablo And'ujar Guerrero"
+
     def test_strips_leading_and_trailing_whitespace(self):
         assert AuthorsAreValid.cleanup("  Fred Smith  ") == "Fred Smith"
 

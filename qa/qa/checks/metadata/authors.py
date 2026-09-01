@@ -104,7 +104,9 @@ class AuthorsAreValid(BaseMetadataAggregateCheck):
         value = re.sub(r",(?=[A-Za-z])", ", ", value)
         # Strip a leading "author:" or "authors:" prefix.
         value = re.sub(r"(?i)^authors?:\s*", "", value)
-        # Change capitalized or uppercase `And` to `and`.
-        value = re.sub(r"\bA(?i:ND)\b", "and", value)
+        # Change capitalized or uppercase `And` to `and`, but only when it
+        # stands alone as a word (surrounded by spaces), not inside a name
+        # like "And'ujar".
+        value = re.sub(r"(?<= )A(?i:ND)(?= )", "and", value)
 
         return value
