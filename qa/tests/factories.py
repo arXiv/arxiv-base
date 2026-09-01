@@ -1,4 +1,4 @@
-from qa.checks.models import SubmitEventInfo
+from qa.checks.models import SubmitEventInfo, SubmitterProfile
 
 
 def make_test_submit_event_info(
@@ -13,3 +13,7 @@ def make_test_submit_event_info(
         submitter_name=submitter_name,
         source_format=source_format,
     )
+
+
+def make_test_submitter_profile(is_suspect=False):
+    return SubmitterProfile(is_suspect=is_suspect)

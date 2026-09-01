@@ -13,7 +13,7 @@ from qa.checks.metadata.title import TitleIsValid  # noqa
 
 from qa.checks.submission.files import DoesNotExceedTheFileSizeLimit, FileTypeDoesNotRequireReview  # noqa
 from qa.checks.submission.type import IsNotAWithdrawal  # noqa
-from qa.checks.submission.user import AuthorsContainsSubmitterName  # noqa
+from qa.checks.submission.user import AuthorsContainsSubmitterName, SubmitterIsNotFlagged  # noqa
 
 from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
 from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
@@ -35,6 +35,7 @@ submit_event_checks: list[BaseCheck] = metadata_checks + [
     DoesNotExceedTheFileSizeLimit(),
     FileTypeDoesNotRequireReview(),
     IsNotAWithdrawal(),
+    SubmitterIsNotFlagged(),
 ]
 
 fulltext_checks: list[BaseCheck] = [

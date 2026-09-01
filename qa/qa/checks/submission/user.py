@@ -6,8 +6,27 @@ from arxiv.authors import parse_author_affil
 from qa.checks.base import BaseCheck, EmptyFieldError
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 
-# TODO add flagged user check
 # TODO add proxy of proxy check
+
+
+class SubmitterIsNotFlagged(BaseCheck):
+    name = "submitter_is_not_flagged"
+    display_name = "Submitter Is Not Flagged"
+    id = 40
+    version = "1.0.0"
+    description = "The submitter's account has not been flagged."
+    on_failure_policy = OnFailurePolicy.WARN
+    failure_message = "Submitter's account has been flagged."
+
+    required_data = {"submitter_profile"}
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        assert data_registry.submitter_profile is not None
+
+        if data_registry.submitter_profile.is_suspect:
+            return self._result(passed=False, message=self.failure_message)
+        else:
+            return self._result(passed=True)
 
 
 class AuthorsContainsSubmitterName(BaseCheck):
