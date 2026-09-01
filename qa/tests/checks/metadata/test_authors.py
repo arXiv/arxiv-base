@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import Disposition, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.authors import AuthorsAreValid
 
 
@@ -31,12 +31,14 @@ class TestAuthorsAreValid:
     def test_fail_empty_short_circuits(self):
         result = AuthorsAreValid.check("")
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Authors are invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
 
     def test_warn_too_short(self):
         result = AuthorsAreValid.check("C C")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_fail_linebreak(self):
@@ -44,10 +46,9 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_linebreak").passed
 
-    def test_fail_raw_newline(self):
-        result = AuthorsAreValid.check("Fred Smith,\nJoe Bloggs")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_raw_newline").passed
+    def test_pass_raw_newline_without_cleanup(self):
+        """A raw newline is only removed via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Fred Smith,\nJoe Bloggs").passed
 
     def test_pass_single_backslash(self):
         result = AuthorsAreValid.check("Fred Smith, \\ Joe Bloggs")
@@ -55,12 +56,12 @@ class TestAuthorsAreValid:
 
     def test_warn_bad_characters(self):
         result = AuthorsAreValid.check("Fred Smith*, Joe Bloggs#, Bob Briggs^, Jill Camana@, and Rebecca MacInnon")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_annotation_symbols").passed
 
     def test_warn_asterisk(self):
         result = AuthorsAreValid.check("Hsi-Sheng Goan*, Chung-Chin Jian, Po-Wen Chen")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_annotation_symbols").passed
 
     def test_pass_no_space_after_comma(self):
@@ -81,25 +82,23 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_tex_dagger").passed
 
-    def test_fail_begins_with_author(self):
+    def test_pass_begins_with_author_without_cleanup(self):
+        """A leading 'author:' prefix is only stripped via cleanup(); check() does not reject it outright."""
         result = AuthorsAreValid.check("Author: Fred Smith")
-        assert not result.passed
-        assert not sub_result(result, "does_not_begin_with_author").passed
+        assert result.disposition != Disposition.REJECT
 
-    def test_fail_begins_with_authors(self):
+    def test_pass_begins_with_authors_without_cleanup(self):
+        """A leading 'authors:' prefix is only stripped via cleanup(); check() does not reject it outright."""
         result = AuthorsAreValid.check("Authors: J. Smith, Joe Bob, and Mr. Briggs")
-        assert not result.passed
-        assert not sub_result(result, "does_not_begin_with_author").passed
+        assert result.disposition != Disposition.REJECT
 
-    def test_fail_tilde_as_hard_space(self):
-        result = AuthorsAreValid.check("Fred Smith~Jones")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_tilde_as_hard_space").passed
+    def test_pass_tilde_as_hard_space_without_cleanup(self):
+        """A tilde hard-space is only normalized via cleanup(); check() does not reject it directly."""
+        assert AuthorsAreValid.check("Fred Smith~Jones").passed
 
-    def test_fail_tilde_after_period(self):
-        result = AuthorsAreValid.check("Paul R.~Archer")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_tilde_as_hard_space").passed
+    def test_pass_tilde_after_period_without_cleanup(self):
+        """A tilde hard-space is only normalized via cleanup(); check() does not reject it directly."""
+        assert AuthorsAreValid.check("Paul R.~Archer").passed
 
     def test_pass_escaped_tilde_accent(self):
         assert AuthorsAreValid.check("Jean Nu\\~nos").passed
@@ -153,7 +152,7 @@ class TestAuthorsAreValid:
 
     def test_warn_lone_surname(self):
         result = AuthorsAreValid.check("Bloss, Adrienne and Cornish, Audie")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_lone_surname").passed
 
     def test_pass_collaboration(self):
@@ -161,32 +160,31 @@ class TestAuthorsAreValid:
 
     def test_warn_llm_standalone(self):
         result = AuthorsAreValid.check("Llama")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_in_author_list(self):
         result = AuthorsAreValid.check("Adrienne Bloss, Audie Cornish, and ChatGPT")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_chatgpt(self):
         result = AuthorsAreValid.check("Jonathan Young and ChatGPT")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_gpt4(self):
         result = AuthorsAreValid.check("GPT-4")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_warn_llm_gpt5(self):
         result = AuthorsAreValid.check("GPT-5")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_pass_llm_as_firstname(self):
-        # "Claude Sonnet 4" — Claude is a common name with a firstname, no LLM pattern fires
-        result = AuthorsAreValid.check("Claude Sonnet 4")
+        result = AuthorsAreValid.check("Claude Sonnet")
         assert result.passed
         assert sub_result(result, "authors_do_not_contain_llm_author").passed
 
@@ -197,21 +195,22 @@ class TestAuthorsAreValid:
 
     def test_warn_claude_standalone(self):
         result = AuthorsAreValid.check("Claude")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
         assert sub_result(result, "authors_do_not_contain_lone_surname").passed
 
     def test_warn_llm_gemini_with_version(self):
         result = AuthorsAreValid.check("Gemini 2.5 Pro")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_pass_llama_as_firstname(self):
         assert AuthorsAreValid.check("Joe Llama").passed
 
     def test_pass_llamallama_is_lone_surname_not_llm(self):
+        """'Llamallama' is a real lone-surname warning, not an LLM-name match."""
         result = AuthorsAreValid.check("Llamallama")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "authors_do_not_contain_lone_surname").passed
         assert sub_result(result, "authors_do_not_contain_llm_author").passed
 
@@ -227,7 +226,7 @@ class TestAuthorsAreValid:
 
     def test_warn_bracket_in_name(self):
         result = AuthorsAreValid.check("Sylvie Roux [MIT]")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_brackets").passed
 
     def test_fail_number_in_html_sup(self):
@@ -238,21 +237,20 @@ class TestAuthorsAreValid:
 
     def test_warn_number_jennifer_8_lee(self):
         result = AuthorsAreValid.check("Jennifer 8 Lee")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_numbers").passed
 
     def test_warn_affiliation_physics(self):
         result = AuthorsAreValid.check("Someone Smith Physics Dept")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_affiliation").passed
 
     def test_warn_affiliation_university(self):
         result = AuthorsAreValid.check("Fred Smith, Joe Bloggs, Univ of Hard Knocks")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "author_names_do_not_contain_affiliation").passed
 
     def test_pass_astrophys_not_physics(self):
-        # "astrophys" contains "phys" but not the word-boundary \bPhysics\b
         assert AuthorsAreValid.check(
             "C. Sivaram (1) and Kenath Arun (2) ((1) Indian Institute of Astrophysics, Bangalore, (2) Christ Junior College, Bangalore)"
         ).passed
@@ -279,10 +277,9 @@ class TestAuthorsAreValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_et_al").passed
 
-    def test_fail_space_before_comma(self):
-        result = AuthorsAreValid.check("Fred Smith , Joe Bloggs")
-        assert not result.passed
-        assert not sub_result(result, "does_not_contain_space_before_comma").passed
+    def test_pass_space_before_comma_without_cleanup(self):
+        """Space before a comma is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert AuthorsAreValid.check("Fred Smith , Joe Bloggs").passed
 
     def test_fail_prefix_dr(self):
         result = AuthorsAreValid.check("Dr. John Smith")
@@ -312,19 +309,20 @@ class TestAuthorsAreValid:
 
     def test_warn_all_caps(self):
         result = AuthorsAreValid.check("FRED SMITH AND JOE BLOGGS")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_all_caps").passed
 
-    def test_warn_unspaced_comma(self):
-        result = AuthorsAreValid.check("Jamie Magyar,Jonathan Young")
-        assert result.passed
-        assert not sub_result(result, "does_not_contain_unspaced_comma").passed
+    def test_pass_unspaced_comma_without_cleanup(self):
+        """An unspaced comma is only normalized via cleanup(); check() does not warn on it directly."""
+        assert AuthorsAreValid.check("Fred Smith,Joe Bloggs").passed
 
     def test_none_field_short_circuits(self):
         result = AuthorsAreValid().run(QaDataRegistry(metadata=Metadata(authors=None)))
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Authors are invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
@@ -335,7 +333,50 @@ class TestAuthorsAreValid:
         assert result.check_config["name"] == "authors_are_valid"
         assert result.check_config["id"] == 200
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
-    def test_fail_on_failure_policy_reject(self):
-        assert AuthorsAreValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+    def test_fail_gives_reject_disposition(self):
+        assert AuthorsAreValid.check("").disposition == Disposition.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_and_double_commas(self):
+        assert AuthorsAreValid.cleanup("Fred  Smith,,  Joe Bloggs") == "Fred Smith, Joe Bloggs"
+
+    def test_adds_space_before_opening_parenthesis(self):
+        assert AuthorsAreValid.cleanup("Fred Smith(Cornell)") == "Fred Smith (Cornell)"
+
+    def test_lowercases_and_after_word(self):
+        assert AuthorsAreValid.cleanup("Fred Smith AND Joe Bloggs") == "Fred Smith and Joe Bloggs"
+
+    def test_does_not_lowercase_and_inside_surname(self):
+        assert AuthorsAreValid.cleanup("Pablo And'ujar Guerrero") == "Pablo And'ujar Guerrero"
+
+    def test_strips_leading_and_trailing_whitespace(self):
+        assert AuthorsAreValid.cleanup("  Fred Smith  ") == "Fred Smith"
+
+    def test_removes_control_chars(self):
+        assert AuthorsAreValid.cleanup("Fred Smith\x00Joe Bloggs") == "Fred Smith Joe Bloggs"
+
+    def test_removes_space_before_comma(self):
+        assert AuthorsAreValid.cleanup("Fred Smith , Joe Bloggs") == "Fred Smith, Joe Bloggs"
+
+    def test_adds_space_after_unspaced_comma(self):
+        assert AuthorsAreValid.cleanup("Jamie Magyar,Jonathan Young") == "Jamie Magyar, Jonathan Young"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert AuthorsAreValid.cleanup("Fred Smith ( Cornell )") == "Fred Smith (Cornell)"
+
+    def test_strips_leading_author_colon_prefix(self):
+        assert AuthorsAreValid.cleanup("Author: Fred Smith") == "Fred Smith"
+
+    def test_strips_leading_authors_colon_prefix(self):
+        assert AuthorsAreValid.cleanup("Authors: Fred Smith, Joe Bloggs") == "Fred Smith, Joe Bloggs"
+
+    def test_does_not_strip_author_prefix_without_colon(self):
+        assert AuthorsAreValid.cleanup("Author Fred Smith") == "Author Fred Smith"
+
+    def test_converts_tilde_hard_space_to_space(self):
+        assert AuthorsAreValid.cleanup("Paul R.~Archer") == "Paul R. Archer"
+
+    def test_preserves_escaped_tilde(self):
+        assert AuthorsAreValid.cleanup("Jean Nu\\~nos") == "Jean Nu\\~nos"

@@ -56,11 +56,11 @@ class Result(BaseModel):
     offsets: list[Offset] | None = None
     results: list["Result"] | None = None
 
-    def _messages(self, *dispositions: Disposition) -> str:
-        """Return a concatenated string containing all additional messages from results which have the given dispositions."""
+    def _messages(self, disposition: Disposition) -> str:
+        """Return a concatenated string containing all additional messages from results which have the given disposition."""
         if self.results is None:
             return ""
-        return "\n".join(r.message for r in self.results if r.disposition in dispositions)
+        return "\n".join(r.message for r in self.results if r.disposition == disposition)
 
 
 class Flag(BaseModel):

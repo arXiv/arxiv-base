@@ -90,6 +90,30 @@ class TestAuthorsContainsSubmitterName:
             .passed
         )
 
+    def test_pass_lhcb_collaboration(self):
+        assert (
+            AuthorsContainsSubmitterName()
+            .run(
+                QaDataRegistry(
+                    metadata=Metadata(authors="Tom Jones for the LHCb collaboration"),
+                    submit_event_info=make_test_submit_event_info(submitter_name="Fred Smith"),
+                )
+            )
+            .passed
+        )
+
+    def test_pass_belle_collaboration(self):
+        assert (
+            AuthorsContainsSubmitterName()
+            .run(
+                QaDataRegistry(
+                    metadata=Metadata(authors="Tom Jones for the Belle Collaboration"),
+                    submit_event_info=make_test_submit_event_info(submitter_name="Fred Smith"),
+                )
+            )
+            .passed
+        )
+
     def test_fail_unknown_collaboration(self):
         assert (
             not AuthorsContainsSubmitterName()

@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result, Disposition
 from qa.checks.metadata.journal_ref import JournalRefIsValid
 
 
@@ -16,24 +16,30 @@ class TestJournalRefIsValid:
     def test_pass_normal(self):
         assert JournalRefIsValid.check("Phys. Rev. Lett. 132, 011001 (2024)").passed
 
-    def test_pass_none(self):
+    def test_none_is_ignored(self):
         result = JournalRefIsValid.check(None)
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
-    def test_pass_empty(self):
+    def test_empty_is_ignored(self):
         result = JournalRefIsValid.check("")
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
     def test_warn_too_short(self):
         result = JournalRefIsValid.check("2024")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
 
     def test_warn_too_long(self):
         result = JournalRefIsValid.check("x" * 1501 + " 2024")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_fail_no_valid_year(self):
@@ -100,4 +106,13 @@ class TestJournalRefIsValid:
         assert result.check_config["name"] == "journal_ref_is_valid"
         assert result.check_config["id"] == 600
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_strips_outer_whitespace(self):
+        result = JournalRefIsValid.cleanup("  Phys. Rev. Lett. 132, 011001 (2024)  ")
+        assert result == "Phys. Rev. Lett. 132, 011001 (2024)"
+
+    def test_does_not_collapse_internal_whitespace(self):
+        result = JournalRefIsValid.cleanup("Phys. Rev.  Lett. 132")
+        assert result == "Phys. Rev.  Lett. 132"

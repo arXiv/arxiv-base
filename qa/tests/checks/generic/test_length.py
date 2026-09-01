@@ -2,7 +2,7 @@
 
 import pytest
 
-from qa.checks.base import EmptyFieldError, MissingDataError
+from qa.checks.base import MissingDataError
 from qa.checks.models import QaDataRegistry, Metadata, OnFailurePolicy
 from qa.checks.generic.length import NotTooLong, NotTooShort
 
@@ -21,14 +21,6 @@ class TestBaseGenericCheckValidation:
     def test_missing_data_raises(self):
         with pytest.raises(MissingDataError):
             self.check.run(QaDataRegistry())
-
-    def test_none_field_raises(self):
-        with pytest.raises(EmptyFieldError):
-            self.check.run(inputs(None))
-
-    def test_empty_field_raises(self):
-        with pytest.raises(EmptyFieldError):
-            self.check.run(inputs(""))
 
 
 class TestNotTooShort:

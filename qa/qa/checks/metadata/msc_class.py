@@ -1,11 +1,13 @@
 """MSC class metadata checks."""
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+import re
+
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
-class MscClassIsValid(BaseAggregateCheck):
+class MscClassIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata msc_class field."""
 
     name = "msc_class_is_valid"
@@ -13,32 +15,19 @@ class MscClassIsValid(BaseAggregateCheck):
     id = 800
     version = "1.0.0"
     description = "The metadata msc_class field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "MSC class is invalid."
 
-    required_data = {"metadata"}
     field = "msc_class"
 
-    @classmethod
-    def check(cls, msc_class: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(msc_class=msc_class)))
-
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        """Both None and empty string are valid and should pass without running sub-checks."""
-        if data_registry.metadata.msc_class in (None, ""):  # type: ignore
-            return self._result(passed=True, results=[])
-        return super()._run(data_registry)
-
     _checks = (
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
-        generic.NoUnnecessarySpaceInParens(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
-        ),
-        generic.DoesNotContainControlChars(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"
-        ),
+        generic.EmptyFieldCheck(on_failure_policy=OnFailurePolicy.IGNORE, data="metadata", field="msc_class"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
-        generic.DoesNotContainSemicolon(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="msc_class"),
+        generic.DoesNotContainSemicolon(
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="msc_class",
+            failure_message="Separate classification keys with commas.",
+        ),
         generic.NotTooLong(
             max_chars=160,
             on_failure_policy=OnFailurePolicy.WARN,
@@ -49,3 +38,28 @@ class MscClassIsValid(BaseAggregateCheck):
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Normalize msc_class."""
+        # Strip leading and trailing whitespace.
+        value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
+        value = re.sub(r"\s+", " ", value)
+        # Strip trailing periods.
+        value = re.sub(r"\s*\.[\s.]*$", "", value)
+        # Drop a leading "MSC classification" style prefix.
+        value = re.sub(
+            r"^MSC([\s:\-]{0,4}(classification|class|number))?"
+            r"([\s:\-]{0,4}\(?2000\)?)?[\s:\-]*",
+            "",
+            value,
+            flags=re.I,
+        )
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
+
+        return value

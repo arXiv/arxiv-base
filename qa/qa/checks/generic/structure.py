@@ -1,5 +1,7 @@
 """Generic structural integrity checks (brackets, HTML)."""
 
+import bleach
+
 from qa.checks.models import Result, Offset, QaDataRegistry
 from qa.checks.base import BaseGenericCheck, BaseGenericPatternCheck
 
@@ -20,6 +22,12 @@ class NoHtmlElements(BaseGenericPatternCheck):
         "</div>",
         "<br[^a-z]",
         "</br>",
+        "<hr[^a-z]",
+        "</hr>",
+        "<em[^a-z]",
+        "</em>",
+        "<strong[^a-z]",
+        "</strong>",
         "</a>",
         "<img[^a-z]",
         "</img>",
@@ -32,6 +40,38 @@ class NoHtmlElements(BaseGenericPatternCheck):
     ]
 
     _pattern = "|".join(HTML_ELEMENTS)
+
+
+class DoesNotContainHtmlEscapes(BaseGenericPatternCheck):
+    name = "does_not_contain_html_escapes"
+    display_name = "Does Not Contain HTML Escapes"
+    id = 10073
+    version = "1.0.0"
+    description = "The value does not contain HTML escapes."
+    failure_message = "Contains HTML escapes."
+
+    _pattern = r"\&(?:[a-z]{3,4}|#x?[0-9a-f]{1,4})\;"
+
+
+class DoesNotContainUnacceptableHtmlTags(BaseGenericCheck):
+    name = "does_not_contain_unacceptable_html_tags"
+    display_name = "Does Not Contain Unacceptable HTML Tags"
+    id = 10074
+    version = "1.0.0"
+    description = "The value does not contain HTML tags outside of an allowed set."
+    failure_message = "Contains unacceptable HTML tags."
+
+    ALLOWED_HTML = ["br", "hr", "em", "strong", "sup", "sub", "h"]
+
+    def _run(self, data_registry: QaDataRegistry) -> Result:
+        v = getattr(getattr(data_registry, self.data), self.field)
+
+        cleaned = bleach.clean(v, tags=self.ALLOWED_HTML, strip=True)
+
+        if len(v) > len(cleaned):
+            return self._result(passed=False, message=self.failure_message)
+        else:
+            return self._result(passed=True)
 
 
 class AllBracketsBalanced(BaseGenericCheck):
@@ -71,17 +111,6 @@ class AllBracketsBalanced(BaseGenericCheck):
                 message=self.failure_message,
                 offsets=[Offset(start=error_index, end=error_index + 1)],
             )
-
-
-class DoesNotContainRawNewline(BaseGenericPatternCheck):
-    name = "does_not_contain_raw_newline"
-    display_name = "Does Not Contain Raw Newline"
-    id = 10057
-    version = "1.0.0"
-    description = "The value does not contain a raw newline or carriage return character."
-    failure_message = "Contains a line break."
-
-    _pattern = r"[\r\n]"
 
 
 class DoesNotContainAnnotationSymbols(BaseGenericPatternCheck):

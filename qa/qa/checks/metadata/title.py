@@ -1,11 +1,13 @@
 """Title metadata checks."""
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+import re
+
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
-class TitleIsValid(BaseAggregateCheck):
+class TitleIsValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata title field."""
 
     name = "title_is_valid"
@@ -13,23 +15,16 @@ class TitleIsValid(BaseAggregateCheck):
     id = 100
     version = "1.0.0"
     description = "The metadata title field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
-    failure_message = "Title is invalid or empty."
+    failure_message = "Title is invalid."
 
-    required_data = {"metadata"}
     field = "title"
 
-    @classmethod
-    def check(cls, title: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(title=title)))
-
     _checks = (
-        generic.NotTooShort(
-            min_chars=3,
-            on_failure_policy=OnFailurePolicy.WARN,
+        generic.EmptyFieldCheck(
+            on_failure_policy=OnFailurePolicy.REJECT,
             data="metadata",
             field="title",
-            failure_message="Too short: must be at least 3 characters.",
+            failure_message="Title is required and cannot be empty.",
         ),
         generic.NotTooLong(
             max_chars=300,
@@ -38,18 +33,43 @@ class TitleIsValid(BaseAggregateCheck):
             field="title",
             failure_message="Too long: must be 300 characters or fewer.",
         ),
-        generic.DoesNotBeginWithTitle(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        generic.DoesNotContainHtmlEscapes(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        generic.DoesNotContainUnacceptableHtmlTags(
+            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"
+        ),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
-        generic.DoesNotContainRawNewline(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="title"),
+        generic.NotTooShort(
+            min_chars=3,
+            on_failure_policy=OnFailurePolicy.WARN,
+            data="metadata",
+            field="title",
+            failure_message="Too short: must be at least 3 characters.",
+        ),
         generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NotAllCaps(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotStartWithLowercase(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotContainUnnecessaryEscape(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoHtmlElements(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="title"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Normalize title."""
+        # Strip leading and trailing whitespace.
+        value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
+        value = re.sub(r"\s+", " ", value)
+        # Strip a leading "title:" prefix.
+        value = re.sub(r"(?i)^title:\s*", "", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
+
+        return value

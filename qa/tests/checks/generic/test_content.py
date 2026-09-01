@@ -2,7 +2,7 @@
 
 import pytest
 
-from qa.checks.base import EmptyFieldError, MissingDataError
+from qa.checks.base import MissingDataError
 from qa.checks.models import QaDataRegistry, Metadata, OnFailurePolicy
 from qa.checks.generic.content import IsEnglish
 
@@ -21,14 +21,6 @@ class TestIsEnglish:
     def test_missing_data_raises(self):
         with pytest.raises(MissingDataError):
             self.check.run(QaDataRegistry())
-
-    def test_none_field_raises(self):
-        with pytest.raises(EmptyFieldError):
-            self.check.run(inputs(None))
-
-    def test_empty_field_raises(self):
-        with pytest.raises(EmptyFieldError):
-            self.check.run(inputs(""))
 
     def test_too_short_passes(self):
         assert self.check.run(inputs("1234")).passed

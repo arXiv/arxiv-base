@@ -4,14 +4,18 @@ from abc import ABC, abstractmethod
 import re
 
 
-from qa.checks.models import Result, Offset, OnFailurePolicy, Disposition, QaDataRegistry
+from qa.checks.models import Result, Offset, OnFailurePolicy, Disposition, QaDataRegistry, Metadata
 
 
 class MissingDataError(Exception):
+    """A required data object in the QaDataRegistry (e.g. Metadata) is None."""
+
     pass
 
 
 class EmptyFieldError(Exception):
+    """A required field (e.g. Metadata.title) is None or an empty string."""
+
     pass
 
 
@@ -86,8 +90,10 @@ class BaseCheck(ABC):
 class BaseGenericCheck(BaseCheck):
     """
     An extension of BaseCheck that can be instantiated to run on different fields with different on failure policies.
-    Raises a MissingDataError if either the required data is missing or the field is empty.
+    Raises a MissingDataError if any of the required data are missing.
     """
+
+    _short_circuits_on_failure: bool = False
 
     def __init__(
         self,
@@ -117,13 +123,6 @@ class BaseGenericCheck(BaseCheck):
             **super().config,
             "field": self.field,
         }
-
-    def _validate_data(self, data_registry: QaDataRegistry) -> None:
-        """Validate that the data and field are not missing or empty."""
-        super()._validate_data(data_registry)
-
-        if getattr(getattr(data_registry, self.data), self.field) in (None, ""):
-            raise EmptyFieldError(f"Field {self.field} in required data '{self.data}' is empty.")
 
     @abstractmethod
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -173,20 +172,20 @@ class BaseGenericPatternCheck(BaseGenericCheck):
 
 
 class BaseAggregateCheck(BaseCheck):
-    """
-    An extension of BaseCheck that runs many generic sub-checks.
-    Raises a MissingDataError if any of the required data is missing.
-    Returns a failure if a field required by a sub-check is empty.
-    """
+    """An extension of BaseCheck that runs many generic sub-checks."""
 
-    field: str
     _checks: tuple[BaseGenericCheck, ...]
 
     @property
     def config(self) -> dict:
+        """An aggregate has no on_failure_policy of its own - its disposition is derived from its sub-checks' results."""
         return {
-            **super().config,
-            "field": self.field,
+            "name": self.name,
+            "display_name": self.display_name,
+            "id": self.id,
+            "version": self.version,
+            "required_data": self.required_data,
+            "failure_message": self.failure_message,
         }
 
     def _describe(self) -> dict:
@@ -196,16 +195,19 @@ class BaseAggregateCheck(BaseCheck):
         }
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
-        """Run all sub-checks and return results."""
+        """
+        Run all sub-checks and return results.
+        Short circuits if a check marked to short circuit (e.g. EmptyFieldCheck) fails.
+        """
 
         results: list[Result] = []
 
         for check in self._checks:
-            try:
-                result = check.run(data_registry)
-                results.append(result)
-            except EmptyFieldError:
-                return self._result(passed=False, results=[], message=self.failure_message)
+            result = check.run(data_registry)
+            results.append(result)
+
+            if check._short_circuits_on_failure and not result.passed:
+                break
 
         if self._passed(results):
             return self._result(passed=True, results=results)
@@ -213,8 +215,16 @@ class BaseAggregateCheck(BaseCheck):
             return self._result(passed=False, results=results, message=self.failure_message)
 
     def _passed(self, results: list[Result]) -> bool:
-        """The aggregate passes unless a sub-check with REJECT policy has failed."""
-        return not any(not r.passed and r.check_config["on_failure_policy"] == OnFailurePolicy.REJECT for r in results)
+        """The aggregate passes only if every sub-check passed."""
+        return all(r.passed for r in results)
+
+    def _disposition(self, results: list[Result]) -> Disposition:  # type: ignore
+        """The aggregate disposition is the most severe disposition among its sub-check results."""
+        if any(r.disposition == Disposition.REJECT for r in results):
+            return Disposition.REJECT
+        if any(r.disposition == Disposition.WARN for r in results):
+            return Disposition.WARN
+        return Disposition.OK
 
     def _result(  # type: ignore
         self,
@@ -225,7 +235,29 @@ class BaseAggregateCheck(BaseCheck):
         return Result(
             check_config=self.config,
             passed=passed,
-            disposition=self._disposition(passed),
+            disposition=self._disposition(results),
             message=message,
             results=results,
         )
+
+
+class BaseMetadataAggregateCheck(BaseAggregateCheck):
+    """An extension of BaseAggregateCheck for checks on a single metadata field."""
+
+    field: str
+    required_data = {"metadata"}
+
+    @property
+    def config(self) -> dict:
+        return {
+            **super().config,
+            "field": self.field,
+        }
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        return value
+
+    @classmethod
+    def check(cls, value: str | None) -> Result:
+        return cls().run(QaDataRegistry(metadata=Metadata(**{cls.field: value})))

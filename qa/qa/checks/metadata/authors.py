@@ -1,11 +1,13 @@
 """Author metadata checks."""
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+import re
+
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
-class AuthorsAreValid(BaseAggregateCheck):
+class AuthorsAreValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata authors field."""
 
     name = "authors_are_valid"
@@ -13,17 +15,17 @@ class AuthorsAreValid(BaseAggregateCheck):
     id = 200
     version = "1.0.0"
     description = "The metadata authors field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
-    failure_message = "Authors are invalid or empty."
+    failure_message = "Authors are invalid."
 
-    required_data = {"metadata"}
     field = "authors"
 
-    @classmethod
-    def check(cls, authors: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(authors=authors)))
-
     _checks = (
+        generic.EmptyFieldCheck(
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="authors",
+            failure_message="Authors are required and cannot be empty.",
+        ),
         generic.DoesNotEndWithPunctuation(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainEtAl(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainAnonymous(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
@@ -32,18 +34,10 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.AuthorNamesDoNotContainSemicolon(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
-        generic.DoesNotContainSpaceBeforeComma(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
-        ),
         generic.DoesNotContainTexDagger(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
-        generic.DoesNotContainRawNewline(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
-        generic.DoesNotContainTildeAsHardSpace(
-            on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
-        ),
-        generic.DoesNotBeginWithAuthor(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"),
         generic.AuthorNamesDoNotContainPrefix(
             on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="authors"
         ),
@@ -68,9 +62,6 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.DoesNotContainAnnotationSymbols(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
         generic.AuthorsDoNotContainLoneSurname(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),
@@ -84,5 +75,38 @@ class AuthorsAreValid(BaseAggregateCheck):
         generic.AuthorNamesDoNotContainAffiliation(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"
         ),
-        generic.DoesNotContainUnspacedComma(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="authors"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:  # TODO check pre or post parsing
+        """Normalize authors."""
+        # Strip leading and trailing whitespace.
+        value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
+        value = re.sub(r"\s+", " ", value)
+        # Convert a TeX hard-space (an unescaped tilde) to a literal space.
+        value = re.sub(r"(?<!\\)~", " ", value)
+        value = re.sub(r"\s+", " ", value)
+        # Remove doubled commas.
+        value = re.sub(r",(\s*,)+", ",", value)
+        # Add spaces between word and opening parenthesis.
+        value = re.sub(r"(\w)\(", r"\g<1> (", value)
+        # Add spaces between closing parenthesis and word.
+        value = re.sub(r"\)(\w)", r") \g<1>", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Add a space after a comma when missing.
+        value = re.sub(r",(?=[A-Za-z])", ", ", value)
+        # Strip a leading "author:" or "authors:" prefix.
+        value = re.sub(r"(?i)^authors?:\s*", "", value)
+        # Change capitalized or uppercase `And` to `and`, but only when it
+        # stands alone as a word (surrounded by spaces), not inside a name
+        # like "And'ujar".
+        value = re.sub(r"(?<= )A(?i:ND)(?= )", "and", value)
+
+        return value
