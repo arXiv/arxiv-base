@@ -28,7 +28,7 @@ class AuthorsContainsSubmitterName(BaseCheck):
         r"CMS and TOTEM Collaborations",
         r"ALICE Collaboration",
         r"STAR Collaboration",
-        r"LHCb collaboration"
+        r"LHCb collaboration",
         r"Belle Collaboration",
     ]
 
