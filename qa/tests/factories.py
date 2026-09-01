@@ -15,5 +15,17 @@ def make_test_submit_event_info(
     )
 
 
-def make_test_submitter_profile(is_suspect=False):
-    return SubmitterProfile(is_suspect=is_suspect)
+def make_test_submitter_profile(
+    is_suspect=False,
+    user_id=108086,
+    email="submitter@example.com",
+    name="Donald Duck",
+    submitter_url="https://arxiv.org/auth/admin/user-detail.php?tapir_id=108086",
+):
+    return SubmitterProfile(
+        user_id=user_id,
+        email=email,
+        name=name,
+        is_suspect=is_suspect,
+        submitter_url=submitter_url,
+    )

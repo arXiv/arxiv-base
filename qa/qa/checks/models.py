@@ -95,9 +95,15 @@ class SubmitEventInfo(BaseModel):
 
 
 class SubmitterProfile(BaseModel):
-    """Information about the submitter's user account."""
+    """
+    Submitter data for the account that created a submission.
+    """
 
+    user_id: int
+    email: str
+    name: str
     is_suspect: bool
+    submitter_url: str
 
 
 class Metadata(BaseModel):
