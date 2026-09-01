@@ -70,8 +70,6 @@ class TestTitleIsValid:
         assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
 
     def test_warn_allowed_html_tag(self):
-        """<em> is allowed by does_not_contain_unacceptable_html_tags, but is still in
-        NoHtmlElements' fixed list, so it's a WARN rather than a clean pass."""
         result = TitleIsValid.check("Title with <em>emphasis</em>")
         assert not result.passed
         assert result.disposition == Disposition.WARN
@@ -79,15 +77,13 @@ class TestTitleIsValid:
         assert sub_result(result, "does_not_contain_unacceptable_html_tags").passed
 
     def test_pass_short_html_like_tags_not_flagged_by_no_html_elements(self):
-        """Short tags like <x>/<i>/<b> aren't in NoHtmlElements' fixed list, but are still real
-        tags to a parser, so does_not_contain_unacceptable_html_tags still flags them."""
         result = TitleIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>")
         assert not result.passed
         assert sub_result(result, "no_html_elements").passed
         assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
 
     def test_pass_begins_with_title_without_cleanup(self):
-        """A leading 'title:' prefix is only stripped via cleanup(); check() no longer rejects it directly."""
+        """A leading 'title:' prefix is only stripped via cleanup(); check() does not reject it directly."""
         assert TitleIsValid.check("Title: Something").passed
 
     def test_pass_single_backslash(self):
@@ -100,7 +96,7 @@ class TestTitleIsValid:
         assert not sub_result(result, "does_not_contain_linebreak").passed
 
     def test_pass_raw_newline_without_cleanup(self):
-        """A raw newline is only normalized via cleanup(); check() no longer rejects it directly."""
+        """A raw newline is only normalized via cleanup(); check() does not reject it directly."""
         assert TitleIsValid.check("A title with\na raw newline").passed
 
     def test_pass_complex_parens(self):

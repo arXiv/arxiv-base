@@ -37,6 +37,7 @@ class AcmClassIsValid(BaseMetadataAggregateCheck):
             failure_message="Too long: must be 160 characters or fewer.",
         ),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
+        generic.AcmClassHasValidFormat(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="acm_class"),
     )
 
     @staticmethod

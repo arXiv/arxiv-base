@@ -13,8 +13,6 @@ def sub_result(result: Result, name: str) -> Result:
 
 
 class TestAbstractIsValid:
-    # Appended to short fixtures below only to clear the 150-char minimum-length WARN,
-    # so each test stays a genuine "nothing about this input fails" check.
     _filler = (
         " This additional discussion is included solely to satisfy the minimum length "
         "requirement for this test case and does not affect the specific behavior under examination."

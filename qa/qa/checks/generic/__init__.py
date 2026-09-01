@@ -5,6 +5,10 @@ from qa.checks.generic.length import (  # noqa
     NotTooShort,
 )
 
+from qa.checks.generic.acm_class import (  # noqa
+    AcmClassHasValidFormat,
+)
+
 from qa.checks.generic.whitespace import (  # noqa
     DoesNotContainSpaceBeforeComma,
     NoExtraWhitespace,

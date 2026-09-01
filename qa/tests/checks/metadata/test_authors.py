@@ -83,23 +83,21 @@ class TestAuthorsAreValid:
         assert not sub_result(result, "does_not_contain_tex_dagger").passed
 
     def test_pass_begins_with_author_without_cleanup(self):
-        """A leading 'author:' prefix is only stripped via cleanup(); check() does not reject it outright,
-        though the unstripped prefix confuses the author parser into a spurious lone-surname warning."""
+        """A leading 'author:' prefix is only stripped via cleanup(); check() does not reject it outright."""
         result = AuthorsAreValid.check("Author: Fred Smith")
         assert result.disposition != Disposition.REJECT
 
     def test_pass_begins_with_authors_without_cleanup(self):
-        """A leading 'authors:' prefix is only stripped via cleanup(); check() does not reject it outright,
-        though the unstripped prefix confuses the author parser into a spurious lone-surname warning."""
+        """A leading 'authors:' prefix is only stripped via cleanup(); check() does not reject it outright."""
         result = AuthorsAreValid.check("Authors: J. Smith, Joe Bob, and Mr. Briggs")
         assert result.disposition != Disposition.REJECT
 
     def test_pass_tilde_as_hard_space_without_cleanup(self):
-        """A tilde hard-space is only normalized via cleanup(); check() no longer rejects it directly."""
+        """A tilde hard-space is only normalized via cleanup(); check() does not reject it directly."""
         assert AuthorsAreValid.check("Fred Smith~Jones").passed
 
     def test_pass_tilde_after_period_without_cleanup(self):
-        """A tilde hard-space is only normalized via cleanup(); check() no longer rejects it directly."""
+        """A tilde hard-space is only normalized via cleanup(); check() does not reject it directly."""
         assert AuthorsAreValid.check("Paul R.~Archer").passed
 
     def test_pass_escaped_tilde_accent(self):
@@ -186,7 +184,6 @@ class TestAuthorsAreValid:
         assert not sub_result(result, "authors_do_not_contain_llm_author").passed
 
     def test_pass_llm_as_firstname(self):
-        # "Claude Sonnet" — Claude is a common name with a firstname, no LLM pattern fires
         result = AuthorsAreValid.check("Claude Sonnet")
         assert result.passed
         assert sub_result(result, "authors_do_not_contain_llm_author").passed
@@ -254,7 +251,6 @@ class TestAuthorsAreValid:
         assert not sub_result(result, "author_names_do_not_contain_affiliation").passed
 
     def test_pass_astrophys_not_physics(self):
-        # "astrophys" contains "phys" but not the word-boundary \bPhysics\b
         assert AuthorsAreValid.check(
             "C. Sivaram (1) and Kenath Arun (2) ((1) Indian Institute of Astrophysics, Bangalore, (2) Christ Junior College, Bangalore)"
         ).passed
@@ -317,8 +313,8 @@ class TestAuthorsAreValid:
         assert not sub_result(result, "not_all_caps").passed
 
     def test_pass_unspaced_comma_without_cleanup(self):
-        """An unspaced comma is only normalized via cleanup(); check() no longer warns on it directly."""
-        assert AuthorsAreValid.check("Jamie Magyar,Jonathan Young").passed
+        """An unspaced comma is only normalized via cleanup(); check() does not warn on it directly."""
+        assert AuthorsAreValid.check("Fred Smith,Joe Bloggs").passed
 
     def test_none_field_short_circuits(self):
         result = AuthorsAreValid().run(QaDataRegistry(metadata=Metadata(authors=None)))

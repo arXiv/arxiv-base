@@ -47,7 +47,7 @@ class TestAcmClassIsValid:
         assert not sub_result(result, "not_too_long").passed
 
     def test_pass_at_max_length(self):
-        assert AcmClassIsValid.check("x" * 160).passed
+        assert sub_result(AcmClassIsValid.check("x" * 160), "not_too_long").passed
 
     def test_fail_contains_url(self):
         result = AcmClassIsValid.check("https://example.com/F.2.2")
@@ -59,8 +59,38 @@ class TestAcmClassIsValid:
         assert not result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_pass_space_separated(self):
-        assert AcmClassIsValid.check("abc def").passed
+    def test_warn_space_separated_invalid_format(self):
+        result = AcmClassIsValid.check("abc def")
+        assert not result.passed
+        assert sub_result(result, "does_not_contain_comma").passed
+        assert not sub_result(result, "acm_class_has_valid_format").passed
+
+    def test_pass_valid_format_with_subclass(self):
+        assert AcmClassIsValid.check("I.2.7").passed
+
+    def test_pass_valid_format_no_subclass(self):
+        assert AcmClassIsValid.check("F.2").passed
+
+    def test_pass_valid_format_m_general(self):
+        assert AcmClassIsValid.check("D.m").passed
+
+    def test_pass_valid_format_lowercase_subsubclass(self):
+        assert AcmClassIsValid.check("I.2.7.a").passed
+
+    def test_warn_invalid_letter(self):
+        result = AcmClassIsValid.check("Z.2.2")
+        assert not result.passed
+        assert not sub_result(result, "acm_class_has_valid_format").passed
+
+    def test_warn_missing_period(self):
+        result = AcmClassIsValid.check("F22")
+        assert not result.passed
+        assert not sub_result(result, "acm_class_has_valid_format").passed
+
+    def test_warn_one_invalid_entry_in_list(self):
+        result = AcmClassIsValid.check("F.2.2; not-a-class")
+        assert not result.passed
+        assert not sub_result(result, "acm_class_has_valid_format").passed
 
     def test_all_sub_checks_run_on_valid(self):
         result = AcmClassIsValid.check("F.2.2")

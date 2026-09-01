@@ -72,13 +72,9 @@ class TestDoiIsValid:
         assert not sub_result(result, "does_not_contain_doi").passed
 
     def test_pass_doi_without_registrant_code(self):
-        # Per the DOI spec, the registrant code is optional: a directory indicator
-        # followed directly by "/" and a suffix is a syntactically valid prefix.
         assert DoiIsValid.check("10/abcdefghij").passed
 
     def test_pass_doi_with_multi_segment_registrant_code(self):
-        # Per the DOI spec, the registrant code may itself contain multiple
-        # period-separated digit sequences (e.g. "10.500.100").
         assert DoiIsValid.check("10.500.100/suffix").passed
 
     def test_warn_invalid_doi_with_preceding_text(self):

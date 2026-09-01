@@ -91,15 +91,15 @@ class TestReportNumIsValid:
         assert not sub_result(result, "contains_a_letter_and_a_digit").passed
 
     def test_pass_extra_whitespace_without_cleanup(self):
-        """Extra whitespace is only normalized via cleanup(); check() no longer rejects it directly."""
+        """Extra whitespace is only normalized via cleanup(); check() does not reject it directly."""
         assert ReportNumIsValid.check("CERN  EP-2024-001").passed
 
     def test_pass_space_in_parens_without_cleanup(self):
-        """Unnecessary space in parens is only normalized via cleanup(); check() no longer rejects it directly."""
+        """Unnecessary space in parens is only normalized via cleanup(); check() does not reject it directly."""
         assert ReportNumIsValid.check("CERN-EP-2024-001 ( draft )").passed
 
     def test_pass_control_chars_without_cleanup(self):
-        """Control characters are only normalized via cleanup(); check() no longer rejects them directly."""
+        """Control characters are only normalized via cleanup(); check() does not reject them directly."""
         assert ReportNumIsValid.check("CERN-EP\t2024-001").passed
 
     def test_fail_malformed_unicode(self):
