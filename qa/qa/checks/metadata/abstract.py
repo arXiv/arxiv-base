@@ -68,7 +68,7 @@ class AbstractIsValid(BaseMetadataAggregateCheck):
         # Normalize any newline followed by some whitespace into newline + two spaces (paragraph).
         value = re.sub(r"\n\s+", "\n  ", value)
         # Convert any newline between two non-whitespace characters into a space.
-        value = re.sub(r"(\S)\n(\S)", "\\g<1> \\g<2>", value)
+        value = re.sub(r"(\S)\n(?=\S)", "\\g<1> ", value)
         # Convert multiple spaces into a single space.
         value = re.sub(r"(?<!\n)[ ]{2,}", " ", value)
         # Remove TeX return (\\) at end of a line or at the end of the abstract.

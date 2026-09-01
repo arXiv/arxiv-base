@@ -192,3 +192,15 @@ class TestCleanup:
 
     def test_removes_unnecessary_space_in_parens(self):
         assert AbstractIsValid.cleanup("( text )") == "(text)"
+
+    def test_joins_all_hard_wraps_with_single_char_tokens(self):
+        assert AbstractIsValid.cleanup("a\nb\nc") == "a b c"
+
+    def test_joins_alternating_single_char_wraps(self):
+        assert AbstractIsValid.cleanup("x\ny\nz\nw") == "x y z w"
+
+    def test_joins_wrap_after_single_char_word(self):
+        assert AbstractIsValid.cleanup("We\npresent\na\nnew\nmethod") == "We present a new method"
+
+    def test_joins_wrap_around_single_char_math_symbol(self):
+        assert AbstractIsValid.cleanup("x\n=\ny") == "x = y"
