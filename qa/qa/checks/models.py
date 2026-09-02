@@ -103,7 +103,6 @@ class SubmitterProfile(BaseModel):
     email: str
     name: str
     is_suspect: bool
-    submitter_url: str
 
 
 class Metadata(BaseModel):

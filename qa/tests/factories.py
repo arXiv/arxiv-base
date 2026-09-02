@@ -27,5 +27,4 @@ def make_test_submitter_profile(
         email=email,
         name=name,
         is_suspect=is_suspect,
-        submitter_url=submitter_url,
     )
