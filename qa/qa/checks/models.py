@@ -94,6 +94,17 @@ class SubmitEventInfo(BaseModel):
     source_format: Literal["pdf", "tex", "pdftex", "withdrawn", "docx", "invalid", "ps", "html"]
 
 
+class SubmitterProfile(BaseModel):
+    """
+    Submitter data for the account that created a submission.
+    """
+
+    user_id: int
+    email: str
+    name: str
+    is_suspect: bool
+
+
 class Metadata(BaseModel):
     """
     Paper metadata.
@@ -139,3 +150,4 @@ class QaDataRegistry(BaseModel):
     tex_report: str | None = None
     metadata: Metadata | None = None
     submit_event_info: SubmitEventInfo | None = None
+    submitter_profile: SubmitterProfile | None = None

@@ -1,8 +1,8 @@
-"""Tests for AuthorsContainsSubmitterName."""
+"""Tests for AuthorsContainsSubmitterName and SubmitterIsNotFlagged."""
 
 from qa.checks.models import QaDataRegistry, Metadata
-from qa.checks.submission.user import AuthorsContainsSubmitterName
-from tests.factories import make_test_submit_event_info
+from qa.checks.submission.user import AuthorsContainsSubmitterName, SubmitterIsNotFlagged
+from tests.factories import make_test_submit_event_info, make_test_submitter_profile
 
 
 def test_name_contained():
@@ -123,5 +123,21 @@ class TestAuthorsContainsSubmitterName:
                     submit_event_info=make_test_submit_event_info(submitter_name="Fred Smith"),
                 )
             )
+            .passed
+        )
+
+
+class TestSubmitterIsNotFlagged:
+    def test_pass_not_suspect(self):
+        assert (
+            SubmitterIsNotFlagged()
+            .run(QaDataRegistry(submitter_profile=make_test_submitter_profile(is_suspect=False)))
+            .passed
+        )
+
+    def test_fail_suspect(self):
+        assert (
+            not SubmitterIsNotFlagged()
+            .run(QaDataRegistry(submitter_profile=make_test_submitter_profile(is_suspect=True)))
             .passed
         )
