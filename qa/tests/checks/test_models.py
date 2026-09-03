@@ -3,7 +3,7 @@
 from pydantic import ValidationError
 from unittest import TestCase
 
-from qa.checks.models import BaseReport, Disposition, Flag, Result
+from qa.checks.models import BaseReport, Disposition, Flag, Result, SubmitEventInfo
 
 
 def base_report(
@@ -96,6 +96,31 @@ class TestResultMessages(TestCase):
             ],
         )
         self.assertEqual(result._messages(Disposition.OK), "passed message\nignored message")
+
+
+class TestSubmitEventInfo(TestCase):
+    def test_accepts_explicit_none_for_nullable_fields(self):
+        info = SubmitEventInfo(type=None, is_oversize=None, submitter_name=None, source_format=None)
+        self.assertIsNone(info.type)
+        self.assertIsNone(info.is_oversize)
+        self.assertIsNone(info.submitter_name)
+        self.assertIsNone(info.source_format)
+
+    def test_requires_type_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"is_oversize": None, "submitter_name": None, "source_format": None})
+
+    def test_requires_is_oversize_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"type": None, "submitter_name": None, "source_format": None})
+
+    def test_requires_submitter_name_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"type": None, "is_oversize": None, "source_format": None})
+
+    def test_requires_source_format_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"type": None, "is_oversize": None, "submitter_name": None})
 
 
 class TestFlag(TestCase):

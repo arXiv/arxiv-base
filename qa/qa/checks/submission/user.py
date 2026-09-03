@@ -109,12 +109,13 @@ class AuthorsContainsSubmitterName(BaseCheck):
         authors = data_registry.metadata.authors
 
         submitter_name = data_registry.submit_event_info.submitter_name
-        submitter_names = AuthorsContainsSubmitterName.normalize_author_name(submitter_name).split()
 
         passed = False
 
-        if authors is None:
+        if authors is None or submitter_name is None:
             return self._result(passed=True)
+
+        submitter_names = AuthorsContainsSubmitterName.normalize_author_name(submitter_name).split()
 
         if AuthorsContainsSubmitterName.known_collaboration(authors):
             return self._result(passed=True)
