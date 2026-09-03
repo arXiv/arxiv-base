@@ -1,11 +1,13 @@
 """Comments metadata checks."""
 
-from qa.checks.base import BaseAggregateCheck
-from qa.checks.models import QaDataRegistry, OnFailurePolicy, Metadata, Result
+import re
+
+from qa.checks.base import BaseMetadataAggregateCheck
+from qa.checks.models import OnFailurePolicy
 from qa.checks import generic
 
 
-class CommentsAreValid(BaseAggregateCheck):
+class CommentsAreValid(BaseMetadataAggregateCheck):
     """Aggregate check for the metadata comments field."""
 
     name = "comments_are_valid"
@@ -13,34 +15,44 @@ class CommentsAreValid(BaseAggregateCheck):
     id = 400
     version = "1.0.0"
     description = "The metadata comments field is valid."
-    on_failure_policy = OnFailurePolicy.REJECT
     failure_message = "Comments are invalid."
 
-    required_data = {"metadata"}
     field = "comments"
 
-    @classmethod
-    def check(cls, comments: str | None) -> Result:
-        return cls().run(QaDataRegistry(metadata=Metadata(comments=comments)))
-
-    def _run(self, data_registry: QaDataRegistry) -> Result:
-        """Both None and empty string are valid and should pass without running sub-checks."""
-        if data_registry.metadata.comments in (None, ""):  # type: ignore
-            return self._result(passed=True, results=[])
-        return super()._run(data_registry)
-
     _checks = (
-        generic.NotTooLong(max_chars=10000, on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.NoExcessiveCapitals(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.EmptyFieldCheck(on_failure_policy=OnFailurePolicy.IGNORE, data="metadata", field="comments"),
+        generic.NotTooLong(
+            max_chars=1000,
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="comments",
+            failure_message="Too long: must be 1000 characters or fewer.",
+        ),
+        generic.DoesNotContainLinebreak(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
+        generic.NotAllCaps(on_failure_policy=OnFailurePolicy.REJECT, data="metadata", field="comments"),
         generic.DoesNotContainUnnecessaryEscape(
             on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"
         ),
-        generic.DoesNotContainTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.NoBoundaryWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.NoExtraWhitespace(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.NoUnnecessarySpaceInParens(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
+        generic.DoesNotContainHrefOrUrlTex(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.AllBracketsBalanced(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
-        generic.DoesNotContainControlChars(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
         generic.NoUtf8DecodingErrors(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="comments"),
     )
+
+    @staticmethod
+    def cleanup(value: str) -> str:
+        """Normalize comments."""
+        # Strip leading and trailing whitespace.
+        value = value.strip()
+        # Convert every control character to a space.
+        value = "".join(" " if ord(c) < 0x20 else c for c in value)
+        # Collapse whitespace.
+        value = re.sub(r"\s+", " ", value)
+        # Strip trailing periods.
+        value = re.sub(r"\s*\.[\s.]*$", "", value)
+        # Remove space before a comma.
+        value = re.sub(r"\s+,", ",", value)
+        # Remove unnecessary space inside parentheses.
+        value = re.sub(r"\(\s+", "(", value)
+        value = re.sub(r"\s+\)", ")", value)
+
+        return value

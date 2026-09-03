@@ -56,11 +56,11 @@ class Result(BaseModel):
     offsets: list[Offset] | None = None
     results: list["Result"] | None = None
 
-    def failure_messages(self, *dispositions: Disposition) -> str:
-        """Return a concatenated string containing all messages for failed results with the given dispositions."""
-        if not self.results:
-            return self.message if not self.passed else ""
-        return "\n".join(r.message for r in self.results if not r.passed and r.disposition in dispositions)
+    def _messages(self, disposition: Disposition) -> str:
+        """Return a concatenated string containing all additional messages from results which have the given disposition."""
+        if self.results is None:
+            return ""
+        return "\n".join(r.message for r in self.results if r.disposition == disposition)
 
 
 class Flag(BaseModel):
@@ -85,16 +85,24 @@ class FulltextReport(BaseReport):
     version: str = "1.0"
 
 
-class SubmitEventInfo(BaseModel):  # TODO: check which fields are always provided by the snapshot and which are optional
-    """Information about the submission provided by the submit event."""
+class SubmitEventInfo(BaseModel):
+    """Information about the submission."""
 
-    type: Literal["new", "rep", "wdr", "jref", "cross"]
-    is_oversize: bool
-    data_version: int
-    metadata_version: int
-    submitter_name: str
-    user_is_flagged: bool
-    source_format: Literal["pdf", "tex", "pdftex", "withdrawn", "docx", "invalid", "ps", "html"]
+    type: Literal["new", "rep", "wdr", "jref", "cross"] | None
+    is_oversize: bool | None
+    submitter_name: str | None
+    source_format: Literal["pdf", "tex", "pdftex", "withdrawn", "docx", "invalid", "ps", "html"] | None
+
+
+class SubmitterProfile(BaseModel):
+    """
+    Submitter data for the account that created a submission.
+    """
+
+    user_id: int
+    email: str
+    name: str
+    is_suspect: bool
 
 
 class Metadata(BaseModel):
@@ -142,3 +150,4 @@ class QaDataRegistry(BaseModel):
     tex_report: str | None = None
     metadata: Metadata | None = None
     submit_event_info: SubmitEventInfo | None = None
+    submitter_profile: SubmitterProfile | None = None

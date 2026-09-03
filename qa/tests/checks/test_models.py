@@ -3,7 +3,7 @@
 from pydantic import ValidationError
 from unittest import TestCase
 
-from qa.checks.models import BaseReport, Disposition, Flag, Result
+from qa.checks.models import BaseReport, Disposition, Flag, Result, SubmitEventInfo
 
 
 def base_report(
@@ -39,39 +39,23 @@ class TestBaseReport(TestCase):
             base_report(submission_id=0)
 
 
-class TestResultFailureMessages(TestCase):
-    def test_no_results_and_passed_returns_empty_string(self):
-        result = Result(check_config={}, passed=True, disposition=Disposition.OK, message="")
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "")
-
-    def test_no_results_and_failed_returns_own_message(self):
+class TestResultMessages(TestCase):
+    def test_no_results_returns_empty_string(self):
         result = Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="own message")
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "own message")
+        self.assertEqual(result._messages(Disposition.REJECT), "")
 
-    def test_no_dispositions_returns_empty_string(self):
+    def test_concatenates_multiple_messages_at_the_same_disposition(self):
         result = Result(
             check_config={},
             passed=False,
             disposition=Disposition.REJECT,
             message="",
             results=[
-                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
+                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="first reject message"),
+                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="second reject message"),
             ],
         )
-        self.assertEqual(result.failure_messages(), "")
-
-    def test_concatenates_messages_matching_given_dispositions(self):
-        result = Result(
-            check_config={},
-            passed=False,
-            disposition=Disposition.REJECT,
-            message="",
-            results=[
-                Result(check_config={}, passed=False, disposition=Disposition.WARN, message="warn message"),
-                Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
-            ],
-        )
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "warn message\nreject message")
+        self.assertEqual(result._messages(Disposition.REJECT), "first reject message\nsecond reject message")
 
     def test_filters_to_a_single_disposition(self):
         result = Result(
@@ -84,9 +68,9 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.REJECT, message="reject message"),
             ],
         )
-        self.assertEqual(result.failure_messages(Disposition.REJECT), "reject message")
+        self.assertEqual(result._messages(Disposition.REJECT), "reject message")
 
-    def test_excludes_passed_and_ignored_sub_checks(self):
+    def test_excludes_non_matching_dispositions(self):
         result = Result(
             check_config={},
             passed=True,
@@ -98,9 +82,9 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.WARN, message="warn message"),
             ],
         )
-        self.assertEqual(result.failure_messages(Disposition.WARN, Disposition.REJECT), "warn message")
+        self.assertEqual(result._messages(Disposition.WARN), "warn message")
 
-    def test_excludes_passed_sub_checks_even_with_matching_disposition(self):
+    def test_includes_passed_sub_checks_with_matching_disposition(self):
         result = Result(
             check_config={},
             passed=True,
@@ -111,7 +95,32 @@ class TestResultFailureMessages(TestCase):
                 Result(check_config={}, passed=False, disposition=Disposition.OK, message="ignored message"),
             ],
         )
-        self.assertEqual(result.failure_messages(Disposition.OK), "ignored message")
+        self.assertEqual(result._messages(Disposition.OK), "passed message\nignored message")
+
+
+class TestSubmitEventInfo(TestCase):
+    def test_accepts_explicit_none_for_nullable_fields(self):
+        info = SubmitEventInfo(type=None, is_oversize=None, submitter_name=None, source_format=None)
+        self.assertIsNone(info.type)
+        self.assertIsNone(info.is_oversize)
+        self.assertIsNone(info.submitter_name)
+        self.assertIsNone(info.source_format)
+
+    def test_requires_type_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"is_oversize": None, "submitter_name": None, "source_format": None})
+
+    def test_requires_is_oversize_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"type": None, "submitter_name": None, "source_format": None})
+
+    def test_requires_submitter_name_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"type": None, "is_oversize": None, "source_format": None})
+
+    def test_requires_source_format_field(self):
+        with self.assertRaises(ValidationError):
+            SubmitEventInfo.model_validate({"type": None, "is_oversize": None, "submitter_name": None})
 
 
 class TestFlag(TestCase):
