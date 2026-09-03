@@ -24,6 +24,12 @@ class TestOversizeCheck:
         with pytest.raises(MissingDataError):
             DoesNotExceedTheFileSizeLimit().run(QaDataRegistry())
 
+    def test_oversize_none_passes(self):
+        sub_metadata = make_test_submit_event_info(is_oversize=None)
+        result = DoesNotExceedTheFileSizeLimit().run(QaDataRegistry(submit_event_info=sub_metadata))
+
+        assert result.passed
+
 
 class TestHtmlFileType:
     def test_htmlfiletype_pass(self):
@@ -41,3 +47,9 @@ class TestHtmlFileType:
     def test_missing_submit_event_info_raises(self):
         with pytest.raises(MissingDataError):
             FileTypeDoesNotRequireReview().run(QaDataRegistry())
+
+    def test_source_format_none_passes(self):
+        sub_metadata = make_test_submit_event_info(source_format=None)
+        result = FileTypeDoesNotRequireReview().run(QaDataRegistry(submit_event_info=sub_metadata))
+
+        assert result.passed

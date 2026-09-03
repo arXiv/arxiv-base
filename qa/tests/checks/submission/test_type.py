@@ -24,3 +24,9 @@ class TestWithdrawalCheck:
     def test_missing_submit_event_info_raises(self):
         with pytest.raises(MissingDataError):
             IsNotAWithdrawal().run(QaDataRegistry())
+
+    def test_type_none_passes(self):
+        sub_metadata = make_test_submit_event_info(type=None)
+        result = IsNotAWithdrawal().run(QaDataRegistry(submit_event_info=sub_metadata))
+
+        assert result.passed
