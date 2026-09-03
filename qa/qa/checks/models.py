@@ -88,12 +88,10 @@ class FulltextReport(BaseReport):
 class SubmitEventInfo(BaseModel):
     """Information about the submission."""
 
-    type: Literal["new", "rep", "wdr", "jref", "cross"] | None = None
-    is_oversize: bool | None = None
-    submitter_name: str | None = None
-    source_format: (
-        Literal["pdf", "tex", "pdftex", "withdrawn", "docx", "invalid", "ps", "html"] | None
-    ) = None
+    type: Literal["new", "rep", "wdr", "jref", "cross"] | None
+    is_oversize: bool | None
+    submitter_name: str | None
+    source_format: Literal["pdf", "tex", "pdftex", "withdrawn", "docx", "invalid", "ps", "html"] | None
 
 
 class SubmitterProfile(BaseModel):
