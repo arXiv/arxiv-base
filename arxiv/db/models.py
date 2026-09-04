@@ -2261,7 +2261,7 @@ class CheckTargets(Base):
     def __repr__(self):
         return f"{ type(self).__name__ }/{ self.check_target_id }:{self.name}"
 
-# This class is no longer used
+
 class Checks(Base):
     __tablename__ = "arXiv_checks"
     __table_args__ = {"mysql_charset": "latin1"}
@@ -2294,16 +2294,16 @@ class CheckResults(Base):
 
     check_result_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     submission_id: Mapped[int] = mapped_column(ForeignKey("arXiv_submissions.submission_id"), nullable=False, index=True)
-    data_version: Mapped[int] = mapped_column(Integer, nullable=True)
-    metadata_version: Mapped[int] = mapped_column(Integer, nullable=True)
-    check_id: Mapped[int] = mapped_column(Integer, nullable=True)
+    data_version: Mapped[Optional[int]] = mapped_column(Integer)
+    metadata_version: Mapped[Optional[int]] = mapped_column(Integer)
+    check_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("tapir_users.user_id"), nullable=False, index=True)
     ok: Mapped[int] = mapped_column(Integer, nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
     message: Mapped[Optional[str]] = mapped_column(String(200))
     data: Mapped[Optional[str]] = mapped_column(Text)
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
 
+    submission: Mapped["Submission"] = relationship("Submission", back_populates="arXiv_check_results")
     user: Mapped["TapirUser"] = relationship("TapirUser", back_populates="arXiv_check_results")
     check_responses: Mapped[List["CheckResponses"]] = relationship("CheckResponses", back_populates="check_result")
     """ 
