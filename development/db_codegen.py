@@ -523,6 +523,28 @@ def run_mysql_container(port: int):
         logging.error(f"Unexpected error: {e}")
 
 
+def is_mariadb_client():
+    """Detect whether the `mysql` binary is actually the MariaDB client.
+
+    MariaDB ships a `mysql` compatibility wrapper that does not understand
+    MySQL's `--ssl-mode` option (it uses `--ssl`/`--skip-ssl` instead).
+    """
+    try:
+        result = subprocess.run(
+            ["mysql", "--version"], capture_output=True, text=True, check=True
+        )
+        return "mariadb" in result.stdout.lower()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
+def ssl_client_flag(ssl_enabled: bool):
+    """Return the client SSL flag appropriate for the installed `mysql` client."""
+    if is_mariadb_client():
+        return "--ssl" if ssl_enabled else "--skip-ssl"
+    return "--ssl-mode=REQUIRED" if ssl_enabled else "--ssl-mode=disabled"
+
+
 def load_sql_file(sql_file, mysql_port=3306, ssl_enabled=True):
     """Load a sql file to mysql
 
@@ -542,7 +564,7 @@ ERROR:root:Error loading SQL file: Command '['mysql', '--host=127.0.0.1', '-uroo
                 f"--port={mysql_port}",
                 "-uroot",
                 "-ptestpassword",
-                "--ssl-mode=REQUIRED" if ssl_enabled else "--ssl-mode=disabled",
+                ssl_client_flag(ssl_enabled),
                 "testdb"
             ], stdin=sql, check=True)
             logging.info(f"SQL file '{sql_file}' loaded successfully into 'testdb' on port {mysql_port}.")
@@ -606,7 +628,7 @@ def main() -> None:
     if env.get("PYTHONPATH"):
         pythonpath = pythonpath + os.pathsep + env["PYTHONPATH"]
     env["PYTHONPATH"] = pythonpath
-    subprocess.run(['venv/bin/python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile,
+    subprocess.run(['python', '-m', 'sqlacodegen', p_url, '--outfile', p_outfile,
                     '--model-metadata', db_metadata], check=True, cwd=arxiv_base_dir, env=env)
 
     # autogen_models.py
