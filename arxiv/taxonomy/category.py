@@ -70,7 +70,7 @@ class Group(BaseTaxonomy):
     is_test: Optional[bool] = None
 
     def get_archives(self, include_inactive: bool = False) -> List['Archive'] :
-        """creates a list of all archives withing the group. By default only includes active archives"""
+        """creates a list of all archives within the group. By default only includes active archives"""
         from .definitions import ARCHIVES
         if include_inactive:
             return [archive for archive in ARCHIVES.values() if archive.in_group == self.id]
@@ -90,7 +90,7 @@ class Archive(BaseTaxonomy):
         return GROUPS[self.in_group]
 
     def get_categories(self, include_inactive: bool =False) -> List['Category'] :
-        """creates a list of all categories withing the group. By default only includes active categories"""
+        """creates a list of all categories within the group. By default only includes active categories"""
         from .definitions import CATEGORIES
         if include_inactive:
             return [category for category in CATEGORIES.values() if category.in_archive == self.id]
@@ -98,8 +98,8 @@ class Archive(BaseTaxonomy):
             return [category for category in CATEGORIES.values() if category.in_archive == self.id and category.is_active]
 
     def get_canonical(self) -> Union['Category', 'Archive']:
-        """returns the canonical version of an archive. The main purpose is transforming subsumed archives into their subsumign categories.
-        For most archives this returns the archive itself. In the case of archives that are also categories, it return the Archive version of the archive"""
+        """returns the canonical version of an archive. The main purpose is transforming subsumed archives into their subsuming categories.
+        For most archives this returns the archive itself. In the case of archives that are also categories, it returns the Archive version of the archive"""
         from .definitions import CATEGORIES
         if self.canonical_id!= self.id and self.canonical_id in CATEGORIES:
             return CATEGORIES[self.canonical_id]
