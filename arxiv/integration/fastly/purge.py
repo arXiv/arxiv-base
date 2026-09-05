@@ -35,7 +35,7 @@ def purge_cache_for_paper(paper_id:str, old_cats:Optional[str]=None) -> None:
 
 def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
     """fetches the current categories for a paper as well as the last date it had announced changes to determine if it belongs in recent or new page
-        extra days were added to accomidate for weekends and holidays, 
+        extra days were added to accommodate for weekends and holidays, 
         these will occasionally purge new and recent papers more than is needed, but better to over clear than underclear
     """
     meta=aliased(Metadata)
@@ -60,7 +60,7 @@ def _get_category_and_date(arxiv_id:Identifier)-> Tuple[str, Optional[date]]:
         raise IdentifierException(f'paper id not found: {arxiv_id.id}')
 
     new_cats: str=result[0]
-    recent_date: Optional[date] = result[1]  #Papers that havent been changed since 2007 may not be in updates table
+    recent_date: Optional[date] = result[1]  #Papers that haven't been changed since 2007 may not be in updates table
 
     return new_cats, recent_date
 
@@ -68,7 +68,7 @@ def _purge_category_change(arxiv_id:Identifier, old_cats:Optional[str]=None )-> 
     """determines all list and year pages required for a category change to a paper
         returns list of all keys to purge
         does not include paths for the paper itself
-        assumes categories will be provided as string like from abs_categories feild, but could be improved if categories could be specified in a list
+        assumes categories will be provided as string like from abs_categories field, but could be improved if categories could be specified in a list
     """
     grp_physics=GROUPS['grp_physics']
     new_cats, recent_date= _get_category_and_date(arxiv_id)
