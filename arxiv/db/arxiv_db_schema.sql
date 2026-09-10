@@ -1,3 +1,4 @@
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -353,8 +354,8 @@ DROP TABLE IF EXISTS `arXiv_check_results`;
 CREATE TABLE `arXiv_check_results` (
   `check_result_id` int NOT NULL AUTO_INCREMENT,
   `submission_id` int NOT NULL,
-  `data_version` int NOT NULL DEFAULT '0',
-  `metadata_version` int NOT NULL DEFAULT '0',
+  `data_version` int DEFAULT NULL,
+  `metadata_version` int DEFAULT NULL,
   `check_id` int NOT NULL,
   `user_id` int unsigned NOT NULL,
   `ok` tinyint(1) NOT NULL,
@@ -1822,7 +1823,7 @@ DROP TABLE IF EXISTS `publish_batches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `publish_batches` (
-  `batch_id` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch_id` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_processed` int NOT NULL DEFAULT '0',
   `new_count` int NOT NULL DEFAULT '0',
   `rep_count` int NOT NULL DEFAULT '0',

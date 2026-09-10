@@ -351,11 +351,49 @@ class ArxivUserClaims:
 
 
     @classmethod
-    def decode_jwt_payload(cls, tokens: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256') -> "ArxivUserClaims":
+    def decode_jwt_payload(cls, tokens: dict, jwt_payload: str, secret: str, algorithm: str = 'HS256',
+                           leeway: int = 30) -> "ArxivUserClaims":
         """
-        Decodes the user claims.
+        Decode a signed JWT into an :class:`ArxivUserClaims`.
+
+        Verifies the token signature, then reassembles the claims. Registered
+        RFC 7519 claims (sub/exp/iat/...) live at the JWT top level, while the
+        arXiv custom claims travel as a JSON "hitchhiker" blob under
+        ``NG_COOKIE_HITCHHIKER_NAME``; both are merged into ``tokens`` and
+        validated into the model.
+
+        Parameters
+        ----------
+        tokens : dict
+            Base claim dict to populate; updated in place with the decoded
+            registered and custom claims.
+        jwt_payload : str
+            The encoded JWT to decode and verify.
+        secret : str
+            Shared secret used to verify the signature.
+        algorithm : str
+            Signing algorithm to verify against (default ``'HS256'``).
+        leeway : int
+            Seconds of clock-skew tolerance between the issuing and verifying
+            hosts when validating the time claims (iat/nbf/exp), so a token
+            issued "now" is not rejected with ImmatureSignatureError. Per
+            RFC 7519 this should be kept small -- "no more than a few minutes", and
+            30 is the lower-end of normal leeway.
+
+        Returns
+        -------
+        :class:`ArxivUserClaims`
+
+        Raises
+        ------
+        ValueError
+            If the claims cannot be validated into an
+            :class:`ArxivUserClaimsModel`, or the payload cannot be decoded.
+        jwt.exceptions.InvalidTokenError
+            If signature verification or time-claim validation fails
+            (e.g. expired or not-yet-valid token).
         """
-        payload_ng = jwt.decode(jwt_payload, secret, algorithms = [algorithm])
+        payload_ng = jwt.decode(jwt_payload, secret, algorithms = [algorithm], leeway=leeway)
         try:
             payload = json.loads(payload_ng.get(NG_COOKIE_HITCHHIKER_NAME) or '{}')
         except Exception as e:

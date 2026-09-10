@@ -12,7 +12,7 @@ class FulltextNotTooShort(BaseCheck):
     on_failure_policy = OnFailurePolicy.WARN
     failure_message = "Text too short."
 
-    required_inputs = {"fulltext"}
+    required_data = {"fulltext"}
 
     min_chars = 10000
     min_words = 1400

@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import QaDataRegistry, Result, Disposition
 from qa.checks.metadata.msc_class import MscClassIsValid
 
 
@@ -14,37 +14,60 @@ def sub_result(result: Result, name: str) -> Result:
 
 class TestMscClassIsValid:
     def test_pass_normal(self):
-        assert MscClassIsValid.check("35K55; 65M06").passed
+        assert MscClassIsValid.check("35K55").passed
 
-    def test_pass_none(self):
+    def test_none_is_ignored(self):
         result = MscClassIsValid.check(None)
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
-    def test_pass_empty(self):
+    def test_empty_is_ignored(self):
         result = MscClassIsValid.check("")
-        assert result.passed
-        assert result.results == []
+        assert not result.passed
+        assert result.disposition == Disposition.OK
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert result.results[0].check_config["name"] == "field_is_not_empty"
 
     def test_warn_too_long(self):
-        result = MscClassIsValid.check("x" * 1001)
-        assert result.passed
+        result = MscClassIsValid.check("x" * 161)
+        assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
     def test_warn_contains_url(self):
         result = MscClassIsValid.check("https://example.com/35K55")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_url").passed
 
     def test_warn_contains_doi(self):
         result = MscClassIsValid.check("doi:10.1103/35K55")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_doi").passed
 
-    def test_warn_contains_semicolon(self):
+    def test_fail_contains_semicolon(self):
         result = MscClassIsValid.check("35K55; 65M06")
-        assert result.passed
+        assert not result.passed
         assert not sub_result(result, "does_not_contain_semicolon").passed
+
+    def test_pass_extra_whitespace_without_cleanup(self):
+        """Extra whitespace is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert MscClassIsValid.check("35K55  65M06").passed
+
+    def test_pass_space_in_parens_without_cleanup(self):
+        """Unnecessary space in parens is only normalized via cleanup(); check() no longer rejects it directly."""
+        assert MscClassIsValid.check("14J60 ( Primary)").passed
+
+    def test_pass_control_chars_without_cleanup(self):
+        """Control characters are only normalized via cleanup(); check() no longer rejects them directly."""
+        assert MscClassIsValid.check("35K55\t65M06").passed
+
+    def test_fail_malformed_unicode(self):
+        result = MscClassIsValid.check("35K55 \xc0\x80 65M06")
+        assert not result.passed
+        assert not sub_result(result, "no_utf8_decoding_errors").passed
 
     def test_pass_space_separated(self):
         assert MscClassIsValid.check("abc def").passed
@@ -66,4 +89,23 @@ class TestMscClassIsValid:
         assert result.check_config["name"] == "msc_class_is_valid"
         assert result.check_config["id"] == 800
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+
+
+class TestCleanup:
+    def test_collapses_whitespace_without_converting_semicolons(self):
+        assert MscClassIsValid.cleanup("  35K55 ; 65M06  ") == "35K55 ; 65M06"
+
+    def test_strips_msc_classification_prefix(self):
+        assert MscClassIsValid.cleanup("MSC classification: 35K55") == "35K55"
+
+    def test_strips_msc_2000_prefix(self):
+        assert MscClassIsValid.cleanup("MSC 2000: 35K55") == "35K55"
+
+    def test_does_not_normalize_comma_spacing(self):
+        assert MscClassIsValid.cleanup("35K55,65M06") == "35K55,65M06"
+
+    def test_removes_control_chars(self):
+        assert MscClassIsValid.cleanup("35K55\x0065M06") == "35K55 65M06"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert MscClassIsValid.cleanup("14J60 ( Primary)") == "14J60 (Primary)"

@@ -8,8 +8,6 @@ from arxiv.authors import parse_author_affil
 from qa.checks.base import BaseGenericCheck
 from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 
-# Note: the ids in this file should be the metadata check id + 10000,
-# to avoid collision with the check_ids previously used in the arxiv_checks table.
 
 _LLM_NAMES = {
     "llama",
@@ -58,8 +56,15 @@ class BaseAuthorPatternCheck(BaseAuthorCheck):
 
     _pattern: str
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern)
 
     @property
@@ -80,7 +85,7 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
     id = 10051
     version = "1.0.0"
     description = "No author has only a surname without a given name, unless it is a known collaboration or LLM name."
-    failure_message = "Contains lone surname."
+    failure_message = "Contains an author surname without a given name."
 
     _collaboration_patterns = [
         r"collaboration",
@@ -93,8 +98,15 @@ class AuthorsDoNotContainLoneSurname(BaseAuthorCheck):
 
     _pattern = "|".join(_collaboration_patterns)
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
 
     @property
@@ -117,7 +129,7 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
     id = 10052
     version = "1.0.0"
     description = "No author's name appears to be an AI language model."
-    failure_message = "Potential LLM author detected."
+    failure_message = "Contains an LLM author."
 
     _llm_name_patterns = [
         r"\bchatgpt?\b",
@@ -133,8 +145,15 @@ class AuthorsDoNotContainLlmAuthor(BaseAuthorCheck):
 
     _pattern = "|".join(_llm_name_patterns)
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
 
     @property
@@ -164,7 +183,7 @@ class AuthorNamesDoNotContainBrackets(BaseAuthorPatternCheck):
     id = 10054
     version = "1.0.0"
     description = "No parsed author name contains square bracket characters."
-    failure_message = "Unusual character detected."
+    failure_message = "Contains square brackets."
 
     _pattern = r"\[|]"
 
@@ -186,13 +205,9 @@ class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
     id = 10056
     version = "1.0.0"
     description = "No parsed author name contains institution or affiliation keywords."
-    failure_message = "Contains a suffix that may be university affiliation or degree related."
+    failure_message = "Contains an keyword that may be affiliation or degree related."
 
     _affiliation_patterns = [
-        r"\bIEEE\b",
-        r"\bphd\b",
-        r"\bprof\b",
-        r"\bdr\b",
         r"\bPhysics\b",
         r"\bMath\b",
         r"\bInst\b",
@@ -205,6 +220,35 @@ class AuthorNamesDoNotContainAffiliation(BaseAuthorPatternCheck):
 
     _pattern = "|".join(_affiliation_patterns)
 
-    def __init__(self, *, on_failure_policy: OnFailurePolicy, data: str, field: str) -> None:
-        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field)
+    def __init__(
+        self,
+        *,
+        on_failure_policy: OnFailurePolicy,
+        data: str,
+        field: str,
+        failure_message: str | None = None,
+    ) -> None:
+        super().__init__(on_failure_policy=on_failure_policy, data=data, field=field, failure_message=failure_message)
         self._compiled_pattern = re.compile(self._pattern, re.IGNORECASE)
+
+
+class AuthorNamesDoNotContainPrefix(BaseAuthorPatternCheck):
+    name = "author_names_do_not_contain_prefix"
+    display_name = "Author Names Do Not Contain Prefix"
+    id = 10064
+    version = "1.0.0"
+    description = "No parsed author name contains a title prefix such as 'Dr' or 'Prof'."
+    failure_message = "Contains a prefix that may be a title, e.g. 'Dr' or 'Prof'."
+
+    _pattern = r"\b(Dr|DR|Prof|PROF)(\.|,)"
+
+
+class AuthorNamesDoNotContainDegreeSuffix(BaseAuthorPatternCheck):
+    name = "author_names_do_not_contain_degree_suffix"
+    display_name = "Author Names Do Not Contain Degree Suffix"
+    id = 10065
+    version = "1.0.0"
+    description = "No parsed author name contains a degree or society suffix such as 'PhD' or 'IEEE'."
+    failure_message = "Contains a suffix that may be a degree or society, e.g. 'PhD' or 'IEEE'."
+
+    _pattern = r"\b(PhD|PHD|IEEE)\b"

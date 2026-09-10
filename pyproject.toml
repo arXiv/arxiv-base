@@ -47,8 +47,6 @@ sphinx-autodoc-typehints = { version = "*", optional = true }
 psycopg2-binary = { version = ">=2.9.9", optional = true  }
 retry = "^0.9.2"
 pyjwt = "^2.9.0"
-redis = "==2.10.6"
-redis-py-cluster = "==1.3.6"
 setuptools = "^78.1.1"
 pydantic-settings = "^2.5.2"
 jwcrypto = "^1.5.6"
@@ -66,7 +64,6 @@ qa = [ "gcld3", "wheel"]
 autopep8 = "^2.3.1"
 black = "^24.10.0"
 click = "*"
-fakeredis = "*"
 functions-framework = "^3.8.1"
 geoalchemy2 = "^0.15.2"
 google-cloud-bigquery = "^3.26.0"

@@ -3,7 +3,7 @@
 import pytest
 
 from qa.checks.base import MissingDataError
-from qa.checks.models import OnFailurePolicy, QaDataRegistry, Metadata, Result
+from qa.checks.models import Disposition, QaDataRegistry, Metadata, Result
 from qa.checks.metadata.title import TitleIsValid
 
 
@@ -28,34 +28,76 @@ class TestTitleIsValid:
     def test_fail_empty_short_circuits(self):
         result = TitleIsValid.check("")
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Title is invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
 
     def test_warn_too_short(self):
-        result = TitleIsValid.check("Tiny")
-        assert result.passed
+        result = TitleIsValid.check("Ti")
+        assert not result.passed
         assert not sub_result(result, "not_too_short").passed
+
+    def test_fail_too_long(self):
+        result = TitleIsValid.check("x" * 301)
+        assert not result.passed
+        assert not sub_result(result, "not_too_long").passed
+
+    def test_pass_at_max_length(self):
+        assert TitleIsValid.check("X" + "x" * 299).passed
 
     def test_pass_ends_with_punctuation(self):
         result = TitleIsValid.check("A title with period.")
         assert result.passed
 
+    def test_warn_all_caps(self):
+        result = TitleIsValid.check("A TITLE IN ALL CAPS")
+        assert not result.passed
+        assert not sub_result(result, "not_all_caps").passed
+
     def test_pass_digit_strings_not_caps(self):
         result = TitleIsValid.check("The is a title with 12345678 and 987654321 words not capitalized")
         assert result.passed
 
-    def test_pass_short_html_like_tags(self):
-        result = TitleIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>")
-        assert result.passed
+    def test_fail_html_escape(self):
+        result = TitleIsValid.check("Fish &amp; chips")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_html_escapes").passed
 
-    def test_warn_begins_with_title(self):
-        result = TitleIsValid.check("Title: Something")
-        assert result.passed
-        assert not sub_result(result, "does_not_begin_with_title").passed
+    def test_fail_unacceptable_html_tag(self):
+        result = TitleIsValid.check("A title with <p>paragraph</p>")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
+
+    def test_warn_allowed_html_tag(self):
+        result = TitleIsValid.check("Title with <em>emphasis</em>")
+        assert not result.passed
+        assert result.disposition == Disposition.WARN
+        assert not sub_result(result, "no_html_elements").passed
+        assert sub_result(result, "does_not_contain_unacceptable_html_tags").passed
+
+    def test_pass_short_html_like_tags_not_flagged_by_no_html_elements(self):
+        result = TitleIsValid.check("These should not be flagged as HTML: <x> <xyz> <ijk> <i> <b>")
+        assert not result.passed
+        assert sub_result(result, "no_html_elements").passed
+        assert not sub_result(result, "does_not_contain_unacceptable_html_tags").passed
+
+    def test_pass_begins_with_title_without_cleanup(self):
+        """A leading 'title:' prefix is only stripped via cleanup(); check() does not reject it directly."""
+        assert TitleIsValid.check("Title: Something").passed
 
     def test_pass_single_backslash(self):
         result = TitleIsValid.check("This \\ is not a line break")
         assert result.passed
+
+    def test_fail_tex_linebreak(self):
+        result = TitleIsValid.check("Line break at end\\\\")
+        assert not result.passed
+        assert not sub_result(result, "does_not_contain_linebreak").passed
+
+    def test_pass_raw_newline_without_cleanup(self):
+        """A raw newline is only normalized via cleanup(); check() does not reject it directly."""
+        assert TitleIsValid.check("A title with\na raw newline").passed
 
     def test_pass_complex_parens(self):
         result = TitleIsValid.check("Something about sin(x), H2(SO)4, and (Non-)Commutative operations")
@@ -73,8 +115,10 @@ class TestTitleIsValid:
     def test_none_field_short_circuits(self):
         result = TitleIsValid().run(QaDataRegistry(metadata=Metadata(title=None)))
         assert not result.passed
-        assert result.results == []
-        assert result.message == "Title is invalid or empty."
+        assert result.results is not None
+        assert len(result.results) == 1
+        assert not result.results[0].passed
+        assert result.results[0].disposition == Disposition.REJECT
 
     def test_missing_metadata_raises(self):
         with pytest.raises(MissingDataError):
@@ -85,7 +129,36 @@ class TestTitleIsValid:
         assert result.check_config["name"] == "title_is_valid"
         assert result.check_config["id"] == 100
         assert result.check_config["version"] == "1.0.0"
-        assert result.check_config["on_failure_policy"] == OnFailurePolicy.REJECT
 
-    def test_fail_on_failure_policy_reject(self):
-        assert TitleIsValid.check("").check_config["on_failure_policy"] == OnFailurePolicy.REJECT
+    def test_fail_gives_reject_disposition(self):
+        assert TitleIsValid.check("").disposition == Disposition.REJECT
+
+    def test_fail_empty_messages_are_not_empty(self):
+        """_messages() should surface a reason even when the field itself is empty."""
+        assert TitleIsValid.check("")._messages(Disposition.REJECT) != ""
+
+
+class TestCleanup:
+    def test_collapses_whitespace_and_strips(self):
+        assert TitleIsValid.cleanup("  A   title  with   spaces  ") == "A title with spaces"
+
+    def test_strips_leading_title_colon_prefix(self):
+        assert TitleIsValid.cleanup("Title: Something") == "Something"
+
+    def test_does_not_strip_title_prefix_without_colon(self):
+        assert TitleIsValid.cleanup("Title Something") == "Title Something"
+
+    def test_does_not_strip_title_like_word(self):
+        assert TitleIsValid.cleanup("Titleist irons review") == "Titleist irons review"
+
+    def test_converts_raw_newline_to_space(self):
+        assert TitleIsValid.cleanup("A title with\na raw newline") == "A title with a raw newline"
+
+    def test_removes_control_chars(self):
+        assert TitleIsValid.cleanup("A title\x00with control") == "A title with control"
+
+    def test_removes_space_before_comma(self):
+        assert TitleIsValid.cleanup("A title , with comma") == "A title, with comma"
+
+    def test_removes_unnecessary_space_in_parens(self):
+        assert TitleIsValid.cleanup("A title ( draft )") == "A title (draft)"

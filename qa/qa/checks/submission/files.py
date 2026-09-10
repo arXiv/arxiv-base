@@ -3,7 +3,8 @@
 from qa.checks.base import BaseCheck
 from qa.checks.models import OnFailurePolicy, QaDataRegistry, Result
 
-# TODO: oversize images, too!
+# TODO: add oversize image check
+# TODO: add TeX processing flag checks (post-exCITe)
 
 
 class DoesNotExceedTheFileSizeLimit(BaseCheck):
@@ -48,6 +49,3 @@ class FileTypeDoesNotRequireReview(BaseCheck):
             return self._result(passed=False, message=self.failure_message)
         else:
             return self._result(passed=True)
-
-
-# TODO: add TeX processing flag checks (post-exCITe)
