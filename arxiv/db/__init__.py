@@ -45,7 +45,7 @@ import json
 import threading
 from datetime import datetime, timedelta
 from contextlib import contextmanager
-from typing import Tuple, Optional
+from typing import Any, Callable, Tuple, Optional
 
 from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.event import listens_for
@@ -164,9 +164,29 @@ def config_query_timing(engine: Engine, slightly_long_sec: float, long_sec: floa
                 print (json.dumps(log))
 
 
-def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
+def configure_db (base_settings: Settings,
+                  creator: Optional[Callable[[], Any]] = None) -> Tuple[Engine, Optional[Engine]]:
+    """Build the classic (and optional LaTeXML) engines from ``base_settings``.
+
+    ``creator``, when given, is handed to SQLAlchemy's ``create_engine`` as its
+    ``creator`` argument: a zero-argument callable returning a live DBAPI
+    connection. It lets a caller own the dialling while arxiv-base still owns
+    the engine, models and Session -- needed whenever a connection cannot be
+    expressed as a URI, such as the Cloud SQL Python Connector, where the
+    caller passes a dialect-only ``CLASSIC_DB_URI`` (``"mysql+pymysql://"``)
+    plus the connector's ``connect`` callable.
+
+    Without it such a caller has to build its own engine and then rebind
+    arxiv-base's models and session_factory onto it by hand, which is easy to
+    get half-right -- ORM and raw SQL landing on two connections deadlock
+    against each other.
+
+    Applies to the classic engine only; the LaTeXML engine is always built
+    from its URI.
+    """
+    classic_kwargs = {} if creator is None else {"creator": creator}
     if 'sqlite' in base_settings.CLASSIC_DB_URI:
-        engine = create_engine(base_settings.CLASSIC_DB_URI)
+        engine = create_engine(base_settings.CLASSIC_DB_URI, **classic_kwargs)
         if base_settings.LATEXML_DB_URI:
             latexml_engine = create_engine(base_settings.LATEXML_DB_URI)
         else:
@@ -177,7 +197,8 @@ def configure_db (base_settings: Settings) -> Tuple[Engine, Optional[Engine]]:
                         isolation_level=base_settings.CLASSIC_DB_TRANSACTION_ISOLATION_LEVEL,
                         pool_recycle=600,
                         max_overflow=(base_settings.REQUEST_CONCURRENCY - 5), # max overflow is how many + base pool size, which is 5 by default
-                        pool_pre_ping=base_settings.POOL_PRE_PING)
+                        pool_pre_ping=base_settings.POOL_PRE_PING,
+                        **classic_kwargs)
         if base_settings.LATEXML_DB_URI:
             stmt_timeout: int = max(base_settings.LATEXML_DB_QUERY_TIMEOUT, 1)
             latexml_engine = create_engine(base_settings.LATEXML_DB_URI,
