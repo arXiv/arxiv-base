@@ -222,6 +222,27 @@ def next_publish_time(dt: datetime, holidays: frozenset[str]) -> datetime:
     return publish.replace(hour=publish_hour_policy())
 
 
+def last_publish_time(dt: datetime, holidays: frozenset[str]) -> datetime:
+    """Most recent publish time at/before ``dt``.
+
+    The backward-walking counterpart to :func:`next_publish_time`, answering
+    "when was the mailing that should have run most recently" rather than
+    "when is the next one". Used to detect a publish run that never started.
+
+    Boundary: at/after today's 20:00 on a publish day returns today's publish
+    time; strictly before it walks back to the most recent prior publish day.
+    """
+    dt = dt.astimezone(BUSINESS_TZ)
+    publish = _midnight(dt.date())
+    if dt.hour < publish_hour_policy():
+        publish -= timedelta(days=1)
+
+    while not is_publish_day(publish.date(), holidays):
+        publish -= timedelta(days=1)
+
+    return publish.replace(hour=publish_hour_policy())
+
+
 def publish_time(submit_dt: datetime, holidays: frozenset[str]) -> datetime:
     """Publish time for a paper submitted at ``submit_dt``. Port of ``publish_time``.
 
@@ -248,6 +269,19 @@ def is_between_freeze_and_publish(
         next_publish = next_publish_time(last_freeze, holidays)
     next_publish = next_publish + timedelta(minutes=1)
     return last_freeze <= now <= next_publish
+
+
+def pub_yymmdd(dt: datetime, holidays: frozenset[str]) -> str:
+    """``YYMMDD`` of the publish day belonging to the freeze most recently
+    passed at ``dt``. Port of ``pub_yymmdd``.
+
+    This is the mailing a paper frozen in the current cycle lands in, so it
+    is *not* :func:`last_publish_time`: a Friday freeze announces on the
+    following Sunday, two days after a mailing that already ran on Thursday.
+    """
+    return next_publish_time(
+        last_freeze_time(dt, holidays), holidays
+    ).strftime("%y%m%d")
 
 
 # --------------------------------------------------------------------------
