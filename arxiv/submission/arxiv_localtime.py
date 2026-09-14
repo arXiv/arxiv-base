@@ -19,8 +19,6 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..db.models import Holiday
-
 # Timezone of the arXiv business offices (freeze / publish policy is
 # expressed in this zone). Port of $ARXIV_OFFICES_BUSINESS_TZ from
 # arXiv::Config::MainSite.
@@ -59,6 +57,13 @@ def get_holidays(
     reference a holiday a few days before ``now``; pass an earlier
     ``start_date`` if you rely on those.
     """
+    # Imported here, not at module scope: ``arxiv.db`` builds an engine from
+    # CLASSIC_DB_URI as an import side effect, and every other function in
+    # this module is pure date arithmetic that needs no database at all.
+    # A module-scope import makes merely computing a publish day require a
+    # configured DB, which breaks callers that connect by other means.
+    from ..db.models import Holiday
+
     stmt = select(Holiday.freeze_skip_date)
     if start_date is not None:
         if callable(start_date):
