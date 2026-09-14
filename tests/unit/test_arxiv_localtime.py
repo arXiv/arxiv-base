@@ -330,6 +330,48 @@ class TestNextPublishTime:
 
 
 # ==========================================================================
+# last_publish_time -- the mailing that should most recently have run
+# ==========================================================================
+
+class TestLastPublishTime:
+    """Backward counterpart of ``next_publish_time``.
+
+    Answers "when was the mailing that should already have gone out", which
+    is what a monitor needs to notice a publish run that never started.
+    """
+
+    def test_exactly_at_publish_hour_is_today(self, holidays: frozenset[str]) -> None:
+        """20:00:00 on a publish day -> today's mailing, not yesterday's."""
+        result = lt.last_publish_time(biz(2025, 1, 7, 20, 0), holidays)
+        assert result == biz(2025, 1, 7, 20, 0)
+
+    def test_before_publish_hour_walks_back(self, holidays: frozenset[str]) -> None:
+        """Tue 19:00 -> tonight's mailing has not run yet -> Mon 20:00."""
+        result = lt.last_publish_time(biz(2025, 1, 7, 19, 0), holidays)
+        assert result == biz(2025, 1, 6, 20, 0)
+
+    def test_saturday_walks_back_past_friday(self, holidays: frozenset[str]) -> None:
+        """Neither Sat nor Fri publishes -> Thu 2025-01-09 20:00."""
+        result = lt.last_publish_time(biz(2025, 1, 11, 12, 0), holidays)
+        assert result == biz(2025, 1, 9, 20, 0)
+
+    def test_sunday_evening_is_sunday(self, holidays: frozenset[str]) -> None:
+        """Sun does publish when the preceding Fri was a workday."""
+        result = lt.last_publish_time(biz(2025, 1, 12, 21, 0), holidays)
+        assert result == biz(2025, 1, 12, 20, 0)
+
+    def test_walks_back_over_a_holiday(self, holidays: frozenset[str]) -> None:
+        """Mon 01-20 is a holiday -> the last mailing was Sun 01-19."""
+        result = lt.last_publish_time(biz(2025, 1, 20, 21, 0), holidays)
+        assert result == biz(2025, 1, 19, 20, 0)
+
+    def test_friday_holiday_also_kills_the_sunday(self, holidays: frozenset[str]) -> None:
+        """Fri 07-04 holiday -> Sun 07-06 does not publish either -> Thu 07-03."""
+        result = lt.last_publish_time(biz(2025, 7, 7, 10, 0), holidays)
+        assert result == biz(2025, 7, 3, 20, 0)
+
+
+# ==========================================================================
 # publish_time -- when a paper submitted at ``now`` gets announced
 # ==========================================================================
 
@@ -393,6 +435,31 @@ class TestIsBetweenFreezeAndPublish:
         """20:02 -> past the one-minute cushion -> outside the window."""
         assert lt.is_between_freeze_and_publish(
             biz(2025, 1, 7, 20, 2), holidays) is False
+
+
+# ==========================================================================
+# pub_yymmdd -- mail_id stamp for the freeze cycle in flight
+# ==========================================================================
+
+class TestPubYymmdd:
+    """The mailing that the most recently passed freeze lands in."""
+
+    def test_same_day_after_publish(self, holidays: frozenset[str]) -> None:
+        """Wed 21:00: Wed's freeze announced in Wed's own mailing."""
+        assert lt.pub_yymmdd(biz(2025, 1, 8, 21, 0), holidays) == "250108"
+
+    def test_before_freeze_uses_the_previous_cycle(self, holidays: frozenset[str]) -> None:
+        """Thu 10:00 is before Thu's freeze -> still Wed's cycle."""
+        assert lt.pub_yymmdd(biz(2025, 1, 9, 10, 0), holidays) == "250108"
+
+    def test_friday_freeze_announces_on_sunday(self, holidays: frozenset[str]) -> None:
+        """This is why it is not ``last_publish_time``: that would say Thu 01-09."""
+        assert lt.pub_yymmdd(biz(2025, 1, 10, 15, 0), holidays) == "250112"
+        assert lt.last_publish_time(biz(2025, 1, 10, 15, 0), holidays) == biz(2025, 1, 9, 20, 0)
+
+    def test_holiday_has_no_freeze_of_its_own(self, holidays: frozenset[str]) -> None:
+        """Thu 11-27 is a holiday: no freeze ran, so the cycle is Wed 11-26's."""
+        assert lt.pub_yymmdd(biz(2025, 11, 27, 15, 0), holidays) == "251126"
 
 
 # ==========================================================================
