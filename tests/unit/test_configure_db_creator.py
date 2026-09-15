@@ -62,16 +62,22 @@ def test_creator_applies_to_the_non_sqlite_branch() -> None:
     """The MySQL branch is the real target: a dialect-only URI plus a creator,
     exactly how the Cloud SQL Python Connector is wired.
 
+    The driver is mysqldb, NOT pymysql: ``create_engine`` imports the DBAPI
+    eagerly, and mysqlclient (which provides ``MySQLdb``) is a locked main
+    dependency of this package while pymysql appears nowhere in poetry.lock.
+    A pymysql URL fails in CI with ModuleNotFoundError even though it works
+    in environments that happen to have it.
+
     Asserted on the built engine rather than by connecting: the mysql dialect
-    calls ``character_set_name()`` on every new connection, which only a real
-    MySQL DBAPI provides. What matters here is that the creator reaches the
+    calls ``character_set_name()`` on every new connection, which only a live
+    MySQL server provides. What matters here is that the creator reaches the
     pool on this branch too, alongside the branch's pool options.
     """
 
     def creator():  # never called -- we do not connect
         raise AssertionError("unreachable")
 
-    engine, _ = configure_db(_settings("mysql+pymysql://"), creator=creator)
+    engine, _ = configure_db(_settings("mysql+mysqldb://"), creator=creator)
     assert engine.dialect.name == "mysql"
     assert engine.pool._creator is creator
     assert engine.pool._recycle == 600  # branch options still applied
