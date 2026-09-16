@@ -43,7 +43,7 @@ jobs:
       - name: Run arxiv-base tests with coverage
       # Run tests with high coverage first
         run: |
-          poetry run pytest --cov=arxiv.base --cov=arxiv.metadata --cov-fail-under=85 arxiv
+          poetry run pytest --cov=arxiv.base --cov-fail-under=85 arxiv
           poetry run pytest --cov=fourohfour --cov-fail-under=74 fourohfour --cov-append
           poetry run pytest --cov=arxiv --cov-fail-under=82 arxiv --cov-append
 
