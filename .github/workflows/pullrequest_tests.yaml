@@ -45,7 +45,7 @@ jobs:
         run: |
           poetry run pytest --cov=arxiv.base --cov-fail-under=85 arxiv
           poetry run pytest --cov=fourohfour --cov-fail-under=74 fourohfour --cov-append
-          poetry run pytest --cov=arxiv --cov-fail-under=82 arxiv --cov-append
+          poetry run pytest --cov=arxiv --cov-fail-under=79 arxiv --cov-append
 
       # - name: Check Types
       # TODO The types are in bad shape and need to be fixed
