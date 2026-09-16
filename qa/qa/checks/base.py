@@ -209,10 +209,7 @@ class BaseAggregateCheck(BaseCheck):
             if check._short_circuits_on_failure and not result.passed:
                 break
 
-        if self._passed(results):
-            return self._result(passed=True, results=results)
-        else:
-            return self._result(passed=False, results=results, message=self.failure_message)
+        return self._result(passed=self._passed(results), results=results)
 
     def _passed(self, results: list[Result]) -> bool:
         """The aggregate passes only if every sub-check passed."""
@@ -230,13 +227,18 @@ class BaseAggregateCheck(BaseCheck):
         self,
         passed: bool,
         results: list[Result],
-        message: str = "",
     ) -> Result:
+        """
+        The message follows the disposition, not `passed` - a sub-check that failed
+        under an IGNORE policy leaves the aggregate not passing but still ok, and an
+        ok result must not carry a failure message.
+        """
+        disposition = self._disposition(results)
         return Result(
             check_config=self.config,
             passed=passed,
-            disposition=self._disposition(results),
-            message=message,
+            disposition=disposition,
+            message="" if disposition == Disposition.OK else self.failure_message,
             results=results,
         )
 
