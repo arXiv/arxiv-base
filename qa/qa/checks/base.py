@@ -229,9 +229,7 @@ class BaseAggregateCheck(BaseCheck):
         results: list[Result],
     ) -> Result:
         """
-        The message follows the disposition, not `passed` - a sub-check that failed
-        under an IGNORE policy leaves the aggregate not passing but still ok, and an
-        ok result must not carry a failure message.
+        The message follows the disposition, not `passed`.
         """
         disposition = self._disposition(results)
         return Result(
