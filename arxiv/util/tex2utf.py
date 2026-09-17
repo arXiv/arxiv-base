@@ -37,7 +37,7 @@ accents = {
     'cG': 0x0122, 'cK': 0x0136, 'cL': 0x013b, 'cN': 0x0145,
     'cR': 0x0156, 'cS': 0x015e, 'cT': 0x0162, 'cc': 0x00e7,
     'ce': 0x0229, 'cg': 0x0123, 'ck': 0x0137, 'cl': 0x013c,
-    # Commented out due ARXIVDEV-2322 (bug reported by PG)
+    # Commented out due to ARXIVDEV-2322 (bug reported by PG)
     # 'ci' : 'i\x{0327}' = chr(0x69).ch(0x327) # i with combining cedilla
     'cn': 0x0146, 'cr': 0x0157, 'cs': 0x015f, 'ct': 0x0163,
     'kA': 0x0104, 'kE': 0x0118, 'kI': 0x012e, 'kO': 0x01ea,
@@ -87,7 +87,7 @@ textgreek = {
     'kappa': 0x03ba, 'lambda': 0x03bb, 'mu': 0x03bc,
     'nu': 0x03bd, 'xi': 0x03be, 'omicron': 0x03bf,
     'pi': 0x03c0, 'rho': 0x03c1, 'varsigma': 0x03c2,
-    'sigma': 0x03c3, 'tau': 0x03c4, 'upsion': 0x03c5,
+    'sigma': 0x03c3, 'tau': 0x03c4, 'upsilon': 0x03c5,
     'varphi': 0x03C6,  # φ
     'phi':  0x03D5,  # ϕ
     'chi': 0x03c7, 'psi': 0x03c8, 'omega': 0x03c9,
@@ -128,7 +128,7 @@ def _textgreek_sub(match: Match) -> str:
 def texch2UTF(acc: str) -> str:
     """Convert single character TeX accents to UTF-8.
 
-    Strip non-whitepsace characters from any sequence not recognized
+    Strip non-whitespace characters from any sequence not recognized
     (hence could return an empty string if there are no word characters
     in the input string).
 
@@ -145,7 +145,7 @@ def tex2utf(tex: str, greek: bool = True) -> str:
 
     :param tex: Text to filter.
     :param greek: If False, do not convert greek letters or ligatures.
-        Greek symbols can cause problems. Ex. \phi is not suppose to
+        Greek symbols can cause problems. Ex. \phi is not supposed to
         look like φ. φ looks like \varphi. See ARXIVNG-1612
     :returns: string, possibly with some TeX replaced with UTF8
     """
@@ -175,7 +175,7 @@ def tex2utf(tex: str, greek: bool = True) -> str:
                  lambda m: texch2UTF(m.group(1) + m.group(2)), utf)
 
     # Accents which have a letter prefix in TeX
-    #  \u{x} u above (breve), \v{x}   v above (caron), \H{x}   double accute...
+    #  \u{x} u above (breve), \v{x}   v above (caron), \H{x}   double acute...
     utf = re.sub(r'\\([Hckoruv])\{([a-zA-Z])\}',
                  lambda m: texch2UTF(m.group(1) + m.group(2)), utf)
 
