@@ -21,7 +21,6 @@ from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 metadata_checks: list[BaseCheck] = [
     TitleIsValid(),
     AuthorsAreValid(),
-    AuthorsContainsSubmitterName(),
     AbstractIsValid(),
     CommentsAreValid(),
     ReportNumIsValid(),
@@ -32,6 +31,7 @@ metadata_checks: list[BaseCheck] = [
 ]
 
 submit_event_checks: list[BaseCheck] = metadata_checks + [
+    AuthorsContainsSubmitterName(),
     DoesNotExceedTheFileSizeLimit(),
     FileTypeDoesNotRequireReview(),
     IsNotAWithdrawal(),
