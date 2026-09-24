@@ -18,7 +18,9 @@
 <title>{{ pagetitle }} | arXiv e-print repository</title>
 <script defer src="{{ url_for('base.static', filename='fontawesome-free-5.11.2-web/js/all.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('base.static', filename='css/arxivstyle.css')}}" />
-<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('base.static', filename='css/arxiv-header-footer.css') }}?v=20260624c" />
+{#- Not screen-only: in print its own rules size the logo and hide the rest of the
+    chrome, whose icons and funder logos have no size without it (ARXIVCE-4527). -#}
+<link rel="stylesheet" type="text/css" href="{{ url_for('base.static', filename='css/arxiv-header-footer.css') }}?v=20260924" />
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     messageStyle: "none",
