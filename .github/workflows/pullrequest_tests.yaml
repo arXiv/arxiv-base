@@ -4,6 +4,7 @@ on:
     paths-ignore:
       - "qa/**"
       - "arxiv-functions/**"
+      - "consistency-checks/**"
       
 jobs:
   build:

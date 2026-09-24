@@ -1,0 +1,16 @@
+name: consistency-checks triggers
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "consistency-checks/**"
+
+jobs:
+  call-lint-test:
+    name: Lint and test consistency-checks
+    uses: ./.github/workflows/lint-test-package.yml
+    with:
+      package_name: consistency-checks
