@@ -381,10 +381,13 @@
   .ds-site-header.is-collapsible .ds-site-header-divider { display: none; }
 }
 
+/* Print keeps the logo, at a modest size, and none of the bar or its controls */
 @media print {
   .ds-announcement,
-  .ds-site-header,
-  .ds-skip-link { display: none !important; }
+  .ds-skip-link,
+  .ds-site-header > :not(.ds-site-header-logo) { display: none !important; }
+  .ds-site-header { height: auto; padding: 0 0 16px; background: none; }
+  .ds-site-header-logo img { height: 28px; }
 }
 
 
