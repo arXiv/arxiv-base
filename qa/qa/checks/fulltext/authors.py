@@ -8,14 +8,14 @@ class AuthorsFoundInFulltext(BaseCheck):
     display_name = "Authors Found In Fulltext"
     id = 8
     version = "1.0.0"
-    description = "The metadata authors were found in the full text, and none look anonymous or invalid."
+    description = "Every metadata author was found in the full text."
     on_failure_policy = OnFailurePolicy.WARN
-    failure_message = "Author check failed."
+    failure_message = "Some authors from metadata not found in text."
 
     required_data = {"author_report"}
 
-    # Flags written by the arxiv-qa check_authors cloud function.
-    failure_flag_ids = ("missing-authors-fulltext", "anonymous-authors", "bad-authors")
+    # Flag written by the arxiv-qa check_authors cloud function.
+    failure_flag_id = "missing-authors-fulltext"
 
     @classmethod
     def check(cls, author_report: AuthorCheckReport) -> Result:
@@ -25,16 +25,14 @@ class AuthorsFoundInFulltext(BaseCheck):
     def config(self) -> dict:
         return {
             **super().config,
-            "failure_flag_ids": self.failure_flag_ids,
+            "failure_flag_id": self.failure_flag_id,
         }
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
         author_report = data_registry.author_report
         assert author_report is not None
 
-        failures = [flag for flag in author_report.flags if flag.id in self.failure_flag_ids]
-
-        if failures:
-            message = " ".join(flag.description or self.failure_message for flag in failures)
-            return self._result(passed=False, message=message)
+        for flag in author_report.flags:
+            if flag.id == self.failure_flag_id:
+                return self._result(passed=False, message=flag.description or self.failure_message)
         return self._result(passed=True)
