@@ -5,8 +5,10 @@ from qa.checks.models import FlaggedTermMatch, FlaggedTermsReport, Offset, QaDat
 def flagged_terms(matches: list[FlaggedTermMatch]) -> list[str]:
     """One entry per flagged term, in the order first found."""
     terms: dict[int, str] = {}
+
     for m in matches:
         terms.setdefault(m.keywords_id, m.keywords_name or m.match.strip())
+
     return list(terms.values())
 
 

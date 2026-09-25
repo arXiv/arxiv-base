@@ -1,20 +1,20 @@
 from qa.checks import generic
 from qa.checks.base import BaseAggregateCheck
 from qa.checks.generic.flagged_terms import flagged_terms
-from qa.checks.models import FlaggedTermsReport, OnFailurePolicy, QaDataRegistry, Result
+from qa.checks.models import Disposition, FlaggedTermsReport, OnFailurePolicy, QaDataRegistry, Result
 
 # The fields the arxiv-qa concerning_words cloud function searches.
 FLAGGED_TERMS_FIELDS = ("title", "authors", "abstract", "comments", "journal_ref", "fulltext")
 
 
 class NoFlaggedTerms(BaseAggregateCheck):
-    """Aggregate check with one sub-check per field searched for flagged terms (fka concerning words)."""
+    """Aggregate check with one sub-check per field."""
 
     name = "no_flagged_terms"
     display_name = "No Flagged Terms"
     id = 7
     version = "1.0.0"
-    description = "No flagged terms were found in the metadata or full text."
+    description = "No flagged terms were found in the metadata or fulltext."
     failure_message = "Flagged terms found"
 
     required_data = {"flagged_terms_report"}
@@ -33,7 +33,7 @@ class NoFlaggedTerms(BaseAggregateCheck):
     def _run(self, data_registry: QaDataRegistry) -> Result:
         result = super()._run(data_registry)
 
-        if result.message:
+        if result.disposition != Disposition.OK:
             report = data_registry.flagged_terms_report
             assert report is not None
             matches = [m for m in report.data if m.field in FLAGGED_TERMS_FIELDS]
