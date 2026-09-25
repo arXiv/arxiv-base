@@ -17,6 +17,7 @@ from qa.checks.submission.user import AuthorsContainsSubmitterName, SubmitterIsN
 
 from qa.checks.fulltext.authors import AuthorsFoundInFulltext  # noqa
 from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
+from qa.checks.fulltext.flagged_terms import NoFlaggedTerms  # noqa
 from qa.checks.fulltext.language import FulltextHasEnoughEnglish, FulltextLanguageRecognized  # noqa
 from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 
@@ -43,6 +44,7 @@ submit_event_checks: list[BaseCheck] = metadata_checks + [
 fulltext_checks: list[BaseCheck] = [
     TextExtractionSuccessful(),
     FulltextNotTooShort(),
+    NoFlaggedTerms(),
     AuthorsFoundInFulltext(),
     FulltextLanguageRecognized(),
     FulltextHasEnoughEnglish(),

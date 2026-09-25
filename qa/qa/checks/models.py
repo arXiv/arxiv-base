@@ -85,6 +85,35 @@ class FulltextReport(BaseReport):
     version: str = "1.0"
 
 
+class FlaggedTermMatch(BaseModel):
+    """
+    One match of a flagged term in a flagged terms report.
+    """
+
+    field: str
+    keywords_id: int
+    keywords_name: str | None = None
+    action: str | None = None
+    action_message: str | None = None
+    description: str | None = None
+    match: str
+    starts_at: int | None = None
+    ends_at: int | None = None
+    context: str | None = None
+
+
+class FlaggedTermsReport(BaseModel):
+    """
+    The {submission_id}.concerning_words.json report written by the arxiv-qa concerning_words cloud function.
+    Unlike BaseReport, it has no submission_id or flags: `data` is the list of matches.
+    """
+
+    name: str = "concerning-words"
+    version: str = "1.0"
+    data: list[FlaggedTermMatch] = []
+    metadata: dict = {}
+
+
 class AuthorCheckReport(BaseReport):
     """
     The {submission_id}.author-check.json report written by the check_authors cloud function.
@@ -156,7 +185,7 @@ class QaDataRegistry(BaseModel):
     fulltext: str | None = None
     fulltext_report: FulltextReport | None = None
     author_report: AuthorCheckReport | None = None
-    flagged_terms_report: str | None = None
+    flagged_terms_report: FlaggedTermsReport | None = None
     tex_report: str | None = None
     metadata: Metadata | None = None
     submit_event_info: SubmitEventInfo | None = None
