@@ -114,6 +114,16 @@ class FlaggedTermsReport(BaseModel):
     metadata: dict = {}
 
 
+class AuthorCheckReport(BaseReport):
+    """
+    The {submission_id}.author-check.json report written by the check_authors cloud function.
+    """
+
+    name: str = "arXiv Author Metadata Report"
+    key_name: str = "author-check"
+    version: str = "1.1"
+
+
 class SubmitEventInfo(BaseModel):
     """Information about the submission."""
 
@@ -174,7 +184,7 @@ class QaDataRegistry(BaseModel):
 
     fulltext: str | None = None
     fulltext_report: FulltextReport | None = None
-    author_report: str | None = None
+    author_report: AuthorCheckReport | None = None
     flagged_terms_report: FlaggedTermsReport | None = None
     tex_report: str | None = None
     metadata: Metadata | None = None

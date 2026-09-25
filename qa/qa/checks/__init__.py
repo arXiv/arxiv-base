@@ -15,8 +15,10 @@ from qa.checks.submission.files import DoesNotExceedTheFileSizeLimit, FileTypeDo
 from qa.checks.submission.type import IsNotAWithdrawal  # noqa
 from qa.checks.submission.user import AuthorsContainsSubmitterName, SubmitterIsNotFlagged  # noqa
 
+from qa.checks.fulltext.authors import AuthorsFoundInFulltext  # noqa
 from qa.checks.fulltext.extraction import TextExtractionSuccessful  # noqa
 from qa.checks.fulltext.flagged_terms import NoFlaggedTerms  # noqa
+from qa.checks.fulltext.language import FulltextHasEnoughEnglish, FulltextLanguageRecognized  # noqa
 from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 
 metadata_checks: list[BaseCheck] = [
@@ -43,6 +45,9 @@ fulltext_checks: list[BaseCheck] = [
     TextExtractionSuccessful(),
     FulltextNotTooShort(),
     NoFlaggedTerms(),
+    AuthorsFoundInFulltext(),
+    FulltextLanguageRecognized(),
+    FulltextHasEnoughEnglish(),
 ]
 
 checks: list[BaseCheck] = submit_event_checks + fulltext_checks
