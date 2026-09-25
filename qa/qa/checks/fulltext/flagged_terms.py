@@ -3,7 +3,7 @@ from qa.checks.base import BaseAggregateCheck
 from qa.checks.generic.flagged_terms import flagged_terms
 from qa.checks.models import Disposition, FlaggedTermsReport, OnFailurePolicy, QaDataRegistry, Result
 
-# The fields the arxiv-qa concerning_words cloud function searches.
+# The fields searched by the concerning_words cloud function
 FLAGGED_TERMS_FIELDS = ("title", "authors", "abstract", "comments", "journal_ref", "fulltext")
 
 
@@ -36,6 +36,7 @@ class NoFlaggedTerms(BaseAggregateCheck):
         if result.disposition != Disposition.OK:
             report = data_registry.flagged_terms_report
             assert report is not None
+
             matches = [m for m in report.data if m.field in FLAGGED_TERMS_FIELDS]
             result.message = f"{self.failure_message}: {', '.join(flagged_terms(matches))}"
 

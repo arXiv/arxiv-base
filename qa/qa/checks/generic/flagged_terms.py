@@ -13,16 +13,11 @@ def flagged_terms(matches: list[FlaggedTermMatch]) -> list[str]:
 
 
 class DoesNotContainFlaggedTerms(BaseGenericCheck):
-    """
-    Reads the flagged terms report rather than the value itself: `field` is the report's name for the
-    searched text (e.g. "title", "fulltext"), and `data` is the registry key of the report.
-    """
-
     name = "does_not_contain_flagged_terms"
     display_name = "Does Not Contain Flagged Terms"
     id = 10076
     version = "1.0.0"
-    description = "The flagged terms report has no matches in the value."
+    description = "No flagged terms found."
     failure_message = "Flagged terms found"
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
@@ -34,7 +29,6 @@ class DoesNotContainFlaggedTerms(BaseGenericCheck):
         if not matches:
             return self._result(passed=True)
 
-        # Offsets are into the text of self.field.
         offsets = [
             Offset(start=m.starts_at, end=m.ends_at)
             for m in matches
