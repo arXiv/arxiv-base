@@ -62,7 +62,7 @@ class TestAuthorsFoundInFulltext:
 
     def test_default_message_when_flag_has_no_description(self):
         report = author_report(flags=[Flag(id="missing-authors-fulltext", description=None)])
-        assert AuthorsFoundInFulltext.check(report).message == "Some authors from metadata not found in text."
+        assert AuthorsFoundInFulltext.check(report).message == "One or more authors from metadata not found in text."
 
     def test_pass_on_other_author_report_flags(self):
         report = author_report(

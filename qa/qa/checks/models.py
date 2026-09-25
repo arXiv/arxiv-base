@@ -87,8 +87,7 @@ class FulltextReport(BaseReport):
 
 class AuthorCheckReport(BaseReport):
     """
-    The {submission_id}.author-check.json report written by the arxiv-qa check_authors cloud function.
-    `data` includes missing_authors, anonymous_authors, bad_authors, pdf_generation and metadata_generation.
+    The {submission_id}.author-check.json report written by the check_authors cloud function.
     """
 
     name: str = "arXiv Author Metadata Report"

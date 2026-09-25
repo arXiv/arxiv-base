@@ -8,9 +8,9 @@ class AuthorsFoundInFulltext(BaseCheck):
     display_name = "Authors Found In Fulltext"
     id = 8
     version = "1.0.0"
-    description = "Every metadata author was found in the full text."
+    description = "Every metadata author was found in the fulltext."
     on_failure_policy = OnFailurePolicy.WARN
-    failure_message = "Some authors from metadata not found in text."
+    failure_message = "One or more authors from metadata not found in text."
 
     required_data = {"author_report"}
 
@@ -35,4 +35,5 @@ class AuthorsFoundInFulltext(BaseCheck):
         for flag in author_report.flags:
             if flag.id == self.failure_flag_id:
                 return self._result(passed=False, message=flag.description or self.failure_message)
+
         return self._result(passed=True)
