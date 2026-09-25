@@ -88,8 +88,6 @@ class FulltextReport(BaseReport):
 class FlaggedTermMatch(BaseModel):
     """
     One match of a flagged term in a flagged terms report.
-    `starts_at`/`ends_at` index into the text of `field`, and span the whole regex match,
-    which can include a neighbouring non-word character and trailing whitespace or punctuation.
     """
 
     field: str
