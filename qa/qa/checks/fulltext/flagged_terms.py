@@ -1,46 +1,42 @@
-from qa.checks.base import BaseCheck
+from qa.checks import generic
+from qa.checks.base import BaseAggregateCheck
+from qa.checks.generic.flagged_terms import flagged_terms
+from qa.checks.models import FlaggedTermsReport, OnFailurePolicy, QaDataRegistry, Result
 
-from qa.checks.models import FlaggedTermsReport, Offset, OnFailurePolicy, QaDataRegistry, Result
+# The fields the arxiv-qa concerning_words cloud function searches.
+FLAGGED_TERMS_FIELDS = ("title", "authors", "abstract", "comments", "journal_ref", "fulltext")
 
 
-class NoFlaggedTerms(BaseCheck):
+class NoFlaggedTerms(BaseAggregateCheck):
+    """Aggregate check with one sub-check per field searched for flagged terms (fka concerning words)."""
+
     name = "no_flagged_terms"
     display_name = "No Flagged Terms"
     id = 7
     version = "1.0.0"
-    description = "No flagged terms (fka concerning words) were found in the metadata or full text."
-    on_failure_policy = OnFailurePolicy.WARN
+    description = "No flagged terms were found in the metadata or full text."
     failure_message = "Flagged terms found"
 
     required_data = {"flagged_terms_report"}
+
+    _checks = tuple(
+        generic.DoesNotContainFlaggedTerms(
+            on_failure_policy=OnFailurePolicy.WARN, data="flagged_terms_report", field=field
+        )
+        for field in FLAGGED_TERMS_FIELDS
+    )
 
     @classmethod
     def check(cls, flagged_terms_report: FlaggedTermsReport) -> Result:
         return cls().run(QaDataRegistry(flagged_terms_report=flagged_terms_report))
 
     def _run(self, data_registry: QaDataRegistry) -> Result:
-        flagged_terms_report = data_registry.flagged_terms_report
-        assert flagged_terms_report is not None
+        result = super()._run(data_registry)
 
-        matches = flagged_terms_report.data
+        if result.message:
+            report = data_registry.flagged_terms_report
+            assert report is not None
+            matches = [m for m in report.data if m.field in FLAGGED_TERMS_FIELDS]
+            result.message = f"{self.failure_message}: {', '.join(flagged_terms(matches))}"
 
-        if not matches:
-            return self._result(passed=True)
-
-        # One entry per flagged term, in the order first found.
-        terms: dict[int, str] = {}
-        for m in matches:
-            terms.setdefault(m.keywords_id, m.keywords_name or m.match.strip())
-
-        # Offsets are into the text of each match's own field.
-        offsets = [
-            Offset(start=m.starts_at, end=m.ends_at)
-            for m in matches
-            if m.starts_at is not None and m.ends_at is not None
-        ]
-
-        return self._result(
-            passed=False,
-            message=f"{self.failure_message}: {', '.join(terms.values())}",
-            offsets=offsets or None,
-        )
+        return result

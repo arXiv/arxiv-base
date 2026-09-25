@@ -2,22 +2,8 @@
 
 import json
 
-import pytest
-
-from qa.checks.fulltext.flagged_terms import NoFlaggedTerms
-from qa.checks.models import FlaggedTermMatch, FlaggedTermsReport, Offset, QaDataRegistry
-
-
-def match(keywords_id: int, keywords_name: str | None, text: str, starts_at: int | None, ends_at: int | None):
-    return FlaggedTermMatch(
-        field="fulltext",
-        keywords_id=keywords_id,
-        keywords_name=keywords_name,
-        action="admin",
-        match=text,
-        starts_at=starts_at,
-        ends_at=ends_at,
-    )
+from qa.checks.fulltext.flagged_terms import FLAGGED_TERMS_FIELDS, NoFlaggedTerms
+from qa.checks.models import Disposition, FlaggedTermMatch, FlaggedTermsReport, Offset
 
 
 def report(*matches: FlaggedTermMatch) -> FlaggedTermsReport:
@@ -33,38 +19,38 @@ CONCERNING_WORDS_JSON = json.dumps(
             {
                 "field": "abstract",
                 "keywords_id": 12,
-                "keywords_name": "tortured phrase",
+                "keywords_name": "fake term one",
                 "action": "admin",
                 "action_message": "Hold for review",
-                "description": "Known tortured phrase",
-                "match": " counterfeit consciousness ",
+                "description": "Test flagged term",
+                "match": " fake term one ",
                 "starts_at": 40,
-                "ends_at": 67,
-                "context": "In this paper we apply counterfeit consciousness to the problem",
+                "ends_at": 55,
+                "context": "In this paper we apply fake term one to the problem",
             },
             {
                 "field": "fulltext",
                 "keywords_id": 12,
-                "keywords_name": "tortured phrase",
+                "keywords_name": "fake term one",
                 "action": "admin",
                 "action_message": "Hold for review",
-                "description": "Known tortured phrase",
-                "match": " counterfeit consciousness,",
+                "description": "Test flagged term",
+                "match": " Fake term one,",
                 "starts_at": 1520,
-                "ends_at": 1547,
-                "context": "... methods of counterfeit consciousness, as shown ...",
+                "ends_at": 1535,
+                "context": "... methods of Fake term one, as shown ...",
             },
             {
                 "field": "fulltext",
                 "keywords_id": 31,
-                "keywords_name": "regenerate response",
+                "keywords_name": "fake term two",
                 "action": "comment",
                 "action_message": None,
-                "description": "LLM output artifact",
-                "match": " Regenerate response\n",
+                "description": "Another test flagged term",
+                "match": " fake term two\n",
                 "starts_at": 9001,
-                "ends_at": 9022,
-                "context": "... as an AI language model. Regenerate response",
+                "ends_at": 9015,
+                "context": "... end of the paper. fake term two",
             },
         ],
         "metadata": {
@@ -82,6 +68,10 @@ CONCERNING_WORDS_JSON = json.dumps(
 )
 
 
+def sub_result(result, field):
+    return next(r for r in result.results if r.check_config["field"] == field)
+
+
 class TestFlaggedTermsReport:
     def test_parses_cloud_function_output(self):
         parsed = FlaggedTermsReport.model_validate_json(CONCERNING_WORDS_JSON)
@@ -97,45 +87,42 @@ class TestFlaggedTermsReport:
 
 
 class TestNoFlaggedTerms:
+    def test_one_sub_check_per_field(self):
+        assert [c.field for c in NoFlaggedTerms._checks] == list(FLAGGED_TERMS_FIELDS)
+        assert len(NoFlaggedTerms()._describe()["checks"]) == len(FLAGGED_TERMS_FIELDS)
+
     def test_pass_when_no_matches(self):
         result = NoFlaggedTerms.check(report())
         assert result.passed
-        assert result.offsets is None
+        assert result.disposition == Disposition.OK
+        assert result.message == ""
+        assert result.results is not None
+        assert all(r.passed for r in result.results)
 
-    def test_fail_lists_each_term_once_in_order_found(self):
+    def test_fail_lists_each_term_once_across_fields(self):
         result = NoFlaggedTerms.check(FlaggedTermsReport.model_validate_json(CONCERNING_WORDS_JSON))
         assert not result.passed
-        assert result.message == "Flagged terms found: tortured phrase, regenerate response"
+        assert result.disposition == Disposition.WARN
+        assert result.message == "Flagged terms found: fake term one, fake term two"
 
-    def test_offsets_for_every_match(self):
+    def test_sub_results_by_field(self):
         result = NoFlaggedTerms.check(FlaggedTermsReport.model_validate_json(CONCERNING_WORDS_JSON))
-        assert result.offsets == [
-            Offset(start=40, end=67),
-            Offset(start=1520, end=1547),
-            Offset(start=9001, end=9022),
-        ]
 
-    def test_offsets_skip_matches_without_positions(self):
+        abstract = sub_result(result, "abstract")
+        assert not abstract.passed
+        assert abstract.message == "Flagged terms found: fake term one"
+        assert abstract.offsets == [Offset(start=40, end=55)]
+
+        fulltext = sub_result(result, "fulltext")
+        assert not fulltext.passed
+        assert fulltext.message == "Flagged terms found: fake term one, fake term two"
+        assert fulltext.offsets == [Offset(start=1520, end=1535), Offset(start=9001, end=9015)]
+
+        for field in ("title", "authors", "comments", "journal_ref"):
+            assert sub_result(result, field).passed
+
+    def test_ignores_matches_in_unsearched_fields(self):
         result = NoFlaggedTerms.check(
-            report(
-                match(1, "alpha", " alpha ", 10, 17),
-                match(2, "beta", " beta ", None, None),
-                match(3, "gamma", " gamma ", 30, None),
-            )
+            report(FlaggedTermMatch(field="report_num", keywords_id=1, keywords_name="alpha", match=" alpha "))
         )
-        assert not result.passed
-        assert result.message == "Flagged terms found: alpha, beta, gamma"
-        assert result.offsets == [Offset(start=10, end=17)]
-
-    def test_no_offsets_when_report_has_none(self):
-        result = NoFlaggedTerms.check(report(match(1, "alpha", " alpha ", None, None)))
-        assert not result.passed
-        assert result.offsets is None
-
-    def test_term_falls_back_to_match_text(self):
-        result = NoFlaggedTerms.check(report(match(1, None, " alpha,", 10, 17)))
-        assert result.message == "Flagged terms found: alpha,"
-
-    def test_none_flagged_terms_report_raises(self):
-        with pytest.raises(AssertionError):
-            NoFlaggedTerms()._run(QaDataRegistry(flagged_terms_report=None))
+        assert result.passed
