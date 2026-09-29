@@ -72,6 +72,10 @@ from qa.checks.generic.presence import (  # noqa
     EmptyFieldCheck,
 )
 
+from qa.checks.generic.flagged_terms import (  # noqa
+    DoesNotContainFlaggedTerms,
+)
+
 from qa.checks.generic.author_name import (  # noqa
     AuthorNamesDoNotContainAffiliation,
     AuthorNamesDoNotContainBrackets,

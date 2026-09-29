@@ -20,6 +20,7 @@ class TestJournalRefIsValid:
         result = JournalRefIsValid.check(None)
         assert not result.passed
         assert result.disposition == Disposition.OK
+        assert result.message == ""
         assert result.results is not None
         assert len(result.results) == 1
         assert result.results[0].check_config["name"] == "field_is_not_empty"
@@ -28,6 +29,7 @@ class TestJournalRefIsValid:
         result = JournalRefIsValid.check("")
         assert not result.passed
         assert result.disposition == Disposition.OK
+        assert result.message == ""
         assert result.results is not None
         assert len(result.results) == 1
         assert result.results[0].check_config["name"] == "field_is_not_empty"

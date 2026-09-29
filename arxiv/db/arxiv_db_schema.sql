@@ -355,7 +355,7 @@ CREATE TABLE `arXiv_check_results` (
   `check_result_id` int NOT NULL AUTO_INCREMENT,
   `submission_id` int NOT NULL,
   `data_version` int DEFAULT NULL,
-  `metadata_version` int DEFAULT NULL,
+  `metadata_version` int unsigned DEFAULT NULL,
   `check_id` int NOT NULL,
   `user_id` int unsigned NOT NULL,
   `ok` tinyint(1) NOT NULL,
