@@ -21,7 +21,7 @@ something".
 | Check | Replaces | What it does | Schedule (ET) | Mails to |
 |---|---|---|---|---|
 | `new_accounts` | `cron/watch_new_accounts.pl` | New accounts (default: last 24 h) matched against the FLAGS patterns | daily 08:30 | system-queue@ |
-| `recent_articles` | `cron/check_recently_updated_articles.pl` | Files written in the last day: `.tar.gz` lists, `.gz` decompresses, `pdfinfo` clean, `.abs` parses with canonical categories and a valid license | Mon–Fri 12:20, 16:20 | sheriff@ |
+| `recent_articles` | `cron/check_recently_updated_articles.pl` | Files written in the last day: `.tar.gz` lists, `.gz` decompresses, `pdfinfo` clean, `.abs` parses with canonical categories and a valid license | Mon-Fri 12:20, 16:20 | sheriff@ |
 | `db_stats` | `cron/db_stats.pl` | User/article stats, moderation gaps, Google/Bing index counts | Mon 06:29 | mod-admin@, db-stats-list@ |
 | `deleted_papers` | `test/check_deleted_papers.pl` | Deleted papers: zero-size abs, source kept, no DB rows | Sat 05:33 | cron-errors@ |
 | `orig_consistency` | `cron/check_files_in_orig.pl` + `test/check_abs_src_files.pl` | ftp/ holds the abs + source of each current version, orig/ of each older version; nothing else in there | Sat 03:33 | sheriff@ |
@@ -49,16 +49,16 @@ entry, ready to activate. `crosses.pl` output was mailed on every run, while
 - The `check_versions` history check in `check_files_in_orig.pl` only ran for
   the on-prem "not yet rolled in" (unversioned) files in orig. It was not
   ported. Such files are now reported as unexpected.
-- `new_accounts` runs daily. Perl ran Mon–Fri with a 24 h window and so never
+- `new_accounts` runs daily. Perl ran Mon-Fri with a 24 h window and so never
   looked at weekend sign-ups.
 - The deleted-papers list comes from `deleted.json` (`arxiv.legacy.papers.deleted`),
   not the Perl hash.
-- The historical category exceptions (known bad primaries, funct-an → math.OA)
+- The historical category exceptions (known bad primaries, funct-an -> math.OA)
   were generated from `arxiv-lib` into `consistency_checks/legacy_categories.py`.
 
 ### Not ported
 
-- `cron/get_unhandled_submissions.pl`: left out for now. The crontab runs it Mon–Fri at 08:00 (`-m -o`) and 17:00 (`-m -n -s`).
+- `cron/get_unhandled_submissions.pl`: left out for now. The crontab runs it Mon-Fri at 08:00 (`-m -o`) and 17:00 (`-m -n -s`).
 - **OPEN DISCUSSION: `arxiv-analysis/author_id_stats.pl`.** In the crontab it
   runs Mondays at 08:15 (`-g`) and 08:17 (`-w`), mailing the weekly counts and
   an EPS graph to busybody@arxiv.org. Its web-log part (`/a/<id>` hits in CIT
