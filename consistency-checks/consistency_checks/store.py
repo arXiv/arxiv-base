@@ -1,6 +1,6 @@
 """Minimal read-only view of the data bucket (or a local copy of it).
 
-Keys use the bucket layout: ``ftp/…``, ``orig/…``, ``ps_cache/…``, ``txt/…``.
+Keys use the bucket layout: ``ftp/...``, ``orig/...``, ``ps_cache/...``, ``txt/...``.
 
 ponytail: not `arxiv.files.object_store` because checks need recursive
 listing and directory (delimiter) listing, which its `LocalObjectStore` lacks.

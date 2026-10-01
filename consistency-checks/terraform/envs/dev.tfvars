@@ -7,15 +7,26 @@ scheduler_sa = "cloud-scheduler@arxiv-development.iam.gserviceaccount.com"
 
 # Read-only DB URI secret (mysql://user:pass@host/db) on the dev-db-6 read replica.
 db_uri_secret = "dev-db-6-readonly-uri"
-# Only if that URI connects via unix_socket=/cloudsql/<conn>:
-# db_instance_connection_name = "arxiv-development:us-central1:dev-db-6"
+# The URI connects via unix_socket=/cloudsql/<conn>:
+db_instance_connection_name = "arxiv-development:us-central1:dev-db-6"
 
 data_bucket = "arxiv-dev-data"
 # Copy of gs://arxiv-production-data/deleted.json (made 2026-09-24; the job SA
 # only reads data_bucket). Re-copy when the prod list changes.
 deleted_gs_url = "gs://arxiv-dev-data/deleted.json"
 
-mail_dry_run = true
+mail_dry_run = false
+
+# All dev reports go to a test address instead of the checks' real recipients.
+# Keep every job listed: a missing key falls back to the real list.
+mail_to = {
+  new-accounts     = "norbert@arxiv.org"
+  recent-articles  = "norbert@arxiv.org"
+  db-stats         = "norbert@arxiv.org"
+  deleted-papers   = "norbert@arxiv.org"
+  orig-consistency = "norbert@arxiv.org"
+  categories       = "norbert@arxiv.org"
+}
 
 # dev-db-6 replicates the full DB while arxiv-dev-data may hold only part of the
 # files, so scheduled full scans would mostly report missing files. Keep the

@@ -1,0 +1,172 @@
+# consistency-checks: terraform plan on PRs, build + plan + apply on merge.
+#
+#   PR to develop/master  -> plan for dev/prod, posted as a PR comment
+#   push to develop       -> build, push, plan, apply to arxiv-development
+#   push to master        -> build, push, plan, apply to arxiv-production.
+#                            A plan that only changes the jobs' image (library
+#                            or code changes) applies right away; any other
+#                            change waits for approval in the GitHub
+#                            Environment "production" (required reviewers;
+#                            the plan is in the plan job's summary).
+#                            See consistency-checks/terraform/plan_kind.jq.
+#
+# Auth: the org-wide WIF pool "github" and github-actions-sa, as in arxiv-browse.
+name: consistency-checks deploy
+
+on:
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - "consistency-checks/**"
+      - ".github/workflows/consistency-checks-deploy.yml"
+  push:
+    branches: [develop, master]
+    # everything that goes into the image (consistency-checks/Dockerfile)
+    paths:
+      - "consistency-checks/**"
+      - "arxiv/**"
+      - "gcp/**"
+      - "arxiv-functions/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - ".github/workflows/consistency-checks-deploy.yml"
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: consistency-checks-${{ github.base_ref || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  REGION: us-central1
+  TF_DIR: consistency-checks/terraform
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.kind.outputs.environment }}
+      changes: ${{ steps.kind.outputs.changes }}
+      project: ${{ steps.env.outputs.PROJECT }}
+      project_number: ${{ steps.env.outputs.PROJECT_NUMBER }}
+      tf_state: ${{ steps.env.outputs.TF_STATE }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select environment
+        id: env
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = master ]; then
+            vars="environment=production ENV=prod PROJECT=arxiv-production PROJECT_NUMBER=1090350072932 REPO=arxiv-docker TF_STATE=prod-arxiv-terraform-state"
+          else
+            vars="environment=development ENV=dev PROJECT=arxiv-development PROJECT_NUMBER=874717964009 REPO=arxiv-dev-docker TF_STATE=dev-arxiv-terraform-state"
+          fi
+          echo "$vars" | tr ' ' '\n' | tee -a "$GITHUB_ENV" >> "$GITHUB_OUTPUT"
+
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github/providers/github-actions-provider
+          service_account: github-actions-sa@${{ env.PROJECT }}.iam.gserviceaccount.com
+          project_id: ${{ env.PROJECT }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
+
+      - name: Build and push image
+        if: github.event_name == 'push'
+        run: |
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          ref="$REGION-docker.pkg.dev/$PROJECT/$REPO/consistency-checks:${GITHUB_SHA::12}"
+          docker build -f consistency-checks/Dockerfile -t "$ref" .
+          docker push "$ref"
+          echo "IMAGE=$(docker inspect --format '{{index .RepoDigests 0}}' "$ref")" >> "$GITHUB_ENV"
+
+      # ponytail: a PR plan keeps the deployed image, so it shows infra changes
+      # only; the code change is in the PR diff. Building per PR would push
+      # unmerged code to the prod registry.
+      - name: Use deployed image
+        if: github.event_name == 'pull_request'
+        run: |
+          image=$(gcloud run jobs describe consistency-checks-db-stats --region "$REGION" \
+            --format='value(spec.template.spec.template.spec.containers[0].image)' 2>/dev/null || true)
+          echo "IMAGE=${image:-not-deployed-yet}" >> "$GITHUB_ENV"
+
+      - name: Terraform plan
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform fmt -check -recursive
+          terraform init -input=false -backend-config="bucket=$TF_STATE"
+          terraform plan -input=false -var-file="envs/$ENV.tfvars" -var="image=$IMAGE" -out=tfplan
+          {
+            echo "### consistency-checks terraform plan: $ENV ($PROJECT)"
+            echo '```'
+            terraform show -no-color tfplan | tail -c 60000
+            echo '```'
+          } > plan.md
+          cat plan.md >> "$GITHUB_STEP_SUMMARY"
+
+      # environment for the apply job: only prod infra changes need approval
+      - name: Classify plan
+        id: kind
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          changes=$(terraform show -json tfplan | jq -r -f plan_kind.jq)
+          environment=${{ steps.env.outputs.environment }}
+          if [ "$environment" = production ] && [ "$changes" = image ]; then
+            environment=production-image-only
+          fi
+          echo "Plan changes: $changes -> environment $environment" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "changes=$changes" >> "$GITHUB_OUTPUT"
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file "$TF_DIR/plan.md" --edit-last --create-if-none
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: tfplan
+          path: ${{ env.TF_DIR }}/tfplan
+          retention-days: 7
+
+  apply:
+    if: github.event_name == 'push' && needs.plan.outputs.changes != 'none'
+    needs: plan
+    runs-on: ubuntu-latest
+    # "production" has required reviewers, so the job waits for approval;
+    # "production-image-only" and "development" have none
+    environment: ${{ needs.plan.outputs.environment }}
+    env:
+      PROJECT: ${{ needs.plan.outputs.project }}
+      PROJECT_NUMBER: ${{ needs.plan.outputs.project_number }}
+      TF_STATE: ${{ needs.plan.outputs.tf_state }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github/providers/github-actions-provider
+          service_account: github-actions-sa@${{ env.PROJECT }}.iam.gserviceaccount.com
+          project_id: ${{ env.PROJECT }}
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ env.TF_DIR }}
+
+      # applies exactly the reviewed plan; terraform refuses it if the state
+      # changed since (stale plan), then re-run the workflow
+      - name: Terraform apply
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform init -input=false -backend-config="bucket=$TF_STATE"
+          terraform apply -input=false tfplan

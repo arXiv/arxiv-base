@@ -87,7 +87,8 @@ variable "bing_api_key_secret" {
 
 variable "scheduler_sa" {
   type        = string
-  description = "Service account Cloud Scheduler uses to start the jobs (gets run.invoker on each)."
+  default     = ""
+  description = "Service account Cloud Scheduler uses to start the jobs (gets run.invoker on each); empty = the jobs' own consistency-checks SA."
 }
 
 variable "schedules_paused" {
