@@ -2,10 +2,13 @@
 #
 #   PR to develop/master  -> plan for dev/prod, posted as a PR comment
 #   push to develop       -> build, push, plan, apply to arxiv-development
-#   push to master        -> build, push, plan, then apply to arxiv-production
-#                            after approval (GitHub Environment "production"
-#                            with required reviewers; the plan is in the
-#                            plan job's summary)
+#   push to master        -> build, push, plan, apply to arxiv-production.
+#                            A plan that only changes the jobs' image (library
+#                            or code changes) applies right away; any other
+#                            change waits for approval in the GitHub
+#                            Environment "production" (required reviewers;
+#                            the plan is in the plan job's summary).
+#                            See consistency-checks/terraform/plan_kind.jq.
 #
 # Auth: the org-wide WIF pool "github" and github-actions-sa, as in arxiv-browse.
 name: consistency-checks deploy
@@ -45,7 +48,8 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ steps.env.outputs.environment }}
+      environment: ${{ steps.kind.outputs.environment }}
+      changes: ${{ steps.kind.outputs.changes }}
       project: ${{ steps.env.outputs.PROJECT }}
       project_number: ${{ steps.env.outputs.PROJECT_NUMBER }}
       tf_state: ${{ steps.env.outputs.TF_STATE }}
@@ -105,6 +109,20 @@ jobs:
           } > plan.md
           cat plan.md >> "$GITHUB_STEP_SUMMARY"
 
+      # environment for the apply job: only prod infra changes need approval
+      - name: Classify plan
+        id: kind
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          changes=$(terraform show -json tfplan | jq -r -f plan_kind.jq)
+          environment=${{ steps.env.outputs.environment }}
+          if [ "$environment" = production ] && [ "$changes" = image ]; then
+            environment=production-image-only
+          fi
+          echo "Plan changes: $changes -> environment $environment" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "changes=$changes" >> "$GITHUB_OUTPUT"
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+
       - name: Comment plan on PR
         if: github.event_name == 'pull_request'
         env:
@@ -119,10 +137,11 @@ jobs:
           retention-days: 7
 
   apply:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && needs.plan.outputs.changes != 'none'
     needs: plan
     runs-on: ubuntu-latest
-    # "production" has required reviewers: the job waits for approval
+    # "production" has required reviewers, so the job waits for approval;
+    # "production-image-only" and "development" have none
     environment: ${{ needs.plan.outputs.environment }}
     env:
       PROJECT: ${{ needs.plan.outputs.project }}

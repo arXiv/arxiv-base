@@ -128,9 +128,12 @@ Terraform state is kept in `{dev|prod}-arxiv-terraform-state` under the prefix
   comment. The plan keeps the deployed image, so it shows only infra changes.
 - A push to `develop` builds and pushes the image, plans, and applies to
   arxiv-development.
-- A push to `master` does the same for arxiv-production. The apply job waits
-  for approval in the GitHub Environment `production` (required reviewers),
-  and the plan is in the summary of the plan job.
+- A push to `master` does the same for arxiv-production. A plan that only
+  changes the jobs' image (code or library changes) applies right away
+  (environment `production-image-only`). Any other change waits for approval
+  in the GitHub Environment `production` (required reviewers); the plan is in
+  the summary of the plan job. `terraform/plan_kind.jq` decides which.
+  A plan without changes skips the apply.
 
 It authenticates through the org-wide WIF pool `github` as `github-actions-sa`.
 The `make` targets above remain for manual deploys.
