@@ -118,7 +118,22 @@ make apply  ENV=dev         # apply exactly the reviewed plan (terraform/tfplan-
 other image, and `TAG=...` overrides the default tag (`git describe --always --dirty`). Images go to
 `us-central1-docker.pkg.dev/<project>/{arxiv-dev-docker|arxiv-docker}/consistency-checks`.
 Terraform state is kept in `{dev|prod}-arxiv-terraform-state` under the prefix
-`consistency-checks`. `cloudbuild.yaml` builds the same image in Cloud Build instead.
+`consistency-checks`.
+
+### CI deploy
+
+`.github/workflows/consistency-checks-deploy.yml` deploys on merge:
+
+- A PR to `develop` or `master` gets the terraform plan for dev or prod as a PR
+  comment. The plan keeps the deployed image, so it shows only infra changes.
+- A push to `develop` builds and pushes the image, plans, and applies to
+  arxiv-development.
+- A push to `master` does the same for arxiv-production. The apply job waits
+  for approval in the GitHub Environment `production` (required reviewers),
+  and the plan is in the summary of the plan job.
+
+It authenticates through the org-wide WIF pool `github` as `github-actions-sa`.
+The `make` targets above remain for manual deploys.
 
 In arxiv-development the schedules are paused; run jobs on demand with `gcloud run jobs execute`.
 
