@@ -88,6 +88,8 @@ locals {
   )
   secrets = distinct(compact(concat(values(local.secret_env), [var.flags_secret])))
 
+  scheduler_sa = var.scheduler_sa != "" ? var.scheduler_sa : google_service_account.checks.email
+
   plain_env = {
     GOOGLE_CLOUD_PROJECT = var.gcp_project_id
     BUCKET               = var.data_bucket
@@ -229,7 +231,7 @@ resource "google_cloud_run_v2_job_iam_member" "scheduler_invoker" {
   location = var.gcp_region
   name     = google_cloud_run_v2_job.check[each.key].name
   role     = "roles/run.invoker"
-  member   = "serviceAccount:${var.scheduler_sa}"
+  member   = "serviceAccount:${local.scheduler_sa}"
 }
 
 resource "google_cloud_scheduler_job" "check" {
@@ -245,7 +247,7 @@ resource "google_cloud_scheduler_job" "check" {
     http_method = "POST"
     uri         = "https://run.googleapis.com/v2/projects/${var.gcp_project_id}/locations/${var.gcp_region}/jobs/${google_cloud_run_v2_job.check[each.key].name}:run"
     oauth_token {
-      service_account_email = var.scheduler_sa
+      service_account_email = local.scheduler_sa
       scope                 = "https://www.googleapis.com/auth/cloud-platform"
     }
   }
