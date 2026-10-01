@@ -1,0 +1,14 @@
+# Build and push the consistency-checks image. Run from the arxiv-base repo root:
+#   gcloud builds submit --config=consistency-checks/cloudbuild.yaml --substitutions=_TAG=$(git rev-parse --short HEAD) .
+# then deploy with terraform (consistency-checks/terraform), pinning the printed digest.
+substitutions:
+  _REGION: us-central1
+  _REPO: arxiv-docker
+  _TAG: latest
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: [build, -f, consistency-checks/Dockerfile, -t, "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/consistency-checks:${_TAG}", .]
+
+images:
+  - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/consistency-checks:${_TAG}"
