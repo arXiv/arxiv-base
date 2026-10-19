@@ -9,30 +9,24 @@
   {% import "base/macros.html" as macros %}
   {% import "base/analytics_macros.html" as analytics_macros %}
   {% import "base/announcement_banner.html" as announcement %}
-  <header>
-    {%- if config['ANALYTICS_ENABLED'] -%}
-    {{ analytics_macros.render_analytics_noscript(config['ANALYTICS_BASE_URL'], config['ANALYTICS_SITE_ID']) }}
-    {%- endif -%}
-    <a href="#main-container" class="ds-skip-link">Skip to main content</a>
-    {% block announcement %}
-    {%- if config.get('SPINOUT_BANNER_ENABLED') -%}
-    {{ announcement.announcement_banner("arXiv is now an independent nonprofit!", "Learn more", "https://info.arxiv.org/about", "spinout-nonprofit") }}
-    {%- endif -%}
-    {% endblock announcement %}
-    {% block header %}
-    {% include "base/header.html" %}
-    {% endblock header %}
-  </header>
+  {%- if config['ANALYTICS_ENABLED'] -%}
+  {{ analytics_macros.render_analytics_noscript(config['ANALYTICS_BASE_URL'], config['ANALYTICS_SITE_ID']) }}
+  {%- endif -%}
+  <a href="#main-container" class="ds-skip-link">Skip to main content</a>
+  {#- The shared header draws the announcement band (SPINOUT_BANNER_ENABLED) and its own
+      <header>, so neither block has a wrapper. -#}
+  {% block announcement %}{% endblock announcement %}
+  {% block header %}
+  {% include "base/header.html" %}
+  {% endblock header %}
   <main class="container" id="main-container">
     {% block alerts %}{{ macros.alerts(get_alerts()) }}{% endblock alerts %}
     {% block content %}
     {% endblock content %}
   </main>
-  <footer>
-    {% block footer %}
-    {% include "base/footer.html" %}
-    {% endblock footer %}
-  </footer>
-  <script src="{{ url_for('base.static', filename='js/arxiv-header.js') }}?v=20260624c"></script>
+  {#- Likewise the shared footer renders its own <footer>. -#}
+  {% block footer %}
+  {% include "base/footer.html" %}
+  {% endblock footer %}
   </body>
 </html>

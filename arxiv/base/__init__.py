@@ -28,6 +28,8 @@ from typing import Optional, Any, Dict
 from flask import Blueprint, Flask, Blueprint
 from werkzeug.exceptions import NotFound
 
+import arxiv_brand
+
 from . import exceptions, urls, alerts, context_processors, filters
 from . import config as base_config
 from .converter import ArXivConverter
@@ -122,6 +124,15 @@ class Base(object):
 
         filters.register_filters(app)
         context_processors.register_context_processors(app)
+
+        # The shared head/header/footer (arxiv_brand). Their links are paths on the app's
+        # BASE_SERVER / HELP_SERVER, falling back to base's config like the url_for
+        # registry; AUTH_SERVER comes from the app only, else auth links follow
+        # BASE_SERVER. inject_brand_chrome supplies the per-request values.
+        brand = {k: app.config.get(k, getattr(base_config, k, None))
+                 for k in ("BASE_SERVER", "HELP_SERVER", "EXTERNAL_URL_SCHEME", "BRAND_STATIC_BASE")}
+        brand["AUTH_SERVER"] = app.config.get("AUTH_SERVER")
+        arxiv_brand.init_app(app, **arxiv_brand.config_values(brand))
 
         @app.teardown_appcontext
         def remove_scoped_session (response_or_exc: BaseException | None) -> None:
