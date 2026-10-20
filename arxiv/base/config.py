@@ -155,10 +155,13 @@ AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 RELATIVE_STATIC_PATHS = bool(int(os.environ.get("RELATIVE_STATIC_PATHS", "0")))
 RELATIVE_STATIC_PREFIX = os.environ.get("RELATIVE_STATIC_PREFIX", "")
 
-# Site-wide spinout announcement band ("arXiv is now an independent nonprofit!").
-# Rendered by base/base.html via the .ds-announcement macro when truthy; opt-in
-# per app/env so the temporal banner can be switched off without a base release.
+# Shows the design system's shared announcements (its json/announcements.json, each with
+# its own window) in the shared header when truthy; otherwise none. Opt-in per app/env.
 SPINOUT_BANNER_ENABLED = bool(int(os.environ.get("SPINOUT_BANNER_ENABLED", "0")))
+
+BRAND_STATIC_BASE = os.environ.get("BRAND_STATIC_BASE")
+"""Root URL of the design-system asset route (CSS, fonts, logos, chrome JS). Unset, the
+templates' default: the production route. A dev deployment or a local preview sets its own."""
 
 ANALYTICS_ENABLED = bool(int(os.environ.get("ANALYTICS_ENABLED", "0")))
 """Enable/disable Matomo web analytics."""
