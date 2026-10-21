@@ -139,5 +139,6 @@ arxiv/db/.autogen_models.py
 
 # Claude Code
 .claude/
-
+# pycharm 
 .ruff_cache
+.junie/

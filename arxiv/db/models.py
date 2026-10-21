@@ -58,7 +58,7 @@ from .types import intpk
 from ..document.version import SOURCE_FORMAT
 
 # This is used. Don't take it out unless we move onto ues utf-8 database
-from .column_types import Utf8Text, Utf8String
+from .column_types import Utf8Text, Utf8String, LegacyUtf8Text, LegacyUtf8String
 
 tb_secret = settings.TRACKBACK_SECRET
 tz = gettz(settings.ARXIV_BUSINESS_TZ)
@@ -1153,7 +1153,7 @@ class Submission(Base):
     viewed: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     stage: Mapped[Optional[int]] = mapped_column(Integer, server_default=FetchedValue())
     submitter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tapir_users.user_id", ondelete="CASCADE", onupdate="CASCADE"), index=True)
-    submitter_name: Mapped[Optional[str]] = mapped_column(String(64))
+    submitter_name: Mapped[Optional[str]] = mapped_column(LegacyUtf8String.column_factory(64))
     submitter_email: Mapped[Optional[str]] = mapped_column(String(64))
     created: Mapped[Optional[datetime]] = mapped_column(DateTime)
     updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -1167,16 +1167,16 @@ class Submission(Base):
     source_flags: Mapped[Optional[str]] = mapped_column(String(12))
     has_pilot_data: Mapped[Optional[int]] = mapped_column(Integer)
     is_withdrawn: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    title: Mapped[Optional[str]] = mapped_column(Text)
-    authors: Mapped[Optional[str]] = mapped_column(Text)
-    comments: Mapped[Optional[str]] = mapped_column(Text)
+    title: Mapped[Optional[str]] = mapped_column(LegacyUtf8Text.column_factory())
+    authors: Mapped[Optional[str]] = mapped_column(LegacyUtf8Text.column_factory())
+    comments: Mapped[Optional[str]] = mapped_column(LegacyUtf8Text.column_factory())
     proxy: Mapped[Optional[str]] = mapped_column(String(255))
     report_num: Mapped[Optional[str]] = mapped_column(Text)
     msc_class: Mapped[Optional[str]] = mapped_column(String(255))
     acm_class: Mapped[Optional[str]] = mapped_column(String(255))
     journal_ref: Mapped[Optional[str]] = mapped_column(Text)
     doi: Mapped[Optional[str]] = mapped_column(String(255))
-    abstract: Mapped[Optional[str]] = mapped_column(Text)
+    abstract: Mapped[Optional[str]] = mapped_column(LegacyUtf8Text.column_factory())
     license: Mapped[Optional[str]] = mapped_column(ForeignKey("arXiv_licenses.name", onupdate="CASCADE"), index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     type: Mapped[Optional[str]] = mapped_column(String(8), index=True)

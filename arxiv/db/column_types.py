@@ -326,3 +326,83 @@ class Utf8Text(TranscodedText):
     def column_factory(cls, **kwargs: Any) -> "Utf8Text":
         """Return Utf8Text for MySQL with a plain Text fallback for SQLite."""
         return cls(**kwargs).with_variant(Text, "sqlite")
+
+# Columns in utf8 tables that the legacy app wrote through a latin1 connection.
+#
+# The legacy connection treats its utf8 bytes as latin1 and the server re-encodes them to utf8,
+# so the stored text is double-encoded ("é" is stored as "Ã©"). The legacy connection reverses
+# this on read. Our connection is utf8mb4, so we reverse and reapply it here. No BINARY casts:
+# the server must see ordinary character data so that comparisons and LIKE work on the
+# double-encoded form (bind parameters pass through process_bind_param too).
+
+_MYSQL_UTF8_CHARSETS = ("utf8", "utf8mb3")
+
+
+def _to_latin1_bytes(s: str) -> bytes:
+    """Encode text as MySQL's latin1 (cp1252, but 0x81/0x8d/0x8f/0x90/0x9d map to U+0081 etc.)."""
+    out = bytearray()
+    for c in s:
+        try:
+            out += c.encode("cp1252")
+        except UnicodeEncodeError:
+            if ord(c) > 0xFF:
+                raise
+            out.append(ord(c))
+    return bytes(out)
+
+
+def _from_latin1_bytes(b: bytes) -> str:
+    """Decode bytes as MySQL's latin1; inverse of _to_latin1_bytes."""
+    out = []
+    for x in b:
+        try:
+            out.append(bytes([x]).decode("cp1252"))
+        except UnicodeDecodeError:
+            out.append(chr(x))
+    return "".join(out)
+
+
+class LegacyUtf8Mixin:
+    """Undo/redo the legacy double encoding. Mix into a TypeDecorator."""
+
+    cache_ok = True
+
+    def process_result_value(self, value: Any, dialect: Dialect) -> Optional[str]:
+        if value is None:
+            return None
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
+        try:
+            return _to_latin1_bytes(value).decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            # Not double-encoded (written as plain utf8); return as stored.
+            return value
+
+    def process_bind_param(self, value: Any, dialect: Dialect) -> Optional[str]:
+        if value is None:
+            return None
+        if not isinstance(value, str):
+            value = str(value)
+        return _from_latin1_bytes(value.encode("utf-8"))
+
+
+class LegacyUtf8String(LegacyUtf8Mixin, TypeDecorator):
+    """VARCHAR in a utf8 table written by the legacy latin1 connection."""
+    impl = String
+    cache_ok = True
+
+    @classmethod
+    def column_factory(cls, length: Optional[int] = None, **kwargs: Any) -> "LegacyUtf8String":
+        """Return LegacyUtf8String for MySQL with a plain String fallback for SQLite."""
+        return cls(length=length, **kwargs).with_variant(String(length=length), "sqlite")
+
+
+class LegacyUtf8Text(LegacyUtf8Mixin, TypeDecorator):
+    """TEXT in a utf8 table written by the legacy latin1 connection."""
+    impl = Text
+    cache_ok = True
+
+    @classmethod
+    def column_factory(cls, **kwargs: Any) -> "LegacyUtf8Text":
+        """Return LegacyUtf8Text for MySQL with a plain Text fallback for SQLite."""
+        return cls(**kwargs).with_variant(Text, "sqlite")
