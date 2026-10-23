@@ -53,12 +53,11 @@ def test_decode_keeps_what_is_not_double_encoded(stored: str) -> None:
     assert legacy_utf8_decode(stored) == stored
 
 
-def test_decode_mixed_value_decodes_where_it_can() -> None:
-    """Double-encoded text next to a stray U+FFFD: the double-encoded part still decodes, and
-    re-encoding the result gives a fully double-encoded value instead of a third layer."""
-    stored = "BÃ¼rger �"
-    assert legacy_utf8_decode(stored) == "Bürger �"
-    assert legacy_utf8_decode(legacy_utf8_encode(legacy_utf8_decode(stored))) == "Bürger �"
+def test_decode_returns_mixed_value_as_stored() -> None:
+    """Double-encoded text next to a stray U+FFFD does not decode as a whole and comes back as
+    stored; the cloud-cron-jobs consistency checks list such values for repair."""
+    stored = "B\u00c3\u00bcrger \ufffd"
+    assert legacy_utf8_decode(stored) == stored
 
 
 def test_too_long_once_encoded_is_refused_on_assignment() -> None:

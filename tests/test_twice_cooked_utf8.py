@@ -139,20 +139,6 @@ def test_plain_utf8_row_is_returned_unchanged(db_engine: Engine, db_session: Ses
     assert db_session.execute(select(cooked.c.body)).scalar_one() == "é"
 
 
-def test_mixed_value_is_repaired_on_write(db_engine: Engine, db_session: Session) -> None:
-    """A stored value mixing double-encoded text with a raw U+FFFD: the double-encoded part reads
-    correctly, and an edit stores the whole value double-encoded instead of adding a layer."""
-    with db_engine.begin() as conn:
-        conn.execute(text(f"INSERT INTO {TABLE_NAME} (id, body) VALUES (1, :b)"), {"b": "B\u00c3\u00bcrger \ufffd"})
-
-    value = db_session.execute(select(cooked.c.body)).scalar_one()
-    assert value == "Bürger \ufffd"
-    db_session.execute(cooked.update().values(body=value + "!"))
-    db_session.commit()
-    with db_engine.connect() as conn:
-        assert legacy_read(conn) == "Bürger \ufffd!"
-
-
 def test_single_encoded_row_is_lossy_for_legacy_until_rewritten(db_engine: Engine, db_session: Session) -> None:
     """A value some writer stored single-encoded (sid 8180083's submitter_name) reads correctly
     here, but a legacy (latin1) reader gets '?' for characters outside latin1. Writing it back

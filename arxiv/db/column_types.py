@@ -349,34 +349,22 @@ _LATIN1_BYTE = {c: b for b, c in enumerate(_LATIN1_CHAR)}
 
 
 def legacy_utf8_decode(value: str) -> str:
-    """Undo the legacy double encoding, one UTF-8 sequence at a time.
+    """Undo the legacy double encoding of a whole value.
 
-    Each run of characters whose latin1 bytes form one valid UTF-8 sequence is replaced by the
-    character it encodes; everything else is kept as stored. So a fully double-encoded value
-    decodes completely, a single-encoded value ("Müller", "Cătălina") comes back unchanged, and a
-    value that mixes both (e.g. double-encoded text plus a stray U+FFFD) decodes where it can.
-    Re-encoding the result with legacy_utf8_encode() then yields a fully double-encoded value, so
-    an edit never adds a second layer to the part that was already double-encoded.
+    A value that is not double-encoded as a whole is returned as stored: single-encoded text
+    ("Müller", "Cătălina") is already the real text and is stored double-encoded on the next
+    write. A value that mixes double-encoded text with something that does not decode is also
+    returned as stored; an edit would then encode its double-encoded part a second time. Such
+    values are listed by the cloud-cron-jobs consistency checks (submission_encoding for
+    unpublished submissions, before they are published), to be repaired in the database rather
+    than guessed at on every read. Production had none in submitter_name (2026-10).
     """
     if value.isascii():
         return value
-    out = []
-    i, n = 0, len(value)
-    while i < n:
-        lead = _LATIN1_BYTE.get(value[i])
-        if lead is not None and 0xC2 <= lead <= 0xF4:
-            size = 2 if lead < 0xE0 else 3 if lead < 0xF0 else 4
-            seq = [_LATIN1_BYTE.get(c) for c in value[i:i + size]]
-            if len(seq) == size and None not in seq:
-                try:
-                    out.append(bytes(seq).decode("utf-8"))  # validates continuation bytes too
-                    i += size
-                    continue
-                except UnicodeDecodeError:
-                    pass
-        out.append(value[i])
-        i += 1
-    return "".join(out)
+    try:
+        return bytes(_LATIN1_BYTE[c] for c in value).decode("utf-8")
+    except (KeyError, UnicodeDecodeError):
+        return value
 
 
 def legacy_utf8_encode(value: str) -> str:
