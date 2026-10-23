@@ -21,9 +21,6 @@ from qa.checks.fulltext.flagged_terms import NoFlaggedTerms  # noqa
 from qa.checks.fulltext.language import FulltextHasEnoughEnglish, FulltextLanguageRecognized  # noqa
 from qa.checks.fulltext.structure import FulltextNotTooShort  # noqa
 
-# Checks on a single metadata field, runnable with metadata alone. Callers key
-# results by each check's `field`, so checks across fields or needing other data
-# belong in submit_event_checks.
 metadata_checks: list[BaseMetadataAggregateCheck] = [
     TitleIsValid(),
     AuthorsAreValid(),
