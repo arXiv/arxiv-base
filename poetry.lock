@@ -46,6 +46,26 @@ typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 trio = ["trio (>=0.26.1)"]
 
 [[package]]
+name = "arxiv-brand-templates"
+version = "0.1.0"
+description = "arXiv brand head/header/footer as portable Jinja, installed from git."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+jinja2 = ">=3"
+
+[package.source]
+type = "git"
+url = "https://github.com/arXiv/design-system.git"
+reference = "master"
+resolved_reference = "a9f7252c6b77b55a06cb5a14dc1c0aa6ad2daa56"
+subdirectory = "templates"
+
+[[package]]
 name = "attrs"
 version = "25.3.0"
 description = "Classes Without Boilerplate"
@@ -3659,4 +3679,4 @@ sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "d19e6e2672faa14017daa44f5b14b44cc952a37152222d1b05cff7634f2df3d3"
+content-hash = "faa4b9deea91d520730fa253a87da54174e5f520c09cc5cba605df5efe448d29"

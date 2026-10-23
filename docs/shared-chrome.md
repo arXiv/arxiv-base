@@ -11,8 +11,12 @@ The chrome is three assets in `arxiv/base/static/`, published to GCS (see the
 - `css/arxiv-header-footer.css` — the stylesheet (this document describes it).
 - `js/arxiv-header.js` — behavior (search overlay, hamburger, banner dismissal,
   institutional acknowledgement).
-- `templates/base/header.html`, `footer.html`, `announcement_banner.html` — the
-  markup that consumes the classes below.
+- `templates/base/announcement_banner.html` — the band's markup, for apps that still use it.
+
+Base's own `templates/base/header.html` and `footer.html` include the design system's shared
+chrome instead (`arxiv_brand`, from arXiv/design-system), which loads its stylesheet and
+scripts from the design-system asset route (`BRAND_STATIC_BASE`). The assets above serve the
+apps not on it yet.
 
 ## Provenance and sync policy
 
@@ -103,10 +107,8 @@ Markup contract:
 place** — arxiv-base `static/images/funders/*.png` — and every consumer references
 them through the base-static root, never a local copy:
 
-- Apps that run the base blueprint (**browse**, **auth**) `{% include "base/footer.html" %}`
-  and get the logos via `url_for('base.static', …)`. They hold no funder markup and no
-  funder asset, so a change here (e.g. adding a third funder) reaches them with **zero
-  per-app edits**.
+- Apps that run the base blueprint (**auth**) `{% include "base/footer.html" %}`, which is
+  the design system's shared footer: it changes there, with **zero per-app edits**.
 - Vendored consumers that can't inherit (**search**, **submit**, **docs**, **status**)
   copy this markup but point every logo at their configured base-static root
   (`config.BASE_STATIC` / `c.config.base_static` / `config.extra.base_static`) — the only
