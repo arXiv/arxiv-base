@@ -137,5 +137,3 @@ docs/*
 four
 
 fastly_hourly_stats.ini
-# consistency-checks build needs its README (hatchling metadata)
-!consistency-checks/README.md
