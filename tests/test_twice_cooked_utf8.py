@@ -32,6 +32,8 @@ SAMPLES = [
     "2-byte: é ñ ü ß",
     "3-byte: 日本語",
     "cp1252 range: Müller – “quoted” €",
+    "undefined cp1252 byte: Łukasz",  # UTF-8 C5 81
+    "4-byte: \U0001F600",
 ]
 
 metadata = MetaData()
@@ -68,10 +70,15 @@ def legacy_insert(conn: Connection, sample: str) -> None:
     )
 
 
+def legacy_read_raw(conn: Connection) -> bytes:
+    """The bytes the legacy latin1 connection receives."""
+    hexed = conn.execute(text(f"SELECT HEX(CONVERT(body USING latin1)) FROM {TABLE_NAME}")).scalar_one()
+    return bytes.fromhex(hexed)
+
+
 def legacy_read(conn: Connection) -> str:
     """What the legacy app reads: the utf8 bytes it originally wrote."""
-    hexed = conn.execute(text(f"SELECT HEX(CONVERT(body USING latin1)) FROM {TABLE_NAME}")).scalar_one()
-    return bytes.fromhex(hexed).decode("utf-8")
+    return legacy_read_raw(conn).decode("utf-8")
 
 
 def test_connection_is_utf8mb4(db_engine: Engine) -> None:
@@ -132,6 +139,37 @@ def test_plain_utf8_row_is_returned_unchanged(db_engine: Engine, db_session: Ses
     assert db_session.execute(select(cooked.c.body)).scalar_one() == "é"
 
 
+def test_mixed_value_is_repaired_on_write(db_engine: Engine, db_session: Session) -> None:
+    """A stored value mixing double-encoded text with a raw U+FFFD: the double-encoded part reads
+    correctly, and an edit stores the whole value double-encoded instead of adding a layer."""
+    with db_engine.begin() as conn:
+        conn.execute(text(f"INSERT INTO {TABLE_NAME} (id, body) VALUES (1, :b)"), {"b": "B\u00c3\u00bcrger \ufffd"})
+
+    value = db_session.execute(select(cooked.c.body)).scalar_one()
+    assert value == "Bürger \ufffd"
+    db_session.execute(cooked.update().values(body=value + "!"))
+    db_session.commit()
+    with db_engine.connect() as conn:
+        assert legacy_read(conn) == "Bürger \ufffd!"
+
+
+def test_single_encoded_row_is_lossy_for_legacy_until_rewritten(db_engine: Engine, db_session: Session) -> None:
+    """A value some writer stored single-encoded (sid 8180083's submitter_name) reads correctly
+    here, but a legacy (latin1) reader gets '?' for characters outside latin1. Writing it back
+    through the type stores the double-encoded form, which the legacy reader decodes."""
+    name = "Oana-Maria-Cătălina Crisan"
+    with db_engine.begin() as conn:
+        conn.execute(text(f"INSERT INTO {TABLE_NAME} (id, body) VALUES (1, :b)"), {"b": name})
+    with db_engine.connect() as conn:
+        assert legacy_read_raw(conn) == b"Oana-Maria-C?t?lina Crisan"
+
+    assert db_session.execute(select(cooked.c.body)).scalar_one() == name
+    db_session.execute(cooked.update().values(body=name))
+    db_session.commit()
+    with db_engine.connect() as conn:
+        assert legacy_read(conn) == name
+
+
 def test_none_round_trip(db_session: Session) -> None:
     db_session.execute(cooked.insert().values(name=None, body=None))
     db_session.commit()
@@ -152,7 +190,7 @@ def test_search_matches_non_ascii(db_session: Session) -> None:
 def test_check_warns_on_non_utf8_table(caplog: pytest.LogCaptureFixture) -> None:
     bad = MetaData()
     Table("latin1_table", bad, Column("t", LegacyUtf8Text.column_factory()), mysql_charset="latin1")
-    with caplog.at_level(logging.WARNING, logger="arxiv.db.legacy_utf8_checks"):
+    with caplog.at_level(logging.WARNING, logger="arxiv.db.legacy_utf8_table"):
         problems = check_legacy_utf8_tables(bad)
     assert len(problems) == 1 and "latin1_table" in problems[0]
     assert "latin1_table" in caplog.text
