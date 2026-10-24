@@ -802,6 +802,20 @@ CREATE TABLE `arXiv_log_positions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `arXiv_login_throttle`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `arXiv_login_throttle` (
+  `throttle_key` varchar(80) NOT NULL COMMENT 'u:<user_id>, n:<hmac of name> or ip:<address or /64>',
+  `failures` int unsigned NOT NULL DEFAULT '0' COMMENT 'failures in the current window',
+  `window_start_utc` datetime DEFAULT NULL COMMENT 'start of the current window',
+  `lockouts` int unsigned NOT NULL DEFAULT '0' COMMENT 'lockouts in a row; sets the next wait',
+  `locked_until_utc` datetime DEFAULT NULL COMMENT 'NULL = not locked',
+  `updated_utc` datetime NOT NULL COMMENT 'last change; for cleanup',
+  PRIMARY KEY (`throttle_key`),
+  KEY `updated_utc` (`updated_utc`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `arXiv_metadata`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;

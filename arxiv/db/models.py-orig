@@ -662,6 +662,20 @@ class LogPosition(Base):
     date: Mapped[Optional[int]]
 
 
+class LoginThrottle(Base):
+    """Failed-login counters for aaa's POST /login: one row per account or IP block. Times are UTC."""
+
+    __tablename__ = 'arXiv_login_throttle'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    throttle_key: Mapped[str] = mapped_column(String(80), primary_key=True, comment='u:<user_id>, n:<hmac of name> or ip:<address or /64>')
+    failures: Mapped[int] = mapped_column(INTEGER, nullable=False, server_default=text("'0'"), comment='failures in the current window')
+    lockouts: Mapped[int] = mapped_column(INTEGER, nullable=False, server_default=text("'0'"), comment='lockouts in a row; sets the next wait')
+    updated_utc: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, index=True, comment='last change; for cleanup')
+    window_start_utc: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, comment='start of the current window')
+    locked_until_utc: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, comment='NULL = not locked')
+
+
 
 class Metadata(Base):
     __tablename__ = 'arXiv_metadata'
