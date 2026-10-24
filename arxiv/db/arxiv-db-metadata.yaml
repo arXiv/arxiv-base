@@ -337,6 +337,14 @@ arXiv_submission_view_flag:
   class_name: SubmissionViewFlag
 arXiv_submissions:
   class_name: Submission
+  # The legacy app writes these through a latin1 connection into utf8mb3 columns, so the stored text
+  # is double-encoded. The Legacy* types undo/redo that. See arxiv/db/column_types.py
+  columns:
+    submitter_name: "mapped_column(LegacyUtf8String.column_factory(64))"
+    title: "mapped_column(LegacyUtf8Text.column_factory())"
+    authors: "mapped_column(LegacyUtf8Text.column_factory())"
+    comments: "mapped_column(LegacyUtf8Text.column_factory())"
+    abstract: "mapped_column(LegacyUtf8Text.column_factory())"
   relationships:
     agreement: "relationship('SubmissionAgreement', primaryjoin='Submission.agreement_id == SubmissionAgreement.agreement_id', back_populates='arXiv_submissions')"
     document: "relationship('Document', primaryjoin='Submission.document_id == Document.document_id', back_populates='arXiv_submissions')"
