@@ -24,7 +24,7 @@ class Auth(object):
 
     Set env var or `Flask.config` `ARXIV_AUTH_DEBUG` to True to get
     additional debugging in the logs. Only use this for short term debugging of
-    configs. This may be used in produciton but should not be left on in production.
+    configs. This may be used in production but should not be left on in production.
 
     Intended for use in a Flask application factory, for example:
 
@@ -38,7 +38,7 @@ class Auth(object):
        def create_web_app() -> Flask:
           app = Flask('someapp')
           app.config.from_pyfile('config.py')
-          Auth(app)   # Registers the before_reques auth check
+          Auth(app)   # Registers the before_request auth check
 
           @app.route("/hello")
           def hello():
@@ -116,7 +116,7 @@ class Auth(object):
 
         if app.config.get('ARXIV_AUTH_DEBUG') or os.getenv('ARXIV_AUTH_DEBUG'):
             self.auth_debug()
-            logger.debug("ARXIV_AUTH_DEBUG is set and auth debug messages to logging is turned on")
+            logger.debug("ARXIV_AUTH_DEBUG is set and auth debug messages to logging are turned on")
 
 
     def load_session(self) -> Optional[Response]:
@@ -132,11 +132,11 @@ class Auth(object):
         """
         # Check the WSGI request environ for the key, which is where the auth
         # middleware puts any unpacked auth information from the request OR any
-        # exceptions that need to be raised withing the request context.
+        # exceptions that need to be raised within the request context.
         req_auth: Optional[Union[domain.Session, Exception]] = \
             request.environ.get(self.auth_session_name)
 
-        # Middlware may raise exception, needs to be raised in to be handled correctly.
+        # Middleware may raise exception, needs to be raised in to be handled correctly.
         if isinstance(req_auth, Exception):
             logger.debug('Middleware passed an exception: %s', req_auth)
             raise req_auth
@@ -147,7 +147,7 @@ class Auth(object):
             else:
                 logger.warning('No legacy DB, will not check tapir auth.')
 
-        # Attach auth to the request so other can access easily. request.auth
+        # Attach auth to the request so others can access easily. request.auth
         setattr(request, self.auth_session_name, req_auth)
         return None
 
@@ -171,7 +171,7 @@ class Auth(object):
         cookies for both arxiv.org and sub.arxiv.org. If this is being
         served at sub.arxiv.org, there is no response that will cause
         the browser to alter its cookie store for arxiv.org. Duplicate
-        cookies must be handled gracefully to for the domain and
+        cookies must be handled gracefully for the domain and
         subdomain to coexist.
 
         The standard way to avoid this problem is to append part of
