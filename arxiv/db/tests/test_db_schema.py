@@ -46,6 +46,7 @@ from arxiv.db.models import (
     JrefControl,
     License,
     LogPosition,
+    LoginThrottle,
     Metadata,
     MirrorList,
     ModeratorApiKey,
@@ -182,8 +183,8 @@ def test_db_schema_sqlite3():
         # print(row[0])
         n_tables += 1
     conn.close()
-    # There are 152 tables in production
-    assert n_tables == (146 + 3 + 3)
+    # There are 152 tables in production, plus arXiv_login_throttle
+    assert n_tables == (146 + 3 + 3 + 1)
     os.unlink(filename)
 
 def test_models():
@@ -225,6 +226,7 @@ def test_models():
     assert JrefControl()
     assert License()
     assert LogPosition()
+    assert LoginThrottle()
     assert Metadata()
     assert MirrorList()
     assert ModeratorApiKey()

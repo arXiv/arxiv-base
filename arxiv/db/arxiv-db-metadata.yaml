@@ -197,6 +197,9 @@ arXiv_licenses:
 arXiv_log_positions:
   class_name: LogPosition
 
+arXiv_login_throttle:
+  class_name: LoginThrottle
+
 arXiv_metadata:
   class_name: Metadata
   columns:
