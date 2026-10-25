@@ -91,3 +91,11 @@ def test_bad_data(app):
             authenticate.authenticate(None, None, ('long' * 20) + '-something')
         with pytest.raises(exceptions.AuthenticationFailed):
             authenticate.authenticate(None, None, '1234-' + 40 * 'long')
+
+
+def test_values_that_arent_strings_are_refused_as_such():
+    """The checks name the type they were passed, and the username's checks the username."""
+    with pytest.raises(ValueError, match="non-str password: <class 'int'>"):
+        authenticate._authenticate_password('abc', 234)
+    with pytest.raises(ValueError, match="non-str username_or_email: <class 'int'>"):
+        authenticate._authenticate_password(1234, 'password')

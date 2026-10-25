@@ -60,7 +60,7 @@ def authenticate(username_or_email: Optional[str] = None,
         # perspective).
         elif token:
             db_token = _authenticate_token(token, session=session)
-            passdata = _get_user_by_user_id(db_token.user_id)
+            passdata = _get_user_by_user_id(db_token.user_id, session=session)
         else:
             logger.debug('Neither username/password nor token provided')
             raise AuthenticationFailed('Username+password or token required')
@@ -174,14 +174,14 @@ def _authenticate_password(username_or_email: str, password: str, session: SASes
     if not password:
         raise ValueError('Passed empty password')
     if not isinstance(password, str):
-        raise ValueError('Passed non-str password: {type(password)}')
+        raise ValueError(f'Passed non-str password: {type(password)}')
     if not is_ascii(password):
         raise ValueError('Password non-ascii password')
 
     if not username_or_email:
         raise ValueError('Passed empty username_or_email')
-    if not isinstance(password, str):
-        raise ValueError('Passed non-str username_or_email: {type(username_or_email)}')
+    if not isinstance(username_or_email, str):
+        raise ValueError(f'Passed non-str username_or_email: {type(username_or_email)}')
     if len(username_or_email) > 255:
         raise ValueError(f'Passed username_or_email too long: len {len(username_or_email)}')
     if not is_ascii(username_or_email):
@@ -202,7 +202,7 @@ def _authenticate_password(username_or_email: str, password: str, session: SASes
     raise AuthenticationFailed('Invalid username or password')
 
 
-def _get_user_by_user_id(user_id: int, session = DefaultSession) -> PassData:
+def _get_user_by_user_id(user_id: int, session: SASession = DefaultSession) -> PassData:
     tapir_user: TapirUser = session.query(TapirUser) \
         .filter(TapirUser.user_id == int(user_id)) \
         .filter(TapirUser.flag_approved == 1) \
@@ -306,7 +306,7 @@ def _invalidate_token(user_id: str, secret: str, session: SASession = DefaultSes
         Raised when the token or user cannot be found.
 
     """
-    db_token = _get_token(user_id, secret)
+    db_token = _get_token(user_id, secret, session=session)
     db_token.valid = 0
     session.add(db_token)
     session.commit()
