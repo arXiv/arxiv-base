@@ -1,6 +1,9 @@
 """User is attempting login with username+password."""
 import pytest
 from pytz import timezone
+from sqlalchemy.orm import Session
+
+from arxiv.db import models
 
 from .util import SetUpUserMixin
 from .. import authenticate, exceptions
@@ -99,3 +102,41 @@ def test_values_that_arent_strings_are_refused_as_such():
         authenticate._authenticate_password('abc', 234)
     with pytest.raises(ValueError, match="non-str username_or_email: <class 'int'>"):
         authenticate._authenticate_password(1234, 'password')
+
+
+@pytest.mark.parametrize('name', ['nobody', 'nobody@example.org'])
+def test_an_unknown_name_hashes_the_password_too(app, mocker, name):
+    """No account: the password is checked against a stand-in hash, as a wrong password would be."""
+    check = mocker.patch.object(authenticate, 'check_password', wraps=authenticate.check_password)
+    with app.app_context():
+        with pytest.raises(exceptions.AuthenticationFailed):
+            authenticate.authenticate(name, 'thepassword')
+    check.assert_called_once_with('thepassword', authenticate._NO_ACCOUNT_HASH)
+
+
+def test_an_account_that_cant_log_in_hashes_the_password_too(app, db_with_user, mocker, foouser):
+    """A banned account, and an account with no password row."""
+    with Session(db_with_user) as session:
+        session.query(models.TapirUser).filter(models.TapirUser.user_id == foouser.user_id) \
+            .update({models.TapirUser.flag_banned: 1})
+        session.add(models.TapirUser(
+            user_id=15831, first_name='no', last_name='password', suffix_name='', email='nopw@last.iv',
+            policy_class=2, flag_edit_users=0, flag_email_verified=1, flag_edit_system=0, flag_approved=1,
+            flag_deleted=0, flag_banned=0, tracking_cookie='nopwcookie'))
+        session.add(models.TapirNickname(
+            nickname='nopwuser', user_id=15831, user_seq=1, flag_valid=1, role=0, policy=0, flag_primary=1))
+        session.commit()
+    check = mocker.patch.object(authenticate, 'check_password', wraps=authenticate.check_password)
+    with app.app_context():
+        for name in (foouser.tapir_nicknames.nickname, 'nopwuser', 'nopw@last.iv'):
+            with pytest.raises(exceptions.AuthenticationFailed):
+                authenticate.authenticate(name, 'thepassword')
+    assert check.call_args_list == [mocker.call('thepassword', authenticate._NO_ACCOUNT_HASH)] * 3
+
+
+def test_a_wrong_password_is_checked_against_the_accounts_hash(app, mocker, foouser):
+    check = mocker.patch.object(authenticate, 'check_password', wraps=authenticate.check_password)
+    with app.app_context():
+        with pytest.raises(exceptions.AuthenticationFailed):
+            authenticate.authenticate(foouser.tapir_nicknames.nickname, 'notthepassword')
+    check.assert_called_once_with('notthepassword', foouser.tapir_passwords.password_enc)

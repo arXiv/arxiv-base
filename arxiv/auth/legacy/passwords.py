@@ -22,7 +22,7 @@ def hash_password(password: str) -> str:
     return b64encode(salt + hashed).decode('ascii')
 
 
-def check_password(password: str, encrypted: bytes):
+def check_password(password: str, encrypted: str | bytes) -> bool:
     """Check a password against an encrypted hash."""
     try:
         password.encode('ascii')
