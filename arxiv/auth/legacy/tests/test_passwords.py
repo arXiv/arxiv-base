@@ -4,6 +4,7 @@ from unittest import TestCase
 from ..exceptions import PasswordAuthenticationFailed
 from ..passwords import hash_password, check_password
 
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 import string
@@ -28,3 +29,14 @@ class TestCheckPassword(TestCase):
             with self.assertRaises(PasswordAuthenticationFailed):
                 check_password(fuzzpw,
                                     hash_password(passw).encode('ascii'))
+
+
+def test_check_password_compares_in_constant_time(mocker):
+    """The hashes are compared with hmac.compare_digest, not ==, whether they match or not."""
+    from .. import passwords
+    compare = mocker.spy(passwords.hmac, 'compare_digest')
+    encrypted = hash_password('thepassword')
+    assert check_password('thepassword', encrypted)
+    with pytest.raises(PasswordAuthenticationFailed):
+        check_password('notthepassword', encrypted)
+    assert compare.call_count == 2
