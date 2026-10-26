@@ -699,10 +699,10 @@ class LoginThrottle(Base):
 
     throttle_key: Mapped[str] = mapped_column(String(80), primary_key=True, comment="u:<user_id>, n:<hmac of name> or ip:<address or /64>")
     failures: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"), comment="failures in the current window")
-    lockouts: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"), comment="lockouts in a row; sets the next wait")
-    updated_utc: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True, comment="last change; for cleanup")
     window_start_utc: Mapped[Optional[datetime]] = mapped_column(DateTime, comment="start of the current window")
+    lockouts: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"), comment="lockouts in a row; sets the next wait")
     locked_until_utc: Mapped[Optional[datetime]] = mapped_column(DateTime, comment="NULL = not locked")
+    updated_utc: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True, comment="last change; for cleanup")
 
 
 class Metadata(Base):
