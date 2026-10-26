@@ -175,6 +175,21 @@ CREATE TABLE `arXiv_archives` (
   CONSTRAINT `0_576` FOREIGN KEY (`in_group`) REFERENCES `arXiv_groups` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `arXiv_auth_rate_limit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `arXiv_auth_rate_limit` (
+  `limit_key` varchar(80) NOT NULL COMMENT 'user id, hmac of an unknown name, or ip address or /64',
+  `action` varchar(32) NOT NULL COMMENT 'the rule: login, login_ip, recovery_mail, recovery_mail_ip, verify_mail',
+  `hits` int NOT NULL DEFAULT '0' COMMENT 'events in the current window',
+  `window_start_utc` datetime DEFAULT NULL COMMENT 'start of the current window',
+  `lockouts` int NOT NULL DEFAULT '0' COMMENT 'blocks in a row; sets the next wait',
+  `locked_until_utc` datetime DEFAULT NULL COMMENT 'NULL = not blocked',
+  `updated_utc` datetime NOT NULL COMMENT 'last change; for cleanup',
+  PRIMARY KEY (`limit_key`,`action`),
+  KEY `ix_arXiv_auth_rate_limit_updated_utc` (`updated_utc`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `arXiv_author_ids`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;

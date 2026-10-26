@@ -217,6 +217,22 @@ class Archive(Base):
 
 
 
+class AuthRateLimit(Base):
+    """Rate-limit counters for aaa: one row per key and action. The key is a user id, an HMAC of an unknown login name, or an IP address or /64; the action names the rule. Times are UTC."""
+
+    __tablename__ = 'arXiv_auth_rate_limit'
+    __table_args__ = {'mysql_charset': 'latin1'}
+
+    limit_key: Mapped[str] = mapped_column(String(80), primary_key=True, comment='user id, hmac of an unknown name, or ip address or /64')
+    action: Mapped[str] = mapped_column(String(32), primary_key=True, comment='the rule: login, login_ip, recovery_mail, recovery_mail_ip, verify_mail')
+    hits: Mapped[int] = mapped_column(INTEGER, nullable=False, server_default=text("'0'"), comment='events in the current window')
+    window_start_utc: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, comment='start of the current window')
+    lockouts: Mapped[int] = mapped_column(INTEGER, nullable=False, server_default=text("'0'"), comment='blocks in a row; sets the next wait')
+    locked_until_utc: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, comment='NULL = not blocked')
+    updated_utc: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, index=True, comment='last change; for cleanup')
+
+
+
 class AwsConfig(Base):
     __tablename__ = 'arXiv_aws_config'
 
@@ -660,7 +676,6 @@ class LogPosition(Base):
     id: Mapped[str] = mapped_column(String(255), primary_key=True, server_default=FetchedValue())
     position: Mapped[Optional[int]]
     date: Mapped[Optional[int]]
-
 
 
 class Metadata(Base):

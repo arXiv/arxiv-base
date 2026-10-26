@@ -17,6 +17,7 @@ from arxiv.db.models import (
     ArchiveDef,
     ArchiveGroup,
     Archive,
+    AuthRateLimit,
     AwsConfig,
     AwsFile,
     BibFeed,
@@ -182,8 +183,8 @@ def test_db_schema_sqlite3():
         # print(row[0])
         n_tables += 1
     conn.close()
-    # There are 152 tables in production
-    assert n_tables == (146 + 3 + 3)
+    # There are 152 tables in production, plus arXiv_auth_rate_limit
+    assert n_tables == (146 + 3 + 3 + 1)
     os.unlink(filename)
 
 def test_models():
@@ -196,6 +197,7 @@ def test_models():
     assert ArchiveDef()
     assert ArchiveGroup()
     assert Archive()
+    assert AuthRateLimit()
     assert AwsConfig()
     assert AwsFile()
     assert BibFeed()
