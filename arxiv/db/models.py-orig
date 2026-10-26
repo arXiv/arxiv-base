@@ -663,7 +663,7 @@ class LogPosition(Base):
 
 
 class LoginThrottle(Base):
-    """Failed-login counters for aaa's POST /login: one row per account or IP block. Times are UTC."""
+    """Failed-login counters for aaa's POST /login: one row per account, per unknown login name or per IP block. Times are UTC."""
 
     __tablename__ = 'arXiv_login_throttle'
     __table_args__ = {'mysql_charset': 'latin1'}
