@@ -2,6 +2,7 @@
 
 from typing import Optional, Tuple
 import logging
+import secrets
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session as SASession
@@ -9,7 +10,7 @@ from sqlalchemy.orm import Session as SASession
 from . import util
 from .. import domain
 
-from . passwords import check_password, is_ascii
+from . passwords import check_password, hash_password, is_ascii
 from ...db import Session as DefaultSession
 from ...db.models import TapirUser, TapirUsersPassword, TapirPermanentToken, \
     TapirNickname, Demographic
@@ -19,6 +20,9 @@ from .exceptions import NoSuchUser, AuthenticationFailed, \
 logger = logging.getLogger(__name__)
 
 PassData = Tuple[TapirUser, TapirUsersPassword, TapirNickname, Demographic]
+
+_NO_ACCOUNT_HASH = hash_password(secrets.token_hex(16))
+"""Checked when there is no account or no password, so those failures hash the password too."""
 
 
 def authenticate(username_or_email: Optional[str] = None,
@@ -60,7 +64,7 @@ def authenticate(username_or_email: Optional[str] = None,
         # perspective).
         elif token:
             db_token = _authenticate_token(token, session=session)
-            passdata = _get_user_by_user_id(db_token.user_id)
+            passdata = _get_user_by_user_id(db_token.user_id, session=session)
         else:
             logger.debug('Neither username/password nor token provided')
             raise AuthenticationFailed('Username+password or token required')
@@ -174,23 +178,32 @@ def _authenticate_password(username_or_email: str, password: str, session: SASes
     if not password:
         raise ValueError('Passed empty password')
     if not isinstance(password, str):
-        raise ValueError('Passed non-str password: {type(password)}')
+        raise ValueError(f'Passed non-str password: {type(password)}')
     if not is_ascii(password):
         raise ValueError('Password non-ascii password')
 
     if not username_or_email:
         raise ValueError('Passed empty username_or_email')
-    if not isinstance(password, str):
-        raise ValueError('Passed non-str username_or_email: {type(username_or_email)}')
+    if not isinstance(username_or_email, str):
+        raise ValueError(f'Passed non-str username_or_email: {type(username_or_email)}')
     if len(username_or_email) > 255:
         raise ValueError(f'Passed username_or_email too long: len {len(username_or_email)}')
     if not is_ascii(username_or_email):
         raise ValueError('Passed non-ascii username_or_email')
 
-    if '@' in username_or_email:
-        passdata = _get_user_by_email(username_or_email, session=session)
-    else:
-        passdata = _get_user_by_username(username_or_email, session=session)
+    try:
+        if '@' in username_or_email:
+            passdata = _get_user_by_email(username_or_email, session=session)
+        else:
+            passdata = _get_user_by_username(username_or_email, session=session)
+    except RuntimeError as e:
+        # NoSuchUser, or _get_passdata's missing password. Hash the password anyway, as a wrong
+        # password would be. These failures still make fewer queries than a wrong password.
+        try:
+            check_password(password, _NO_ACCOUNT_HASH)
+        except PasswordAuthenticationFailed:
+            pass
+        raise AuthenticationFailed('Invalid username or password') from e
 
     db_user, db_pass, db_nick, db_profile = passdata
     logger.debug(f'Got user with user_id: {db_user.user_id}')
@@ -202,7 +215,7 @@ def _authenticate_password(username_or_email: str, password: str, session: SASes
     raise AuthenticationFailed('Invalid username or password')
 
 
-def _get_user_by_user_id(user_id: int, session = DefaultSession) -> PassData:
+def _get_user_by_user_id(user_id: int, session: SASession = DefaultSession) -> PassData:
     tapir_user: TapirUser = session.query(TapirUser) \
         .filter(TapirUser.user_id == int(user_id)) \
         .filter(TapirUser.flag_approved == 1) \
@@ -306,7 +319,7 @@ def _invalidate_token(user_id: str, secret: str, session: SASession = DefaultSes
         Raised when the token or user cannot be found.
 
     """
-    db_token = _get_token(user_id, secret)
+    db_token = _get_token(user_id, secret, session=session)
     db_token.valid = 0
     session.add(db_token)
     session.commit()
