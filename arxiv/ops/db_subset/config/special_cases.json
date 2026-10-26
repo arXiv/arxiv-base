@@ -23,7 +23,7 @@
     "arXiv_monitor_mailq": "?",
     "arXiv_monitor_klog": "? empty...",
     "Subscription_UniversalInstitution": "all",
-    "arXiv_login_throttle": "empty",
+    "arXiv_auth_rate_limit": "empty",
     "arXiv_log_positions": "all",
     "arXiv_licenses": "all",
     "arXiv_group_def": "all",
