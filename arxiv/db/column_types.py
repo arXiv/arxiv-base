@@ -4,7 +4,8 @@ These TypeDecorators handle transcoding from bytes to strings based on the colum
 """
 
 from typing import Optional, Any, Type
-from sqlalchemy import TypeDecorator, String, Text, LargeBinary, func
+from sqlalchemy import TypeDecorator, String, Text, LargeBinary, func, event
+from sqlalchemy.orm import Mapper
 from sqlalchemy.sql.type_api import TypeEngine, _CT
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.dialects import mysql
@@ -334,32 +335,54 @@ class Utf8Text(TranscodedText):
 # this on read. Our connection is utf8mb4, so we reverse and reapply it here. No BINARY casts:
 # the server must see ordinary character data so that comparisons and LIKE work on the
 # double-encoded form (bind parameters pass through process_bind_param too).
+#
+# A legacy (latin1) reader gets "?" for any stored character outside latin1, so a value written
+# single-encoded by some other writer is lossy for every legacy reader. Writing through these
+# types always stores the double-encoded form.
 
 _MYSQL_UTF8_CHARSETS = ("utf8", "utf8mb3")
 
-
-def _to_latin1_bytes(s: str) -> bytes:
-    """Encode text as MySQL's latin1 (cp1252, but 0x81/0x8d/0x8f/0x90/0x9d map to U+0081 etc.)."""
-    out = bytearray()
-    for c in s:
-        try:
-            out += c.encode("cp1252")
-        except UnicodeEncodeError:
-            if ord(c) > 0xFF:
-                raise
-            out.append(ord(c))
-    return bytes(out)
+# MySQL's latin1 is cp1252, except that the five bytes cp1252 leaves undefined
+# (0x81/0x8d/0x8f/0x90/0x9d) map to the C1 controls U+0081 etc. Byte -> char, and back.
+_LATIN1_CHAR = tuple(bytes([b]).decode("cp1252", errors="ignore") or chr(b) for b in range(256))
+_LATIN1_BYTE = {c: b for b, c in enumerate(_LATIN1_CHAR)}
 
 
-def _from_latin1_bytes(b: bytes) -> str:
-    """Decode bytes as MySQL's latin1; inverse of _to_latin1_bytes."""
-    out = []
-    for x in b:
-        try:
-            out.append(bytes([x]).decode("cp1252"))
-        except UnicodeDecodeError:
-            out.append(chr(x))
-    return "".join(out)
+def legacy_utf8_decode(value: str) -> str:
+    """Undo the legacy double encoding of a whole value.
+
+    A value that is not double-encoded as a whole is returned as stored: single-encoded text
+    ("Müller", "Cătălina") is already the real text and is stored double-encoded on the next
+    write. A value that mixes double-encoded text with something that does not decode is also
+    returned as stored; an edit would then encode its double-encoded part a second time. Such
+    values are listed by the cloud-cron-jobs consistency checks (submission_encoding for
+    unpublished submissions, before they are published), to be repaired in the database rather
+    than guessed at on every read. Production had none in submitter_name (2026-10).
+    """
+    if value.isascii():
+        return value
+    try:
+        return bytes(_LATIN1_BYTE[c] for c in value).decode("utf-8")
+    except (KeyError, UnicodeDecodeError):
+        return value
+
+
+def legacy_utf8_encode(value: str) -> str:
+    """Apply the legacy double encoding: each UTF-8 byte of value becomes one latin1 character."""
+    if value.isascii():
+        return value
+    return "".join(_LATIN1_CHAR[b] for b in value.encode("utf-8"))
+
+
+class LegacyUtf8TooLong(ValueError):
+    """A value is longer than its column once double-encoded (VARCHAR counts encoded characters)."""
+
+    def __init__(self, column: str, length: int, encoded_length: int) -> None:
+        super().__init__(f"{column}: {encoded_length} characters once stored double-encoded, "
+                         f"the column holds {length}")
+        self.column = column
+        self.length = length
+        self.encoded_length = encoded_length
 
 
 class LegacyUtf8Mixin:
@@ -372,18 +395,14 @@ class LegacyUtf8Mixin:
             return None
         if isinstance(value, bytes):
             value = value.decode("utf-8")
-        try:
-            return _to_latin1_bytes(value).decode("utf-8")
-        except (UnicodeEncodeError, UnicodeDecodeError):
-            # Not double-encoded (written as plain utf8); return as stored.
-            return value
+        return legacy_utf8_decode(value)
 
     def process_bind_param(self, value: Any, dialect: Dialect) -> Optional[str]:
         if value is None:
             return None
         if not isinstance(value, str):
             value = str(value)
-        return _from_latin1_bytes(value.encode("utf-8"))
+        return legacy_utf8_encode(value)
 
 
 class LegacyUtf8String(LegacyUtf8Mixin, TypeDecorator):
@@ -406,3 +425,26 @@ class LegacyUtf8Text(LegacyUtf8Mixin, TypeDecorator):
     def column_factory(cls, **kwargs: Any) -> "LegacyUtf8Text":
         """Return LegacyUtf8Text for MySQL with a plain Text fallback for SQLite."""
         return cls(**kwargs).with_variant(Text, "sqlite")
+
+
+# The length check runs when a mapped attribute is assigned, not in process_bind_param: a bind
+# parameter can also be a WHERE or LIKE operand, which may legitimately be longer than the column.
+# Without it, strict MySQL rejects the row (1406) and non-strict MySQL cuts the value in the middle
+# of an encoded sequence, which then reads back as mojibake for good.
+
+def _length_checker(column: str, length: int) -> Any:
+    def check(target: Any, value: Any, oldvalue: Any, initiator: Any) -> None:
+        if isinstance(value, str) and not value.isascii():
+            encoded = len(legacy_utf8_encode(value))
+            if encoded > length:
+                raise LegacyUtf8TooLong(column, length, encoded)
+    return check
+
+
+@event.listens_for(Mapper, "mapper_configured")
+def _add_legacy_utf8_length_checks(mapper: Mapper, class_: Any) -> None:
+    for prop in mapper.column_attrs:
+        for col in prop.columns:
+            length = getattr(col.type, "length", None)
+            if isinstance(col.type, LegacyUtf8Mixin) and length:
+                event.listen(getattr(class_, prop.key), "set", _length_checker(f"{col.table.name}.{col.name}", length))

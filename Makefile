@@ -7,7 +7,7 @@ default: venv/lib/python3.11/site-packages/sqlalchemy /usr/bin/firefox-esr /usr/
 
 venv/bin/poetry: venv/bin/pip
 	. venv/bin/activate && pip install poetry
-	. venv/bin/activate && poetry poetry install
+	. venv/bin/activate && poetry install
 
 venv/bin/pip: venv
 	. venv/bin/activate && pip install --upgrade pip
