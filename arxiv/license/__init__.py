@@ -3,30 +3,28 @@ from typing import Optional
 
 """arXiv license definitions."""
 
-
 LICENSE_ICON_BASE_URI = '/icons/licenses'
 LICENSES = {
     # key is the license URI
     'http://creativecommons.org/licenses/by/4.0/': {
-        'label': 'CC BY: Creative Commons Attribution',
+        'label': 'CC BY 4.0: Attribution 4.0 International',
         "short_label": "CC BY 4.0",
-        'note': 'This license allows reusers to distribute, remix, adapt, and '
-                'build upon the material in any medium or format, so long as '
-                'attribution is given to the creator. The license allows for '
-                'commercial use.',
+        'note': 'This is the least restrictive license. By selecting this '
+                'license, you will have given permission to anyone to '
+                'share, reuse, remix, or adapt your article as long as '
+                'they formally attribute it to you.',
         'order': 1,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-4.0.png'},
     'http://creativecommons.org/licenses/by-sa/4.0/': {
         'order': 2,
-        'label': 'CC BY-SA: Creative Commons Attribution-ShareAlike',
+        'label': 'CC BY-SA 4.0: Attribution-ShareAlike 4.0 International',
         "short_label": "CC BY-SA 4.0",
-        'note': 'This license allows reusers to distribute, remix, adapt, and '
-                'build upon the material in any medium or format, so long as '
-                'attribution is given to the creator. The license allows for '
-                'commercial use. If you remix, adapt, or build upon the '
-                'material, you must license the modified material under '
-                'identical terms.',
+        'note': 'By selecting this license, you will have given permission '
+                'to anyone to share, reuse, remix, or adapt your article as '
+                'long as they formally attribute it to you and they distribute '
+                'any remixed or adapted version of it under the same license. '
+                'Exceptions for different licenses can be made with your permission.',
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-sa-4.0.png'},
     'http://creativecommons.org/licenses/by-nc-sa/4.0/': {
@@ -40,17 +38,29 @@ LICENSES = {
                 'is given to the creator. If you remix, adapt, or build upon '
                 'the material, you must license the modified material under '
                 'identical terms.',
-        'is_current': True,
+        'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-sa-4.0.png'},
-    'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
+    'http://creativecommons.org/licenses/by-nc/4.0/': {
         'order': 4,
-        'label': 'CC BY-NC-ND: Creative Commons '
-                 'Attribution-Noncommercial-NoDerivatives',
+        'label': 'CC BY-NC 4.0: Attribution-NonCommercial 4.0 International',
+        "short_label": "CC BY-NC 4.0",
+        'note': 'By selecting this license, you will have given permission to '
+                'anyone to share, reuse, remix, or adapt your article as long '
+                'as it is not for commercial purposes and they formally '
+                'attribute* it to you. Exceptions for commercial use can be '
+                'made with your permission.',
+        'is_current': True,
+        'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-4.0.png'},
+    'http://creativecommons.org/licenses/by-nc-nd/4.0/': {
+        'order': 5,
+        'label': 'CC BY-NC-ND 4.0: Attribution-NonCommercial-NoDerivatives 4.0 International',
         "short_label": "CC BY-NC-ND 4.0",
-        'note': 'This license allows reusers to copy and distribute the '
-                'material in any medium or format in unadapted form only, for '
-                'noncommercial purposes only, and only so long as attribution '
-                'is given to the creator.',
+        'note': 'By selecting this license, you will have given permission to '
+                'anyone to share or reuse your article as long as it is not '
+                'for commercial purposes, and they formally attribute the '
+                'article to you and do not distribute any remixed or adapted '
+                'version of it. Exceptions for remixing, adapting, or '
+                'commercial use can be made with your permission.',
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/by-nc-nd-4.0.png'},
     'http://arxiv.org/licenses/nonexclusive-distrib/1.0/': {
@@ -60,18 +70,17 @@ LICENSES = {
         'note': 'This license gives limited rights to arXiv to distribute the '
                 'article, and limits re-use of any type from other entities '
                 'or individuals.',
-        'order': 5,
+        'order': 6,
         'is_current': True,
     },
     'http://creativecommons.org/publicdomain/zero/1.0/': {
-        'label': 'CC Zero: No Rights Reserved',
+        'label': 'CC0 1.0: CC0 1.0 Universal',
         "short_label": "CC Zero",
-        'note': 'CC Zero is a public dedication tool, which allows creators '
-                'to give up their copyright and put their works into the '
-                'worldwide public domain. CC0 allows reusers to distribute, '
-                'remix, adapt, and build upon the material in any medium or '
-                'format, with no conditions.',
-        'order': 6,
+        'note': 'You dedicate your article to the public domain by waiving any '
+                'rights worldwide under copyright law. Anyone can copy, modify, '
+                'and distribute your article, even for commercial purposes, '
+                'all without asking permission or attribution.',
+        'order': 7,
         'is_current': True,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/zero-1.0.png'
     },
@@ -105,7 +114,40 @@ LICENSES = {
         'order': 12,
         'is_current': False,
         'icon_uri': f'{LICENSE_ICON_BASE_URI}/publicdomain.png'
+    },
+    'http://arxiv.org/licenses/us-public-domain/': {
+        'label': 'U. S. Public Domain',
+        'short_label': 'US-PD',
+        'note': (
+            'The article is a work of the U.S. government created by government'
+            ' employees within the scope of their employment or under a contract '
+            'assigning rights to the U.S. government. Government works are by '
+            'default in the U.S. Public Domain and not subject to domestic '
+            'copyright protection under 17 U.S.C. § 105. Within the U.S., '
+            'anyone can copy, modify, and distribute the article, even for '
+            'commercial purposes, all without asking permission. The U.S. '
+            'government reserves the right to enforce its copyright elsewhere. '
+            'The default U.S. Public Domain status of U.S. Government Works is '
+            'limited to the jurisdiction of the United States. If an agency is '
+            'able to expand the public domain status to apply internationally '
+            'for works that they have produced, they can use the Creative Commons '
+            'Zero worldwide public domain dedication, by making the CC0 selection above.'
+        ),
+        'order': 13,
+        'is_current': True,
+    },
+    'none': {
+        'label': 'I do not wish to add any of these licenses.',
+        'short_label': 'None',
+        'note': (
+            'You do not wish to assign any additional reuse license beyond the standard '
+            'arXiv submission license. Others may view your article, but reuse rights '
+            'are limited unless allowed by other applicable copyright law.'
+        ),
+        'order': 999,  # placed at bottom
+        'is_current': True,
     }
+
 }
 NO_LICENSE_TEXT = 'I do not certify that any of the above licenses apply'
 
@@ -113,11 +155,11 @@ ASSUMED_LICENSE_URI = 'http://arxiv.org/licenses/assumed-1991-2003/'
 
 TRANSLATED_LICENSES = {
     'http://creativecommons.org/licenses/by/3.0/':
-    'http://creativecommons.org/licenses/by/4.0/',
+        'http://creativecommons.org/licenses/by/4.0/',
     'http://creativecommons.org/licenses/by-nc-sa/3.0/':
-    'http://creativecommons.org/licenses/by-nc-sa/4.0/',
+        'http://creativecommons.org/licenses/by-nc-sa/4.0/',
     'http://creativecommons.org/licenses/publicdomain/':
-    'http://creativecommons.org/publicdomain/zero/1.0/'
+        'http://creativecommons.org/publicdomain/zero/1.0/'
 }
 """Historical license to updated/current license (old URI: new URI)."""
 
@@ -207,7 +249,7 @@ class License:
         """Get the short label for the license."""
         if self.effective_uri in LICENSES:
             return LICENSES[self.effective_uri].get("short_label",
-                        LICENSES[self.effective_uri].get("label", "No License")
-            )
+                                                    LICENSES[self.effective_uri].get("label", "No License")
+                                                    )
         else:
             return "No License"
