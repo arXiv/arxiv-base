@@ -66,10 +66,17 @@ footer
 main
   padding: 3rem 1.5rem
   a
-    border-bottom: 1px solid transparent
-    /*font-weight: bold*/
     &:hover
-      border-bottom: 1px dotted $blue
+      color: $blue-hover
+    &:visited
+      color: $link-visited
+  /* Inline links within paragraphs get underlines for accessibility */
+  p a, dd a, blockquote a, .content a:not(.button):not(.tag):not(.pagination-link):not(.pagination-previous):not(.pagination-next)
+    text-decoration: underline
+    text-underline-offset: 2px
+    text-decoration-thickness: 1px
+    &:hover
+      text-decoration-thickness: 2px
   p,
   dl,
   ol,
