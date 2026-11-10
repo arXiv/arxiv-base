@@ -12,7 +12,7 @@ from qa.checks.models import QaDataRegistry, OnFailurePolicy, Result
 class SubmitterIsNotFlagged(BaseCheck):
     name = "submitter_is_not_flagged"
     display_name = "Submitter Is Not Flagged"
-    id = 40
+    id = 24
     version = "1.0.0"
     description = "The submitter's account has not been flagged."
     on_failure_policy = OnFailurePolicy.WARN
