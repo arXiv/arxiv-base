@@ -62,6 +62,9 @@ arXiv_archives:
     arXiv_categories: "relationship('Category', back_populates='arXiv_archive')"
     arXiv_groups: ""
 
+arXiv_auth_rate_limit:
+  class_name: AuthRateLimit
+
 arXiv_aws_config:
   class_name: AwsConfig
 arXiv_aws_files:
