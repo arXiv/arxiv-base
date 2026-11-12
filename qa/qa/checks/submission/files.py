@@ -30,7 +30,7 @@ class DoesNotExceedTheFileSizeLimit(BaseCheck):
 class FileTypeDoesNotRequireReview(BaseCheck):
     name = "acceptable_file_type"
     display_name = "Acceptable File type"
-    id = 50
+    id = 13
     version = "1.0.0"
     description = "The submission file type does not require manual review."
     on_failure_policy = OnFailurePolicy.REJECT
