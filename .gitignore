@@ -137,6 +137,9 @@ arxiv/db/.autogen_models.py
 /arxiv/db/near_models.py
 /development/db_codegen_log.txt
 
+# dev and code gen env files
+.arxiv/
+
 # Claude Code
 .claude/
 
