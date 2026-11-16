@@ -767,24 +767,6 @@ watchdog = ">=1.0.0"
 Werkzeug = ">=0.14,<4.0.0"
 
 [[package]]
-name = "gcld3"
-version = "3.0.13"
-description = "CLD3 is a neural network model for language identification."
-optional = true
-python-versions = "*"
-groups = ["main"]
-markers = "extra == \"qa\""
-files = [
-    {file = "gcld3-3.0.13-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:11a127e493c2952a83a957e2f025d6ff8b1d2efd353baa25bd99d7ceb3c96c54"},
-    {file = "gcld3-3.0.13-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:51538b26dd1741f49ceb03421710d4355c6ce3fd257a2ddebe868e36458f5d45"},
-    {file = "gcld3-3.0.13-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:fb745958278bfcc230fe3e15af3babb2752e77afd929ae0f95b9ef52648f3271"},
-    {file = "gcld3-3.0.13-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:c6bc0ecf3d95943a2b9fe61214aab8284a3b33f25e07c6caad064ea59417620f"},
-    {file = "gcld3-3.0.13-pp36-pypy36_pp73-macosx_10_9_x86_64.whl", hash = "sha256:b56a9852861c7209434917885b8331ddf5f11d3d5810baafb9a29ffd5ccd35d1"},
-    {file = "gcld3-3.0.13-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:4fc4ae1c8c7baab21a46fc66074787d010ca338f5c4b2ff80dd2448d18cc3d89"},
-    {file = "gcld3-3.0.13.tar.gz", hash = "sha256:47c8c779bfe7372a38564b0cd357556dc362aec81cb55b0c889059e8b952e959"},
-]
-
-[[package]]
 name = "geoalchemy2"
 version = "0.15.2"
 description = "Using SQLAlchemy with Spatial Databases"
@@ -3673,7 +3655,7 @@ type = ["pytest-mypy"]
 
 [extras]
 postgres = ["psycopg2-binary"]
-qa = ["gcld3", "wheel"]
+qa = ["wheel"]
 sphinx = ["sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-websupport"]
 
 [metadata]

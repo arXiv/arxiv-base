@@ -51,7 +51,6 @@ setuptools = "^78.1.1"
 pydantic-settings = "^2.5.2"
 jwcrypto = "^1.5.6"
 ruamel-yaml = "^0.18.6"
-gcld3 = { version = "^3.0.13", optional = true }
 wheel = { version = "^0.45.1", optional = true }
 # The shared head/header/footer from the design system; poetry.lock pins the SHA, and an
 # update is a relock (poetry update arxiv-brand-templates).
@@ -61,7 +60,7 @@ arxiv-brand-templates = { git = "https://github.com/arXiv/design-system.git", br
 [tool.poetry.extras]
 sphinx = [ "sphinx", "sphinxcontrib-websupport", "sphinx-autodoc-typehints" ]
 postgres = ["psycopg2-binary"]
-qa = [ "gcld3", "wheel"]
+qa = [ "wheel"]
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.3.1"
