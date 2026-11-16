@@ -4,7 +4,7 @@ from qa.checks.base import BaseCheck
 
 from qa.checks.models import FulltextReport, OnFailurePolicy, QaDataRegistry, Result
 
-UNKNOWN_LANGUAGE = "un"  # what pdftotext records for a page cld2 cannot reliably identify
+UNKNOWN_LANGUAGE = "un"  # what pdftotext records when a language cannot be reliably identified
 
 
 def _language_id(fulltext_report: FulltextReport) -> tuple[str | None, str | None, dict[str, int]]:
