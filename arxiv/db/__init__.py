@@ -79,9 +79,9 @@ try:
     from flask import has_app_context, Flask
     from flask.globals import app_ctx
     def _scope_id() -> int:
-        """Gets an ID used as a key to the sessions from the scopped_session registry.
-        `sqlalchemy.orm.Session` objects are NOT thread safe, but we are using `arxiv.db.session` as if were thread safe.
-        This works by `scopped_session` returning a proxy/registry that uses a different session based on
+        """Gets an ID used as a key to the sessions from the scoped_session registry.
+        `sqlalchemy.orm.Session` objects are NOT thread safe, but we are using `arxiv.db.session` as if it were thread safe.
+        This works by `scoped_session` returning a proxy/registry that uses a different session based on
         what thread is running.
         See https://docs.sqlalchemy.org/en/20/orm/contextual.html#thread-local-scope
         """

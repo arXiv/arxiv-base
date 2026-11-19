@@ -157,12 +157,12 @@ class Settings(BaseSettings):
     LATEXML_DB_TRANSACTION_ISOLATION_LEVEL: Optional[IsolationLevel] = None
 
     LATEXML_DB_QUERY_TIMEOUT: int = 5
-    """Maximium seconds any query to the latxml DB can run.
+    """Maximum seconds any query to the latexml DB can run.
 
-    The statement will raise an excepton if it runs for longer than this
+    The statement will raise an exception if it runs for longer than this
     time.
 
-    This is intened to prevent a backed up latexml db from blocking arxiv-browse
+    This is intended to prevent a backed up latexml db from blocking arxiv-browse
     from serving pages. See ARXIVCE-2433.
 
     """
