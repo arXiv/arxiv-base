@@ -1,0 +1,27 @@
+name: Warn on changes to DB files
+on:
+  pull_request:
+    paths:
+      - 'arxiv/db/**'
+
+jobs:
+  post-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warning comment on pr
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+            issue_number: ${{ github.event.number }},
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: ':warning: :warning: :warning:\n'+
+            '### Do not manually change the db files!\n\n'+
+            'Changes to the db files must be done using code generation tools.\n\n'+
+            'Only accept this PR if the changes to the file under arxiv/db were done with the code gen tools or are unrelated to the db schema. '+
+            'See [How to generate](https://github.com/arxiv/arxiv-base/arxiv/development/README.md#How-to-generate).\n\n'+
+            ':warning: :warning: :warning:\n'})
+
+      
