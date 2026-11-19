@@ -56,26 +56,20 @@ def embed_content(path: str) -> Markup:
         return Markup(f.read())
 
 
-def tidy_filesize(size: Union[int, float]) -> str:
+def tidy_filesize(bytes: Union[int, float]) -> str:
     """Convert upload size to human readable form.
 
-    Decision to use powers of 10 rather than powers of 2 to stay compatible
-    with Jinja filesizeformat filter with binary=false setting that we are
-    using in file_upload template.
-
     Parameter: size in bytes
-    Returns: formatted string of size in units up through GB
+    Returns: formatted string of size in units up through TB
     """
-    units = ["B", "KB", "MB", "GB"]
-    if size == 0:
+    units = ["B", "KB", "MB", "GB", "TB"]
+    if bytes == 0:
         return "0B"
-    if size > 1000000000:
-        return '{} {}'.format(size, units[3])
-    units_index = 0
-    while size > 1000:
-        units_index += 1
-        size = round(size / 1000, 3)
-    return '{} {}'.format(size, units[units_index])
+    i = 0
+    while bytes >= 1024 and i < len(units) - 1:
+        bytes /= 1024
+        i += 1
+    return f"{bytes:.2f} {units[i]}"
 
 
 def as_eastern(utc_datetime: datetime) -> datetime:
