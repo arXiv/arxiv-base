@@ -51,6 +51,14 @@ class TestAcmClassIsValid:
     def test_pass_at_max_length(self):
         assert sub_result(AcmClassIsValid.check("x" * 160), "not_too_long").passed
 
+    def test_reject_over_255(self):
+        result = AcmClassIsValid.check("x" * 256)
+        assert result.disposition == Disposition.REJECT
+        assert result._messages(Disposition.REJECT) == "Too long: must be 255 characters or fewer."
+
+    def test_only_warn_at_255(self):
+        assert AcmClassIsValid.check("x" * 255).disposition == Disposition.WARN
+
     def test_fail_contains_url(self):
         result = AcmClassIsValid.check("https://example.com/F.2.2")
         assert not result.passed
