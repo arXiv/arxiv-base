@@ -38,6 +38,13 @@ class DoiIsValid(BaseMetadataAggregateCheck):
             field="doi",
             failure_message="Too long: must be 50 characters or fewer.",
         ),
+        generic.NotTooLong(
+            max_chars=255,
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="doi",
+            failure_message="Too long: must be 255 characters or fewer.",
+        ),
         generic.DoiHasValidFormat(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="doi"),
     )
 

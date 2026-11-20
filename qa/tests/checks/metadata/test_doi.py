@@ -47,6 +47,14 @@ class TestDoiIsValid:
     def test_pass_at_max_length(self):
         assert DoiIsValid.check("10.1103/" + "a" * 42).passed
 
+    def test_reject_over_255(self):
+        result = DoiIsValid.check("10.1103/" + "a" * 248)
+        assert result.disposition == Disposition.REJECT
+        assert result._messages(Disposition.REJECT) == "Too long: must be 255 characters or fewer."
+
+    def test_only_warn_at_255(self):
+        assert DoiIsValid.check("10.1103/" + "a" * 247).disposition == Disposition.WARN
+
     def test_fail_bad_doi_prefix_doi_colon(self):
         """A 'doi:' prefix is only stripped via cleanup(); check() still fails via does_not_contain_doi."""
         result = DoiIsValid.check("doi:10.1103/PhysRevLett.132.011001")

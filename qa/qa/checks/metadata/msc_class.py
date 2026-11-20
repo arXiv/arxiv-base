@@ -35,6 +35,13 @@ class MscClassIsValid(BaseMetadataAggregateCheck):
             field="msc_class",
             failure_message="Too long: must be 160 characters or fewer.",
         ),
+        generic.NotTooLong(
+            max_chars=255,
+            on_failure_policy=OnFailurePolicy.REJECT,
+            data="metadata",
+            field="msc_class",
+            failure_message="Too long: must be 255 characters or fewer.",
+        ),
         generic.DoesNotContainUrl(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
         generic.DoesNotContainDoi(on_failure_policy=OnFailurePolicy.WARN, data="metadata", field="msc_class"),
     )

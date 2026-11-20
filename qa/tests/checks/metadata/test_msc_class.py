@@ -39,6 +39,14 @@ class TestMscClassIsValid:
         assert not result.passed
         assert not sub_result(result, "not_too_long").passed
 
+    def test_reject_over_255(self):
+        result = MscClassIsValid.check("x" * 256)
+        assert result.disposition == Disposition.REJECT
+        assert result._messages(Disposition.REJECT) == "Too long: must be 255 characters or fewer."
+
+    def test_only_warn_at_255(self):
+        assert MscClassIsValid.check("x" * 255).disposition == Disposition.WARN
+
     def test_warn_contains_url(self):
         result = MscClassIsValid.check("https://example.com/35K55")
         assert not result.passed
